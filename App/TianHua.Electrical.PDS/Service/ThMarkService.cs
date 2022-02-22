@@ -14,11 +14,11 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThMarkService
     {
-        private ThCADCoreNTSSpatialIndex Lines { get; set; }
-        private ThCADCoreNTSSpatialIndex Texts { get; set; }
-        private ThCADCoreNTSSpatialIndex points { get; set; }
+        private ThCADCoreNTSSpatialIndex LineIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex TextIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
 
-        private Dictionary<DBPoint,List<string>> marksDic { get; set; }
+        private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
         public ThMarkService(List<ThRawIfcAnnotationElementData> markDatas, List<ThBlockReferenceData> markBlocks)
         {
             var lines = new DBObjectCollection();
@@ -47,10 +47,10 @@ namespace TianHua.Electrical.PDS.Service
                     objs.OfType<DBText>().ForEach(l => texts.Add(l));
                 }
             });
-            marksDic = new Dictionary<DBPoint, List<string>>();
-            Lines = new ThCADCoreNTSSpatialIndex(lines);
-            Texts = new ThCADCoreNTSSpatialIndex(texts);
+            LineIndex = new ThCADCoreNTSSpatialIndex(lines);
+            TextIndex = new ThCADCoreNTSSpatialIndex(texts);
 
+            MarkDic = new Dictionary<DBPoint, List<string>>();
             var mLeader = markDatas.Select(o => o.Data).OfType<MLeader>();
             mLeader.ForEach(e =>
             {
@@ -62,16 +62,20 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         vertex = e.GetFirstVertex(i);
                         continueDo = true;
-                        break ;
+                        break;
                     }
                     catch
                     {
                         continue;
                     }
                 }
-                if(continueDo)
+                if (continueDo)
                 {
-                    marksDic.Add(ToDbPoint(vertex), GetTexts(e.MText));
+                    var point = ToDbPoint(vertex);
+                    if (!MarkDic.ContainsKey(point))
+                    {
+                        MarkDic.Add(point, GetTexts(e.MText));
+                    }
                 }
             });
             markBlocks.ForEach(o =>
@@ -82,28 +86,28 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else
                 {
-                    marksDic.Add(ToDbPoint(o.Position), GetTexts(o));
+                    MarkDic.Add(ToDbPoint(o.Position), GetTexts(o));
                 }
             });
-            points = new ThCADCoreNTSSpatialIndex(marksDic.Keys.ToCollection());
+            PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
         }
 
         public List<string> GetMarks(Polyline frame)
         {
-            List<string> result = new List<string>();
-            var lineCollection = Lines.SelectFence(frame);
+            var result = new List<string>();
+            var lineCollection = LineIndex.SelectFence(frame);
             if (lineCollection.Count > 0)
             {
-                Line line = lineCollection.Cast<Line>().OrderByDescending(o => o.Length).First();
-                var bfLine = line.ExtendLine(10).Buffer(10);
-                lineCollection = Lines.SelectCrossingPolygon(bfLine);
+                var line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
+                var bfLine = line.ExtendLine(10.0).Buffer(10.0);
+                lineCollection = LineIndex.SelectCrossingPolygon(bfLine);
                 lineCollection.Remove(line);
                 if (lineCollection.Count > 0)
                 {
-                    line = lineCollection.Cast<Line>().OrderByDescending(o => o.Length).First();
+                    line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
                 }
-                bfLine = line.ExtendLine(200).Buffer(200);
-                var TextCollection = Texts.SelectCrossingPolygon(bfLine);//（Buffer200）+文字
+                bfLine = line.ExtendLine(200.0).Buffer(200.0);
+                var TextCollection = TextIndex.SelectCrossingPolygon(bfLine);//（Buffer200）+文字
                 TextCollection.OfType<DBText>().ForEach(o =>
                 {
                     result.Add(o.TextString);
@@ -111,10 +115,10 @@ namespace TianHua.Electrical.PDS.Service
             }
             else
             {
-                var pointCollection = points.SelectWindowPolygon(frame);
-                if(pointCollection.Count > 0)
+                var pointCollection = PointIndex.SelectWindowPolygon(frame);
+                if (pointCollection.Count > 0)
                 {
-                    result = marksDic[pointCollection[0] as DBPoint];
+                    result = MarkDic[pointCollection[0] as DBPoint];
                 }
             }
             return result;

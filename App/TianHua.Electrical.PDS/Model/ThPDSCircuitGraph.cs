@@ -18,7 +18,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 桥架
         /// </summary>
-        Bridge,
+        Cabletray,
         /// <summary>
         /// 未知
         /// </summary>

@@ -6,7 +6,7 @@ using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
 {
-    public class ThLoadNameService
+    public class ThConfigurationFileService
     {
         public List<ThPDSBlockInfo> Acquire(string loadConfigUrl)
         {

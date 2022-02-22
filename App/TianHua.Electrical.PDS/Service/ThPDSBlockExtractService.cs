@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
@@ -12,51 +11,28 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSBlockExtractService
     {
-        readonly static string LoadConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "平面关注对象.xlsx");
-
         /// <summary>
         /// 标注块
         /// </summary>
-        public List<ThBlockReferenceData> MarkBlocks = new List<ThBlockReferenceData>();
+        public List<ThBlockReferenceData> MarkBlocks { get; set; } = new List<ThBlockReferenceData>();
 
         /// <summary>
         /// 负载块
         /// </summary>
-        public List<ThBlockReferenceData> LoadBlocks = new List<ThBlockReferenceData>();
+        public List<ThBlockReferenceData> LoadBlocks { get; set; } = new List<ThBlockReferenceData>();
 
         /// <summary>
         /// 配电箱
         /// </summary>
-        public List<ThBlockReferenceData> DistBoxBlocks = new List<ThBlockReferenceData>();
+        public List<ThBlockReferenceData> DistBoxBlocks { get; set; } = new List<ThBlockReferenceData>();
 
-        /// <summary>
-        /// 配电箱序列
-        /// </summary>
-        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-
-        public void Extract(Database database)
+        public void Extract(Database database, List<string> nameFilter, List<string> propertyFilter, List<int> distBoxFilter)
         {
-            var nameFilter = new List<string>();
-            var propertyFilter = new List<string>();
-            var nameService = new ThLoadNameService();
-            var tableInfo = nameService.Acquire(LoadConfigUrl);
-            tableInfo.ForEach(o =>
-            {
-                if (string.IsNullOrEmpty(o.Properties))
-                {
-                    nameFilter.Add(o.BlockName);
-                }
-                else
-                {
-                    propertyFilter.Add(o.Properties);
-                }
-            });
-
             var engine = new ThPDSBlockExtractionEngine
             {
                 NameFilter = nameFilter.Distinct().ToList(),
                 PropertyFilter = propertyFilter.Distinct().ToList(),
-                DistBoxFilter = DistBoxFilter,
+                DistBoxFilter = distBoxFilter,
             };
             engine.ExtractFromMS(database);
             engine.Results.Select(o => o.Data as ThBlockReferenceData)
@@ -82,7 +58,7 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             for (var i = 0; i < propertyFilter.Count; i++)
                             {
-                                if (DistBoxFilter.Contains(i))
+                                if (distBoxFilter.Contains(i))
                                 {
                                     if (o.IndexOf(propertyFilter[i]) == 0)
                                     {

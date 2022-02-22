@@ -114,7 +114,7 @@
         /// <summary>
         /// 负载类型
         /// </summary>
-        public string LoadType { get; set; }
+        public ThPDSLoadType LoadType { get; set; }
 
         /// <summary>
         /// 是否是消防设备

@@ -1,14 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using QuickGraph;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SystemDiagram.Extension;
@@ -23,8 +23,10 @@ namespace TianHua.Electrical.PDS.Engine
     /// </summary>
     public class ThPDSLoopGraphEngine
     {
-        private ThPDSCircuitGraph graph;
-        private const double AllowableTolerance = 25;//允许公差
+        private ThPDSCircuitGraph PDSGraph;
+
+        private const double AllowableTolerance = 25.0;//允许公差
+
         /// <summary>
         /// 全部数据集合
         /// </summary>
@@ -33,54 +35,74 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 配电箱集合
         /// </summary>
-        private List<Entity> DistributionBoxCollection { get; set; }
+        private List<Entity> DistBoxes { get; set; }
 
         /// <summary>
         /// 已捕捉到的配电箱集合
         /// </summary>
-        private Dictionary<Entity, ThPDSCircuitGraphNode> CacheDistributionBoxCollection { get; set; }
+        private Dictionary<Entity, ThPDSCircuitGraphNode> CacheDistBoxes { get; set; }
 
         /// <summary>
         /// 负载集合
         /// </summary>
-        private List<BlockReference> LoadCollection { get; set; }
+        private List<BlockReference> Loads { get; set; }
 
         /// <summary>
         /// 已捕捉到的负载集合
         /// </summary>
-        private List<Entity> CacheLoadCollection { get; set; }
+        private List<Entity> CacheLoads { get; set; }
 
-        private List<Line> BridgeCollection { get; set; }
-        private List<Curve> LineCollection { get; set; }
+        /// <summary>
+        /// 桥架集合
+        /// </summary>
+        private List<Line> Cabletrays { get; set; }
 
-        private ThCADCoreNTSSpatialIndex distributionBoxSpatialIndex;
-        private ThCADCoreNTSSpatialIndex loadSpatialIndex;
-        private ThCADCoreNTSSpatialIndex lineSpatialIndex;
-        private ThPDSCircuitGraphNode BridgeNode;//桥架节点
-        private ThMarkService markService;
-        private Database database;
+        /// <summary>
+        /// 回路集合
+        /// </summary>
+        private List<Curve> Cables { get; set; }
 
-        public ThPDSLoopGraphEngine(Database Database, List<ThBlockReferenceData> DistributionBoxs, List<ThBlockReferenceData> Loads, List<Line> Bridges, List<Curve> Lines, ThMarkService MarkService)
+        /// <summary>
+        /// 配电箱关键字
+        /// </summary>
+        private List<string> DistBoxKey { get; set; }
+
+        private ThCADCoreNTSSpatialIndex DistBoxSpatialIndex;
+        private ThCADCoreNTSSpatialIndex LoadSpatialIndex;
+        private ThCADCoreNTSSpatialIndex CableSpatialIndex;
+        private ThPDSCircuitGraphNode CabletrayNode;//桥架节点
+        private ThMarkService MarkService;
+        private Database Database;
+
+        public ThPDSLoopGraphEngine(Database database, List<ThBlockReferenceData> distBoxes,
+            List<ThBlockReferenceData> loads, List<Line> cabletrays, List<Curve> cables, ThMarkService markService,
+            List<string> distBoxKey)
         {
-            database = Database;
-            markService = MarkService; 
-            using (AcadDatabase acad = AcadDatabase.Use(database))
+            Database = database;
+            MarkService = markService;
+            DistBoxKey = distBoxKey;
+            using (AcadDatabase acad = AcadDatabase.Use(this.Database))
             {
-                DistributionBoxCollection = DistributionBoxs.Select(o => acad.Element<Entity>(o.ObjId, false)).ToList();
-                LoadCollection = Loads.Select(o => acad.Element<BlockReference>(o.ObjId, false)).ToList();
-                CacheDistributionBoxCollection = new Dictionary<Entity, ThPDSCircuitGraphNode>();
-                CacheLoadCollection = new List<Entity>();
-                BridgeCollection = Bridges;
-                LineCollection = Lines;
+                DistBoxes = distBoxes.Select(o => acad.Element<Entity>(o.ObjId, false)).ToList();
+                Loads = loads.Select(o => acad.Element<BlockReference>(o.ObjId, false)).ToList();
+                CacheDistBoxes = new Dictionary<Entity, ThPDSCircuitGraphNode>();
+                CacheLoads = new List<Entity>();
+                Cabletrays = cabletrays;
+                Cables = cables;
 
-                distributionBoxSpatialIndex = new ThCADCoreNTSSpatialIndex(DistributionBoxCollection.ToCollection());
-                loadSpatialIndex = new ThCADCoreNTSSpatialIndex(LoadCollection.ToCollection());
-                lineSpatialIndex = new ThCADCoreNTSSpatialIndex(LineCollection.ToCollection());
+                DistBoxSpatialIndex = new ThCADCoreNTSSpatialIndex(DistBoxes.ToCollection());
+                LoadSpatialIndex = new ThCADCoreNTSSpatialIndex(this.Loads.ToCollection());
+                CableSpatialIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
 
-                graph = new ThPDSCircuitGraph() { Graph  = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>() };
-                BridgeNode = new ThPDSCircuitGraphNode();
-                BridgeNode.NodeType = PDSNodeType.Bridge;
-                graph.Graph.AddVertex(BridgeNode);
+                PDSGraph = new ThPDSCircuitGraph
+                {
+                    Graph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
+                };
+                CabletrayNode = new ThPDSCircuitGraphNode
+                {
+                    NodeType = PDSNodeType.Cabletray,
+                };
+                PDSGraph.Graph.AddVertex(CabletrayNode);
             }
         }
 
@@ -89,13 +111,13 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         public void CreatGraph()
         {
-            foreach (Line bridge in BridgeCollection)
+            foreach (var cabletray in Cabletrays)
             {
-                FindGraph(null, bridge);
+                FindGraph(null, cabletray);
             }
-            foreach (Entity distributionBox in DistributionBoxCollection.Except(CacheDistributionBoxCollection.Keys))
+            foreach (var distBox in DistBoxes.Except(CacheDistBoxes.Keys))
             {
-                FindGraph(null, distributionBox);
+                FindGraph(null, distBox);
             }
         }
 
@@ -104,81 +126,79 @@ namespace TianHua.Electrical.PDS.Engine
         /// 实现根据节点，寻找该节点所能到达回路的方法
         /// </summary>
         /// <param name="startingEntity"></param>
-        public void FindGraph(Entity ExtraEntity, Entity startingEntity)
+        public void FindGraph(Entity extraEntity, Entity startingEntity)
         {
             //是配电箱
             if (startingEntity is BlockReference blockObj)
             {
-                ThPDSCircuitGraphNode Node;
-                if (!CacheDistributionBoxCollection.ContainsKey(startingEntity))
+                ThPDSCircuitGraphNode node;
+                if (!CacheDistBoxes.ContainsKey(startingEntity))
                 {
-                    Node = CreatNode(startingEntity);
-                    CacheDistributionBoxCollection.Add(startingEntity, Node);
-                    graph.Graph.AddVertex(Node);
+                    node = CreateNode(startingEntity);
+                    CacheDistBoxes.Add(startingEntity, node);
+                    PDSGraph.Graph.AddVertex(node);
                 }
                 else
                 {
-                    Node = CacheDistributionBoxCollection[startingEntity];
+                    node = CacheDistBoxes[startingEntity];
                 }
-                Polyline polyline = Buffer(blockObj);
-                var results = new List<Entity>();
-                results = FindNextLine(startingEntity, polyline);
-                results.Remove(ExtraEntity);
+                var polyline = Buffer(blockObj);
+                var results = FindNextLine(startingEntity, polyline);
+                results.Remove(extraEntity);
                 //配电箱搭着线
                 foreach (Curve findcurve in results)
                 {
                     //线得搭到块上才可遍历，否则认为线只是跨过块
-                    var blockobb = Buffer(blockObj, 0);
-                    if (blockobb.Distance(findcurve.StartPoint) < AllowableTolerance || blockobb.Distance(findcurve.EndPoint) < AllowableTolerance)
+                    if (polyline.Contains(findcurve.StartPoint) || polyline.Contains(findcurve.EndPoint))
                     {
-                        PrepareNavigate(Node, new List<Entity>(), new List<string>(), startingEntity, findcurve);
+                        PrepareNavigate(node, new List<Entity>(), new List<string>(), startingEntity, findcurve);
                     }
                 }
 
-                results = FindNextDistributionBox(blockObj, polyline);
-                results.Remove(ExtraEntity);
+                results = FindNextDistBox(blockObj, polyline);
+                results.Remove(extraEntity);
                 //配电箱搭着配电箱
-                foreach (var distributionBox in results)
+                foreach (var distBox in results)
                 {
-                    if (!CacheDistributionBoxCollection.ContainsKey(distributionBox))
+                    if (!CacheDistBoxes.ContainsKey(distBox))
                     {
-                        ThPDSCircuitGraphNode newNode = CreatNode(distributionBox);
-                        CacheDistributionBoxCollection.Add(distributionBox, newNode);
-                        graph.Graph.AddVertex(newNode);
+                        var newNode = CreateNode(distBox);
+                        CacheDistBoxes.Add(distBox, newNode);
+                        PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = CreatEdge(Node, newNode, new List<string>());
-                        graph.Graph.AddEdge(newEdge);
+                        var newEdge = CreatEdge(node, newNode, new List<string>());
+                        PDSGraph.Graph.AddEdge(newEdge);
 
-                        FindGraph(startingEntity, distributionBox);
+                        FindGraph(startingEntity, distBox);
                     }
                 }
 
                 results = FindNextLoad(blockObj, polyline);
-                results.Remove(ExtraEntity);
+                results.Remove(extraEntity);
                 //配电箱搭着负载
                 foreach (var load in results)
                 {
-                    if (!CacheLoadCollection.Contains(load))
+                    if (!CacheLoads.Contains(load))
                     {
-                        CacheLoadCollection.Add(load);
-                        PrepareNavigate(Node, new List<Entity>() { load }, new List<string>(), startingEntity, load);
+                        CacheLoads.Add(load);
+                        PrepareNavigate(node, new List<Entity> { load }, new List<string>(), startingEntity, load);
                     }
                 }
             }
             //是桥架
             else if (startingEntity is Curve curve)
             {
-                Polyline polyline = Buffer(curve);
+                var polyline = Buffer(curve);
                 //桥架第一次搭出去的肯定是线
                 var results = FindNextLine(curve, polyline);
-                foreach (Line findcurve in results)
+                foreach (Line findCurve in results)
                 {
-                    bool IsStart = findcurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findcurve.StartPoint, false)) < AllowableTolerance;
-                    bool IsEnd = findcurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findcurve.EndPoint, false)) < AllowableTolerance;
+                    var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false)) < AllowableTolerance;
+                    var IsEnd = findCurve.EndPoint.DistanceTo(curve.GetClosestPointTo(findCurve.EndPoint, false)) < AllowableTolerance;
                     //都不相邻即无关系，都相邻即近似平行，都不符合
                     if (IsStart != IsEnd)
                     {
-                        PrepareNavigate(BridgeNode, new List<Entity>(), new List<string>(), curve, findcurve);
+                        PrepareNavigate(CabletrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
                     }
                 }
             }
@@ -187,55 +207,64 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 寻路（核心算法）
         /// </summary>
-        public void PrepareNavigate(ThPDSCircuitGraphNode Node, List<Entity> Loads, List<string> Logos, Entity SourceEntity, Entity nextEntity)
+        public void PrepareNavigate(ThPDSCircuitGraphNode node, List<Entity> loads, List<string> logos, Entity sourceEntity,
+            Entity nextEntity)
         {
-            var DistributionBox = Navigate(Node, Loads, Logos, SourceEntity, nextEntity);
-            if (Loads.Count > 0)
+            var distributionBox = Navigate(node, loads, logos, sourceEntity, nextEntity);
+            if (loads.Count > 0)
             {
-                ThPDSCircuitGraphNode newNode = CreateNode(Loads);
-                graph.Graph.AddVertex(newNode);
+                var newNode = CreateNode(loads);
+                PDSGraph.Graph.AddVertex(newNode);
 
-                var newEdge = CreatEdge(Node, newNode, new List<string>());
-                graph.Graph.AddEdge(newEdge);
-                DistributionBox.ForEach(distributionBox =>
+                var newEdge = CreatEdge(node, newNode, logos);
+                PDSGraph.Graph.AddEdge(newEdge);
+                distributionBox.ForEach(box =>
                 {
-                    var distributionBoxNode = CacheDistributionBoxCollection[distributionBox.Item2];
-                    var newDistributionBoxEdge = CreatEdge(newNode, distributionBoxNode, new List<string>());
-                    graph.Graph.AddEdge(newDistributionBoxEdge);
+                    var distBoxNode = CacheDistBoxes[box.Item2];
+                    var newDistBoxEdge = CreatEdge(newNode, distBoxNode, logos);
+                    PDSGraph.Graph.AddEdge(newDistBoxEdge);
 
-                    FindGraph(distributionBox.Item1, distributionBox.Item2);
+                    FindGraph(box.Item1, box.Item2);
                 });
             }
         }
 
         /// <summary>
-        /// 寻路算法
+        /// 寻路算法，sourceEntity表示连接上级，nextEntity表示自身
         /// </summary>
-        public List<Tuple<Entity,Entity>> Navigate(ThPDSCircuitGraphNode Node, List<Entity> Loads, List<string> Logos, Entity SourceEntity, Entity nextEntity)
+        public List<Tuple<Entity, Entity>> Navigate(ThPDSCircuitGraphNode node, List<Entity> loads, List<string> logos,
+            Entity sourceEntity, Entity nextEntity)
         {
-            List<Tuple<Entity, Entity>> results = new List<Tuple<Entity, Entity>>();
-            var findLoop = FindRootNextElement(SourceEntity, nextEntity);
+            var results = new List<Tuple<Entity, Entity>>();
+            var findLoop = FindRootNextElement(sourceEntity, nextEntity);
             foreach (var item in findLoop)
             {
-                if (DistributionBoxCollection.Contains(item.Key))
+                // 搜索回路标注
+                var circuitMark = new List<string>();
+                item.Value.ForEach(curve =>
+                {
+                    logos.AddRange(MarkService.GetMarks(Buffer(curve)));
+                });
+
+                if (DistBoxes.Contains(item.Key))
                 {
                     ThPDSCircuitGraphNode newNode;
-                    if (!CacheDistributionBoxCollection.ContainsKey(item.Key))
+                    if (!CacheDistBoxes.ContainsKey(item.Key))
                     {
-                        newNode = CreatNode(item.Key);
-                        CacheDistributionBoxCollection.Add(item.Key, newNode);
-                        graph.Graph.AddVertex(newNode);
+                        newNode = CreateNode(item.Key);
+                        CacheDistBoxes.Add(item.Key, newNode);
+                        PDSGraph.Graph.AddVertex(newNode);
                     }
                     else
                     {
-                        newNode = CacheDistributionBoxCollection[item.Key];
+                        newNode = CacheDistBoxes[item.Key];
                     }
 
-                    if (DistributionBoxCollection.Contains(SourceEntity) || BridgeCollection.Contains(SourceEntity))
+                    if (DistBoxes.Contains(sourceEntity) || Cabletrays.Contains(sourceEntity))
                     {
                         //配电箱搭着配电箱
-                        var newEdge = CreatEdge(Node, newNode, new List<string>());
-                        graph.Graph.AddEdge(newEdge);
+                        var newEdge = CreatEdge(node, newNode, logos);
+                        PDSGraph.Graph.AddEdge(newEdge);
                         if (item.Value.Count > 0)
                         {
                             FindGraph(item.Value.Last(), item.Key);
@@ -250,21 +279,21 @@ namespace TianHua.Electrical.PDS.Engine
                         //负载搭着配电箱
                         if (item.Value.Count > 0)
                         {
-                            results.Add((item.Value.Last() as Entity, item.Key as Entity).ToTuple());
+                            results.Add(Tuple.Create(item.Value.Last() as Entity, item.Key));
                         }
                         else
                         {
-                            results.Add((nextEntity, item.Key as Entity).ToTuple());
+                            results.Add(Tuple.Create(nextEntity, item.Key));
                         }
                     }
                 }
-                else if (LoadCollection.Contains(item.Key))
+                else if (Loads.Contains(item.Key))
                 {
-                    //负载搭着负载
-                    if (!CacheLoadCollection.Contains(item.Key))
+                    //搭着负载
+                    if (!CacheLoads.Contains(item.Key))
                     {
-                        Loads.Add(item.Key);
-                        CacheLoadCollection.Add(nextEntity);
+                        loads.Add(item.Key);
+                        CacheLoads.Add(item.Key);
                         var nextLoops = FindNext(item.Key, Buffer(item.Key));
                         if (item.Value.Count > 0)
                         {
@@ -274,17 +303,17 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             nextLoops.Remove(nextEntity);
                         }
-                        foreach (Entity entity in nextLoops)
+                        foreach (var entity in nextLoops)
                         {
                             //这就是自己本身延伸出去的块
-                            results.AddRange(Navigate(Node, Loads, new List<string>(), item.Key, entity));
+                            results.AddRange(Navigate(node, loads, new List<string>(), item.Key, entity));
                         }
                     }
                 }
                 else
                 {
                     //未知负载
-                    Loads.Add(item.Key);
+                    loads.Add(item.Key);
                 }
             }
             return results;
@@ -293,25 +322,29 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 由根节点找到下个元素(块)
         /// </summary>
-        /// <param name="node">起始节点</param>
-        /// <param name="loads">负载</param>
-        /// <param name="existingElement">已存在的元素</param>
-        /// <param name="sourceElement">源点块</param>
+        /// <param name="rootElement"></param>
+        /// <param name="specifyElement"></param>
         /// <returns></returns>
         public Dictionary<Entity, List<Curve>> FindRootNextElement(Entity rootElement, Entity specifyElement)
         {
-            Dictionary<Entity, List<Curve>> NextElement = new Dictionary<Entity, List<Curve>>();
+            var NextElement = new Dictionary<Entity, List<Curve>>();
             if (specifyElement is BlockReference blk)
-                return new Dictionary<Entity, List<Curve>>() { { blk, new List<Curve>() } };
+            {
+                return new Dictionary<Entity, List<Curve>>
+                {
+                    { blk, new List<Curve>() },
+                };
+            }
             //线需要寻块，且要考虑到一条线延伸多条线的情况
             else if (specifyElement is Curve curve)
             {
-                List<Curve> sharedpath = new List<Curve>();
+                var sharedpath = new List<Curve>();
                 //配电箱
-                if (rootElement is BlockReference rootblk)
+                if (rootElement is BlockReference rootBlk)
                 {
+                    var obb = Buffer(rootBlk, 0);
                     //起点连着块
-                    if (Buffer(rootblk, 0).Distance(curve.StartPoint) < AllowableTolerance)
+                    if (obb.Distance(curve.StartPoint) < obb.Distance(curve.EndPoint))
                     {
                         NextElement = FindRootNextPath(sharedpath, curve, false);
                     }
@@ -322,10 +355,10 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                 }
                 //桥架
-                else if (rootElement is Curve rootcurve)
+                else if (rootElement is Curve rootCurve)
                 {
                     //起点连着桥架
-                    if (curve.StartPoint.DistanceTo(rootcurve.GetClosestPointTo(curve.StartPoint, false)) < AllowableTolerance)
+                    if (curve.StartPoint.DistanceTo(rootCurve.GetClosestPointTo(curve.StartPoint, false)) < AllowableTolerance)
                     {
                         NextElement = FindRootNextPath(sharedpath, curve, false);
                     }
@@ -347,11 +380,13 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public Dictionary<Entity, List<Curve>> FindRootNextPath(List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
         {
-            Dictionary<Entity, List<Curve>> FindPath = new Dictionary<Entity, List<Curve>>();
+            var FindPath = new Dictionary<Entity, List<Curve>>();
             if (sharedPath.Contains(sourceElement))
+            {
                 return FindPath;
+            }
             sharedPath.Add(sourceElement);
-            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(AllowableTolerance * 2);
+            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(2 * AllowableTolerance);
             var probeResults = FindNext(sourceElement, probe);
             switch (probeResults.Count)
             {
@@ -360,23 +395,29 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         if (sourceElement is Line sourceline)
                         {
-                            Polyline longProbe = new Polyline();
+                            var longProbe = new Polyline();
                             if (IsStartPoint)
                             {
-                                longProbe = ThDrawTool.ToRectangle(sourceline.StartPoint, ExtendLine(sourceline.EndPoint, sourceline.StartPoint), AllowableTolerance * 2);
+                                longProbe = ThDrawTool.ToRectangle(sourceline.StartPoint, ExtendLine(sourceline.EndPoint,
+                                    sourceline.StartPoint), AllowableTolerance * 2);
                             }
                             else
                             {
-                                longProbe = ThDrawTool.ToRectangle(sourceline.EndPoint, ExtendLine(sourceline.StartPoint, sourceline.EndPoint), AllowableTolerance * 2);
+                                longProbe = ThDrawTool.ToRectangle(sourceline.EndPoint, ExtendLine(sourceline.StartPoint,
+                                    sourceline.EndPoint), AllowableTolerance * 2);
                             }
                             var longProbeResults = FindNext(sourceElement, longProbe);
-                            var longProbeLineResults = longProbeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>().ToList();
+                            var longProbeLineResults = longProbeResults.Where(e => e is Line).OfType<Line>().ToList();
                             //长探针只能找到一个符合条件的线。如果遇到多条，只取最符合的一条线
                             var point = IsStartPoint ? sourceline.StartPoint : sourceline.EndPoint;
-                            longProbeLineResults = longProbeLineResults.Where(o => ThGeometryTool.IsCollinearEx(sourceline.StartPoint, sourceline.EndPoint, o.StartPoint, o.EndPoint)).OrderBy(o => Math.Min(point.DistanceTo(o.StartPoint), point.DistanceTo(o.EndPoint))).ToList();
+                            longProbeLineResults = longProbeLineResults
+                                .Where(o => ThGeometryTool.IsCollinearEx(sourceline.StartPoint, sourceline.EndPoint, o.StartPoint, o.EndPoint))
+                                .OrderBy(o => Math.Min(point.DistanceTo(o.StartPoint), point.DistanceTo(o.EndPoint)))
+                                .ToList();
                             if (longProbeLineResults.Count > 0)
                             {
-                                bool isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint) > point.DistanceTo(longProbeLineResults[0].EndPoint);
+                                var isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint)
+                                    > point.DistanceTo(longProbeLineResults[0].EndPoint);
                                 return FindRootNextPath(sharedPath, longProbeLineResults[0], isStartPoint);
                             }
                             else
@@ -403,10 +444,10 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 return FindRootNextPath(sharedPath, curve, false);
                             }
-                            else if (sourceElement is Line sourceline && probeResults[0] is Line targetline)
+                            else if (sourceElement is Line sourceLine && probeResults[0] is Line targetLine)
                             {
-                                var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
-                                var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
+                                var mainVec = sourceLine.StartPoint.GetVectorTo(sourceLine.EndPoint);
+                                var branchVec = targetLine.StartPoint.GetVectorTo(targetLine.EndPoint);
                                 var ang = mainVec.GetAngleTo(branchVec);
                                 if (ang > Math.PI)
                                 {
@@ -415,19 +456,21 @@ namespace TianHua.Electrical.PDS.Engine
                                 //误差一度内认为近似垂直
                                 if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
                                 {
-                                    sharedPath.Add(targetline);
-                                    var square = Buffer(targetline);
-                                    var Secondresults = FindNextLine(targetline,square);
-                                    Secondresults.Remove(sourceline);
-                                    if (Secondresults.Count == 0)
+                                    sharedPath.Add(targetLine);
+                                    var square = Buffer(targetLine);
+                                    var secondResults = FindNextLine(targetLine, square);
+                                    secondResults.Remove(sourceLine);
+                                    if (secondResults.Count == 0)
+                                    {
                                         break;
+                                    }
                                     else
                                     {
-                                        foreach (var secondEntity in Secondresults)
+                                        foreach (var secondEntity in secondResults)
                                         {
                                             if (secondEntity is Curve secondCurve)
                                             {
-                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < AllowableTolerance)
+                                                if (secondCurve.StartPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.StartPoint, false)) < AllowableTolerance)
                                                 {
                                                     var newsharedPath = sharedPath.Clone().ToList();
                                                     FindRootNextPath(newsharedPath, secondCurve, false).ForEach(newPath =>
@@ -435,7 +478,7 @@ namespace TianHua.Electrical.PDS.Engine
                                                         FindPath.Add(newPath.Key, newPath.Value);
                                                     });
                                                 }
-                                                else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < AllowableTolerance)
+                                                else if (secondCurve.EndPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.EndPoint, false)) < AllowableTolerance)
                                                 {
                                                     var newsharedPath = sharedPath.Clone().ToList();
                                                     FindRootNextPath(newsharedPath, secondCurve, true).ForEach(newPath =>
@@ -462,12 +505,12 @@ namespace TianHua.Electrical.PDS.Engine
                             FindPath.Add(blk, sharedPath);
                         }
                         //遇到分支的情况
-                        else if (sourceElement is Line sourceline)
+                        else if (sourceElement is Line sourceLine)
                         {
-                            var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
-                            foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
+                            var mainVec = sourceLine.StartPoint.GetVectorTo(sourceLine.EndPoint);
+                            foreach (var targetLine in probeResults.OfType<Line>())
                             {
-                                var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
+                                var branchVec = targetLine.StartPoint.GetVectorTo(targetLine.EndPoint);
                                 var ang = mainVec.GetAngleTo(branchVec);
                                 if (ang > Math.PI)
                                 {
@@ -476,19 +519,21 @@ namespace TianHua.Electrical.PDS.Engine
                                 //误差一度内认为近似垂直
                                 if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
                                 {
-                                    sharedPath.Add(targetline);
-                                    var square = Buffer(targetline);
-                                    var Secondresults = FindNext(sourceline, square);
-                                    Secondresults.Remove(targetline);
-                                    if (Secondresults.Count == 0)
+                                    sharedPath.Add(targetLine);
+                                    var square = Buffer(targetLine);
+                                    var secondResults = FindNext(sourceLine, square);
+                                    secondResults.Remove(targetLine);
+                                    if (secondResults.Count == 0)
+                                    {
                                         break;
+                                    }
                                     else
                                     {
-                                        foreach (var secondEntity in Secondresults)
+                                        foreach (var secondEntity in secondResults)
                                         {
                                             if (secondEntity is Curve secondCurve)
                                             {
-                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < AllowableTolerance)
+                                                if (secondCurve.StartPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.StartPoint, false)) < AllowableTolerance)
                                                 {
                                                     var newsharedPath = sharedPath.Clone().ToList();
                                                     FindRootNextPath(newsharedPath, secondCurve, false).ForEach(newPath =>
@@ -496,7 +541,7 @@ namespace TianHua.Electrical.PDS.Engine
                                                         FindPath.Add(newPath.Key, newPath.Value);
                                                     });
                                                 }
-                                                else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < AllowableTolerance )
+                                                else if (secondCurve.EndPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.EndPoint, false)) < AllowableTolerance)
                                                 {
                                                     var newsharedPath = sharedPath.Clone().ToList();
                                                     FindRootNextPath(newsharedPath, secondCurve, true).ForEach(newPath =>
@@ -525,11 +570,11 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNext(Entity existingEntity, Polyline space)
         {
-            var results = lineSpatialIndex.SelectCrossingPolygon(space);
-            results = results.Union(loadSpatialIndex.SelectCrossingPolygon(space));
-            results = results.Union(distributionBoxSpatialIndex.SelectCrossingPolygon(space));
+            var results = CableSpatialIndex.SelectCrossingPolygon(space);
+            results = results.Union(LoadSpatialIndex.SelectCrossingPolygon(space));
+            results = results.Union(DistBoxSpatialIndex.SelectCrossingPolygon(space));
             results.Remove(existingEntity);
-            return results.Cast<Entity>().ToList();
+            return results.OfType<Entity>().ToList();
         }
 
         /// <summary>
@@ -540,9 +585,9 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNextLine(Entity existingEntity, Polyline space)
         {
-            var results = lineSpatialIndex.SelectCrossingPolygon(space);
+            var results = CableSpatialIndex.SelectCrossingPolygon(space);
             results.Remove(existingEntity);
-            return results.Cast<Entity>().ToList();
+            return results.OfType<Entity>().ToList();
         }
 
         /// <summary>
@@ -553,9 +598,9 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNextLoad(Entity existingEntity, Polyline space)
         {
-            var results = loadSpatialIndex.SelectCrossingPolygon(space);
+            var results = LoadSpatialIndex.SelectCrossingPolygon(space);
             results.Remove(existingEntity);
-            return results.Cast<Entity>().ToList();
+            return results.OfType<Entity>().ToList();
         }
 
         /// <summary>
@@ -564,11 +609,11 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="existingElement">已存在的元素</param>
         /// <param name="space">空间</param>
         /// <returns></returns>
-        public List<Entity> FindNextDistributionBox(Entity existingEntity, Polyline space)
+        public List<Entity> FindNextDistBox(Entity existingEntity, Polyline space)
         {
-            var results = distributionBoxSpatialIndex.SelectCrossingPolygon(space);
+            var results = DistBoxSpatialIndex.SelectCrossingPolygon(space);
             results.Remove(existingEntity);
-            return results.Cast<Entity>().ToList();
+            return results.OfType<Entity>().ToList();
         }
 
         public Polyline Buffer(Entity entity, double distance = AllowableTolerance)
@@ -586,8 +631,8 @@ namespace TianHua.Electrical.PDS.Engine
                 }
                 else if (curve is Polyline polyline)
                 {
-                    var objs = polyline.TessellatePolylineWithArc(100.0).BufferPL(distance);
-                    return objs.Cast<Polyline>().OrderByDescending(o => o.Length).First();
+                    var objs = polyline.BufferPL(distance);
+                    return objs.OfType<Polyline>().OrderByDescending(o => o.Length).First();
                 }
                 else
                 {
@@ -596,7 +641,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
             else if (entity is BlockReference blk)
             {
-                Polyline rectangle = database.GetBlockReferenceOBB(blk);
+                var rectangle = Database.GetBlockReferenceOBB(blk);
                 return rectangle.Buffer(distance)[0] as Polyline;
             }
             else
@@ -613,38 +658,73 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="ep"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Point3d ExtendLine(Point3d sp, Point3d ep, double length = 2000.0)
+        private Point3d ExtendLine(Point3d sp, Point3d ep, double length = 2000.0)
         {
             var vec = sp.GetVectorTo(ep).GetNormal();
             return ep + vec.MultiplyBy(length);
         }
 
         #region Test
-        private ThPDSCircuitGraphNode CreatNode(Entity entity)
+        private ThPDSCircuitGraphNode CreateNode(Entity entity)
         {
-            var node = new ThPDSCircuitGraphNode() { NodeType = PDSNodeType.DistributionBox };
+            var node = new ThPDSCircuitGraphNode
+            {
+                NodeType = PDSNodeType.DistributionBox
+            };
             var frame = Buffer(entity);
-            var marks = markService.GetMarks(frame);
+            var marks = MarkService.GetMarks(frame);
+            var service = new ThPDSMarkAnalysisService();
+            node.Loads = new List<ThPDSLoad>
+            {
+                service.DistBoxMarkAnalysis(marks, DistBoxKey),
+            };
             return node;
         }
 
-        private ThPDSCircuitGraphNode CreateNode(List<Entity> entitys)
+        private ThPDSCircuitGraphNode CreateNode(List<Entity> entities)
         {
-            if (entitys.Count(o => o is Line) >0)
+            var node = new ThPDSCircuitGraphNode();
+            var loads = new List<ThPDSLoad>();
+            var noneLoad = false;
+            entities.ForEach(e =>
             {
-                return new ThPDSCircuitGraphNode() { NodeType = PDSNodeType.None, Loads = entitys.Select(o => new ThPDSLoad()).ToList() };
+                if(e is Line line)
+                {
+                    noneLoad = true;
+                }
+                else
+                {
+                    var frame = Buffer(e);
+                    var marks = MarkService.GetMarks(frame);
+                    var service = new ThPDSMarkAnalysisService();
+                    loads.Add(service.LoadMarkAnalysis(marks));
+                }
+            });
+
+            node.Loads = loads;
+            if (noneLoad)
+            {
+                node.NodeType = PDSNodeType.None;
             }
-            return new ThPDSCircuitGraphNode() { NodeType = PDSNodeType.Load, Loads = entitys.Select(o => new ThPDSLoad()).ToList() };
+            else
+            {
+                node.NodeType = PDSNodeType.Load;
+            }
+            return node;
         }
 
-        private ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreatEdge(ThPDSCircuitGraphNode source, ThPDSCircuitGraphNode tatget, List<string> list)
+        private ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreatEdge(ThPDSCircuitGraphNode source, 
+            ThPDSCircuitGraphNode tatget, List<string> list)
         {
-            return new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source,tatget);
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, tatget);
+            var service = new ThPDSMarkAnalysisService();
+            edge.Circuit = service.CircuitMarkAnalysis(list, DistBoxKey);
+            return edge;
         }
 
         public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GetGraph()
         {
-            return this.graph.Graph;
+            return this.PDSGraph.Graph;
         }
         #endregion
     }
