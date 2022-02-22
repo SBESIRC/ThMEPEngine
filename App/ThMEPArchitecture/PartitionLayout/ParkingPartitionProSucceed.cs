@@ -519,6 +519,53 @@ namespace ThMEPArchitecture.PartitionLayout
             }).ToList();
         }
 
+        private void ReDefinePillarDimensions()
+        {
+            if (HasImpactOnDepthForPillarConstruct)
+            {
+                Pillars = Pillars.Select(e =>
+                  {
+                      var segobjs = new DBObjectCollection();
+                      e.Explode(segobjs);
+                      if (DisPillarLength < DisPillarDepth)
+                      {
+                          double t = DisPillarDepth;
+                          DisPillarDepth = DisPillarLength;
+                          DisPillarLength = t;
+                          t = PillarNetLength;
+                          PillarNetLength = PillarNetDepth;
+                          PillarNetDepth = t;
+                      }
+                      var segs = segobjs.Cast<Line>().OrderByDescending(t => t.Length).ToList();
+                      if (DisPillarLength < DisPillarDepth)
+                          segs = segobjs.Cast<Line>().OrderBy(t => t.Length).ToList();
+                      Line a = new Line();
+                      Line b = new Line();
+                      if (DisPillarLength != DisPillarDepth)
+                      {
+                          a = segs[0];
+                          b = segs[1];
+                      }
+                      else
+                      {
+                          a=segs[0];
+                          segs.RemoveAt(0);
+                          b = segs.Where(t => IsParallelLine(t, a)).First();
+                      }
+                      b.ReverseCurve();
+                      a.Scale(a.GetCenter(), PillarNetLength / a.Length);
+                      b.Scale(b.GetCenter(), PillarNetLength / b.Length);
+                      a.TransformBy(Matrix3d.Displacement(CreateVector(a.GetCenter(), b.GetCenter()).GetNormal() * ThicknessOfPillarConstruct));
+                      b.TransformBy(Matrix3d.Displacement(-CreateVector(a.GetCenter(), b.GetCenter()).GetNormal() * ThicknessOfPillarConstruct));
+                      var pl = CreatPolyFromLines(a, b);
+                      e.Dispose();
+                      a.Dispose();
+                      b.Dispose();
+                      return pl;
+                  }).ToList();
+            }
+        }
+
         private PerpModlues ConstructPerpModules(Vector3d vec, List<Line> ilanes)
         {
             PerpModlues result = new PerpModlues();
@@ -901,6 +948,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         var lf = CreateLine(li);
                         lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
                         var pillar = CreatePolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
+                        pillar.TransformBy(Matrix3d.Displacement(CreateVector(ed).GetNormal() * DisHalfCarToPillar));
                         if (isin_backback)
                             pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2)));
                         else
