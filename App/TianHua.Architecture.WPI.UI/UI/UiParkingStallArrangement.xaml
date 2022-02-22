@@ -6,8 +6,8 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(1.6)" SizeToContent="Manual" Height="684.456"
-              Width="460" MaxWidth="550"  MaxHeight="690" WindowStartupLocation="CenterScreen"
+              Title="车位自动排布(1.6)" SizeToContent="Manual" Height="710"
+              Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
     <Window.Resources>
@@ -20,17 +20,18 @@
             <StackPanel >
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
                 <StackPanel Orientation="Vertical">
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
-                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
+                    <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
+                    <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
                         <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">只生成分区线</CheckBox>
                         <Label Margin="0,2,5,0">方案数：</Label>
                         <TextBox Width="25" Height="15" Margin="0,4,5,5" Text="{Binding LayoutCount}"></TextBox>
                     </StackPanel>
-                    
-
                 </StackPanel>
+
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -70,25 +71,25 @@
                 </StackPanel>
                 <StackPanel>
                     <Label>柱网规格：</Label>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Margin="5,5,5,5" Orientation="Horizontal">
                         <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">大柱网</RadioButton>
                         <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">大小柱网</RadioButton>
                         <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">小柱网</RadioButton>
                     </StackPanel>
-                    <RadioButton GroupName="ColumnSize" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandColumnSize, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="自定义柱网："/>
+                    <RadioButton GroupName="ColumnSize" Margin="5,5,5,5" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandColumnSize, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="自定义柱网："/>
                     <StackPanel Orientation="Horizontal">
                         <Label>平行于车道方向柱子尺寸：</Label>
-                        <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnSizeOfParalleToRoad}"></TextBox>
+                        <TextBox Width="40" Margin="60,5,5,5" Text="{Binding ColumnSizeOfParalleToRoad}"></TextBox>
                         <Label>mm</Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>垂直于车道方向柱子尺寸：</Label>
-                        <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnSizeOfPerpendicularToRoad}"></TextBox>
+                        <TextBox Width="40" Margin="60,5,5,5" Text="{Binding ColumnSizeOfPerpendicularToRoad}"></TextBox>
                         <Label>mm</Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label>柱子完成面尺寸:</Label>
-                        <TextBox Width="40" Margin="58,5,5,5" Text="{Binding ColumnAdditionalSize}"></TextBox>
+                        <Label>柱子完成面尺寸：</Label>
+                        <TextBox Width="40" Margin="108,5,5,5" Text="{Binding ColumnAdditionalSize}"></TextBox>
                         <Label>mm</Label>
                         <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding ColumnAdditionalInfluenceLaneWidth}">是否影响车道净宽</CheckBox>
                     </StackPanel>
@@ -96,7 +97,7 @@
                     <StackPanel Orientation="Vertical" IsEnabled="{Binding CommandColumnSize, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=3}" RenderTransformOrigin="0.474,-0.205">
                         <StackPanel Orientation="Horizontal">
                             <Label>柱间距：</Label>
-                            <TextBox Width="40" Margin="72,5,5,5" Text="{Binding ColumnWidth}"></TextBox>
+                            <TextBox Width="40" Margin="156,5,5,5" Text="{Binding ColumnWidth}"></TextBox>
                             <Label>mm</Label>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
@@ -107,7 +108,7 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label>单排模块：柱子沿车道法向偏移距离</Label>
-                            <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnShiftDistanceOfSingleRowModular}"></TextBox>
+                            <TextBox Width="40" Margin="12,5,5,5" Text="{Binding ColumnShiftDistanceOfSingleRowModular}"></TextBox>
                             <Label>mm</Label>
                         </StackPanel>
                     </StackPanel>
