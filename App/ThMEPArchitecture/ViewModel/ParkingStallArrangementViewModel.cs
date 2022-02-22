@@ -234,28 +234,28 @@ namespace ThMEPArchitecture.ViewModel
                 _CommandColumnSize = value;
                 if (value == CommandColumnSizeEnum.Large)
                 {
-                    MaxColumnWidth = 7800;
+                    ColumnWidth = 7800;
                     ColumnShiftDistanceOfDoubleRowModular = 1050;
                     MidColumnInDoubleRowModular = false;
                     ColumnShiftDistanceOfSingleRowModular = 550;
                 }
                 else if (value == CommandColumnSizeEnum.LargeAndSmall)
                 {
-                    MaxColumnWidth = 7800;
+                    ColumnWidth = 7800;
                     ColumnShiftDistanceOfDoubleRowModular = 550;
                     MidColumnInDoubleRowModular = true;
                     ColumnShiftDistanceOfSingleRowModular = 550;
                 }
                 else if (value == CommandColumnSizeEnum.Small)
                 {
-                    MaxColumnWidth = 5400;
+                    ColumnWidth = 5400;
                     ColumnShiftDistanceOfDoubleRowModular = 550;
                     MidColumnInDoubleRowModular = true;
                     ColumnShiftDistanceOfSingleRowModular = 550;
                 }
                 else
                 {
-                    MaxColumnWidth = 7800;
+                    ColumnWidth = 7800;
                     ColumnShiftDistanceOfDoubleRowModular = 550;
                     MidColumnInDoubleRowModular = true;
                     ColumnShiftDistanceOfSingleRowModular = 550;
@@ -264,18 +264,18 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //最大柱间距,需要改成柱间距
-        private int _MaxColumnWidth = 7800; //mm
+        private int _ColumnWidth = 7800; //mm
 
-        public int MaxColumnWidth
+        public int ColumnWidth
         {
             get
             {
-                return _MaxColumnWidth;
+                return _ColumnWidth;
             }
             set
             {
-                _MaxColumnWidth = value;
-                RaisePropertyChanged("MaxColumnWidth");
+                _ColumnWidth = value;
+                RaisePropertyChanged("ColumnWidth");
             }
         }
 

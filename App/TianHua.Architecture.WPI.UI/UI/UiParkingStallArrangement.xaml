@@ -95,8 +95,8 @@
 
                     <StackPanel Orientation="Vertical" IsEnabled="{Binding CommandColumnSize, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=3}" RenderTransformOrigin="0.474,-0.205">
                         <StackPanel Orientation="Horizontal">
-                            <Label>最大柱间距（要改成柱间距）：</Label>
-                            <TextBox Width="40" Margin="72,5,5,5" Text="{Binding MaxColumnWidth}"></TextBox>
+                            <Label>柱间距：</Label>
+                            <TextBox Width="40" Margin="72,5,5,5" Text="{Binding ColumnWidth}"></TextBox>
                             <Label>mm</Label>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">

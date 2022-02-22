@@ -69,7 +69,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 DisVertCarLength = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotLength : vm.VerticalSpotWidth;
                 DisVertCarWidth = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotWidth : vm.VerticalSpotLength;
                 DisLaneWidth = vm.RoadWidth;
-                MaxPillarSpacing = vm.MaxColumnWidth;
+                MaxPillarSpacing = vm.ColumnWidth;
                 PillarNetLength = vm.ColumnSizeOfParalleToRoad;
                 PillarNetDepth = vm.ColumnSizeOfPerpendicularToRoad;
                 ThicknessOfPillarConstruct = vm.ColumnAdditionalSize;

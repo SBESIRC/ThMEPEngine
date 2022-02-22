@@ -31,16 +31,19 @@ namespace ThMEPArchitecture.PartitionLayout
                 DisVertCarLength = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotLength : vm.VerticalSpotWidth;
                 DisVertCarWidth = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotWidth : vm.VerticalSpotLength;
                 DisLaneWidth = vm.RoadWidth;
-                //MaxPillarSpacing = vm.MaxColumnWidth;
+                PillarSpacing = vm.ColumnWidth;
+                GenerateMiddlePillars = vm.MidColumnInDoubleRowModular;
+                DisPillarMoveDeeplyBackBack = vm.ColumnShiftDistanceOfDoubleRowModular;
+                DisPillarMoveDeeplySingle = vm.ColumnShiftDistanceOfSingleRowModular;
                 PillarNetLength = vm.ColumnSizeOfParalleToRoad;
                 PillarNetDepth = vm.ColumnSizeOfPerpendicularToRoad;
                 ThicknessOfPillarConstruct = vm.ColumnAdditionalSize;
                 LayoutMode = ((int)vm.RunMode);
             }
-            GeneratePillars = MaxPillarSpacing < DisVertCarWidth ? false : GeneratePillars;
+            GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
             DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
             DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
-            CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
+            CountPillarDist = ((int)(Math.Floor(PillarSpacing / DisVertCarWidth)));
             DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
             DisModulus = DisCarAndHalfLane * 2;
             LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2;
@@ -55,7 +58,7 @@ namespace ThMEPArchitecture.PartitionLayout
             MaxLength = BoundingBox.Length / 2;
             InitialzeDatas(iniLanes);
             Boundary = JoinCurves(walls, iniLanes)[0];
-            DisHalfCarToPillar = (MaxPillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;         
+            DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;         
         }
 
         public List<Polyline> Walls;
@@ -86,7 +89,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public static double PillarNetLength = 500;
         public static double PillarNetDepth = 500;
         public static double ThicknessOfPillarConstruct = 50;
-        public static double MaxPillarSpacing = 8400;
+        public static double PillarSpacing = 7800;
         public static double DisVertCarLength = 5100;
         public static double DisVertCarWidth = 2400;
         public static double DisParallelCarLength = 6000;
@@ -94,10 +97,10 @@ namespace ThMEPArchitecture.PartitionLayout
         public static double DisLaneWidth = 5500;
         public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
         public static double DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
-        public static int CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
+        public static int CountPillarDist = ((int)(Math.Floor(PillarSpacing / DisVertCarWidth)));
         public static double DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
         public static double DisModulus = DisCarAndHalfLane * 2;
-        public static double DisHalfCarToPillar = (MaxPillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
+        public static double DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
         public static double DisPillarMoveDeeplyBackBack = 1000;
         public static double DisPillarMoveDeeplySingle = 550;
 

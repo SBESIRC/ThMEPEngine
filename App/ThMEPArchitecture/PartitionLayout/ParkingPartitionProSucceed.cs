@@ -509,7 +509,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 var clone = t.Clone() as Polyline;
                 clone.Scale(clone.GetRecCentroid(), 0.5);
-                if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength)
+                if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
                 {
                     clone.Dispose();
                     return false;
@@ -862,7 +862,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             }
                             var pp = precar.GetClosestPointTo(ed.StartPoint, false);
                             var li = new Line(pp, ed.StartPoint);
-                            li.EndPoint = ed.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(li).GetNormal() * DisPillarLength));
+                            li.EndPoint = pp.TransformBy(Matrix3d.Displacement(CreateVector(li).GetNormal() * DisPillarLength));
                             var lf = CreateLine(li);
                             lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
                             var pillar = CreatePolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
