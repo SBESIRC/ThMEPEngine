@@ -100,7 +100,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> orgBuildingBoxes);
             layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> outerWallLines);
             layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
+
             var OuterBoundary = layoutPara.OuterBoundary;
+            var ramps = layoutPara.RampList;
             var bound = GeoUtilities.JoinCurves(outerWallLines, inilanes)[0];
             var ObstaclesSpatialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
 #if DEBUG
@@ -141,10 +143,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 if (ext.ToExtents2d().GetArea() >= 2 * 10e7 && ext.ToExtents2d().GetArea() < 10e15)
                     buildingBoxes.Add(ext.ToRectangle());
             }
-            partition = new ParkingPartitionPro(outerWallLines, inilanes, obstacles, bound,vm);
+            partition = new ParkingPartitionPro(outerWallLines, inilanes, obstacles, bound, vm);
             partition.OutBoundary = OuterBoundary;
             partition.BuildingBoxes = buildingBoxes;
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+            partition.RampList = ramps.Where(e => bound.Contains(e.InsertPt)).ToList();
         }
     }
 }

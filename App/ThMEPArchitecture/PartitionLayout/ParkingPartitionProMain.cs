@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
@@ -84,6 +85,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<CarModule> CarModules = new List<CarModule>();
         private List<Point3d> ObstacleVertexes = new List<Point3d>();
         public List<Polyline> BuildingBoxes = new List<Polyline>();
+        public List<Ramps> RampList = new List<Ramps>();
 
         public static bool GeneratePillars = true;
         public static bool GenerateMiddlePillars = true;
@@ -167,6 +169,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 OriginalLanes.Add(e);
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Vertices().Cast<Point3d>()));
+
             IniLaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)));
             //CarBoxesSpatialIndex.Update(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)).ToCollection(), new DBObjectCollection());
         }
@@ -226,7 +229,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void PreProcess()
         {
-            var iniLanes=IniLanes.Select(e => e.Line).ToList();
+            var iniLanes = IniLanes.Select(e => e.Line).ToList();
             for (int i = 0; i < iniLanes.Count; i++)
             {
                 var line = iniLanes[i];
@@ -261,6 +264,25 @@ namespace ThMEPArchitecture.PartitionLayout
                     IniLanes.RemoveAt(i);
                     i--;
                 }
+            }
+            if (RampList.Count > 0)
+            {
+                var ramp = RampList[0];
+                var pt = ramp.InsertPt;
+                var pl = ramp.Ramp;
+                var segobjs = new DBObjectCollection();
+                pl.Explode(segobjs);
+                var seg = segobjs.Cast<Line>().OrderByDescending(t => t.Length).First();
+                var vec = CreateVector(seg).GetNormal();
+                var ptest = pt.TransformBy(Matrix3d.Displacement(vec));
+                if (pl.Contains(ptest)) vec = -vec;
+                var rampline = CreateLineFromStartPtAndVector(pt, vec, MaxLength);
+                rampline = SplitLine(rampline, IniLanes.Select(e => e.Line).ToList()).OrderBy(t => t.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
+                var prepvec = vec.GetPerpendicularVector();
+                IniLanes.Add(new Lane(rampline, prepvec));
+                IniLanes.Add(new Lane(rampline, -prepvec));
+                OriginalLanes.Add(rampline);
+                IniLaneBoxes.Add(rampline.Buffer(DisLaneWidth / 2));
             }
         }
 
