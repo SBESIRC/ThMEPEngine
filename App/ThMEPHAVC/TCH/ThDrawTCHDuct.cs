@@ -18,8 +18,7 @@ namespace ThMEPHVAC.TCH
         public void Draw(List<SegInfo> segInfos, Matrix3d mat, ref ulong gId)
         {
             sqliteHelper.Conn();
-            sqliteHelper.ClearTable(ThTCHCommonTables.ductTableName);
-            sqliteHelper.ClearTable(ThTCHCommonTables.interfaceTableName);
+            var gap = ThTCHCommonTables.flgThickness * 0.5;
             foreach (var seg in segInfos)
             {
                 RecordDuctInfo(ref gId);
@@ -34,7 +33,7 @@ namespace ThMEPHVAC.TCH
                     width = width,
                     normalVector = dirVec,
                     heighVector = new Vector3d(0, 0, 1),
-                    centerPoint = l.StartPoint.TransformBy(mat)
+                    centerPoint = l.StartPoint.TransformBy(mat) + (gap * dirVec),
                 };
                 var eEndParam = new TCHInterfaceParam()
                 {
@@ -44,9 +43,9 @@ namespace ThMEPHVAC.TCH
                     width = width,
                     normalVector = -dirVec,
                     heighVector = new Vector3d(0, 0, 1),
-                    centerPoint = l.EndPoint.TransformBy(mat)
+                    centerPoint = l.EndPoint.TransformBy(mat) - (gap * dirVec)
                 };
-                RecordPortInfo(sEndParam, eEndParam);
+                ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
             sqliteHelper.db.Close();
         }
@@ -55,10 +54,10 @@ namespace ThMEPHVAC.TCH
             ductParam = new TCHDuctParam()
             {
                 ID = gId++,
-                endFaceID = gId++,
                 startFaceID = gId++,
-                subSystemID = 3,
-                materialID = 4,
+                endFaceID = gId++,
+                subSystemID = 1,
+                materialID = 0,
                 sectionType = 0,
                 ductType = 1,
                 Soft = 0,
@@ -78,27 +77,6 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductParam.AirLoad.ToString() + "')";
             sqliteHelper.Query<TCHDuctParam>(recordDuct);
         }
-        private void RecordPortInfo(TCHInterfaceParam sEndParam, TCHInterfaceParam eEndParam)
-        {
-            string recordDuctSrtInfo = $"INSERT INTO " + ThTCHCommonTables.interfaceTableName +
-                                 " VALUES ('" + sEndParam.ID.ToString() + "'," +
-                                         "'" + sEndParam.sectionType.ToString() + "'," +
-                                         "'" + sEndParam.height.ToString() + "'," +
-                                         "'" + sEndParam.width.ToString() + "'," +
-                                         "'" + CovertVector(sEndParam.normalVector) + "'," +
-                                         "'" + CovertVector(sEndParam.heighVector) + "'," +
-                                         "'" + CovertPoint(sEndParam.centerPoint) + "')";
-            string recordDuctEndInfo = $"INSERT INTO " + ThTCHCommonTables.interfaceTableName +
-                                 " VALUES ('" + eEndParam.ID.ToString() + "'," +
-                                         "'" + eEndParam.sectionType.ToString() + "'," +
-                                         "'" + eEndParam.height.ToString() + "'," +
-                                         "'" + eEndParam.width.ToString() + "'," +
-                                         "'" + CovertVector(eEndParam.normalVector) + "'," +
-                                         "'" + CovertVector(eEndParam.heighVector) + "'," +
-                                         "'" + CovertPoint(eEndParam.centerPoint) + "')";
-            sqliteHelper.Query<TCHInterfaceParam>(recordDuctSrtInfo);
-            sqliteHelper.Query<TCHInterfaceParam>(recordDuctEndInfo);
-        }
         private static void GetWidthAndHeight(string size, out double width, out double height)
         {
             string[] s = size.Split('x');
@@ -106,14 +84,6 @@ namespace ThMEPHVAC.TCH
                 throw new NotImplementedException("Duct size info doesn't contain width or height");
             width = Double.Parse(s[0]);
             height = Double.Parse(s[1]);
-        }
-        private string CovertPoint(Point3d p)
-        {
-            return CovertVector(p.GetAsVector());
-        }
-        private string CovertVector(Vector3d v)
-        {
-            return $@"{{""X"":{Math.Round(v.X, 6)},""Y"":{Math.Round(v.Y, 6)},""Z"":{Math.Round(v.Z, 6)}}}";
         }
     }
 }

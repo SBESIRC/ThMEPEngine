@@ -6,6 +6,7 @@ using Linq2Acad;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
+using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
 {
@@ -16,14 +17,21 @@ namespace ThMEPHVAC.Model
         public DBObjectCollection bypass;
         private Matrix3d disMat;
         private ThDuctPortsDrawService service;
-        public ThFanDraw(ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable)
+        private ThTCHDrawFactory tchDrawService;
+        public ThFanDraw(ref ulong gId, ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable)
         {
             Init(anayRes);
             DrawCenterLine(anayRes);
-            service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
-            service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
-            service.DrawDuct(anayRes.UpDownVertivalPipe, disMat);
-            service.DrawReducing(anayRes.reducings, disMat);
+            tchDrawService.DrawSpecialShape(anayRes.specialShapesInfo, disMat, ref gId);
+            tchDrawService.ductService.Draw(anayRes.centerLines.Values.ToList(), disMat, ref gId);
+            tchDrawService.ductService.Draw(anayRes.UpDownVertivalPipe, disMat, ref gId);
+            tchDrawService.reducingService.Draw(anayRes.reducings, disMat, ref gId);
+
+
+            //service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
+            //service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
+            //service.DrawDuct(anayRes.UpDownVertivalPipe, disMat);
+            //service.DrawReducing(anayRes.reducings, disMat);
             service.DrawSideDuctText(anayRes, anayRes.moveSrtP, fanParam);
             DrawHose(roomEnable, notRoomEnable);
         }
@@ -34,6 +42,7 @@ namespace ThMEPHVAC.Model
             fanParam = anayRes.fanParam;
             bypass = anayRes.bypass;
             service = new ThDuctPortsDrawService(fan.scenario, fanParam.scale);
+            tchDrawService = new ThTCHDrawFactory("D://TG20.db");
         }
         private void DrawCenterLine(ThFanAnalysis anayRes)
         {

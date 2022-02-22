@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Linq2Acad;
@@ -101,7 +102,9 @@ namespace TianHua.Hvac.UI.Command
             }
             return true;
         }
-        public void NotPressurizedAirSupply(FanParam fanParam, 
+        public void NotPressurizedAirSupply(ref ulong gId, 
+                                            string curDbPath,
+                                            FanParam fanParam, 
                                             ThDbModelFan fan,
                                             DBObjectCollection wallLines, 
                                             PortParam portParam, 
@@ -114,17 +117,19 @@ namespace TianHua.Hvac.UI.Command
                 return;
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            _ = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
+            _ = new ThFanDraw(ref gId, anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             if (isIntegrate)
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
+                var ductPort = new ThHvacDuctPortsCmd(ref gId, curDbPath, portParam, allFansDic);
                 ductPort.Execute();
             }
         }
 
-        public void PressurizedAirSupply(FanParam fanParam,
+        public void PressurizedAirSupply(ref ulong gId, 
+                                         string curDbPath, 
+                                         FanParam fanParam,
                                          ThDbModelFan fan,
                                          DBObjectCollection wallLines,
                                          PortParam portParam,
@@ -146,7 +151,7 @@ namespace TianHua.Hvac.UI.Command
             // 先画阀，pinter会移动中心线导致墙线与中心线交不上
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            var pinter = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
+            var pinter = new ThFanDraw(ref gId, anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             InsertElectricValve(fanParam, fan, maxBypass, pinter);
             if (fanParam.bypassPattern == "RBType4" || fanParam.bypassPattern == "RBType5")
             {
@@ -160,9 +165,15 @@ namespace TianHua.Hvac.UI.Command
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
+                var ductPort = new ThHvacDuctPortsCmd(ref gId, curDbPath, portParam, allFansDic);
                 ductPort.Execute();
             }
+        }
+        public static void InitTables(string curDbPath, string templateDbPath)
+        {
+            if (File.Exists(curDbPath))
+                File.Delete(curDbPath);
+            File.Copy(templateDbPath, curDbPath);
         }
 
         private void TransFanParamToPortParam(PortParam portParam, FanParam fanParam, Point3d srtP, Line realSrtOftLine)

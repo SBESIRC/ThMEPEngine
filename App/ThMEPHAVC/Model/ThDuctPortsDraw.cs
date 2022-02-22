@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
@@ -10,7 +11,6 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDraw
     {
-        private ulong gId = 0;
         private double portWidth;
         private double portHeight;
         private ThDuctPortsDrawService service;
@@ -18,10 +18,10 @@ namespace ThMEPHVAC.Model
         private Vector3d orgDisVec;
         private Matrix3d orgDisMat;
         public ThTCHDrawFactory tchDrawService;
-        public ThDuctPortsDraw(PortParam portParam)
+        public ThDuctPortsDraw(PortParam portParam, string curDbPath)
         {
             Init(portParam);
-            tchDrawService = new ThTCHDrawFactory("D://TG20.db");
+            tchDrawService = new ThTCHDrawFactory(curDbPath);
         }
         private void Init(PortParam portParam)
         {
@@ -33,14 +33,20 @@ namespace ThMEPHVAC.Model
             orgDisVec = portParam.srtPoint.GetAsVector();
             orgDisMat = Matrix3d.Displacement(orgDisVec);
         }
-        public void Draw(ThDuctPortsAnalysis anayRes)
+        public void Draw(ThDuctPortsAnalysis anayRes, ref ulong gId)
         {
             if (portParam.genStyle == GenerationStyle.Auto && portParam.param.portNum > 0)
                 DrawPortMark(anayRes.endLinesInfos); // DrawEndlines的DrawDimension会改变风口个数，所以先插标注
+
+            tchDrawService.ductService.Draw(anayRes.breakedDucts, orgDisMat, ref gId);
+            tchDrawService.ductService.Draw(anayRes.mainLinesInfos.Values.ToList(), orgDisMat, ref gId);
+            tchDrawService.reducingService.Draw(anayRes.reducings, orgDisMat, ref gId);
+            tchDrawService.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat, ref gId);
+
             DrawEndlines(anayRes);
-            DrawMainlines(anayRes.mainLinesInfos);
-            service.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat);
-            
+            //DrawMainlines(anayRes.mainLinesInfos); // 画打组管段
+            //service.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat);
+
             if (portParam.param.scenario == "消防排烟" || portParam.param.scenario == "消防补风" || portParam.param.scenario == "消防加压送风")
                 service.fireValveService.InsertValves(portParam.srtPoint, anayRes.endLinesInfos, ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_BEC);
             else
@@ -84,9 +90,8 @@ namespace ThMEPHVAC.Model
 
         private void DrawEndlines(ThDuctPortsAnalysis anayRes)
         {
-            tchDrawService.ductService.Draw(anayRes.breakedDucts, orgDisMat, ref gId);
-            service.DrawDuct(anayRes.breakedDucts, orgDisMat);
-            service.DrawReducing(anayRes.reducings, orgDisMat);
+            //service.DrawDuct(anayRes.breakedDucts, orgDisMat);// 画打组管段
+            //service.DrawReducing(anayRes.reducings, orgDisMat);// 画打组管段
             service.DrawSideDuctText(anayRes.textAlignment, portParam.srtPoint, portParam.param);
             if (portParam.genStyle != GenerationStyle.GenerationWithPortVolume)
             {

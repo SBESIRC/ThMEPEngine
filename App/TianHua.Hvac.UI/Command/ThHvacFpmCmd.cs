@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -28,6 +27,10 @@ namespace TianHua.Hvac.UI.Command
         }
         public override void SubExecute()
         {
+            string curDbPath = "D://TG20.db";
+            string templateDbPath = "D:/qyx-res/TZ/sys/TG20.db";
+            ulong gId = 2;// 0 1 为材料和子系统预留
+            ThHvacCmdService.InitTables(curDbPath, templateDbPath);
             var status = GetFanParam(out bool isSelectFan,
                                      out Point3d startPoint,
                                      out PortParam portParam,
@@ -62,14 +65,14 @@ namespace TianHua.Hvac.UI.Command
                     var wallLines = GetWalls(p, wallIndex);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
-                        cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
+                        cmdService.PressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
                     else
-                        cmdService.NotPressurizedAirSupply(fan, model, wallLines, portParam, flag, allFansDic);
+                        cmdService.NotPressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic);
                 }
             }
             else
             {
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
+                var ductPort = new ThHvacDuctPortsCmd(ref gId, curDbPath, portParam, allFansDic);
                 ductPort.Execute();
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);

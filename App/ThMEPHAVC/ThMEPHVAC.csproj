@@ -223,11 +223,15 @@
     <Compile Include="TCH\ThDrawTCHCross.cs" />
     <Compile Include="TCH\ThDrawTCHDuct.cs" />
     <Compile Include="TCH\ThDrawTCHElbow.cs" />
+    <Compile Include="TCH\ThDrawTCHFlanges.cs" />
+    <Compile Include="TCH\ThDrawTCHMaterials.cs" />
     <Compile Include="TCH\ThDrawTCHReducing.cs" />
+    <Compile Include="TCH\ThDrawTCHSubSystemTypes.cs" />
     <Compile Include="TCH\ThDrawTCHTee.cs" />
     <Compile Include="TCH\ThSQLiteHelper.cs" />
     <Compile Include="TCH\ThTCHCommonTables.cs" />
     <Compile Include="TCH\ThTCHDrawFactory.cs" />
+    <Compile Include="TCH\ThTCHService.cs" />
     <Compile Include="ThHAVCIndoorFanCmds.cs" />
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />

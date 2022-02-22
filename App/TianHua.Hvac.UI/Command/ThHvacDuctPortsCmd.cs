@@ -13,11 +13,15 @@ namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
+        public ulong gId;
+        private string curDbPath;
         private PortParam portParam;
         private Dictionary<Polyline, ObjectId> allFansDic;
         public ThHvacDuctPortsCmd() { }
-        public ThHvacDuctPortsCmd(PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic)
+        public ThHvacDuctPortsCmd(ref ulong gId, string curDbPath, PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic)
         {
+            this.gId = gId;
+            this.curDbPath = curDbPath;
             this.portParam = portParam;
             this.allFansDic = allFansDic;
         }
@@ -35,8 +39,8 @@ namespace TianHua.Hvac.UI.Command
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);
             anayRes.CreatePortDuctGeo();// 获得风口位置后再调用(同时获得管段间变径)
             anayRes.CreateReducing();
-            var painter = new ThDuctPortsDraw(portParam);
-            painter.Draw(anayRes);
+            var painter = new ThDuctPortsDraw(portParam, curDbPath);
+            painter.Draw(anayRes, ref gId);
         }
         private DBObjectCollection GetExcludeLine()
         {
