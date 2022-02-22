@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 {
@@ -36,6 +37,28 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 allLines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }
             return allLines;
+        }
+
+        /// <summary>
+        /// 获取所有墙polyline
+        /// </summary>
+        /// <param name="allWalls"></param>
+        /// <returns></returns>
+        public static List<Polyline> GetWallPolylines(List<Entity> allWalls)
+        {
+            var resPolys = new List<Polyline>();
+            foreach (var wall in allWalls)
+            {
+                if (wall is Polyline polyline)
+                {
+                    resPolys.Add(polyline);
+                }
+                else if (wall is MPolygon mPolygon)
+                {
+                    resPolys.Add(mPolygon.Shell());
+                }
+            }
+            return resPolys;
         }
     }
 }

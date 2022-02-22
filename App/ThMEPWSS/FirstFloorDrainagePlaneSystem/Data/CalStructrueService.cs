@@ -54,7 +54,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             };
             var dxfNames = new string[]
             {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                RXClass.GetClass(typeof(BlockReference)).DxfName,
             };
             var filter = ThSelectionFilterTool.Build(dxfNames);
             var result = Active.Editor.GetSelection(options, filter);
@@ -106,6 +106,46 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         }
 
         /// <summary>
+        /// 获取用户绘制出户框线
+        /// </summary>
+        /// <param name="acadDatabase"></param>
+        /// <returns></returns>
+        public static List<Polyline> GetUserFrame(this Polyline polyline, AcadDatabase acadDatabase)
+        {
+            List<Polyline> frameLst = new List<Polyline>();
+
+            // 获取框线
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var layerNames = new string[] { ThWSSCommon.OutFrameLayerName };
+            var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return frameLst;
+            }
+
+            foreach (ObjectId obj in result.Value.GetObjectIds())
+            {
+                var frame = acadDatabase.Element<Polyline>(obj);
+                if (polyline.Contains(frame))
+                {
+                    frameLst.Add(frame);
+                }
+            }
+
+            return frameLst;
+        }
+
+        /// <summary>
         /// 获取构建信息
         /// </summary>
         /// <param name="acdb"></param>
@@ -113,9 +153,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        public static void GetStructureInfo(AcadDatabase acdb, Polyline polyline, Polyline pFrame, out List<Polyline> columns, out List<Polyline> walls)
+        public static void GetStructureInfo(this Polyline pFrame, AcadDatabase acdb, out List<Polyline> columns, out List<Polyline> walls)
         {
-            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
+            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, pFrame.Vertices());
 
             //获取柱
             columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
@@ -135,12 +175,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
             {
                 //建筑墙
-                archWallEngine.Recognize(acdb.Database, polyline.Vertices());
+                archWallEngine.Recognize(acdb.Database, pFrame.Vertices());
                 var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
                 objs = new DBObjectCollection();
                 arcWall.ForEach(x => objs.Add(x));
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
+                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList());
             }
         }
 
@@ -150,19 +190,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="rooms"></param>
         /// <param name="userFrames"></param>
         /// <returns></returns>
-        public static List<Polyline> GetRoomWall(List<Polyline> rooms, List<Polyline> userFrames)
+        public static List<MPolygon> GetRoomWall(List<Polyline> rooms, List<Polyline> userFrames)
         {
-            var roomWallLst = new List<Polyline>();
-            var bufferFrameDic = userFrames.ToDictionary(x => x, y => y.ExtendByLengthLine(100));
+            var roomWallLst = new List<MPolygon>();
+            var bufferFrames = userFrames.Select(x => x.Buffer(100)[0] as Polyline).ToList();
             foreach (var room in rooms)
             {
-                var checkFrame = bufferFrameDic.Where(x => room.IsIntersects(x.Value)).ToDictionary(x => x.Key, y => y.Value);
+                var checkFrame = bufferFrames.Where(x => room.IsIntersects(x)).ToList();
                 if (checkFrame.Count > 0)
                 {
-                    var bufferRoom = room.Buffer(100)[0] as Polyline;
+                    var bufferRoom = room.Buffer(300)[0] as Polyline;
                     var resMPoly = ThMPolygonTool.CreateMPolygon(room, new List<Curve>() { bufferRoom });
-                    var roomWalls = resMPoly.Difference(checkFrame.Values.ToCollection()).Cast<Polyline>().ToList();
-                    roomWallLst.AddRange(roomWalls);
+                    roomWallLst.Add(resMPoly);
                 }
             }
 
@@ -174,7 +213,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// </summary>
         /// <param name="acdb"></param>
         /// <param name="polyline"></param>
-        public static void GetVerticalPipe(AcadDatabase acdb, Polyline polyline)
+        public static List<Entity> GetVerticalPipe(this Polyline polyline, AcadDatabase acdb)
         {
             var dxfNames = new string[]
             {
@@ -211,6 +250,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 var position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
                 return polyline.Contains(position);
             }).ToList();
+
+            return pipes;
         }
 
         /// <summary>
@@ -218,7 +259,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// </summary>
         /// <param name="acdb"></param>
         /// <param name="polyline"></param>
-        public static void GetPipeMarks(AcadDatabase acdb, Polyline polyline)
+        public static List<Entity> GetPipeMarks(this Polyline polyline, AcadDatabase acdb)
         {
             var allLayers = acdb.Layers.Select(x => x.Name).ToList();
             var markLayers = allLayers.Where(x => containMarkLayers.Any(y => y.All(z => x.Contains(z))) || macthMarkLayers.Any(y => y.First().Matching(x))).ToList();
@@ -236,6 +277,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 var position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
                 return polyline.Contains(position);
             }).ToList();
+
+            return marks;
         }
 
         /// <summary>
@@ -245,11 +288,107 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="pipes"></param>
         /// <param name="marks"></param>
         /// <returns></returns>
-        public static List<VerticalPipeModel> RecognizeVerticalPipe(List<Entity> pipes, List<Entity> marks)
+        public static List<VerticalPipeModel> RecognizeVerticalPipe(this Polyline polyline, AcadDatabase acdb)
         {
+            var pipes = polyline.GetVerticalPipe(acdb);
+            var marks = polyline.GetPipeMarks(acdb);
             VerticalPipeRecognizeEngine verticalPipeRecognize = new VerticalPipeRecognizeEngine();
             var resModels = verticalPipeRecognize.Recognize(pipes, marks);
             return resModels;
+        }
+
+        /// <summary>
+        /// 识别洁具立管
+        /// </summary>
+        /// <param name="layerNames"></param>
+        /// <param name="polyline"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        public static List<DrainingEquipmentModel> RecognizeSanitaryWarePipe(this Polyline polyline, Dictionary<string, List<string>> layerNames,  List<Polyline> walls)
+        {
+            DrainingPointRecognizeEngine pointRecognizeEngine = new DrainingPointRecognizeEngine(layerNames);
+            var resModels = pointRecognizeEngine.Recognize(polyline, walls);
+            return resModels;
+        }
+
+        /// <summary>
+        /// 提取室外污水主管
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="acadDatabase"></param>
+        /// <returns></returns>
+        public static List<Polyline> GetSewageDrainageMainPipe(this Polyline polyline, AcadDatabase acadDatabase)
+        {
+            List<Polyline> resPolys = new List<Polyline>();
+
+            // 获取框线
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var layerNames = new string[] { ThWSSCommon.OutdoorSewagePipeLayerName };
+            var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return resPolys;
+            }
+
+            foreach (ObjectId obj in result.Value.GetObjectIds())
+            {
+                var frame = acadDatabase.Element<Polyline>(obj);
+                if (polyline.Contains(frame))
+                {
+                    resPolys.Add(frame);
+                }
+            }
+            return resPolys;
+        }
+
+        /// <summary>
+        /// 提取室外雨水主管
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="acadDatabase"></param>
+        /// <returns></returns>
+        public static List<Polyline> GetRainDrainageMainPipe(this Polyline polyline, AcadDatabase acadDatabase)
+        {
+            List<Polyline> resPolys = new List<Polyline>();
+
+            // 获取框线
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var layerNames = new string[] { ThWSSCommon.OutdoorRainPipeLayerName };
+            var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return resPolys;
+            }
+
+            foreach (ObjectId obj in result.Value.GetObjectIds())
+            {
+                var frame = acadDatabase.Element<Polyline>(obj);
+                if (polyline.Contains(frame))
+                {
+                    resPolys.Add(frame);
+                }
+            }
+            return resPolys;
         }
     }
 }

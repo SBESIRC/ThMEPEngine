@@ -72,14 +72,19 @@ namespace Linq2Acad
       return this.Select(b => new EntityContainer(database, transaction, b.ObjectId));
     }
 
-    /// <summary>
-    /// Creates a new BlockTableRecord and adds the given Entites to it.
-    /// </summary>
-    /// <param name="name">The name of the new BlockTableRecord.</param>
-    /// <param name="entities">The Entities that should be added to the BlockTableRecord.</param>
-    /// <returns>A new instance of BlockTableRecord.</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown when parameters <i>name</i> or <i>entities</i> is null.</exception>
-    public BlockTableRecord Create(string name, IEnumerable<Entity> entities)
+        public BlockTableRecord ElementOrDefault(object blockName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a new BlockTableRecord and adds the given Entites to it.
+        /// </summary>
+        /// <param name="name">The name of the new BlockTableRecord.</param>
+        /// <param name="entities">The Entities that should be added to the BlockTableRecord.</param>
+        /// <returns>A new instance of BlockTableRecord.</returns>
+        /// <exception cref="System.ArgumentNullException">Thrown when parameters <i>name</i> or <i>entities</i> is null.</exception>
+        public BlockTableRecord Create(string name, IEnumerable<Entity> entities)
     {
       if (name == null) throw Error.ArgumentNull("name");
       if (!Helpers.IsNameValid(name)) throw Error.InvalidName(name);

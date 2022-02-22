@@ -26,8 +26,8 @@
         </Grid.RowDefinitions>
         <cus:ImageButton Grid.Row="0" Content="参数设置" x:Name="btnParamSet" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnSltFloor_Click"></cus:ImageButton>
         <Line Grid.Row="1" X1="5" Y1="0" X2="170" Y2="0" StrokeDashArray="5" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center"/>
-        <cus:ImageButton Grid.Row="2" Content="绘制户外污水管" x:Name="btnDrainagePipe" Width="140" Height="22" Margin="7,10,7,7" ImageTextLocation="TextOnly"  Click="btnSltFloor_Click"></cus:ImageButton>
-        <cus:ImageButton Grid.Row="3" Content="绘制户外雨水管" x:Name="btnRainPipe" Width="140" Height="22" Margin="7" ImageTextLocation="TextOnly"  Click="btnSltFloor_Click"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="2" Content="绘制户外污水管" x:Name="btnDrainagePipe" Width="140" Height="22" Margin="7,10,7,7" ImageTextLocation="TextOnly"  Click="btnDrainagePipe_Click"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="3" Content="绘制户外雨水管" x:Name="btnRainPipe" Width="140" Height="22" Margin="7" ImageTextLocation="TextOnly"  Click="btnRainPipe_Click"></cus:ImageButton>
         <cus:ImageButton Grid.Row="4" Content="框选出户外墙" x:Name="btnDrawWall" Width="140" Height="22" Margin="7,7,7,20" ImageTextLocation="TextOnly"  Click="btnDrawWall_Click"></cus:ImageButton>
         <Label Grid.Row="5" Margin="5" >出图比例：</Label>
         <ComboBox Grid.Row="6" Margin="5,0,5,10" Name="cbbScale"></ComboBox>

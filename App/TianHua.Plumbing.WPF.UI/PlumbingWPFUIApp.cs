@@ -12,6 +12,7 @@ using ThMEPWSS.FlushPoint.Data;
 using ThMEPWSS.SprinklerConnect.Cmd;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -23,12 +24,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
         SprinklerCheckersUI uiSprinklerCheckers;
         SprinklerConnectionUI uiSprinklerConnection;
         RoomOutlineUI uiRoomOutline;
+        FirstFloorDrainagePlaneUI floorDrainagePlaneUI;
         public void Initialize()
         {
             uiFireHydrant = null;
             uiFlushPoint = null;
             uiSprinklerCheckers = null;
             uiRoomOutline = null;
+            floorDrainagePlaneUI = null;
             if (ThHydrantProtectionRadiusCmd.FireHydrantVM == null)
             {
                 ThHydrantProtectionRadiusCmd.FireHydrantVM = new ThFireHydrantVM();
@@ -368,6 +371,17 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     parkingStallExtractor.ParkingStalls.Cast<Entity>().ToList().CreateGroup(acadDb.Database, 1);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSCPSPM", CommandFlags.Modal)]
+        public void ThFirstFloorDrainagePlane()
+        {
+            if (floorDrainagePlaneUI != null && floorDrainagePlaneUI.IsLoaded)
+            {
+                return;
+            }
+            floorDrainagePlaneUI = new FirstFloorDrainagePlaneUI();
+            AcadApp.ShowModelessWindow(floorDrainagePlaneUI);
         }
 
         /// <summary>
