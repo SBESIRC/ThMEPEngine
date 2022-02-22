@@ -14,14 +14,5 @@ namespace ThMEPEngineCore.Service
             OFFSETDISTANCE= 20.0;
             ClOSED_DISTANC_TOLERANCE = 600.0;
         }
-        public DBObjectCollection Close(DBObjectCollection objs)
-        {
-            var results = new DBObjectCollection();
-            var polys = objs.OfType<Polyline>().ToList();
-            Close(polys);
-            polys.ForEach(p => results.Add(p));
-            objs.OfType<Entity>().Where(e => !(e is Polyline)).ForEach(e => results.Add(e));
-            return results;
-        }
     }
 }

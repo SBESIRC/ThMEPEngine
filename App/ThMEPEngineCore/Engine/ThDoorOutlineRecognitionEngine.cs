@@ -77,15 +77,13 @@ namespace ThMEPEngineCore.Engine
                 var transformer = new ThMEPOriginTransformer(curves);
                 transformer.Transform(curves);
                 var doorSimplifer = new ThRoomOutlineSimplifier();
-                var doorPolys = curves.OfType<Polyline>().ToList();
-                doorSimplifer.Close(doorPolys); // 封闭
-                var doorObjs = doorPolys.ToCollection();
-                doorObjs = doorSimplifer.Normalize(doorObjs); // 处理狭长线
-                doorObjs = doorSimplifer.MakeValid(doorObjs); // 处理自交
-                doorObjs = doorSimplifer.Simplify(doorObjs);  // 处理简化线
-                doorObjs = doorSimplifer.Filter(doorObjs);
-                transformer.Reset(doorObjs);
-                foreach (Polyline pl in doorObjs)
+                doorSimplifer.MakeClosed(curves); // 封闭
+                curves = doorSimplifer.Normalize(curves); // 处理狭长线
+                curves = doorSimplifer.MakeValid(curves); // 处理自交
+                curves = doorSimplifer.Simplify(curves);  // 处理简化线
+                curves = doorSimplifer.Filter(curves);
+                transformer.Reset(curves);
+                foreach (Polyline pl in curves)
                     doorOutLines.Add(pl);
             }
         }

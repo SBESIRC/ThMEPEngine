@@ -60,7 +60,7 @@ namespace ThMEPHVAC.Service
         {
             var simplifier = new ThRoomOutlineSimplifier();
             var results = simplifier.Tessellate(roomOutlines);
-            results = simplifier.Close(results.OfType<Polyline>().ToList()).ToCollection();
+            simplifier.MakeClosed(results);
             results = results.FilterSmallArea(1.0);
             results = simplifier.Normalize(results);
             results = results.FilterSmallArea(1.0);

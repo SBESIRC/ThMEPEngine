@@ -5,10 +5,9 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
-using System.Collections.Generic;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Service
 {
@@ -44,7 +43,7 @@ namespace ThMEPEngineCore.Service
                 }
             });
             return objs;
-        }      
+        }
 
         public virtual DBObjectCollection Normalize(DBObjectCollection curves)
         {
@@ -63,9 +62,9 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
-        public virtual void Close(List<AcPolygon> polys)
+        public virtual void MakeClosed(DBObjectCollection curves)
         {
-            polys.ForEach(p =>
+            curves.OfType<AcPolygon>().ForEach(p =>
             {
                 if (ThMEPFrameService.IsClosed(p, ClOSED_DISTANC_TOLERANCE))
                 {

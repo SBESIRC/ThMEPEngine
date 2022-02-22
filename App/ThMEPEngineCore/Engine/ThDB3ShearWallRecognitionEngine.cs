@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Engine
             var objs = datas.Select(o => o.Geometry).ToCollection();
             //处理不完美的墙
             var simplifier = new ThShearWallSimplifier();
-            objs = simplifier.Close(objs);
+            simplifier.MakeClosed(objs);
             objs = simplifier.Simplify(objs);
             objs = simplifier.Normalize(objs);
             if (polygon.Count > 0)
