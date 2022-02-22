@@ -24,7 +24,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public double MaxValue { get; set; }//线的最大值
         public double StartValue { get; set; }//线的起始点另一维
         public double EndValue { get; set; }//线的终止点另一维
-        public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
+        public int SpecialFlag { get; set; }// 特殊基因编号，-1：非特殊基因，0：位于lowerbound的特殊基因，1：位于ub的特殊基因，2：位于lb + 车位长的特殊基因，3：位于ub-车位长的特殊基因 
+        public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue,int specialFlag = -1)
         {
             Value = value;
             VerticalDirection = direction;
@@ -32,10 +33,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             MaxValue = maxValue;//绝对的最大值
             StartValue = startValue;
             EndValue = endValue;
+            SpecialFlag = specialFlag;
         }
         public Gene Clone()
         {
-            var gene = new Gene(Value, VerticalDirection, MinValue, MaxValue, StartValue, EndValue);
+            var gene = new Gene(Value, VerticalDirection, MinValue, MaxValue, StartValue, EndValue, SpecialFlag);
             return gene;
         }
         public Gene()
@@ -259,7 +261,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 catch (Exception ex)
                 {
-                    Active.Editor.WriteMessage(ex.Message);
+                    ;
                 }
             }
             return count;
@@ -271,27 +273,62 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                var partitionpro = new ParkingPartitionPro();
-                ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                if (!partitionpro.Validate()) continue;
-                try
+                GeoUtilities.LogMomery("UnitStart: ");
+                var use_partition_pro = true;
+                if (use_partition_pro)
                 {
-                    var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
-                    if (CachedPartitionCnt.ContainsKey(partitionBoundary))
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
+                    try
                     {
-                        count += CachedPartitionCnt[partitionBoundary];
+                        var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
+                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
+                        {
+                            count += CachedPartitionCnt[partitionBoundary];
+                        }
+                        else
+                        {
+                            var subCnt = partitionpro.CalNumOfParkingSpaces();
+                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                            count += subCnt;
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        var subCnt = partitionpro.CalNumOfParkingSpaces();
-                        CachedPartitionCnt.Add(partitionBoundary, subCnt);
-                        System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
-                        count += subCnt;
+                        ;
                     }
+                    continue;
                 }
-                catch (Exception ex)
+
+                ParkingPartition partition = new ParkingPartition();
+                if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
                 {
-                    Active.Editor.WriteMessage(ex.Message);
+                    try
+                    {
+                        var partitionBoundary = new PartitionBoundary(partition.Boundary.Vertices());
+                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
+                        {
+                            count += CachedPartitionCnt[partitionBoundary];
+                        }
+                        else
+                        {
+                            var subCnt = partition.CalNumOfParkingSpaces();
+                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                            count += subCnt;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //partition.Dispose();
+                        Logger.Error(ex.Message);
+                    }
+                    finally
+                    {
+                       // partition.Dispose();
+                    }
                 }
             }
             return count;
@@ -306,9 +343,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
     public class ParkingStallGAGenerator : IDisposable
     {
         //Genetic Algorithm parameters
-        double MaxTime;
-        int IterationCount = 10;
+        readonly double MaxTime;
+        readonly int IterationCount = 10;
         int PopulationSize;
+
         int FirstPopulationSize;
         double SelectionRate;
         int FirstPopulationSizeMultiplyFactor = 2;
@@ -323,31 +361,37 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double GoldenRatio;
         private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
+        //-1：非特殊基因，0：位于lowerbound的特殊基因，1：位于ub的特殊基因，2：位于lb + 车位长的特殊基因，3：位于ub-车位长的特殊基因 
+        private Dictionary<int, List<double>> SpecialGene;// 特殊基因的值
+        private Dictionary<int, List<double?>> MovingAvgPN;// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
+        private List<List<double>> SpecialGeneScore;//每个特殊基因的分数
+        private List<List<double>> SpecialGeneProb;// 特殊基因对应的随机概率
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
         ParkingStallArrangementViewModel ParameterViewModel;
         List<Chromosome> InitGenomes;
         private bool BreakFlag;
+
         //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
         //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public Serilog.Core.Logger Logger = null;
-
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null, List<Chromosome> initgenomes = null,bool breakFlag = false)
         {
+
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
-            var Rand = new Random(DateTime.Now.Millisecond);//随机数
+
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
 
             InitGenomes = initgenomes;// 输入初始基因，生成初代时使用
-            // TO DO 更改迭代最大时间以及种群数量
+            // 更改迭代最大时间以及种群数量
             BreakFlag = breakFlag;// true 则为打断模式（打断模式包含早期迭代，纵向打断迭代，以及横向打断迭代）
             if (BreakFlag & InitGenomes == null)
             {
@@ -359,7 +403,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     InitGenomes.ForEach(g => g.Logger = this.Logger);
                 }
             }
-
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
@@ -385,8 +428,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var tempT = new Tuple<double, double>(LowerBound, UpperBound);
                 LowerUpperBound.Add(i, tempT);
             }
+            UpdateSpecialGene();
         }
-
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
             double tol = 1e-4;
@@ -408,6 +451,35 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
         }
 
+        private void UpdateSpecialGene()
+        {
+            SpecialGene = new Dictionary<int, List<double>>();
+            var parkingLength = ParameterViewModel.VerticalSpotLength;
+            for (int i = 0;i< GaPara.LineCount; ++i)
+            {
+                double LowerBound = LowerUpperBound[i].Item1;
+                double UpperBound = LowerUpperBound[i].Item2;
+                var SolutionLis = new List<double>() { LowerBound, UpperBound };
+                var s1 = LowerBound + parkingLength;
+                var s2 = UpperBound - parkingLength;
+                if (s1 < UpperBound) SolutionLis.Add(s1);
+                if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
+                SpecialGene.Add(i, SolutionLis);
+
+                var initlis = new List<double?>();
+                var initScore = new List<double>();
+                var initProb = new List<double>();
+                for (int j = 0; j < SolutionLis.Count; ++j)
+                {
+                    initlis.Add(null);
+                    initScore.Add(1);
+                    initProb.Add(1 / SolutionLis.Count);
+                }
+                MovingAvgPN.Add(i,initlis);
+                SpecialGeneScore.Add(initScore);
+                SpecialGeneProb.Add(initProb);
+            }
+        }
         private void ReclaimMemory()
         {
             GC.Collect();
@@ -470,15 +542,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double LowerBound = LowerUpperBound[i].Item1;
                     double UpperBound = LowerUpperBound[i].Item2;
                     double RandValue;
+                    Gene gene;
                     if (RandDouble() > GoldenRatio)
                     {
-                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
+                        //RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
+                        RandValue = RandomSpecialNumber(i,out int specialflag);
+                        gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal, specialflag);
                     }
                     else
                     {
                         RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
+                        gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     }
-                    Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
+                    //Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
                 solution.Genome = genome;
@@ -762,6 +838,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 return SolutionLis[RandInt(SolutionLis.Count)];// 随机选一个
             }
         }
+        private double RandomSpecialNumber(int i,out int idx)
+        {
+            //随机的特殊解，用于卡车位
+            // 输出的之保持在最大最小值之间
+            idx = RandInt(SpecialGene[i].Count);
+            return SpecialGene[i][idx];// 随机选一个
+        }
         #endregion
         #region
         // run2代码部分
@@ -821,7 +904,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 MutationL(rstLM);
                 pop.AddRange(rstLM);
             }
-            //string strBest;
+            string strBest;
             //if (!BreakFlag) strBest = $"最大车位数: {maxNums}";
             //else
             //{
@@ -846,6 +929,56 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information(strTotalMins);
             // 返回最后一代选择的比例
             return selected.Take(SelectionSize).ToList();
+        }
+        private void UpdateMovingAvgPNs(List<Chromosome> solutions)
+        {
+            var SpecialGenePNs = new Dictionary<int, List< List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
+
+            for (int i = 0; i< GaPara.LineCount; i++)
+            {
+                var lis = new List<List<int>>();
+                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                {
+                    lis.Add(new List<int>());// 添加特殊基因个list
+                }
+                SpecialGenePNs.Add(i, lis);
+            }
+            foreach(var solution in solutions)
+            {
+                var parkingStallCount = solution.ParkingStallCount;
+                for (int i = 0; i < GaPara.LineCount; i++)
+                {
+                    if(solution.Genome[i].SpecialFlag != -1)// 特殊基因
+                    {
+                        int j = solution.Genome[i].SpecialFlag;
+                        SpecialGenePNs[i][j].Add(parkingStallCount);
+                    }
+                }
+            }
+            for (int i = 0; i < GaPara.LineCount; i++)
+            {
+                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                {
+                    MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);
+                }
+            }
+        }
+
+        private double? GetNewMovingAvg(double? preMA, List<int> PSCounts)// 获取某一个特殊基因更新后的movingAvg
+        {
+
+            if (PSCounts.Count == 0) return preMA;
+
+            var PS_Avg = PSCounts.Average();
+            if (preMA == null) return PS_Avg;
+            else
+            {
+                var val = Math.PI / 2;
+                val *= 1.5;
+                var lam = 0.4* PSCounts.Count;
+                var alpha = Math.Atan(lam) / val;// alpha 范围从0.161~0.6666666
+                return (double)preMA*(1 - alpha)  + alpha* PS_Avg;
+            }
         }
         private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
         {
@@ -980,9 +1113,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     else
                     {
-                        s[i].Genome[j].Value = RandomSpecialNumber(minVal, maxVal);
+                        //s[i].Genome[j].Value = RandomSpecialNumber(minVal, maxVal);
+                        s[i].Genome[j].Value = RandomSpecialNumber(j, out int specialflag);
+                        s[i].Genome[j].SpecialFlag = specialflag;
                     }
-
                 }
             }
         }
