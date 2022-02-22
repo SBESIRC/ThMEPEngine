@@ -13,8 +13,6 @@ using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System.Linq;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -53,7 +51,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    
                     Run(currentDb);
                 }
             }
@@ -79,6 +76,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var dataprocessingFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (!dataprocessingFlag) return;
+            
             Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
 
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);

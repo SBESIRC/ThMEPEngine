@@ -397,7 +397,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         private static double dist2Build(this Line line, BlockReference build)
         {
             var objs = new DBObjectCollection();
-            (build as Entity).Explode(objs);
+            build.Explode(objs);
             double minDist = line.GetMinDist(build.GetRect().GetCenter());
             foreach (var obj in objs)
             {
@@ -691,13 +691,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool IsCorrectSegLines(Line segLine, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-          out double maxVal, out double minVal, out List<Polyline> rstAreas)
+          out double maxVal, out double minVal)
         {
             maxVal = 0;
             minVal = 0;
 
             var segAreas = segLine.SplitByLine(area);
-            rstAreas = new List<Polyline>();//分割线分割生成的区域
             if (segAreas.Count != 2)//不是两个区域直接退出
             {
                 return false;
@@ -708,12 +707,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var res = sortedAreas.Take(2);
             foreach (var segArea in res)
             {
-                rstAreas.Add(segArea);
                 var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
                 var buildCnt = buildLines.Count;
                 if (buildCnt == 0)
                 {
-                    return false;//没有建筑物要他作甚
+                    return false;//没有建筑物直接退出
                 }
                 buildingNums.Add(buildCnt);
                 var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);

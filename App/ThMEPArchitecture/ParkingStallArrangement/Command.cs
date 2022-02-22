@@ -89,11 +89,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
 
             var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                var pline = outerBrder.WallLine;
-                currentDb.CurrentSpace.Add(pline);
-            }
+
             if (!getouterBorderFlag) return;
             var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
             if(!dataPreprocessingFlag)

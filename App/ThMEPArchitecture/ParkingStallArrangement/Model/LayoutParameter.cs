@@ -293,7 +293,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             Clear();//清空所有参数
 
-            var areas = new List<Polyline>();
             var tmpBoundary = OuterBoundary.Clone() as Polyline;
 
             for (int i = 0; i < genome.Count; i++)
@@ -304,41 +303,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLineIndexDic.Add(i, line);
             }
             
-            if(SeglineNeighborIndexDic is null)
-            {
-                //If in automation mode
-                //
-                areas.Add(tmpBoundary);
+            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
 
-                //init splitting lines
-                for (int i = 0; i < genome.Count; i++)
-                {
-                    Gene gene = genome[i];
-                    Split(gene, ref areas);
-                }
-            }
-            else
-            { 
-                //If in manual mode
-                areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
-            }
-
-            if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
-            {
-                return false;//必定是个不合理的解
-            }
-            if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            if(!IsReasonableAns(areas, tmpBoundary))
             {
                 return false;
             }
 
-            double areaTolerance = 1.0;//面积容差
-            double areasTotalArea = 0;//分割后区域总面积
-            areas.ForEach(a => areasTotalArea += a.Area);
-            if (areasTotalArea - areaTolerance > OuterBoundary.Area)
-            {
-                return false;//分割后的总面积不能大于原始面积
-            }
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 
@@ -355,14 +326,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 tmpBoundary.Dispose();
             }
 
-            // update other parameters
-            for (int i = 0; i < PtDic.Count; i++)
-            {
-                var line1 = SegLines[PtDic[i][0]];//拿到第一根分割线
-                var line2 = SegLines[PtDic[i][1]];//拿到第二根分割线
-                var pt = line1.Intersect(line2, Intersect.ExtendBoth).First();
-                IntersectPt.Add(pt);//交点添加
-            }
             for (int i = 0; i < Areas.Count; i++)
             {
                 AreaNumber.Add(i);
@@ -402,12 +365,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             return true;
         }
 
+
+        public bool IsReasonableAns(List<Polyline> areas, Polyline tmpBoundary)
+        {
+            if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
+            {
+                return false;//必定是个不合理的解
+            }
+            if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            {
+                return false;
+            }
+
+            double areaTolerance = 1.0;//面积容差
+            double areasTotalArea = 0;//分割后区域总面积
+            areas.ForEach(a => areasTotalArea += a.Area);
+            if (areasTotalArea - areaTolerance > OuterBoundary.Area)
+            {
+                return false;//分割后的总面积不能大于原始面积
+            }
+            return true;
+        }
+
         public bool IsInCorrectSegLine(Polyline area, List<Line> seglines)
         {
             var halfLaneWidth = 2750;
             double carWidth = 4800;
             var lines = area.ToLines();
-            var areaPts = new Point3dCollection(area.GetPoints().ToArray());
             var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
             foreach(var l in seglines)
             {
@@ -441,23 +425,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
                 else
                 {
-                    ; 
                     return true;
                 }
-                try
+                var rect = extendL.Buffer(halfLaneWidth);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                if (rst.Count > 0)
                 {
-                    var rect = extendL.Buffer(halfLaneWidth);
-                    var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
-                    if (rst.Count > 0)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                catch(Exception ex)
-                {
-                    ;
-                }
-                
             }
             return false;
         }
@@ -616,19 +591,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return new Line(spt, ept);
         }
+
         private void Split(Gene gene, ref List<Polyline> areas)
         {
             var line = gene.ToLine();//对于每一条线
-            if (AreaSplit.SplitAreasByOrgiginLine(line, ref areas))
-            {
-                ;
-            }
-            else
+            var rstSplitByOriginalLine = AreaSplit.SplitAreasByOrgiginLine(line, ref areas);//
+            if(!rstSplitByOriginalLine)
             {
                 AreaSplit.SplitAreasByExtentedLine(line, ref areas);
             }
             line.Dispose();
         }
+
         private List<BlockReference> GetBuildings(Polyline area)
         {
             var dbObjs = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
@@ -639,10 +613,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             var segLines = new List<Line>();
             lineNums = new List<int>();
-            var pts = area.GetPoints();
             var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
             var areaColl = new List<Polyline>() { area };
-            var areaIndex = new ThCADCoreNTSSpatialIndex(areaColl.ToCollection());
             areaColl.Clear();
             foreach (var db in dbObjs)
             {
@@ -666,6 +638,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
             return segLines;
         }
+
         private List<Line> GetAreaSegs(Polyline area, List<Line> allSegs, out List<Polyline> areaWalls)
         {
             var segLines = new List<Line>();
@@ -679,13 +652,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             foreach (var seg in allSegs)
             {
                 var rst = lineSpatialIndex.SelectFence(seg);
-                if (rst.Count == 0)
+                if(rst.Count > 0)
                 {
-                    ;
-                }
-                else
-                {
-                    foreach(var r in rst)
+                    foreach (var r in rst)
                     {
                         var l = r as Line;
                         if (l.Angle.IsParallel(seg.Angle))
@@ -836,7 +805,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             BuildingBlockSpatialIndex.Dispose();
             SegLineSpatialIndex?.Dispose();
             AllShearwallsSpatialIndex?.Dispose();
-            //AllShearwallsMPolygonSpatialIndex?.Dispose();
         }
     }
 
@@ -859,24 +827,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         {
                             continue;
                         }
-                        try
-                        {
 
-                            var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
-                            if (closedPline.Closed)
-                            {
-                                plines.Add(closedPline);
-                            }
-                            else
-                            {
-                                Logger?.Information("存在不闭合的多段线！");
-                            }
-                        }
-                        catch(Exception ex)
+                        var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
+                        if (closedPline.Closed)
                         {
-                            ;
+                            plines.Add(closedPline);
                         }
-                        
+                        else
+                        {
+                            Logger?.Information("存在不闭合的多段线！");
+                        }
                     }
                 }
             }

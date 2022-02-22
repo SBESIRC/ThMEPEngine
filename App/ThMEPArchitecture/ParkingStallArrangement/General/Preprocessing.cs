@@ -25,6 +25,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 return false;
             }
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var pline = outerBrder.WallLine;
+                currentDb.CurrentSpace.Add(pline);
+            }
+#endif
             return true;
         }
 
@@ -32,7 +39,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true, bool IsAutoSegline = false)
         {
             layoutPara = new LayoutParameter();
-            var area = outerBrder.WallLine;
             gaPara = new GaParameter(outerBrder.SegLines);
 
             var maxVals = new List<double>();

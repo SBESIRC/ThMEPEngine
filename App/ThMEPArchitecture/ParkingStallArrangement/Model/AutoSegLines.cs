@@ -11,25 +11,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
     public class AutoSegLines
     {
-        public int SeglineClass { get; set; }//分割线层级
         public Line Seglines { get; set; }//分割线
-        public List<Polyline> SegAreas { get; set; }//由分割线生成的区域
         public double MaxValues { get; set; }//分割线的最大值
         public double MinValues { get; set; }//分割线的最小值
         public bool Direction { get; set; }//分割线的方向
 
-        public AutoSegLines()
-        {
-            Seglines = new Line();
-            SegAreas = new List<Polyline>();
-            MaxValues = 0;
-            MinValues = 0;
-            Direction = true;
-        }
-        public AutoSegLines(Line segLine, List<Polyline> segAreas, double maxVal, double minVal)
+        public AutoSegLines(Line segLine, double maxVal, double minVal)
         {
             Seglines = segLine;
-            SegAreas = segAreas;
             MaxValues = maxVal;
             MinValues = minVal;
             Direction = segLine.GetDirection() == 1;

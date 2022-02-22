@@ -1,11 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
@@ -46,6 +42,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return linePtDic;
         }
+
         public static bool HasIntersection(this Line line1, Line line2)
         {
             if(line1.GetDirection() == line2.GetDirection())

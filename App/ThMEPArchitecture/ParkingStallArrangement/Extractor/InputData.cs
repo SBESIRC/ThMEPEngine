@@ -14,22 +14,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
     {
         private static BlockReference SelectBlock(AcadDatabase acadDatabase)
         {
-            
             var entOpt = new PromptEntityOptions("\n请选择地库:");
             var entityResult = Active.Editor.GetEntity(entOpt);
-
             var entId = entityResult.ObjectId;
             var dbObj = acadDatabase.Element<Entity>(entId);
-            if (dbObj is BlockReference)
+            if (dbObj is BlockReference blk)
             {
-                return (BlockReference)dbObj;
+                return blk;
             }
             else
             {
                 Active.Editor.WriteMessage("选择的地库对象不是一个块！");
                 return null;
             }
-            
         }
 
         public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null)
@@ -61,6 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             
             return true;
         }
+
         private static bool IsOrthogonal(List<Line> SegLines,out List<Line> NewSegLines,Serilog.Core.Logger Logger)
         {
             double tol = 0.02;// arctan 0.02 （1.146°）以下的交会自动归正
@@ -70,10 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 
                 var line = SegLines[i];
                 var spt = line.StartPoint;
-                if(spt.DistanceTo(new Point3d(54334.0192089887, -691560.41359979, 0)) < 10)
-                {
-                    ;
-                }
+
                 var ept = line.EndPoint;
                 //1. check parallel, perpendicular
                 var X_dif = Math.Abs(spt.X - ept.X);
@@ -113,6 +108,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return true;
         }
+
         private static bool IsValidSegLines(List<Line> SegLines, Polyline WallLine, Serilog.Core.Logger Logger)
         {
             double tol = 1e-4;
@@ -121,10 +117,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 var pts = new List<Point3d>();
                 var line = SegLines[i];
                 var spt = line.StartPoint;
-                if (spt.DistanceTo(new Point3d(54334.0192089887, -691560.41359979, 0)) < 10)
-                {
-                    ;
-                }
+
                 // check intersection points
                 pts.AddRange(line.Intersect(WallLine, 0));//求与边界的交点
                 for (int j = 0; j < SegLines.Count; j++)
