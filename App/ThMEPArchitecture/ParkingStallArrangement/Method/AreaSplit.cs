@@ -45,6 +45,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rst;
         }
 
+        public static Polyline SplitByRamp(this Polyline polygon,  DBObjectCollection rstRamps, double tor = 5.0)
+        {
+            var defaultTesselateLength = 100;
+            var lines = polygon.ToLines(defaultTesselateLength);
+
+            foreach(var ramp in rstRamps)
+            {
+                var objs = new DBObjectCollection();
+                (ramp as BlockReference).Explode(objs);
+                var tmpLines = (objs[0] as Polyline).ToLines(defaultTesselateLength);
+                lines.AddRange(tmpLines);
+            }
+            var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
+            var areas = extendLines.PolygonsEx();
+
+
+            var rst = new List<Polyline>();
+            foreach (DBObject area in areas)
+            {
+                rst.Add(area as Polyline);
+            }
+            rst = rst.OrderByDescending(a => a.Area).ToList();
+            return rst.First();
+        }
+
+
         public static List<Polyline> SplitArea(this List<Line> splitterLines, List<Polyline> polyLines, double tor = 5.0)
         {
             var rst = new List<Polyline>();

@@ -51,6 +51,7 @@
     <Compile Include="ParkingStallArrangement\Model\AutoSegLines.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
     <Compile Include="ParkingStallArrangement\Model\LinePairs.cs" />
+    <Compile Include="ParkingStallArrangement\Model\Ramps.cs" />
     <Compile Include="ParkingStallArrangement\Model\SegLineEx.cs" />
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />

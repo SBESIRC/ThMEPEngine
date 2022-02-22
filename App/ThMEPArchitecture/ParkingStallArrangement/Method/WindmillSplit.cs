@@ -11,6 +11,7 @@ using DotNetARX;
 using System;
 using ThMEPEngineCore;
 using AcHelper;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -129,15 +130,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
         }
 
-        public static bool Split(bool isDirectlyArrange, Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
+        public static bool Split(bool isDirectlyArrange, OuterBrder outerBrder, Dictionary<int, Line> seglineDic, 
+            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segAreasCnt)
         {
+            var area = outerBrder.WallLine;
+            var buildLinesSpatialIndex = outerBrder.BuildingSpatialIndex;
+            var attachedRampSpatialIndex = outerBrder.AttachedRampSpatialIndex;
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
-            segSreasCnt = rstAreas.Count;
-            var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
+            segAreasCnt = rstAreas.Count;
+            SegLineCut(segLines, area, out List<Line> cutlines);
 
             var width = GetMaxWidth(area);
             
@@ -151,14 +155,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 else
                 {
                     var l = cutlines[i];
-                    l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
-                    if(maxVal2 < minVal2)
+                    if(attachedRampSpatialIndex.SelectFence(l.ExtendLineEx(10.0,3)).Count > 0)
                     {
-                        Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
-                        return false;
+                        maxVals.Add(0);
+                        minVals.Add(0);
                     }
-                    maxVals.Add(maxVal2);
-                    minVals.Add(minVal2);
+                    else
+                    {
+                        l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+                        if (maxVal2 < minVal2)
+                        {
+                            Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
+                            return false;
+                        }
+                        maxVals.Add(maxVal2);
+                        minVals.Add(minVal2);
+                    }
                 }
             }
             return true;

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ViewModel;
@@ -45,6 +46,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public ThCADCoreNTSSpatialIndex BuildingBlockSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
         public Dictionary<int, List<int>> SeglineNeighborIndexDic { get; set; }//分割线临近线
+
+        public List<Ramps> RampList { get; set; }//坡道
         public int SegAreasCnt { get; set; }//初始分割线
         public bool UsePline { get; set; }//建筑物框线，true使用polyline，false使用hatch
         private Serilog.Core.Logger Logger { get; set; }
@@ -98,14 +101,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
 
         }
-        public LayoutParameter(Polyline outerBoundary, DBObjectCollection buildingBlocks, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
+        public LayoutParameter(OuterBrder outerBrder, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
             Dictionary<LinePairs, int> linePtDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
             int segAreasCnt = 0, bool usePline = true, Serilog.Core.Logger logger = null)
         {
+            var outerBoundary = outerBrder.WallLine;
             InitialWalls = outerBoundary.Clone() as Polyline;
             OuterBoundary = outerBoundary;
-            BuildingBlocks = buildingBlocks;
-            SegLines = segLines;
+            BuildingBlocks = outerBrder.BuildingObjs;
+            SegLines = outerBrder.SegLines;
+            RampList = outerBrder.RampLists;
             AreaNumber = new List<int>();
             SubAreaNumber = new List<string>() { "a", "b", "c", "d", "e" };
             Areas = new List<Polyline>();
@@ -120,7 +125,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             SubAreaDic = new Dictionary<string, Polyline>();
             SubAreaWallLineDic = new Dictionary<string, Polyline>();
             SubAreaSegLineDic = new Dictionary<string, Polyline>();
-            BuildingBlockSpatialIndex = new ThCADCoreNTSSpatialIndex(buildingBlocks);
+            BuildingBlockSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingObjs);
             PtDic = ptDic;
             PtDirectionList = directionList;
             IntersectPt = new List<Point3d>();

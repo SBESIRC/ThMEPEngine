@@ -70,6 +70,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 
                 var line = SegLines[i];
                 var spt = line.StartPoint;
+                if(spt.DistanceTo(new Point3d(54334.0192089887, -691560.41359979, 0)) < 10)
+                {
+                    ;
+                }
                 var ept = line.EndPoint;
                 //1. check parallel, perpendicular
                 var X_dif = Math.Abs(spt.X - ept.X);
@@ -116,6 +120,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             {
                 var pts = new List<Point3d>();
                 var line = SegLines[i];
+                var spt = line.StartPoint;
+                if (spt.DistanceTo(new Point3d(54334.0192089887, -691560.41359979, 0)) < 10)
+                {
+                    ;
+                }
                 // check intersection points
                 pts.AddRange(line.Intersect(WallLine, 0));//求与边界的交点
                 for (int j = 0; j < SegLines.Count; j++)

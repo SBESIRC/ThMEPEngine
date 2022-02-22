@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using ThCADCore.NTS;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
@@ -34,7 +33,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         {
             layoutPara = new LayoutParameter();
             var area = outerBrder.WallLine;
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
             gaPara = new GaParameter(outerBrder.SegLines);
 
             var maxVals = new List<double>();
@@ -46,7 +44,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 seglineDic.Add(index++, line);
             }
-            var rstSplit = WindmillSplit.Split(isDirectlyArrange, area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
+            var rstSplit = WindmillSplit.Split(isDirectlyArrange, outerBrder, seglineDic, ref maxVals, ref minVals, 
                 out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt);
             if(!rstSplit)
             {
@@ -63,7 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 var flag = random.NextDouble() < 0.5;
                 directionList.Add(num, flag);//默认给全横向
             }
-            layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, 
+            layoutPara = new LayoutParameter(outerBrder, ptDic, directionList, linePtDic, 
                 seglineIndexDic, segAreasCnt, usePline, Logger);
 
             return true;

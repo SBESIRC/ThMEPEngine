@@ -630,8 +630,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static List<List<SegLineEx>> GetDichotomySegline(OuterBrder outerBrder)
         {
             var seglinesList = new List<List<SegLineEx>>();
-            var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
-            var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
+            var seglineCnt = outerBrder.Buildings.Count - 1;//二分法，分割线数目是障碍物数目减一
+            var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Buildings.ToCollection());//建筑物索引
 
             var area = outerBrder.WallLine;
             var segs = new List<SegLineEx>();
@@ -668,8 +668,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         /// <returns></returns>
         public static List<SegLineEx> GetRandomSeglines(OuterBrder outerBrder, int seglineDir = 0)
         {
-            var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
-            var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
+            var seglineCnt = outerBrder.Buildings.Count - 1;//二分法，分割线数目是障碍物数目减一
+            var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Buildings.ToCollection());//建筑物索引
             var rstSegLines = new List<SegLineEx>();
             var successedSeg = false;
             var maxSegCnt = 20;
