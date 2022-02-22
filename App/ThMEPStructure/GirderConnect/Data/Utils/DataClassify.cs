@@ -99,6 +99,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             {
                 if (outsideColumn is Polyline pl)
                 {
+                    
                     if (!plColumnVisted.ContainsKey(pl))
                     {
                         plColumnVisted.Add(pl, false);
@@ -123,7 +124,12 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                             plColumnVisted[polylineColumn] = true;
                         }
                     }
-                    var simplifiedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault().DPSimplify(1);
+                    var unionPolygons = mergeCollection.UnionPolygons().OfType<Polyline>().Where(p => p.Area > 1.0).OrderByDescending(o => o.Area).ToCollection();
+                    if (unionPolygons.Count == 0)
+                    {
+                        continue;
+                    }
+                    var simplifiedPolyline = unionPolygons.OfType<Polyline>().First().DPSimplify(1);
                     if (simplifiedPolyline != null)
                     {
                         DataProcess.AddOutline(simplifiedPolyline, ref outerWalls);

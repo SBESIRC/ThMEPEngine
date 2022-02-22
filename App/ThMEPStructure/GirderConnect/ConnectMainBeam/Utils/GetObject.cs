@@ -286,13 +286,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             Point3d ansPt = fromPt;
             double minDis = double.MaxValue;
-            //double minDigree = 7;
-            //double minCross = double.MaxValue;
             foreach (Point3d curPt in basePts)
             {
                 double curRotate = aimDirection.GetAngleTo(curPt - fromPt);
                 double curDis = fromPt.DistanceTo(curPt);
-                double curCross = curRotate * 7 + curDis * 5;
                 if (curRotate < tolerance && curDis < constrain && curDis > 200)
                 {
                     if (curDis < minDis)
@@ -301,17 +298,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         minDis = curDis;
                     }
                 }
-                //if (curRotate < minDigree && curDis < constrain && curDis > 200)
-                //{
-                //    if (curRotate < minDigree)
-                //    {
-                //        ansPt = curPt;
-                //        minDigree = curRotate;
-                //    }
-                //}
             }
             return ansPt;
         }
+
         /// <summary>
         /// Get Closest Point By Direction On a Polyline
         /// </summary>
@@ -443,35 +433,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             vector = basePt.DistanceTo(ansLine.StartPoint) < basePt.DistanceTo(ansLine.EndPoint) ? ansLine.StartPoint - ansLine.EndPoint : ansLine.EndPoint - ansLine.StartPoint;
-        }
-        public static void GetCloestVectorsOfPolyline(Polyline polyline, Point3d basePt, ref HashSet<Vector3d> vectors, double range = 500)
-        {
-            int n = polyline.NumberOfVertices;
-            if (n < 2)
-            {
-                return;
-            }
-            Circle circle = new Circle(basePt, new Vector3d(), range);
-            for (int i = 0; i < n; ++i)
-            {
-                Line curLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
-                Random rd = new Random();
-                int xx = rd.Next(1, 10) % 7 + 1;
-                //ShowInfo.DrawLine(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n), xx);
-
-                //ShowInfo.ShowPointAsO(basePt, xx, 1000);
-                //if (polyline.Intersects(circle))
-                //{
-                //    if (polyline.Intersects(circle))
-                //    {
-
-                //    }
-                //}
-                if (circle.ToNTSPolygon().Intersects(curLine.ToNTSGeometry())) //不知道为啥这个总是0
-                { 
-                    vectors.Add((polyline.GetPoint3dAt(i) - polyline.GetPoint3dAt((i + 1) % n)).GetNormal());
-                }
-            }
         }
 
         /// <summary>

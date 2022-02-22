@@ -26,9 +26,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Dictionary<Polyline, Polyline> outline2OriOutline, HashSet<Point3d> allWallPts, double findLength = 11000, double findDegree = Math.PI / 6)
         {
             allWallPts = PointsCenters.PointsCores(allWallPts.ToList(), 500).ToHashSet();
-            HashSet<Polyline> allOutlines = outline2BorderNearPts.Keys.ToHashSet();
-
-            var wall2WallPts = PointsDealer.GetOutline2BorderPts(allOutlines.ToList(), allWallPts.ToList());
+            List<Polyline> allOutlines = outline2BorderNearPts.Keys.ToList();
+            var wall2WallPts = PointsDealer.GetOutline2BorderPts(allOutlines, allWallPts.ToList());
             foreach(var outline in allOutlines)
             {
                 if (walls.Contains(outline) && outline2WallPts.ContainsKey(outline) && wall2WallPts.ContainsKey(outline))
@@ -45,8 +44,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     ptss.Add(pt);
                 }
             }
-            //ShowInfo.ShowPoints(ptss.ToList(), 'O', 3, 1000);
-
             Dictionary<Point3d, HashSet<Point3d>> priorityWallCntWall = new Dictionary<Point3d, HashSet<Point3d>>();
 
             //1、墙墙连 + 墙连柱
@@ -66,9 +63,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             var curDirection = baseDirection.RotateBy(i * Math.PI / 2, Vector3d.ZAxis).GetNormal();
 
-                            //ShowInfo.DrawLine(wallPt, wallPt + curDirection * 1000);
                             //1.2 获取墙点与柱点的连接
-                            if (!WallCntColumnPt(wallPt, curDirection, columnPts, curWall, findLength, findDegree, ref outline2BorderNearPts))
+                            if (!WallCntColumnPt(wallPt, curDirection, columnPts, curWall, findLength, findDegree, allOutlines, ref outline2BorderNearPts))
                             {
                                 //1.3 获取墙点与墙点的连接(仅生成单线)
                                 WallCntWallPt(wallPt, curDirection, ptss, curWall, findLength, findDegree, ref wallConnectWall, ref priorityWallCntWall);
@@ -88,13 +84,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
         //删除无用的”墙与墙之间的连线“
         private static void UpdateWallConnectWall(ref Dictionary<Point3d, HashSet<Point3d>> wallConnectWall, 
-            ref Dictionary<Point3d, HashSet<Point3d>> priorityWallCntWall, HashSet<Polyline> allOutlines)
+            ref Dictionary<Point3d, HashSet<Point3d>> priorityWallCntWall, List<Polyline> allOutlines)
         {
-            //ShowInfo.ShowDicTuples(wallConnectWall, 1);
             //1、删除掉和墙相交的线
             StructureDealer.RemoveLinesInterSectWithOutlines(allOutlines, ref wallConnectWall);
             //2、有优先级的删除掉角度相近的线
-
             ReduceSimilarLineB(ref wallConnectWall, priorityWallCntWall, Math.PI / 18 * 5);
             //3、删除掉两两相交的线
             DicTuplesDealer.RemoveIntersectLines(ref wallConnectWall);
@@ -107,12 +101,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, List<Tuple<Point3d, Point3d>> priority1stBorderNearTuples)
         {
             var dicTuples = LineDealer.RemoveLineIntersectWithOutline(outline2BorderNearPts, ref priority1stBorderNearTuples, 600);
+            var outlines = outline2BorderNearPts.Keys.ToList();
             Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
             priority1stBorderNearTuples.ForEach(o => DicTuplesDealer.AddLineTodicTuples(o.Item1, o.Item2, ref priority1stDicTuples));
+
+            StructureDealer.RemoveLinesNearOutlines(outlines, ref priority1stDicTuples);
             ReduceSimilarLine(ref dicTuples, priority1stDicTuples, Math.PI / 18 * 5);
             DicTuplesDealer.RemoveIntersectLines(ref dicTuples);
-
-            return PointsDealer.CreateOutline2BorderNearPts(dicTuples, outline2BorderNearPts.Keys.ToList());
+            return PointsDealer.CreateOutline2BorderNearPts(dicTuples, outlines);
         }
 
         /// <summary>
@@ -196,13 +192,22 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 墙上的点和柱点进行连接
         /// </summary>
         public static bool WallCntColumnPt(Point3d wallPt, Vector3d direction, HashSet<Point3d> columnPts, Polyline wall,
-            double findLength, double findDegree, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+            double findLength, double findDegree, List<Polyline> allOutlines, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             Point3d nearPt = GetObject.GetPointByDirectionB(wallPt, direction, columnPts, findDegree, findLength);
             
             if (nearPt != wallPt)
             {
-                //ShowInfo.DrawLine(wallPt, nearPt, 4);
+                Line reducedLine = LineDealer.ReduceLine(wallPt, nearPt, 1000);
+                foreach (var outline in allOutlines)
+                {
+                    var pl = outline.Buffer(500)[0] as Polyline;
+                    if (pl.Intersects(reducedLine))
+                    {
+                        return false;
+                    }
+                }
+
                 if (!outline2BorderNearPts[wall].ContainsKey(wallPt))
                 {
                     outline2BorderNearPts[wall].Add(wallPt, new HashSet<Point3d>());
@@ -228,7 +233,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             if (cntWallPt != wallPt + direction * 500)
             {
                 Point3d middlePt = new Point3d((wallPt.X + cntWallPt.X) / 2, (wallPt.Y + cntWallPt.Y) / 2, 0);
-                Circle circle = new Circle(middlePt, Vector3d.ZAxis, 1000);
+                Circle circle = new Circle(middlePt, Vector3d.ZAxis, 500);
                 if (!wall.Intersects(circle) && !wall.Contains(middlePt))
                 {
                     DicTuplesDealer.AddLineTodicTuples(wallPt, cntWallPt, ref wallConnectWall);

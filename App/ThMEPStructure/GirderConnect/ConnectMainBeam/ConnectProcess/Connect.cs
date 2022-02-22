@@ -152,6 +152,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 foreach (var pt in dicLines.Value)
                 {
                     DicTuplesDealer.AddLineTodicTuples(dicLines.Key, pt, ref dicTuples);
+                    //ShowInfo.DrawLine(dicLines.Key, pt, 4);
                 }
             }
             DicTuplesDealer.SimplifyDicTuples(ref dicTuples, zeroPts, SimilarPointsDis, SimilarAngle);
@@ -159,10 +160,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 
             //5、获得辅助外框线
             List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, transformer);
-            //StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
             closebdLines.ForEach(o => DicTuplesDealer.DeleteFromDicTuples(o.Item1, o.Item2, ref dicTuples));
             DicTuplesDealer.SimplifyDicTuples(ref dicTuples, zeroPts, SimilarPointsDis, SimilarAngle);
-            StructureDealer.RemoveLinesInterSectWithOutlines(Outlines.ToHashSet(), ref dicTuples);
+            StructureDealer.RemoveLinesInterSectWithOutlines(Outlines, ref dicTuples);
+
             //6、返回结果
             return dicTuples;
         }

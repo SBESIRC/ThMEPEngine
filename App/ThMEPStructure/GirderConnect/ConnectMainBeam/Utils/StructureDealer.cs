@@ -426,22 +426,24 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// 在线集中删除和多边形相交的线
         /// </summary>
-        public static void RemoveLinesInterSectWithOutlines(HashSet<Polyline> outlines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void RemoveLinesInterSectWithOutlines(List<Polyline> outlines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             var tmpTuples = LineDealer.UnifyTuples(dicTuples);
             var tuple2reduce = new Dictionary<Tuple<Point3d, Point3d>, Tuple<Point3d, Point3d>>();
-            tmpTuples.ForEach(t => tuple2reduce.Add(t, LineDealer.ReduceTuple(t, 800)));
-            
+            tmpTuples.ForEach(t => { if(t.Item1.DistanceTo(t.Item2) > 2300) tuple2reduce.Add(t, LineDealer.ReduceTuple(t, 800)); });
             foreach (var tmpTuple in tmpTuples)
             {
-                Line reducedLine = new Line(tuple2reduce[tmpTuple].Item1, tuple2reduce[tmpTuple].Item2);
-                Point3d middlePt = new Point3d((tuple2reduce[tmpTuple].Item1.X + tuple2reduce[tmpTuple].Item2.X) / 2, (tuple2reduce[tmpTuple].Item1.Y + tuple2reduce[tmpTuple].Item2.Y) / 2, 0);
-                Circle circle = new Circle(middlePt, Vector3d.ZAxis, 800);
-                foreach (var outline in outlines)
+                if (tuple2reduce.ContainsKey(tmpTuple))
                 {
-                    if (outline.Intersects(reducedLine) || outline.Intersects(circle))
+                    Line reducedLine = new Line(tuple2reduce[tmpTuple].Item1, tuple2reduce[tmpTuple].Item2);
+                    Point3d middlePt = new Point3d((tuple2reduce[tmpTuple].Item1.X + tuple2reduce[tmpTuple].Item2.X) / 2, (tuple2reduce[tmpTuple].Item1.Y + tuple2reduce[tmpTuple].Item2.Y) / 2, 0);
+                    Circle circle = new Circle(middlePt, Vector3d.ZAxis, 1000);
+                    foreach (var outline in outlines)
                     {
-                        DicTuplesDealer.DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
+                        if (outline.Intersects(reducedLine) || outline.Intersects(circle))
+                        {
+                            DicTuplesDealer.DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
+                        }
                     }
                 }
             }
@@ -453,7 +455,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static void RemoveLinesNearOutlines(List<Polyline> outlines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double redius = 1000)
         {
             var pt1s = dicTuples.Keys.ToList();
-            var redius2 = redius * 2;
+            var redius2 = redius * 1.6;
             var redius4 = redius * 4;
 
             foreach (var pt1 in pt1s)

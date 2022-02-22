@@ -108,8 +108,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var outlineNearPt in outlineNearPts)
             {
                 curOutline = outlineNearPt.Key;
-                List<Line> exdLines = new List<Line>();
-                TypeConvertor.Polyline2Lines(curOutline).ForEach(o => exdLines.Add(LineDealer.ReduceLine(o, -2000)));
                 if (!outline2BorderNearPts.ContainsKey(curOutline))
                 {
                     outline2BorderNearPts.Add(curOutline, new Dictionary<Point3d, HashSet<Point3d>>());

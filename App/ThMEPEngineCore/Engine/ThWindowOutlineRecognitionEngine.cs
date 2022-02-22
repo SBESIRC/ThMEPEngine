@@ -76,15 +76,16 @@ namespace ThMEPEngineCore.Engine
             {
                 var transformer = new ThMEPOriginTransformer(curves);
                 transformer.Transform(curves);
-                var simplifer = new ThRoomOutlineSimplifier();
-                var doorObjs = simplifer.Close(
-                    curves.OfType<Polyline>().ToList()).ToCollection(); // 封闭
-                doorObjs = simplifer.Normalize(doorObjs); // 处理狭长线
-                doorObjs = simplifer.MakeValid(doorObjs); // 处理自交
-                doorObjs = simplifer.Simplify(doorObjs);  // 处理简化线
-                doorObjs = simplifer.Filter(doorObjs);
-                transformer.Reset(doorObjs);
-                foreach (Polyline pl in doorObjs)
+                var windowPolys = curves.OfType<Polyline>().ToList();
+                var simplifer = new ThRoomOutlineSimplifier();               
+                simplifer.Close(windowPolys); // 封闭
+                var windowObjs = windowPolys.ToCollection();
+                windowObjs = simplifer.Normalize(windowObjs); // 处理狭长线
+                windowObjs = simplifer.MakeValid(windowObjs); // 处理自交
+                windowObjs = simplifer.Simplify(windowObjs);  // 处理简化线
+                windowObjs = simplifer.Filter(windowObjs);
+                transformer.Reset(windowObjs);
+                foreach (Polyline pl in windowObjs)
                     windowsOutLines.Add(pl);
             }
         }

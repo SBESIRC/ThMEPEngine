@@ -77,8 +77,9 @@ namespace ThMEPEngineCore.Engine
                 var transformer = new ThMEPOriginTransformer(curves);
                 transformer.Transform(curves);
                 var roomSimplifer = new ThRoomOutlineSimplifier();
-                var roomObjs = roomSimplifer.Close(
-                    curves.OfType<Polyline>().ToList()).ToCollection(); // 封闭
+                var roomPolys = curves.OfType<Polyline>().ToList();
+                roomSimplifer.Close(roomPolys); // 封闭
+                var roomObjs = roomPolys.ToCollection();
                 roomObjs = roomSimplifer.Normalize(roomObjs); // 处理狭长线
                 roomObjs = roomSimplifer.MakeValid(roomObjs); // 处理自交
                 roomObjs = roomSimplifer.Simplify(roomObjs);  // 处理简化线
