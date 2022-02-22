@@ -48,12 +48,67 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             if(!(Logger == null))
             {
                 //check seg lines
+                if(IsOrthogonal(outerBrder.SegLines, out List<Line> NewSegLines, Logger))
+                {
+                    outerBrder.SegLines = NewSegLines;
+                }
+                else
+                {
+                    return false;
+                }
                 if (!IsValidSegLines(outerBrder.SegLines, outerBrder.WallLine, Logger)) return false;
             }
             
             return true;
         }
-
+        private static bool IsOrthogonal(List<Line> SegLines,out List<Line> NewSegLines,Serilog.Core.Logger Logger)
+        {
+            double tol = 0.02;// arctan 0.02 （1.146°）以下的交会自动归正
+            NewSegLines = new List<Line>();
+            for (int i = 0; i < SegLines.Count; i++)
+            {
+                
+                var line = SegLines[i];
+                var spt = line.StartPoint;
+                var ept = line.EndPoint;
+                //1. check parallel, perpendicular
+                var X_dif = Math.Abs(spt.X - ept.X);
+                var Y_dif = Math.Abs(spt.Y - ept.Y);
+                if (Y_dif > X_dif)// 垂直线
+                {
+                    if (X_dif / Y_dif > tol)
+                    {
+                        Logger?.Information("发现非正交分割线 ！\n");
+                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
+                        Active.Editor.WriteMessage("发现非正交分割线 ！\n");
+                        Active.Editor.WriteMessage("起始点：" + spt.ToString() + "\n");
+                        Active.Editor.WriteMessage("终点：" + ept.ToString() + "\n");
+                        return false;
+                    }
+                    var newX = (spt.X + ept.X) / 2;
+                    spt = new Point3d(newX, spt.Y,0);
+                    ept = new Point3d(newX, ept.Y, 0);
+                    NewSegLines.Add( new Line(spt, ept));
+                }
+                if (X_dif > Y_dif)// 水平线
+                {
+                    if(Y_dif/X_dif > tol)
+                    {
+                        Logger?.Information("发现非正交分割线 ！\n");
+                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
+                        Active.Editor.WriteMessage("发现非正交分割线 ！\n");
+                        Active.Editor.WriteMessage("起始点：" + spt.ToString() + "\n");
+                        Active.Editor.WriteMessage("终点：" + ept.ToString() + "\n");
+                        return false;
+                    }
+                    var newY = (spt.Y + ept.Y) / 2;
+                    spt = new Point3d(spt.X, newY, 0);
+                    ept = new Point3d(ept.X, newY, 0);
+                    NewSegLines.Add(new Line(spt, ept));
+                }
+            }
+            return true;
+        }
         private static bool IsValidSegLines(List<Line> SegLines, Polyline WallLine, Serilog.Core.Logger Logger)
         {
             double tol = 1e-4;
@@ -61,18 +116,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             {
                 var pts = new List<Point3d>();
                 var line = SegLines[i];
-                var spt = line.StartPoint;
-                //1. check parallel, perpendicular
-                if (Math.Abs(line.StartPoint.X - line.EndPoint.X) > tol && Math.Abs(line.StartPoint.Y - line.EndPoint.Y) > tol)
-                {
-                    Logger?.Information("发现非正交分割线 ！\n");
-                    Logger?.Information("起始点：" + line.StartPoint.ToString() + "终点：" + line.EndPoint.ToString() + "的分割线不符合要求\n");
-                    Active.Editor.WriteMessage("发现非正交分割线 ！\n");
-                    Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString() + "\n");
-                    Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString()+"\n");
-                    return false;
-                }
-                //2. check intersection points
+                // check intersection points
                 pts.AddRange(line.Intersect(WallLine, 0));//求与边界的交点
                 for (int j = 0; j < SegLines.Count; j++)
                 {
