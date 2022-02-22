@@ -131,63 +131,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rst;
         }
 
-        public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-            GaParameter gaParameter, out double maxVal, out double minVal)
-        {
-            maxVal = 0;
-            minVal = 0;
-            double simplifyFactor = 1.0;
-            var segLine = gaParameter.SegLine[i];//分割线
-            for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
-            {
-                areas[k] = areas[k].TPSimplify(simplifyFactor);
-                var area = areas[k];
-                var segAreas = segLine.SplitByLine(area);
-
-                if (segAreas.Count == 2)
-                {
-                    areas.RemoveAt(k);
-                    areas.AddRange(segAreas);
-                    foreach (var segArea in segAreas)
-                    {
-                        var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
-                        if (segLine.GetValueType(boundPt))
-                        {
-                            maxVal = segLine.GetMinDist(boundPt) - 2760;
-                        }
-                        else
-                        {
-                            minVal = -segLine.GetMinDist(boundPt) + 2760;
-                        }
-                    }
-                    return true;
-                }
-                if (segAreas.Count > 2)
-                {
-                    var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
-                    var res = sortedAreas.Take(2);
-                    areas.RemoveAt(k);
-                    areas.AddRange(res);
-                    foreach (var segArea in res)
-                    {
-                        var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
-                        if (segLine.GetValueType(boundPt))
-                        {
-                            maxVal = segLine.GetMinDist(boundPt) - 2760;
-                        }
-                        else
-                        {
-                            minVal = -segLine.GetMinDist(boundPt) + 2760;
-                        }
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public static bool SplitAreasByOrgiginLine(Line line, ref List<Polyline> areas)
         {
             double minArea = 1e8;

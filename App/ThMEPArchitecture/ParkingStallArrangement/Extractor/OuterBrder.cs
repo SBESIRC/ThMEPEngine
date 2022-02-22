@@ -71,6 +71,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 }
                 LonelyRampSpatialIndex = new ThCADCoreNTSSpatialIndex(LonelyRamps.ToCollection());
                 var splitArea = WallLine.SplitByRamp(rstRamps);
+                splitArea = splitArea.DPSimplify(1.0);
+                splitArea = splitArea.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
                 WallLine = splitArea;
             }
 
