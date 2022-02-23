@@ -480,6 +480,57 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 SpecialGeneProb.Add(initProb);
             }
         }
+        private void UpdateMovingAvgPNs(List<Chromosome> solutions)
+        {
+            var SpecialGenePNs = new Dictionary<int, List<List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
+
+            for (int i = 0; i < GaPara.LineCount; i++)
+            {
+                var lis = new List<List<int>>();
+                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                {
+                    lis.Add(new List<int>());// 添加特殊基因个list
+                }
+                SpecialGenePNs.Add(i, lis);//创建SpecialGenePNs
+            }
+            foreach (var solution in solutions)
+            {
+                var parkingStallCount = solution.ParkingStallCount;
+                for (int i = 0; i < GaPara.LineCount; i++)
+                {
+                    if (solution.Genome[i].SpecialFlag != -1)// 特殊基因
+                    {
+                        int j = solution.Genome[i].SpecialFlag;
+                        SpecialGenePNs[i][j].Add(parkingStallCount);//向SpecialGenePNs中添加数据
+                    }
+                }
+            }
+            for (int i = 0; i < GaPara.LineCount; i++)
+            {
+                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                {
+                    MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);
+                }
+            }
+        }
+
+        private double? GetNewMovingAvg(double? preMA, List<int> PSCounts)// 获取某一个特殊基因更新后的movingAvg
+        {
+
+            if (PSCounts.Count == 0) return preMA;
+
+            var PS_Avg = PSCounts.Average();
+            if (preMA == null) return PS_Avg;
+            else
+            {
+                var val = Math.PI / 2;
+                val *= 1.5;
+                var lam = 0.4 * PSCounts.Count;
+                var alpha = Math.Atan(lam) / val;// alpha 范围从0.161~0.6666666
+                return (double)preMA * (1 - alpha) + alpha * PS_Avg;
+            }
+        }
+
         private void ReclaimMemory()
         {
             GC.Collect();
@@ -930,56 +981,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             // 返回最后一代选择的比例
             return selected.Take(SelectionSize).ToList();
         }
-        private void UpdateMovingAvgPNs(List<Chromosome> solutions)
-        {
-            var SpecialGenePNs = new Dictionary<int, List< List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
-
-            for (int i = 0; i< GaPara.LineCount; i++)
-            {
-                var lis = new List<List<int>>();
-                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
-                {
-                    lis.Add(new List<int>());// 添加特殊基因个list
-                }
-                SpecialGenePNs.Add(i, lis);
-            }
-            foreach(var solution in solutions)
-            {
-                var parkingStallCount = solution.ParkingStallCount;
-                for (int i = 0; i < GaPara.LineCount; i++)
-                {
-                    if(solution.Genome[i].SpecialFlag != -1)// 特殊基因
-                    {
-                        int j = solution.Genome[i].SpecialFlag;
-                        SpecialGenePNs[i][j].Add(parkingStallCount);
-                    }
-                }
-            }
-            for (int i = 0; i < GaPara.LineCount; i++)
-            {
-                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
-                {
-                    MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);
-                }
-            }
-        }
-
-        private double? GetNewMovingAvg(double? preMA, List<int> PSCounts)// 获取某一个特殊基因更新后的movingAvg
-        {
-
-            if (PSCounts.Count == 0) return preMA;
-
-            var PS_Avg = PSCounts.Average();
-            if (preMA == null) return PS_Avg;
-            else
-            {
-                var val = Math.PI / 2;
-                val *= 1.5;
-                var lam = 0.4* PSCounts.Count;
-                var alpha = Math.Atan(lam) / val;// alpha 范围从0.161~0.6666666
-                return (double)preMA*(1 - alpha)  + alpha* PS_Avg;
-            }
-        }
         private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
@@ -1103,7 +1104,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     // 对每个选中基因进行变异
                     double minVal = LowerUpperBound[j].Item1;
                     double maxVal = LowerUpperBound[j].Item2;
-
                     var loc = s[i].Genome[j].Value;
 
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
