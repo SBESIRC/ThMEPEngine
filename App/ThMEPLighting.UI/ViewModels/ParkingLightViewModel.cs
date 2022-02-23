@@ -285,7 +285,7 @@ namespace ThMEPLighting.UI.ViewModels
                 {
                     var str = _parkFactorSelect.Name.ToString();
                     double.TryParse(str, out double dFactor);
-                    parkingStallIllumination.MastIllumination = dFactor;
+                    parkingStallIllumination.MaintenanceFactor = dFactor;
                 }
                 this.RaisePropertyChanged();
             }
