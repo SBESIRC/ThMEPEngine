@@ -53,7 +53,7 @@ namespace ThMEPArchitecture.ViewModel
         }
 
         //分割线打断调整
-        private bool _OptmizeThenBreakSeg = true;
+        private bool _OptmizeThenBreakSeg = false;
 
         public bool OptmizeThenBreakSeg
         {
