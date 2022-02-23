@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using QuickGraph;
 
 using ThCADExtension;
 using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Command
@@ -78,8 +80,14 @@ namespace TianHua.Electrical.PDS.Command
                 var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks,
                     loadExtractService.LoadBlocks, cabletrayEngine.Results, cableEngine.Results, markService, distBoxKey);
                 graphEngine.CreatGraph();
-
                 var graph = graphEngine.GetGraph();
+
+                var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>
+                {
+                    graph,
+                };
+                var unionEngine = new ThPDSGraphUnionEngine(distBoxKey);
+                var unionGrapg = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
             }
         }
 

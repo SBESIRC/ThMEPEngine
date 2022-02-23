@@ -92,8 +92,19 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public ThPDSCircuit CircuitMarkAnalysis(List<string> infos, List<string> distBoxKey)
         {
-            var circuit = new ThPDSCircuit();
-            circuit.ID = CreateCircuitID(infos, distBoxKey);
+            var circuit = new ThPDSCircuit
+            {
+                ID = CreateCircuitID(infos, distBoxKey)
+            };
+            return circuit;
+        }
+
+        public ThPDSCircuit CircuitMarkAnalysis(List<string> infos)
+        {
+            var circuit = new ThPDSCircuit
+            {
+                ID = CreateCircuitID(infos)
+            };
             return circuit;
         }
 
@@ -118,6 +129,16 @@ namespace TianHua.Electrical.PDS.Service
             if (circuitMarks.Distinct().Count() == 1)
             {
                 circuitID.CircuitNumber = circuitMarks[0];
+            }
+            return circuitID;
+        }
+
+        private ThPDSID CreateCircuitID(List<string> infos)
+        {
+            var circuitID = new ThPDSID();
+            if (infos.Distinct().Count() == 1)
+            {
+                circuitID.CircuitNumber = infos[0];
             }
             return circuitID;
         }

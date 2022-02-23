@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 回路编号
         /// </summary>
-        public string CircuitNumber { get; set; }
+        public string CircuitNumber { get; set; } = "";
 
         /// <summary>
         /// 上级配电箱编号

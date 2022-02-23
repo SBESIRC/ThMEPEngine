@@ -38,6 +38,7 @@
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
     <Compile Include="Engine\ThPDSBlockExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSBlockExtractionVisitor.cs" />
+    <Compile Include="Engine\ThPDSGraphUnionEngine.cs" />
     <Compile Include="Model\ThPDSBlockInfo.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
@@ -47,6 +48,8 @@
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThMarkService.cs" />
+    <Compile Include="Service\ThPDSBufferService.cs" />
+    <Compile Include="Service\ThPDSGraphService.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />
     <Compile Include="Service\ThPDSBlockExtractService.cs" />
