@@ -15,7 +15,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.ViewModel
         {
             throw new NotImplementedException();
         }
-        private ObservableCollection<ThWaterWellConfigInfo> TmpConfigInfo;
+        private ObservableCollection<ThWaterWellConfigInfo> TmpConfigInfo = new ObservableCollection<ThWaterWellConfigInfo>();
         public ObservableCollection<ThWaterWellConfigInfo> WellConfigInfo
         {
             get

@@ -101,10 +101,50 @@ namespace TianHua.Plumbing.WPF.UI.UI
             //处理viewModel里面的数据
             ViewModel.WellConfigInfo = groups;
         }
-
+        public void HighlightWell()
+        {
+            FocusMainWindow();
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                IntegerCollection intCol = new IntegerCollection();
+                if (ViewModel.WellConfigInfo != null)
+                {
+                    foreach (var info in ViewModel.WellConfigInfo)
+                    {
+                        if (info.IsDisplay)
+                        {
+                            info.WellModelList.ForEach(w =>
+                            {
+                                tm.AddTransient(w.WellObb, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
+                            });
+                        }
+                    }
+                }
+            }
+        }
         private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
+            FocusMainWindow();
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                IntegerCollection intCol = new IntegerCollection();
+                if(ViewModel.WellConfigInfo != null)
+                {
+                    foreach (var info in ViewModel.WellConfigInfo)
+                    {
+                        if (info.IsDisplay)
+                        {
+                            info.WellModelList.ForEach(w =>
+                            {
+                                tm.EraseTransient(w.WellObb, intCol);
+                            });
+                        }
+                    }
+                }
+            }
             this.Hide();
         }
 
@@ -113,7 +153,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var checkbox = sender as CheckBox;
             var configInfo = checkbox.DataContext as ThWaterWellConfigInfo;
             FocusMainWindow();
-
+            configInfo.IsDisplay = true;
             using (var acadDatabase = AcadDatabase.Active())
             {
                 var tm = cadGraph.TransientManager.CurrentTransientManager;
@@ -123,18 +163,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     tm.AddTransient(well.WellObb, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
                 }
             }
-            //using (var doclock = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            //using (var database = AcadDatabase.Active())
-            //{
-            //    foreach (var well in configInfo.WellModelList)
-            //    {
-            //        database.ModelSpace.Add(well.WellObb);
-            //        well.WellObb.Layer = "0";
-            //        well.WellObb.Linetype = "ByLayer";
-            //        well.WellObb.LineWeight = Autodesk.AutoCAD.DatabaseServices.LineWeight.LineWeight100;
-            //        well.WellObb.ColorIndex = 1;
-            //    }
-            //}
         }
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
@@ -142,6 +170,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var checkbox = sender as CheckBox;
             var configInfo = checkbox.DataContext as ThWaterWellConfigInfo;
             FocusMainWindow();
+            configInfo.IsDisplay = false;
             using (var acadDatabase = AcadDatabase.Active())
             {
                 var tm = cadGraph.TransientManager.CurrentTransientManager;
@@ -151,15 +180,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     tm.EraseTransient(w.WellObb, intCol);
                 });
             }
-            //using (var doclock = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            //using (var database = AcadDatabase.Active())
-            //{
-            //    configInfo.WellModelList.Where(o=>!o.WellObb.IsDisposed && !o.WellObb.IsErased).ForEach(w =>
-            //    {
-            //        var element = database.Element<Entity>(w.WellObb.ObjectId, true);
-            //        element.Erase();
-            //    });
-            //}
         }
     }
 }

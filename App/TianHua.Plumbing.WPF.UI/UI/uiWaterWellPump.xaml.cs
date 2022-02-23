@@ -39,6 +39,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 WellInfoWidget = new uiWaterWellPumpInfo();
             }
             DataContext = ViewModel;
+            MutexName = "Mutext_uiWaterWellPump";
         }
 
         private void btnFixDeepWaterPump_Click(object sender, RoutedEventArgs e)
@@ -116,6 +117,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             identifyInfo.WhiteList = config["集水井"];
             WellInfoWidget.IdentifyInfo = identifyInfo;
+            WellInfoWidget.HighlightWell();
             AcadApp.ShowModelessWindow(WellInfoWidget);
         }
     }
