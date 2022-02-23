@@ -21,7 +21,7 @@ namespace ThMEPHVAC.TCH
             var gap = ThTCHCommonTables.flgThickness * 0.5;
             foreach (var seg in segInfos)
             {
-                RecordDuctInfo(ref gId);
+                RecordDuctInfo(seg.airVolume, ref gId);
                 GetWidthAndHeight(seg.ductSize, out double width, out double height);
                 var l = seg.GetShrinkedLine();
                 var dirVec = (l.EndPoint - l.StartPoint).GetNormal();
@@ -49,7 +49,7 @@ namespace ThMEPHVAC.TCH
             }
             sqliteHelper.db.Close();
         }
-        private void RecordDuctInfo(ref ulong gId)
+        private void RecordDuctInfo(double airVolume, ref ulong gId)
         {
             ductParam = new TCHDuctParam()
             {
@@ -62,7 +62,7 @@ namespace ThMEPHVAC.TCH
                 ductType = 1,
                 Soft = 0,
                 Bulge = 0.0,
-                AirLoad = 10000.0
+                AirLoad = airVolume
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.ductTableName +
                           " VALUES ('" + ductParam.ID.ToString() + "'," +

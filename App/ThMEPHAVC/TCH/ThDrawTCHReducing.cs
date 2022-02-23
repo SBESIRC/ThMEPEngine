@@ -32,7 +32,7 @@ namespace ThMEPHVAC.TCH
                     sectionType = 0,
                     height = 0,
                     width = bigWidth,
-                    normalVector = dirVec,
+                    normalVector = -dirVec,
                     heighVector = new Vector3d(0, 0, 1),
                     centerPoint = srtP + (gap * dirVec)
                 };
@@ -42,12 +42,12 @@ namespace ThMEPHVAC.TCH
                     sectionType = 0,
                     height = 0,
                     width = smallWidth,
-                    normalVector = -dirVec,
+                    normalVector = dirVec,
                     heighVector = new Vector3d(0, 0, 1),
                     centerPoint = endP - (gap * dirVec)
                 };
-                flangesService.Draw(srtP, dirVec, bigWidth, ref gId);
-                flangesService.Draw(endP, -dirVec, smallWidth, ref gId);
+                flangesService.Draw(srtP, -sEndParam.normalVector, bigWidth, ref gId);
+                flangesService.Draw(endP, -eEndParam.normalVector, smallWidth, ref gId);
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
             sqliteHelper.db.Close();
@@ -69,8 +69,8 @@ namespace ThMEPHVAC.TCH
             reducingParam = new TCHReducingParam()
             {
                 ID = gId++,
-                endFaceID = gId++,
                 startFaceID = gId++,
+                endFaceID = gId++,
                 subSystemID = 1,
                 materialID = 0
             };
