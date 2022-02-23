@@ -134,7 +134,11 @@ namespace ThMEPArchitecture.PartitionLayout
             ls = SplitLine(ls, boundary).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
             var buffer = ls.Buffer(10);
             var obcrossed = obspacialindex.SelectCrossingPolygon(buffer).Cast<Polyline>().ToList();
-            ls = SplitLine(ls, obcrossed).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
+            var splits = SplitLine(ls, obcrossed)
+                .Where(e => !IsInAnyPolys(e.GetCenter(), obcrossed))
+                .OrderBy(e => e.GetCenter().DistanceTo(ps));
+            if (splits.Count() > 0) ls = splits.First();
+            else return;
             var carcrossded = carspacialindex.SelectCrossingPolygon(buffer).Cast<Polyline>().ToList();
             ls = SplitLine(ls, carcrossded).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
             var perplanes = lanes.Where(e => IsPerpLine(ls, e)).Where(e => e.GetClosestPointTo(ps, false).DistanceTo(ps) > 10).ToList();
