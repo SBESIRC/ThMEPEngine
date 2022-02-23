@@ -3,6 +3,7 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -24,8 +25,9 @@ namespace ThMEPWSS.FlushPoint.Service
         /// <summary>
         /// 车位长度 5.0m-5.5m
         /// </summary>
-        public double Length { get; set; }
-        public double BufferLength { get; set; }
+        public double Length { get; set; } 
+        public double ColumnBufferLength { get; set; } // 柱子往外扩的长度
+        public double WallDetectLength { get; set; } // 探测墙的长度
 
         public ThAdjustWashPointPositionService(
             List<Polyline> columns,
@@ -36,7 +38,8 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             Width = 2500;  
             Length = 5500;
-            BufferLength = 300.0;
+            ColumnBufferLength = 300.0;
+            WallDetectLength = 100000;
             WallSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             ColumnSpatialIndex = new ThCADCoreNTSSpatialIndex(columns.ToCollection());
             ParkingStallSpatialIndex = new ThCADCoreNTSSpatialIndex(parkingStalls.ToCollection());
@@ -64,59 +67,144 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         private Point3d? Adjust(Polyline column)
         {
-            var collector = new List<Point3d>();
-            var validPtDict = new Dictionary<Point3d,Vector3d>();
+            // 获取柱子所有边的朝向
+            var outerEdgeDirs = BuildEdgeOuterDirection(column);
+            // step1: 过滤没有与车位碰撞的边
+            var noConflictParkingStalls = GetNotConflictToParkintStallEdges(outerEdgeDirs);
+            if(noConflictParkingStalls.Count==1)
+            {
+                // 若经过每一步后只剩下一个可选边，则直接布在这边上
+                var first = Query(outerEdgeDirs,noConflictParkingStalls).First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
+            else if(noConflictParkingStalls.Count==0)
+            {
+                // 若每一步后一条可选边都剩不下，则在上一步筛选后的基础上任选一边布置
+                var first = outerEdgeDirs.First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
+            // step2: 过滤没有与障碍物碰撞的边
+            var noConflictObstacles = GetNotConflictToObstaclesEdges(Query(outerEdgeDirs, noConflictParkingStalls));
+            if(noConflictObstacles.Count==1)
+            {
+                // 若经过每一步后只剩下一个可选边，则直接布在这边上
+                var first = Query(outerEdgeDirs, noConflictObstacles).First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
+            else if(noConflictObstacles.Count == 0)
+            {
+                // 若每一步后一条可选边都剩不下，则在上一步筛选后的基础上任选一边布置
+                var first = Query(outerEdgeDirs, noConflictParkingStalls).First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
+            // step3: 剩下的根据距离墙较远的边排序
+            var farestWallEdgeSorts = OrderByDistanceToNearestEdge(Query(outerEdgeDirs,noConflictObstacles),WallDetectLength);
+            if (farestWallEdgeSorts.Count > 0)
+            {
+                // 若经过每一步后只剩下一个可选边，则直接布在这边上
+                var first = farestWallEdgeSorts.First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
+            return null;
+        }
+
+        private List<string> GetNotConflictToParkintStallEdges(List<Tuple<string, Point3d, Point3d, Vector3d>> edges)
+        {
+            var results = new List<string>();
+            edges.ForEach(item =>
+            {
+                var checkArea = BuildCheckArea(item.Item2, item.Item3, item.Item4);
+                var parkingStalls = FindParkingStalls(checkArea);
+                if (parkingStalls.Count ==0)
+                {
+                    results.Add(item.Item1);
+                }
+                checkArea.Dispose();
+            });
+            return results;
+        }
+
+        private List<string> GetNotConflictToObstaclesEdges(List<Tuple<string, Point3d, Point3d, Vector3d>> edges)
+        {
+            var results = new List<string>();
+            edges.ForEach(item =>
+            {
+                var checkArea = BuildCheckArea(item.Item2, item.Item3, item.Item4);
+                var parkingStalls = FindObstacles(checkArea);
+                if (parkingStalls.Count == 0)
+                {
+                    results.Add(item.Item1);
+                }
+                checkArea.Dispose();
+            });
+            return results;
+        }
+
+        private List<Tuple<string, Point3d, Point3d, Vector3d>> OrderByDistanceToNearestEdge(
+            List<Tuple<string, Point3d, Point3d, Vector3d>> edges, double detectLength)
+        {
+            return edges.OrderByDescending(o => DistanceToNearestWallEdge(o.Item2.GetMidPt(o.Item3), o.Item4, detectLength)).ToList();
+        }
+
+        private List<Tuple<string,Point3d, Point3d, Vector3d>> BuildEdgeOuterDirection(Polyline column)
+        {
+            var results = new List<Tuple<string, Point3d, Point3d, Vector3d>>();
             for (int i = 0; i < column.NumberOfVertices; i++)
             {
                 var lineSegment = column.GetLineSegmentAt(i);
-                if(lineSegment.Length<1e-4)
+                if (lineSegment.Length < 1e-4)
                 {
                     continue;
                 }
                 var dir = lineSegment.StartPoint.GetVectorTo(lineSegment.EndPoint).GetPerpendicularVector();
                 var position = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
-                collector.Add(position);
                 var extendPt = position + dir.GetNormal().MultiplyBy(5.0);
                 if (column.Contains(extendPt))
                 {
                     dir = dir.Negate();
                 }
-                if (CanLayout(lineSegment.StartPoint, lineSegment.EndPoint, dir))
-                {
-                    validPtDict.Add(position, dir);
-                }
+                results.Add(Tuple.Create(Guid.NewGuid().ToString(),lineSegment.StartPoint, lineSegment.EndPoint, dir));
             }
-            if(validPtDict.Count == 0)
+            return results;
+        }
+        private List<Tuple<string, Point3d, Point3d, Vector3d>> Query(List<Tuple<string, Point3d, Point3d, Vector3d>> edges,List<string> ids)
+        {
+            return edges.Where(o => ids.Contains(o.Item1)).ToList();
+        }
+        private double DistanceToNearestWallEdge(Point3d pt,Vector3d dir,double findLength)
+        {
+            // 查找距离哪个房间的边最近
+            var walls = FindWalls(pt, dir, findLength);
+            if (walls.Count > 0)
             {
-                return collector.Count > 0 ? (Point3d?)collector[0] : null;
+                var res = DistanceToNearestEdge(pt, walls);
+                return res.HasValue ? res.Value : double.MaxValue;
             }
-            else if(validPtDict.Count == 1)
-            {
-                return validPtDict.First().Key;
-            }
-            else
-            {
-                return validPtDict
-                    .OrderByDescending(o => DistanceToNearestEdge(o.Key, o.Value, 5000000)) //尽可能多选点
-                    .First().Key;
-            }
+            return double.MaxValue;
         }
 
-        private double DistanceToNearestEdge(Point3d pt,Vector3d dir,double findLength)
+        private double DistanceToNearestRoomEdge(Point3d pt, Vector3d dir, double findLength)
         {
-           var walls =  FindWalls(pt, dir, findLength);
+            // 查找距离哪个房间的边最近
             var rooms = FindRooms(pt, dir, findLength);
-            if (walls.Count==0 && rooms.Count==0)
+            if (rooms.Count > 0)
             {
-                return double.MaxValue;
+                var res = DistanceToNearestEdge(pt, rooms);
+                return res.HasValue?res.Value: double.MaxValue;
             }
-            var boundaries = walls.Union(rooms);
+            return double.MaxValue;
+        }
+        private double? DistanceToNearestEdge(Point3d pt, DBObjectCollection boundaries)
+        {
+            if (boundaries.Count == 0)
+            {
+                return null;
+            }
             var edges = boundaries.Cast<Entity>().SelectMany(e => ToLines(e)).ToList();
             var disList = edges
-                .Select(o => pt.DistanceTo(o.GetClosestPointTo(pt,false)));
+                .Select(o => pt.DistanceTo(o.GetClosestPointTo(pt, false)));
             return disList.OrderBy(o => o).First();
         }
-
         private List<Line> ToLines(Entity entity)
         {
             //要设置分割长度TesslateLength
@@ -146,7 +234,7 @@ namespace ThMEPWSS.FlushPoint.Service
 
         private bool CanLayout(Point3d segSp,Point3d segEp, Vector3d dir)
         {
-            var area = CheckArea(segSp, segEp, dir);
+            var area = BuildCheckArea(segSp, segEp, dir);
             var parkingStalls  = FindParkingStalls(area);
             if(parkingStalls.Count>0)
             {
@@ -175,7 +263,7 @@ namespace ThMEPWSS.FlushPoint.Service
             }
             return true;
         }
-        private Point3dCollection CheckArea(Point3d lineSp, Point3d lineEp, Vector3d dir)
+        private Point3dCollection BuildCheckArea(Point3d lineSp, Point3d lineEp, Vector3d dir,double innerDis=5.0)
         {
             var pts = new Point3dCollection();
             var vec = lineSp.GetVectorTo(lineEp);
@@ -183,10 +271,10 @@ namespace ThMEPWSS.FlushPoint.Service
             var newLineSp = lineSp + vec.GetNormal().MultiplyBy(length);
             var newLineEp = lineEp + vec.Negate().GetNormal().MultiplyBy(length);
 
-            var pt1 = newLineSp + dir.GetNormal().MultiplyBy(BufferLength);
-            var pt2 = newLineEp + dir.GetNormal().MultiplyBy(BufferLength);
-            var pt3 = newLineEp - dir.GetNormal().MultiplyBy(50.0);
-            var pt4 = newLineSp - dir.GetNormal().MultiplyBy(50.0);
+            var pt1 = newLineSp + dir.GetNormal().MultiplyBy(ColumnBufferLength);
+            var pt2 = newLineEp + dir.GetNormal().MultiplyBy(ColumnBufferLength);
+            var pt3 = newLineEp - dir.GetNormal().MultiplyBy(innerDis);
+            var pt4 = newLineSp - dir.GetNormal().MultiplyBy(innerDis);
 
             pts.Add(pt1);
             pts.Add(pt2);

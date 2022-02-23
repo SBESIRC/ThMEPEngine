@@ -126,7 +126,6 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                 }
             }
-
             var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
             Extents3d ext = new Extents3d();
             obstacles.ForEach(o => ext.AddExtents(o.GeometricExtents));
@@ -134,12 +133,6 @@ namespace ThMEPArchitecture.PartitionLayout
             obstacles.ForEach(e => Cutters.Add(e));
             //Cutters.Add(boundary);
             var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-            ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles, boundary, buildingBox);
-            partition.Obstacles=new List<Polyline>(obstacles);
-            partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-            partition.ObstaclesMPolygonSpatialIndex = ObstaclesSpatialIndex;
-            partition.GenerateParkingSpaces();
-            partition.Display();
         }
     }
 }

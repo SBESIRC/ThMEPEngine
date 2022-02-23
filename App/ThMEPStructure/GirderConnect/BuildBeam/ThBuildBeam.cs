@@ -62,16 +62,19 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 int B = SecondaryMainBeamsInfo.Item1;
                 int H = SecondaryMainBeamsInfo.Item2;
                 var query = spatialIndex.SelectFence(o);
-                query.Cast<Entity>().ToList().ForEach(i =>
+                if (BuildBeamLayoutConfig.BeamCheckSelection == 1)
                 {
-                    if (SecondaryBeamsData[i as Line].Item2 + BuildBeamLayoutConfig.BeamCheck > H)
+                    query.Cast<Entity>().ToList().ForEach(i =>
                     {
-                        H = SecondaryBeamsData[i as Line].Item2 + 50;
+                        if (SecondaryBeamsData[i as Line].Item2 + BuildBeamLayoutConfig.BeamCheck > H)
+                        {
+                            H = SecondaryBeamsData[i as Line].Item2 + 50;
+                        }
+                    });
+                    if (B < H / 4)
+                    {
+                        B = (int)Math.Floor(1.0 * H / 4 / 50) * 50;
                     }
-                });
-                if (B < H / 4)
-                {
-                    B = (int)Math.Floor(1.0 * H / 4 / 50) * 50;
                 }
                 code = AddText(o, B, H);
                 var outline = BuildLinearBeam(o, B);
@@ -378,7 +381,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 else
                 {
                     H = BuildBeamLayoutConfig.TableMiddleA6.H;
-                    B = BuildBeamLayoutConfig.TableMiddleB6.B;
+                    B = BuildBeamLayoutConfig.TableMiddleA6.B;
                 }
             }
             return (B, H).ToTuple();

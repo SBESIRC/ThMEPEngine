@@ -55,7 +55,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.IO
         private List<ThGeometry> BuildBuildingLines()
         {
             var results = new List<ThGeometry>();
-            Border.Building.ForEach(o =>
+            Border.Buildings.ForEach(o =>
             {
                 var buildingId = Guid.NewGuid().ToString();
                 Plines.GetCutters(o).ForEach(p =>

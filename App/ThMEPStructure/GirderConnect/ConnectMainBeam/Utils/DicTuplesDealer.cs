@@ -387,5 +387,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 dicTuples[ptB].Add(ptA);
             }
         }
+        public static void AddALineTodicTuples(Point3d ptA, Point3d ptB, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            if (!dicTuples.ContainsKey(ptA))
+            {
+                dicTuples.Add(ptA, new HashSet<Point3d>());
+            }
+            if (!dicTuples[ptA].Contains(ptB))
+            {
+                dicTuples[ptA].Add(ptB);
+            }
+        }
     }
 }

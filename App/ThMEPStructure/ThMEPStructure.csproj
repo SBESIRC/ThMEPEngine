@@ -38,12 +38,14 @@
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\DicTuplesDealer.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsCenters.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsDealer.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\ShowInfo.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureDealer.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThGroupService.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThMainBuildingLayerManager.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\TypeConvertor.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\WallConnect.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ConnectSndBeam.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ExtractInfo.cs" />
     <Compile Include="GirderConnect\ConnectProcess\GenerateLine.cs" />

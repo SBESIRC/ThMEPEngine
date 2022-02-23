@@ -15,113 +15,100 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
     public static class PointAreaSeg
     {
         public static double Gap = 15700;
+
         public static List<Polyline> PtAreaSeg(Polyline area, List<int> ptIndex, List<int> direction, List<Polyline> building,
             List<Point3d> intersectPt)
         {
-            try
+            var pts = new List<Point3d>();
+            for (int i = 0; i < ptIndex.Count; i++)
             {
-                var pts = new List<Point3d>();
-                for (int i = 0; i < ptIndex.Count; i++)
-                {
-                    pts.Add(intersectPt[ptIndex[i]]);//交点提取
-                }
-                if (ptIndex.Count == 1)
-                {
-                    return Pt1Seg(area, pts[0], direction[0], building);
-                }
-                if (ptIndex.Count == 2)
-                {
-                    return Pt2Seg(area, pts, direction, building);
-                }
-                if (ptIndex.Count == 4)
-                {
-                    return Pt4Seg(area, pts, direction, building);
-                }
+                pts.Add(intersectPt[ptIndex[i]]);//交点提取
             }
-            catch (Exception ex)
+            if (ptIndex.Count == 1)
             {
-                ;
+                return Pt1Seg(area, pts[0], direction[0], building);
             }
-            
+            if (ptIndex.Count == 2)
+            {
+                return Pt2Seg(area, pts, direction, building);
+            }
+            if (ptIndex.Count == 4)
+            {
+                return Pt4Seg(area, pts, direction, building);
+            }
 
             return new List<Polyline>() { area };
         }
+
         private static List<Polyline> Pt1Seg(Polyline area, Point3d pt, int direction, List<Polyline> building)
         {
-            try
-            {
-                var splitAreas = new List<Polyline>() { area };
-                double tor = 10000;
-                var areaPts = area.GetPoints();//拿到所有的点
-                var areaPtsVerticalSort = areaPts.OrderBy(p => p.Y);
-                var areaPtsHorizontalSort = areaPts.OrderBy(p => p.X);
-                var buildPts = new List<Point3d>();//所有建筑物的点
-                building.ForEach(pline => buildPts.AddRange(pline.GetPoints()));
+            var splitAreas = new List<Polyline>() { area };
+            double tor = 10000;
+            var areaPts = area.GetPoints();//拿到所有的点
+            var areaPtsVerticalSort = areaPts.OrderBy(p => p.Y);
+            var areaPtsHorizontalSort = areaPts.OrderBy(p => p.X);
+            var buildPts = new List<Point3d>();//所有建筑物的点
+            building.ForEach(pline => buildPts.AddRange(pline.GetPoints()));
 
-                var centerPt = area.GetCenter();
-                var line = new Line();
-                if (direction == 1)//竖向分割
-                {
-                    buildPts = buildPts.OrderBy(p => p.X).ToList();
-                    var spt = new Point3d(pt.X, areaPtsVerticalSort.Last().Y + tor, 0);
-                    var ept = new Point3d(pt.X, areaPtsVerticalSort.First().Y - tor, 0);
-                    line = new Line(spt, ept);
-                    if (centerPt.X < pt.X)//区域在分割线左边
-                    {
-                        var bound = buildPts.Last().X;
-                        int gapNums = (int)((Math.Abs(pt.X - bound) / Gap));
-                        if (gapNums > 0)
-                        {
-                            var splitLine = line.OffSetX(-gapNums * Gap);
-                            splitAreas = splitLine.SplitByLine(area);
-                        }
-                    }
-                    else//区域在分割线右边
-                    {
-                        var bound = buildPts.First().X;
-                        int gapNums = (int)((Math.Abs(pt.X - bound) / Gap));
-                        if (gapNums > 0)
-                        {
-                            var splitLine = line.OffSetX(gapNums * Gap);
-                            splitAreas = splitLine.SplitByLine(area);
-                        }
-                    }
-                }
-                else//横向分割
-                {
-                    buildPts = buildPts.OrderBy(p => p.Y).ToList();
-                    var spt = new Point3d(areaPtsHorizontalSort.First().X - tor, pt.Y, 0);
-                    var ept = new Point3d(areaPtsHorizontalSort.Last().X + tor, pt.Y, 0);
-                    line = new Line(spt, ept);
-                    if (centerPt.Y < pt.Y)//区域在分割线下边
-                    {
-                        var bound = buildPts.Last().Y;
-                        int gapNums = (int)((Math.Abs(pt.Y - bound) / Gap));
-                        if (gapNums > 0)
-                        {
-                            var splitLine = line.OffSetY(-gapNums * Gap);
-                            splitAreas = splitLine.SplitByLine(area);
-                        }
-                    }
-                    else//区域在分割线上边
-                    {
-                        var bound = buildPts.First().Y;
-                        int gapNums = (int)((Math.Abs(pt.Y - bound) / Gap));
-                        if (gapNums > 0)
-                        {
-                            var splitLine = line.OffSetY(gapNums * Gap);
-                            splitAreas = splitLine.SplitByLine(area);
-                        }
-                    }
-                }
-                return splitAreas;
-            }
-            catch (Exception ex)
+            var centerPt = area.GetCenter();
+            var line = new Line();
+            if (direction == 1)//竖向分割
             {
-                ;
+                buildPts = buildPts.OrderBy(p => p.X).ToList();
+                var spt = new Point3d(pt.X, areaPtsVerticalSort.Last().Y + tor, 0);
+                var ept = new Point3d(pt.X, areaPtsVerticalSort.First().Y - tor, 0);
+                line = new Line(spt, ept);
+                if (centerPt.X < pt.X)//区域在分割线左边
+                {
+                    var bound = buildPts.Last().X;
+                    int gapNums = (int)((Math.Abs(pt.X - bound) / Gap));
+                    if (gapNums > 0)
+                    {
+                        var splitLine = line.OffSetX(-gapNums * Gap);
+                        splitAreas = splitLine.SplitByLine(area);
+                    }
+                }
+                else//区域在分割线右边
+                {
+                    var bound = buildPts.First().X;
+                    int gapNums = (int)((Math.Abs(pt.X - bound) / Gap));
+                    if (gapNums > 0)
+                    {
+                        var splitLine = line.OffSetX(gapNums * Gap);
+                        splitAreas = splitLine.SplitByLine(area);
+                    }
+                }
             }
-            return new List<Polyline>() { area };
+            else//横向分割
+            {
+                buildPts = buildPts.OrderBy(p => p.Y).ToList();
+                var spt = new Point3d(areaPtsHorizontalSort.First().X - tor, pt.Y, 0);
+                var ept = new Point3d(areaPtsHorizontalSort.Last().X + tor, pt.Y, 0);
+                line = new Line(spt, ept);
+                if (centerPt.Y < pt.Y)//区域在分割线下边
+                {
+                    var bound = buildPts.Last().Y;
+                    int gapNums = (int)((Math.Abs(pt.Y - bound) / Gap));
+                    if (gapNums > 0)
+                    {
+                        var splitLine = line.OffSetY(-gapNums * Gap);
+                        splitAreas = splitLine.SplitByLine(area);
+                    }
+                }
+                else//区域在分割线上边
+                {
+                    var bound = buildPts.First().Y;
+                    int gapNums = (int)((Math.Abs(pt.Y - bound) / Gap));
+                    if (gapNums > 0)
+                    {
+                        var splitLine = line.OffSetY(gapNums * Gap);
+                        splitAreas = splitLine.SplitByLine(area);
+                    }
+                }
+            }
+            return splitAreas;
         }
+
         private static List<Polyline> Pt1Seg(Polyline area, Point3d pt, int direction, List<Polyline> building, out Point3d offsetPt)
         {
             offsetPt = new Point3d(pt.X, pt.Y, 0);
@@ -195,6 +182,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return splitAreas;
         }
+
         private static List<Polyline> Pt2Seg(Polyline area, List<Point3d> pts, List<int> directions, List<Polyline> building)
         {
             var splitAreas = new List<Polyline>() { };
@@ -230,6 +218,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
             }
         }
+
         private static List<Point3d> SumEq01Sort(List<Point3d> pts, List<int> directions, out bool flag)
         {
             //flag表示 输出的点顺序， 01为true，10为false
@@ -259,6 +248,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
         }
+
         private static List<Polyline> Pt3Seg(Polyline area, List<Point3d> pts, List<int> directions, List<Polyline> building)
         {
             var splitAreas = new List<Polyline>() { area };
@@ -270,25 +260,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (!tmp.Contains(pts[i]))
                     {
                         splitAreas.Remove(tmp);
-                        try
-                        {
-                            splitAreas.AddRange(Pt1Seg(tmp, pts[i], directions[i], building));
-
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
+                        splitAreas.AddRange(Pt1Seg(tmp, pts[i], directions[i], building));
                         break;
                     }
                 }
             }
             return splitAreas;
         }
+        
         private static List<Polyline> Pt4Seg(Polyline area, List<Point3d> pts, List<int> directions, List<Polyline> building)
         {
             var splitAreas = new List<Polyline>() { area };
-            double tor = 10000;
             var areaPts = area.GetPoints();//拿到所有的点
             var areaPtsVerticalSort = areaPts.OrderBy(p => p.Y);
             var areaPtsHorizontalSort = areaPts.OrderBy(p => p.X);
@@ -356,12 +338,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
             return splitAreas;
         }
+
         private static List<Polyline> PtSeg0101(Polyline area, List<Point3d> pts, List<int> directions, List<Polyline> building)
         {
             var splitAreas = new List<Polyline>() { };
-
             var newPts = new List<Point3d>();
-
             for (int i = 0; i < pts.Count; i++)
             {
                 var pt = pts[i];
@@ -387,6 +368,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
             return splitAreas;
         }
+
         private static Polyline PtSegCenter(Polyline area, List<Point3d> pts, List<int> directions, List<Polyline> building)
         {
             var splitAreas = new List<Polyline>() { area };
@@ -424,9 +406,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return centerArea;
         }
+
         private static Polyline GetArea(Point3d pt1, Point3d pt2)
         {
-            double tor = 1.0;
             var pts = new Point2dCollection();
             var pline = new Polyline();
             if (pt1.GetPtDir(pt2) == -1)
@@ -479,17 +461,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     if (curPt.GetPtDir(pts[i]) == secondDir)
                     {
-                        if(sortPt.Count == 0)
+                        if (sortPt.Count == 0)
                         {
                             sortPt.Add(curPt);//添加为1分割点
                         }
-                        
+
                         sortPt.Add(pts[i]);//获取最后分割点
                     }
                 }
             }
             return sortPt;
         }
+
         private static List<Point3d> SumEq2Sort(List<Point3d> pts, List<int> directions, out int flag)
         {
             var sortPt = new List<Point3d>();

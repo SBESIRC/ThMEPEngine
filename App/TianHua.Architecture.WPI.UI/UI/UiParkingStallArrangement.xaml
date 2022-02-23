@@ -6,8 +6,8 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(1.5)" SizeToContent="Manual" Height="530"
-              Width="460" MaxWidth="550"  MaxHeight="670" WindowStartupLocation="CenterScreen"
+              Title="车位自动排布(1.6)" SizeToContent="Manual" Height="710"
+              Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
     <Window.Resources>
@@ -19,16 +19,19 @@
         <StackPanel>
             <StackPanel >
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
+                <StackPanel Orientation="Vertical">
+                    <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
+                    <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">无迭代速排</RadioButton>
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动迭代排布</RadioButton>
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动迭代排布:</RadioButton>
-                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
-                            <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">只生成分割线</CheckBox>
-                            <Label Margin="0,2,5,0">方案数：</Label>
-                            <TextBox Width="25" Height="15" Margin="0,4,5,5" Text="{Binding LayoutCount}"></TextBox>
+                    <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
+                        <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">只生成分区线</CheckBox>
+                        <Label Margin="0,2,5,0">方案数：</Label>
+                        <TextBox Width="25" Height="15" Margin="0,4,5,5" Text="{Binding LayoutCount}"></TextBox>
                     </StackPanel>
                 </StackPanel>
+
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -64,28 +67,50 @@
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <Label FontSize="16" FontWeight="Bold">柱设置：</Label>
+                    <Label FontSize="16" FontWeight="Bold">柱网设置：</Label>
                 </StackPanel>
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label>最大柱间距：</Label>
-                        <TextBox Width="40" Margin="72,5,5,5" Text="{Binding MaxColumnWidth}"></TextBox>
-                        <Label>mm</Label>
+                    <Label>柱网规格：</Label>
+                    <StackPanel Margin="5,5,5,5" Orientation="Horizontal">
+                        <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">大柱网</RadioButton>
+                        <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">大小柱网</RadioButton>
+                        <RadioButton GroupName="ColumnSize" IsChecked="{Binding CommandColumnSize, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">小柱网</RadioButton>
                     </StackPanel>
+                    <RadioButton GroupName="ColumnSize" Margin="5,5,5,5" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandColumnSize, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="自定义柱网："/>
                     <StackPanel Orientation="Horizontal">
                         <Label>平行于车道方向柱子尺寸：</Label>
-                        <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnSizeOfParalleToRoad}"></TextBox>
+                        <TextBox Width="40" Margin="60,5,5,5" Text="{Binding ColumnSizeOfParalleToRoad}"></TextBox>
                         <Label>mm</Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>垂直于车道方向柱子尺寸：</Label>
-                        <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnSizeOfPerpendicularToRoad}"></TextBox>
+                        <TextBox Width="40" Margin="60,5,5,5" Text="{Binding ColumnSizeOfPerpendicularToRoad}"></TextBox>
                         <Label>mm</Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label>柱子完成面尺寸:</Label>
-                        <TextBox Width="40" Margin="58,5,5,5" Text="{Binding ColumnAdditionalSize}"></TextBox>
+                        <Label>柱子完成面尺寸：</Label>
+                        <TextBox Width="40" Margin="108,5,5,5" Text="{Binding ColumnAdditionalSize}"></TextBox>
                         <Label>mm</Label>
+                        <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding ColumnAdditionalInfluenceLaneWidth}">是否影响车道净宽</CheckBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" IsEnabled="{Binding CommandColumnSize, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=3}" RenderTransformOrigin="0.474,-0.205">
+                        <StackPanel Orientation="Horizontal">
+                            <Label>柱间距：</Label>
+                            <TextBox Width="40" Margin="156,5,5,5" Text="{Binding ColumnWidth}"></TextBox>
+                            <Label>mm</Label>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label>背靠背模块：柱子沿车道法向偏移距离</Label>
+                            <TextBox Width="40" Margin="0,5,5,5" Text="{Binding ColumnShiftDistanceOfDoubleRowModular}"></TextBox>
+                            <Label>mm</Label>
+                            <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding MidColumnInDoubleRowModular}">背靠背中柱</CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label>单排模块：柱子沿车道法向偏移距离</Label>
+                            <TextBox Width="40" Margin="12,5,5,5" Text="{Binding ColumnShiftDistanceOfSingleRowModular}"></TextBox>
+                            <Label>mm</Label>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
@@ -107,29 +132,29 @@
                     <Label></Label>
                 </StackPanel>
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
-                <StackPanel>
-                    <StackPanel >
-                        <Label>速度：</Label>
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">快速(5分钟)</RadioButton>
-                            <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">一般(30分钟)</RadioButton>
-                            <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">慢速(60分钟)</RadioButton>
+                    <StackPanel>
+                        <StackPanel >
+                            <Label>速度：</Label>
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">快速(5分钟)</RadioButton>
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">一般(30分钟)</RadioButton>
+                                <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">慢速(60分钟)</RadioButton>
+                            </StackPanel>
+                        </StackPanel>
+                        <Label></Label>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton GroupName="SpeedGroup" VerticalAlignment="Center" VerticalContentAlignment="Center"  IsChecked="{Binding CommandRunSpeed, ConverterParameter=3, Converter={StaticResource RadioValueConverter}}" RenderTransformOrigin="0.534,1.575" Content="高级设置："/>
+                        <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsAdvancedSettingEnabled}" RenderTransformOrigin="0.474,-0.205">
+                            <Label Content="迭代次数："/>
+                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding IterationCount}"/>
+                            <Label Content="种群数量："/>
+                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding PopulationCount}"/>
+                            <Label Content="最长时间："/>
+                            <TextBox Width="40" Margin="0,5,5,5" Text="{Binding MaxTimespan}"/>
+                            <Label Content="分钟"/>
                         </StackPanel>
                     </StackPanel>
-                    <Label></Label>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=3}">高级设置：</RadioButton>
-                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsAdvancedSettingEnabled}">
-                        <Label>迭代次数：</Label>
-                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding IterationCount}"></TextBox>
-                        <Label>种群数量：</Label>
-                            <TextBox Width="30" Margin="0,5,5,5" Text="{Binding PopulationCount}"></TextBox>
-                        <Label>最长时间：</Label>
-                            <TextBox Width="40" Margin="0,5,5,5" Text="{Binding MaxTimespan}"></TextBox>
-                        <Label>分钟</Label>
-                    </StackPanel>
-                </StackPanel>
                 </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,10,5,5">

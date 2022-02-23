@@ -7,8 +7,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using ThCADCore.NTS;
 using ThCADExtension;
+using DotNetARX;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Algorithm.FrameComparer
 {
@@ -21,16 +24,24 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         public DBObjectCollection curGraph;
         public DBObjectCollection reference;
         public Dictionary<int, ObjectId> dicCode2Id;
-        public ThFrameExactor(CompareFrameType type)
+        private Point3dCollection fence;
+        public ThFrameExactor(CompareFrameType type, Point3dCollection fence)
         {
-            switch (type)
-            {
-                case CompareFrameType.DOOR: GetDoorFrame(); break;
-                case CompareFrameType.ROOM: GetRoomFrame(); break;
-                case CompareFrameType.WINDOW: GetWindowFrame(); break;
-                case CompareFrameType.FIRECOMPONENT: GetFireComponentFrame(); break;
-                default: throw new NotImplementedException("不支持该类型框线");
-            }
+            curGraph = new DBObjectCollection();
+            reference = new DBObjectCollection();
+            var pl = new Polyline();
+            pl.CreateRectangle(fence[0].ToPoint2d(), fence[1].ToPoint2d());
+            this.fence = pl.Vertices();
+            if (type == CompareFrameType.ROOM)
+                GetRoomFrame();
+            else if (type == CompareFrameType.DOOR)
+                GetDoorFrame();
+            else if (type == CompareFrameType.WINDOW)
+                GetWindowFrame();
+            else if (type == CompareFrameType.FIRECOMPONENT)
+                GetFireComponentFrame();
+            else
+                throw new NotImplementedException("未找到该框线类型！！！");
             DoProcCurGraphPl();
             DoProcReferencePl();
         }
@@ -101,22 +112,33 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         }
         private void GetDoorReference(AcadDatabase adb)
         {
-            throw new NotImplementedException();
+            var engine = new ThAIDoorOutlineRecognitionEngine();
+            engine.Recognize(adb.Database, fence);
+            engine.doorOutLines.ForEachDbObject(o => reference.Add(o));
         }
         private void GetWindowReference(AcadDatabase adb)
         {
-            throw new NotImplementedException();
+            var engine = new ThAIWindowOutlineRecognitionEngine();
+            engine.Recognize(adb.Database, fence);
+            engine.windowsOutLines.ForEachDbObject(o => reference.Add(o));
         }
         private void GetFireComponentReference(AcadDatabase adb)
         {
-            throw new NotImplementedException();
+            var engine = new ThFireCompartmentOutlineRecognitionEngine()
+            {
+                LayerFilter = ThFireCompartmentLayerManager.CurveModelSpaceLayers(adb.Database),
+            };
+            engine.Recognize(adb.Database, fence);
+            var rooms = engine.Elements.Cast<ThIfcRoom>().ToList();
+            rooms.Select(o => o.Boundary)
+                 .OfType<Polyline>()
+                 .ForEachDbObject(o => reference.Add(o));
         }
         private void GetRoomReference(AcadDatabase adb)
         {
-            var roomEngine = new ThRoomOutlineRecognitionEngine();
-            roomEngine.Recognize(adb.Database, new Point3dCollection());
-            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            reference = new DBObjectCollection();
+            var engine = new ThAIRoomOutlineRecognitionEngine();
+            engine.Recognize(adb.Database, fence);
+            var rooms = engine.Elements.Cast<ThIfcRoom>().ToList();
             rooms.Select(o => o.Boundary)
                  .OfType<Polyline>()
                  .ForEachDbObject(o => reference.Add(o));
@@ -124,10 +146,24 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         private void GetCurGraph(AcadDatabase adb, string layer)
         {
             var layerFilter = new List<string>() { layer };
-            curGraph = adb.ModelSpace
+            var graphs = adb.ModelSpace
                 .OfType<Polyline>()
                 .Where(o => layerFilter.Contains(o.Layer))
                 .ToCollection();
+            if (fence.Count > 0)
+            {
+                // 有框选 fence 是大范围，用polyline求交就可以了，不用MPolygon
+                var index = new ThCADCoreNTSSpatialIndex(graphs);
+                var curves = index.SelectCrossingPolygon(fence);
+                foreach (Polyline p in curves)
+                    curGraph.Add(p);
+            }
+            else
+            {
+                // 无框选
+                foreach (Polyline pl in graphs)
+                    curGraph.Add(pl);
+            }
         }
     }
 }

@@ -32,7 +32,8 @@ namespace ThMEPLighting.IlluminationLighting
      
         public static string NormalTag = "正常照明";
         public static string EvacuationTag = "疏散照明";
-
+        public static string Layer_Blind = "AI-照明盲区";
+        public static int Color_Blind = 1;
         public enum LightTypeEnum
         {
             /// <summary>

@@ -199,7 +199,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var boundaryEngine = new ThMEPEngineCore.Engine.ThDB3RoomOutlineRecognitionEngine();
                 boundaryEngine.RecognizeMS(acadDatabase.Database, pts);
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
-                var markEngine = new ThRoomMarkRecognitionEngine();
+                var markEngine = new ThAIRoomMarkRecognitionEngine();
                 markEngine.RecognizeMS(acadDatabase.Database, pts);
                 var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();

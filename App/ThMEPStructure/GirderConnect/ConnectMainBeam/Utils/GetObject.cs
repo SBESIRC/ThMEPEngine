@@ -10,6 +10,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Geometries;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -204,7 +206,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return fromPt;
         }
-        public static Point3d GetPointByDirection(Point3d fromPt, Vector3d aimDirection, Point3dCollection basePts, double tolerance = Math.PI / 12, double constrain = 9000)
+        public static Point3d GetPointByDirection(Point3d fromPt, Vector3d aimDirection, HashSet<Point3d> basePts, double tolerance = Math.PI / 12, double constrain = 9000)
         {
             double minFstCross = double.MaxValue;
             double minSndCross = double.MaxValue;
@@ -280,6 +282,26 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansPt;
         }
+        public static Point3d GetPointByDirectionB(Point3d fromPt, Vector3d aimDirection, HashSet<Point3d> basePts, double tolerance = Math.PI / 12, double constrain = 9000)
+        {
+            Point3d ansPt = fromPt;
+            double minDis = double.MaxValue;
+            foreach (Point3d curPt in basePts)
+            {
+                double curRotate = aimDirection.GetAngleTo(curPt - fromPt);
+                double curDis = fromPt.DistanceTo(curPt);
+                if (curRotate < tolerance && curDis < constrain && curDis > 200)
+                {
+                    if (curDis < minDis)
+                    {
+                        ansPt = curPt;
+                        minDis = curDis;
+                    }
+                }
+            }
+            return ansPt;
+        }
+
         /// <summary>
         /// Get Closest Point By Direction On a Polyline
         /// </summary>
@@ -360,13 +382,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
-        /// 获取多边形上距离目标点某个方向最近的那条线(此函数不好使)
+        /// 获取多边形上距离目标点某个方向最近的那条线
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="basePt"></param>
         /// <param name="baseVec"></param>
         /// <returns></returns>
-        public static Line GetClosetLineOfPolyline(Polyline polyline, Point3d basePt, Vector3d baseVec)
+        public static Line GetCloestLineOfPolyline(Polyline polyline, Point3d basePt, Vector3d baseVec)
         {
             int n = polyline.NumberOfVertices;
             if (n < 2)
@@ -380,13 +402,37 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 Vector3d curVec = polyline.GetPoint3dAt(i) - polyline.GetPoint3dAt((i + 1) % n);
                 Line curLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
                 double curDis = basePt.DistanceTo(curLine.GetClosestPointTo(basePt, false));
-                if (Math.Abs(curVec.GetAngleTo(baseVec) - Math.PI / 2) < 7 && curDis < minDis) //垂直偏离不超过7度
+                if (Math.Abs(curVec.GetAngleTo(baseVec) - Math.PI / 2) < Math.PI/180*7 && curDis < minDis) //垂直偏离不超过7度
                 {
                     minDis = curDis;
                     ansLine = curLine;
                 }
             }
             return ansLine;
+        }
+
+
+        public static void GetCloestLineOfPolyline(Polyline polyline, Point3d basePt, ref Vector3d vector)
+        {
+            int n = polyline.NumberOfVertices;
+            if (n < 2)
+            {
+                return;
+            }
+            double minDis = double.MaxValue;
+            Line ansLine = null;
+            for (int i = 0; i < n; ++i)
+            {
+                //Vector3d curVec = polyline.GetPoint3dAt(i) - polyline.GetPoint3dAt((i + 1) % n);
+                Line curLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
+                double curDis = basePt.DistanceTo(curLine.GetClosestPointTo(basePt, false));
+                if (curDis < minDis)
+                {
+                    minDis = curDis;
+                    ansLine = curLine;
+                }
+            }
+            vector = basePt.DistanceTo(ansLine.StartPoint) < basePt.DistanceTo(ansLine.EndPoint) ? ansLine.StartPoint - ansLine.EndPoint : ansLine.EndPoint - ansLine.StartPoint;
         }
 
         /// <summary>

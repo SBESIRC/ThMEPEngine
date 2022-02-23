@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.Algorithm
     {
         public DBObjectCollection ErasedFrame;
         public HashSet<Polyline> AppendedFrame;// 仅在外参中包含的多段线
-        public HashSet<Polyline> unChangedFrame;
+        public Dictionary<Polyline, Polyline> unChangedFrame;
         public Dictionary<Polyline, Tuple<Polyline, double>> ChangedFrame;// 外参 -> (本图, 相似度)
         public Point3d srtP;
         private const float FRAME_AREA_FLOOR = 1000f;
@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.Algorithm
             
             ErasedFrame = new DBObjectCollection();
             AppendedFrame = new HashSet<Polyline>();
-            unChangedFrame = new HashSet<Polyline>();
+            unChangedFrame = new Dictionary<Polyline, Polyline>();
             ChangedFrame = new Dictionary<Polyline, Tuple<Polyline, double>>();
             dicMp2Polyline = new Dictionary<int, Polyline>();
         }
@@ -56,9 +56,13 @@ namespace ThMEPEngineCore.Algorithm
             foreach (Polyline pl in AppendedFrame)
                 if (set.Add(pl.GetHashCode()))
                     pl.TransformBy(mat);
-            foreach (Polyline pl in unChangedFrame)
-                if (set.Add(pl.GetHashCode()))
-                    pl.TransformBy(mat);
+            foreach (var pair in unChangedFrame)
+            {
+                if (set.Add(pair.Key.GetHashCode()))
+                    pair.Key.TransformBy(mat);
+                if (set.Add(pair.Value.GetHashCode()))
+                    pair.Value.TransformBy(mat);
+            }
             foreach (var pair in ChangedFrame)
             {
                 if (set.Add(pair.Key.GetHashCode()))
@@ -85,13 +89,9 @@ namespace ThMEPEngineCore.Algorithm
             var srcFrameIndex = CreateSrcIndex();
             foreach (Polyline pl in tarFrames)
             {
-                if (!unChangedFrame.Contains(pl) && !ChangedFrame.ContainsKey(pl))
-                {
-                    var mp = CreateMP(pl);
-                    var res = srcFrameIndex.SelectCrossingPolygon(mp);
-                    if (res.Count == 0)
-                        AppendedFrame.Add(pl);
-                }
+                var res = srcFrameIndex.SelectCrossingPolygon(pl);
+                if (res.Count == 0)
+                    AppendedFrame.Add(pl);
             }
         }
         private ThCADCoreNTSSpatialIndex CreateSrcIndex()
@@ -99,8 +99,7 @@ namespace ThMEPEngineCore.Algorithm
             var frames = new DBObjectCollection();
             foreach (Polyline frame in srcFrames)
             {
-                var mp = CreateMP(frame);
-                frames.Add(mp);
+                frames.Add(frame);
             }
             return new ThCADCoreNTSSpatialIndex(frames);
         }
@@ -163,16 +162,37 @@ namespace ThMEPEngineCore.Algorithm
         }
         private void SelectMaxCrossArea(Polyline pl, DBObjectCollection crossPolygons)
         {
-            var maxCrossPl = new Polyline();
+            DetectCrossPl(pl, crossPolygons, out Polyline maxCrossPl, out Polyline minBoundPl);
+            if (maxCrossPl.Area > 0)
+            {
+                // 与复数个区域相交，直接将最大的面积并入变化的框线
+                AddChangedFrame(pl, maxCrossPl, pl.SimilarityMeasure(maxCrossPl));
+            }
+            else if (minBoundPl.Area > 0)
+            {
+                // 被复数个框线包含
+                CheckSimilarity(pl, minBoundPl);
+            }
+            //else 从crossPolygons中找到了unchanged，直接退出
+        }
+        private void DetectCrossPl(Polyline pl, DBObjectCollection crossPolygons, out Polyline maxCrossPl, out Polyline minBoundPl)
+        {
+            maxCrossPl = new Polyline();
             double maxCrossArea = double.MinValue;
-            var minBoundPl = new Polyline();
+            minBoundPl = new Polyline();
             double minBoundArea = double.MaxValue;
             foreach (MPolygon crossPl in crossPolygons)
             {
-                var realCrossPl = dicMp2Polyline[crossPl.GetHashCode()];
+                var realCrossPl = dicMp2Polyline[crossPl.GetHashCode()];// 本图上的相交多段线
                 var crossArea = CalcCrossArea(pl, realCrossPl);
-                var diffArea = Math.Abs(crossArea - pl.Area);
-                if (diffArea < 1e-3 && crossPl.Area >= pl.Area)
+                if (crossArea < 0)
+                    continue;// 贴着一个边相交
+                if (pl.SimilarityMeasure(realCrossPl) >= 0.995)
+                {
+                    AddUnChangedFrame(pl, realCrossPl);// 找到一个完全相同的直接退出
+                    break;
+                }
+                if (Math.Abs(crossArea - pl.Area) < 1e-3 && crossPl.Area >= pl.Area)
                 {
                     if (crossPl.Area < minBoundArea)
                     {
@@ -187,8 +207,6 @@ namespace ThMEPEngineCore.Algorithm
                     maxCrossPl = realCrossPl;
                 }
             }
-            var detectPl = maxCrossPl.Area > 0 ? maxCrossPl : minBoundPl;
-            CheckSimilarity(pl, detectPl);
         }
         private double CalcCrossArea(Polyline p1, Polyline p2)
         {
@@ -209,26 +227,38 @@ namespace ThMEPEngineCore.Algorithm
             // tarPl->外参 srcPl->本图 外参映射到本图
             var coef = srcPl.SimilarityMeasure(tarPl);
             if (coef >= 0.995)
-                unChangedFrame.Add(tarPl);
+                AddUnChangedFrame(tarPl, srcPl);
             else if(coef >= 0.9)
+                AddChangedFrame(srcPl, tarPl, coef);
+        }
+        void AddUnChangedFrame(Polyline tarPl, Polyline srcPl)
+        {
+            if (ChangedFrame.ContainsKey(tarPl))
+                ChangedFrame.Remove(tarPl);
+            if (!unChangedFrame.ContainsKey(tarPl))
+                unChangedFrame.Add(tarPl, srcPl);
+        }
+        private void AddChangedFrame(Polyline srcPl, Polyline tarPl, double coef)
+        {
+            if (ChangedFrame.ContainsKey(tarPl))
             {
-                if (ChangedFrame.ContainsKey(tarPl))
+                if (ChangedFrame[tarPl].Item2 < coef)
                 {
-                    if (ChangedFrame[tarPl].Item2 < coef)
-                    {
-                        ChangedFrame.Remove(tarPl);
-                        ChangedFrame.Add(tarPl, new Tuple<Polyline, double>(srcPl, coef));
-                    }
-                    else
-                    {
-                        // 本图与外参相交的框线除了最大的，其他的都放到新增里
-                        AppendedFrame.Add(tarPl);
-                    }
+                    ChangedFrame.Remove(tarPl);
+                    ChangedFrame.Add(tarPl, new Tuple<Polyline, double>(srcPl, coef));
                 }
                 else
                 {
-                    ChangedFrame.Add(tarPl, new Tuple<Polyline, double>(srcPl, coef));
+                    // 本图与外参相交的框线除了最大的，其他的都放到新增里
+                    AppendedFrame.Add(tarPl);
                 }
+            }
+            else
+            {
+                if (coef >= 0.995)
+                    AddUnChangedFrame(tarPl, srcPl);
+                else if (coef >= 0.9)
+                    ChangedFrame.Add(tarPl, new Tuple<Polyline, double>(srcPl, coef));
             }
         }
         private MPolygon CreateMP(Polyline pl)

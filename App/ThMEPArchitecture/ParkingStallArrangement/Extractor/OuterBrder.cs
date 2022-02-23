@@ -1,38 +1,36 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThMEPArchitecture.ParkingStallArrangement.Model;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {
     public class OuterBrder
     {
-        public DBObjectCollection OuterLines = new DBObjectCollection();//外框线
-        public DBObjectCollection BuildingLines = new DBObjectCollection();//建筑物block
-        public DBObjectCollection EquipmentLines = new DBObjectCollection();//机房设备线
-        public DBObjectCollection SegmentLines = new DBObjectCollection();//分割线
+        public DBObjectCollection OuterLineObjs = new DBObjectCollection();
+        public DBObjectCollection BuildingObjs = new DBObjectCollection();
+
         public List<Line> SegLines = new List<Line>();//分割线
-        public List<BlockReference> Building = new List<BlockReference>();//建筑物block
+        public List<BlockReference> Buildings = new List<BlockReference>();//建筑物block
         public Polyline WallLine = new Polyline();//外框线
-        public List<List<Polyline>> buildingPlines = new List<List<Polyline>>();//建筑物hatch提取得到的多段线
+        public List<BlockReference> Ramps = new List<BlockReference>();//坡道块
+        public List<BlockReference> LonelyRamps = new List<BlockReference>();//未合并的坡道
+
+        public ThCADCoreNTSSpatialIndex BuildingSpatialIndex = null;//建筑物SpatialIndex
+        public ThCADCoreNTSSpatialIndex LonelyRampSpatialIndex = null;//孤立在地库中间的坡道
+        public ThCADCoreNTSSpatialIndex AttachedRampSpatialIndex = null;//依附在地库边界上的坡道
+        public List<Ramps> RampLists = new List<Ramps>();//孤立坡道块
         public bool Extract(BlockReference basement)
         {
-            var objs = new DBObjectCollection();
-
             Explode(basement);
-            foreach (var db in SegmentLines)
-            {
-                var spt = (db as Polyline).StartPoint;
-                var ept = (db as Polyline).EndPoint;
-                SegLines.Add(new Line(spt, ept));
-            }
-            
-            foreach(var obj in OuterLines)
+            BuildingSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingObjs);
+            foreach (var obj in OuterLineObjs)
             {
                 var pline = obj as Polyline;
                 if (pline.Length > 0.0)
@@ -43,52 +41,72 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 WallLine = pline;
                 break;
             }
-            if(WallLine.GetPoints().Count() == 0)//外框线不存在
+
+            if (WallLine.GetPoints().Count() == 0)//外框线不存在
             {
                 Active.Editor.WriteMessage("地库边界不存在！");
                 return false;
             }
-            if(Building.Count == 0)
+
+            if (Buildings.Count == 0)
             {
                 Active.Editor.WriteMessage("障碍物不存在！");
                 return false;
             }
-            var buildingPlines = new List<List<Polyline>>();
-            foreach(var block in Building)
+
+            if (Ramps.Count == 0)
             {
-                buildingPlines.Add(ExplodeBlock(block));
+                return true;
             }
-            
+
+            if (Ramps.Count > 0)//合并坡道至墙线
+            {
+                Ramps.ForEach(ramp => LonelyRamps.Add(ramp));
+                var rampSpatialIndex = new ThCADCoreNTSSpatialIndex(Ramps.ToCollection());
+                var rstRamps = rampSpatialIndex.SelectFence(WallLine);
+                AttachedRampSpatialIndex = new ThCADCoreNTSSpatialIndex(rstRamps);
+                foreach (var ramp in rstRamps)
+                {
+                    LonelyRamps.Remove(ramp as BlockReference);
+                }
+                LonelyRampSpatialIndex = new ThCADCoreNTSSpatialIndex(LonelyRamps.ToCollection());
+                var splitArea = WallLine.SplitByRamp(rstRamps);
+                splitArea = splitArea.DPSimplify(1.0);
+                splitArea = splitArea.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
+                WallLine = splitArea;
+            }
+
+            for (int i = SegLines.Count - 1; i >= 0; i--)
+            {
+                var segLine = SegLines[i];
+                var rst = LonelyRampSpatialIndex.SelectFence(segLine);
+                if (rst.Count > 0)
+                {
+                    var blk = rst[0] as BlockReference;
+                    var rect = blk.GetRect();
+                    RampLists.Add(new Ramps(segLine.Intersect(rect, 0).First(), blk));
+
+                    SegLines.RemoveAt(i);
+                }
+            }
             return true;
         }
 
-
-        private List<Polyline> ExplodeBlock(BlockReference block)
-        {
-            var plines = new List<Polyline>();
-            var dbObjs = new DBObjectCollection();
-            block.Explode(dbObjs);
-            foreach(var obj in dbObjs)
-            {
-                if (obj is Polyline pline)
-                {
-                    plines.Add(pline);
-                }
-            }
-            return plines;
-        }
         private bool IsOuterLayer(string layer)
         {
             return layer.ToUpper() == "地库边界";
         }
+
         private bool IsBuildingLayer(string layer)
         {
             return layer.ToUpper().Contains("障碍物");
         }
-        private bool IsEquipmentLayer(string layer)
+
+        private bool IsRampLayer(string layer)
         {
-            return layer.ToUpper() == "机房";
+            return layer.ToUpper() == "坡道";
         }
+
         private bool IsSegLayer(string layer)
         {
             return layer.ToUpper() == "分割线";
@@ -96,66 +114,49 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 
         private void Explode(Entity entity)
         {
-            if(entity is BlockReference)
+            var dbObjs = new DBObjectCollection();
+            entity.Explode(dbObjs);
+
+            foreach (var obj in dbObjs)
             {
-                var dbObjs = new DBObjectCollection();
-                entity.Explode(dbObjs);
-                foreach (var obj in dbObjs)
-                {
-                    var ent = obj as Entity;
-                    AddObjs(ent);
-                }
-            }
-            if(IsCurve(entity))
-            {
-                AddObjs(entity);
+                var ent = obj as Entity;
+                AddObjs(ent);
             }
         }
+
         private void AddObjs(Entity ent)
         {
             if (IsOuterLayer(ent.Layer))
             {
-                AddObjs(ent, OuterLines);
+                if (ent is Polyline pline)
+                {
+                    OuterLineObjs.Add(pline);
+                }
             }
             if (IsBuildingLayer(ent.Layer))
             {
-                AddObjs2(ent, BuildingLines);
+                if (ent is BlockReference br)
+                {
+                    Buildings.Add(br);
+                    BuildingObjs.Add(br);
+                }
             }
-            if (IsEquipmentLayer(ent.Layer))
+            if (IsRampLayer(ent.Layer))
             {
-                AddObjs(ent, EquipmentLines);
+                if (ent is BlockReference br)
+                {
+                    Ramps.Add(br);
+                    Buildings.Add(br);
+                    BuildingObjs.Add(br);
+                }
             }
             if (IsSegLayer(ent.Layer))
             {
-                AddObjs(ent, SegmentLines);
+                if (ent is Line line)
+                {
+                    SegLines.Add(line);
+                }
             }
-        }
-        private void AddObjs(Entity entity, DBObjectCollection dbObjs)
-        {
-            if(entity is Polyline)
-            {
-                dbObjs.Add(entity);
-            }
-            if(entity is Line line)
-            {
-                dbObjs.Add(line.ToPolyline());
-            }
-        }
-        private void AddObjs2(Entity entity, DBObjectCollection dbObjs)
-        {
-            if (entity is BlockReference br)
-            {
-                Building.Add(br);
-                dbObjs.Add(br);
-            }
-        }
-        private bool IsCurve(Entity ent)
-        {
-            return ent is Polyline ||
-                   ent is Line;
         }
     }
-
-    
-
 }

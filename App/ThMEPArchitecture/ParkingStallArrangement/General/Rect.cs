@@ -1,11 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.General
@@ -21,7 +16,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             pts.Add(new Point2d(pt2.X, pt2.Y));
             pts.Add(new Point2d(pt2.X, pt1.Y));
             pts.Add(new Point2d(pt1.X, pt1.Y));
-
             pline.CreatePolyline(pts);
 
             return pline;
@@ -36,7 +30,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             pts.Add(new Point2d(pt1.X + tolerance, pt1.Y + tolerance));
             pts.Add(new Point2d(pt1.X + tolerance, pt1.Y - tolerance));
             pts.Add(new Point2d(pt1.X - tolerance, pt1.Y - tolerance));
-
             pline.CreatePolyline(pts);
 
             return pline;
@@ -48,6 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             var maxPt = br.GeometricExtents.MaxPoint;
             return GetRect(minPt, maxPt);
         }
+
         public static Polyline GetRectExtend(this BlockReference br, double dist = 1.0)
         {
             var minPt = br.GeometricExtents.MinPoint;

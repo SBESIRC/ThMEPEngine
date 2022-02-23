@@ -45,11 +45,11 @@ namespace ThCADCore.NTS
             return OverlayNGRobust.Union(curves.ToNTSMultiPolygon().Geometries);
         }
 
-        public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
+        public static DBObjectCollection UnionPolygons(this DBObjectCollection curves, bool keepHole = false)
         {
             if (curves.Count > 0)
             {
-                return curves.UnionGeometries().ToDbCollection();
+                return curves.UnionGeometries().ToDbCollection(keepHole);
             }
             return new DBObjectCollection();
         }

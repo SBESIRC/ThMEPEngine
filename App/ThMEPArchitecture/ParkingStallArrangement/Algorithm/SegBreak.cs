@@ -14,12 +14,10 @@ using System.Diagnostics;
 using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
-using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
-using System.Text.RegularExpressions;
 using DotNetARX;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ViewModel;
-
+using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -40,13 +38,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         private List<Line> SegLines;// 初始的分割线，会被重新赋值
 
+        private List<int> VertLines_index ;// 垂直线索引
+
+        private List<int> HorzLines_index;// 横向线索引
+
         private GaParameter GaPara;
         
         private Polyline WallLine;
 
         private int ImpossibleIdx = int.MaxValue;
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
-        public SegBreak(OuterBrder outerbrder,GaParameter gaPara, bool verticaldirection, bool gopositive)
+        public SegBreak(OuterBrder outerbrder,GaParameter gaPara, bool verticaldirection, bool gopositive = true)
         {
             SegLines = new List<Line>();
             outerbrder.SegLines.ForEach(l => SegLines.Add(new Line(l.StartPoint, l.EndPoint)));
@@ -59,25 +61,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //GoPositive true则坐标增加顺序打断，false则坐标减少顺序打断
             // 获取分割线上下边界，目前不做判断
             GaPara = gaPara;
-            List<int> VertLines_index = new List<int>();// 垂直线索引
+            VertLines_index = new List<int>();
 
-            List<int> HorzLines_index = new List<int>();// 垂直线索引
-
+            HorzLines_index = new List<int>();
             for (int i = 0; i < SegLines.Count; ++i)
             {
                 var line = SegLines[i];
                 if (Math.Abs(line.StartPoint.X - line.EndPoint.X) < 1e-4)
                 {
                     //横坐标相等，垂直线
-                    //VertLines.Add(Genome[i].ToLine());
                     VertLines_index.Add(i);
                 }
                 else
                 {
-                    //HorzLines.Add(Genome[i].ToLine());
                     HorzLines_index.Add(i);
                 }
             }
+            premove();// 预平移，避免起于同一点
 
             BreakedLines = new List<Line>();
             BreakedLinesIdxs = new List<int>();
@@ -219,6 +219,58 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return res;
         }
 
+        private void premove(double dist = 1)
+        {
+            var dist1 = dist * 1.1;
+            // 先出头
+            foreach (var index in VertLines_index)
+            {
+                var line = SegLines[index];
+                var MaxY = Math.Max(line.StartPoint.Y, line.EndPoint.Y);
+                var MinY = Math.Min(line.StartPoint.Y, line.EndPoint.Y);
+                var spt = new Point3d(line.StartPoint.X, MinY - dist1, 0);
+                var ept = new Point3d(line.StartPoint.X, MaxY + dist1, 0);
+                SegLines[index] = new Line(spt, ept);
+            }
+            foreach (var index in HorzLines_index)
+            {
+                var line = SegLines[index];
+                var MaxX = Math.Max(line.StartPoint.X, line.EndPoint.X);
+                var MinX = Math.Min(line.StartPoint.X, line.EndPoint.X);
+                var spt = new Point3d(MinX - dist1, line.StartPoint.Y, 0);
+                var ept = new Point3d(MaxX + dist1, line.StartPoint.Y, 0);
+                SegLines[index] = new Line(spt, ept);
+            }
+
+            ////预位移，避免同向线相交
+            //double curdist;
+            //if (VerticalDirection)//垂直打断，平移横向线
+            //{
+            //    var stepsize = (2 * dist) / (HorzLines_index.Count - 1);//均匀步长
+            //    for (int i = 0;i< HorzLines_index.Count; i++)
+            //    {
+            //        var index = HorzLines_index[i];
+            //        var line = SegLines[index];
+            //        curdist = stepsize * i - dist;//当前位置
+            //        var spt = new Point3d(line.StartPoint.X, line.StartPoint.Y + curdist, 0);
+            //        var ept = new Point3d(line.EndPoint.X, line.EndPoint.Y + curdist, 0);
+            //        SegLines[index] = new Line(spt, ept);
+            //    }
+            //}
+            //else//横向打断，纵向平移
+            //{
+            //    var stepsize = (2 * dist) / (VertLines_index.Count - 1);
+            //    for (int i = 0; i < VertLines_index.Count; i++)
+            //    {
+            //        var index = VertLines_index[i];
+            //        var line = SegLines[index];
+            //        curdist = stepsize * i - dist;
+            //        var spt = new Point3d(line.StartPoint.X+ curdist, line.StartPoint.Y , 0);
+            //        var ept = new Point3d(line.EndPoint.X+ curdist, line.EndPoint.Y , 0);
+            //        SegLines[index] = new Line(spt, ept);
+            //    }
+            //}
+        }
         private void precut(double prop = 0.8)
         {
             ;// 留下的出头比例
@@ -543,4 +595,59 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
     }
 
 
+    static class Functions
+    {   // Note： 分割线打断排布会使用之前的参数（种群数和代数）,对种群数做调整
+
+        // solution: 当前发现的最优解
+        // verticaldirection: 是否纵向打断
+        // Orgsolutions: 之前发现的优解
+        // specialOnly:是否只使用特殊基因
+        // gopositive: 是否按坐标增加顺序打断
+        // layoutPara: 返回值，当前打断方案对应的LayoutParameter
+        public static LayoutParameter BreakAndOptimize(List<Line> sortedSegLines, OuterBrder outerBrder, ParkingStallArrangementViewModel ParameterViewModel, Serilog.Core.Logger Logger,
+            out Chromosome solution,bool verticaldirection = true, List<Chromosome> Orgsolutions = null,bool specialOnly = false, bool gopositive = true)// 打断，赋值，再迭代,默认正方向打断
+        {
+            outerBrder.SegLines = sortedSegLines;// 之前的分割线
+            var GaPara = new GaParameter(sortedSegLines);
+
+            var segbkparam = new SegBreak(outerBrder, GaPara, verticaldirection, gopositive);// 打断操作
+            outerBrder.SegLines = new List<Line>();
+            segbkparam.NewSegLines.ForEach(l => outerBrder.SegLines.Add(l.Clone() as Line));// 复制打断后的分割线
+            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+
+            ParkingStallGAGenerator geneAlgorithm;
+            if (Orgsolutions != null)
+            {
+                // gaparam 赋值
+                var initgenomes = segbkparam.TransPreSols(ref gaPara, Orgsolutions);// orgsolutions 之前迭代结果
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel, initgenomes);
+            }
+            else
+            {
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
+            geneAlgorithm.Logger = Logger;
+            var rst = new List<Chromosome>();
+            var histories = new List<Chromosome>();
+            bool recordprevious = false;
+            try
+            {
+                rst = geneAlgorithm.Run2(histories, recordprevious, specialOnly);
+            }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+            solution = rst.First();
+            return layoutPara;
+#if (DEBUG)
+            string layer;
+            if (verticaldirection) layer = "AI-垂直打断后初始分割线-Debug";
+            else layer = "AI-水平打断后初始分割线-Debug";
+            Draw.DrawSeg(segbkparam.NewSegLines, layer);
+            Draw.DrawSeg(sortedSegLines, "AI-打断前分割线-Debug");
+#endif
+        }
+    }
 }

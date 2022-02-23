@@ -82,5 +82,16 @@
         public static string Sprinkler_Connect_MainPipe = "W-喷淋-不接支管主管";
         public static string Sprinkler_Connect_SubMainPipe = "W-喷淋-连接支管主管";
         public static string Sprinkler_Connect_Pipe = "W-FRPT-SPRL-PIPE";
+
+        //一层给排水平面系统
+        //立管名称
+        public static string VerticalPipe_BlockName1 = "污废水管+通气管";
+        public static string VerticalPipe_BlockName2 = "带定位立管";
+        public static string VerticalPipe_BlockName3 = "带定位立管150";
+        //出乎框线图层
+        public static string OutFrameLayerName = "0";
+        //室外主管图层
+        public static string OutdoorSewagePipeLayerName = "AI-室外污水主管";
+        public static string OutdoorRainPipeLayerName = "AI-室外雨水主管";
     }
 }

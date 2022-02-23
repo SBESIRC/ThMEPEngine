@@ -130,6 +130,7 @@
         public const string BLOCK_VALVE_VISIBILITY_SILENCER_200 = "ZP200";
         public const string BLOCK_VALVE_VISIBILITY_ELECTRIC = "电动多叶调节风阀";
         public const string BLOCK_VALVE_VISIBILITY_FIRE_MEC = "电/手动排烟阀（电磁、手动、常闭）MEC";
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_BEC = "电/手动排烟阀（电磁、反馈，就地手动、常闭）BEC";
         public const string BLOCK_VALVE_VISIBILITY_FIRE_MECH_280 = "280度电/手动防火阀（电磁，反馈，常闭）MECH";
         public const string BLOCK_VALVE_VISIBILITY_FIRE_BECH_280 = "280度电/手动防火阀（电磁，反馈，就地手动，常闭）BECH";
 

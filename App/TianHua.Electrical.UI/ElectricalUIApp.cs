@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using System.Collections.Generic;
 using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical;
@@ -13,6 +14,7 @@ using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
 
 namespace TianHua.Electrical.UI
 {
@@ -158,24 +160,14 @@ namespace TianHua.Electrical.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJKXDB", CommandFlags.Modal)]
+        /// <summary>
+        /// 框线比较
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
         public void FrameComparerUI()
         {
-            var room = new ThFrameExactor(CompareFrameType.ROOM);
-            var frameComp = new ThMEPFrameComparer(room.curGraph, room.reference);
-            //var textComp = new ThMEFrameTextComparer(frameComp);// 对房间框线需要对文本再进行比对
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                // 此处单独使用using域是为了立即显示绘制效果
-                var painter = new ThFramePainter();
-                painter.Draw(frameComp, room.dicCode2Id, CompareFrameType.ROOM);
-            }
-            using (var dlg = new UIFrameComparer(frameComp, room.dicCode2Id))
-            {
-                if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
-                    return;
-            }
-
+            var dlg = new UIFrameComparer();
+            AcadApp.ShowModelessDialog(dlg);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -29,9 +30,51 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
     {
         [ThreadStatic] private static Random Local;
 
+        [ThreadStatic] private static int _Seed;
+
+        public static int Seed
+        {
+            get 
+            {
+                var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
+#if (DEBUG)
+                if (File.Exists(path))// 读取
+                {
+                    _Seed = int.Parse(File.ReadLines(path).First());
+                }
+                else//写入
+                {
+                    _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+
+                    using (var tw = new StreamWriter(path, false))
+                    {
+                        tw.WriteLine(_Seed.ToString());
+                    }
+                }
+#else
+                //Release 只执行写入
+                _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+                using (var tw = new StreamWriter(path, false))
+                {
+                    tw.WriteLine(_Seed.ToString());
+                }
+#endif
+                return _Seed;
+            }
+        }
+
+        public static int ReadSeed()
+        {
+            return _Seed;
+        }
         public static Random ThisThreadsRandom
         {
-            get { return Local ?? (Local = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
+            get { return Local ?? (Local = new Random(Seed)); }
+        }
+
+        public static void Set()// 设置Seed
+        {
+            Local = new Random(Seed);
         }
     }
     internal class Utils
@@ -53,20 +96,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
             if (rstDirection.StringResult.Equals("纵向"))
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.VERTICAL);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.VERTICAL);
             }
             else if (rstDirection.StringResult.Equals("横向"))
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.HORIZONTAL);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.HORIZONTAL);
             }
             else
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.LENGTH);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.LENGTH);
             }
 
             return true;
         }
 
+        public static void SetSeed()
+        {
+            ThreadSafeRandom.Set();
+        }
+        public static int GetSeed()
+        {
+            return ThreadSafeRandom.ReadSeed();
+        }
         public static List<int> RandChoice(int UpperBound, int n=-1,int LowerBound = 0)
         {
             // random choose n integers from n to UpperBound without replacement
@@ -174,12 +225,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
         public static int RandInt(int range)
         {
-            //return General.Utils.RandInt(range);
             return ThreadSafeRandom.ThisThreadsRandom.Next(0, range);
         }
         public static double RandDouble()
         {
-            //return General.Utils.RandDouble();
             return ThreadSafeRandom.ThisThreadsRandom.NextDouble();
         }
         public static double RandNormal(double loc, double scale)

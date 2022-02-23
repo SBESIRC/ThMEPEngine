@@ -11,7 +11,7 @@ namespace ThMEPArchitecture.ViewModel
     public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically}//directly, with splitters, without splitters
     public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
-
+    public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
         private bool _usePolylineAsObstacle = true;
@@ -49,6 +49,19 @@ namespace ThMEPArchitecture.ViewModel
             { 
                 _JustCreateSplittersChecked = value; 
                 RaisePropertyChanged("JustCreateSplittersChecked"); 
+            }
+        }
+
+        //分割线打断调整
+        private bool _OptmizeThenBreakSeg = false;
+
+        public bool OptmizeThenBreakSeg
+        {
+            get { return _OptmizeThenBreakSeg; }
+            set
+            {
+                _OptmizeThenBreakSeg = value;
+                RaisePropertyChanged("OptmizeThenBreakSeg");
             }
         }
 
@@ -152,22 +165,6 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
-
-        //最大柱间距
-        private int _MaxColumnWidth = 7800; //mm
-
-        public int MaxColumnWidth
-        {
-            get
-            {
-                return _MaxColumnWidth;
-            }
-            set
-            {
-                _MaxColumnWidth = value;
-                RaisePropertyChanged("MaxColumnWidth");
-            }
-        }
         //平行于车道方向柱子尺寸
         private int _ColumnSizeOfParalleToRoad = 500; //mm
 
@@ -211,6 +208,119 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _ColumnAdditionalSize = value;
                 RaisePropertyChanged("ColumnAdditionalSize");
+            }
+        }
+
+        //柱子完成面是否影响车道净宽
+        private bool _ColumnAdditionalInfluenceLaneWidth = true;
+
+        public bool ColumnAdditionalInfluenceLaneWidth
+        {
+            get { return _ColumnAdditionalInfluenceLaneWidth; }
+            set
+            {
+                _ColumnAdditionalInfluenceLaneWidth = value;
+                RaisePropertyChanged("ColumnAdditionalInfluenceLaneWidth");
+            }
+        }
+
+        private CommandColumnSizeEnum _CommandColumnSize = CommandColumnSizeEnum.LargeAndSmall;
+        public CommandColumnSizeEnum CommandColumnSize
+        {
+            get
+            { return _CommandColumnSize; }
+            set
+            {
+                _CommandColumnSize = value;
+                if (value == CommandColumnSizeEnum.Large)
+                {
+                    ColumnWidth = 7800;
+                    ColumnShiftDistanceOfDoubleRowModular = 1050;
+                    MidColumnInDoubleRowModular = false;
+                    ColumnShiftDistanceOfSingleRowModular = 550;
+                }
+                else if (value == CommandColumnSizeEnum.LargeAndSmall)
+                {
+                    ColumnWidth = 7800;
+                    ColumnShiftDistanceOfDoubleRowModular = 550;
+                    MidColumnInDoubleRowModular = true;
+                    ColumnShiftDistanceOfSingleRowModular = 550;
+                }
+                else if (value == CommandColumnSizeEnum.Small)
+                {
+                    ColumnWidth = 5400;
+                    ColumnShiftDistanceOfDoubleRowModular = 550;
+                    MidColumnInDoubleRowModular = true;
+                    ColumnShiftDistanceOfSingleRowModular = 550;
+                }
+                else
+                {
+                    ColumnWidth = 7800;
+                    ColumnShiftDistanceOfDoubleRowModular = 550;
+                    MidColumnInDoubleRowModular = true;
+                    ColumnShiftDistanceOfSingleRowModular = 550;
+                }
+                RaisePropertyChanged("CommandColumnSize");
+            }
+        }
+        //最大柱间距,需要改成柱间距
+        private int _ColumnWidth = 7800; //mm
+
+        public int ColumnWidth
+        {
+            get
+            {
+                return _ColumnWidth;
+            }
+            set
+            {
+                _ColumnWidth = value;
+                RaisePropertyChanged("ColumnWidth");
+            }
+        }
+
+        //背靠背模块：柱子沿车道法向偏移距离
+        private int _ColumnShiftDistanceOfDoubleRowModular = 550; //mm
+
+        public int ColumnShiftDistanceOfDoubleRowModular
+        {
+            get
+            {
+                return _ColumnShiftDistanceOfDoubleRowModular;
+            }
+            set
+            {
+                _ColumnShiftDistanceOfDoubleRowModular = value;
+                RaisePropertyChanged("ColumnShiftDistanceOfDoubleRowModular");
+            }
+        }
+
+        //背靠背模块是否使用中柱
+        private bool _MidColumnInDoubleRowModular = true;
+
+        public bool MidColumnInDoubleRowModular
+        {
+            get { return _MidColumnInDoubleRowModular; }
+            set
+            {
+                _MidColumnInDoubleRowModular = value;
+                RaisePropertyChanged("MidColumnInDoubleRowModular");
+            }
+        }
+
+        //单排模块：柱子沿车道法向偏移距离
+        private int _ColumnShiftDistanceOfSingleRowModular = 550; //mm
+
+        public int ColumnShiftDistanceOfSingleRowModular
+        {
+            get
+            {
+                return _ColumnShiftDistanceOfSingleRowModular;
+            }
+            set
+            {
+                _ColumnShiftDistanceOfSingleRowModular = value;
+                RaisePropertyChanged("ColumnShiftDistanceOfSingleRowModular");
             }
         }
 

@@ -16,6 +16,7 @@ using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -24,6 +25,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class UiWaterWellPump : ThCustomWindow
     {
+        private static uiWaterWellPumpInfo WellInfoWidget = null;
         private static WaterwellPumpParamsViewModel ViewModel = null;
         public UiWaterWellPump()
         {
@@ -32,27 +34,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                ViewModel = new WaterwellPumpParamsViewModel();
             }
-
-            DataContext = ViewModel;
-        }
-
-        private void btnWaterwellRecog_Click(object sender, RoutedEventArgs e)
-        {
-            uiWaterWellPumpFilter uiFilter = new uiWaterWellPumpFilter();
-            uiFilter.SetWaterWellIdentifyConfigInfo(ViewModel.GetConfigInfo().WaterWellInfo.identifyInfo);
-            if (uiFilter.ShowDialog() == true)
+            if(WellInfoWidget == null)
             {
-                ViewModel.SetIdentfyConfigInfo(uiFilter.GetIdentfyConfigInfo());
+                WellInfoWidget = new uiWaterWellPumpInfo();
             }
+            DataContext = ViewModel;
+            MutexName = "Mutext_uiWaterWellPump";
         }
 
         private void btnFixDeepWaterPump_Click(object sender, RoutedEventArgs e)
         {
-            WaterWellIdentifyConfigInfo identifyConfigInfo = new WaterWellIdentifyConfigInfo();
-            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            identifyConfigInfo.WhiteList = config["集水井"];
-            ViewModel.SetIdentfyConfigInfo(identifyConfigInfo);
             ThCreateWaterWellPumpCmd cmd = new ThCreateWaterWellPumpCmd(ViewModel);
+            cmd.WellConfigInfo = WellInfoWidget.GetViewModel().WellConfigInfo;
             cmd.Execute();
         }
 
@@ -112,6 +105,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 }
             }
             ((TextBox)e.Source).Text = newStr;
+        }
+
+        private void btnCheckPump_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void btnSelectWell_Click(object sender, RoutedEventArgs e)
+        {
+            WaterWellIdentifyConfigInfo identifyInfo = new WaterWellIdentifyConfigInfo();
+            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            identifyInfo.WhiteList = config["集水井"];
+            WellInfoWidget.IdentifyInfo = identifyInfo;
+            WellInfoWidget.HighlightWell();
+            AcadApp.ShowModelessWindow(WellInfoWidget);
         }
     }
 }

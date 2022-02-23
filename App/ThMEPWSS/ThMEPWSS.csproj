@@ -37,7 +37,19 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Data\CalStructrueService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Engine\DrainingPointRecognizeEngine.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Engine\VerticalPipeRecognizeEngine.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\DrainingEquipmentModel.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\VerticalPipeModel.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateConnectPipesService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateDrainagePipeRoute.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Service\CheckService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Service\StructGeoService.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -219,8 +231,8 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
-    <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
-    <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
+    <Compile Include="WaterWellPumpLayout\Command\ThCreateWaterWellPumpCmd.cs" />
+    <Compile Include="WaterWellPumpLayout\Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
     <Compile Include="Command\ThHydrantProtectionRadiusCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
@@ -381,8 +393,12 @@
     <Compile Include="Pipe\Engine\ThWWaterWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
-    <Compile Include="Pipe\Model\ThWaterWellPumpArrangement.cs" />
-    <Compile Include="Pipe\Model\ThWDeepWellPump.cs" />
+    <Compile Include="WaterWellPumpLayout\Command\ThSelectWaterWellCmd.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWaterPumpModel.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWaterWellConfigInfo.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWaterWellModel.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWaterWellPumpArrangement.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWDeepWellPump.cs" />
     <Compile Include="Pipe\Model\ThWPipeInterfaces.cs" />
     <Compile Include="Pipe\Model\ThWPipeRun.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
@@ -400,7 +416,7 @@
     <Compile Include="Pipe\Model\ThWRoofRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWCondensePipe.cs" />
-    <Compile Include="Pipe\Model\ThWWaterWell.cs" />
+    <Compile Include="WaterWellPumpLayout\Model\ThWWaterWell.cs" />
     <Compile Include="Pipe\Model\ThWWell.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
@@ -599,7 +615,6 @@
     <Compile Include="UndergroundSpraySystem\Model\SprayPipe.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem2.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\Verticalpipe2.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Valve.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Verticalpipe.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BFS.cs" />
@@ -635,7 +650,9 @@
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\ThSprinklerConnectVM.cs" />
     <Compile Include="ViewModel\ThTianHuaUserConfigVM.cs" />
-    <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
+    <Compile Include="WaterWellPumpLayout\Service\ThWaterWellToDBService.cs" />
+    <Compile Include="WaterWellPumpLayout\ViewModel\ThWaterWellConfigViewModel.cs" />
+    <Compile Include="WaterWellPumpLayout\ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\CleaningToolsSystem.cs" />
@@ -676,7 +693,7 @@
       <Name>CADExtension</Name>
     </ProjectReference>
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
-      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Project>{5DDFCADA-BEA4-402C-B3E4-5C7F83C2F09E}</Project>
       <Name>DotNetARX</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
@@ -700,9 +717,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="WaterWellPumpLayout\Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>

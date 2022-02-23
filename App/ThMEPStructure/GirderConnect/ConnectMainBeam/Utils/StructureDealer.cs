@@ -397,6 +397,93 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
+        public static void RemoveLinesInterSectWithImportantLines(Dictionary<Point3d, HashSet<Point3d>> importantLines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            var tmpTuples = LineDealer.UnifyTuples(dicTuples);
+            var tuple2deduce = new Dictionary<Tuple<Point3d, Point3d>, Tuple<Point3d, Point3d>>();
+            tmpTuples.ForEach(t => tuple2deduce.Add(t, LineDealer.ReduceTuple(t, 200)));
+            foreach (var dicLines in importantLines)
+            {
+                foreach(var pt in dicLines.Value)
+                {
+                    var tup = new Tuple<Point3d, Point3d>(dicLines.Key, pt);
+                    if (tup.Item1.DistanceTo(tup.Item2) > 20000)
+                    {
+                        continue;
+                    }
+                    var tupA = LineDealer.ReduceTuple(tup, 200);
+                    foreach (var tmpTuple in tmpTuples)
+                    {
+                        if (LineDealer.IsIntersect(tupA.Item1, tupA.Item2, tuple2deduce[tmpTuple].Item1, tuple2deduce[tmpTuple].Item2))
+                        {
+                            DicTuplesDealer.DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 在线集中删除和多边形相交的线
+        /// </summary>
+        public static void RemoveLinesInterSectWithOutlines(List<Polyline> outlines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            var tmpTuples = LineDealer.UnifyTuples(dicTuples);
+            var tuple2reduce = new Dictionary<Tuple<Point3d, Point3d>, Tuple<Point3d, Point3d>>();
+            tmpTuples.ForEach(t => { if(t.Item1.DistanceTo(t.Item2) > 2300) tuple2reduce.Add(t, LineDealer.ReduceTuple(t, 800)); });
+            foreach (var tmpTuple in tmpTuples)
+            {
+                if (tuple2reduce.ContainsKey(tmpTuple))
+                {
+                    Line reducedLine = new Line(tuple2reduce[tmpTuple].Item1, tuple2reduce[tmpTuple].Item2);
+                    Point3d middlePt = new Point3d((tuple2reduce[tmpTuple].Item1.X + tuple2reduce[tmpTuple].Item2.X) / 2, (tuple2reduce[tmpTuple].Item1.Y + tuple2reduce[tmpTuple].Item2.Y) / 2, 0);
+                    Circle circle = new Circle(middlePt, Vector3d.ZAxis, 1000);
+                    foreach (var outline in outlines)
+                    {
+                        if (outline.Intersects(reducedLine) || outline.Intersects(circle))
+                        {
+                            DicTuplesDealer.DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除掉和外边框偏转角度30度内的多边形
+        /// </summary>
+        public static void RemoveLinesNearOutlines(List<Polyline> outlines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double redius = 1000)
+        {
+            var pt1s = dicTuples.Keys.ToList();
+            var redius2 = redius * 1.6;
+            var redius4 = redius * 4;
+
+            foreach (var pt1 in pt1s)
+            {
+                if (dicTuples.ContainsKey(pt1))
+                {
+                    var pt2s = dicTuples[pt1].ToList();
+                    foreach(var pt2 in pt2s)
+                    {
+                        if (dicTuples[pt1].Contains(pt2) && pt1.DistanceTo(pt2) > redius4)
+                        {
+                            var dir = (pt2 - pt1).GetNormal();
+                            Circle circle1 = new Circle(pt1 + dir * redius2, Vector3d.ZAxis, redius);
+                            Circle circle2 = new Circle(pt2 - dir * redius2, Vector3d.ZAxis, redius);
+                            foreach(var pl in outlines)
+                            {
+                                if (pl.Intersects(circle1) || pl.Intersects(circle2))
+                                {
+                                    DicTuplesDealer.DeleteFromDicTuples(pt1, pt2, ref dicTuples);
+                                    //ShowInfo.DrawLine(pt1, pt2, 6);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public static int ContainLines(List<Tuple<Point3d, Point3d>> oriTuples, Dictionary<Point3d, Point3d> closeBorderLines)
         {
             int cnt = 0;

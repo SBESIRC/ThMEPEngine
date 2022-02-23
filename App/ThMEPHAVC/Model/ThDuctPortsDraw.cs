@@ -38,7 +38,7 @@ namespace ThMEPHVAC.Model
             service.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat);
             
             if (portParam.param.scenario == "消防排烟" || portParam.param.scenario == "消防补风" || portParam.param.scenario == "消防加压送风")
-                service.fireValveService.InsertValve(portParam.srtPoint, anayRes.endLinesInfos);
+                service.fireValveService.InsertValves(portParam.srtPoint, anayRes.endLinesInfos, ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_BEC);
             else
                 service.airValveService.InsertValve(portParam.srtPoint, anayRes.endLinesInfos);
             if (portParam.param.portNum == 0)

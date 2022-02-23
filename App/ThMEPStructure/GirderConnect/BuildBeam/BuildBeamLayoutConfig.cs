@@ -11,6 +11,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
         public static int EstimateSelection = 1;
         public static int FormulaEstimateSelection = 1;
         public static int TableEstimateSelection = 1;
+        public static int BeamCheckSelection = 1;
         public static FormulaFule FormulaTop = new FormulaFule() { LDividesH = 10, HDividesB = 2, Hmin = 500, Bmin = 300 };
         public static FormulaFule FormulaMiddleA = new FormulaFule() { LDividesH = 10, HDividesB = 2, Hmin = 500, Bmin = 250 };
         public static FormulaFule FormulaMiddleB = new FormulaFule() { LDividesH = 15, HDividesB = 3, Hmin = 500, Bmin = 200 };
@@ -46,6 +47,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
         public static int EstimateSelection = 1;
         public static int FormulaEstimateSelection = 1;
         public static int TableEstimateSelection = 1;
+        public static int BeamCheckSelection = 1;
         public static FormulaFule FormulaTop = new FormulaFule() { LDividesH = 10, HDividesB = 2, Hmin = 500, Bmin = 300 };
         public static FormulaFule FormulaMiddleA = new FormulaFule() { LDividesH = 10, HDividesB = 2, Hmin = 500, Bmin = 250 };
         public static FormulaFule FormulaMiddleB = new FormulaFule() { LDividesH = 15, HDividesB = 3, Hmin = 500, Bmin = 200 };

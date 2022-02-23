@@ -8,7 +8,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class ParkingStallDirectGenerator : IDisposable
     {
-        GaParameter GaPara;
+        readonly GaParameter GaPara;
         public ParkingStallDirectGenerator(GaParameter gaPara)
         {
             GaPara = gaPara;

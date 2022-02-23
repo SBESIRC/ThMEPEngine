@@ -263,13 +263,13 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                         <GroupBox>
                             <GroupBox.Header>
                                 <Label>梁高检查</Label>
                             </GroupBox.Header>
                             <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
-                                <CheckBox Margin="0,0,15,0" IsEnabled="False" IsChecked="True">梁高A的H ≥ 搁置次梁H + 高差限值</CheckBox>
+                                <CheckBox x:Name="BeamCheck" Margin="0,0,15,0" IsChecked="True">主梁A高H ≥ 搁置次梁高H + 高差限值</CheckBox>
                                 <StackPanel Orientation="Horizontal" Margin="10,5,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
                                     <Label FontFamily="Arial" Content="高差限值(mm)"></Label>
                                     <cus:InputTextBox Name="BeamCheckTxt" TextBoxInputType="InputInteger" Width="30" HorizontalContentAlignment="Center" Text=""/>
@@ -292,7 +292,9 @@
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,20,0">
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,10,20,0">
+                        <cus:ImageButton Margin="0,0,20,0" Content="导入配置" Width="60" Height="24" Click="ImportButton_Click"></cus:ImageButton>
+                        <cus:ImageButton Margin="0,0,20,0" Content="导出配置" Width="60" Height="24" Click="ExportButton_Click"></cus:ImageButton>
                         <cus:ImageButton Margin="0,0,20,0" Content="恢复默认" Width="75" Height="24" Click="ResetButton_Click"></cus:ImageButton>
                         <cus:ImageButton Content="确定" Width="60" Height="24" Click="ConfirmButton_Click"></cus:ImageButton>
                     </StackPanel>

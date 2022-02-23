@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DotNetARX;
+using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +14,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ThCADExtension;
+using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPWSS;
+using ThMEPWSS.Command;
+using TianHua.Plumbing.WPF.UI.UI;
 
 namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 {
@@ -26,14 +33,46 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
             InitializeComponent();
         }
 
+        private void btnPipeLine_Click(object sender, RoutedEventArgs e)
+        {
+            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config);
+            drainageCmd.Execute();
+        }
+
         private void btnSltFloor_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void btnGenerate_Click(object sender, RoutedEventArgs e)
+        private void btnDrawWall_Click(object sender, RoutedEventArgs e)
         {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutFrameLayerName), false);
+                currentDb.Database.SetCurrentLayer(ThWSSCommon.OutFrameLayerName);
+            }
+        }
 
+        private void btnRainPipe_Click(object sender, RoutedEventArgs e)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutdoorRainPipeLayerName), false);
+                currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorRainPipeLayerName);
+            }
+        }
+
+        private void btnDrainagePipe_Click(object sender, RoutedEventArgs e)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutdoorSewagePipeLayerName), false);
+                currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorSewagePipeLayerName);
+            }
         }
     }
 }

@@ -66,7 +66,7 @@ namespace ThMEPHVAC.Model
             airValveService = new ThDuctPortsDrawValve(airValveVisibility, airValveName, airValveLayer);
             if (scenario == "消防排烟")
             {
-                fireValveVisibility = ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_BECH_280;
+                fireValveVisibility = ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_280;
             }
             else if (scenario == "消防补风" || scenario == "消防加压送风")
             {

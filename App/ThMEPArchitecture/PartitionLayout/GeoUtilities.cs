@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static Point3d AveragePoint(Point3d a, Point3d b)
         {
-            return new Point3d((a.X + b.X) / 2, (a.Y + b.Y / 2), (a.Z + b.Z) / 2);
+            return new Point3d((a.X + b.X) / 2, ((a.Y + b.Y) / 2), (a.Z + b.Z) / 2);
         }
 
         public static Point3d GetRecCentroid(this Polyline rec)
@@ -629,6 +629,37 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             Point3dCollection pts = new Point3dCollection();
             pts = new Point3dCollection(crv.GetPointsByDist(length).ToArray());
+            segs = crv.GetSplitCurves(pts);
+            if (segs.Count == 0) segs.Add(crv);
+            return pts;
+        }
+
+        public static Point3dCollection DivideCurveByKindsOfLength(Curve crv, ref DBObjectCollection segs,
+            double length_a, int count_a, double length_b, int count_b,
+            double length_c, int count_c, double length_d, int count_d)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            pts.Add(crv.StartPoint);
+            double t = 0;
+            bool quit = false;
+            while (true)
+            {
+                for (int i = 0; i < count_a + count_b + count_c + count_d; i++)
+                {
+                    if (i < count_a) t += length_a;
+                    else if (i < count_a + count_b) t += length_b;
+                    else if (i < count_a + count_b + count_c) t += length_c;
+                    else t += length_d;
+                    if (t < crv.GetLength()) pts.Add(crv.GetPointAtDist(t));
+                    else
+                    {
+                        quit = true;
+                        break;
+                    }
+                }
+                if (quit) break;
+            }
+            pts.Add(crv.EndPoint);
             segs = crv.GetSplitCurves(pts);
             if (segs.Count == 0) segs.Add(crv);
             return pts;

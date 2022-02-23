@@ -74,18 +74,18 @@ namespace ThMEPElectrical.StructureHandleService
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomEngine = new ThRoomOutlineExtractionEngine();
+                var roomEngine = new ThAIRoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
                 roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var markEngine = new ThRoomMarkExtractionEngine();
+                var markEngine = new ThAIRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
                 markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                var boundaryEngine = new ThRoomOutlineRecognitionEngine();
+                var boundaryEngine = new ThAIRoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
-                var markRecEngine = new ThRoomMarkRecognitionEngine();
+                var markRecEngine = new ThAIRoomMarkRecognitionEngine();
                 markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
                 var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();

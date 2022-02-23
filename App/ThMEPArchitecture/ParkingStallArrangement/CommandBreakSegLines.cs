@@ -4,16 +4,13 @@ using Linq2Acad;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using ThCADCore.NTS;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
-using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
@@ -25,7 +22,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThBreakSegLinesCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SegBreakLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
@@ -46,6 +43,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            Utils.SetSeed();
+            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
             try
             {
                 using (var docLock = Active.Document.LockDocument())
@@ -68,7 +67,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
-
         public void DrawBreakedSeg(AcadDatabase acadDatabase)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
@@ -95,7 +93,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch(Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
 
             //foreach(Polyline pline in segbkparam.BufferTanks)
@@ -115,7 +113,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 return;
             }
 
-            var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
+            var segLinesEx = Dfs.GetRandomSeglines(outerBrder,1);
             var GenSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
             outerBrder.SegLines = GenSegLines;
             var gaPara = new GaParameter(GenSegLines);
@@ -125,17 +123,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var rst = geneAlgorithm.Run();
             try
             {
-                var segbkparam = new SegBreak(outerBrder, gaPara, false, false);
+                var segbkparam = new SegBreak(outerBrder, gaPara, true);
                 Draw.DrawSeg(segbkparam.NewSegLines, 0);
                 outerBrder.SegLines = segbkparam.NewSegLines;
 
             }
             catch (Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
         }
-
         public void RunBrSeg(AcadDatabase acadDatabase)// 生成二分生成分割线，然后打断，然后迭代
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
@@ -143,28 +140,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 return;
             }
-
-            var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
-            var GenSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
-            outerBrder.SegLines = GenSegLines;
-            var GaPara = new GaParameter(GenSegLines);
-
-            //var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
-
-            var segbkparam = new SegBreak(outerBrder, GaPara, true, true);// 纵向且正方向
-            outerBrder.SegLines = segbkparam.NewSegLines;
-
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
-
-            ParkingStallGAGenerator geneAlgorithm = null;
-
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();
                 if (!dirSetted)
                     return;
-
                 var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
                 if (iterationCnt.Status != PromptStatus.OK) return;
 
@@ -173,28 +153,48 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 ParameterViewModel.IterationCount = iterationCnt.Value;
                 ParameterViewModel.PopulationCount = popSize.Value;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else
             {
-                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+                ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
             }
-            geneAlgorithm.Logger = Logger;
 
-            var rst = new List<Chromosome>();
+            LayoutParameter layoutPara;// 最优的分割方案（横向或者纵向优先
+            Chromosome solution;// 最优解
+            List<Line> GenSegLines;
+            Logger?.Information($"############################################");
+            Logger?.Information($"垂直打断迭代");
+            var segLinesEx = Dfs.GetRandomSeglines(outerBrder,1);
+            var GenSegLinesV = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var layoutParaVB = Functions.BreakAndOptimize(GenSegLinesV, outerBrder, ParameterViewModel, Logger, out Chromosome solutionVB, true, null,true);// 垂直打断,只用特殊解
+            Logger?.Information($"############################################");
+            Logger?.Information($"水平打断迭代");
+            segLinesEx = Dfs.GetRandomSeglines(outerBrder, -1);
+            var GenSegLinesH = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var layoutParaHB = Functions.BreakAndOptimize(GenSegLinesH, outerBrder, ParameterViewModel, Logger, out Chromosome solutionHB, false, null, true);// 横向打断,只用特殊解
+            
+            if (solutionVB.ParkingStallCount > solutionHB.ParkingStallCount)// 垂直打断比横向优
+            {
+                solution = solutionVB;
+                layoutPara = layoutParaVB;
+                GenSegLines = GenSegLinesV;
+            }
+            else//横向打断最优
+            {
+                solution = solutionHB;
+                layoutPara = layoutParaHB;
+                GenSegLines = GenSegLinesH;
+            }
+            
+            var strBest = $"最大车位数{solution.ParkingStallCount}";
+            Logger?.Information(strBest);
+            Active.Editor.WriteMessage(strBest);
+
             var histories = new List<Chromosome>();
-            bool recordprevious = false;
-            try
-            {
-                rst = geneAlgorithm.Run2(histories, recordprevious);
-            }
-            catch (Exception ex)
-            {
-                ;
-            }
-            var solution = rst.First();
-            histories.Add(rst.First());
+            histories.Add(solution);
+
             var parkingStallCount = solution.ParkingStallCount;
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, parkingStallCount);
 
@@ -202,47 +202,35 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 layoutPara.Set(histories[k].Genome);
                 if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
+                var Cars = new List<Polyline>();
+                var Pillars = new List<Polyline>();
+                var Lanes = new List<Line>();
+                var Boundary = layoutPara.OuterBoundary;
+                var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    var use_partition_pro = true;
-                    if (use_partition_pro)
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
+                    try
                     {
-                        var partitionpro = new ParkingPartitionPro();
-                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                        if (!partitionpro.Validate()) continue;
-                        try
-                        {
-                            partitionpro.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
-                        continue;
+                        partitionpro.Process(Cars, Pillars, Lanes);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ParkingPartition partition = new ParkingPartition();
-                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
-                        {
-                            try
-                            {
-                                partition.ProcessAndDisplay();
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(ex.Message);
-                                partition.Dispose();
-                            }
-                        }
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                var partitionpro_final = new ParkingPartitionPro();
+                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Pillars = Pillars;
+                partitionpro_final.Display();
             }
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            Draw.DrawSeg(GenSegLines,"自动分割线");
+            Draw.DrawSeg(GenSegLines, "自动分割线");
         }
-
 
     }
 }

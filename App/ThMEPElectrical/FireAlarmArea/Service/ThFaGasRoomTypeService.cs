@@ -31,10 +31,9 @@ namespace ThMEPElectrical.FireAlarmArea.Service
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.RoomConfigPath();
-            var roomTableTree = ThAFASRoomUtils .ReadRoomConfigTable(roomConfigUrl);
+            var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
             var gasTag = ThFaSmokeCommon.gasTag;
             var expPrfTag = ThFaSmokeCommon.expPrfTag;
-            var nonLayoutTag = ThFaSmokeCommon.nonLayoutTag;
 
             foreach (var room in Room)
             {
@@ -44,15 +43,13 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                 if (typeInt != 0 && roomName != "")
                 {
                     var tagList = RoomConfigTreeService.GetRoomTag(roomTableTree, roomName);
-                    if(tagList.Contains(expPrfTag) && tagList.Contains(gasTag))
+                    if (tagList.Contains(expPrfTag) && tagList.Contains(gasTag))
                     {
                         typeInt = ThFaSmokeCommon.layoutType.gasPrf;
-                    } else if (tagList.Contains(gasTag))
+                    }
+                    else if (tagList.Contains(gasTag))
                     {
                         typeInt = ThFaSmokeCommon.layoutType.gas;
-                    } else if (tagList.Contains(nonLayoutTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.nonLayout;
                     }
                 }
 
@@ -64,6 +61,10 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                 {
                     frameSensorType.Add(frame, typeInt);
                 }
+
+                var printPt = roomFrameDict[room].GetPoint3dAt(0);
+                ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(printPt.X, printPt.Y - 300, 0), string.Format("roomTypeGas:{0}", typeInt.ToString()), "l0roomTypeGas", 121, 25, 200);
+
             }
 
             return frameSensorType;

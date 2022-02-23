@@ -37,5 +37,9 @@ namespace ThMEPElectrical.FireAlarmArea
             smokePrf=9,
             smokeHeatPrf = 10,
         }
+
+        public static string Layer_Blind = "AI-烟温感盲区";
+        public static string Layer_Gas_Blind = "AI-可燃气盲区";
+        public static int Color_Blind = 1;
     }
 }

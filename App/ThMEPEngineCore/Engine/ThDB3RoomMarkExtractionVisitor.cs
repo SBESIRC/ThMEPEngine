@@ -6,11 +6,11 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThDB3RoomMarkExtractionVisitor : ThAnnotationElementExtractionVisitor
     {
-        private ThRoomMarkExtractionVisitor Impl { get; set; }
+        private ThAIRoomMarkExtractionVisitor Impl { get; set; }
 
         public ThDB3RoomMarkExtractionVisitor()
         {
-            Impl = new ThRoomMarkExtractionVisitor();
+            Impl = new ThAIRoomMarkExtractionVisitor();
         }
 
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj, Matrix3d matrix)

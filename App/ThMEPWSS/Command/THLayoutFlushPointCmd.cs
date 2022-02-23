@@ -125,8 +125,9 @@ namespace ThMEPWSS.Command
                 Rooms = rooms.Select(o => o.Boundary).ToList(),
                 Db = db,
                 WashPoints = layOutPts,
-                PtRange = 10.0,
+                PtRange = 10.0,               
             };
+
             var layoutService = new ThLayoutWashPointBlockService(layoutData);
             layoutInfo.LayoutBlock = layoutService.Layout();
             layoutData.WashPoints = layoutInfo.LayoutBlock.Keys.ToList(); //直接用layOutPts可能存在重复点
@@ -170,7 +171,6 @@ namespace ThMEPWSS.Command
             //点位标识的操作通过以下保存的结果与UI交互操作
             ThPointIdentificationService.LayoutInfo = layoutInfo;
         }
-
         private Point3dCollection GetRange()
         {
             var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(

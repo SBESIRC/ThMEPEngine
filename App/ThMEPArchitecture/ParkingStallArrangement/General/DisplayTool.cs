@@ -2,9 +2,6 @@
 using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
@@ -20,10 +17,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 values.Add(pt.Y);
             }
             string rst = "";
-            foreach (var val in values)
+            for (int i = 0; i < values.Count; i++)
             {
-                rst += Convert.ToString(val);
-                rst += ',';
+                rst += Convert.ToString(values[i]);
+                if (i < values.Count - 1)
+                {
+                    rst += ',';
+                }
             }
             return rst;
         }

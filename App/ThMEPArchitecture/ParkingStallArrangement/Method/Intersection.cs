@@ -1,11 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
@@ -30,6 +26,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return intersectDic;
         }
+
         public static Dictionary<LinePairs, int> GetLinePtDic(Dictionary<int, List<int>> ptDic)
         {
             var linePtDic = new Dictionary<LinePairs, int>();
@@ -45,8 +42,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return linePtDic;
         }
+
         public static bool HasIntersection(this Line line1, Line line2)
         {
+            if(line1.GetDirection() == line2.GetDirection())
+            {
+                //同方向的线不考虑交点
+                return false;
+            }
             var pts = line1.Intersect(line2, 0);
             if (pts.Count == 0)//不存在交点
             {

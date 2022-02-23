@@ -48,10 +48,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             if (UseDb3Engine)
             {
-                var outlineEngine = new ThRoomOutlineExtractionEngine();
+                var outlineEngine = new ThAIRoomOutlineExtractionEngine();
                 outlineEngine.ExtractFromMS(database);
 
-                var markEngine = new ThRoomMarkExtractionEngine();
+                var markEngine = new ThAIRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(database);
 
                 var transformer = new ThMEPOriginTransformer();
@@ -70,10 +70,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
                 markEngine.Results.ForEach(o => transformer.Transform(o.Geometry));
                 var newPts = transformer.Transform(pts);
 
-                var outlineRecogEngine = new ThRoomOutlineRecognitionEngine();
+                var outlineRecogEngine = new ThAIRoomOutlineRecognitionEngine();
                 outlineRecogEngine.Recognize(outlineEngine.Results, newPts);
 
-                var markRecogEngine = new ThRoomMarkRecognitionEngine();
+                var markRecogEngine = new ThAIRoomMarkRecognitionEngine();
                 markRecogEngine.Recognize(markEngine.Results, newPts);
 
                 var rooms = outlineRecogEngine.Elements.Cast<ThIfcRoom>().ToList();

@@ -123,6 +123,11 @@
                 <Setter TargetName="win_max_button" Property="Visibility" Value="Collapsed"/>
                 <Setter TargetName="win_min_button" Property="Visibility" Value="Collapsed"/>
             </Trigger>
+            <Trigger Property="ResizeMode" Value="CanMinimize">
+                <Setter TargetName="win_normal_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="win_max_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="win_min_button" Property="Visibility" Value="Visible"/>
+            </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
@@ -155,7 +160,7 @@
         <Setter Property="Focusable" Value="False"></Setter>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
-                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" ResizeBorderThickness="4" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
+                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
                 </WindowChrome>
             </Setter.Value>
         </Setter>

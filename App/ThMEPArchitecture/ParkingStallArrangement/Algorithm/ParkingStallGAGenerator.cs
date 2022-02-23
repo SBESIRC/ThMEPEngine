@@ -6,15 +6,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using Autodesk.AutoCAD.Geometry;
-using System.IO;
 using ThCADExtension;
-using Serilog;
 using System.Diagnostics;
 using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
-using System.Text.RegularExpressions;
 using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
@@ -202,6 +199,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
             }
             //判断是否有孤立的车道线
+            if (lanes.Count == 1) return true;
             for (int i = 0; i < lanes.Count; i++)
             {
                 bool connected = false;
@@ -261,7 +259,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 catch (Exception ex)
                 {
-                    ;
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             return count;
@@ -273,62 +271,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                GeoUtilities.LogMomery("UnitStart: ");
-                var use_partition_pro = true;
-                if (use_partition_pro)
+                var partitionpro = new ParkingPartitionPro();
+                ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                if (!partitionpro.Validate()) continue;
+                try
                 {
-                    var partitionpro = new ParkingPartitionPro();
-                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                    if (!partitionpro.Validate()) continue;
-                    try
+                    var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
+                    if (CachedPartitionCnt.ContainsKey(partitionBoundary))
                     {
-                        var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
-                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
-                        {
-                            count += CachedPartitionCnt[partitionBoundary];
-                        }
-                        else
-                        {
-                            var subCnt = partitionpro.CalNumOfParkingSpaces();
-                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
-                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
-                            count += subCnt;
-                        }
+                        count += CachedPartitionCnt[partitionBoundary];
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        ;
+                        var subCnt = partitionpro.CalNumOfParkingSpaces();
+                        CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                        System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                        count += subCnt;
                     }
-                    continue;
                 }
-
-                ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        var partitionBoundary = new PartitionBoundary(partition.Boundary.Vertices());
-                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
-                        {
-                            count += CachedPartitionCnt[partitionBoundary];
-                        }
-                        else
-                        {
-                            var subCnt = partition.CalNumOfParkingSpaces();
-                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
-                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
-                            count += subCnt;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //partition.Dispose();
-                        Logger.Error(ex.Message);
-                    }
-                    finally
-                    {
-                       // partition.Dispose();
-                    }
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             return count;
@@ -342,13 +305,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
     public class ParkingStallGAGenerator : IDisposable
     {
-        Random Rand = new Random();
-
         //Genetic Algorithm parameters
-        readonly double MaxTime;
-        readonly int IterationCount = 10;
+        double MaxTime;
+        int IterationCount = 10;
         int PopulationSize;
-
         int FirstPopulationSize;
         double SelectionRate;
         int FirstPopulationSizeMultiplyFactor = 2;
@@ -361,6 +321,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
+        private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
         //Inputs
         GaParameter GaPara;
@@ -374,12 +335,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public Serilog.Core.Logger Logger = null;
+
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null, List<Chromosome> initgenomes = null,bool breakFlag = false)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
-            Rand = new Random(DateTime.Now.Millisecond);//随机数
+            var Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
@@ -424,6 +386,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 LowerUpperBound.Add(i, tempT);
             }
         }
+
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
             double tol = 1e-4;
@@ -493,7 +456,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return genome;
         }
 
-        private bool RandomCreateChromosome(out Chromosome solution, int N = 1000)
+        private bool RandomCreateChromosome(out Chromosome solution, int N = 100)
         {
             // Try N times
             solution = new Chromosome();
@@ -509,11 +472,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double RandValue;
                     if (RandDouble() > GoldenRatio)
                     {
-                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//纯随机数
+                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
                     }
                     else
                     {
-                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//随机特殊解
+                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
                     }
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
@@ -523,6 +486,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     return true;
                 }
+                ReclaimMemory();
             }
             return false;
         }
@@ -754,7 +718,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound)
         {
-            
+            if (SpecialOnly)
+            {
+                return RandomSpecialNumber(LowerBound, UpperBound);
+            }
             double tol = 1e-4;
             if (UpperBound- LowerBound <= tol) return loc;
 
@@ -770,6 +737,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
+            if (SpecialOnly)
+            {
+                return RandomSpecialNumber(LowerBound, UpperBound);
+            }
             double tol = 1e-4;
             if (UpperBound - LowerBound < tol) return LowerBound ;
             else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
@@ -798,12 +769,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。
         // 对精英种群和一部分交叉产生的后代使用小变异，对一部分后代使用大变异，对剩下的后代不做变异。
-        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious)
+        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious,bool specialOnly = false)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
-
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            SpecialOnly = specialOnly;
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();
@@ -813,8 +786,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var curIteration = 0;
             int maxCount = 0;
             int maxNums = 0;
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+
             int lamda; //变异方差，随代数递减
 
             while (curIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
@@ -849,7 +821,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 MutationL(rstLM);
                 pop.AddRange(rstLM);
             }
-            string strBest;
+            //string strBest;
             //if (!BreakFlag) strBest = $"最大车位数: {maxNums}";
             //else
             //{

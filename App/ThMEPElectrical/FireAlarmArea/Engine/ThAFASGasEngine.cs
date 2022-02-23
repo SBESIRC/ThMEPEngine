@@ -26,6 +26,7 @@ namespace ThMEPElectrical.FireAlarmArea
         {
             blindsResult = new List<Polyline>();
             layoutResult = new List<ThLayoutPt>();
+            var tempBlindsResult = new List<Polyline>();
 
             foreach (var frame in dataQuery.FrameList)
             {
@@ -35,12 +36,12 @@ namespace ThMEPElectrical.FireAlarmArea
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.gasPrf)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gasPrf, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGasPrf);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameGasPrf);
                     }
                     else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.gas)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gas, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGas);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameGas);
                     }
                 }
                 catch
@@ -48,6 +49,9 @@ namespace ThMEPElectrical.FireAlarmArea
                     continue;
                 }
             }
+
+            blindsResult = ThFaAreaLayoutService.CleanBlind(tempBlindsResult);
+
         }
 
         private static void LayoutProcess(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThAFASGasLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)

@@ -32,6 +32,7 @@ namespace ThMEPElectrical.FireAlarmArea
         public static void ThFaSmokeHeatLayoutEngine(ThAFASAreaDataQueryService dataQuery, ThAFASSmokeLayoutParameter layoutParameter, out List<ThLayoutPt> layoutResult, out List<Polyline> blindsResult)
         {
             blindsResult = new List<Polyline>();
+            var tempBlindsResult = new List<Polyline>();
             layoutResult = new List<ThLayoutPt>();
 
             foreach (var frame in dataQuery.FrameList)
@@ -47,25 +48,25 @@ namespace ThMEPElectrical.FireAlarmArea
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.heat || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeat)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameHeat);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameHeat);
                         dataQuery.FramePriorityList[frame].AddRange(ThFaAreaLayoutService.ToPriority(localPts, ThFaCommon.blk_size[layoutParameter.BlkNameHeat], layoutParameter.Scale, layoutParameter.priorityExtend));
                     }
                     else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.heatPrf || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeatPrf)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameHeatPrf);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameHeatPrf);
                         dataQuery.FramePriorityList[frame].AddRange(ThFaAreaLayoutService.ToPriority(localPts, ThFaCommon.blk_size[layoutParameter.BlkNameHeatPrf], layoutParameter.Scale, layoutParameter.priorityExtend));
                     }
 
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smoke || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeat)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.smoke, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameSmoke);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameSmoke);
                     }
                     else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokePrf || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeatPrf)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.smoke, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameSmokePrf);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameSmokePrf);
                     }
                 }
                 catch (System.Exception ex)
@@ -83,6 +84,8 @@ namespace ThMEPElectrical.FireAlarmArea
                     continue;
                 }
             }
+
+            blindsResult = ThFaAreaLayoutService.CleanBlind(tempBlindsResult);
 
         }
 
@@ -120,7 +123,7 @@ namespace ThMEPElectrical.FireAlarmArea
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", stype, sCenterLine), "l0Info", 3, 25, 200);
-            
+
             DrawUtils.ShowGeometry(frame, string.Format("l0roomFrame"), 30);
             DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0FrameHole"), 150);
             DrawUtils.ShowGeometry(dataQuery.FrameColumnList[frame], string.Format("l0FrameColumn"), 1);

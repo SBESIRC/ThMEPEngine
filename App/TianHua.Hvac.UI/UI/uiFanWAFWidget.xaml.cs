@@ -24,8 +24,6 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiFanWAFWidget : UserControl
     {
-        
-        
         public uiFanWAFWidget()
         {
             InitializeComponent();

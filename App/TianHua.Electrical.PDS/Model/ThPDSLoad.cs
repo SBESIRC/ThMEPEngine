@@ -89,6 +89,11 @@
         /// 充电桩（快充、慢充）
         /// </summary>
         Charger,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
+        None,
     }
 
     /// <summary>
@@ -109,7 +114,7 @@
         /// <summary>
         /// 负载类型
         /// </summary>
-        public string LoadType { get; set; }
+        public ThPDSLoadType LoadType { get; set; }
 
         /// <summary>
         /// 是否是消防设备
@@ -150,5 +155,10 @@
         /// 位置信息
         /// </summary>
         public ThPDSLocation Location { get; set; }
+
+        /// <summary>
+        /// 是否变频
+        /// </summary>
+        public bool FrequencyConversion { get; set; }
     }
 }

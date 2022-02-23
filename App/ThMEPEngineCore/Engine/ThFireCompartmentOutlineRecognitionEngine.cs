@@ -2,7 +2,6 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using NFox.Cad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -45,7 +44,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            throw new NotSupportedException();
+            var visitor = new ThAIRoomOutlineExtractionVisitor()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
@@ -110,7 +116,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotSupportedException();
+            var engine = new ThFireCompartmentOutlineExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
     }
 }

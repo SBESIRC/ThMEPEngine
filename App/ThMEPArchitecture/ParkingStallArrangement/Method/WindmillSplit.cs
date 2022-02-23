@@ -10,6 +10,8 @@ using Dreambuild.AutoCAD;
 using DotNetARX;
 using System;
 using ThMEPEngineCore;
+using AcHelper;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -67,6 +69,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 seglineTndexDic.Add(index, new List<int>() { target });
             }
         }
+
         public static List<Line> GetExtendSegline(Dictionary<int, Line> seglineDic, Dictionary<int, List<int>> seglineIndexDic)
         {
             var segLines = new List<Line>();
@@ -92,12 +95,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return segLines;
         }
+
         public static void ExtendLines(ref Line linei, ref Line linej)
         {
             var intersectPt = linei.Intersect(linej, (Intersect)3).First();//两根线都延展求交点
             linei = ExtendLineToPt(linei, intersectPt);
             linej = ExtendLineToPt(linej, intersectPt);
         }
+
         public static Line ExtendLineToPt(Line line, Point3d pt)
         {
             double tor = 1.0;
@@ -125,15 +130,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
         }
 
-        public static List<Polyline> Split(bool isDirectlyArrange, Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
+        public static bool Split(bool isDirectlyArrange, OuterBrder outerBrder, Dictionary<int, Line> seglineDic, 
+            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segAreasCnt)
         {
+            var area = outerBrder.WallLine;
+            var buildLinesSpatialIndex = outerBrder.BuildingSpatialIndex;
+            var attachedRampSpatialIndex = outerBrder.AttachedRampSpatialIndex;
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
-            segSreasCnt = rstAreas.Count;
-            var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
+            segAreasCnt = rstAreas.Count;
+            SegLineCut(segLines, area, out List<Line> cutlines);
 
             var width = GetMaxWidth(area);
             
@@ -147,13 +155,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 else
                 {
                     var l = cutlines[i];
-                    l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
-
-                    maxVals.Add(maxVal2);
-                    minVals.Add(minVal2);
+                    if(attachedRampSpatialIndex?.SelectFence(l.ExtendLineEx(10.0,3)).Count > 0)
+                    {
+                        maxVals.Add(0);
+                        minVals.Add(0);
+                    }
+                    else
+                    {
+                        l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+                        if (maxVal2 < minVal2)
+                        {
+                            Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
+                            return false;
+                        }
+                        maxVals.Add(maxVal2);
+                        minVals.Add(minVal2);
+                    }
                 }
             }
-            return rstAreas;
+            return true;
         }
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
@@ -169,54 +189,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var boundPt1 = line.GetBoundPt(buildLines1, rect1, area, ptsIndex, out bool hasBuilding);
             var boundPt2 = line.GetBoundPt(buildLines2, rect2, area, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
-            if(!hasBuilding)
-            {
-                maxVal += 2765;
-            }
             minVal = -line.GetMinDist(boundPt2) + 2760;
-            if (!hasBuilding2)
-            {
-                minVal -= 2765;
-            }
-        }
-
-        public static bool GetMaxMinVal(this Line line, Polyline area, out double maxVal, out double minVal)
-        {
-            double tor = 2.0;
-            maxVal = 0;
-            minVal = 0;
-            var lines = area.ToLines();
-            var dir = line.GetDirection();
-            var intersectLines = new List<Line>();
-            foreach(var l in lines)
-            {
-                if(line.Intersect(l,0).Count > 0)
-                {
-                    intersectLines.Add(l);
-                }
-            }
-            if(intersectLines.Count == 1)
-            {
-                var intersect = intersectLines[0];
-                if (dir == 1)//竖直线
-                {
-                    var val = line.StartPoint.X;
-                    var sy = intersect.StartPoint.X - val;
-                    var ey = intersect.EndPoint.X - val;
-                    maxVal = Math.Max(sy, ey) - tor;
-                    minVal = Math.Min(sy, ey) + tor;
-                }
-                else
-                {
-                    var val = line.StartPoint.Y;
-                    var sy = intersect.StartPoint.Y - val;
-                    var ey = intersect.EndPoint.Y - val;
-                    maxVal = Math.Max(sy, ey) - tor;
-                    minVal = Math.Min(sy, ey) + tor;
-                }
-                return true;
-            }
-            return false;
         }
 
         public static Polyline GetHalfBuffer(this Line line, bool flag, double tor = 99999)

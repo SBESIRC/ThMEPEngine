@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3RoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database),
+                LayerFilter = ThRoomMarkLayerManager.TextXrefLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);

@@ -1,9 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
@@ -32,10 +28,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             return Segline.GetHashCode();
         }
+
         public bool Equals(SegLineEx other)
         {
             return Segline.EqualsTo(other.Segline);
         }
-
     }
 }

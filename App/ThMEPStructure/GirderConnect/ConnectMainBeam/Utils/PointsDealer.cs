@@ -102,7 +102,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <returns></returns>
         public static List<Point3d> NearPoints(Dictionary<Polyline, Point3dCollection> poly2points, Point3dCollection points)
         {
-            BorderConnectToNear.VoronoiDiagramNearPoints(points, poly2points);
+            BorderConnectToNear.VoronoiDiagramNearPoints(points, ref poly2points);
 
             List<Point3d> ansPts = new List<Point3d>();
             foreach (var pts in poly2points.Values)
@@ -410,7 +410,21 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static List<Point3d> PointsDistinct(List<Point3d> pts, double deviation = 1.0)
         {
             List<Point3d> ansPts = new List<Point3d>();
-            var kdTree = new ThCADCoreNTSKdTree(1.0);
+            var kdTree = new ThCADCoreNTSKdTree(deviation);
+            foreach (Point3d pt in pts)
+            {
+                kdTree.InsertPoint(pt);
+            }
+            kdTree.Nodes.ForEach(o =>
+            {
+                ansPts.Add(o.Key.Coordinate.ToAcGePoint3d());
+            });
+            return ansPts;
+        }
+        public static HashSet<Point3d> PointsDistinct(HashSet<Point3d> pts, double deviation = 1.0)
+        {
+            HashSet<Point3d> ansPts = new HashSet<Point3d>();
+            var kdTree = new ThCADCoreNTSKdTree(deviation);
             foreach (Point3d pt in pts)
             {
                 kdTree.InsertPoint(pt);

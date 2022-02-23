@@ -20,6 +20,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
 
         }
+
         public GaParameter(List<Line> segLine)
         {
             LineNumber = new List<int>();

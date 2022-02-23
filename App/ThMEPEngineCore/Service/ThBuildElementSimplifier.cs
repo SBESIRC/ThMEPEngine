@@ -5,6 +5,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
@@ -16,6 +17,7 @@ namespace ThMEPEngineCore.Service
         public double OFFSETDISTANCE = 30.0;
         public double DISTANCETOLERANCE = 1.0;
         public double TESSELLATEARCLENGTH = 100.0;
+        public double ClOSED_DISTANC_TOLERANCE = 100.0;
 
         public virtual DBObjectCollection Simplify(DBObjectCollection curves)
         {
@@ -41,7 +43,7 @@ namespace ThMEPEngineCore.Service
                 }
             });
             return objs;
-        }      
+        }
 
         public virtual DBObjectCollection Normalize(DBObjectCollection curves)
         {
@@ -58,6 +60,17 @@ namespace ThMEPEngineCore.Service
                     });
             }
             return objs;
+        }
+
+        public virtual void MakeClosed(DBObjectCollection curves)
+        {
+            curves.OfType<AcPolygon>().ForEach(p =>
+            {
+                if (ThMEPFrameService.IsClosed(p, ClOSED_DISTANC_TOLERANCE))
+                {
+                    p.Closed = true;
+                }
+            });
         }
 
         public virtual DBObjectCollection Filter(DBObjectCollection Polygons)

@@ -31,34 +31,50 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         public Dictionary<Point3d, BlockReference> Layout()
         {
-            if(LayoutData==null || !LayoutData.IsValid)
+            var results = new Dictionary<Point3d, BlockReference>();
+            if (LayoutData==null || !LayoutData.IsValid)
             {
-                return new Dictionary<Point3d, BlockReference>();
+                return results;
             }
             BuildSpatialIndex();
-            var ptDic = new Dictionary<Point3d, Vector3d>();
+            //var blk1Dic = new Dictionary<Point3d, Vector3d>(); // 给水角阀平面(暂时不要)
+            var blk2Dic = new Dictionary<Point3d, Vector3d>(); // 给水角阀带定位
             LayoutData.WashPoints.ForEach(o =>
             {
-                var vec = CalculateDirection(o);
-                if(!ptDic.ContainsKey(o))
+                bool isOnObj = false;
+                var vec = CalculateDirection(o,out isOnObj);
+                if(isOnObj)
                 {
-                    ptDic.Add(o, vec);
+                    //将图块沿垂直柱边方向向外平移100距离
+                    var pt = o + vec.GetNormal().MultiplyBy(100.0);
+                    if (!blk2Dic.ContainsKey(pt))
+                    {
+                        blk2Dic.Add(pt, vec);
+                    }
+                }
+                else
+                {
+                    if (!blk2Dic.ContainsKey(o))
+                    {
+                        blk2Dic.Add(o, vec);
+                    }
                 }
             });
-            return Print(ptDic);
-        }
-        private Dictionary<Point3d, BlockReference> Print(Dictionary<Point3d, Vector3d> ptDic)
-        {
             SetDatabaseDefaults();
-            return InsertBlock(ptDic); //根据点位，插块
+            //var blk1Res = InsertBlock(blk1Dic, LayoutData.WashPointLayerName, LayoutData.WashPointBlkName);
+            //blk1Res.ForEach(b => results.Add(b.Key, b.Value));
+            var blk2Res = InsertBlock(blk2Dic, LayoutData.WashPointLayerName, LayoutData.LocatedVerticalPipeBlkName);
+            blk2Res.ForEach(b => results.Add(b.Key, b.Value));
+            return results;
         }
         private void SetDatabaseDefaults()
         {
             using (var currentDb = AcadDatabase.Active())
             using (var blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), true);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WashPointLayerName), false);
+                //currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), true);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.LocatedVerticalPipeBlkName), true);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WashPointLayerName), true);
                 SetLayerDefaults(LayoutData.WashPointLayerName);
             }
         }
@@ -82,8 +98,9 @@ namespace ThMEPWSS.FlushPoint.Service
             LayoutData.Rooms.ForEach(o=>roomObjs.Add(o));
             RoomSpatialIndex = new ThCADCoreNTSSpatialIndex(roomObjs);
         }
-        private Vector3d CalculateDirection(Point3d pt)
+        private Vector3d CalculateDirection(Point3d pt,out bool isOnObj)
         {
+            isOnObj = false;
             var square = ThDrawTool.CreateSquare(pt, LayoutData.PtRange);
             var objs = SpatialIndex.SelectCrossingPolygon(square);
             if(objs.Count==0)
@@ -91,6 +108,7 @@ namespace ThMEPWSS.FlushPoint.Service
                 var rooms = RoomSpatialIndex.SelectCrossingPolygon(square);
                 if(rooms.Count>0)
                 {
+                    isOnObj = true;
                     var obj = GetClosestObj(rooms, pt);
                     var edge = GetPropertyEdge(obj, pt);
                     var leftVec = edge.LineDirection().GetPerpendicularVector().GetNormal();
@@ -105,7 +123,8 @@ namespace ThMEPWSS.FlushPoint.Service
             }
             else
             {
-                var obj = GetClosestObj(objs, pt);                
+                var obj = GetClosestObj(objs, pt);
+                isOnObj = true;
                 var edge = GetPropertyEdge(obj, pt);
                 var leftVec = edge.LineDirection().GetPerpendicularVector().GetNormal();
                 var rightVec = leftVec.Negate();
@@ -199,7 +218,7 @@ namespace ThMEPWSS.FlushPoint.Service
             }
             return false;
         }
-        private Dictionary<Point3d,BlockReference> InsertBlock(Dictionary<Point3d,Vector3d> ptDic)
+        private Dictionary<Point3d,BlockReference> InsertBlock(Dictionary<Point3d,Vector3d> ptDic,string layer,string blkName)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -208,7 +227,7 @@ namespace ThMEPWSS.FlushPoint.Service
                 {
                     var rad = Vector3d.XAxis.GetAngleTo(o.Value, Vector3d.ZAxis);
                     var objId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                        LayoutData.WashPointLayerName, LayoutData.WashPointBlkName,
+                        layer, blkName,
                         o.Key, new Scale3d(1.0, 1.0, 1.0), rad);
                     var br = acadDb.Element<BlockReference>(objId);
                     br.ColorIndex = (int)ColorIndex.BYLAYER;
@@ -226,6 +245,7 @@ namespace ThMEPWSS.FlushPoint.Service
         public List<Entity> Columns { get; set; }
         public List<Entity> Rooms { get; set; }
         public string WashPointBlkName { get; set; }
+        public string LocatedVerticalPipeBlkName { get; set; }
         /// <summary>
         /// 冲洗点位块的图层名称
         /// </summary>
@@ -274,12 +294,13 @@ namespace ThMEPWSS.FlushPoint.Service
             PtRange = 5.0;
             LeaderAngle = 45;
             TextHeight = 3.5;
-            WashPointBlkName = "给水角阀平面";
-            WashPointLayerName = "W-WSUP-EQPM";
-            WaterSupplyMarkLayerName = "W-WSUP-NOTE";
-            WaterSupplyMarkStyle = "TH-STYLE3";
-            WaterSupplyMarkWidthFactor = 0.7;
             PlotScale = "1:1";
+            WaterSupplyMarkWidthFactor = 0.7;
+            WashPointBlkName = "给水角阀平面";
+            WashPointLayerName = "W-WSUP-EQPM"; 
+            WaterSupplyMarkStyle = "TH-STYLE3";
+            WaterSupplyMarkLayerName = "W-WSUP-NOTE";
+            LocatedVerticalPipeBlkName = "给水角阀带立管";
             Walls = new List<Entity>();            
             Rooms = new List<Entity>();
             Columns = new List<Entity>();

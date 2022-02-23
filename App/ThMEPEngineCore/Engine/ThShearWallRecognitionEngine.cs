@@ -50,7 +50,8 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs;
             }
-            ThShearWallSimplifier thShearWallSimplifier = new ThShearWallSimplifier();
+            var thShearWallSimplifier = new ThShearWallSimplifier();
+            thShearWallSimplifier.MakeClosed(curves);
             curves = thShearWallSimplifier.MakeValid(curves);
             if (curves.Count > 0)
             {

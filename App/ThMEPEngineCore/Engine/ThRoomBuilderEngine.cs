@@ -24,10 +24,10 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts)
         {
-            var roomEngine = new ThRoomOutlineRecognitionEngine();
+            var roomEngine = new ThAIRoomOutlineRecognitionEngine();
             roomEngine.RecognizeMS(db, pts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine();
+            var markEngine = new ThAIRoomMarkRecognitionEngine();
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);            

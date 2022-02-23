@@ -47,6 +47,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <returns></returns>
         public static bool IsIntersect(Point3d aSt, Point3d aEd, Point3d bSt, Point3d bEd)
         {
+            if (Math.Max(aSt.X, aEd.X) < Math.Min(bSt.X, bEd.X)) return false;
+            if (Math.Max(aSt.Y, aEd.Y) < Math.Min(bSt.Y, bEd.Y)) return false;
+            if (Math.Max(bSt.X, bEd.X) < Math.Min(aSt.X, aEd.X)) return false;
+            if (Math.Max(bSt.Y, bEd.Y) < Math.Min(aSt.Y, aEd.Y)) return false;
             double EPS3 = 1.0e-3f;
             var dir = bEd - bSt;
             var dValue = (aSt - bSt).CrossProduct(dir).Z * (aEd - bSt).CrossProduct(dir).Z;
@@ -410,15 +414,20 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var direction = (tuple.Item2 - tuple.Item1).GetNormal();
             return new Tuple<Point3d, Point3d>(tuple.Item1 + direction * length, tuple.Item2 - direction * length);
         }
-        public static Line ReduceTupleB(Tuple<Point3d, Point3d> tuple, double length)
-        {
-            var direction = (tuple.Item2 - tuple.Item1).GetNormal();
-            return new Line(tuple.Item1 + direction * length, tuple.Item2);
-        }
         public static Line ReduceLine(Line line, double length)
         {
             var direction = (line.EndPoint - line.StartPoint).GetNormal();
             return new Line(line.StartPoint + direction * length, line.EndPoint - direction * length);
+        }
+        public static Line ReduceLine(Point3d ptA, Point3d ptB, double length)
+        {
+            var direction = (ptB - ptA).GetNormal();
+            return new Line(ptA + direction * length, ptB - direction * length);
+        }
+        public static Line ReduceTupleB(Tuple<Point3d, Point3d> tuple, double length)
+        {
+            var direction = (tuple.Item2 - tuple.Item1).GetNormal();
+            return new Line(tuple.Item1 + direction * length, tuple.Item2);
         }
     }
 }

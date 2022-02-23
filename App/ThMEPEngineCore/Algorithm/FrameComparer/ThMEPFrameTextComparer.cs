@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Linq2Acad;
+﻿using System;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
@@ -9,95 +9,94 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
     public class ThMEPFrameTextComparer
     {
         private Point3d srtP;
-        private Dictionary<int, string> dicTexts;         // 文字外包框到文字参数的映射
-        private ThCADCoreNTSSpatialIndex orgTextBounds;
-        private Dictionary<int, HashSet<string>> dicFrameTexts;   // 外包框到文字参数的映射
+        private ThCADCoreNTSSpatialIndex orgTextIndex;
+        private ThCADCoreNTSSpatialIndex refTextIndex;
+        private Dictionary<int, string> dicFrameText;   // 外包框到文字参数的映射
         
-        public ThMEPFrameTextComparer(ThMEPFrameComparer frameComp)
+        public ThMEPFrameTextComparer(ThMEPFrameComparer frameComp, ThFrameTextExactor textExactor)
         {
-            // 检查UnChanged 和 Changed 的功能是否变化
-            Init(frameComp);
+            // 检查UnChanged的功能是否变化
+            // UnChanged中框线与各自文字外包框求交后，对比结果文字是否一致
+            Init(frameComp, textExactor);
+            CheckUnChangedFrame(frameComp);
+            Recover(textExactor);
         }
 
-        private void Init(ThMEPFrameComparer frameComp)
+        private void Recover(ThFrameTextExactor textExactor)
+        {
+            var mat = Matrix3d.Displacement(srtP.GetAsVector());
+            foreach (var text in textExactor.curTexts)
+                text.Geometry.TransformBy(mat);
+            foreach (var text in textExactor.refTexts)
+                text.Geometry.TransformBy(mat);
+        }
+
+        private void Init(ThMEPFrameComparer frameComp, ThFrameTextExactor textExactor)
         {
             srtP = frameComp.srtP;
-            dicTexts = new Dictionary<int, string>();
-            dicFrameTexts = new Dictionary<int, HashSet<string>>();
+            dicFrameText = new Dictionary<int, string>();
+            var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+            // 框线大不需要用MPolygon
+            var orgTextBounds = new DBObjectCollection();
+            foreach (var text in textExactor.curTexts)
+            {
+                text.Geometry.TransformBy(mat);
+                orgTextBounds.Add(text.Geometry);
+                dicFrameText.Add(text.Geometry.GetHashCode(), text.Text);
+            }
+            orgTextIndex = new ThCADCoreNTSSpatialIndex(orgTextBounds);
+            var refTextBounds = new DBObjectCollection();
+            foreach (var text in textExactor.refTexts)
+            {
+                text.Geometry.TransformBy(mat);
+                refTextBounds.Add(text.Geometry);
+                dicFrameText.Add(text.Geometry.GetHashCode(), text.Text);
+            }
+            refTextIndex = new ThCADCoreNTSSpatialIndex(refTextBounds);
         }
 
-        private void AttachFrameText(ThMEPFrameComparer frameComp)
+        private void CheckUnChangedFrame(ThMEPFrameComparer frameComp)
         {
             var mat = Matrix3d.Displacement(-srtP.GetAsVector());
-            GetTextBounds(mat);
-            foreach (Polyline pl in frameComp.unChangedFrame)
+            var revMat = Matrix3d.Displacement(srtP.GetAsVector());
+            var tFrames = new Dictionary<Polyline, Polyline>();
+            foreach (var pair in frameComp.unChangedFrame)
             {
-                var mp = CreateMP(pl);
-                mp.TransformBy(mat);
-                var res = orgTextBounds.SelectCrossingPolygon(mp);
-                if (res.Count > 0)
+                pair.Key.TransformBy(mat);
+                var orgTexts = orgTextIndex.SelectCrossingPolygon(pair.Key);
+                if (orgTexts.Count > 0)
                 {
-                    int key = pl.GetHashCode();
-                    dicFrameTexts.Add(key, new HashSet<string>());
-                    foreach (MPolygon p in res)
-                        dicFrameTexts[key].Add(dicTexts[p.GetHashCode()]);
+                    // unchanged可以用本图框线与底图文字求交
+                    var refTexts = refTextIndex.SelectCrossingPolygon(pair.Key);
+                    if (!IsSameTexts(orgTexts, refTexts))
+                    {
+                        if (!frameComp.ChangedFrame.ContainsKey(pair.Key))
+                        {
+                            pair.Key.TransformBy(revMat);
+                            frameComp.ChangedFrame.Add(pair.Key, new Tuple<Polyline, double>(pair.Value, 1));
+                        }
+                    }
+                    else
+                    {
+                        pair.Key.TransformBy(revMat);
+                        tFrames.Add(pair.Key, pair.Value);
+                    }
                 }
-                // 找到了本图上的字，怎么找底图上的字？？？
             }
+            frameComp.unChangedFrame.Clear();
+            frameComp.unChangedFrame = tFrames;
         }
-        private void GetTextBounds(Matrix3d mat)
-        {
-            var texts = ReadDuctTexts();
-            var bounds = new DBObjectCollection();
-            foreach (var t in texts)
-            {
-                var l = new Line(t.Bounds.Value.MinPoint, t.Bounds.Value.MaxPoint);
-                var mp = CreateMP(l.Buffer(1));
-                mp.TransformBy(mat);
-                dicTexts.Add(mp.GetHashCode(), t.TextString);
-                bounds.Add(mp);
-            }
-            orgTextBounds = new ThCADCoreNTSSpatialIndex(bounds);
-        }
-        private List<DBText> ReadDuctTexts()
-        {
-            var texts = new List<DBText>();
-            using (var db = AcadDatabase.Active())
-            {
-                var dbTexts = db.ModelSpace.OfType<DBText>();
-                foreach (var t in dbTexts)
-                    if (IsRoom(t.TextString) && t.Layer == "AI-房间名称")
-                        texts.Add(t);
-            }
-            return texts;
-        }
-        private bool IsSameTexts(HashSet<string> texts1, HashSet<string> texts2)
+        private bool IsSameTexts(DBObjectCollection texts1, DBObjectCollection texts2)
         {
             if (texts1.Count != texts2.Count)
                 return false;
-            foreach (var t in texts1)
-            {
-                if (!texts2.Contains(t))
+            var set = new HashSet<string>();
+            foreach (Polyline pl in texts1)
+                set.Add(dicFrameText[pl.GetHashCode()]);
+            foreach (Polyline pl in texts2)
+                if (!set.Contains(dicFrameText[pl.GetHashCode()]))
                     return false;
-            }
             return true;
-        }
-        private bool IsRoom(string s)
-        {
-            return s.Contains("房") ||
-                   s.Contains("道") ||
-                   s.Contains("室") ||
-                   s.Contains("间") ||
-                   s.Contains("梯") ||
-                   s.Contains("堂") ||
-                   s.Contains("电") ||
-                   s.Contains("厅") ||
-                   s == "车库" ||
-                   s == "水";
-        }
-        private MPolygon CreateMP(Polyline pl)
-        {
-            return pl.ToNTSPolygon().ToDbMPolygon();
         }
     }
 }

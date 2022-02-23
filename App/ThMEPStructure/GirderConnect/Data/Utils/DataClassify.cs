@@ -19,7 +19,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// </summary>
         /// <param name="outlineWalls"></param>
         /// <param name="outlineClumns"></param>
-        public static void ClassifyOutlineWalls(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        public static void ClassifyOutlineWalls(ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, ref Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
         {
             foreach (var outlineWall in outlineWalls)
             {
@@ -92,13 +92,14 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <param name="outsideShearwall"></param>
         public static void OuterClassify(List<Entity> outsideColumns, List<Entity> outsideShearwall, 
             Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, 
-            ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
+            ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts, ref Dictionary<Polyline, Polyline> outline2OriOutline)
         {
             Dictionary<Polyline, bool> plColumnVisted = new Dictionary<Polyline, bool>();
             foreach (var outsideColumn in outsideColumns)
             {
                 if (outsideColumn is Polyline pl)
                 {
+                    
                     if (!plColumnVisted.ContainsKey(pl))
                     {
                         plColumnVisted.Add(pl, false);
@@ -123,11 +124,17 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                             plColumnVisted[polylineColumn] = true;
                         }
                     }
-                    var simplifiedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault().DPSimplify(1);
+                    var unionPolygons = mergeCollection.UnionPolygons().OfType<Polyline>().Where(p => p.Area > 1.0).OrderByDescending(o => o.Area).ToCollection();
+                    if (unionPolygons.Count == 0)
+                    {
+                        continue;
+                    }
+                    var simplifiedPolyline = unionPolygons.OfType<Polyline>().First().DPSimplify(1);
                     if (simplifiedPolyline != null)
                     {
                         DataProcess.AddOutline(simplifiedPolyline, ref outerWalls);
                         olCrossPts.Add(simplifiedPolyline, olCrossPt.ToHashSet());
+                        outline2OriOutline.Add(simplifiedPolyline, polyline);
                     }
                 }
             }
@@ -150,7 +157,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         }
 
         public static void InnerColumnTypeClassify(Dictionary<Entity, HashSet<Entity>> columnGroupDict,
-            Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns)
+           ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, ref Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns)
         {
             foreach (var columnGroup in columnGroupDict)
             {
@@ -225,6 +232,24 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 }
             }
             return newOutlineWalls;
+        }
+
+        public static void ClassifyColumnPoints(ref HashSet<Point3d> allColumnPts, List<Entity> outsideColumns, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        {
+            foreach (var outsideColumn in outsideColumns)
+            {
+                if (outsideColumn is Polyline pl)
+                {
+                    allColumnPts.Add(pl.GetCentroidPoint());
+                }
+            }
+            foreach (var pts in outlineClumns.Values)
+            {
+                foreach (Point3d pt in pts)
+                {
+                    allColumnPts.Add(pt);
+                }
+            }
         }
     }
 }

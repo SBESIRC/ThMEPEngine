@@ -142,6 +142,8 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFaAreaData", CommandFlags.Modal)]
         public void ThFaAreaData()
         {
+
+            var selectFloorRoom = ThAFASUtils.SettingInt("\n选楼层布置(0) 选房间布置(1)", 0);
             var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThickness = 0.0;
             var needDetective = true;
@@ -163,9 +165,15 @@ namespace ThMEPElectrical
             var cleanBlkName = new List<string>();
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
-            //画框，提数据，转数据
-            //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
-            var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+            var selectPts = new Point3dCollection();
+            if (selectFloorRoom == 0)
+            {
+                selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+            }
+            else
+            {
+                selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+            }
 
             if (selectPts.Count == 0)
             {
@@ -193,6 +201,7 @@ namespace ThMEPElectrical
             data.AddMRoomDict();
             data.ClassifyDataNew();
             var roomType = FireAlarmArea.Service.ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
+            roomType = FireAlarmArea.Service.ThFaGasRoomTypeService.GetGasSensorType(data.Rooms, data.RoomFrameDict);
             foreach (var frame in data.FrameList)
             {
                 var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area

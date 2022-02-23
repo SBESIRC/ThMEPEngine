@@ -38,7 +38,8 @@ namespace ThMEPEngineCore.Engine
             var curves = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
             //处理不完美的墙
-            var simplifier = new ThPolygonalElementSimplifier();
+            var simplifier = new ThShearWallSimplifier();
+            simplifier.MakeClosed(objs);
             objs = simplifier.Simplify(objs);
             objs = simplifier.Normalize(objs);
             if (polygon.Count > 0)

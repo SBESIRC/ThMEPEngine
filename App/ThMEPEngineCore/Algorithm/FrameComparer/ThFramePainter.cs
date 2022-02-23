@@ -8,7 +8,6 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 
-
 namespace ThMEPEngineCore.Algorithm.FrameComparer
 {
     public static class AppendLayerInfo
@@ -28,25 +27,36 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
     {
         public ThFramePainter()
         {
-            ImportLayerBlock();
             PreProcLayer();
+            ImportLayerBlock();
         }
         private void ImportLayerBlock()
         {
-            using (var adb = AcadDatabase.Active())
+            using (var db = AcadDatabase.Active())
             {
                 using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    adb.Database.CreateAIDoorLayer();
-                    adb.Database.CreateAIWindowLayer();
-                    adb.Database.CreateAIRoomOutlineLayer();
-                    adb.Database.CreateAIFireCompartmentLayer();
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendDoorLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendWindowLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendRoomFrameLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendFireComponentLayer, 30);
-                    adb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Hidden), true);
-                    adb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Continuous), true);
+                    using (db.Database.GetDocument().LockDocument())
+                    {
+                        if (!db.Layers.Contains(ThMEPEngineCoreLayerUtils.DOOR))
+                            db.Database.CreateAIDoorLayer();
+                        if (!db.Layers.Contains(ThMEPEngineCoreLayerUtils.WINDOW))
+                            db.Database.CreateAIWindowLayer();
+                        if (!db.Layers.Contains(ThMEPEngineCoreLayerUtils.ROOMOUTLINE))
+                            db.Database.CreateAIRoomOutlineLayer();
+                        if (!db.Layers.Contains(ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT))
+                            db.Database.CreateAIFireCompartmentLayer();
+                        if (!db.Layers.Contains(AppendLayerInfo.AppendDoorLayer))
+                            db.Database.CreateAILayer(AppendLayerInfo.AppendDoorLayer, 30);
+                        if (!db.Layers.Contains(AppendLayerInfo.AppendWindowLayer))
+                            db.Database.CreateAILayer(AppendLayerInfo.AppendWindowLayer, 30);
+                        if (!db.Layers.Contains(AppendLayerInfo.AppendRoomFrameLayer))
+                            db.Database.CreateAILayer(AppendLayerInfo.AppendRoomFrameLayer, 30);
+                        if (!db.Layers.Contains(AppendLayerInfo.AppendFireComponentLayer))
+                            db.Database.CreateAILayer(AppendLayerInfo.AppendFireComponentLayer, 30);
+                        db.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Hidden), true);
+                        db.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Continuous), true);
+                    }
                 }
             }
         }
@@ -54,11 +64,14 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         {
             using (AcadDatabase db = AcadDatabase.Active())
             {
-                GetCurLayer(db, "0");
-                GetCurLayer(db, ThMEPEngineCoreLayerUtils.DOOR);
-                GetCurLayer(db, ThMEPEngineCoreLayerUtils.WINDOW);
-                GetCurLayer(db, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
-                GetCurLayer(db, ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT);
+                using (db.Database.GetDocument().LockDocument())
+                {
+                    GetCurLayer(db, "0");
+                    GetCurLayer(db, ThMEPEngineCoreLayerUtils.DOOR);
+                    GetCurLayer(db, ThMEPEngineCoreLayerUtils.WINDOW);
+                    GetCurLayer(db, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                    GetCurLayer(db, ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT);
+                }
             }
         }
         private void GetCurLayer(AcadDatabase db, string layerName)
@@ -72,11 +85,19 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             DrawDeleteLine(comp.ErasedFrame, dicCode2Id);
             DrawChangedLine(comp, dicCode2Id);
             DrawAppendLine(comp, type, dicCode2Id);
-            
+            //DrawUnchangedLine(comp, type, dicCode2Id);
         }
+
+        private void DrawUnchangedLine(ThMEPFrameComparer comp, CompareFrameType type, Dictionary<int, ObjectId> dicCode2Id)
+        {
+            var unchangedFrames = comp.unChangedFrame.Keys.ToCollection();
+            DrawLines(ref unchangedFrames, ColorIndex.Cyan, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
+        }
+
         public void DrawDeleteLine(DBObjectCollection lines, Dictionary<int, ObjectId> dicCode2Id)
         {
             using (var db = AcadDatabase.Active())
+            using (db.Database.GetDocument().LockDocument())
             {
                 lines.OfType<Polyline>().ForEach(p =>
                 {
@@ -90,52 +111,61 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         {
             using (var db = AcadDatabase.Active())
             {
-                var appFrames = comp.AppendedFrame.ToCollection();
-                string layer;
-                switch (type)
+                using (db.Database.GetDocument().LockDocument())
                 {
-                    case CompareFrameType.DOOR: layer = AppendLayerInfo.AppendDoorLayer; break;
-                    case CompareFrameType.ROOM: layer = AppendLayerInfo.AppendRoomFrameLayer; break;
-                    case CompareFrameType.WINDOW: layer = AppendLayerInfo.AppendWindowLayer; break;
-                    case CompareFrameType.FIRECOMPONENT: layer = AppendLayerInfo.AppendFireComponentLayer; break;
-                    default:throw new NotImplementedException("不支持该类型框线");
+                    var appFrames = comp.AppendedFrame.ToCollection();
+                    string layer;
+                    switch (type)
+                    {
+                        case CompareFrameType.DOOR: layer = AppendLayerInfo.AppendDoorLayer; break;
+                        case CompareFrameType.ROOM: layer = AppendLayerInfo.AppendRoomFrameLayer; break;
+                        case CompareFrameType.WINDOW: layer = AppendLayerInfo.AppendWindowLayer; break;
+                        case CompareFrameType.FIRECOMPONENT: layer = AppendLayerInfo.AppendFireComponentLayer; break;
+                        default: throw new NotImplementedException("不支持该类型框线");
+                    }
+                    DrawLines(ref appFrames, ColorIndex.Green, LineTypeInfo.Continuous, layer, dicCode2Id);
+                    comp.AppendedFrame.Clear();
+                    foreach (Polyline frame in appFrames)
+                        comp.AppendedFrame.Add(frame);
                 }
-                DrawLines(ref appFrames, ColorIndex.Green, LineTypeInfo.Continuous, layer, dicCode2Id);
-                comp.AppendedFrame.Clear();
-                foreach (Polyline frame in appFrames)
-                    comp.AppendedFrame.Add(frame);
             }
         }
         public void DrawChangedLine(ThMEPFrameComparer comp, Dictionary<int, ObjectId> dicCode2Id)
         {
             using (var db = AcadDatabase.Active())
             {
-                var ChangedFrame = comp.ChangedFrame;
-                var mapLines = new DBObjectCollection();
-                foreach (var ppp in ChangedFrame.Values)
-                    mapLines.Add(ppp.Item1);
-                DrawChangeMapLine(mapLines, dicCode2Id);
-                var frames = ChangedFrame.Keys.ToCollection();
-                DrawLines(ref frames, ColorIndex.Magenta, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
-                var tChangedFrame = new Dictionary<Polyline, Tuple<Polyline, double>>();
-                int i = 0;
-                foreach (var frame in ChangedFrame.Values)
+                using (db.Database.GetDocument().LockDocument())
                 {
-                    tChangedFrame.Add(frames[i++] as Polyline, frame);
+                    var ChangedFrame = comp.ChangedFrame;
+                    var mapLines = new DBObjectCollection();
+                    foreach (var ppp in ChangedFrame.Values)
+                        mapLines.Add(ppp.Item1);
+                    DrawChangeMapLine(mapLines, dicCode2Id);
+                    var frames = ChangedFrame.Keys.ToCollection();
+                    DrawLines(ref frames, ColorIndex.Magenta, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
+                    var tChangedFrame = new Dictionary<Polyline, Tuple<Polyline, double>>();
+                    int i = 0;
+                    foreach (var frame in ChangedFrame.Values)
+                    {
+                        tChangedFrame.Add(frames[i++] as Polyline, frame);
+                    }
+                    comp.ChangedFrame = tChangedFrame;
                 }
-                comp.ChangedFrame = tChangedFrame;
             }
         }
         private void DrawChangeMapLine(DBObjectCollection lines, Dictionary<int, ObjectId> dicCode2Id)
         {
             using (var db = AcadDatabase.Active())
             {
-                lines.OfType<Polyline>().ForEach(p =>
+                using (db.Database.GetDocument().LockDocument())
                 {
-                    var poly = db.Element<Polyline>(dicCode2Id[p.GetHashCode()], true);
-                    poly.ColorIndex = (int)ColorIndex.Yellow;
-                    poly.Linetype = LineTypeInfo.Continuous;
-                });
+                    lines.OfType<Polyline>().ForEach(p =>
+                    {
+                        var poly = db.Element<Polyline>(dicCode2Id[p.GetHashCode()], true);
+                        poly.ColorIndex = (int)ColorIndex.Yellow;
+                        poly.Linetype = LineTypeInfo.Continuous;
+                    });
+                }
             }
         }
         public void DrawLines(ref DBObjectCollection lines, ColorIndex color, string lineType, string layer, Dictionary<int, ObjectId> dicCode2Id)
@@ -143,22 +173,25 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             // dicCode2Id主要用于将新画的多段线加到字典中
             using (var db = AcadDatabase.Active())
             {
-                if (lines != null)
+                using (db.Database.GetDocument().LockDocument())
                 {
-                    var newLines = new DBObjectCollection();
-                    foreach (Curve obj in lines)
+                    if (lines != null)
                     {
-                        var shadow = obj.Clone() as Curve;
-                        newLines.Add(shadow);
-                        var id = db.ModelSpace.Add(shadow);
-                        dicCode2Id.Add(shadow.GetHashCode(), id);
-                        shadow.SetDatabaseDefaults();
-                        shadow.Layer = layer;
-                        shadow.ColorIndex = (int)color;
-                        shadow.Linetype = lineType;
+                        var newLines = new DBObjectCollection();
+                        foreach (Curve obj in lines)
+                        {
+                            var shadow = obj.Clone() as Curve;
+                            newLines.Add(shadow);
+                            var id = db.ModelSpace.Add(shadow);
+                            dicCode2Id.Add(shadow.GetHashCode(), id);
+                            shadow.SetDatabaseDefaults();
+                            shadow.Layer = layer;
+                            shadow.ColorIndex = (int)color;
+                            shadow.Linetype = lineType;
+                        }
+                        lines.Clear();
+                        lines = newLines;
                     }
-                    lines.Clear();
-                    lines = newLines;
                 }
             }
         }

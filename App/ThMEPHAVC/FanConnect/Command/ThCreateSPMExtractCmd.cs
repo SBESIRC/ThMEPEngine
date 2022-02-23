@@ -41,13 +41,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     ThFanConnectUtils.ImportBlockFile();
                     //选择起点
                     var startPt = ThFanConnectUtils.SelectPoint();
+                    startPt = startPt.ToPoint2d().ToPoint3d();
                     if (startPt.IsEqualTo(new Point3d()))
                     {
                         return;
                     }
                     //提取水管路由
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
-                    if(pipes.Count == 0)
+
+                    if (pipes.Count == 0)
                     {
                         return;
                     }
@@ -58,6 +60,11 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     //提取水管连接点
                     var fcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
+                    foreach(var f in fcus)
+                    {
+                        f.FanPoint = f.FanPoint.ToPoint2d().ToPoint3d();
+                        f.FanObb = f.FanObb.ToNTSLineString().ToDbPolyline();
+                    }
                     if (fcus.Count == 0)
                     {
                         return;
@@ -71,10 +78,11 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllLine = pipes
                     };
                     var tmpTree = handlePipeService.HandleFanPipe(mt);
-                    if(tmpTree == null)
+                    if (tmpTree == null)
                     {
                         return;
                     }
+                    var badLines = handlePipeService.GetBadLine(tmpTree, mt);
                     var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统

@@ -1,31 +1,18 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using Linq2Acad;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
-using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
-using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
-using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
-using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
-using NFox.Cad;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -64,7 +51,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    
                     Run(currentDb);
                 }
             }
@@ -88,8 +74,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
             //if (!dataprocessingFlag) return;
 
-            var dataprocessingFlag = Preprocessing.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
+            var dataprocessingFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (!dataprocessingFlag) return;
+            
             Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
 
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
@@ -104,41 +91,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
+                var Cars = new List<Polyline>();
+                var Pillars = new List<Polyline>();
+                var Lanes = new List<Line>();
+                var Boundary = layoutPara.OuterBoundary;
+                var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    var use_partition_pro = true;
-                    if (use_partition_pro)
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
+                    try
                     {
-                        var partitionpro = new ParkingPartitionPro();
-                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                        if (!partitionpro.Validate()) continue;
-                        try
-                        {
-                            count += partitionpro.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
-                        continue;
+                        count += partitionpro.Process(Cars,Pillars,Lanes);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ParkingPartition partition = new ParkingPartition();
-                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
-                        {
-                            try
-                            {
-                                count += partition.ProcessAndDisplay();
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(ex.Message);
-                                partition.Dispose();
-                            }
-                        }
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars,ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                count = Cars.Count;
+                var partitionpro_final = new ParkingPartitionPro();
+                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Pillars = Pillars;
+                partitionpro_final.Display();
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();
