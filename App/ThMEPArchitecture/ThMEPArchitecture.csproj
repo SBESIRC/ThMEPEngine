@@ -103,10 +103,6 @@
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
-      <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
-      <Name>ThMEPWSS</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Accord.Math">
