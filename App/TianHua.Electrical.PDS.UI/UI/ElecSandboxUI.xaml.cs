@@ -2,6 +2,8 @@
 using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
+using TianHua.Electrical.PDS.Project;
+using TianHua.Electrical.PDS.UI.Project;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using TianHua.Electrical.PDS.UI.ViewModels;
 
@@ -19,8 +21,25 @@ namespace TianHua.Electrical.PDS.UI.UI
             InitializeComponent();
 
             MutexName = "ElecSandboxUI";
-
             InitTopTableItem();
+
+            LoadProject();
+        }
+
+        /// <summary>
+        /// 加载项目文件
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        private void LoadProject(string url = null)
+        {
+            //Setp 1
+            PDSProject.Instance.Load(url);//加载项目
+
+            //Setp 2
+            ConverterFactory.ConvertToViewModel();//数据转换ViewModel
+
+            //Setp 3
+            //刷新所有UI的DataContext
         }
 
         #region 初始化信息

@@ -12,6 +12,7 @@ using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Command
 {
@@ -69,6 +70,7 @@ namespace TianHua.Electrical.PDS.Command
                 };
                 var unionEngine = new ThPDSGraphUnionEngine(distBoxKey);
                 var unionGraph = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
+                PDSProject.Instance.PushGraphData(unionGraph);
             }
         }
 

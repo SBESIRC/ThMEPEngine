@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using TianHua.Electrical.PDS.UI.Project;
 using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
@@ -60,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnSaveSet_Click(object sender, RoutedEventArgs e)
         {
-
+            ConverterFactory.ConvertToViewModel();//数据转换ViewModel
         }
         #endregion
     }
