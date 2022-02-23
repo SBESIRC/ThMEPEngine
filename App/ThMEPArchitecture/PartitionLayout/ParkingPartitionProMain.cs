@@ -294,6 +294,19 @@ namespace ThMEPArchitecture.PartitionLayout
                 IniLanes.Add(new Lane(rampline, -prepvec));
                 OriginalLanes.Add(rampline);
                 IniLaneBoxes.Add(rampline.Buffer(DisLaneWidth / 2));
+                for (int i = 0; i < IniLanes.Count; i++)
+                {
+                    var line = IniLanes[i].Line;
+                    var nvec = IniLanes[i].Vec;
+                    var splits = SplitLine(line, rampline);
+                    if (splits.Count() > 1)
+                    {
+                        IniLanes.RemoveAt(i);
+                        IniLanes.Add(new Lane(splits[0], nvec));
+                        IniLanes.Add(new Lane(splits[1], nvec));
+                        break;
+                    }
+                }
             }
         }
 
