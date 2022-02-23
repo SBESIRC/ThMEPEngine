@@ -96,15 +96,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
             if (rstDirection.StringResult.Equals("纵向"))
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.VERTICAL);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.VERTICAL);
             }
             else if (rstDirection.StringResult.Equals("横向"))
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.HORIZONTAL);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.HORIZONTAL);
             }
             else
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = ((int)LayoutDirection.LENGTH);
+                ThMEPArchitecture.PartitionLayout.ParkingPartitionPro.LayoutMode = ((int)LayoutDirection.LENGTH);
             }
 
             return true;

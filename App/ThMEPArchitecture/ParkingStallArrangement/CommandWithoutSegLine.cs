@@ -160,7 +160,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
-                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
                 BreakFlag = ParameterViewModel.OptmizeThenBreakSeg;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel,null, BreakFlag);
             }

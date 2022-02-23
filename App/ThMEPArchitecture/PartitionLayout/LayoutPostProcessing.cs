@@ -17,6 +17,15 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public static class LayoutPostProcessing
     {
+        /// <summary>
+        /// 全局判断识别，对于分隔线尽端如果能生成车位的情况，重新排布局部区域
+        /// </summary>
+        /// <param name="cars"></param>
+        /// <param name="pillars"></param>
+        /// <param name="lanes"></param>
+        /// <param name="obspacialindex"></param>
+        /// <param name="boundary"></param>
+        /// <param name="vm"></param>
         public static void DealWithCarsOntheEndofLanes(ref List<Polyline> cars,ref List<Polyline> pillars, List<Line> lanes
             , ThCADCoreNTSSpatialIndex obspacialindex,Polyline boundary, ParkingStallArrangementViewModel vm)
         {
@@ -181,6 +190,5 @@ namespace ThMEPArchitecture.PartitionLayout
             cars.AddRange(partitionpro.CarSpots);
             pillars.AddRange(partitionpro.Pillars);
         }
-
     }
 }

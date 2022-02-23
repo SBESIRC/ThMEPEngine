@@ -156,7 +156,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
-                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
             }
 
             LayoutParameter layoutPara;// 最优的分割方案（横向或者纵向优先

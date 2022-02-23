@@ -18,10 +18,7 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public partial class ParkingPartitionPro
     {
-        public ParkingPartitionPro()
-        {
-
-        }
+        public ParkingPartitionPro() { }
         public ParkingPartitionPro(List<Polyline> walls, List<Line> iniLanes,
         List<Polyline> obstacles, Polyline boundary, ParkingStallArrangementViewModel vm = null, bool gpillars = true)
         {
@@ -107,7 +104,6 @@ namespace ThMEPArchitecture.PartitionLayout
         public static double DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
         public static double DisPillarMoveDeeplyBackBack = 1000;
         public static double DisPillarMoveDeeplySingle = 550;
-
         public static double LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
         public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3;
@@ -123,14 +119,20 @@ namespace ThMEPArchitecture.PartitionLayout
             VERTICAL = 2
         }
 
+        /// <summary>
+        /// 在构造类时初始化数据
+        /// </summary>
+        /// <param name="iniLanes"></param>
         private void InitialzeDatas(List<Line> iniLanes)
         {
             int count = 0;
+            //如果柱子完成面宽度对车道间距没有影响，则在一开始便将柱子缩小为净尺寸
             if (!HasImpactOnDepthForPillarConstruct)
             {
                 DisPillarLength = PillarNetLength;
                 DisPillarDepth = PillarNetDepth;
             }
+            //输入的车道线有可能有碎线，将能合并join的join起来
             while (true)
             {
                 count++;
@@ -157,8 +159,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                     if (joined) break;
                 }
-            }
-        
+            }    
+            //将车道线构造为车道线Lane类
             foreach (var e in iniLanes)
             {
                 var vec = CreateVector(e).GetPerpendicularVector().GetNormal();
@@ -169,11 +171,15 @@ namespace ThMEPArchitecture.PartitionLayout
                 OriginalLanes.Add(e);
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Vertices().Cast<Point3d>()));
-
             IniLaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)));
             //CarBoxesSpatialIndex.Update(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)).ToCollection(), new DBObjectCollection());
         }
 
+        /// <summary>
+        /// 验证输入的数据是否有效
+        /// 如果输入的车道线靠近墙车道宽度不够，判断不合理的长度距离和，如果大于特定值，判断该输入数据无效。
+        /// </summary>
+        /// <returns></returns>
         public bool Validate()
         {
             double length_judge_lane_nextto_wall = 30000;
@@ -227,6 +233,11 @@ namespace ThMEPArchitecture.PartitionLayout
             return CarSpots.Count;
         }
 
+        /// <summary>
+        /// 数据预处理
+        /// 1. 如果车道线穿过建筑物了（靠近边界的情况），分割该车道线取第一段
+        /// 2. 如果区域内含有坡道，从出入点到边界生成一条车道线
+        /// </summary>
         private void PreProcess()
         {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
@@ -291,13 +302,9 @@ namespace ThMEPArchitecture.PartitionLayout
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 if (!adb.Layers.Contains(carLayerName))
-                {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, carLayerName, 0);
-                }
                 if (!adb.Layers.Contains(columnLayerName))
-                {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, columnLayerName, 0);
-                }
             }
             CarSpots.Select(e =>
             {
@@ -328,8 +335,15 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
+        /// <summary>
+        /// 生成三种类别的车道线：
+        /// 1. 背靠背模块偏移出来的车道
+        /// 2. 从车道线尽端生长出来的车道
+        /// 3. 两道方向一致的建筑物之间生成一条车道
+        /// 每生成一次比较各种生成的车道线的大小，选最大的作为该轮生成的车道线，直至三种方式均不能再生成车道线为止。
+        /// </summary>
         private void GenerateLanes()
-        {
+        {        
             int count = 0;
             while (true)
             {
@@ -365,6 +379,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     break;
                 }
             }
+            //在一个比较复杂的凹边形边界中，出现了一处inilanes中应该记录新生成的车道线但实际没有生成的情况
+            //通过读取CarModules中的数据将该车道线重新记录进去
             foreach (var module in CarModules)
             {
                 var lane = module.Line;
@@ -624,23 +640,6 @@ namespace ThMEPArchitecture.PartitionLayout
                         var plback = pl.Clone() as Polyline;
                         plback.TransformBy(Matrix3d.Displacement(-vec * DisCarAndHalfLane));
                         var split_splitori_points = plback.Intersect(Boundary, Intersect.OnBothOperands).Select(e => splitori.GetClosestPointTo(e, false)).ToList();
-                        if (false)
-                        {
-                            splitori = SplitLine(splitori, split_splitori_points).Where(e =>
-                            {
-                                var l = CreateLine(e);
-                                l.StartPoint = l.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(l).GetNormal() * 10));
-                                l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
-                                var bf = l.Buffer(DisLaneWidth / 2 - 1);
-                                var result = bf.Intersect(Boundary, Intersect.OnBothOperands).Count == 0;
-                                bf.Dispose();
-                                l.Dispose();
-                                return result;
-                            }).Where(e => e.Length > 1).First();
-                            var line_to_ori = CreateLine(splitori);
-                            line_to_ori.TransformBy(Matrix3d.Displacement(vec.GetNormal() * (DisVertCarLength + DisLaneWidth)));
-                            plback = CreatPolyFromLines(splitori, line_to_ori);
-                        }
                         var mod = new CarModule(plback, splitori, vec);
                         mod.IsInBackBackModule = true;
                         paras.CarModulesToAdd.Add(mod);
@@ -871,6 +870,9 @@ namespace ThMEPArchitecture.PartitionLayout
             if (paras.CarModulesToAdd.Count > 0) CarModules.AddRange(paras.CarModulesToAdd);
         }
 
+        /// <summary>
+        /// 生成从车道线上垂直方向生成的模块
+        /// </summary>
         private void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
@@ -907,6 +909,9 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
+        /// <summary>
+        /// 在车道线剩下的空间生成车位
+        /// </summary>
         private void GenerateCarsOnRestLanes()
         {
             LaneSpatialIndex.Update(IniLanes.Select(e => CreatePolyFromLine(e.Line)).ToCollection(), new DBObjectCollection());
@@ -952,80 +957,5 @@ namespace ThMEPArchitecture.PartitionLayout
             RemoveInvalidPillars();
             ReDefinePillarDimensions();
         }
-
-    }
-
-    public class GenerateLaneParas
-    {
-        public int SetNotBeMoved = -1;
-        public int SetGStartAdjLane = -1;
-        public int SetGEndAdjLane = -1;
-        public List<Lane> LanesToAdd = new List<Lane>();
-        public List<Polyline> CarBoxesToAdd = new List<Polyline>();
-        public List<CarModule> CarModulesToAdd = new List<CarModule>();
-        public List<CarBoxPlus> CarBoxPlusToAdd = new List<CarBoxPlus>();
-        public void Dispose()
-        {
-            LanesToAdd.ForEach(e => e.Line.Dispose());
-            CarBoxesToAdd.ForEach(e => e.Dispose());
-            CarModulesToAdd.ForEach(e => e.Line.Dispose());
-            CarModulesToAdd.ForEach(e => e.Box.Dispose());
-        }
-    }
-
-    public class CarBoxPlus
-    {
-        public CarBoxPlus()
-        {
-
-        }
-        public CarBoxPlus(Polyline box,bool isSingleForParallelExist=false)
-        {
-            Box = box;
-            IsSingleForParallelExist=isSingleForParallelExist;
-        }
-        public Polyline Box;
-        public bool IsSingleForParallelExist = false;
-    }
-
-    public class Lane
-    {
-        public Lane(Line line, Vector3d vec, bool canBeMoved = true)
-        {
-            Line = line;
-            Vec = vec;
-            CanBeMoved = canBeMoved;
-        }
-        public Line Line;
-        public bool CanBeMoved;
-        public Vector3d Vec;
-        public bool GStartAdjLine = false;
-        public bool GEndAdjLine = false;
-        public bool CanExtend = true;
-    }
-
-    public class PerpModlues
-    {
-        public List<Line> Lanes;
-        public int Mminindex;
-        public int Count;
-        public Vector3d Vec;
-        public List<Polyline> Bounds;
-    }
-
-    public class CarModule
-    {
-        public CarModule() { }
-        public CarModule(Polyline box, Line line, Vector3d vec)
-        {
-            Box = box;
-            Line = line;
-            Vec = vec;
-        }
-        public bool GenerateCars = true;
-        public Polyline Box;
-        public Line Line;
-        public Vector3d Vec;
-        public bool IsInBackBackModule = false;
     }
 }

@@ -149,6 +149,16 @@ namespace ThMEPArchitecture.PartitionLayout
             return SplitLine(line, points);
         }
 
+        /// <summary>
+        /// 判断在准备生成背靠背车道的前方是否有已经存在的平行车道了
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="vec"></param>
+        /// <param name="maxlength"></param>
+        /// <param name="minlength"></param>
+        /// <param name="dis_to_move"></param>
+        /// <param name="prepLine"></param>
+        /// <returns></returns>
         private bool HasParallelLaneForwardExisted(Line line, Vector3d vec, double maxlength, double minlength, ref double dis_to_move
             , ref Line prepLine)
         {
@@ -177,6 +187,12 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
+        /// <summary>
+        /// 判断在该车道方向上是否需要生成贴近建筑物的车道
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="vec"></param>
+        /// <returns></returns>
         private double IsEssentialToCloseToBuilding(Line line, Vector3d vec)
         {
             if (!IsPerpVector(vec, Vector3d.XAxis)) return -1;
@@ -290,8 +306,6 @@ namespace ThMEPArchitecture.PartitionLayout
             if(inilinesplitcarboxesactionpoints.Count > 0)
                 if (inilinesplitcarboxes.StartPoint.DistanceTo(inilinesplitcarboxesactionpoints[0]) < 10) return generate_lane_length;
             inilinesplitcarboxes =SplitLine(inilinesplitcarboxes, inilinesplitcarboxesactionpoints).First();
-
-
             //与障碍物相交
             var iniplsplitbox = inilinesplitcarboxes.Buffer(DisLaneWidth / 2);
             iniplsplitbox.Scale(iniplsplitbox.GetRecCentroid(), ScareFactorForCollisionCheck);
@@ -856,6 +870,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             Pillars.RemoveAt(Pillars.Count - 1);
                         }
                     }
+                    //如果是生成该车道上的第一个车位，判断是否需要在前方生成柱子，如果需要则生成
                     if (precar.Area == 0)
                     {
                         if (gfirstpillar && GeneratePillars)
@@ -935,6 +950,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         else { }
                         precar = car;
                     }
+                    //判断是否需要生成最后一个柱子
                     if (glastpillar && c == segscount && GeneratePillars)
                     {
                         var ed = seg;
@@ -976,6 +992,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 s.Dispose();
             }
             segobjs.Dispose();
+            //判断是否需要生成中柱
             if (generate_middle_pillar)
             {
                 var middle_pillars = new List<Polyline>();
