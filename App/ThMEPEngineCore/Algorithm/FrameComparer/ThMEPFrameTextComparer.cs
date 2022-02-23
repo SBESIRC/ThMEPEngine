@@ -58,6 +58,7 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         private void CheckUnChangedFrame(ThMEPFrameComparer frameComp)
         {
             var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+            var revMat = Matrix3d.Displacement(srtP.GetAsVector());
             var tFrames = new Dictionary<Polyline, Polyline>();
             foreach (var pair in frameComp.unChangedFrame)
             {
@@ -70,10 +71,14 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                     if (!IsSameTexts(orgTexts, refTexts))
                     {
                         if (!frameComp.ChangedFrame.ContainsKey(pair.Key))
+                        {
+                            pair.Key.TransformBy(revMat);
                             frameComp.ChangedFrame.Add(pair.Key, new Tuple<Polyline, double>(pair.Value, 1));
+                        }
                     }
                     else
                     {
+                        pair.Key.TransformBy(revMat);
                         tFrames.Add(pair.Key, pair.Value);
                     }
                 }
