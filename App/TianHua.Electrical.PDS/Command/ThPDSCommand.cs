@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Geometry;
@@ -39,46 +40,26 @@ namespace TianHua.Electrical.PDS.Command
                 // 提取标注
                 var markExtractor = new ThCircuitMarkExtractionEngine();
                 markExtractor.ExtractFromMS(acad.Database);
+                
                 // 根据块名提取负载及标注块
                 var loadExtractService = new ThPDSBlockExtractService();
-                loadExtractService.Extract(acad.Database, nameFilter, propertyFilter, DistBoxFilter);
-
-                // 提取配电箱
-                //var distributionExtractService = new ThPDSDistributionExtractService();
-                //distributionExtractService.Extract(acad.Database);
-                //var distributionLayer = ThPDSLayerService.CreateAITestDistributionLayer(acad.Database);
-                //distributionExtractService.Results.ForEach(o =>
-                //{
-                //    var blockReference = acad.Element<BlockReference>(o.ObjId, true);
-                //    var rectangle = blockReference.GeometricExtents.ToRectangle();
-                //    acad.ModelSpace.Add(rectangle);
-                //    rectangle.LayerId = distributionLayer;
-                //});
+                loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
 
                 // 提取回路
                 var cableEngine = new ThCableSegmentRecognitionEngine();
                 cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                //var cableLayer = ThPDSLayerService.CreateAITestCableLayer(acad.Database);
-                //cableEngine.Results.OfType<Curve>().ForEach(o =>
-                //{
-                //    acad.ModelSpace.Add(o);
-                //    o.LayerId = cableLayer;
-                //});
 
                 // 提取桥架
                 var cabletrayEngine = new ThCabletraySegmentRecognitionEngine();
                 cabletrayEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                //var cabletrayLayer = ThPDSLayerService.CreateAITestCabletrayLayer(acad.Database);
-                //cabletrayEngine.Results.OfType<Curve>().ForEach(o =>
-                //{
-                //    acad.ModelSpace.Add(o);
-                //    o.LayerId = cabletrayLayer;
-                //});
 
                 //做一个标注的Service
                 var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks);
-                var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks,
-                    loadExtractService.LoadBlocks, cabletrayEngine.Results, cableEngine.Results, markService, distBoxKey);
+
+                ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
+                ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
+                var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
+                    loadExtractService.LoadBlocks.Keys.ToList(), cabletrayEngine.Results, cableEngine.Results, markService, distBoxKey);
                 graphEngine.CreatGraph();
                 var graph = graphEngine.GetGraph();
 
@@ -87,7 +68,7 @@ namespace TianHua.Electrical.PDS.Command
                     graph,
                 };
                 var unionEngine = new ThPDSGraphUnionEngine(distBoxKey);
-                var unionGrapg = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
+                var unionGraph = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
             }
         }
 

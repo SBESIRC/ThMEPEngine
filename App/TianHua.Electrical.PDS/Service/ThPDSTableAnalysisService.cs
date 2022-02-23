@@ -9,7 +9,7 @@ namespace TianHua.Electrical.PDS.Service
         public void Analysis(List<ThPDSBlockInfo> tableInfo, List<int> distBoxFilter, ref List<string> nameFilter,
             ref List<string> propertyFilter, ref List<string> distBoxKey)
         {
-            foreach (ThPDSBlockInfo o in tableInfo)
+            foreach (var o in tableInfo)
             {
                 if (string.IsNullOrEmpty(o.Properties))
                 {

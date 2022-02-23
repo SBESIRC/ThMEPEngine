@@ -28,5 +28,10 @@ namespace TianHua.Electrical.PDS.Model
         /// 上级配电箱编号
         /// </summary>
         public string SourcePanelID { get; set; }
+
+        /// <summary>
+        /// 块名
+        /// </summary>
+        public string BlockName { get; set; }
     }
 }

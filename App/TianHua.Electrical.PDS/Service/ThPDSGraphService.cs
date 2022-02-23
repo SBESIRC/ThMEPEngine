@@ -8,6 +8,9 @@ namespace TianHua.Electrical.PDS.Service
 {
     public static class ThPDSGraphService
     {
+        public static Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
+        public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
+
         public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService, List<string> distBoxKey)
         {
             var node = new ThPDSCircuitGraphNode
@@ -19,7 +22,7 @@ namespace TianHua.Electrical.PDS.Service
             var service = new ThPDSMarkAnalysisService();
             node.Loads = new List<ThPDSLoad>
             {
-                service.DistBoxMarkAnalysis(marks, distBoxKey),
+                service.DistBoxMarkAnalysis(marks, distBoxKey, DistBoxBlocks[entity]),
             };
             return node;
         }
@@ -40,7 +43,7 @@ namespace TianHua.Electrical.PDS.Service
                     var frame = ThPDSBufferService.Buffer(e, database);
                     var marks = markService.GetMarks(frame);
                     var service = new ThPDSMarkAnalysisService();
-                    loads.Add(service.LoadMarkAnalysis(marks));
+                    loads.Add(service.LoadMarkAnalysis(marks, LoadBlocks[e]));
                 }
             });
 

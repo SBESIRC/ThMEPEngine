@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Engine
     {
         public List<string> NameFilter { get; set; }
         public List<string> PropertyFilter { get; set; }
-        public List<int> DistBoxFilter { get; set; }
+        public List<string> DistBoxKey { get; set; }
 
         public override void Extract(Database database)
         {
@@ -20,7 +20,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 NameFilter = NameFilter,
                 PropertyFilter = PropertyFilter,
-                DistBoxFilter = DistBoxFilter,
+                DistBoxKey = DistBoxKey,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 NameFilter = NameFilter,
                 PropertyFilter = PropertyFilter,
-                DistBoxFilter = DistBoxFilter,
+                DistBoxKey = DistBoxKey,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);

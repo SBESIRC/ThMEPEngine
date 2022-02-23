@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -12,13 +13,23 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad DistBoxMarkAnalysis(List<string> marks, List<string> distBoxKey)
+        public ThPDSLoad DistBoxMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
         {
             var thPDSDistBox = new ThPDSLoad
             {
                 ID = CreatePDSID(marks, distBoxKey),
-                LoadType = ThPDSLoadType.DistributionPanel
+                LoadTypeCat_1 = distBoxData.Cat_1,
+                LoadTypeCat_2 = distBoxData.Cat_2,
+                DefaultCircuitType = distBoxData.DefaultCircuitType,
+                FireLoad = false,
+                Location = new ThPDSLocation
+                {
+                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                    BasePoint = distBoxData.Position,
+                }
             };
+            thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
+
             return thPDSDistBox;
         }
 
@@ -28,12 +39,20 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks)
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, ThPDSBlockReferenceData distBoxData)
         {
             var thPDSDistBox = new ThPDSLoad
             {
                 ID = CreatePDSID(marks),
-                LoadType = ThPDSLoadType.None,
+                LoadTypeCat_1 = ThPDSLoadTypeCat_1.None,
+                LoadTypeCat_2 = distBoxData.Cat_2,
+                DefaultCircuitType = distBoxData.DefaultCircuitType,
+                FireLoad = false,
+                Location = new ThPDSLocation
+                {
+                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                    BasePoint = distBoxData.Position,
+                }
             };
             return thPDSDistBox;
         }
@@ -92,18 +111,34 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public ThPDSCircuit CircuitMarkAnalysis(List<string> infos, List<string> distBoxKey)
         {
+            var id = CreateCircuitID(infos, distBoxKey);
+            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfigModel.BlockConfig);
             var circuit = new ThPDSCircuit
             {
-                ID = CreateCircuitID(infos, distBoxKey)
+                ID = id,
+                Type = circuitModel.CircuitType,
+                KV = circuitModel.KV,
+                Phase = circuitModel.Phase,
+                DemandFactor = circuitModel.DemandFactor,
+                PowerFactor = circuitModel.PowerFactor,
+                FireLoad = circuitModel.FireLoad,
             };
             return circuit;
         }
 
         public ThPDSCircuit CircuitMarkAnalysis(List<string> infos)
         {
+            var id = CreateCircuitID(infos);
+            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfigModel.BlockConfig);
             var circuit = new ThPDSCircuit
             {
-                ID = CreateCircuitID(infos)
+                ID = id,
+                Type = circuitModel.CircuitType,
+                KV = circuitModel.KV,
+                Phase = circuitModel.Phase,
+                DemandFactor = circuitModel.DemandFactor,
+                PowerFactor = circuitModel.PowerFactor,
+                FireLoad = circuitModel.FireLoad,
             };
             return circuit;
         }
@@ -141,6 +176,23 @@ namespace TianHua.Electrical.PDS.Service
                 circuitID.CircuitNumber = infos[0];
             }
             return circuitID;
+        }
+
+        private ThPDSCircuitModel SelectModel(string circuitNumber, List<ThPDSCircuitModel> table)
+        {
+            var result = new ThPDSCircuitModel();
+            foreach(var o in table)
+            {
+                var check = o.TextKey.Replace("*", ".*");
+                var r = new Regex(@check);
+                var m = r.Match(circuitNumber);
+                if (m.Success)
+                {
+                    result = o;
+                    break;
+                }
+            }
+            return result;
         }
     }
 }

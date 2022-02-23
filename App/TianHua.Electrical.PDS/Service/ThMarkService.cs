@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThCADExtension;
 using System;
 using ThMEPEngineCore.CAD;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -19,7 +20,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
 
         private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
-        public ThMarkService(List<ThRawIfcAnnotationElementData> markDatas, List<ThBlockReferenceData> markBlocks)
+        public ThMarkService(List<ThRawIfcAnnotationElementData> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks)
         {
             var lines = new DBObjectCollection();
             var texts = new DBObjectCollection();
@@ -80,13 +81,13 @@ namespace TianHua.Electrical.PDS.Service
             });
             markBlocks.ForEach(o =>
             {
-                if (o.EffectiveName.Equals("E-电力平面-负荷明细"))
+                if (o.Value.EffectiveName.Equals("E-电力平面-负荷明细"))
                 {
 
                 }
                 else
                 {
-                    MarkDic.Add(ToDbPoint(o.Position), GetTexts(o));
+                    MarkDic.Add(ToDbPoint(o.Value.Position), GetTexts(o.Value));
                 }
             });
             PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
@@ -134,7 +135,7 @@ namespace TianHua.Electrical.PDS.Service
             return mText.Text.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
-        private List<string> GetTexts(ThBlockReferenceData Data)
+        private List<string> GetTexts(ThPDSBlockReferenceData Data)
         {
             var dic = Data.Attributes;
             return dic.Select(o => o.Key + ":" + o.Value).ToList();

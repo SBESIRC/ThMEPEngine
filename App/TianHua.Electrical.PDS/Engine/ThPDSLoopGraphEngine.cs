@@ -42,7 +42,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 负载集合
         /// </summary>
-        private List<BlockReference> Loads { get; set; }
+        private List<Entity> Loads { get; set; }
 
         /// <summary>
         /// 已捕捉到的负载集合
@@ -71,8 +71,8 @@ namespace TianHua.Electrical.PDS.Engine
         private ThMarkService MarkService;
         private Database Database;
 
-        public ThPDSLoopGraphEngine(Database database, List<ThBlockReferenceData> distBoxes,
-            List<ThBlockReferenceData> loads, List<Line> cabletrays, List<Curve> cables, ThMarkService markService,
+        public ThPDSLoopGraphEngine(Database database, List<Entity> distBoxes,
+            List<Entity> loads, List<Line> cabletrays, List<Curve> cables, ThMarkService markService,
             List<string> distBoxKey)
         {
             Database = database;
@@ -80,8 +80,8 @@ namespace TianHua.Electrical.PDS.Engine
             DistBoxKey = distBoxKey;
             using (AcadDatabase acad = AcadDatabase.Use(this.Database))
             {
-                DistBoxes = distBoxes.Select(o => acad.Element<Entity>(o.ObjId, false)).ToList();
-                Loads = loads.Select(o => acad.Element<BlockReference>(o.ObjId, false)).ToList();
+                DistBoxes = distBoxes;
+                Loads = loads;
                 CacheDistBoxes = new Dictionary<Entity, ThPDSCircuitGraphNode>();
                 CacheLoads = new List<Entity>();
                 Cabletrays = cabletrays;
@@ -114,7 +114,10 @@ namespace TianHua.Electrical.PDS.Engine
             }
             foreach (var distBox in DistBoxes.Except(CacheDistBoxes.Keys))
             {
-                FindGraph(null, distBox);
+                if (!CacheDistBoxes.ContainsKey(distBox))
+                {
+                    FindGraph(null, distBox);
+                }
             }
         }
 

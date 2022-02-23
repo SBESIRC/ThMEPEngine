@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using Dreambuild.AutoCAD;
 using QuickGraph;
 
@@ -67,6 +67,14 @@ namespace TianHua.Electrical.PDS.Engine
                 unionGraph.AddVertex(edge.Target);
                 unionGraph.AddEdge(edge);
             });
+
+            foreach (var vertice in unionGraph.Vertices)
+            {
+                if (!unionGraph.Edges.Any(o => o.Target.Equals(vertice)))
+                {
+                    vertice.IsStartVertexOfGraph = true;
+                }
+            }
 
             return unionGraph;
         }
