@@ -35,21 +35,21 @@ namespace ThMEPElectrical.AFAS.Data
         public override void Extract(Database database, Point3dCollection pts)
         {
             //获取本地的房间框线
-            var roomOutlineExtraction = new ThRoomOutlineExtractionEngine();
+            var roomOutlineExtraction = new ThAIRoomOutlineExtractionEngine();
             roomOutlineExtraction.ExtractFromMS(database);
 
             //获取本地的房间标注
-            var roomMarkExtraction = new ThRoomMarkExtractionEngine();
+            var roomMarkExtraction = new ThAIRoomMarkExtractionEngine();
             roomMarkExtraction.ExtractFromMS(database);
 
             roomOutlineExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
             roomMarkExtraction.Results.ForEach(o => Transformer.Transform(o.Geometry));
 
             var newPts = Transformer.Transform(pts);
-            var roomEngine = new ThRoomOutlineRecognitionEngine();
+            var roomEngine = new ThAIRoomOutlineRecognitionEngine();
             roomEngine.Recognize(roomOutlineExtraction.Results, newPts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine();
+            var markEngine = new ThAIRoomMarkRecognitionEngine();
             markEngine.Recognize(roomMarkExtraction.Results, newPts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
 

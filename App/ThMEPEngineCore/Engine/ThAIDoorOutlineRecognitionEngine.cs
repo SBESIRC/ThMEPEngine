@@ -10,11 +10,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDoorOutlineExtractionEngine : ThSpatialElementExtractionEngine
+    public class ThAIDoorOutlineExtractionEngine : ThSpatialElementExtractionEngine
     {
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThRoomOutlineExtractionVisitor()
+            var visitor = new ThAIRoomOutlineExtractionVisitor()
             {
                 LayerFilter = ThDoorLayerManager.CurveModelSpaceLayers(database),
             };
@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            var visitor = new ThRoomOutlineExtractionVisitor()
+            var visitor = new ThAIRoomOutlineExtractionVisitor()
             {
                 LayerFilter = ThDoorLayerManager.CurveModelSpaceLayers(database),
             };
@@ -41,19 +41,19 @@ namespace ThMEPEngineCore.Engine
             throw new NotImplementedException();
         }
     }
-    public class ThDoorOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThAIDoorOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
         public List<Polyline> doorOutLines;
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDoorOutlineExtractionEngine();
+            var engine = new ThAIDoorOutlineExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThDoorOutlineExtractionEngine();
+            var engine = new ThAIDoorOutlineExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

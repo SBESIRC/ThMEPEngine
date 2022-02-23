@@ -9,13 +9,13 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.Data
 {
-    class ThWaterRoomMarkExtractionEngine: ThRoomMarkExtractionEngine
+    class ThWaterRoomMarkExtractionEngine: ThAIRoomMarkExtractionEngine
     {
         public override void Extract(Database database)
         {
             var visitor = new ThWaterRoomMarkExtractVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
+                LayerFilter = ThRoomMarkLayerManager.TextModelSpaceLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);

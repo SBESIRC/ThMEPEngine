@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThSpaceNameLayerManager
+    public class ThRoomMarkLayerManager
     {
         public static List<string> TextXrefLayers(Database database)
         {
@@ -30,13 +30,13 @@ namespace ThMEPEngineCore.Service
                     .ToList();
             }
         }
-        public static List<string> AIRoomNameXRefLayers(Database database)
+        public static List<string> AIRoomMarkXRefLayers(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
                     .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsAIRoomNameXRefLayer(o.Name))
+                    .Where(o => IsAIRoomMarkXRefLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
@@ -69,7 +69,7 @@ namespace ThMEPEngineCore.Service
             }
             return patterns[0] == "AI" && patterns[1] == "房间名称";
         }
-        private static bool IsAIRoomNameXRefLayer(string name)
+        private static bool IsAIRoomMarkXRefLayer(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').ToArray();
             if (patterns.Count() < 2)

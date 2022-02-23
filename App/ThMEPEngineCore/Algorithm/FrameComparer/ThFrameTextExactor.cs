@@ -31,16 +31,16 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             using (var db = AcadDatabase.Active())
             {
                 // 提取
-                var visitor = new ThRoomMarkExtractionVisitor
+                var visitor = new ThAIRoomMarkExtractionVisitor
                 {
-                    LayerFilter = ThSpaceNameLayerManager.AIRoomNameXRefLayers(db.Database),
+                    LayerFilter = ThRoomMarkLayerManager.AIRoomMarkXRefLayers(db.Database),
                 };
                 var extractor = new ThAnnotationElementExtractor();
                 extractor.Accept(visitor);
                 extractor.Extract(db.Database);
 
                 // 识别
-                var markEngine = new ThRoomMarkRecognitionEngine();
+                var markEngine = new ThAIRoomMarkRecognitionEngine();
                 markEngine.Recognize(visitor.Results, new Autodesk.AutoCAD.Geometry.Point3dCollection());
                 var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 foreach (var t in marks)

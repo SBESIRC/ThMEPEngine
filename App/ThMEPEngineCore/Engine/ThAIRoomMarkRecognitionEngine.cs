@@ -11,13 +11,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
+    public class ThAIRoomMarkExtractionEngine : ThAnnotationElementExtractionEngine
     {
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThRoomMarkExtractionVisitor
+            var visitor = new ThAIRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
+                LayerFilter = ThRoomMarkLayerManager.TextModelSpaceLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -27,9 +27,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            var visitor = new ThRoomMarkExtractionVisitor
+            var visitor = new ThAIRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database),
+                LayerFilter = ThRoomMarkLayerManager.AIRoomMarkXRefLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -37,18 +37,18 @@ namespace ThMEPEngineCore.Engine
             Results = visitor.Results;
         }
     }
-    public class ThRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
+    public class ThAIRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine();
+            var engine = new ThAIRoomMarkExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomMarkExtractionEngine();
+            var engine = new ThAIRoomMarkExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }       

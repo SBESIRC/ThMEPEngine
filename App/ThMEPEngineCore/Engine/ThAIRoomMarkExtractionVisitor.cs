@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRoomMarkExtractionVisitor : ThAnnotationElementExtractionVisitor
+    public class ThAIRoomMarkExtractionVisitor : ThAnnotationElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcAnnotationElementData> elements, Entity dbObj, Matrix3d matrix)
         {

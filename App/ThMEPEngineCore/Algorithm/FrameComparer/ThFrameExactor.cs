@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 using ThCADCore.NTS;
 using ThCADExtension;
 using DotNetARX;
@@ -111,19 +112,22 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         }
         private void GetDoorReference(AcadDatabase adb)
         {
-            var engine = new ThDoorOutlineRecognitionEngine();
+            var engine = new ThAIDoorOutlineRecognitionEngine();
             engine.Recognize(adb.Database, fence);
             engine.doorOutLines.ForEachDbObject(o => reference.Add(o));
         }
         private void GetWindowReference(AcadDatabase adb)
         {
-            var engine = new ThWindowOutlineRecognitionEngine();
+            var engine = new ThAIWindowOutlineRecognitionEngine();
             engine.Recognize(adb.Database, fence);
             engine.windowsOutLines.ForEachDbObject(o => reference.Add(o));
         }
         private void GetFireComponentReference(AcadDatabase adb)
         {
-            var engine = new ThFireCompartmentOutlineRecognitionEngine();
+            var engine = new ThFireCompartmentOutlineRecognitionEngine()
+            {
+                LayerFilter = ThFireCompartmentLayerManager.CurveModelSpaceLayers(adb.Database),
+            };
             engine.Recognize(adb.Database, fence);
             var rooms = engine.Elements.Cast<ThIfcRoom>().ToList();
             rooms.Select(o => o.Boundary)
@@ -132,7 +136,7 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         }
         private void GetRoomReference(AcadDatabase adb)
         {
-            var engine = new ThRoomOutlineRecognitionEngine();
+            var engine = new ThAIRoomOutlineRecognitionEngine();
             engine.Recognize(adb.Database, fence);
             var rooms = engine.Elements.Cast<ThIfcRoom>().ToList();
             rooms.Select(o => o.Boundary)

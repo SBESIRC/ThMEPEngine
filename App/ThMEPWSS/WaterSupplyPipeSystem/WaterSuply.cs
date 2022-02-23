@@ -126,7 +126,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             var markExtractEngine = new ThWaterRoomMarkExtractionEngine();
             markExtractEngine.ExtractFromMS(acadDatabase.Database);
 
-            var markRecognizeEngine = new ThRoomMarkRecognitionEngine();
+            var markRecognizeEngine = new ThAIRoomMarkRecognitionEngine();
             markRecognizeEngine.Recognize(markExtractEngine.Results, selectArea);
             var ele = markRecognizeEngine.Elements;
 

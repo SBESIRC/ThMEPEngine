@@ -8,7 +8,7 @@ using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.Data
 {
-    public class ThWaterRoomMarkExtractVisitor: ThRoomMarkExtractionVisitor
+    public class ThWaterRoomMarkExtractVisitor: ThAIRoomMarkExtractionVisitor
     {
         public override bool IsAnnotationElementBlock(BlockTableRecord blockTableRecord)
         {

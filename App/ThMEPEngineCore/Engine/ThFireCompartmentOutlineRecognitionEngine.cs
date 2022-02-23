@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -45,9 +44,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            var visitor = new ThRoomOutlineExtractionVisitor()
+            var visitor = new ThAIRoomOutlineExtractionVisitor()
             {
-                LayerFilter = ThFireCompartmentLayerManager.CurveModelSpaceLayers(database),
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
