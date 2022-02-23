@@ -20,6 +20,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
 using ThMEPStructure.GirderConnect.Service;
 using ThMEPStructure.GirderConnect.BuildBeam;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -95,6 +96,8 @@ namespace ThMEPStructure.GirderConnect.Command
                 ImportService.ImportUniteBeamInfo();
                 //导入文字样式
                 ImportService.ImportTextStyle();
+
+                LayerDealer.HiddenLayer(BeamConfig.ErrorLayerName);
 
                 bool CreatGroup = true;//是否分组
                 if ((BuildBeamLayoutConfig.EstimateSelection == 1 && BuildBeamLayoutConfig.FormulaEstimateSelection == 1) || BuildBeamLayoutConfig.EstimateSelection == 2 && BuildBeamLayoutConfig.TableEstimateSelection == 1)

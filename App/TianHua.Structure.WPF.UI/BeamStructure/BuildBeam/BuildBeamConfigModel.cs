@@ -36,6 +36,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
         public int EstimateSelection { get; set; }
         public int FormulaEstimateSelection { get; set; }
         public int TableEstimateSelection { get; set; }
+        public int BeamCheckSelection { get; set; }
         public FormulaFule FormulaTop { get; set; }
         public FormulaFule FormulaMiddleA { get; set; }
         public FormulaFule FormulaMiddleB { get; set; }

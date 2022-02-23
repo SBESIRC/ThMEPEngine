@@ -60,6 +60,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
                         EstimateSelection = BuildBeamLayoutConfigFromFile.EstimateSelection,
                         FormulaEstimateSelection = BuildBeamLayoutConfigFromFile.FormulaEstimateSelection,
                         TableEstimateSelection = BuildBeamLayoutConfigFromFile.TableEstimateSelection,
+                        BeamCheckSelection = BuildBeamLayoutConfigFromFile.BeamCheckSelection,
                         FormulaTop = BuildBeamLayoutConfigFromFile.FormulaTop,
                         FormulaMiddleA = BuildBeamLayoutConfigFromFile.FormulaMiddleA,
                         FormulaMiddleB = BuildBeamLayoutConfigFromFile.FormulaMiddleB,
@@ -95,6 +96,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
                     EstimateSelection = BuildBeamLayoutConfigFromFile.EstimateSelection,
                     FormulaEstimateSelection = BuildBeamLayoutConfigFromFile.FormulaEstimateSelection,
                     TableEstimateSelection = BuildBeamLayoutConfigFromFile.TableEstimateSelection,
+                    BeamCheckSelection = BuildBeamLayoutConfigFromFile.BeamCheckSelection,
                     FormulaTop = BuildBeamLayoutConfigFromFile.FormulaTop,
                     FormulaMiddleA = BuildBeamLayoutConfigFromFile.FormulaMiddleA,
                     FormulaMiddleB = BuildBeamLayoutConfigFromFile.FormulaMiddleB,
@@ -124,10 +126,18 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
             }
         }
 
-        private void SaveConfig(string url)
+        private bool SaveConfig(string url)
         {
-            var data = JsonConvert.SerializeObject(dataModel, Formatting.Indented);
-            File.WriteAllText(url, data);
+            try
+            {
+                var data = JsonConvert.SerializeObject(dataModel, Formatting.Indented);
+                File.WriteAllText(url, data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void DisplayData(BuildBeamConfigModel model)
@@ -140,6 +150,8 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
 
             this.TableTopRadio.IsChecked = model.TableEstimateSelection == 1;
             this.TableMiddleRadio.IsChecked = model.TableEstimateSelection == 2;
+
+            this.BeamCheck.IsChecked = model.BeamCheckSelection == 1;
 
             this.SelectionRectangle.IsChecked = model.RegionSelection == 1;
             this.SelectionPolygon.IsChecked = model.RegionSelection == 2;
@@ -185,6 +197,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
                 BuildBeamLayoutConfig.EstimateSelection = dataModel.EstimateSelection;
                 BuildBeamLayoutConfig.FormulaEstimateSelection = dataModel.FormulaEstimateSelection;
                 BuildBeamLayoutConfig.TableEstimateSelection = dataModel.TableEstimateSelection;
+                BuildBeamLayoutConfig.BeamCheckSelection = dataModel.BeamCheckSelection;
                 BuildBeamLayoutConfig.FormulaTop = dataModel.FormulaTop;
                 BuildBeamLayoutConfig.FormulaMiddleA = dataModel.FormulaMiddleA;
                 BuildBeamLayoutConfig.FormulaMiddleB = dataModel.FormulaMiddleB;
@@ -239,6 +252,10 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
             {
                 return false;
             }
+            if (model.BeamCheckSelection != 1 && model.BeamCheckSelection != 0)
+            {
+                return false;
+            }
             if (model.RegionSelection != 1 && model.RegionSelection != 2)
             {
                 return false;
@@ -258,6 +275,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
                 model.EstimateSelection = this.FormulaEstimateRadio.IsChecked == true ? 1 : 2;
                 model.FormulaEstimateSelection = this.FormulaTopRadio.IsChecked== true ? 1 : 2;
                 model.TableEstimateSelection = this.TableTopRadio.IsChecked== true ? 1 : 2;
+                model.BeamCheckSelection = this.BeamCheck.IsChecked== true ? 1 : 0;
                 model.RegionSelection = this.SelectionRectangle.IsChecked== true ? 1 : 2;
                 model.BeamCheck = int.Parse(this.BeamCheckTxt.Text);
 
@@ -395,6 +413,45 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.BuildBeam
             TableTopRadio.IsChecked =false;
             TableTopPanel.IsEnabled = false;
             TableMiddlePanel.IsEnabled = true ;
+        }
+
+        private void ImportButton_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.Filter = "Json (.json)|*.json"; // Filter files by extension
+            dlg.DefaultExt = ".json"; // Default file extension
+            Nullable<bool> result = dlg.ShowDialog();
+            if (result == true)
+            {
+                // Load document
+                Init(dlg.FileName);
+            }
+        }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            //选择路径
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "天华截面配置"; // Default file name
+            dlg.DefaultExt = ".json"; // Default file extension
+            dlg.Filter = "Json (.json)|*.json"; // Filter files by extension
+            // Show save file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
+            {
+                // Save document
+                if (!SaveConfig(dlg.FileName))
+                {
+                    MessageBox.Show("保存失败，请重新保存！");
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
         }
     }
 }

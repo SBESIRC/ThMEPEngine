@@ -2,6 +2,7 @@
   "EstimateSelection": 2,
   "FormulaEstimateSelection": 2,
   "TableEstimateSelection": 2,
+  "BeamCheckSelection": 1,
   "FormulaTop": {
     "LDividesH": 10,
     "HDividesB": 2,
