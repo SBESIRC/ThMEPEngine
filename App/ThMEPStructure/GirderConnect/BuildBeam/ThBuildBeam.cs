@@ -381,7 +381,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 else
                 {
                     H = BuildBeamLayoutConfig.TableMiddleA6.H;
-                    B = BuildBeamLayoutConfig.TableMiddleB6.B;
+                    B = BuildBeamLayoutConfig.TableMiddleA6.B;
                 }
             }
             return (B, H).ToTuple();

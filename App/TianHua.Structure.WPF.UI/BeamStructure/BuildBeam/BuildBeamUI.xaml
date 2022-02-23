@@ -269,7 +269,7 @@
                                 <Label>梁高检查</Label>
                             </GroupBox.Header>
                             <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
-                                <CheckBox x:Name="BeamCheck" Margin="0,0,15,0" IsChecked="True">梁高A的H ≥ 搁置次梁H + 高差限值</CheckBox>
+                                <CheckBox x:Name="BeamCheck" Margin="0,0,15,0" IsChecked="True">主梁A高H ≥ 搁置次梁高H + 高差限值</CheckBox>
                                 <StackPanel Orientation="Horizontal" Margin="10,5,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
                                     <Label FontFamily="Arial" Content="高差限值(mm)"></Label>
                                     <cus:InputTextBox Name="BeamCheckTxt" TextBoxInputType="InputInteger" Width="30" HorizontalContentAlignment="Center" Text=""/>
