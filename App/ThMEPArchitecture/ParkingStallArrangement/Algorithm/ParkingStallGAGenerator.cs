@@ -13,6 +13,7 @@ using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
+using Accord.Statistics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -346,7 +347,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         readonly double MaxTime;
         readonly int IterationCount = 10;
         int PopulationSize;
-
+        int GeneCount;
         int FirstPopulationSize;
         double SelectionRate;
         int FirstPopulationSizeMultiplyFactor = 2;
@@ -381,7 +382,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public Serilog.Core.Logger Logger = null;
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null, List<Chromosome> initgenomes = null,bool breakFlag = false)
         {
-
+            GeneCount = gaPara.LineCount;//基因总数
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
@@ -421,7 +422,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
             LowerUpperBound = new Dictionary<int, Tuple<double, double>>();//储存每条基因可变动范围，方便后续变异
-            for (int i = 0; i < GaPara.LineCount; ++i)
+            for (int i = 0; i < GeneCount; ++i)
             {
                 GetBoundary(i, out double LowerBound, out double UpperBound);
                 //UpperLowerBound[i] = new Tuple<double, double>(LowerBound, UpperBound);
@@ -455,7 +456,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             SpecialGene = new Dictionary<int, List<double>>();
             var parkingLength = ParameterViewModel.VerticalSpotLength;
-            for (int i = 0;i< GaPara.LineCount; ++i)
+            for (int i = 0;i< GeneCount; ++i)
             {
                 double LowerBound = LowerUpperBound[i].Item1;
                 double UpperBound = LowerUpperBound[i].Item2;
@@ -480,11 +481,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 SpecialGeneProb.Add(initProb);
             }
         }
-        private void UpdateMovingAvgPNs(List<Chromosome> solutions)
+        private void UpdateMovingAvgPNs(List<Chromosome> solutions)//更新全部的MovingAvg
         {
             var SpecialGenePNs = new Dictionary<int, List<List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
-
-            for (int i = 0; i < GaPara.LineCount; i++)
+            for (int i = 0; i < GeneCount; i++)
             {
                 var lis = new List<List<int>>();
                 for (int j = 0; j < MovingAvgPN[i].Count; ++j)
@@ -496,7 +496,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             foreach (var solution in solutions)
             {
                 var parkingStallCount = solution.ParkingStallCount;
-                for (int i = 0; i < GaPara.LineCount; i++)
+                for (int i = 0; i < GeneCount; i++)
                 {
                     if (solution.Genome[i].SpecialFlag != -1)// 特殊基因
                     {
@@ -505,32 +505,82 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                 }
             }
-            for (int i = 0; i < GaPara.LineCount; i++)
+            for (int i = 0; i < GeneCount; i++)
             {
                 for (int j = 0; j < MovingAvgPN[i].Count; ++j)
                 {
-                    MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);
+                    MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);//更新moving avg
                 }
             }
         }
 
         private double? GetNewMovingAvg(double? preMA, List<int> PSCounts)// 获取某一个特殊基因更新后的movingAvg
         {
-
             if (PSCounts.Count == 0) return preMA;
-
             var PS_Avg = PSCounts.Average();
             if (preMA == null) return PS_Avg;
             else
             {
                 var val = Math.PI / 2;
-                val *= 1.5;
-                var lam = 0.4 * PSCounts.Count;
-                var alpha = Math.Atan(lam) / val;// alpha 范围从0.161~0.6666666
-                return (double)preMA * (1 - alpha) + alpha * PS_Avg;
+                var lam = 0.2 * PSCounts.Count;
+                var alpha = Math.Atan(lam) / val;// alpha 范围从0.126~0.9999999
+                return (double)preMA * (1 - alpha) + alpha * PS_Avg;//加权平均
             }
         }
 
+        private void UpdateGeneScore()//更新基因分数
+        {
+            for (int i = 0; i < GeneCount; i++)//对于所有的基因
+            {
+                var SPMovingAvg = MovingAvgPN[i];//该基因的特殊基因的moving avg
+                //获取MovingAvgPN[i] 不为null的index
+                var index = new List<int>();
+                var slice = new List<double>();
+                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                {
+                    if (MovingAvgPN[i][j] != null)
+                    {
+                        index.Add(j);
+                        slice.Add((double) MovingAvgPN[i][j]);
+                    }
+                }
+                if (slice.Count != 0)
+                {
+                    var SPMedian = Measures.Median(slice.ToArray());//取中位数
+                    var SPAbs = slice.Max() - slice.Min();
+                    if (SPAbs > 0)
+                    {
+                        for (int n = 0; n < index.Count; ++n)
+                        {
+                            var idx = index[n];
+                            SpecialGeneScore[i][idx] = 2*(slice[n] - SPMedian) / SPAbs;// score 绝对值长度为2，最大可能值+2（取值范围2~0），最小可能值-2（0~-2）
+                        }
+                    }
+                    else// 最大最小值相同则设置为0
+                    {
+                        foreach (int idx in index)SpecialGeneScore[i][idx] = 0;
+                    }
+                }
+                // 对于所有为null的
+                for (int k = 0; k < SpecialGeneScore[i].Count; ++k)
+                {
+                    if (!index.Contains(k)) SpecialGeneScore[i][k] = 2;
+                }
+            }
+        }
+        private void UpdateGeneProb()
+        {
+            for (int i = 0; i < GeneCount; i++)//对于所有的基因
+            {
+                double sumExp = 0;
+                foreach (var score in SpecialGeneScore[i]) sumExp += Math.Exp(score);
+                for (int j = 0; j < SpecialGeneProb[i].Count; ++j)
+                {
+                    var score = SpecialGeneScore[i][j];
+                    SpecialGeneProb[i][j] = (0.1 / SpecialGeneProb[i].Count) + 0.9 * (Math.Exp(score)/ sumExp);
+                }
+            }
+        }
         private void ReclaimMemory()
         {
             GC.Collect();
@@ -543,7 +593,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Gene> ConvertLineToGene(int index)
         {
             var genome = new List<Gene>();
-            for (int i = 0; i < GaPara.LineCount; i++)
+            for (int i = 0; i < GeneCount; i++)
             {
                 if (index == 0)
                 {
@@ -568,7 +618,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Gene> ConvertLineToGene()//仅根据分割线生成第一代
         {
             var genome = new List<Gene>();
-            for (int i = 0; i < GaPara.LineCount; i++)
+            for (int i = 0; i < GeneCount; i++)
             {
                 var line = GaPara.SegLine[i];
                 var dir = line.GetValue(out double value, out double startVal, out double endVal);
@@ -586,7 +636,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             for (int j = 0; j < N; j++)
             {
                 var genome = new List<Gene>();
-                for (int i = 0; i < GaPara.LineCount; i++)
+                for (int i = 0; i < GeneCount; i++)
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
