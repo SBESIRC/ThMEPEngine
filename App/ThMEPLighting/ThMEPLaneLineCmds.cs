@@ -4,9 +4,9 @@ using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPLighting
 {
-    public class ThLaneLineCmds
+    public class ThMEPLaneLineCmds
     {
-        [CommandMethod("TIANHUACAD", "THTCD", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THTCDX", CommandFlags.Modal)]
         public void ThLaneLine()
         {
             using (var cmd = new ThLaneLineCommand())

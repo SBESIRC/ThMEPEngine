@@ -131,7 +131,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -150,7 +149,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -169,7 +167,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -188,11 +185,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
@@ -209,11 +207,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
@@ -230,11 +229,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
