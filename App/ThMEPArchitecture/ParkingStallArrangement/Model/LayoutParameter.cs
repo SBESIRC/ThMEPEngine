@@ -197,7 +197,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     tmpSegLines.Add(line);
                     tmpSegLineIndexDic.Add(i, line);
                 }
-                
+                if (IsInCorrectSegLine(tmpBoundary, tmpSegLines))
+                {
+                    return false;
+                }
                 //If in manual mode
                 areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
 
@@ -251,11 +254,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                var line = GetSegLine(gene);
+                var line = gene.ToLine();
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
-            
+
+            if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            {
+                return false;
+            }
+
             var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
 
             if(!IsReasonableAns(areas, tmpBoundary))
@@ -326,7 +334,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                var line = GetSegLine(gene);
+                var line = gene.ToLine();
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
@@ -376,20 +384,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
             {
                 return false;
-            }
-            if(tmpSeglines == null)
-            {
-                if (IsInCorrectSegLine(tmpBoundary, SegLines))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (IsInCorrectSegLine(tmpBoundary, tmpSeglines))
-                {
-                    return false;
-                }
             }
 
             double areaTolerance = 1.0;//面积容差
@@ -450,33 +444,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
             return false;
-        }
-
-        private Line GetSegLine(Gene gene)
-        {
-            Point3d spt, ept;
-            if(gene.VerticalDirection)
-            {
-                spt = new Point3d(gene.Value, gene.StartValue, 0);
-                ept = new Point3d(gene.Value, gene.EndValue, 0);
-            }
-            else
-            {
-                spt = new Point3d(gene.StartValue, gene.Value, 0);
-                ept = new Point3d(gene.EndValue, gene.Value, 0);
-            }
-            return new Line(spt, ept);
-        }
-
-        private void Split(Gene gene, ref List<Polyline> areas)
-        {
-            var line = gene.ToLine();//对于每一条线
-            var rstSplitByOriginalLine = AreaSplit.SplitAreasByOrgiginLine(line, ref areas);//
-            if(!rstSplitByOriginalLine)
-            {
-                AreaSplit.SplitAreasByExtentedLine(line, ref areas);
-            }
-            line.Dispose();
         }
 
         private List<BlockReference> GetBuildings(Polyline area)
