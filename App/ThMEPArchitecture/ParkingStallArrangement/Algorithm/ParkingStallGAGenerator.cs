@@ -355,7 +355,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int MaxCount = 10;//出现相同车位数的最大次数
         double MutationRate;
         double GeneMutationRate;
-
+        double MaxSMutationRate;
         int Elite_popsize;
         int Max_SelectionSize;
         double EliminateRate;
@@ -408,7 +408,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
-
+            MaxSMutationRate = GoldenRatio;// 最大小变异几率，随代数递减，0.618
             SelectionRate = 1- GoldenRatio;//保留因子0.382
             SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
 
@@ -462,12 +462,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private double RandomSpecialNumber(int i, out int idx)
         {
             //随机的特殊解，基于当前基因的每个特殊解的概率。用于卡车位
+            // idx 特殊基因的flag
             idx = General.Utils.RandChoiceOne(SpecialGeneProb[i]);// 基于概率随机选一个
             return SpecialGene[i][idx];// 随机选一个
         }
         private void InitSpecialGene()// 初始化特殊基因数据
         {
-            SpecialGene = new List<double[]>();
+            SpecialGene = new List<double[]>();// 特殊基因的值
+            MovingAvgPN = new List<double?[]>();// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
+            SpecialGeneScore = new List<double[]>();//每个特殊基因的分数
+            SpecialGeneProb = new List<double[]>();// 特殊基因对应的随机概率
             var parkingLength = ParameterViewModel.VerticalSpotLength;
             for (int i = 0;i< GeneCount; ++i)
             {
@@ -493,6 +497,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 SpecialGeneScore.Add(initScore);
                 SpecialGeneProb.Add(initProb);
             }
+            ;
         }
         private void UpdateSpecialGene(List<Chromosome> solutions)
         {
@@ -1012,21 +1017,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 MutationL(rstLM);
                 pop.AddRange(rstLM);
             }
-            string strBest;
-            //if (!BreakFlag) strBest = $"最大车位数: {maxNums}";
-            //else
-            //{
-            //    if(InitGenomes != null)
-            //    {
-            //        strBest = $"打断前最大车位数: {maxNums}";
-            //    }
-            //    else
-            //    {
-            //        strBest = $"打断后最大车位数: {maxNums}";
-            //    }
-            //}
-            //Active.Editor.WriteMessage(strBest);
-            //Logger?.Information(strBest);
             string strConverged;
             if (maxCount < MaxCount) strConverged = $"未收敛";
             else strConverged = $"已收敛";
@@ -1083,6 +1073,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 rst.RemoveAt(rst.Count - 1);
             }
+            UpdateSpecialGene(sorted.Take(Max_SelectionSize).ToList());
+
             return rst;
         }
         private List<List<Chromosome>> CreateNextGeneration2(List<Chromosome> solutions)
@@ -1097,7 +1089,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<int> index;
             //List<int> index = Enumerable.Range(0, solutions.Count).ToList();
             int j = Elite_popsize;
-            int SMsize = SelectionSize;// small mutation size,0.382 of total population size
+            int SMsize = PopulationSize - SelectionSize;// small mutation size,0.618of total population size
             int LMsize = PopulationSize - SMsize;//large mutation size
             while (true)
             {
@@ -1150,9 +1142,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             // small mutation
             // 除第一个染色体变异
-            int geneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
+            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda);// 当前最大变异几率
+            int MaxgeneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
             for (int i = 1; i < s.Count; ++i)
             {
+                var geneCnt = RandInt(MaxgeneCnt) + 1;
                 //挑选需要变异的基因
                 var selectedGene = RandChoice(s[0].GenomeCount(), geneCnt);
                 //var cur_lam = (lamda * s.Count) / i;

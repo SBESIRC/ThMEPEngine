@@ -166,6 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 SumP += Prob[i];
                 if (SumP >= rng) return i;
             }
+            //should never execute this:
             return Prob.Length - 1;
         }
         // 旧版本截断正态分布，在特殊情况下容易出现不能找到随机数的情况
