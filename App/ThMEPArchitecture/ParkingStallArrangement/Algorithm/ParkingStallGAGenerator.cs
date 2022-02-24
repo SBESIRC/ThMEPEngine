@@ -85,9 +85,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public int ParkingStallCount { get; set; }
 
-        static private Dictionary<PartitionBoundary,int> _cachedPartitionCnt = new Dictionary<PartitionBoundary, int>();
+        static private Dictionary<PartitionBoundary, int> _cachedPartitionCnt = new Dictionary<PartitionBoundary, int>();
 
-        static public Dictionary<PartitionBoundary,int> CachedPartitionCnt
+        static public Dictionary<PartitionBoundary, int> CachedPartitionCnt
         {
             get { return _cachedPartitionCnt; }
             set { _cachedPartitionCnt = value; }
@@ -262,74 +262,39 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 catch (Exception ex)
                 {
-                    ;
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             return count;
         }
 
-        
+
         private int GetParkingNums(LayoutParameter layoutPara, ParkingStallArrangementViewModel ParameterViewModel)
         {
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                GeoUtilities.LogMomery("UnitStart: ");
-                var use_partition_pro = true;
-                if (use_partition_pro)
+                var partitionpro = new ParkingPartitionPro();
+                ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                if (!partitionpro.Validate()) continue;
+                try
                 {
-                    var partitionpro = new ParkingPartitionPro();
-                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                    if (!partitionpro.Validate()) continue;
-                    try
+                    var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
+                    if (CachedPartitionCnt.ContainsKey(partitionBoundary))
                     {
-                        var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
-                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
-                        {
-                            count += CachedPartitionCnt[partitionBoundary];
-                        }
-                        else
-                        {
-                            var subCnt = partitionpro.CalNumOfParkingSpaces();
-                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
-                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
-                            count += subCnt;
-                        }
+                        count += CachedPartitionCnt[partitionBoundary];
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        ;
+                        var subCnt = partitionpro.CalNumOfParkingSpaces();
+                        CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                        System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                        count += subCnt;
                     }
-                    continue;
                 }
-
-                ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        var partitionBoundary = new PartitionBoundary(partition.Boundary.Vertices());
-                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
-                        {
-                            count += CachedPartitionCnt[partitionBoundary];
-                        }
-                        else
-                        {
-                            var subCnt = partition.CalNumOfParkingSpaces();
-                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
-                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
-                            count += subCnt;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //partition.Dispose();
-                        Logger.Error(ex.Message);
-                    }
-                    finally
-                    {
-                       // partition.Dispose();
-                    }
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             return count;
