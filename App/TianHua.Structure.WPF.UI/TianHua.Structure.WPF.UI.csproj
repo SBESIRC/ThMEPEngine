@@ -47,6 +47,9 @@
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
     <Compile Include="HuaRunPeiJin\WallColumnReinforceSetModel.cs" />
+    <Compile Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml.cs">
+      <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HuaRunPeiJin\WallColumnReinforceSetUI.xaml.cs">
       <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
     </Compile>
@@ -65,6 +68,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -95,7 +102,9 @@
       <Name>ThMEPStructure</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resource\Image\Layer.png" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
