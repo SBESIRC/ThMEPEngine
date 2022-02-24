@@ -713,6 +713,7 @@ namespace ThMEPHVAC.Model
             foreach (Polyline crossPorts in crossPortBounds)
             {
                 var port = dicPlToPort[crossPorts];
+                deleteList.Add(port.handle);
                 port.portAirVolume = avgAirVolume;
                 portParam.param.portRange = port.portRange;
                 var p = ThMEPHVACService.RoundPoint(crossPorts.GetCentroidPoint(), 6);
