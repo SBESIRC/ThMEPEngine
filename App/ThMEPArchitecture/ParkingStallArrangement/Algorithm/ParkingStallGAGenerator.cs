@@ -664,8 +664,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     Gene gene;
                     if (RandDouble() > GoldenRatio)
                     {
-                        //RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
-                        RandValue = RandomSpecialNumber(i,out int specialflag);
+                        RandValue = RandomSpecialNumber(i,out int specialflag);// 随机特殊解
                         gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal, specialflag);
                     }
                     else
@@ -1142,7 +1141,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             // small mutation
             // 除第一个染色体变异
-            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda);// 当前最大变异几率
+            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda-3);// 当前最大变异几率
             int MaxgeneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
             for (int i = 1; i < s.Count; ++i)
             {
@@ -1158,13 +1157,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var loc = s[i].Genome[j].Value;
 
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-                    if (RandDouble() < GoldenRatio)
+                    if (RandDouble() < GoldenRatio)// 截断正态分布解
                     {
                         s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
                     }
-                    else
+                    else//特殊解
                     {
-                        //s[i].Genome[j].Value = RandomSpecialNumber(minVal, maxVal);
                         s[i].Genome[j].Value = RandomSpecialNumber(j, out int specialflag);
                         s[i].Genome[j].SpecialFlag = specialflag;
                     }
