@@ -8,9 +8,14 @@ namespace ThMEPEngineCore.Algorithm
     public static class ThMEPTCHService
     {
         /// <summary>
-        /// DXF
+        /// DXF（水管）
         /// </summary>
         public const string DXF_PIPE = "TCH_PIPE";
+
+        /// <summary>
+        /// DXF（风管）
+        /// </summary>
+        public const string DXF_HVACDUCT = "TCH_DBHVACDUCT";
 
         /// <summary>
         /// 是否是天正元素
