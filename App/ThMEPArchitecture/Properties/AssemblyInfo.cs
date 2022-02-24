@@ -40,5 +40,6 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.WithoutSegLineCmd))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangementByFixedLines))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.TestCommond))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.PartitionLayoutMultiThreadedTest))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.CreateAllSeglinesCmd))]//生成所有分割线
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.ThBreakSegLinesCmd))]

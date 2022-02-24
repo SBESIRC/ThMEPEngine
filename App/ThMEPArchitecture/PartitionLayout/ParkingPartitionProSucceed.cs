@@ -1,10 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -519,6 +521,8 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void RemoveInvalidPillars()
         {
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
             Pillars = Pillars.Where(t =>
             {
                 var clone = t.Clone() as Polyline;
@@ -531,6 +535,23 @@ namespace ThMEPArchitecture.PartitionLayout
                 clone.Dispose();
                 return true;
             }).ToList();
+            //List<Polyline> tmps = new List<Polyline>();
+            //Pillars.AsParallel().ForAll(t =>
+            //{
+            //    var clone = t.Clone() as Polyline;
+            //    clone.Scale(clone.GetRecCentroid(), 0.5);
+            //    if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
+            //        clone.Dispose();
+            //    else
+            //    {
+            //        clone.Dispose();
+            //        tmps.Add(t);
+            //    }
+            //});
+            //Pillars = tmps;
+            //sw.Stop();
+            //var time = sw.Elapsed.TotalMilliseconds.ToString();
+            //Active.Editor.WriteMessage("test：" + time + "\n");
         }
 
         private void ReDefinePillarDimensions()

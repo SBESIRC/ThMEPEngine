@@ -77,7 +77,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public List<Polyline> Pillars = new List<Polyline>();
         private List<Polyline> CarBoxes = new List<Polyline>();
         private List<Polyline> IniLaneBoxes = new List<Polyline>();
-        private List<CarBoxPlus>CarBoxesPlus=new List<CarBoxPlus>();
+        private List<CarBoxPlus> CarBoxesPlus = new List<CarBoxPlus>();
         private List<Polyline> LaneBoxes = new List<Polyline>();
         private List<CarModule> CarModules = new List<CarModule>();
         private List<Point3d> ObstacleVertexes = new List<Point3d>();
