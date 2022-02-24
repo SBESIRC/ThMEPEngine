@@ -1,4 +1,6 @@
-﻿namespace TianHua.Electrical.PDS.Model
+﻿using System.Collections.Generic;
+
+namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 一级负载类型
@@ -172,7 +174,7 @@
         /// <summary>
         /// 安装功率
         /// </summary>
-        public double InstalledCapacity { get; set; }
+        public List<double> InstalledCapacity { get; set; } = new List<double>();
 
         /// <summary>
         /// 相数

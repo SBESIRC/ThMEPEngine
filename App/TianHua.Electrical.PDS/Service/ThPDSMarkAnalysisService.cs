@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -17,7 +19,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var thPDSDistBox = new ThPDSLoad
             {
-                ID = CreatePDSID(marks, distBoxKey),
+                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -39,12 +41,14 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks, ThPDSBlockReferenceData distBoxData)
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
         {
-            var thPDSDistBox = new ThPDSLoad
+            var searchedString = new List<string>();
+            var thPDSLoad = new ThPDSLoad
             {
-                ID = CreatePDSID(marks),
-                LoadTypeCat_1 = ThPDSLoadTypeCat_1.None,
+                ID = CreateLoadID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
+                InstalledCapacity = AnalysisPower(marks, searchedString),
+                LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
                 FireLoad = false,
@@ -54,12 +58,53 @@ namespace TianHua.Electrical.PDS.Service
                     BasePoint = distBoxData.Position,
                 }
             };
-            return thPDSDistBox;
+
+            var StandbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
+            if (StandbyRelationship.Item1)
+            {
+                thPDSLoad.PrimaryAvail = StandbyRelationship.Item2;
+                thPDSLoad.SpareAvail = StandbyRelationship.Item3;
+            }
+
+            var r = new Regex(@"[a-zA-Z]");
+            foreach (var str in marks.Except(searchedString))
+            {
+                if(r.Match(str).Success)
+                {
+                    thPDSLoad.ID.LoadID = str;
+                }
+                else
+                {
+                    thPDSLoad.ID.Description.Add(str);
+                }
+            }
+
+            return thPDSLoad;
         }
 
-        private ThPDSID CreatePDSID(List<string> infos, List<string> distBoxKey)
+        public ThPDSLoad LoadMarkAnalysis(ThPDSBlockReferenceData distBoxData)
         {
-            var id = new ThPDSID();
+            return new ThPDSLoad
+            {
+                ID = new ThPDSID
+                {
+                    BlockName = distBoxData.EffectiveName,
+                    LoadID = distBoxData.Attributes.ContainsKey(ThPDSCommon.LOAD_ID)
+                        ? distBoxData.Attributes[ThPDSCommon.LOAD_ID] : "",
+                    Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
+                        ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
+                },
+                InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>())
+            };
+        }
+
+        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
+        {
+            var id = new ThPDSID
+            {
+                BlockName = blockName
+            };
             var idMarks = new List<string>();
             var circuitMarks = new List<string>();
             infos.ForEach(info =>
@@ -92,15 +137,63 @@ namespace TianHua.Electrical.PDS.Service
             {
                 id.LoadID = idMarks[0];
             }
+            if (circuitMarks.Distinct().Count() == 1)
+            {
+                id.CircuitNumber = circuitMarks[0];
+            }
             return id;
         }
 
-        private ThPDSID CreatePDSID(List<string> infos)
+        private ThPDSID CreateLoadID(List<string> infos, List<string> distBoxKey, string blockName, List<string> searchedString)
         {
-            return new ThPDSID
+            var id = new ThPDSID
             {
-                Description = infos,
+                BlockName = blockName,
             };
+            var circuitNumbers = new List<string>();
+            var circuitIDs = new List<string>();
+            infos.ForEach(info =>
+            {
+                foreach (var key in distBoxKey)
+                {
+                    if (info.Contains(key))
+                    {
+                        circuitNumbers.Add(info);
+                        searchedString.Add(info);
+                        var check = "";
+                        if (info.Contains("-W"))
+                        {
+                            check = "-W.*";
+                        }
+                        else if (info.Contains("/W"))
+                        {
+                            check = "/W.*";
+                        }
+
+                        if (string.IsNullOrEmpty(check))
+                        {
+                            break;
+                        }
+                        var r = new Regex(@check);
+                        var m = r.Match(info);
+                        if (m.Success)
+                        {
+                            circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
+                        }
+                        break;
+                    }
+                }
+            });
+
+            if (circuitNumbers.Distinct().Count() == 1)
+            {
+                id.CircuitNumber = circuitNumbers[0];
+            }
+            if (circuitIDs.Distinct().Count() == 1)
+            {
+                id.CircuitID = circuitIDs[0];
+            }
+            return id;
         }
 
         /// <summary>
@@ -181,7 +274,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThPDSCircuitModel SelectModel(string circuitNumber, List<ThPDSCircuitModel> table)
         {
             var result = new ThPDSCircuitModel();
-            foreach(var o in table)
+            foreach (var o in table)
             {
                 var check = o.TextKey.Replace("*", ".*");
                 var r = new Regex(@check);
@@ -193,6 +286,80 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
             return result;
+        }
+
+        private List<double> AnalysisPower(List<string> infos, List<string> searchedString)
+        {
+            var results = new List<double>();
+            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
+            var r = new Regex(@check);
+            infos.ForEach(info =>
+            {
+                var m = r.Match(info);
+                while (m.Success)
+                {
+                    searchedString.Add(info);
+                    var result = m.Value.Replace("k", "");
+                    result = result.Replace("K", "");
+                    result = result.Replace("w", "");
+                    result = result.Replace("W", "");
+                    if (m.Value.Contains("k") || m.Value.Contains("K"))
+                    {
+                        results.Add(double.Parse(result) * 1000);
+                    }
+                    else
+                    {
+                        results.Add(double.Parse(result));
+                    }
+                    m = m.NextMatch();
+                }
+            });
+            return results;
+        }
+
+        private Tuple<bool, int, int> AnalysisStandbyRelationship(List<string> infos, List<string> searchedString)
+        {
+            var exist = false;
+            var primaryAvail = 0;
+            var spareAvail = 0;
+            var check = "[一二三四五六七八九两]{1}用.*";
+            var r = new Regex(@check);
+            infos.ForEach(info =>
+            {
+                if (r.Match(info).Success)
+                {
+                    searchedString.Add(info);
+                    exist = true;
+                    var numberCheck = "[一二三四五六七八九两]{1}";
+                    var numberRegex = new Regex(numberCheck);
+                    var numberMatch = numberRegex.Match(info);
+                    if (numberMatch.Success)
+                    {
+                        if (numberMatch.Value == "两")
+                        {
+                            primaryAvail = 2;
+                        }
+                        else
+                        {
+                            primaryAvail = ThStringTools.ChineseToNumber(numberMatch.Value);
+                        }
+                    }
+
+                    numberMatch = numberMatch.NextMatch();
+                    if (numberMatch.Success)
+                    {
+                        if (numberMatch.Value == "两")
+                        {
+                            spareAvail = 2;
+                        }
+                        else
+                        {
+                            spareAvail = ThStringTools.ChineseToNumber(numberMatch.Value);
+                        }
+                    }
+                }
+            });
+            return Tuple.Create(exist, primaryAvail, spareAvail);
         }
     }
 }

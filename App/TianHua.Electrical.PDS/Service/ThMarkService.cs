@@ -1,14 +1,16 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Engine;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+
+using ThCADCore.NTS;
 using ThCADExtension;
-using System;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -83,7 +85,12 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (o.Value.EffectiveName.Equals("E-电力平面-负荷明细"))
                 {
-
+                    var marks = GetTexts(o.Value);
+                    var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
+                    obb.Vertices().OfType<Point3d>().ForEach(pt =>
+                    {
+                        MarkDic.Add(ToDbPoint(pt), marks);
+                    });
                 }
                 else
                 {
@@ -109,10 +116,21 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 bfLine = line.ExtendLine(200.0).Buffer(200.0);
                 var TextCollection = TextIndex.SelectCrossingPolygon(bfLine);//（Buffer200）+文字
-                TextCollection.OfType<DBText>().ForEach(o =>
+                if (TextCollection.Count > 0)
                 {
-                    result.Add(o.TextString);
-                });
+                    TextCollection.OfType<DBText>().ForEach(o =>
+                    {
+                        result.Add(o.TextString);
+                    });
+                }
+                else
+                {
+                    var pointCollection = PointIndex.SelectWindowPolygon(bfLine);
+                    if (pointCollection.Count > 0)
+                    {
+                        result = MarkDic[pointCollection[0] as DBPoint];
+                    }
+                }
             }
             else
             {
@@ -122,7 +140,7 @@ namespace TianHua.Electrical.PDS.Service
                     result = MarkDic[pointCollection[0] as DBPoint];
                 }
             }
-            return result;
+            return result.Select(o => Filter(o)).ToList();
         }
 
         private DBPoint ToDbPoint(Point3d point)
@@ -138,7 +156,12 @@ namespace TianHua.Electrical.PDS.Service
         private List<string> GetTexts(ThPDSBlockReferenceData Data)
         {
             var dic = Data.Attributes;
-            return dic.Select(o => o.Key + ":" + o.Value).ToList();
+            return dic.Select(o => o.Value).ToList();
+        }
+
+        private string Filter(string info)
+        {
+            return info.Replace(" ", "");
         }
     }
 }

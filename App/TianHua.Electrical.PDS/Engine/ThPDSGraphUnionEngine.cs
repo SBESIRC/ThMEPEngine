@@ -61,6 +61,10 @@ namespace TianHua.Electrical.PDS.Engine
             }
 
             var unionGraph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            cabletrayEdgeList.ForEach(edge =>
+            {
+                unionGraph.AddVertex(edge.Target);
+            });
             addEdgeList.ForEach(edge =>
             {
                 unionGraph.AddVertex(edge.Source);

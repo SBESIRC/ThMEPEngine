@@ -1,10 +1,7 @@
 ﻿using Dreambuild.AutoCAD;
 using QuickGraph;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 
@@ -34,12 +31,12 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="url"></param>
         public void Load(string url)
         {
-            if(string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(url))
             {
                 //Creat New Project
                 instance = new PDSProject()
                 {
-                    graphData = new ThPDSProjectGraph() { Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>()}
+                    graphData = new ThPDSProjectGraph() { Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>() }
                 };
             }
             else
@@ -81,7 +78,7 @@ namespace TianHua.Electrical.PDS.Project
             newNode.NodeType = node.NodeType;
             newNode.IsStartVertexOfGraph = node.IsStartVertexOfGraph;
             newNode.Load = node.Loads[0];
-            newNode.Load.InstalledCapacity = node.Loads.Sum(O => O.InstalledCapacity);
+            newNode.Load.InstalledCapacity.Add(node.Loads.Sum(o => o.InstalledCapacity.Sum()));
             return newNode;
         }
     }

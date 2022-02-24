@@ -215,7 +215,7 @@ namespace TianHua.Electrical.PDS.Engine
             var distributionBox = Navigate(node, loads, logos, sourceEntity, nextEntity);
             if (loads.Count > 0)
             {
-                var newNode = ThPDSGraphService.CreateNode(loads, Database,MarkService);
+                var newNode = ThPDSGraphService.CreateNode(loads, Database,MarkService, DistBoxKey);
                 PDSGraph.Graph.AddVertex(newNode);
 
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos,DistBoxKey);

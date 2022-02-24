@@ -20,11 +20,6 @@ namespace TianHua.Electrical.PDS.Command
     {
         readonly static string LoadConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "平面关注对象.xlsx");
 
-        /// <summary>
-        /// 配电箱序列
-        /// </summary>
-        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-
         public override void SubExecute()
         {
             using (var acad = AcadDatabase.Active())
@@ -36,7 +31,7 @@ namespace TianHua.Electrical.PDS.Command
                 var nameFilter = new List<string>();
                 var propertyFilter = new List<string>();
                 var tableAnalysis = new ThPDSTableAnalysisService();
-                tableAnalysis.Analysis(tableInfo, DistBoxFilter, ref nameFilter, ref propertyFilter, ref distBoxKey);
+                tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
 
                 // 提取标注
                 var markExtractor = new ThCircuitMarkExtractionEngine();

@@ -11,7 +11,8 @@ namespace TianHua.Electrical.PDS.Service
         public static Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
         public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
 
-        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService, List<string> distBoxKey)
+        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
+            List<string> distBoxKey)
         {
             var node = new ThPDSCircuitGraphNode
             {
@@ -27,7 +28,8 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
-        public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService)
+        public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService, 
+            List<string> distBoxKey)
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
@@ -40,10 +42,17 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else
                 {
-                    var frame = ThPDSBufferService.Buffer(e, database);
-                    var marks = markService.GetMarks(frame);
                     var service = new ThPDSMarkAnalysisService();
-                    loads.Add(service.LoadMarkAnalysis(marks, LoadBlocks[e]));
+                    if (LoadBlocks[e].EffectiveName.IndexOf("电动机及负载标注") == 0)
+                    {
+                        loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
+                    }
+                    else
+                    {
+                        var frame = ThPDSBufferService.Buffer(e, database);
+                        var marks = markService.GetMarks(frame);
+                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e]));
+                    }
                 }
             });
 
