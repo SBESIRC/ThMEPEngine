@@ -1,7 +1,16 @@
 ﻿namespace ThMEPStructure.HuaRunPeiJin.Model
 {
-    public class ThWallColumnReinforceSet
+    public class ThWallColumnReinforceConfig
     {
+        private static readonly ThWallColumnReinforceConfig instance = new ThWallColumnReinforceConfig() { };
+        public static ThWallColumnReinforceConfig Instance { get { return instance; } }
+        internal ThWallColumnReinforceConfig()
+        {
+            Init();
+        }
+        static ThWallColumnReinforceConfig()
+        {
+        }
         /// <summary>
         /// 砼强度等级
         /// </summary>
@@ -15,7 +24,7 @@
         /// </summary>
         public double C { get; set; }
         /// <summary>
-        /// 自适应主表
+        /// 自适应柱表
         /// 取值为：A0、A1、A2...
         /// </summary>
         public string Frame { get; set; }
@@ -39,5 +48,21 @@
         /// 箍线线宽
         /// </summary>
         public double StirrupLineWeight { get; set; }
+        private void Init()
+        {
+            C = 20;
+            Frame = "A1";
+            DrawScale = "1:25";
+            TableRowHeight = 800;
+            Elevation = "0.000~3.000";
+            ConcreteStrengthGrade = "C40";
+            AntiSeismicGrade = "二级";
+            StirrupLineWeight = 30.0;
+            PointReinforceLineWeight = 50.0;
+        }
+        public void Reset()
+        {
+            Init();
+        }
     }
 }

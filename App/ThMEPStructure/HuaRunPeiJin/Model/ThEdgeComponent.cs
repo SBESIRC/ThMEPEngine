@@ -1,6 +1,6 @@
 ﻿namespace ThMEPStructure.HuaRunPeiJin.Model
 {
-    public class ThEdgeComponent
+    public abstract class ThEdgeComponent
     {
         /// <summary>
         /// 编号
