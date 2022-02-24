@@ -133,6 +133,41 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 return index.Take(n).ToList();
             }
         }
+        public static int RandChoice(double[] Prob)// Prob do not need to sum to 1,but must be positive
+        {
+            // return a index with Probability according to Prob
+            var total = Prob.Sum();
+            if(total <=0) throw new ArgumentException("Sum of Probability must be positive");
+            var StandardProb = new double[Prob.Length];
+            for(int i =0;i < Prob.Length; ++i)
+            {
+                var p = Prob[i];
+                if (p < 0) throw new ArgumentException(" Probability must be 0 or positive");
+                StandardProb[i] = p / total;
+            }
+            var rng = RandDouble();
+            var SumP = 0.0;
+            for (int i = 0; i < Prob.Length; ++i)
+            {
+                SumP += StandardProb[i];
+                if (SumP >= rng) return i;
+            }
+            return Prob.Length-1;
+        }
+        public static int RandChoiceOne(double[] Prob)
+        {
+            // return a index with Probability according to Prob
+            // Prob must sum to 1 and positive
+            // This function DO NOT have any input check
+            var rng = RandDouble();
+            var SumP = 0.0;
+            for (int i = 0; i < Prob.Length; ++i)
+            {
+                SumP += Prob[i];
+                if (SumP >= rng) return i;
+            }
+            return Prob.Length - 1;
+        }
         // 旧版本截断正态分布，在特殊情况下容易出现不能找到随机数的情况
         // box muller method
         // 很多情况不符合截断随机分布

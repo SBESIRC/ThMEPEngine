@@ -363,10 +363,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
         //-1：非特殊基因，0：位于lowerbound的特殊基因，1：位于ub的特殊基因，2：位于lb + 车位长的特殊基因，3：位于ub-车位长的特殊基因 
-        private Dictionary<int, List<double>> SpecialGene;// 特殊基因的值
-        private Dictionary<int, List<double?>> MovingAvgPN;// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
-        private List<List<double>> SpecialGeneScore;//每个特殊基因的分数
-        private List<List<double>> SpecialGeneProb;// 特殊基因对应的随机概率
+        private List<double[]> SpecialGene;// 特殊基因的值
+        private List<double?[]> MovingAvgPN;// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
+        private List<double[]> SpecialGeneScore;//每个特殊基因的分数
+        private List<double[]> SpecialGeneProb;// 特殊基因对应的随机概率
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
@@ -429,7 +429,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var tempT = new Tuple<double, double>(LowerBound, UpperBound);
                 LowerUpperBound.Add(i, tempT);
             }
-            UpdateSpecialGene();
+            InitSpecialGene();
         }
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
@@ -451,10 +451,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 UpperBound = Math.Max(Bound1,Bound2);
             }
         }
-
-        private void UpdateSpecialGene()
+        private void ReclaimMemory()
         {
-            SpecialGene = new Dictionary<int, List<double>>();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+        }
+        #region
+        // 特殊基因处理部分
+        private double RandomSpecialNumber(int i, out int idx)
+        {
+            //随机的特殊解，基于当前基因的每个特殊解的概率。用于卡车位
+            idx = General.Utils.RandChoiceOne(SpecialGeneProb[i]);// 基于概率随机选一个
+            return SpecialGene[i][idx];// 随机选一个
+        }
+        private void InitSpecialGene()// 初始化特殊基因数据
+        {
+            SpecialGene = new List<double[]>();
             var parkingLength = ParameterViewModel.VerticalSpotLength;
             for (int i = 0;i< GeneCount; ++i)
             {
@@ -465,33 +478,40 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var s2 = UpperBound - parkingLength;
                 if (s1 < UpperBound) SolutionLis.Add(s1);
                 if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
-                SpecialGene.Add(i, SolutionLis);
+                SpecialGene.Add(SolutionLis.ToArray());
 
-                var initlis = new List<double?>();
-                var initScore = new List<double>();
-                var initProb = new List<double>();
+                var initArr = new double?[SolutionLis.Count];
+                var initScore = new double[SolutionLis.Count];
+                var initProb = new double[SolutionLis.Count];
                 for (int j = 0; j < SolutionLis.Count; ++j)
                 {
-                    initlis.Add(null);
-                    initScore.Add(1);
-                    initProb.Add(1 / SolutionLis.Count);
+                    initArr[j] = null;
+                    initScore[j] = 1;
+                    initProb[j] = 1 / SolutionLis.Count;//初始每个特殊基因的几率相等
                 }
-                MovingAvgPN.Add(i,initlis);
+                MovingAvgPN.Add(initArr);
                 SpecialGeneScore.Add(initScore);
                 SpecialGeneProb.Add(initProb);
             }
         }
+        private void UpdateSpecialGene(List<Chromosome> solutions)
+        {
+            // 输入最新的solutions，更新特殊基因概率
+            UpdateMovingAvgPNs(solutions);
+            UpdateGeneScore();
+            UpdateGeneProb();
+        }
         private void UpdateMovingAvgPNs(List<Chromosome> solutions)//更新全部的MovingAvg
         {
-            var SpecialGenePNs = new Dictionary<int, List<List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
+            var SpecialGenePNs = new List<List<List<int>>>();//SpecialGenePNs[i][j][k]代表第i个基因的第j个特殊基因的第k个元素
             for (int i = 0; i < GeneCount; i++)
             {
                 var lis = new List<List<int>>();
-                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                for (int j = 0; j < MovingAvgPN[i].Length; ++j)
                 {
                     lis.Add(new List<int>());// 添加特殊基因个list
                 }
-                SpecialGenePNs.Add(i, lis);//创建SpecialGenePNs
+                SpecialGenePNs.Add(lis);//创建SpecialGenePNs
             }
             foreach (var solution in solutions)
             {
@@ -507,19 +527,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             for (int i = 0; i < GeneCount; i++)
             {
-                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                for (int j = 0; j < MovingAvgPN[i].Length; ++j)
                 {
                     MovingAvgPN[i][j] = GetNewMovingAvg(MovingAvgPN[i][j], SpecialGenePNs[i][j]);//更新moving avg
                 }
             }
         }
-
         private double? GetNewMovingAvg(double? preMA, List<int> PSCounts)// 获取某一个特殊基因更新后的movingAvg
         {
-            if (PSCounts.Count == 0) return preMA;
+            if (PSCounts.Count == 0) return preMA;// 无更新元素，返回上一次元素
             var PS_Avg = PSCounts.Average();
-            if (preMA == null) return PS_Avg;
-            else
+            if (preMA == null) return PS_Avg;//上一次元素为null，返回当前平均值
+            else//加权平均
             {
                 var val = Math.PI / 2;
                 var lam = 0.2 * PSCounts.Count;
@@ -532,11 +551,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             for (int i = 0; i < GeneCount; i++)//对于所有的基因
             {
-                var SPMovingAvg = MovingAvgPN[i];//该基因的特殊基因的moving avg
                 //获取MovingAvgPN[i] 不为null的index
                 var index = new List<int>();
                 var slice = new List<double>();
-                for (int j = 0; j < MovingAvgPN[i].Count; ++j)
+                for (int j = 0; j < MovingAvgPN[i].Length; ++j)
                 {
                     if (MovingAvgPN[i][j] != null)
                     {
@@ -562,31 +580,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                 }
                 // 对于所有为null的
-                for (int k = 0; k < SpecialGeneScore[i].Count; ++k)
+                for (int k = 0; k < SpecialGeneScore[i].Length; ++k)
                 {
                     if (!index.Contains(k)) SpecialGeneScore[i][k] = 2;
                 }
             }
         }
-        private void UpdateGeneProb()
+        private void UpdateGeneProb()//更新每个特殊基因的概率
         {
             for (int i = 0; i < GeneCount; i++)//对于所有的基因
             {
                 double sumExp = 0;
                 foreach (var score in SpecialGeneScore[i]) sumExp += Math.Exp(score);
-                for (int j = 0; j < SpecialGeneProb[i].Count; ++j)
+                for (int j = 0; j < SpecialGeneProb[i].Length; ++j)
                 {
                     var score = SpecialGeneScore[i][j];
-                    SpecialGeneProb[i][j] = (0.1 / SpecialGeneProb[i].Count) + 0.9 * (Math.Exp(score)/ sumExp);
+                    SpecialGeneProb[i][j] = (0.1 / SpecialGeneProb[i].Length) + 0.9 * (Math.Exp(score)/ sumExp);
                 }
             }
         }
-        private void ReclaimMemory()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.WaitForFullGCComplete();
-        }
+        #endregion
 
         #region
         //第一代初始化
@@ -939,13 +952,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 return SolutionLis[RandInt(SolutionLis.Count)];// 随机选一个
             }
         }
-        private double RandomSpecialNumber(int i,out int idx)
-        {
-            //随机的特殊解，用于卡车位
-            // 输出的之保持在最大最小值之间
-            idx = RandInt(SpecialGene[i].Count);
-            return SpecialGene[i][idx];// 随机选一个
-        }
+
         #endregion
         #region
         // run2代码部分
