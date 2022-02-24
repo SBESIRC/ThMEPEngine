@@ -138,6 +138,9 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorRecognitionEngine.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
