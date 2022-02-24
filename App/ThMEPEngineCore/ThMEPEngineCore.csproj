@@ -252,8 +252,6 @@
     <Compile Include="Engine\ThTCHDuctRecognitionEngine.cs" />
     <Compile Include="Engine\ThTCHFittingExtractionVisitor.cs" />
     <Compile Include="Engine\ThTCHFittingRecognitionEngine.cs" />
-    <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
-    <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThWallColumnsEngine.cs" />
@@ -321,7 +319,6 @@
     <Compile Include="Model\Hvac\ThModifyParam.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
-    <Compile Include="Model\ThSprinkler.cs" />
     <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
@@ -511,7 +508,7 @@
     <Compile Include="Model\ThIfcExternalSpatialStructureElement.cs" />
     <Compile Include="Model\ThIfcFeatureElement.cs" />
     <Compile Include="Model\ThIfcFeatureElementSubtraction.cs" />
-    <Compile Include="Model\ThIfcFireSuppressionTerminal.cs" />
+    <Compile Include="Model\Plumbing\ThIfcFireSuppressionTerminal.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />

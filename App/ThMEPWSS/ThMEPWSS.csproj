@@ -39,6 +39,8 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\CalStructrueService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\DrainingPointRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\VerticalPipeRecognizeEngine.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="Model\ThSprinkler.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectLayer.cs" />
@@ -519,11 +522,9 @@
     <Compile Include="Service\MarkService.cs" />
     <Compile Include="Service\RotateTransformService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
-    <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
-    <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.THDSPSXT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="TowerSeparation\TowerSeparationTest.cs" />

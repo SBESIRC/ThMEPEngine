@@ -10,6 +10,7 @@ using Linq2Acad;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
+using ThMEPWSS.Engine;
 using ThMEPWSS.Sprinkler.Analysis;
 using ThMEPWSS.Sprinkler.Service;
 using ThMEPWSS.ViewModel;

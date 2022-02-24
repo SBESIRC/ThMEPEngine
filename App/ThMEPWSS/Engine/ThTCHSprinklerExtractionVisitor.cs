@@ -6,8 +6,9 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Engine
 {
     public class ThTCHSprinklerExtractionVisitor : ThDistributionElementExtractionVisitor
     {

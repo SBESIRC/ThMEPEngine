@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPEngineCore.Model
+namespace ThMEPEngineCore.Model.Plumbing
 {
     public class ThIfcFireSuppressionTerminal : ThIfcFlowTerminal
     {

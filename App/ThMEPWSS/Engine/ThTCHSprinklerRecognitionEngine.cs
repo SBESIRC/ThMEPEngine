@@ -7,10 +7,12 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Engine
 {
     public class ThTCHSprinklerExtractionEngine : ThDistributionElementExtractionEngine
     {
