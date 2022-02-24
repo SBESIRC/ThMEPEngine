@@ -397,6 +397,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             InitSpecialGene();
         }
+        #region 功能函数
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
             double tol = 1e-4;
@@ -424,6 +425,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GC.WaitForPendingFinalizers();
             GC.WaitForFullGCComplete();
         }
+        #endregion
         #region 特殊基因处理部分
         private double RandomSpecialNumber(int i, out int idx)
         {
