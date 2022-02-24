@@ -231,7 +231,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
-        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, Polyline area, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
+        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, Polyline segArea, Polyline area, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
         {
             hasBuilding = true;
             if (buildLines.Count == 0)//区域内没有建筑物
@@ -291,6 +291,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var plines = GetPlines(closeBuild);
                 plines.ForEach(pl => pl.GetPoints().ForEach(p => closedPts.Add(p)));
                 closedPts = closedPts.OrderBy(p => p.DistanceTo(new Point3d(p.X, line.StartPoint.Y, 0))).ToList();
+                if(buildingWithoutRampSpatialIndex.SelectCrossingPolygon(rect).Count == 0)//该建筑物是坡道
+                {
+                    if(closedPts.Count > 0)
+                    {
+                        return closedPts.First();
+                    }
+                }
                 foreach (var pt in closedPts)
                 {
                     var tempLine = new Line(new Point3d(line.StartPoint.X, pt.Y, 0), new Point3d(line.EndPoint.X, pt.Y, 0));

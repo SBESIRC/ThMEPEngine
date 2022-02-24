@@ -136,6 +136,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var area = outerBrder.WallLine;
             var buildLinesSpatialIndex = outerBrder.BuildingSpatialIndex;
             var attachedRampSpatialIndex = outerBrder.AttachedRampSpatialIndex;
+            var buildingWithoutRampSpatialIndex = outerBrder.BuildingWithoutRampSpatialIndex;
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
@@ -162,7 +163,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                     else
                     {
-                        l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+                        l.GetMaxMinVal(area, buildLinesSpatialIndex, buildingWithoutRampSpatialIndex, width, out double maxVal2, out double minVal2);
                         if (maxVal2 < minVal2)
                         {
                             Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
@@ -176,7 +177,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return true;
         }
 
-        public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
+        public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
         {
             var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
             var dbPts = new List<DBPoint>();
@@ -186,8 +187,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
-            var boundPt1 = line.GetBoundPt(buildLines1, rect1, area, ptsIndex, out bool hasBuilding);
-            var boundPt2 = line.GetBoundPt(buildLines2, rect2, area, ptsIndex, out bool hasBuilding2);
+            var boundPt1 = line.GetBoundPt(buildLines1, buildingWithoutRampSpatialIndex, rect1, area, ptsIndex, out bool hasBuilding);
+            var boundPt2 = line.GetBoundPt(buildLines2, buildingWithoutRampSpatialIndex, rect2, area, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
             minVal = -line.GetMinDist(boundPt2) + 2760;
         }

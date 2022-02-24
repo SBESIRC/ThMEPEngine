@@ -221,7 +221,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 break;
             }
             var width = WindmillSplit.GetMaxWidth(area);
-            curLine.GetMaxMinVal(area, buildingSpatialIndex, width, out double maxVal2, out double minVal2);
+            curLine.GetMaxMinVal(area, buildingSpatialIndex, null, width, out double maxVal2, out double minVal2);
             return new SegLineEx(curLine, maxVal2, minVal2);
         }
 
