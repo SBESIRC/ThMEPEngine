@@ -1,14 +1,13 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPWSS.Engine;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.Model;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
@@ -78,7 +77,7 @@ namespace ThMEPWSS.Hydrant.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                 originDatas = originDatas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
             }
-            Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
+            Elements.AddRange(originDatas.Select(x => new ThFireHydrant() { Outline = x.Geometry }));
         }
         public void Recognize(DBObjectCollection datas, Point3dCollection polygon)
         {
@@ -94,11 +93,7 @@ namespace ThMEPWSS.Hydrant.Engine
             {
                 originDatas = datas.Cast<Entity>().ToList();
             }
-            Elements.AddRange(originDatas.Select(x => 
-            new ThIfcDistributionFlowElement()
-            { 
-                Outline = x.GeometricExtents.ToRectangle() 
-            }));
+            Elements.AddRange(originDatas.Select(x => new ThFireHydrant() { Outline = x.GeometricExtents.ToRectangle() }));
         }
     }
 }

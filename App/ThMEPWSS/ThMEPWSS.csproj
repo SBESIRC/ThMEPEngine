@@ -85,6 +85,8 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="Model\ThFireExtinguisher.cs" />
+    <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
