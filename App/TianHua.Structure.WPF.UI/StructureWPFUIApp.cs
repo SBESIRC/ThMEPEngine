@@ -1,5 +1,7 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using TianHua.Structure.WPF.UI.Command;
+using TianHua.Structure.WPF.UI.HuaRunPeiJin;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Structure.WPF.UI
 {
@@ -38,6 +40,14 @@ namespace TianHua.Structure.WPF.UI
             {
                 cmd.Execute();
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THQZCSSZ", CommandFlags.Session)]
+        public void THQZCSSZ()
+        {
+            var ui = new WallColumnReinforceSetUI();
+            ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModalWindow(ui);
         }
     }
 }

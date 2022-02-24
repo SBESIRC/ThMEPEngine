@@ -75,7 +75,7 @@
     <Compile Include="HuaRunPeiJin\Model\ThLTypeEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThRectangleEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThTTypeEdgeComponent.cs" />
-    <Compile Include="HuaRunPeiJin\Model\ThWallColumnReinforceSet.cs" />
+    <Compile Include="HuaRunPeiJin\Model\ThWallColumnReinforceConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
   </ItemGroup>

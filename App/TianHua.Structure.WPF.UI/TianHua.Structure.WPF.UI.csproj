@@ -42,11 +42,18 @@
     <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
       <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Command\WallColumnReinforceSetCmd.cs" />
     <Compile Include="Command\MainBeamCmd.cs" />
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
+    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetModel.cs" />
+    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetUI.xaml.cs">
+      <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureWPFUIApp.cs" />
+    <Compile Include="Validations\GreaterThanZeroRule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="BeamStructure\BuildBeam\BuildBeamUI.xaml">
@@ -58,6 +65,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HuaRunPeiJin\WallColumnReinforceSetUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
