@@ -1054,7 +1054,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<int> index;
             //List<int> index = Enumerable.Range(0, solutions.Count).ToList();
             int j = Elite_popsize;
-            int SMsize = PopulationSize - SelectionSize;// small mutation size,0.618of total population size
+            int SMsize = SelectionSize;// small mutation size,0.618of total population size
             int LMsize = PopulationSize - SMsize;//large mutation size
             while (true)
             {
@@ -1107,11 +1107,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             // small mutation
             // 除第一个染色体变异
-            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda-3);// 当前最大变异几率
-            int MaxgeneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
+            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda-3);// 当前变异几率
+            int geneCnt = Math.Min((int)(s[0].GenomeCount() * cur_MR), 1);//需要变异的基因数目，最小为1
             for (int i = 1; i < s.Count; ++i)
             {
-                var geneCnt = RandInt(MaxgeneCnt) + 1;
                 //挑选需要变异的基因
                 var selectedGene = RandChoice(s[0].GenomeCount(), geneCnt);
                 //var cur_lam = (lamda * s.Count) / i;
