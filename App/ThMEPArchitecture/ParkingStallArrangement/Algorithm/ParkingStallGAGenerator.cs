@@ -327,6 +327,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double GoldenRatio;
         private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
+        private List<bool> Directions;//记录每个基因的方向
         //-1：非特殊基因，0：位于lowerbound的特殊基因，1：位于ub的特殊基因，2：位于lb + 车位长的特殊基因，3：位于ub-车位长的特殊基因 
         private List<double[]> SpecialGene;// 特殊基因的值
         private List<double?[]> MovingAvgPN;// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
@@ -401,7 +402,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             double tol = 1e-4;
             // get absolute coordinate of segline
             var line = GaPara.SegLine[i];
-            var dir = line.GetValue(out double value, out double startVal, out double endVal);
+            var dir = line.GetValue(out double value, out double startVal, out double endVal);// 垂直true，水平false
+            Directions.Add(dir);
             if (Math.Abs(GaPara.MaxValues[i] - GaPara.MinValues[i])< tol)
             {
                 LowerBound = value;
@@ -422,8 +424,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GC.WaitForPendingFinalizers();
             GC.WaitForFullGCComplete();
         }
-        #region
-        // 特殊基因处理部分
+        #region 特殊基因处理部分
         private double RandomSpecialNumber(int i, out int idx)
         {
             //随机的特殊解，基于当前基因的每个特殊解的概率。用于卡车位
@@ -443,10 +444,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 double LowerBound = LowerUpperBound[i].Item1;
                 double UpperBound = LowerUpperBound[i].Item2;
                 var SolutionLis = new List<double>() { LowerBound, UpperBound };
-                var s1 = LowerBound + parkingLength;
-                var s2 = UpperBound - parkingLength;
-                if (s1 < UpperBound) SolutionLis.Add(s1);
-                if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
+                if (!Directions[i])// 横向线多两个特殊基因
+                {
+                    var s1 = LowerBound + parkingLength;
+                    var s2 = UpperBound - parkingLength;
+                    if (s1 < UpperBound) SolutionLis.Add(s1);
+                    if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
+                }
                 SpecialGene.Add(SolutionLis.ToArray());
 
                 var initArr = new double?[SolutionLis.Count];
@@ -570,9 +574,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
         }
         #endregion
-
-        #region
-        //第一代初始化
+        #region 第一代初始化
         private List<Gene> ConvertLineToGene(int index)
         {
             var genome = new List<Gene>();
@@ -688,8 +690,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
 
         #endregion
-        #region
-        // run代码部分
+        #region run代码部分
         public List<Chromosome> Run(List<Chromosome> histories, bool recordprevious)
         {
             Logger?.Information($"\n");
@@ -869,8 +870,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return newS;
         }
         #endregion
-        #region
-        //随机函数
+        #region 随机函数
         private List<int> RandChoice(int UpperBound, int n = -1, int LowerBound = 0)
         {
             return General.Utils.RandChoice(UpperBound, n, LowerBound);
@@ -923,8 +923,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
 
         #endregion
-        #region
-        // run2代码部分
+        #region run2代码部分
         // 选择逻辑增强，除了选择一部分优秀解之外，对其余解随即保留
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。
