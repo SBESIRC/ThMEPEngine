@@ -567,7 +567,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 for (int j = 0; j < SpecialGeneProb[i].Length; ++j)
                 {
                     var score = SpecialGeneScore[i][j];
-                    SpecialGeneProb[i][j] = (0.1 / SpecialGeneProb[i].Length) + 0.9 * (Math.Exp(score)/ sumExp);
+                    SpecialGeneProb[i][j] = (0.2 / SpecialGeneProb[i].Length) + 0.8 * (Math.Exp(score)/ sumExp);
                 }
             }
         }
