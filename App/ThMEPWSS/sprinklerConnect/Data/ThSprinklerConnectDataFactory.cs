@@ -147,6 +147,29 @@ namespace ThMEPWSS.SprinklerConnect.Data
             }
         }
 
+        public static List<Point3d> GetSprinklerConnectData(Polyline frame)
+        {
+            var sprinklerPt = new List<Point3d>();
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
+                recognizeAllEngine.RecognizeMS(acadDatabase.Database, new Point3dCollection());
+
+
+
+                var sprinklersData = recognizeAllEngine.Elements
+                                      .OfType<ThSprinkler>()
+                                      .Where(o => frame.Contains(o.Position))
+                                      .Select(o => o.Position)
+                                      .ToList();
+                sprinklerPt.AddRange(sprinklersData);
+            }
+
+            return sprinklerPt;
+
+        }
+
         public static List<Polyline> GetPipeData(Polyline frame, string layer)
         {
             var polyList = new List<Polyline>();

@@ -131,6 +131,19 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerNetworkService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerPipeService.cs" />
+    <Compile Include="SprinklerPiping\Cmd\SprinklerPipingCmd.cs" />
+    <Compile Include="SprinklerPiping\Cmd\test.cs" />
+    <Compile Include="SprinklerPiping\Engine\SprinklerGraphAnalyzingEngine.cs" />
+    <Compile Include="SprinklerPiping\Service\SprinklerPipingAssist.cs" />
+    <Compile Include="SprinklerPiping\Engine\SprinklerPipingEngine.cs" />
+    <Compile Include="SprinklerPiping\Engine\SprinklerSceneDivisionEngine.cs" />
+    <Compile Include="SprinklerPiping\Engine\SprinklerTreeEngine.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerParkingRow.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerPipe.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerPipingParameter.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerPoint.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerTreeNode.cs" />
+    <Compile Include="SprinklerPiping\Model\SprinklerTreeState.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
@@ -721,6 +734,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SprinklerPiping\Data\" />
+    <Folder Include="WaterWellPumpLayout\Model\" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>
