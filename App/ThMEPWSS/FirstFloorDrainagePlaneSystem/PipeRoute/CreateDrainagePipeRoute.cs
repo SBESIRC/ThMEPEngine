@@ -15,7 +15,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<VerticalPipeModel> verticalPipes;              //排水立管
         List<DrainingEquipmentModel> drainingEquipment;     //洁具立管
         List<Polyline> wallPolys;                           //墙线
-        readonly double step = 300;                         //步长
+        readonly double step = 100;                         //步长
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> mainPolys, List<VerticalPipeModel> verticalPipesModel, List<DrainingEquipmentModel> drainingEquipmentModel, 
             List<Polyline> walls)
         {

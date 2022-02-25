@@ -209,6 +209,16 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         [Description("马桶")]
         toilet =14,
         /// <summary>
+        /// 单盆洗手台
+        /// </summary>
+        [Description("单盆洗手台")]
+        singleBasinWashingTable = 15,
+        /// <summary>
+        /// 双盆洗手台
+        /// </summary>
+        [Description("双盆洗手台")]
+        doubleBasinWashingTable = 16,
+        /// <summary>
         /// 水管井
         /// </summary>
         [Description("水管井")]

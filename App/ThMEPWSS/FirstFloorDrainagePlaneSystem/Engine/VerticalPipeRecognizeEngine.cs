@@ -133,7 +133,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             if (lineDir.Y < 0) lineDir = -lineDir;
             var closetPt = line.GetClosestPointTo(dBText.Position, true);
             var dir = (dBText.Position - closetPt).GetNormal();
-            if (lineDir.GetAngleTo(Vector3d.XAxis) < Math.PI / 4 * 3)
+            var checkAngle = lineDir.GetAngleTo(Vector3d.XAxis);
+            if (checkAngle > Math.PI / 4 * 3 || checkAngle < Math.PI / 2)
             {
                 return dir.Y > 0;
             }

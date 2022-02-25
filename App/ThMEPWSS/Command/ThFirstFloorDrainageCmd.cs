@@ -55,6 +55,11 @@ namespace ThMEPWSS.Command
                     var routes = createDrainageRoute.Routing();
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        //foreach (var item in holeWalls)
+                        //{
+                        //    originTransformer.Reset(item);
+                        //    acad.ModelSpace.Add(item);
+                        //}
                         foreach (var item in routes)
                         {
                             originTransformer.Reset(item);

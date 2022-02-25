@@ -186,16 +186,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         public static List<MPolygon> GetRoomWall(List<Polyline> rooms, List<Polyline> userFrames)
         {
             var roomWallLst = new List<MPolygon>();
-            var bufferFrames = userFrames.Select(x => x.Buffer(100)[0] as Polyline).ToList();
+            //var bufferFrames = userFrames.Select(x => x.Buffer(100)[0] as Polyline).ToList();
             foreach (var room in rooms)
             {
-                var checkFrame = bufferFrames.Where(x => room.IsIntersects(x)).ToList();
-                if (checkFrame.Count > 0)
-                {
-                    var bufferRoom = room.Buffer(300)[0] as Polyline;
-                    var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
-                    roomWallLst.Add(resMPoly);
-                }
+                var bufferRoom = room.Buffer(150)[0] as Polyline;
+                var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
+                roomWallLst.Add(resMPoly);
+                //var checkFrame = bufferFrames.Where(x => room.IsIntersects(x)).ToList();
+                //if (checkFrame.Count > 0)
+                //{
+                //    var bufferRoom = room.Buffer(150)[0] as Polyline;
+                //    var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
+                //    roomWallLst.Add(resMPoly);
+                //}
             }
 
             return roomWallLst;
@@ -231,7 +234,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     var ent = acdb.Element<Entity>(obj).Clone() as Entity;
                     if (ent is Circle circle)
                     {
-                        if (circle.Radius == 50 || circle.Radius == 100 || circle.Radius == 150 || circle.Radius == 200)
+                        if (circle.Radius == 50 || circle.Radius == 75 || circle.Radius == 100)
                         {
                             pipes.Add(ent);
                         }
@@ -262,17 +265,26 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         {
             var allLayers = acdb.Layers.Select(x => x.Name).ToList();
             var markLayers = allLayers.Where(x => containMarkLayers.Any(y => y.All(z => x.Contains(z))) || macthMarkLayers.Any(y => y.First().Matching(x))).ToList();
-            var marks = acdb.ModelSpace
-                  .OfType<Entity>()
-                  .Where(o => markLayers.Contains(o.Layer))
-                  .Select(x => x.Clone() as Entity)
-                  .ToList();
-            var dbText = acdb.ModelSpace
-                  .OfType<DBText>()
-                  .Select(x => x.Clone() as DBText)
-                  .ToList();
-            marks.AddRange(dbText);
-            marks = marks.Distinct().ToList();
+            var dxfNames = new string[]
+            {
+                 ThCADCommon.DxfName_Tagging,
+                 //RXClass.GetClass(typeof(DBText)).DxfName,
+            };
+            //var layerNames = markLayers.ToArray();
+            var layerNames = new string[]
+            {
+            };
+            var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) | o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
+            var allpipes = Active.Editor.SelectAll(filterlist);
+            var marks = new List<Entity>();
+            if (allpipes.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId obj in allpipes.Value.GetObjectIds())
+                {
+                    var ent = acdb.Element<Entity>(obj).Clone() as Entity;
+                    marks.Add(ent);
+                }
+            }
             marks.ForEach(x => originTransformer.Transform(x));
             marks = marks.Where(o =>
             {
