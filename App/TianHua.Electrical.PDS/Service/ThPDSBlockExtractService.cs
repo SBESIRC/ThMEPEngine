@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
+using ThMEPEngineCore.CAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -41,7 +42,6 @@ namespace TianHua.Electrical.PDS.Service
                 .ForEach(block =>
                 {
                     var blockData = new ThPDSBlockReferenceData(block.ObjectId);
-
                     if (blockData.EffectiveName.IndexOf("负载标注") == 0
                         || blockData.EffectiveName.Contains("水泵标注")
                         || blockData.EffectiveName.Contains("E-电力平面-负荷明细"))

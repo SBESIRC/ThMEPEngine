@@ -53,8 +53,13 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (circuitID.IndexOf(otherDistBoxID) == 0)
                     {
-                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
+                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[i].Target, cabletrayEdgeList[j].Target,
                             new List<string> { circuitID });
+                        edge.Circuit.ViaCableTray = true;
+                        if(cabletrayEdgeList[i].Circuit.ViaConduit || cabletrayEdgeList[j].Circuit.ViaConduit)
+                        {
+                            edge.Circuit.ViaConduit = true;
+                        }
                         addEdgeList.Add(edge);
                     }
                 }
@@ -72,6 +77,7 @@ namespace TianHua.Electrical.PDS.Engine
                 unionGraph.AddEdge(edge);
             });
 
+            // 设置图的遍历起点
             foreach (var vertice in unionGraph.Vertices)
             {
                 if (!unionGraph.Edges.Any(o => o.Target.Equals(vertice)))

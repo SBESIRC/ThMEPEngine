@@ -22,13 +22,12 @@ namespace TianHua.Electrical.PDS.Service
         private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
 
         private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
-        public ThMarkService(List<ThRawIfcAnnotationElementData> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks)
+        public ThMarkService(List<Entity> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks)
         {
             var lines = new DBObjectCollection();
             var texts = new DBObjectCollection();
-            markDatas.ForEach(o =>
+            markDatas.ForEach(entity =>
             {
-                var entity = o.Data as Entity;
                 if (entity is DBText)
                 {
                     texts.Add(entity);
@@ -54,7 +53,7 @@ namespace TianHua.Electrical.PDS.Service
             TextIndex = new ThCADCoreNTSSpatialIndex(texts);
 
             MarkDic = new Dictionary<DBPoint, List<string>>();
-            var mLeader = markDatas.Select(o => o.Data).OfType<MLeader>();
+            var mLeader = markDatas.OfType<MLeader>();
             mLeader.ForEach(e =>
             {
                 var vertex = new Point3d();

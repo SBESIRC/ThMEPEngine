@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 桥架集合
         /// </summary>
-        private List<Line> Cabletrays { get; set; }
+        private List<Line> CableTrays { get; set; }
 
         /// <summary>
         /// 回路集合
@@ -64,9 +64,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         private List<string> DistBoxKey { get; set; }
 
-        private ThCADCoreNTSSpatialIndex DistBoxSpatialIndex;
-        private ThCADCoreNTSSpatialIndex LoadSpatialIndex;
-        private ThCADCoreNTSSpatialIndex CableSpatialIndex;
+        private ThCADCoreNTSSpatialIndex DistBoxIndex;
+        private ThCADCoreNTSSpatialIndex LoadIndex;
+        private ThCADCoreNTSSpatialIndex CableIndex; 
+        private ThCADCoreNTSSpatialIndex CableTrayIndex; 
         public ThPDSCircuitGraphNode CabletrayNode;//桥架节点
         private ThMarkService MarkService;
         private Database Database;
@@ -84,12 +85,13 @@ namespace TianHua.Electrical.PDS.Engine
                 Loads = loads;
                 CacheDistBoxes = new Dictionary<Entity, ThPDSCircuitGraphNode>();
                 CacheLoads = new List<Entity>();
-                Cabletrays = cabletrays;
+                CableTrays = cabletrays;
                 Cables = cables;
 
-                DistBoxSpatialIndex = new ThCADCoreNTSSpatialIndex(DistBoxes.ToCollection());
-                LoadSpatialIndex = new ThCADCoreNTSSpatialIndex(this.Loads.ToCollection());
-                CableSpatialIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
+                DistBoxIndex = new ThCADCoreNTSSpatialIndex(DistBoxes.ToCollection());
+                LoadIndex = new ThCADCoreNTSSpatialIndex(this.Loads.ToCollection());
+                CableIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
+                CableTrayIndex = new ThCADCoreNTSSpatialIndex(CableTrays.ToCollection());
 
                 PDSGraph = new ThPDSCircuitGraph
                 {
@@ -108,7 +110,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         public void CreatGraph()
         {
-            foreach (var cabletray in Cabletrays)
+            foreach (var cabletray in CableTrays)
             {
                 FindGraph(null, cabletray);
             }
@@ -166,7 +168,17 @@ namespace TianHua.Electrical.PDS.Engine
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string>(), DistBoxKey);
+                        var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber}, DistBoxKey);
+                        var newOBB = ThPDSBufferService.Buffer(distBox, Database);
+                        var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
+                        if(filter.Count > 0)
+                        {
+                            newEdge.Circuit.ViaCableTray = true;
+                        }
+                        else
+                        {
+                            newEdge.Circuit.ViaConduit = true;
+                        }
                         PDSGraph.Graph.AddEdge(newEdge);
 
                         FindGraph(startingEntity, distBox);
@@ -203,8 +215,23 @@ namespace TianHua.Electrical.PDS.Engine
                         PrepareNavigate(CabletrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
                     }
                 }
-                // 遍历挂在桥架上的配电箱
 
+                // 遍历挂在桥架上的配电箱
+                var distBoxes = FindNextDistBox(curve, polyline);
+                foreach (var distBox in distBoxes)
+                {
+                    if (!CacheDistBoxes.ContainsKey(distBox))
+                    {
+                        var newNode = ThPDSGraphService.CreateNode(distBox, Database, MarkService, DistBoxKey);
+                        CacheDistBoxes.Add(distBox, newNode);
+                        PDSGraph.Graph.AddVertex(newNode);
+
+                        var newEdge = ThPDSGraphService.CreateEdge(CabletrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
+                        PDSGraph.Graph.AddEdge(newEdge);
+
+                        FindGraph(startingEntity, distBox);
+                    }
+                }
             }
         }
 
@@ -263,10 +290,18 @@ namespace TianHua.Electrical.PDS.Engine
                         newNode = CacheDistBoxes[item.Key];
                     }
 
-                    if (DistBoxes.Contains(sourceEntity) || Cabletrays.Contains(sourceEntity))
+                    if (DistBoxes.Contains(sourceEntity) || CableTrays.Contains(sourceEntity))
                     {
                         //配电箱搭着配电箱
                         var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
+                        if (item.Value.Count > 0)
+                        {
+                            newEdge.Circuit.ViaConduit = true;
+                            if(node.NodeType == PDSNodeType.Cabletray)
+                            {
+                                newEdge.Circuit.ViaCableTray = true;
+                            }
+                        }
                         PDSGraph.Graph.AddEdge(newEdge);
                         if (item.Value.Count > 0)
                         {
@@ -580,9 +615,9 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNext(Entity existingEntity, Polyline space)
         {
-            var results = CableSpatialIndex.SelectCrossingPolygon(space);
-            results = results.Union(LoadSpatialIndex.SelectCrossingPolygon(space));
-            results = results.Union(DistBoxSpatialIndex.SelectCrossingPolygon(space));
+            var results = CableIndex.SelectCrossingPolygon(space);
+            results = results.Union(LoadIndex.SelectCrossingPolygon(space));
+            results = results.Union(DistBoxIndex.SelectCrossingPolygon(space));
             results.Remove(existingEntity);
             return results.OfType<Entity>().ToList();
         }
@@ -595,7 +630,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNextLine(Entity existingEntity, Polyline space)
         {
-            var results = CableSpatialIndex.SelectCrossingPolygon(space);
+            var results = CableIndex.SelectCrossingPolygon(space);
             if(results.Count == 0)
             {
                 return new List<Entity> ();
@@ -612,7 +647,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNextLoad(Entity existingEntity, Polyline space)
         {
-            var results = LoadSpatialIndex.SelectCrossingPolygon(space);
+            var results = LoadIndex.SelectCrossingPolygon(space);
             results.Remove(existingEntity);
             return results.OfType<Entity>().ToList();
         }
@@ -625,7 +660,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         public List<Entity> FindNextDistBox(Entity existingEntity, Polyline space)
         {
-            var results = DistBoxSpatialIndex.SelectCrossingPolygon(space);
+            var results = DistBoxIndex.SelectCrossingPolygon(space);
             results.Remove(existingEntity);
             return results.OfType<Entity>().ToList();
         }

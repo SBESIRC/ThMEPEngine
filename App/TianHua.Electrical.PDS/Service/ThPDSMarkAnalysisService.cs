@@ -251,6 +251,21 @@ namespace TianHua.Electrical.PDS.Service
                         if (info.Contains("-W") || info.Contains("/W"))
                         {
                             circuitMarks.Add(info);
+                            var check = "";
+                            if (info.Contains("-W"))
+                            {
+                                check = "-W.*";
+                            }
+                            else if (info.Contains("/W"))
+                            {
+                                check = "/W.*";
+                            }
+                            var r = new Regex(@check);
+                            var m = r.Match(info);
+                            if (m.Success)
+                            {
+                                circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
+                            }
                             doSearch = false;
                         }
                     }

@@ -99,11 +99,11 @@
         /// <summary>
         /// 回路是否利用桥架
         /// </summary>
-        public bool ViaCableTray { get; set; }
+        public bool ViaCableTray { get; set; } = false;
 
         /// <summary>
         /// 回路是否利用管线
         /// </summary>
-        public bool ViaPipe { get; set; }
+        public bool ViaConduit { get; set; } = false;
     }
 }

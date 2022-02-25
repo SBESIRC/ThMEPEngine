@@ -12,6 +12,10 @@ using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Command
@@ -33,29 +37,72 @@ namespace TianHua.Electrical.PDS.Command
                 var tableAnalysis = new ThPDSTableAnalysisService();
                 tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
 
-                // 提取标注
-                var markExtractor = new ThCircuitMarkExtractionEngine();
-                markExtractor.ExtractFromMS(acad.Database);
-                
-                // 根据块名提取负载及标注块
-                var loadExtractService = new ThPDSBlockExtractService();
-                loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
-
                 // 提取回路
                 var cableEngine = new ThCableSegmentRecognitionEngine();
                 cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
 
+                // 创建移动到原点的类
+                var transformerPt = new Point3d();
+                if (cableEngine.Results.Count > 0)
+                {
+                    transformerPt = cableEngine.Results[0].StartPoint;
+                }
+                var transformer = new ThMEPOriginTransformer(transformerPt);
+
+                cableEngine.Results.ForEach(o =>
+                {
+                    transformer.Transform(o);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(o);
+                });
+
                 // 提取桥架
-                var cabletrayEngine = new ThCabletraySegmentRecognitionEngine();
-                cabletrayEngine.RecognizeMS(acad.Database, new Point3dCollection());
+                var cableTrayEngine = new ThCabletraySegmentRecognitionEngine();
+                cableTrayEngine.RecognizeMS(acad.Database, new Point3dCollection());
+                cableTrayEngine.Results.ForEach(o =>
+                {
+                    transformer.Transform(o);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(o);
+                });
+
+                // 提取标注
+                var markExtractor = new ThCircuitMarkRecognitionEngine();
+                markExtractor.RecognizeMS(acad.Database, new Point3dCollection());
+                var marks = markExtractor.Results.Select(o => o.Data as Entity).ToList();
+                marks.ForEach(o =>
+                {
+                    transformer.Transform(o);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(o);
+                });
+
+                // 根据块名提取负载及标注块
+                var loadExtractService = new ThPDSBlockExtractService();
+                loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
+                loadExtractService.MarkBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Transform(block);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(block);
+                });
+                loadExtractService.DistBoxBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Transform(block);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(block);
+                });
+                loadExtractService.LoadBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Transform(block);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(block);
+                });
 
                 //做一个标注的Service
-                var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks);
+                var markService = new ThMarkService(marks, loadExtractService.MarkBlocks);
 
                 ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                 ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
                 var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
-                    loadExtractService.LoadBlocks.Keys.ToList(), cabletrayEngine.Results, cableEngine.Results, markService, distBoxKey);
+                    loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService, distBoxKey);
                 graphEngine.CreatGraph();
                 var graph = graphEngine.GetGraph();
 

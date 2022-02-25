@@ -74,7 +74,15 @@ namespace TianHua.Electrical.PDS.Service
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
-            if(!string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
+            if(source.NodeType == PDSNodeType.Cabletray)
+            {
+                edge.Circuit.ViaCableTray = true;
+            }
+            if (target.NodeType == PDSNodeType.Load)
+            {
+                edge.Circuit.ViaConduit = true;
+            }
+            if (!string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {

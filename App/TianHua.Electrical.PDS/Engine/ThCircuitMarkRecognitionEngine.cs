@@ -31,6 +31,8 @@ namespace TianHua.Electrical.PDS.Engine
 
     public class ThCircuitMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
+        public List<ThRawIfcAnnotationElementData> Results { get; protected set; }
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             throw new NotImplementedException();
@@ -43,7 +45,9 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var extractionEngine = new ThCircuitMarkExtractionEngine();
+            extractionEngine.ExtractFromMS(database);
+            Results = extractionEngine.Results;
         }
     }
 }
