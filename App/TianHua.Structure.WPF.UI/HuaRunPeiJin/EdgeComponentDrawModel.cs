@@ -44,6 +44,16 @@ namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
                 RaisePropertyChanged("WallLayer");
             }
         }
+        private string dwgSource = "";
+        public string DwgSource
+        {
+            get => dwgSource;
+            set
+            {
+                dwgSource = value;
+                RaisePropertyChanged("DwgSource");
+            }
+        }
         private string sortWay = "";
         /// <summary>
         /// 排序方式
@@ -134,6 +144,19 @@ namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
                 stirrupRatio = value;
                 RaisePropertyChanged("StirrupRatio");
             }
+        }
+        public EdgeComponentDrawModel()
+        {
+            size = 1;
+            stirrupRatio = 1;
+            wallLayer = "砼墙";
+            isConsiderWall = true;
+            reinforceRatio = 0.06;
+            markPosition = "右上";
+            leaderType = "折现引出";
+            wallColumnLayer = "边构";
+            sortWay = "从左到右，从下到上";
+            textLayer = "dsptext_walledge、dsptext_walledgeCal、dsptext_walledgeCX";
         }
     }
 }

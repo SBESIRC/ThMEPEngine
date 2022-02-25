@@ -47,6 +47,7 @@
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentDrawModel.cs" />
+    <Compile Include="HuaRunPeiJin\EdgeComponentDrawVM.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentInfo.cs" />
     <Compile Include="HuaRunPeiJin\WallColumnReinforceSetModel.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml.cs">
