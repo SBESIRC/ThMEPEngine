@@ -9,15 +9,15 @@
                     SizeToContent="WidthAndHeight"
                     mc:Ignorable="d"
                     Title="边缘构件绘制"
-                    Width="650" Height="400" MaxWidth="650" MaxHeight="600">
+                    Width="700" Height="450" MaxWidth="700" MaxHeight="450">
     <Grid Focusable="False" Margin="3,3">
         <Grid.RowDefinitions>
-            <RowDefinition Height="28*"></RowDefinition>
-            <RowDefinition Height="2*"></RowDefinition>
+            <RowDefinition Height="0.94*"></RowDefinition>
+            <RowDefinition Height="0.06*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.70*"/>
-            <ColumnDefinition Width="0.30*"/>
+            <ColumnDefinition Width="0.75*"/>
+            <ColumnDefinition Width="0.25*"/>
         </Grid.ColumnDefinitions>
         <DataGrid Name="table1" Grid.Row="0" Grid.Column="0" AutoGenerateColumns="False" RowBackground="White" 
                   Background="White"  BorderThickness="1,1,0,0"
@@ -35,45 +35,45 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="编号" Width="50" CanUserSort="False" CanUserResize="True">
+                <DataGridTemplateColumn Header="编号" Width="80" CanUserSort="False" CanUserResize="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding Number,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="截面" Width="120" CanUserSort="False" CanUserResize="True">
+                <DataGridTemplateColumn Header="截面" Width="140" CanUserSort="False" CanUserResize="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" Height="20" VerticalAlignment="Stretch" Text="{Binding Spec,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding Spec,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="形状" Width="40" CanUserSort="False" CanUserResize="False">
+                <DataGridTemplateColumn Header="形状" Width="60" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" Height="20" VerticalAlignment="Stretch" Text="{Binding Shape,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding Shape,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="类型" Width="40" CanUserSort="False" CanUserResize="False">
+                <DataGridTemplateColumn Header="类型" Width="60" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" Height="20" VerticalAlignment="Stretch" Text="{Binding Type,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputString" Height="20" VerticalAlignment="Stretch" Text="{Binding Type,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="配筋率(%)" Width="60" CanUserSort="False" CanUserResize="False">
+                <DataGridTemplateColumn Header="配筋率(%)" Width="70" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" Height="20" VerticalAlignment="Stretch" Text="{Binding ReinforceRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputDouble" Height="20" VerticalAlignment="Stretch" Text="{Binding ReinforceRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="配箍率(%)" Width="60" CanUserSort="False" CanUserResize="False">
+                <DataGridTemplateColumn Header="配箍率(%)" Width="70" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <cus:InputTextBox TextBoxInputType="InputInteger" Height="20" VerticalAlignment="Stretch" Text="{Binding StirrupRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
+                            <cus:InputTextBox IsReadOnly="True" TextBoxInputType="InputDouble" Height="20" VerticalAlignment="Stretch" Text="{Binding StirrupRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -93,7 +93,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="2*"></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Content="墙柱："></Label>
                     <Label Grid.Row="1" Grid.Column="0" Content="文字："></Label>
@@ -104,15 +104,15 @@
                              Text="{Binding DrawModel.TextLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBox Name="tbWallLayer" Grid.Row="2" Grid.Column="1" Height="20"
                              Text="{Binding DrawModel.WallLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <Image Name="imgWallColumnLayer" Grid.Row="0" Grid.Column="2" Width="30" Height="30"
-                           Source="/TianHua.Structure.WPF.UI;component/Resource/Image/Layer.png"/>
-                    <Image Name="imgTextLayer" Grid.Row="1" Grid.Column="2" Width="30" Height="30"
-                           Source="/TianHua.Structure.WPF.UI;component/Resource/Image/Layer.png"/>
-                    <Image Name="imgWallLayer" Grid.Row="2" Grid.Column="2" Width="30" Height="30"
-                           Source="/TianHua.Structure.WPF.UI;component/Resource/Image/Layer.png"/>
+                    <Image Name="imgWallColumnLayer" Grid.Row="0" Grid.Column="2" Width="32" Height="32"
+                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgWallColumnLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgTextLayer" Grid.Row="1" Grid.Column="2" Width="32" Height="32"
+                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgTextLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgWallLayer" Grid.Row="2" Grid.Column="2" Width="32" Height="32"
+                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgWallLayer_MouseLeftButtonDown"/>
                 </Grid>
             </GroupBox>
-            <GroupBox>
+            <GroupBox Margin="0,10">
                 <GroupBox.Header>
                     排序
                 </GroupBox.Header>
@@ -121,7 +121,7 @@
                           Text="{Binding DrawModel.SortWay,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">                    
                 </ComboBox>
             </GroupBox>
-            <GroupBox>
+            <GroupBox Margin="0,10">
                 <GroupBox.Header>
                     图层
                 </GroupBox.Header>
@@ -146,7 +146,7 @@
                     </ComboBox>
                 </Grid>
             </GroupBox>
-            <GroupBox Height="100">
+            <GroupBox Height="100" Margin="0,10">
                 <GroupBox.Header>
                     图层
                 </GroupBox.Header>
@@ -167,7 +167,7 @@
                         <TextBox Name="cbSize" Height="20" Width="40"
                                  Text="{Binding DrawModel.Size,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                         <CheckBox Name="chkConsiderWall" Content="考虑墙体" Margin="5,0" 
-                                  Checked="{Binding DrawModel.IsConsiderWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                  IsChecked="{Binding DrawModel.IsConsiderWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <TextBox Name="tbReinforceRatio" Height="20" Grid.Row="1" Grid.Column="1"
                              Text="{Binding DrawModel.ReinforceRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
@@ -176,16 +176,16 @@
                 </Grid>
             </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center">
             <ComboBox Name="cbDwgSource" Margin="1,0" Width="120" HorizontalAlignment="Left"
                       ItemsSource="{Binding DwgSources,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                       Text="{Binding DrawModel.DwgSource,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-            <StackPanel Margin="226,0" Orientation="Horizontal" HorizontalAlignment="Left">
-                <cus:ImageButton Margin="5,0" Name="btnSelect" Width="50" Content="选择"></cus:ImageButton>
-                <cus:ImageButton Margin="5,0" Name="btnClear" Width="50" Content="清空"></cus:ImageButton>
-                <cus:ImageButton Margin="5,0" Name="btnMerge" Width="50" Content="归并"></cus:ImageButton>
-                <cus:ImageButton Margin="5,0" Name="btnDraw" Width="50" Content="绘制"></cus:ImageButton>
-                <cus:ImageButton Margin="5,0" Name="btnCancel" Width="50" Content="取消"></cus:ImageButton>
+            <StackPanel Margin="275,0" Orientation="Horizontal" HorizontalAlignment="Left">
+                <cus:ImageButton Margin="5,0" Name="btnSelect" Width="50" Content="选择" Click="btnSelect_Click"></cus:ImageButton>
+                <cus:ImageButton Margin="5,0" Name="btnClear" Width="50" Content="清空" Click="btnClear_Click"></cus:ImageButton>
+                <cus:ImageButton Margin="5,0" Name="btnMerge" Width="50" Content="归并" Click="btnMerge_Click"></cus:ImageButton>
+                <cus:ImageButton Margin="5,0" Name="btnDraw" Width="50" Content="绘制" Click="btnDraw_Click"></cus:ImageButton>
+                <cus:ImageButton Margin="5,0" Name="btnCancel" Width="50" Content="取消" Click="btnCancel_Click"></cus:ImageButton>
             </StackPanel>
             
         </StackPanel>

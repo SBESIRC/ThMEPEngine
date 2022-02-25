@@ -2,7 +2,7 @@
 
 namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
 {
-    internal class EdgeComponentDrawModel : NotifyPropertyChangedBase
+    public class EdgeComponentDrawModel : NotifyPropertyChangedBase
     {
         private string wallColumnLayer = "";
         /// <summary>
@@ -150,6 +150,7 @@ namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
             size = 1;
             stirrupRatio = 1;
             wallLayer = "砼墙";
+            dwgSource = "YJK";
             isConsiderWall = true;
             reinforceRatio = 0.06;
             markPosition = "右上";
