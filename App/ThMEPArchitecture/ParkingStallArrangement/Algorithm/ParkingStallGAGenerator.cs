@@ -320,14 +320,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int MaxCount = 10;//出现相同车位数的最大次数
         double MutationRate;
         double GeneMutationRate;
-        double MaxSMutationRate;
         int Elite_popsize;
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
         private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
-        private List<bool> Directions;//记录每个基因的方向
+
         //-1：非特殊基因，0：位于lowerbound的特殊基因，1：位于ub的特殊基因，2：位于lb + 车位长的特殊基因，3：位于ub-车位长的特殊基因 
         private List<double[]> SpecialGene;// 特殊基因的值
         private List<double?[]> MovingAvgPN;// 特殊基因的车位数量,PN parkingnumber,MovingAvgPN[i][j]代表第i个基因的第j个特殊基因的值，可以为空
@@ -372,9 +371,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MutationRate = 1 - GoldenRatio;//变异因子,0.382
+            MutationRate =2*( 1 - GoldenRatio) - 0.2 ;//大变异+特殊变异,0.382 + 0.182 
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
-            MaxSMutationRate = GoldenRatio;// 最大小变异几率，随代数递减，0.618
             SelectionRate = 1- GoldenRatio;//保留因子0.382
             SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
 
@@ -388,6 +386,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
             LowerUpperBound = new Dictionary<int, Tuple<double, double>>();//储存每条基因可变动范围，方便后续变异
+
             for (int i = 0; i < GeneCount; ++i)
             {
                 GetBoundary(i, out double LowerBound, out double UpperBound);
@@ -404,7 +403,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             // get absolute coordinate of segline
             var line = GaPara.SegLine[i];
             var dir = line.GetValue(out double value, out double startVal, out double endVal);// 垂直true，水平false
-            Directions.Add(dir);
             if (Math.Abs(GaPara.MaxValues[i] - GaPara.MinValues[i])< tol)
             {
                 LowerBound = value;
@@ -446,13 +444,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 double LowerBound = LowerUpperBound[i].Item1;
                 double UpperBound = LowerUpperBound[i].Item2;
                 var SolutionLis = new List<double>() { LowerBound, UpperBound };
-                if (!Directions[i])// 横向线多两个特殊基因
-                {
-                    var s1 = LowerBound + parkingLength;
-                    var s2 = UpperBound - parkingLength;
-                    if (s1 < UpperBound) SolutionLis.Add(s1);
-                    if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
-                }
+                var s1 = LowerBound + parkingLength;
+                var s2 = UpperBound - parkingLength;
+                if (s1 < UpperBound) SolutionLis.Add(s1);
+                if (s2 > LowerBound) SolutionLis.Add(s2);//这俩条件满足一个则都满足
+                
                 SpecialGene.Add(SolutionLis.ToArray());
 
                 var initArr = new double?[SolutionLis.Count];
@@ -1053,9 +1049,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             List<int> index;
             //List<int> index = Enumerable.Range(0, solutions.Count).ToList();
-            int j = Elite_popsize;
-            int SMsize = SelectionSize;// small mutation size,0.618of total population size
-            int LMsize = PopulationSize - SMsize;//large mutation size
+            int j = Elite_popsize;// 小变异的大小
             while (true)
             {
                 // 随机两两生成后代
@@ -1065,14 +1059,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var s = Crossover(solutions[index[2 * i]].Clone(), solutions[index[2 * i + 1]].Clone());
                     s.Logger = this.Logger;
-                    if (j < SMsize)//添加小变异
-                    {
-                        rstSM.Add(s);
-                    }
-                    else//其余大变异
-                    {
-                        rstLM.Add(s);
-                    }
+
+                    rstLM.Add(s);// 添加大变异 + 特殊变异
                     j++;
                     if (j == PopulationSize)
                     {
@@ -1095,11 +1083,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var selectedGene = RandChoice(s[0].GenomeCount(), geneCnt);
                 foreach (int j in selectedGene)
                 {
-                    double minVal = LowerUpperBound[j].Item1;
-                    double maxVal = LowerUpperBound[j].Item2;
-                    //var dist = Math.Min(maxVal - minVal, MutationUpperBound);
-                    var dist = maxVal - minVal;
-                    s[i].Genome[j].Value = RandDoubleInRange(minVal, maxVal);
+                    if (RandDouble() < GoldenRatio)// 大变异，均匀变异
+                    {
+                        double minVal = LowerUpperBound[j].Item1;
+                        double maxVal = LowerUpperBound[j].Item2;
+                        s[i].Genome[j].Value = RandDoubleInRange(minVal, maxVal);
+                    }
+                    else//特殊解
+                    {
+                        s[i].Genome[j].Value = RandomSpecialNumber(j, out int specialflag);
+                        s[i].Genome[j].SpecialFlag = specialflag;
+                    }
                 }
             }
         }
@@ -1107,8 +1101,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             // small mutation
             // 除第一个染色体变异
-            double cur_MR = MaxSMutationRate / Math.Sqrt(lamda-3);// 当前变异几率
-            int geneCnt = Math.Min((int)(s[0].GenomeCount() * cur_MR), 1);//需要变异的基因数目，最小为1
+            int geneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
             for (int i = 1; i < s.Count; ++i)
             {
                 //挑选需要变异的基因
@@ -1120,17 +1113,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double minVal = LowerUpperBound[j].Item1;
                     double maxVal = LowerUpperBound[j].Item2;
                     var loc = s[i].Genome[j].Value;
-
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-                    if (RandDouble() < GoldenRatio)// 截断正态分布解
-                    {
-                        s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
-                    }
-                    else//特殊解
-                    {
-                        s[i].Genome[j].Value = RandomSpecialNumber(j, out int specialflag);
-                        s[i].Genome[j].SpecialFlag = specialflag;
-                    }
+                    s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
                 }
             }
         }
