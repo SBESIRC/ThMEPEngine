@@ -7,10 +7,8 @@ using NFox.Cad;
 using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using NetTopologySuite.Geometries;
-using Linq2Acad;
 using Dreambuild.AutoCAD;
 using AcHelper;
 
@@ -71,7 +69,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rst.First();
         }
 
-
         public static List<Polyline> SplitArea(this List<Line> splitterLines, List<Polyline> polyLines, double tor = 5.0)
         {
             var rst = new List<Polyline>();
@@ -103,132 +100,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
 
             return rst;
-        }
-
-        public static List<Polyline> SplitByExtentedLine(this Line line, Polyline polygon, double tor = 1.0)
-        {
-            var defaultTesselateLength = 100;
-            var lines = polygon.ToLines(defaultTesselateLength);
-            double extendTor = polygon.GetMaxWidth();
-            var lineEx = line.ExtendLine(extendTor);
-            lines.Add(lineEx);
-
-            var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
-            var areas = extendLines.PolygonsEx();
-
-            lines.ForEach(e => e.Dispose());
-            lines.Clear();
-            foreach (DBObject e in extendLines)
-            {
-                e.Dispose();
-            }
-            extendLines.Dispose();
-            var rst = new List<Polyline>();
-            foreach (var area in areas)
-            {
-                rst.Add(area as Polyline);
-            }
-            return rst;
-        }
-
-        public static bool SplitAreasByOrgiginLine(Line line, ref List<Polyline> areas)
-        {
-            double minArea = 1e8;
-            var segLine = line;//分割线
-            var breakFlag = false;
-            for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
-            {
-                var area = areas[k];
-                var segAreas = segLine.SplitByLine(area);
-                if (segAreas.Count == 2)
-                {
-                    foreach (var a in segAreas)
-                    {
-                        if (a.Area < minArea)
-                        {
-                            breakFlag = true;
-                        }
-                    }
-                    if (breakFlag)
-                    {
-                        breakFlag = false;
-                        continue;
-                    }
-                    areas.RemoveAt(k);
-                    areas.AddRange(segAreas);
-                    return true;
-                }
-                else if (segAreas.Count > 2)
-                {
-                    var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
-                    for (int i = 0; i < 2; i++)
-                    {
-                        var a = sortedAreas[i];
-                        if (a.Area < minArea)
-                        {
-                            return false;
-                        }
-                    }
-                    areas.RemoveAt(k);
-                    areas.Add(sortedAreas[0]);
-                    areas.Add(sortedAreas[1]);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static bool SplitAreasByExtentedLine(Line line, ref List<Polyline> areas)
-        {
-            double minArea = 1e8;
-            var segLine = line;//分割线
-            var middlePt = segLine.GetMiddlePt();
-
-            for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
-            {
-                var breakFlag = false;
-                var area = areas[k];
-                if (area.Contains(middlePt))
-                {
-                    var segAreas = segLine.SplitByExtentedLine(area);
-
-                    if (segAreas.Count == 2)
-                    {
-                        foreach (var a in segAreas)
-                        {
-                            if (a.Area < minArea)
-                            {
-                                breakFlag = true;
-                                break;
-                            }
-                        }
-                        if (breakFlag)
-                            continue;
-                        areas.RemoveAt(k);
-                        areas.AddRange(segAreas);
-                        return true;
-                    }
-                    else if (segAreas.Count > 2)
-                    {
-                        var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
-                        for (int i = 0; i < 2; i++)
-                        {
-                            var a = sortedAreas[i];
-                            if (a.Area < minArea)
-                            {
-                                breakFlag = true;
-                                continue;
-                            }
-                        }
-                        areas.RemoveAt(k);
-                        areas.Add(sortedAreas[0]);
-                        areas.Add(sortedAreas[1]);
-                        return true;
-                    }
-                    return false;
-                }
-            }
-            return false;
         }
 
         public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, Polyline segArea, Polyline area, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
@@ -286,7 +157,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     return sortPts.First();
                 }
                 //var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
-                var closeBuild = buildList.OrderBy(blk => line.dist2Build(blk)).ToList().First();
+                var closeBuild = buildList.OrderBy(blk => line.Dist2Build(blk)).ToList().First();
                 var rect = closeBuild.GetRect();
                 var plines = GetPlines(closeBuild);
                 plines.ForEach(pl => pl.GetPoints().ForEach(p => closedPts.Add(p)));
@@ -343,7 +214,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
 
-        private static double dist2Build(this Line line, BlockReference build)
+        private static double Dist2Build(this Line line, BlockReference build)
         {
             var objs = new DBObjectCollection();
             build.Explode(objs);
@@ -475,162 +346,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return pt.DistanceTo(targetPt);
         }
 
-        public static Line VerticalSeg(ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
-        {
-            double dist = 5000;
-            double laneWidth = 5500;
-            maxVal = 0;
-            minVal = 0;
-            var area = orgAreas.First();//进来就一个区域
-            var orderPts = area.GetPoints().OrderBy(pt => pt.X);
-            var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
-            var left = orderPts.First().X;
-            var right = orderPts.Last().X;
-            var buttom = orderPts2.First().Y - dist;
-            var upper = orderPts2.Last().Y + dist;
-
-            var startX = left;
-            while (startX < right)//直线在框内
-            {
-                var upPt = new Point3d(startX, upper, 0);
-                var buttomPt = new Point3d(startX, buttom, 0);
-                var segLine = new Line(upPt, buttomPt);
-                var segRect = segLine.Buffer(1.0);
-                var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);
-                if (segRectInBuild.Count > 0)
-                {
-                    startX += laneWidth;
-                    continue;//分割线穿墙直接删除
-                }
-                if (IsCorrectSegLines(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
-                {
-                    return segLine;
-                }
-                startX += laneWidth;
-            }
-            return null;
-        }
-
-        public static Line ThroughVerticalSeg(Polyline wallLine, ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
-        {
-            double dist = 5000;
-            double laneWidth = 5500;
-            maxVal = 0;
-            minVal = 0;
-            var area = orgAreas.First();//进来就一个区域
-            var orderPts = area.GetPoints().OrderBy(pt => pt.X);
-            var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
-            var left = orderPts.First().X;
-            var right = orderPts.Last().X;
-            var buttom = orderPts2.First().Y - dist;
-            var upper = orderPts2.Last().Y + dist;
-
-            var startX = left;
-            while (startX < right)//直线在框内
-            {
-                var upPt = new Point3d(startX, upper, 0);
-                var buttomPt = new Point3d(startX, buttom, 0);
-                var segLine = new Line(upPt, buttomPt);
-                var segRect = segLine.Buffer(1.0);
-                var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);//分割线穿过墙
-                if (segRectInBuild.Count == 1)
-                {
-                    var build = segRectInBuild[0] as BlockReference;
-                    var buildRectEx = build.GetRectExtend(laneWidth);//建筑物外框扩展
-                    if (!buildRectEx.Intersects(wallLine))//建筑物和墙线不相交
-                    {
-                        startX += laneWidth;
-                        continue;//分割线穿墙直接删除
-                    }
-                }
-                if (segRectInBuild.Count > 1)
-                {
-                    startX += laneWidth;
-                    continue;//分割线穿墙直接删除
-                }
-                if (IsCorrectSegLines2(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
-                {
-                    return segLine;
-                }
-                startX += laneWidth;
-            }
-            return null;
-        }
-
-        public static Line HorizontalSeg(ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
-        {
-            double dist = 5000;
-            double laneWidth = 5500;
-            maxVal = 0;
-            minVal = 0;
-            var area = orgAreas.First();//进来就一个区域
-            var orderPts = area.GetPoints().OrderBy(pt => pt.X);
-            var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
-            var left = orderPts.First().X - dist;
-            var right = orderPts.Last().X + dist;
-            var buttom = orderPts2.First().Y;
-            var upper = orderPts2.Last().Y;
-
-            var startX = buttom;
-            while (startX < upper)//直线在框内
-            {
-                var leftPt = new Point3d(left, startX, 0);
-                var rightPt = new Point3d(right, startX, 0);
-                var segLine = new Line(leftPt, rightPt);
-                var segRect = segLine.Buffer(1.0);
-                var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);
-                if (segRectInBuild.Count > 0)
-                {
-                    startX += laneWidth;
-                    continue;//分割线穿墙直接删除
-                }
-                //var areas = new List<Polyline>() { area };
-                if (IsCorrectSegLines(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
-                {
-                    return segLine;
-                }
-                startX += laneWidth;
-            }
-            return null;
-        }
-
-        public static bool IsCorrectSegLines(Line segLine, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-          out double maxVal, out double minVal)
-        {
-            maxVal = 0;
-            minVal = 0;
-            var area = areas.First();//其实进来也就一个区域
-
-            var segAreas = segLine.SplitByLine(area);
-            if (segAreas.Count < 2)
-            {
-                return false;
-            }
-
-            var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
-            var res = sortedAreas.Take(2);
-            foreach (var segArea in res)
-            {
-                var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                if (buildLines.Count == 0)
-                {
-                    return false;//没有建筑物要他作甚
-                }
-                var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
-                if (segLine.GetValueType(boundPt))
-                {
-                    maxVal = segLine.GetMinDist(boundPt) - 2760;
-                }
-                else
-                {
-                    minVal = -segLine.GetMinDist(boundPt) + 2760;
-                }
-            }
-            areas.RemoveAt(0);
-            areas.AddRange(res);
-            return true;
-        }
-
         public static bool IsCorrectSegLines(Line segLine, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
           out double maxVal, out double minVal)
         {
@@ -658,54 +373,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
-                    maxVal = segLine.GetMinDist(boundPt) - 2760;
+                    maxVal = segLine.GetMinDist(boundPt) - 2751;
                 }
                 else
                 {
-                    minVal = -segLine.GetMinDist(boundPt) + 2760;
+                    minVal = -segLine.GetMinDist(boundPt) + 2751;
                 }
             }
             if(maxVal < minVal)
             {
                 return false;
             }
-            return true;
-        }
-
-        public static bool IsCorrectSegLines2(Line segLine, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-            out double maxVal, out double minVal)
-        {
-            maxVal = 0;
-            minVal = 0;
-            var area = areas.First();//其实进来也就一个区域
-
-            var segAreas = segLine.SplitByLine(area);
-            if (segAreas.Count < 2)
-            {
-                return false;
-            }
-
-            var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
-            var res = sortedAreas.Take(2);
-            foreach (var segArea in res)
-            {
-                var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                if (buildLines.Count == 0)
-                {
-                    return false;//没有建筑物要他作甚
-                }
-                var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
-                if (segLine.GetValueType(boundPt))
-                {
-                    maxVal = segLine.GetMinDist(boundPt) - 2760;
-                }
-                else
-                {
-                    minVal = -segLine.GetMinDist(boundPt) + 2760;
-                }
-            }
-            areas.RemoveAt(0);
-            areas.AddRange(res);
             return true;
         }
     }

@@ -179,6 +179,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
         {
+            double halfCarLaneWidth = 2751;
             var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
             var dbPts = new List<DBPoint>();
             areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
@@ -189,8 +190,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
             var boundPt1 = line.GetBoundPt(buildLines1, buildingWithoutRampSpatialIndex, rect1, area, ptsIndex, out bool hasBuilding);
             var boundPt2 = line.GetBoundPt(buildLines2, buildingWithoutRampSpatialIndex, rect2, area, ptsIndex, out bool hasBuilding2);
-            maxVal = line.GetMinDist(boundPt1) - 2760;
-            minVal = -line.GetMinDist(boundPt2) + 2760;
+            maxVal = line.GetMinDist(boundPt1) - halfCarLaneWidth;
+            minVal = -line.GetMinDist(boundPt2) + halfCarLaneWidth;
         }
 
         public static Polyline GetHalfBuffer(this Line line, bool flag, double tor = 99999)
