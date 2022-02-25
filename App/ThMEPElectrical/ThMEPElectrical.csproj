@@ -141,6 +141,11 @@
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorRecognitionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionVisitor.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireRecognitionEngine.cs" />
+    <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
+    <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
