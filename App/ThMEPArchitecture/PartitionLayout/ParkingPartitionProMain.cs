@@ -343,7 +343,9 @@ namespace ThMEPArchitecture.PartitionLayout
                 GenerateLanes();
                 GeneratePerpModules();
                 GenerateCarsInModules();
+                //里面的函数目前不适合并行化操作
                 GenerateCarsOnRestLanes();
+                //里面函数大部分可以并行化操作
                 PostProcess();
             }
         }
@@ -977,6 +979,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void PostProcess()
         {
+            //可以并行化
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
             RemoveInvalidPillars();

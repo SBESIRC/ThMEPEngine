@@ -335,6 +335,7 @@ namespace ThMEPArchitecture.PartitionLayout
             return generate_lane_length;
         }
 
+        //可以使用并行化操作
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true)
         {
             var lanes = new List<Lane>();
@@ -821,6 +822,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisPillarLength)), line.EndPoint);
                 }
             }
+            if (line.Length == 0) return;
             //背靠背对齐
             if (Math.Abs(length_divided - DisVertCarWidth) < 1 && align_back_to_back)
             {
@@ -828,7 +830,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var pts = line.StartPoint.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisVertCarLength * 1.5));
                 var pte = pts.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * dis_judge_in_backtoback));
                 var tl = new Line(pts, pte);
-                var tlbf = tl.Buffer(1);
+                Polyline tlbf = tl.Buffer(1);
                 var crosscars = CarSpatialIndex.SelectCrossingPolygon(tlbf).Cast<Polyline>().OrderBy(t => t.GetRecCentroid().DistanceTo(pts)).ToList();
                 if (crosscars.Count > 1)
                 {
