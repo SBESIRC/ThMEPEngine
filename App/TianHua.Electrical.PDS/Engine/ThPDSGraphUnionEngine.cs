@@ -53,8 +53,8 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (circuitID.IndexOf(otherDistBoxID) == 0)
                     {
-                        var edge = ThPDSGraphService.CreateEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
-                            new List<string> { circuitID }, DistBoxKey, true);
+                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
+                            new List<string> { circuitID });
                         addEdgeList.Add(edge);
                     }
                 }

@@ -26,8 +26,6 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THPDSTest", CommandFlags.Modal)]
         public void THPDSTest()
         {
-            PDSProject center = PDSProject.Instance;
-            center.Load("");
             var cmd = new ThPDSCommand();
             cmd.Execute();
         }

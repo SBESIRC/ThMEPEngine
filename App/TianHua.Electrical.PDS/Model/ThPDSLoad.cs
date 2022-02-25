@@ -174,7 +174,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 安装功率
         /// </summary>
-        public List<double> InstalledCapacity { get; set; } = new List<double>();
+        public ThInstalledCapacity InstalledCapacity { get; set; }
 
         /// <summary>
         /// 相数

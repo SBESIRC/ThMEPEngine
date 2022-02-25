@@ -69,7 +69,7 @@
         /// <summary>
         /// 安装功率
         /// </summary>
-        public double InstalledCapacity { get; set; }
+        public ThInstalledCapacity InstalledCapacity { get; set; }
 
         /// <summary>
         /// 相数
@@ -95,5 +95,15 @@
         /// 是否消防回路
         /// </summary>
         public bool FireLoad { get; set; }
+
+        /// <summary>
+        /// 回路是否利用桥架
+        /// </summary>
+        public bool ViaCableTray { get; set; }
+
+        /// <summary>
+        /// 回路是否利用管线
+        /// </summary>
+        public bool ViaPipe { get; set; }
     }
 }

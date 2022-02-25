@@ -69,18 +69,26 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode tatget, List<string> list, List<string> distBoxKey, bool forced = false)
+            ThPDSCircuitGraphNode target, List<string> list, List<string> distBoxKey)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
+            var service = new ThPDSMarkAnalysisService();
+            edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
+            if(!string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
+                && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
+            {
+                edge.Circuit.ID.CircuitNumber = source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID;
+            }
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
+            ThPDSCircuitGraphNode tatget, List<string> list)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, tatget);
             var service = new ThPDSMarkAnalysisService();
-            if (forced)
-            {
-                edge.Circuit = service.CircuitMarkAnalysis(list);
-            }
-            else
-            {
-                edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
-            }
+            edge.Circuit = service.CircuitMarkAnalysis(list);
             return edge;
         }
     }

@@ -240,6 +240,8 @@ namespace TianHua.Electrical.PDS.Service
         {
             var circuitID = new ThPDSID();
             var circuitMarks = new List<string>();
+            var circuitIDs = new List<string>();
+            var doSearch = true;
             infos.ForEach(info =>
             {
                 foreach (var key in distBoxKey)
@@ -249,15 +251,35 @@ namespace TianHua.Electrical.PDS.Service
                         if (info.Contains("-W") || info.Contains("/W"))
                         {
                             circuitMarks.Add(info);
+                            doSearch = false;
                         }
                     }
                 }
             });
 
+            if (doSearch)
+            {
+                var check = "W[a-zA-Z]{0,}[0-9]+.*";
+                var r = new Regex(@check);
+                infos.ForEach(info =>
+                {
+                    var m = r.Match(info);
+                    if (m.Success)
+                    {
+                        circuitIDs.Add(m.Value);
+                    }
+                });
+            }
+
             if (circuitMarks.Distinct().Count() == 1)
             {
                 circuitID.CircuitNumber = circuitMarks[0];
             }
+            if (circuitIDs.Distinct().Count() == 1)
+            {
+                circuitID.CircuitID = circuitIDs[0];
+            }
+
             return circuitID;
         }
 
@@ -288,9 +310,9 @@ namespace TianHua.Electrical.PDS.Service
             return result;
         }
 
-        private List<double> AnalysisPower(List<string> infos, List<string> searchedString)
+        private ThInstalledCapacity AnalysisPower(List<string> infos, List<string> searchedString)
         {
-            var results = new List<double>();
+            var results = new ThInstalledCapacity();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
             infos.ForEach(info =>
@@ -305,11 +327,11 @@ namespace TianHua.Electrical.PDS.Service
                     result = result.Replace("W", "");
                     if (m.Value.Contains("k") || m.Value.Contains("K"))
                     {
-                        results.Add(double.Parse(result) * 1000);
+                        results.UsualPower.Add(double.Parse(result) * 1000);
                     }
                     else
                     {
-                        results.Add(double.Parse(result));
+                        results.UsualPower.Add(double.Parse(result));
                     }
                     m = m.NextMatch();
                 }
