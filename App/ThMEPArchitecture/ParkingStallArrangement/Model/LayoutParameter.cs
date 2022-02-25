@@ -91,7 +91,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
         }
 
-        public LayoutParameter(OuterBrder outerBrder, Dictionary<int, List<int>> ptDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
+        public LayoutParameter(OuterBrder outerBrder, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
             int segAreasCnt = 0, bool usePline = true, Serilog.Core.Logger logger = null)
         {
             var outerBoundary = outerBrder.WallLine;
@@ -340,7 +340,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
 
             //If in manual mode
-            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+            var areas = SegLines.SplitArea(new List<Polyline>() { tmpBoundary });
 
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
@@ -694,7 +694,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     }
                 }
             }
-            
             return plines;
         }
     }

@@ -204,6 +204,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areals.ToCollection());
             double curVal = sval + 5500;
             Line curLine = new Line();
+
+            var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
+            var dbPts = new List<DBPoint>();
+            areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
+            var ptsIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+
             while (curVal < eval)
             {
                 curLine = CreateTempLine(constantVal, curVal, line2);
@@ -221,7 +227,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 break;
             }
             var width = WindmillSplit.GetMaxWidth(area);
-            curLine.GetMaxMinVal(area, buildingSpatialIndex, null, width, out double maxVal2, out double minVal2);
+            curLine.GetMaxMinVal(area, ptsIndex, buildingSpatialIndex, null, width, out double maxVal2, out double minVal2);
             return new SegLineEx(curLine, maxVal2, minVal2);
         }
 

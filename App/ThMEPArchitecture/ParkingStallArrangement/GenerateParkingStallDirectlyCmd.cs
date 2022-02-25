@@ -71,8 +71,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         {
             var isDirectlyArrange = true;
             bool usePline = true;
-            //var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
-            //if (!dataprocessingFlag) return;
 
             var dataprocessingFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (!dataprocessingFlag) return;

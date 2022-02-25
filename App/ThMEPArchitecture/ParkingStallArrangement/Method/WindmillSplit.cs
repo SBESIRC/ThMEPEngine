@@ -5,11 +5,9 @@ using ThCADCore.NTS;
 using NFox.Cad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
 using Dreambuild.AutoCAD;
 using DotNetARX;
 using System;
-using ThMEPEngineCore;
 using AcHelper;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 
@@ -131,8 +129,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool Split(bool isDirectlyArrange, OuterBrder outerBrder, Dictionary<int, Line> seglineDic, 
-            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segAreasCnt)
+            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt)
         {
+            if(isDirectlyArrange)//无迭代速排
+            {
+                DirectlyArrangeParaGet(outerBrder, ref maxVals, ref minVals, out seglineIndexDic, out segAreasCnt);
+                return true;
+            }
+
             var area = outerBrder.WallLine;
             var buildLinesSpatialIndex = outerBrder.BuildingSpatialIndex;
             var attachedRampSpatialIndex = outerBrder.AttachedRampSpatialIndex;
@@ -145,45 +149,58 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             SegLineCut(segLines, area, out List<Line> cutlines);
 
             var width = GetMaxWidth(area);
+
+            var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
+            var dbPts = new List<DBPoint>();
+            areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
+            var ptsIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             
+
             for (int i = 0; i < cutlines.Count; i++)
             {
-                if (isDirectlyArrange)
+                var l = cutlines[i];
+                if (attachedRampSpatialIndex?.SelectFence(l.ExtendLineEx(10.0, 3)).Count > 0)
                 {
                     maxVals.Add(0);
                     minVals.Add(0);
                 }
                 else
                 {
-                    var l = cutlines[i];
-                    if(attachedRampSpatialIndex?.SelectFence(l.ExtendLineEx(10.0,3)).Count > 0)
+                    l.GetMaxMinVal(area, ptsIndex, buildLinesSpatialIndex, buildingWithoutRampSpatialIndex, width, out double maxVal2, out double minVal2);
+                    if (maxVal2 < minVal2)
                     {
-                        maxVals.Add(0);
-                        minVals.Add(0);
+                        Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
+                        return false;
                     }
-                    else
-                    {
-                        l.GetMaxMinVal(area, buildLinesSpatialIndex, buildingWithoutRampSpatialIndex, width, out double maxVal2, out double minVal2);
-                        if (maxVal2 < minVal2)
-                        {
-                            Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
-                            return false;
-                        }
-                        maxVals.Add(maxVal2);
-                        minVals.Add(minVal2);
-                    }
+                    maxVals.Add(maxVal2);
+                    minVals.Add(minVal2);
                 }
             }
             return true;
         }
 
-        public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
+        public static void DirectlyArrangeParaGet(OuterBrder outerBrder, ref List<double> maxVals, ref List<double> minVals, 
+            out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt)
+        {
+            var areas = new List<Polyline>() { outerBrder.WallLine };
+            var segLines = outerBrder.SegLines;
+            for(int i = 0; i < segLines.Count; i++)
+            {
+                maxVals.Add(0);
+                minVals.Add(0);
+            }
+            var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
+            segAreasCnt = rstAreas.Count;
+            seglineIndexDic = null;
+        }
+
+        public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex ptsIndex, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
         {
             double halfCarLaneWidth = 2751;
-            var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
-            var dbPts = new List<DBPoint>();
-            areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
-            var ptsIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+            //var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
+            //var dbPts = new List<DBPoint>();
+            //areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
+            //var ptsIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             var rect1 = line.GetHalfBuffer(true, width);//上、右半区域
             var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
