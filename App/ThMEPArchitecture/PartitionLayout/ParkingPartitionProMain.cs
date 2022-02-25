@@ -940,6 +940,18 @@ namespace ThMEPArchitecture.PartitionLayout
                 lb.Dispose();
                 return py;
             }));
+            LaneBoxes.AddRange(CarModules.Select(e =>
+            {
+                //e.Line.Buffer(DisLaneWidth / 2 - 10));
+                var la = CreateLine(e.Line);
+                var lb = CreateLine(e.Line);
+                la.TransformBy(Matrix3d.Displacement(CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                lb.TransformBy(Matrix3d.Displacement(-CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                var py = CreatPolyFromLines(la, lb);
+                la.Dispose();
+                lb.Dispose();
+                return py;
+            }));
             LaneBufferSpatialIndex.Update(LaneBoxes.ToCollection(), new DBObjectCollection());
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
             foreach (var k in vertlanes)

@@ -222,6 +222,7 @@ namespace ThMEPArchitecture.PartitionLayout
             lt.TransformBy(Matrix3d.Displacement(vec * dist));
             var ltbf = lt.Buffer(DisLaneWidth / 2);
             points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
+            if (points.Count() == 0) return -1;
             var length = points.Last().X - points.First().X;
             if (length >= line.Length / 3 || length >= 23000)
                 return dist - DisLaneWidth / 2;
