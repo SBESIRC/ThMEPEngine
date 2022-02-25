@@ -28,6 +28,7 @@
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonReader.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonWriter.cs" />
     <Compile Include="NTS\ThCADCoreNTSArcTessellationLength.cs" />
+    <Compile Include="NTS\ThCADCoreNTSBlockReferenceExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSBuildArea.cs" />
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSConcaveHull.cs" />
