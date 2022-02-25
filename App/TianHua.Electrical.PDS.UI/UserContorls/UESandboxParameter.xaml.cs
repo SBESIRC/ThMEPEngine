@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnSaveSet_Click(object sender, RoutedEventArgs e)
         {
-            ConverterFactory.ConvertToViewModel();//数据转换ViewModel
+
         }
         #endregion
     }

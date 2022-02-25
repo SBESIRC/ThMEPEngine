@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         public InformationMatchViewModel(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> _graph)
         {
             this.Graph = _graph;
-            this.Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            //this.Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
         }
 
         private AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph;
@@ -29,23 +29,23 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set { graph = value; }
         }
 
-        private ThPDSProjectGraphNode currentNode;
-        public ThPDSProjectGraphNode CurrentNode
-        {
-            get { return currentNode; }
-            set
-            {
-                currentNode = value;
-                Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
-                graph.Edges.Where(o => o.Source.Equals(value)).ForEach(o => Circuit.Add(o));
-            }
-        }
+        //private ThPDSProjectGraphNode currentNode;
+        //public ThPDSProjectGraphNode CurrentNode
+        //{
+        //    get { return currentNode; }
+        //    set
+        //    {
+        //        currentNode = value;
+        //        Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+        //        graph.Edges.Where(o => o.Source.Equals(value)).ForEach(o => Circuit.Add(o));
+        //    }
+        //}
 
-        private ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> circuits;
-        public ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Circuit
-        {
-            get { return circuits; } 
-            set { circuits = value; }
-        }
+        //private ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> circuits;
+        //public ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Circuit
+        //{
+        //    get { return circuits; } 
+        //    set { circuits = value; }
+        //}
     }
 }

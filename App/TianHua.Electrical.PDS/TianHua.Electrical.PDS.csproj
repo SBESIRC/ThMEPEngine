@@ -50,7 +50,11 @@
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Project\Module\CircuitDetails.cs" />
     <Compile Include="Project\Module\InformationMatchViewerModule.cs" />
+    <Compile Include="Project\Module\NodeDetails.cs" />
+    <Compile Include="Project\Module\PDSBaseElement.cs" />
     <Compile Include="Project\Module\PDSProjectModule.cs" />
+    <Compile Include="Project\Module\ProjectEnumCollection.cs" />
+    <Compile Include="Project\Module\SmallBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
     <Compile Include="Project\PDSProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

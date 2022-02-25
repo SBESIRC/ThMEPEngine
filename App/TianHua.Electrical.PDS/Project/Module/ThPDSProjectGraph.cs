@@ -14,7 +14,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             Load = new ThPDSLoad();
             IsStartVertexOfGraph = false;
+            nodeDetails = new NodeDetails();
         }
+        public NodeDetails nodeDetails { get; set; }
         public PDSNodeType NodeType { get; set; }
         public bool IsStartVertexOfGraph { get; set; }
         public ThPDSLoad Load { get; set; }
@@ -27,12 +29,23 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class ThPDSProjectGraphEdge<T> : Edge<T> where T : ThPDSProjectGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
+        public CircuitDetails circuitDetails { get; set; }
+
         public ThPDSProjectGraphEdge(T source, T target) : base(source, target)
         {
             Circuit = new ThPDSCircuit();
+            circuitDetails = new CircuitDetails();
+        }
+
+        /// <summary>
+        /// 计算回路详情
+        /// </summary>
+        public void CalculateCircuitDetails()
+        {
+
         }
     }
-
+    [Serializable]
     public class ThPDSProjectGraph
     {
         public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }

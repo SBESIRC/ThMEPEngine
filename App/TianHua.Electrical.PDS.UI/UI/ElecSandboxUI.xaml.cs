@@ -32,13 +32,12 @@ namespace TianHua.Electrical.PDS.UI.UI
         /// <exception cref="NotImplementedException"></exception>
         private void LoadProject(string url = null)
         {
+            PDSProject.Instance.DataChanged -= PDSProjectVM.Instance.ProjectDataChanged;
+            PDSProject.Instance.DataChanged += PDSProjectVM.Instance.ProjectDataChanged;//订阅Project数据改变事件
+
             //Setp 1
             PDSProject.Instance.Load(url);//加载项目
-
             //Setp 2
-            ConverterFactory.ConvertToViewModel();//数据转换ViewModel
-
-            //Setp 3
             //刷新所有UI的DataContext
         }
 
