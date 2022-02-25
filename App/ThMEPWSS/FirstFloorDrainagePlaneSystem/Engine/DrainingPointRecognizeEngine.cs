@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.DrainageSystemAG;
 using ThMEPWSS.DrainageSystemAG.Models;
@@ -23,6 +24,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         List<EquipmentBlcokVisitorModel> equipmentBlcokVisitorsModelSpace { get; }
         public DrainingPointRecognizeEngine(Dictionary<string, List<string>> layerNames)
         {
+            equipmentBlcokVisitors = new List<EquipmentBlcokVisitorModel>();
+            equipmentBlcokVisitorsModelSpace = new List<EquipmentBlcokVisitorModel>();
             ReadUIConfig(layerNames);
             InitBlockNames();
 
@@ -69,7 +72,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             }
         }
 
-        public List<DrainingEquipmentModel> Recognize(Polyline polyline, List<Polyline> wall)
+        public List<DrainingEquipmentModel> Recognize(Polyline polyline, List<Polyline> wall, ThMEPOriginTransformer originTransformer)
         {
             var resEquipments = new List<DrainingEquipmentModel>();
             var equipments = GetPolylineEquipmentBlocks(polyline);
@@ -92,7 +95,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                         break;
                 }
             }
-            return resEquipments;
+            return TransEquipmentModel(resEquipments, originTransformer);
+        }
+
+        private List<DrainingEquipmentModel> TransEquipmentModel(List<DrainingEquipmentModel> models, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var model in models)
+            {
+                originTransformer.Transform(model.BlockReference);
+                model.DiranPoint = originTransformer.Transform(model.DiranPoint);
+            }
+            return models;
         }
 
         private List<DrainingEquipmentModel> CalRectanglePoint(EquipmentBlcokModel equipModel, List<Polyline> wall, double dis, bool isShortEdge = true)
@@ -107,7 +120,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 {
                     edges = new List<Line>() { allLines[2], allLines[3] };
                 }
-                var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x))).First();
+                var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x)).First().Distance(x)).First();
                 edges.Remove(checkEdge);
                 var otherEdge = edges.First();
 

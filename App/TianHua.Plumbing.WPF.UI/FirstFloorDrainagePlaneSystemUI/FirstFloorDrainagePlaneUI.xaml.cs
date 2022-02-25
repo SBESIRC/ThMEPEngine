@@ -48,30 +48,36 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
         private void btnDrawWall_Click(object sender, RoutedEventArgs e)
         {
             using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (currentDb.Database.GetDocument().LockDocument())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutFrameLayerName), false);
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutFrameLayerName);
+                ThMEPWSS.Common.Utils.FocusToCAD();
             }
         }
 
         private void btnRainPipe_Click(object sender, RoutedEventArgs e)
         {
             using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (currentDb.Database.GetDocument().LockDocument())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutdoorRainPipeLayerName), false);
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorRainPipeLayerName);
+                ThMEPWSS.Common.Utils.FocusToCAD();
             }
         }
 
         private void btnDrainagePipe_Click(object sender, RoutedEventArgs e)
         {
             using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (currentDb.Database.GetDocument().LockDocument())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutdoorSewagePipeLayerName), false);
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorSewagePipeLayerName);
+                ThMEPWSS.Common.Utils.FocusToCAD();
             }
         }
     }

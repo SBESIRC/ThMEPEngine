@@ -145,7 +145,7 @@ namespace ThCADExtension
 
         public static Polyline ToOBB(this BlockReference br, Matrix3d ecs2Wcs)
         {
-            using (var acadDatabase = AcadDatabase.Use(br.Database))
+            using (var acadDatabase = AcadDatabase.Active())
             {
                 var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
                 var rectangle = blockTableRecord.GeometricExtents().ToRectangle();

@@ -1,5 +1,6 @@
 ﻿using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -29,26 +31,62 @@ namespace ThMEPWSS.Command
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 var frameDic = CalStructrueService.GetFrame(acad);
+                if (frameDic.Count <= 0)
+                {
+                    return;
+                }
                 var pt = frameDic.First().Key.StartPoint;
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 foreach (var dic in frameDic)
                 {
-                    var frame = dic.Key;
+                    var frame = dic.Key.Clone() as Polyline;
+                    originTransformer.Transform(frame);
                     var thRooms = frame.GetRoomInfo(acad, originTransformer);
-                    var userOutFrame = frame.GetUserFrame(acad);
-                    frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls);
-                    var roomWalls = CalStructrueService.GetRoomWall(thRooms.Select(x => x.Boundary as Polyline).ToList(), userOutFrame);
+                    var userOutFrame = frame.GetUserFrame(acad, originTransformer);
+                    frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
+                    var roomWalls = CalStructrueService.GetRoomWall(CalAllRoomPolylines(thRooms), userOutFrame);
                     var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
-                    var verticalPipe = frame.RecognizeVerticalPipe(acad);
-                    var drainingEquipment = frame.RecognizeSanitaryWarePipe(config, walls);
-                    var sewagePipes = frame.GetSewageDrainageMainPipe(acad);
-                    var rainPipes = frame.GetRainDrainageMainPipe(acad);
+                    var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
+                    var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
+                    var sewagePipes = frame.GetSewageDrainageMainPipe(acad, originTransformer);
+                    var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame,sewagePipes, verticalPipe, drainingEquipment, holeWalls);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, verticalPipe, drainingEquipment, holeWalls);
                     var routes = createDrainageRoute.Routing();
+                    using (acad.Database.GetDocument().LockDocument())
+                    {
+                        foreach (var item in routes)
+                        {
+                            originTransformer.Reset(item);
+                            acad.ModelSpace.Add(item);
+                        }
+                    }
                 }
             }
-            
+        }
+
+        /// <summary>
+        /// 获取房间所有的polyline
+        /// </summary>
+        /// <param name="thRooms"></param>
+        /// <returns></returns>
+        private List<Polyline> CalAllRoomPolylines(List<ThIfcRoom> thRooms)
+        {
+            var roomPolys = new List<Polyline>();
+            foreach (var room in thRooms)
+            {
+                if (room.Boundary is Polyline polyline)
+                {
+                    roomPolys.Add(polyline);
+                }
+                else if (room.Boundary is MPolygon mPolygon)
+                {
+                    roomPolys.Add(mPolygon.Shell());
+                    roomPolys.AddRange(mPolygon.Holes());
+                }
+            }
+
+            return roomPolys;
         }
 
         /// <summary>
@@ -69,7 +107,7 @@ namespace ThMEPWSS.Command
                 var interOutFrames = userOutFrame.Where(x => x.Intersects(obj)).ToList();
                 if (interOutFrames.Count > 0)
                 {
-                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => y.ExtendByLengthLine(100));
+                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => y.ExtendByLengthLine(200));
                     if (obj is MPolygon mPolygon)
                     {
                         allWalls.AddRange(mPolygon.Difference(bufferFrameDic.Values.ToCollection()).Cast<Entity>().ToList());
@@ -77,6 +115,17 @@ namespace ThMEPWSS.Command
                     else if (obj is Polyline polyline)
                     {
                         allWalls.AddRange(polyline.Difference(bufferFrameDic.Values.ToCollection()).OfType<Entity>().ToList());
+                    }
+                }
+                else
+                {
+                    if (obj is MPolygon mPolygon)
+                    {
+                        allWalls.Add(mPolygon.Shell());
+                    }
+                    else if (obj is Polyline polyline)
+                    {
+                        allWalls.Add(polyline);
                     }
                 }
             }

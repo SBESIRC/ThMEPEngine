@@ -113,7 +113,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                 var copy = blkref.GetTransformedCopy(matrix);
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
-                    Geometry = copy
+                    Geometry = copy,
                 });
             }
         }
