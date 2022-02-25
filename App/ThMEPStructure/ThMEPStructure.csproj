@@ -71,11 +71,16 @@
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\ConnectSecondaryBeamService.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\GetPrimitivesService.cs" />
     <Compile Include="GirderConnect\Service\ImportService.cs" />
+    <Compile Include="HuaRunPeiJin\Data\YJK\ThExtractLeaderMarkService.cs" />
+    <Compile Include="HuaRunPeiJin\Data\YJK\ThExtractWallService.cs" />
+    <Compile Include="HuaRunPeiJin\Data\YJK\ThExtractWallColumnService.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThLTypeEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThRectangleEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThTTypeEdgeComponent.cs" />
     <Compile Include="HuaRunPeiJin\Model\ThWallColumnReinforceConfig.cs" />
+    <Compile Include="HuaRunPeiJin\Data\YJK\ThYJKDataSetFactory.cs" />
+    <Compile Include="HuaRunPeiJin\Service\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
   </ItemGroup>

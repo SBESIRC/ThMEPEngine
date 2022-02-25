@@ -48,7 +48,6 @@
     <Compile Include="Command\SecondaryBeamCmd.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentDrawModel.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentDrawVM.cs" />
-    <Compile Include="HuaRunPeiJin\EdgeComponentInfo.cs" />
     <Compile Include="HuaRunPeiJin\WallColumnReinforceSetModel.cs" />
     <Compile Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml.cs">
       <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
@@ -106,7 +105,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resource\Image\Layer.png" />
+    <Resource Include="Resource\Image\Layer.png" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
