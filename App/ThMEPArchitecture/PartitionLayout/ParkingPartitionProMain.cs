@@ -337,17 +337,14 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void GenerateParkingSpaces()
         {
-            using (AcadDatabase adb = AcadDatabase.Active())
-            {
-                PreProcess();
-                GenerateLanes();
-                GeneratePerpModules();
-                GenerateCarsInModules();
-                //里面的函数目前不适合并行化操作
-                GenerateCarsOnRestLanes();
-                //里面函数大部分可以并行化操作
-                PostProcess();
-            }
+            PreProcess();
+            GenerateLanes();
+            GeneratePerpModules();
+            GenerateCarsInModules();
+            //里面的函数目前不适合并行化操作
+            GenerateCarsOnRestLanes();
+            //里面函数大部分可以并行化操作
+            PostProcess();
         }
 
         /// <summary>
