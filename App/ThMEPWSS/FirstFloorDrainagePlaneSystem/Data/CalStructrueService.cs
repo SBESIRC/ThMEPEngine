@@ -17,6 +17,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -213,8 +214,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         {
             var dxfNames = new string[]
             {
-                 //ThCADCommon.DxfName_VerticalPipe,
-                 //RXClass.GetClass(typeof(Circle)).DxfName,
+                 ThCADCommon.DxfName_VerticalPipe,
+                 RXClass.GetClass(typeof(Circle)).DxfName,
             };
             var pipes = new List<Entity>();
             var blocks = acdb.ModelSpace
@@ -268,12 +269,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             var dxfNames = new string[]
             {
                  ThCADCommon.DxfName_Tagging,
-                 //RXClass.GetClass(typeof(DBText)).DxfName,
+                 RXClass.GetClass(typeof(DBText)).DxfName,
             };
-            //var layerNames = markLayers.ToArray();
-            var layerNames = new string[]
-            {
-            };
+            var layerNames = markLayers.ToArray();
             var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) | o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
             var allpipes = Active.Editor.SelectAll(filterlist);
             var marks = new List<Entity>();
@@ -327,10 +325,26 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="polyline"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        public static List<DrainingEquipmentModel> RecognizeSanitaryWarePipe(this Polyline polyline, Dictionary<string, List<string>> layerNames, List<Polyline> walls, ThMEPOriginTransformer originTransformer)
+        public static List<VerticalPipeModel> RecognizeSanitaryWarePipe(this Polyline polyline, Dictionary<string, List<string>> layerNames, List<Polyline> walls, ThMEPOriginTransformer originTransformer)
         {
             DrainingPointRecognizeEngine pointRecognizeEngine = new DrainingPointRecognizeEngine(layerNames);
-            var resModels = pointRecognizeEngine.Recognize(polyline, walls, originTransformer);
+            var equipmentModels = pointRecognizeEngine.Recognize(polyline, walls, originTransformer);
+            var resModels = new List<VerticalPipeModel>();
+            foreach (var model in equipmentModels)
+            {
+                var vModel = new VerticalPipeModel();
+                vModel.Position = model.DiranPoint;
+                vModel.PipeCircle = new Circle(vModel.Position, Vector3d.ZAxis, 100);
+                vModel.IsEuiqmentPipe = true;
+                if (model.EnumEquipmentType == EnumEquipmentType.toilet)
+                {
+                    vModel.PipeType = VerticalPipeType.SewagePipe;
+                }
+                else
+                {
+                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
+                }
+            }
             return resModels;
         }
 

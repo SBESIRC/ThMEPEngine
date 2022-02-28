@@ -45,9 +45,11 @@
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\DrainingPointRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\VerticalPipeRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\DrainingEquipmentModel.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\RouteModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\VerticalPipeModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateConnectPipesService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateDrainagePipeRoute.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\ReprocessingPipe.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\CheckService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
@@ -720,7 +722,9 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>

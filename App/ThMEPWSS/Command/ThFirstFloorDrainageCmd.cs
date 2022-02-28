@@ -46,12 +46,14 @@ namespace ThMEPWSS.Command
                     frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
                     var roomWalls = CalStructrueService.GetRoomWall(CalAllRoomPolylines(thRooms), userOutFrame);
                     var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
+                    holeWalls.AddRange(columns);
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
                     var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
+                    verticalPipe.AddRange(drainingEquipment);
                     var sewagePipes = frame.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, verticalPipe, drainingEquipment, holeWalls);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls);
                     var routes = createDrainageRoute.Routing();
                     using (acad.Database.GetDocument().LockDocument())
                     {
@@ -62,8 +64,9 @@ namespace ThMEPWSS.Command
                         //}
                         foreach (var item in routes)
                         {
-                            originTransformer.Reset(item);
-                            acad.ModelSpace.Add(item);
+                            var line = item.route;
+                            originTransformer.Reset(line);
+                            acad.ModelSpace.Add(line);
                         }
                     }
                 }
