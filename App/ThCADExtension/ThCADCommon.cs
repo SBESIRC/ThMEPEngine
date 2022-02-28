@@ -33,6 +33,7 @@ namespace ThCADExtension
         public static readonly string DxfName_Attdef    = "ATTDEF";
 
         // Tangent DxfName
+        public static readonly string DxfName_TCH_Pipe = "TCH_PIPE";
         public static readonly string DxfName_TCH_Text = "TCH_TEXT";
         public static readonly string DxfName_TCH_MText = "TCH_MTEXT";
         public static readonly string DxfName_TCH_Dimension2 = "TCH_DIMENSION2";
@@ -54,8 +55,6 @@ namespace ThCADExtension
         public static readonly string DxfName_TCH_Opening = "TCH_OPENING";
         public static readonly string DxfName_TCH_EQUIPMENT_16 = "TCH_EQUIPMENT";
         public static readonly string DxfName_TCH_EQUIPMENT_12 = "TCH EQUIPMENT";
-        public static readonly string DxfName_VerticalPipe = "TCH_PIPE";                 //天正立管
-        public static readonly string DxfName_Tagging = "TCH_MULTILEADER";               //天正标注
 
         // Area Frame
         public static readonly string RegAppName_AreaFrame = "THCAD_AF";

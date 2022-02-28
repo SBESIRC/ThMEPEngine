@@ -214,7 +214,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         {
             var dxfNames = new string[]
             {
-                 ThCADCommon.DxfName_VerticalPipe,
+                 ThCADCommon.DxfName_TCH_Pipe,
                  RXClass.GetClass(typeof(Circle)).DxfName,
             };
             var pipes = new List<Entity>();
@@ -268,7 +268,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             var markLayers = allLayers.Where(x => containMarkLayers.Any(y => y.All(z => x.Contains(z))) || macthMarkLayers.Any(y => y.First().Matching(x))).ToList();
             var dxfNames = new string[]
             {
-                 ThCADCommon.DxfName_Tagging,
+                 ThCADCommon.DxfName_TCH_MLeader,
                  RXClass.GetClass(typeof(DBText)).DxfName,
             };
             var layerNames = markLayers.ToArray();
