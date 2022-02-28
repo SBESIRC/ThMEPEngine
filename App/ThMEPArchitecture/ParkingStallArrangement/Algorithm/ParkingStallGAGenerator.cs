@@ -371,7 +371,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MutationRate =2*( 1 - GoldenRatio) - 0.2 ;//大变异+特殊变异,0.382 + 0.182 
+            MutationRate = GoldenRatio ;//大变异+特殊变异,0.618
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
             SelectionRate = 1- GoldenRatio;//保留因子0.382
             SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
