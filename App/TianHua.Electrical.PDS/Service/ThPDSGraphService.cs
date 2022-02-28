@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -82,6 +83,17 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaConduit = true;
             }
+            var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
+            if(circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID))
+            {
+                edge.Circuit.ID.CircuitID = circuitIDs[0];
+            }
+            var circuitNumbers = target.Loads.Select(o => o.ID.CircuitNumber).Distinct().OfType<string>().ToList();
+            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber))
+            {
+                edge.Circuit.ID.CircuitNumber = circuitNumbers[0];
+            }
+
             if (!string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))

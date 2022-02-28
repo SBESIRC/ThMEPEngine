@@ -10,8 +10,8 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
 using TianHua.Electrical.PDS.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -22,7 +22,9 @@ namespace TianHua.Electrical.PDS.Service
         private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
 
         private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
-        public ThMarkService(List<Entity> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks)
+
+        public ThMarkService(List<Entity> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
+            List<Entity> tchDimension)
         {
             var lines = new DBObjectCollection();
             var texts = new DBObjectCollection();
@@ -33,6 +35,10 @@ namespace TianHua.Electrical.PDS.Service
                     texts.Add(entity);
                 }
                 else if (entity is Line)
+                {
+                    lines.Add(entity);
+                }
+                else if (entity is Polyline)
                 {
                     lines.Add(entity);
                 }
@@ -80,6 +86,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             });
+
             markBlocks.ForEach(o =>
             {
                 if (o.Value.EffectiveName.Equals("E-电力平面-负荷明细"))
@@ -96,6 +103,25 @@ namespace TianHua.Electrical.PDS.Service
                     MarkDic.Add(ToDbPoint(o.Value.Position), GetTexts(o.Value));
                 }
             });
+
+            tchDimension.ForEach(o =>
+            {
+                var objs = new DBObjectCollection();
+                o.Explode(objs);
+                var basePoint = objs.OfType<Line>().First().GetCenter();
+                var textList = new List<string>();
+                objs.OfType<Entity>().ForEach(e =>
+                {
+                    if (ThMEPTCHService.IsTCHText(e))
+                    {
+                        var text = new DBObjectCollection();
+                        e.Explode(text);
+                        textList.Add(text.OfType<DBText>().First().TextString);
+                    }
+                });
+                MarkDic.Add(ToDbPoint(basePoint), textList);
+            });
+
             PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
         }
 
@@ -137,6 +163,18 @@ namespace TianHua.Electrical.PDS.Service
                 if (pointCollection.Count > 0)
                 {
                     result = MarkDic[pointCollection[0] as DBPoint];
+                }
+                else
+                {
+                    frame = frame.Buffer(200.0).OfType<Polyline>().OrderByDescending(o => o.Length).First();
+                    var TextCollection = TextIndex.SelectCrossingPolygon(frame);
+                    if (TextCollection.Count > 0)
+                    {
+                        TextCollection.OfType<DBText>().ForEach(o =>
+                        {
+                            result.Add(o.TextString);
+                        });
+                    }
                 }
             }
             return result.Select(o => Filter(o)).ToList();

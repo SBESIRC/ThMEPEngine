@@ -425,7 +425,7 @@ namespace TianHua.Electrical.PDS.Engine
                 return FindPath;
             }
             sharedPath.Add(sourceElement);
-            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(2 * ThPDSCommon.AllowableTolerance);
+            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThPDSCommon.AllowableTolerance);
             var probeResults = FindNext(sourceElement, probe);
             switch (probeResults.Count)
             {

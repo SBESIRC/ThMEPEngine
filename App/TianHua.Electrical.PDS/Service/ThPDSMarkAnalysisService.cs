@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
 
@@ -71,7 +72,14 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if(r.Match(str).Success)
                 {
-                    thPDSLoad.ID.LoadID = str;
+                    if(distBoxData.EffectiveName.Equals("E-BL001-1"))
+                    {
+                        thPDSLoad.ID.CircuitID = str;
+                    }
+                    else
+                    {
+                        thPDSLoad.ID.LoadID = str;
+                    }
                 }
                 else
                 {
@@ -304,6 +312,16 @@ namespace TianHua.Electrical.PDS.Service
             if (infos.Distinct().Count() == 1)
             {
                 circuitID.CircuitNumber = infos[0];
+                var check = "W[a-zA-Z]{0,}[0-9]+.*";
+                var r = new Regex(@check);
+                infos.ForEach(info =>
+                {
+                    var m = r.Match(info);
+                    if (m.Success)
+                    {
+                        circuitID.CircuitID = m.Value;
+                    }
+                });
             }
             return circuitID;
         }

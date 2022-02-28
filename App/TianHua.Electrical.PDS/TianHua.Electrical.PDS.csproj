@@ -39,6 +39,8 @@
     <Compile Include="Engine\ThPDSBlockExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSBlockExtractionVisitor.cs" />
     <Compile Include="Engine\ThPDSGraphUnionEngine.cs" />
+    <Compile Include="Engine\ThTCHWireDim2RecognitionEngine.cs" />
+    <Compile Include="Engine\ThTCHWireDim2ExtractionVisitor.cs" />
     <Compile Include="Model\ThInstalledCapacity.cs" />
     <Compile Include="Model\ThPDSBlockInfo.cs" />
     <Compile Include="Model\ThPDSBlockReferenceData.cs" />

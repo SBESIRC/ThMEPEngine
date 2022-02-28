@@ -67,8 +67,14 @@ namespace TianHua.Electrical.PDS.Command
                 // 提取标注
                 var markExtractor = new ThCircuitMarkRecognitionEngine();
                 markExtractor.RecognizeMS(acad.Database, new Point3dCollection());
-                var marks = markExtractor.Results.Select(o => o.Data as Entity).ToList();
-                marks.ForEach(o =>
+                markExtractor.Results.ForEach(o =>
+                {
+                    transformer.Transform(o);
+                    ThMEPEntityExtension.ProjectOntoXYPlane(o);
+                });
+                var tchWireDimExtractor = new ThTCHWireDim2RecognitionEngine();
+                tchWireDimExtractor.RecognizeMS(acad.Database, new Point3dCollection());
+                tchWireDimExtractor.Results.ForEach(o =>
                 {
                     transformer.Transform(o);
                     ThMEPEntityExtension.ProjectOntoXYPlane(o);
@@ -97,7 +103,7 @@ namespace TianHua.Electrical.PDS.Command
                 });
 
                 //做一个标注的Service
-                var markService = new ThMarkService(marks, loadExtractService.MarkBlocks);
+                var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks, tchWireDimExtractor.Results);
 
                 ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                 ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
@@ -112,7 +118,25 @@ namespace TianHua.Electrical.PDS.Command
                 };
                 var unionEngine = new ThPDSGraphUnionEngine(distBoxKey);
                 var unionGraph = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
-                PDSProject.Instance.PushGraphData(unionGraph);
+
+                // 移动回原位
+                loadExtractService.MarkBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Reset(block);
+                });
+                loadExtractService.DistBoxBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Reset(block);
+                });
+                loadExtractService.LoadBlocks.ForEach(o =>
+                {
+                    var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                    transformer.Reset(block);
+                });
+
+                //PDSProject.Instance.PushGraphData(unionGraph);
             }
         }
 
