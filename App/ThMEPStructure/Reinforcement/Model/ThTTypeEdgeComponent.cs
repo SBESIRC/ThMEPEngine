@@ -1,8 +1,8 @@
-﻿namespace ThMEPStructure.HuaRunPeiJin.Model
+﻿namespace ThMEPStructure.Reinforcement.Model
 {
-    public class ThLTypeEdgeComponent:ThEdgeComponent
+    public class ThTTypeEdgeComponent:ThEdgeComponent
     {
-        // 请参见"2021-ZZ-技术-总部-JG-CKTJ.pdf Page70"
+        // 请参见"2021-ZZ-技术-总部-JG-CKTJ.pdf Page76"
         public double Bw { get; set; }
         public double Hc1 { get; set; }
         public double Bf { get; set; }
@@ -22,16 +22,5 @@
         /// 对应标注图中的数字4
         /// </summary>
         public string Link4 { get; set; }
-    }
-    public class ThLTypeCalEdgeComponent: ThLTypeEdgeComponent
-    {
-        /// <summary>
-        /// 迭代步数
-        /// </summary>
-        public int X { get; set; }
-        /// <summary>
-        /// 迭代增大后的纵筋规格
-        /// </summary>
-        public string EnhancedReinforce { get; set; }
     }
 }

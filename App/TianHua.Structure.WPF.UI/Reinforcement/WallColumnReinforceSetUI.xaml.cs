@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
 
-namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
+namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public partial class WallColumnReinforceSetUI : ThCustomWindow
     {

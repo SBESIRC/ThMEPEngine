@@ -1,7 +1,7 @@
 ﻿using ThControlLibraryWPF.ControlUtils;
-using ThMEPStructure.HuaRunPeiJin.Model;
+using ThMEPStructure.Reinforcement.Model;
 
-namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
+namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public class ThWallColumnReinforceSetModel : NotifyPropertyChangedBase
     {

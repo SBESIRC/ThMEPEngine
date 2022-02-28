@@ -1,6 +1,6 @@
 ﻿using ThControlLibraryWPF.ControlUtils;
 
-namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
+namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public class EdgeComponentDrawModel : NotifyPropertyChangedBase
     {

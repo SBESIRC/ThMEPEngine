@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
+namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public class WallColumnReinforceSetVM
     {

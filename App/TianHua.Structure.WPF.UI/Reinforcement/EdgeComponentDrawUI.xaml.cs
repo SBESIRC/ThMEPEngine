@@ -1,9 +1,8 @@
-﻿using System.Text.RegularExpressions;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
 
-namespace TianHua.Structure.WPF.UI.HuaRunPeiJin
+namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     /// <summary>
     /// 边缘构件绘制交互逻辑

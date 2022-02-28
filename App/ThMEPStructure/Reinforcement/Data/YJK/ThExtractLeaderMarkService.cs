@@ -7,9 +7,9 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
-using ThMEPStructure.HuaRunPeiJin.Service;
+using ThMEPStructure.Reinforcement.Service;
 
-namespace ThMEPStructure.HuaRunPeiJin.Data.YJK
+namespace ThMEPStructure.Reinforcement.Data.YJK
 {
     /// <summary>
     /// 提取墙

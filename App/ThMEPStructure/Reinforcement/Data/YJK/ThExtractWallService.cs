@@ -8,27 +8,27 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
-using ThMEPStructure.HuaRunPeiJin.Service;
+using ThMEPStructure.Reinforcement.Service;
 
-namespace ThMEPStructure.HuaRunPeiJin.Data.YJK
+namespace ThMEPStructure.Reinforcement.Data.YJK
 {
     /// <summary>
-    /// 提取墙柱
+    /// 提取墙
     /// </summary>
-    internal class ThExtractWallColumnService
+    internal class ThExtractWallService
     {
         public DBObjectCollection Elements { get; set; }
         private double SmallAreaTolerance = 100.0;
-        private List<string> WallColumnLayers { get; set; }
-        public ThExtractWallColumnService(List<string> wallColumnLayers)
+        private List<string> WallLayers { get; set; }
+        public ThExtractWallService(List<string> wallLayers)
         {
             Elements = new DBObjectCollection();
-            WallColumnLayers = wallColumnLayers;
+            WallLayers = wallLayers;
         }
         public void Extract(Database db,Point3dCollection pts)
         {
             // 获取指定图层的对象
-            var objs = db.GetEntitiesFromMS(WallColumnLayers);
+            var objs = db.GetEntitiesFromMS(WallLayers);
 
             // 获取提取对象中的线
             var cloneLines = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
@@ -61,7 +61,7 @@ namespace ThMEPStructure.HuaRunPeiJin.Data.YJK
             // 还原到原始位置
             transformer.Reset(restPolygons);
 
-            // 返回结果
+            // 返回结果            
             restPolygons.OfType<Entity>().ForEach(e => Elements.Add(e));
         }
     }

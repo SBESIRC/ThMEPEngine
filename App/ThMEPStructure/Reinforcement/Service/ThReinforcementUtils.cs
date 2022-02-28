@@ -12,9 +12,9 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Service;
 
-namespace ThMEPStructure.HuaRunPeiJin.Service
+namespace ThMEPStructure.Reinforcement.Service
 {
-    public static class Utils
+    public static class ThReinforcementUtils
     {
         public static DBObjectCollection GetEntitiesFromMS(this Database db,List<string> layers)
         {

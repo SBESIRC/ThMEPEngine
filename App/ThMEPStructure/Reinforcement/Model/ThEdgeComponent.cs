@@ -1,4 +1,4 @@
-﻿namespace ThMEPStructure.HuaRunPeiJin.Model
+﻿namespace ThMEPStructure.Reinforcement.Model
 {
     public abstract class ThEdgeComponent
     {
