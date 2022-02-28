@@ -129,44 +129,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 return retModeles;
             }
         }
-        public static List<Line> SelectPipes()
-        {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
-            {
-                List<Line> retLines = new List<Line>();
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择要布置的水管",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var result = Active.Editor.GetSelection(options);
-                if (result.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result.Value.GetObjectIds())
-                    {
-                        var entity = acadDb.Element<Entity>(obj);
-                        if(entity is Polyline)
-                        {
-                            var line = entity as Polyline;
-                            if(line.Layer.Contains("AI-水管路由"))
-                            {
-                                retLines.AddRange(line.ToLines());
-                            }
-                        }
-                        else if(entity is Line)
-                        {
-                            var line = entity as Line;
-                            if(line.Layer.Contains("AI-水管路由"))
-                            {
-                                retLines.Add(line);
-                            }
-                        }
-                    }
-                }
-                return retLines;
-            }
-        }
         public static List<Line> GetNearbyLine(Point3d pt, List<Line> lines, int N = 3)
         {
             List<Line> returnLines = new List<Line>();
@@ -475,7 +437,7 @@ namespace ThMEPHVAC.FanConnect.Command
             if(node.Children.Count == 0)
             {
                 var closetPt = fan.FanObb.GetClosestPointTo(node.Item.PLine.EndPoint, false);
-                if (closetPt.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
+                if (fan.FanPoint.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
                 {
                     fan.IsConnected = true;
                     node.Item.PipeWidth = 100.0;
@@ -593,6 +555,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 tmpFan.FanObb = GetBlockReferenceAABB(blk);
                 tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
                 tmpFan.FanObb.TransformBy(mt.Inverse());
+
+                tmpFan.FanPoint = tmpFan.FanPoint.ToPoint2d().ToPoint3d();
+                tmpFan.FanObb = tmpFan.FanObb.ToNTSLineString().ToDbPolyline();
             }
             blk.TransformBy(mt.Inverse());
             blk.DowngradeOpen();

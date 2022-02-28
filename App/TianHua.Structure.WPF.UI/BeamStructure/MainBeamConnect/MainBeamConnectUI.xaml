@@ -16,7 +16,7 @@
             <StackPanel Orientation="Vertical" Width="220">
                 <GroupBox>
                     <GroupBox.Header>
-                        <Label>五边形版剖分</Label>
+                        <Label>五边形板剖分</Label>
                     </GroupBox.Header>
                     <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
                         <RadioButton x:Name="nonSplit"  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"

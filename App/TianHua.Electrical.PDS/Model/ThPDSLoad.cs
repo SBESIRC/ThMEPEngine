@@ -1,9 +1,11 @@
-﻿namespace TianHua.Electrical.PDS.Model
+﻿using System.Collections.Generic;
+
+namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
-    /// 负载类型
+    /// 一级负载类型
     /// </summary>
-    public enum ThPDSLoadType
+    public enum ThPDSLoadTypeCat_1
     {
         /// <summary>
         /// 电动机
@@ -91,8 +93,36 @@
         Charger,
 
         /// <summary>
-        /// 未知
+        /// 无
         /// </summary>
+        None,
+    }
+
+    /// <summary>
+    /// 二级负载类型
+    /// </summary>
+    public enum ThPDSLoadTypeCat_2
+    {
+        ResidentialDistributionPanel,
+        LightingDistributionPanel,
+        PowerDistributionPanel,
+        EmergencyLightingDistributionPanel,
+        EmergencyPowerDistributionPanel,
+        ElectricalMeterPanel,
+        ElectricalControlPanel,
+        IsolationSwitchPanel,
+        FireEmergencyLightingDistributionPanel,
+        SubmersiblePump,
+        RollerShutter,
+        ElectricWindow,
+        ACCharger,
+        DCCharger,
+        LaneLights,
+        WaterproofLights,
+        OutdoorLights,
+        FireEmergencyLuminaire,
+        EmergencyLuminaire,
+        LVSocket,
         None,
     }
 
@@ -112,14 +142,24 @@
         public double KV { get; set; }
 
         /// <summary>
-        /// 负载类型
+        /// 一级负载类型
         /// </summary>
-        public ThPDSLoadType LoadType { get; set; }
+        public ThPDSLoadTypeCat_1 LoadTypeCat_1 { get; set; }
+
+        /// <summary>
+        /// 二级负载类型
+        /// </summary>
+        public ThPDSLoadTypeCat_2 LoadTypeCat_2 { get; set; }
+
+        /// <summary>
+        /// 默认回路类型
+        /// </summary>
+        public ThPDSCircuitType DefaultCircuitType { get; set; }
 
         /// <summary>
         /// 是否是消防设备
         /// </summary>
-        public string FireLoad { get; set; }
+        public bool FireLoad { get; set; }
 
         /// <summary>
         /// 主用设备数量
@@ -134,7 +174,7 @@
         /// <summary>
         /// 安装功率
         /// </summary>
-        public double InstalledCapacity { get; set; }
+        public ThInstalledCapacity InstalledCapacity { get; set; }
 
         /// <summary>
         /// 相数

@@ -39,17 +39,30 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\CalStructrueService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\DrainingPointRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\VerticalPipeRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\DrainingEquipmentModel.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\RouteModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\VerticalPipeModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateConnectPipesService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateDrainagePipeRoute.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\ReprocessingPipe.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\CheckService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\StructGeoService.cs" />
+    <Compile Include="HydrantLayout\Command\ThHydrantLayoutImprove.cs" />
+    <Compile Include="HydrantLayout\Data\ThBlkVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayout\Data\ThCircleVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataFactory.cs" />
+    <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataQueryService.cs" />
+    <Compile Include="HydrantLayout\Data\ThTchVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayout\Service\ThHydrantUtil.cs" />
+    <Compile Include="HydrantLayout\Service\ThSelectFrameUtil.cs" />
+    <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -83,6 +96,9 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="Model\ThFireExtinguisher.cs" />
+    <Compile Include="Model\ThFireHydrant.cs" />
+    <Compile Include="Model\ThSprinkler.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectLayer.cs" />
@@ -90,6 +106,7 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
+    <Compile Include="ThHydrantCmds.THXHSYH.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
@@ -519,11 +536,9 @@
     <Compile Include="Service\MarkService.cs" />
     <Compile Include="Service\RotateTransformService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
-    <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
-    <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.THDSPSXT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="TowerSeparation\TowerSeparationTest.cs" />
@@ -685,7 +700,6 @@
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />
-    <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -716,6 +730,11 @@
       <Project>{6fadc5fa-f54f-4742-bacd-9f1f855e8210}</Project>
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
+    <Folder Include="HydrantLayout\Engine\" />
+    <Folder Include="HydrantLayout\Model\" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

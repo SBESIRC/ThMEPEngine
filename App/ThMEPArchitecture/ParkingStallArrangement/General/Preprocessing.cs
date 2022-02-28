@@ -57,8 +57,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             }
             gaPara.Set(outerBrder.SegLines, maxVals, minVals);
 
-            var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
-            layoutPara = new LayoutParameter(outerBrder, ptDic, seglineIndexDic, segAreasCnt, usePline, Logger);
+            layoutPara = new LayoutParameter(outerBrder, seglineIndexDic, segAreasCnt, usePline, Logger);
 
             return true;
         }

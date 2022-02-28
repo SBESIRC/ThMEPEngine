@@ -60,7 +60,12 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var psr = Active.Editor.SelectCrossingPolygon(frame);
+                var dxfNames = new string[]
+                {
+                    ThMEPTCHService.DXF_HVACDUCT,
+                };
+                var filters = ThSelectionFilterTool.Build(dxfNames);
+                var psr = Active.Editor.SelectCrossingPolygon(frame, filters);
                 if (psr.Status == PromptStatus.OK)
                 {
                     var visitor = new ThTCHDuctExtractionVisitor();

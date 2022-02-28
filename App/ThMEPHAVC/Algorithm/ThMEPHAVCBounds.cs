@@ -11,6 +11,7 @@ namespace ThMEPHVAC.Algorithm
     public class ThMEPHAVCBounds
     {
         // 进来的线应该移动到原点附近
+        private static double sidePortFeetLens = 100;
         public static Polyline GetConnectorBounds(DBObjectCollection centerLines, double offset)
         {
             var outlines = centerLines.Buffer(offset);
@@ -71,7 +72,7 @@ namespace ThMEPHVAC.Algorithm
             var position = port.Position.TransformBy(mat);
             var dirVec = ThMEPHVACService.GetDirVecByAngle(rotation);
             var lVec = ThMEPHVACService.GetLeftVerticalVec(dirVec);
-            var disVec = dirVec * 0.5 * portWidth + lVec * 0.5 * ductWidth;
+            var disVec = dirVec * 0.5 * portWidth + lVec * (0.5 * ductWidth + sidePortFeetLens);// 100是侧送风口脚长
             var p = position.ToPoint2D() + disVec;
             return new Point3d(Math.Round(p.X, 6), Math.Round(p.Y, 6), 0);
         }

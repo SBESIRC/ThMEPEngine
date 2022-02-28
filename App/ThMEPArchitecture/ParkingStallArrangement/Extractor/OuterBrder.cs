@@ -15,20 +15,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
     {
         public DBObjectCollection OuterLineObjs = new DBObjectCollection();
         public DBObjectCollection BuildingObjs = new DBObjectCollection();
+        public DBObjectCollection BuildingWithoutRampObjs = new DBObjectCollection();
 
         public List<Line> SegLines = new List<Line>();//分割线
         public List<BlockReference> Buildings = new List<BlockReference>();//建筑物block
         public Polyline WallLine = new Polyline();//外框线
         public List<BlockReference> Ramps = new List<BlockReference>();//坡道块
         public List<BlockReference> LonelyRamps = new List<BlockReference>();//未合并的坡道
+        
 
         public ThCADCoreNTSSpatialIndex BuildingSpatialIndex = null;//建筑物SpatialIndex
         public ThCADCoreNTSSpatialIndex LonelyRampSpatialIndex = null;//孤立在地库中间的坡道
         public ThCADCoreNTSSpatialIndex AttachedRampSpatialIndex = null;//依附在地库边界上的坡道
+        public ThCADCoreNTSSpatialIndex BuildingWithoutRampSpatialIndex = null;//不包含坡道的建筑物
         public List<Ramps> RampLists = new List<Ramps>();//孤立坡道块
         public bool Extract(BlockReference basement)
         {
             Explode(basement);
+            BuildingWithoutRampSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingWithoutRampObjs);
             BuildingSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingObjs);
             foreach (var obj in OuterLineObjs)
             {
@@ -139,6 +143,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 {
                     Buildings.Add(br);
                     BuildingObjs.Add(br);
+                    BuildingWithoutRampObjs.Add(br);
                 }
             }
             if (IsRampLayer(ent.Layer))

@@ -16,15 +16,18 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThLaneLineCommand : IAcadCommand, IDisposable
+    public class ThLaneLineCommand : ThMEPBaseCommand, IDisposable
     {
         public List<string> LaneLineLayers { get; set; }
 
         public ThLaneLineCommand()
         {
+            CommandName = "THTCDX";
+            ActionName = "提车道中心线";
             LaneLineLayers = new List<string>();
         }
 
@@ -33,7 +36,7 @@ namespace ThMEPElectrical.Command
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

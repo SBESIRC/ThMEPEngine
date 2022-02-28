@@ -116,7 +116,10 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThFireCompartmentOutlineExtractionEngine();
+            var engine = new ThFireCompartmentOutlineExtractionEngine()
+            {
+                LayerFilter = LayerFilter,
+            };
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

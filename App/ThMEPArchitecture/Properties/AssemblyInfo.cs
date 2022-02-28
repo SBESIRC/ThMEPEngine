@@ -33,12 +33,13 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.4.0")]
-[assembly: AssemblyFileVersion("1.9.4.0")]
+[assembly: AssemblyVersion("1.9.5.0")]
+[assembly: AssemblyFileVersion("1.9.5.0")]
 
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangement))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.WithoutSegLineCmd))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangementByFixedLines))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.TestCommond))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.PartitionLayoutMultiThreadedTest))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.CreateAllSeglinesCmd))]//生成所有分割线
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.ThBreakSegLinesCmd))]

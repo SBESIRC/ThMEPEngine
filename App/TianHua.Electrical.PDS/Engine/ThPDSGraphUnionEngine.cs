@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using Dreambuild.AutoCAD;
 using QuickGraph;
 
@@ -53,20 +53,38 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (circuitID.IndexOf(otherDistBoxID) == 0)
                     {
-                        var edge = ThPDSGraphService.CreateEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
-                            new List<string> { circuitID }, DistBoxKey, true);
+                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[i].Target, cabletrayEdgeList[j].Target,
+                            new List<string> { circuitID });
+                        edge.Circuit.ViaCableTray = true;
+                        if(cabletrayEdgeList[i].Circuit.ViaConduit || cabletrayEdgeList[j].Circuit.ViaConduit)
+                        {
+                            edge.Circuit.ViaConduit = true;
+                        }
                         addEdgeList.Add(edge);
                     }
                 }
             }
 
             var unionGraph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            cabletrayEdgeList.ForEach(edge =>
+            {
+                unionGraph.AddVertex(edge.Target);
+            });
             addEdgeList.ForEach(edge =>
             {
                 unionGraph.AddVertex(edge.Source);
                 unionGraph.AddVertex(edge.Target);
                 unionGraph.AddEdge(edge);
             });
+
+            // 设置图的遍历起点
+            foreach (var vertice in unionGraph.Vertices)
+            {
+                if (!unionGraph.Edges.Any(o => o.Target.Equals(vertice)))
+                {
+                    vertice.IsStartVertexOfGraph = true;
+                }
+            }
 
             return unionGraph;
         }

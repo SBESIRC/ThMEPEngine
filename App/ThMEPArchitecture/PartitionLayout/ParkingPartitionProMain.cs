@@ -77,7 +77,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public List<Polyline> Pillars = new List<Polyline>();
         private List<Polyline> CarBoxes = new List<Polyline>();
         private List<Polyline> IniLaneBoxes = new List<Polyline>();
-        private List<CarBoxPlus>CarBoxesPlus=new List<CarBoxPlus>();
+        private List<CarBoxPlus> CarBoxesPlus = new List<CarBoxPlus>();
         private List<Polyline> LaneBoxes = new List<Polyline>();
         private List<CarModule> CarModules = new List<CarModule>();
         private List<Point3d> ObstacleVertexes = new List<Point3d>();
@@ -337,15 +337,14 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void GenerateParkingSpaces()
         {
-            using (AcadDatabase adb = AcadDatabase.Active())
-            {
-                PreProcess();
-                GenerateLanes();
-                GeneratePerpModules();
-                GenerateCarsInModules();
-                GenerateCarsOnRestLanes();
-                PostProcess();
-            }
+            PreProcess();
+            GenerateLanes();
+            GeneratePerpModules();
+            GenerateCarsInModules();
+            //里面的函数目前不适合并行化操作
+            GenerateCarsOnRestLanes();
+            //里面函数大部分可以并行化操作
+            PostProcess();
         }
 
         /// <summary>
@@ -940,6 +939,18 @@ namespace ThMEPArchitecture.PartitionLayout
                 lb.Dispose();
                 return py;
             }));
+            LaneBoxes.AddRange(CarModules.Select(e =>
+            {
+                //e.Line.Buffer(DisLaneWidth / 2 - 10));
+                var la = CreateLine(e.Line);
+                var lb = CreateLine(e.Line);
+                la.TransformBy(Matrix3d.Displacement(CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                lb.TransformBy(Matrix3d.Displacement(-CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                var py = CreatPolyFromLines(la, lb);
+                la.Dispose();
+                lb.Dispose();
+                return py;
+            }));
             LaneBufferSpatialIndex.Update(LaneBoxes.ToCollection(), new DBObjectCollection());
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
             foreach (var k in vertlanes)
@@ -965,6 +976,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void PostProcess()
         {
+            //可以并行化
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
             RemoveInvalidPillars();

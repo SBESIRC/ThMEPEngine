@@ -1,5 +1,4 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -8,7 +7,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 所属DWG
         /// </summary>
-        public Database ReferenceDWG { get; set; }
+        public string ReferenceDWG { get; set; }
 
         /// <summary>
         /// 楼层

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 
 using ThMEPEngineCore.Engine;
 using TianHua.Electrical.PDS.Service;
@@ -31,6 +33,8 @@ namespace TianHua.Electrical.PDS.Engine
 
     public class ThCircuitMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
+        public List<Entity> Results { get; protected set; } = new List<Entity>();
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             throw new NotImplementedException();
@@ -43,7 +47,21 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var extractionEngine = new ThCircuitMarkExtractionEngine();
+            extractionEngine.ExtractFromMS(database);
+            extractionEngine.Results.Select(o => o.Data as Entity).ForEach(o =>
+            {
+                if(o is Polyline polyline)
+                {
+                    var lines = new DBObjectCollection();
+                    polyline.Explode(lines);
+                    lines.OfType<Line>().ForEach(e => Results.Add(e)); 
+                }
+                else
+                {
+                    Results.Add(o);
+                }
+            });
         }
     }
 }

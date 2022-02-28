@@ -1,13 +1,10 @@
 ﻿using System;
-using NFox.Cad;
-using System.Linq;
-using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {

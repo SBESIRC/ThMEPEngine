@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.Engine
+namespace ThMEPWSS.Hydrant.Engine
 {
     public class ThFireHydrantExtractionVisitor : ThDistributionElementExtractionVisitor
     {

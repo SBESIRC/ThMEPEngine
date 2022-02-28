@@ -8,9 +8,14 @@ namespace ThMEPEngineCore.Algorithm
     public static class ThMEPTCHService
     {
         /// <summary>
-        /// DXF
+        /// DXF（水管）
         /// </summary>
         public const string DXF_PIPE = "TCH_PIPE";
+
+        /// <summary>
+        /// DXF（风管）
+        /// </summary>
+        public const string DXF_HVACDUCT = "TCH_DBHVACDUCT";
 
         /// <summary>
         /// 是否是天正元素
@@ -39,7 +44,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHValve(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("VALVE");
         }
 
@@ -50,7 +55,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHDuct(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("DBHVACDUCT");
         }
 
@@ -61,7 +66,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHPipe(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("PIPE");
         }
 
@@ -72,7 +77,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHPipeText(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("PIPETEXT");
         }
 
@@ -83,7 +88,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHFitting(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("DBHFITTING");
         }
 
@@ -94,7 +99,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHSprinkler(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
         }
 
@@ -105,8 +110,19 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static bool IsTCHEquipment(this Entity entity)
         {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
+        }
+
+        /// <summary>
+        /// 是否为天正回路标注
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHWireDim2(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("WIREDIM2");
         }
 
         /// <summary>

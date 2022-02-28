@@ -1,10 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -220,6 +222,7 @@ namespace ThMEPArchitecture.PartitionLayout
             lt.TransformBy(Matrix3d.Displacement(vec * dist));
             var ltbf = lt.Buffer(DisLaneWidth / 2);
             points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
+            if (points.Count() == 0) return -1;
             var length = points.Last().X - points.First().X;
             if (length >= line.Length / 3 || length >= 23000)
                 return dist - DisLaneWidth / 2;
@@ -332,6 +335,7 @@ namespace ThMEPArchitecture.PartitionLayout
             return generate_lane_length;
         }
 
+        //可以使用并行化操作
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true)
         {
             var lanes = new List<Lane>();
@@ -519,6 +523,8 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void RemoveInvalidPillars()
         {
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
             Pillars = Pillars.Where(t =>
             {
                 var clone = t.Clone() as Polyline;
@@ -531,6 +537,23 @@ namespace ThMEPArchitecture.PartitionLayout
                 clone.Dispose();
                 return true;
             }).ToList();
+            //List<Polyline> tmps = new List<Polyline>();
+            //Pillars.AsParallel().ForAll(t =>
+            //{
+            //    var clone = t.Clone() as Polyline;
+            //    clone.Scale(clone.GetRecCentroid(), 0.5);
+            //    if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
+            //        clone.Dispose();
+            //    else
+            //    {
+            //        clone.Dispose();
+            //        tmps.Add(t);
+            //    }
+            //});
+            //Pillars = tmps;
+            //sw.Stop();
+            //var time = sw.Elapsed.TotalMilliseconds.ToString();
+            //Active.Editor.WriteMessage("test：" + time + "\n");
         }
 
         private void ReDefinePillarDimensions()
@@ -799,6 +822,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisPillarLength)), line.EndPoint);
                 }
             }
+            if (line.Length == 0) return;
             //背靠背对齐
             if (Math.Abs(length_divided - DisVertCarWidth) < 1 && align_back_to_back)
             {
@@ -806,7 +830,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var pts = line.StartPoint.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisVertCarLength * 1.5));
                 var pte = pts.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * dis_judge_in_backtoback));
                 var tl = new Line(pts, pte);
-                var tlbf = tl.Buffer(1);
+                Polyline tlbf = tl.Buffer(1);
                 var crosscars = CarSpatialIndex.SelectCrossingPolygon(tlbf).Cast<Polyline>().OrderBy(t => t.GetRecCentroid().DistanceTo(pts)).ToList();
                 if (crosscars.Count > 1)
                 {

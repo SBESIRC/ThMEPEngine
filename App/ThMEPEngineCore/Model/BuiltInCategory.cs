@@ -187,5 +187,9 @@
         /// 中心线区域
         /// </summary>
         CenterPolyline,
+        /// <summary>
+        /// 立管
+        /// </summary>
+        VerticalPipe,
     }
 }

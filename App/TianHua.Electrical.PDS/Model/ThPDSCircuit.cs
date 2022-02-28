@@ -6,34 +6,44 @@
     public enum ThPDSCircuitType
     {
         /// <summary>
-        /// 照明
+        /// 照明回路
         /// </summary>
         Lighting,
 
         /// <summary>
-        /// 动力
+        /// 插座回路
+        /// </summary>
+        Socket,
+
+        /// <summary>
+        /// 动力回路
         /// </summary>
         PowerEquipment,
 
         /// <summary>
-        /// 应急照明
+        /// 应急照明回路
         /// </summary>
         EmergencyLighting,
 
         /// <summary>
-        /// 消防动力
+        /// 消防动力回路
         /// </summary>
         EmergencyPowerEquipment,
 
         /// <summary>
-        /// 消防应急照明
+        /// 消防应急照明回路
         /// </summary>
         FireEmergencyLighting,
 
         /// <summary>
-        /// 控制
+        /// 控制回路
         /// </summary>
-        Control
+        Control,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
+        None,
     }
 
     /// <summary>
@@ -59,12 +69,12 @@
         /// <summary>
         /// 安装功率
         /// </summary>
-        public double InstalledCapacity { get; set; }
+        public ThInstalledCapacity InstalledCapacity { get; set; }
 
         /// <summary>
         /// 相数
         /// </summary>
-        public double Phase { get; set; }
+        public int Phase { get; set; }
 
         /// <summary>
         /// 需要系数
@@ -80,5 +90,20 @@
         /// 位置信息
         /// </summary>
         public ThPDSLocation Location { get; set; }
+
+        /// <summary>
+        /// 是否消防回路
+        /// </summary>
+        public bool FireLoad { get; set; }
+
+        /// <summary>
+        /// 回路是否利用桥架
+        /// </summary>
+        public bool ViaCableTray { get; set; } = false;
+
+        /// <summary>
+        /// 回路是否利用管线
+        /// </summary>
+        public bool ViaConduit { get; set; } = false;
     }
 }

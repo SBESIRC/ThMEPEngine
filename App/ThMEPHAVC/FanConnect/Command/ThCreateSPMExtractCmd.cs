@@ -60,11 +60,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                     //提取水管连接点
                     var fcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
-                    foreach(var f in fcus)
-                    {
-                        f.FanPoint = f.FanPoint.ToPoint2d().ToPoint3d();
-                        f.FanObb = f.FanObb.ToNTSLineString().ToDbPolyline();
-                    }
                     if (fcus.Count == 0)
                     {
                         return;

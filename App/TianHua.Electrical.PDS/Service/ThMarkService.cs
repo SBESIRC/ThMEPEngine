@@ -1,14 +1,17 @@
-﻿using NFox.Cad;
+﻿using System;
 using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Engine;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+
+using ThCADCore.NTS;
 using ThCADExtension;
-using System;
 using ThMEPEngineCore.CAD;
+using TianHua.Electrical.PDS.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -19,18 +22,23 @@ namespace TianHua.Electrical.PDS.Service
         private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
 
         private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
-        public ThMarkService(List<ThRawIfcAnnotationElementData> markDatas, List<ThBlockReferenceData> markBlocks)
+
+        public ThMarkService(List<Entity> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
+            List<Entity> tchDimension)
         {
             var lines = new DBObjectCollection();
             var texts = new DBObjectCollection();
-            markDatas.ForEach(o =>
+            markDatas.ForEach(entity =>
             {
-                var entity = o.Data as Entity;
                 if (entity is DBText)
                 {
                     texts.Add(entity);
                 }
                 else if (entity is Line)
+                {
+                    lines.Add(entity);
+                }
+                else if (entity is Polyline)
                 {
                     lines.Add(entity);
                 }
@@ -51,7 +59,7 @@ namespace TianHua.Electrical.PDS.Service
             TextIndex = new ThCADCoreNTSSpatialIndex(texts);
 
             MarkDic = new Dictionary<DBPoint, List<string>>();
-            var mLeader = markDatas.Select(o => o.Data).OfType<MLeader>();
+            var mLeader = markDatas.OfType<MLeader>();
             mLeader.ForEach(e =>
             {
                 var vertex = new Point3d();
@@ -78,17 +86,42 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             });
+
             markBlocks.ForEach(o =>
             {
-                if (o.EffectiveName.Equals("E-电力平面-负荷明细"))
+                if (o.Value.EffectiveName.Equals("E-电力平面-负荷明细"))
                 {
-
+                    var marks = GetTexts(o.Value);
+                    var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
+                    obb.Vertices().OfType<Point3d>().ForEach(pt =>
+                    {
+                        MarkDic.Add(ToDbPoint(pt), marks);
+                    });
                 }
                 else
                 {
-                    MarkDic.Add(ToDbPoint(o.Position), GetTexts(o));
+                    MarkDic.Add(ToDbPoint(o.Value.Position), GetTexts(o.Value));
                 }
             });
+
+            tchDimension.ForEach(o =>
+            {
+                var objs = new DBObjectCollection();
+                o.Explode(objs);
+                var basePoint = objs.OfType<Line>().First().GetCenter();
+                var textList = new List<string>();
+                objs.OfType<Entity>().ForEach(e =>
+                {
+                    if (ThMEPTCHService.IsTCHText(e))
+                    {
+                        var text = new DBObjectCollection();
+                        e.Explode(text);
+                        textList.Add(text.OfType<DBText>().First().TextString);
+                    }
+                });
+                MarkDic.Add(ToDbPoint(basePoint), textList);
+            });
+
             PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
         }
 
@@ -108,10 +141,21 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 bfLine = line.ExtendLine(200.0).Buffer(200.0);
                 var TextCollection = TextIndex.SelectCrossingPolygon(bfLine);//（Buffer200）+文字
-                TextCollection.OfType<DBText>().ForEach(o =>
+                if (TextCollection.Count > 0)
                 {
-                    result.Add(o.TextString);
-                });
+                    TextCollection.OfType<DBText>().ForEach(o =>
+                    {
+                        result.Add(o.TextString);
+                    });
+                }
+                else
+                {
+                    var pointCollection = PointIndex.SelectWindowPolygon(bfLine);
+                    if (pointCollection.Count > 0)
+                    {
+                        result = MarkDic[pointCollection[0] as DBPoint];
+                    }
+                }
             }
             else
             {
@@ -120,8 +164,20 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     result = MarkDic[pointCollection[0] as DBPoint];
                 }
+                else
+                {
+                    frame = frame.Buffer(200.0).OfType<Polyline>().OrderByDescending(o => o.Length).First();
+                    var TextCollection = TextIndex.SelectCrossingPolygon(frame);
+                    if (TextCollection.Count > 0)
+                    {
+                        TextCollection.OfType<DBText>().ForEach(o =>
+                        {
+                            result.Add(o.TextString);
+                        });
+                    }
+                }
             }
-            return result;
+            return result.Select(o => Filter(o)).ToList();
         }
 
         private DBPoint ToDbPoint(Point3d point)
@@ -134,10 +190,15 @@ namespace TianHua.Electrical.PDS.Service
             return mText.Text.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
-        private List<string> GetTexts(ThBlockReferenceData Data)
+        private List<string> GetTexts(ThPDSBlockReferenceData Data)
         {
             var dic = Data.Attributes;
-            return dic.Select(o => o.Key + ":" + o.Value).ToList();
+            return dic.Select(o => o.Value).ToList();
+        }
+
+        private string Filter(string info)
+        {
+            return info.Replace(" ", "");
         }
     }
 }

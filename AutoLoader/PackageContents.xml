@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{F289107C-B284-4852-9AFF-C2008D338E0A}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{813139EB-2714-4409-80C7-B46991B14602}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -131,7 +131,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -150,7 +149,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -169,7 +167,6 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZW"   Global="THZW" />
-                <Command Local="THTCD"  Global="THTCD" />
                 <Command Local="THFDL"  Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
@@ -188,11 +185,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
@@ -209,11 +207,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />
@@ -230,11 +229,12 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THDXC" Global="THDXC" />
-                <Command Local="THYJZMLX" Global="THYJZMLX" />
+                <Command Local="THTCDX" Global="THTCDX" />
                 <Command Local="THFDXC" Global="THFDXC" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
                 <Command Local="THSSLJ" Global="THSSLJ" />
+                <Command Local="THYJZMLX" Global="THYJZMLX" />
                 <Command Local="THSSZSDBZ" Global="THSSZSDBZ" />
                 <Command Local="THCWZMBZ" Global="THCWZMBZ" />
                 <Command Local="THCWZMLX" Global="THCWZMLX" />

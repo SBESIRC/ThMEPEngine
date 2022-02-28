@@ -11,18 +11,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     public class CreateDrainagePipeRoute
     {
         Polyline frame;                                     //外框线
-        List<Polyline> mainPipes;                           //排水主管
-        List<VerticalPipeModel> verticalPipes;              //排水立管
-        List<DrainingEquipmentModel> drainingEquipment;     //洁具立管
+        List<Polyline> mainSewagePipes;                     //排水主管
+        List<Polyline> mainRainPipes;                       //雨水主管
+        List<VerticalPipeModel> verticalPipes;              //排雨水立管
         List<Polyline> wallPolys;                           //墙线
-        readonly double step = 300;                         //步长
-        public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> mainPolys, List<VerticalPipeModel> verticalPipesModel, List<DrainingEquipmentModel> drainingEquipmentModel, 
-            List<Polyline> walls)
+        readonly double step = 90;                          //步长
+        public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls)
         {
             frame = polyline;
-            mainPipes = mainPolys;
+            mainSewagePipes = sewagePolys;
+            mainRainPipes = rainPolys;
             verticalPipes = verticalPipesModel;
-            drainingEquipment = drainingEquipmentModel;
             wallPolys = walls;
         }
 
@@ -30,27 +29,37 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 计算路由
         /// </summary>
         /// <returns></returns>
-        public List<Polyline> Routing()
+        public List<RouteModel> Routing()
         {
-            var resLines = new List<Polyline>();
-            var allLines = mainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var resRoutes = new List<RouteModel>();
+            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             foreach (var pipe in verticalPipes)
             {
+                var allLines = sewageLines;
+                if (pipe.PipeType == VerticalPipeType.rainPipe)
+                {
+                    allLines = rainLines;
+                }
+                if (allLines.Count <= 0)
+                {
+                    continue;
+                }
                 var closetLine = GetClosetLane(allLines, pipe.Position, frame);
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, wallPolys);
-                resLines.AddRange(connectLine);
+                foreach (var line in connectLine)
+                {
+                    RouteModel route = new RouteModel(line, pipe.PipeType);
+                    if (pipe.IsEuiqmentPipe)
+                    {
+                        route.printCircle = pipe.PipeCircle;
+                    }
+                    resRoutes.Add(route);
+                }
             }
 
-            foreach (var pipe in drainingEquipment)
-            {
-                var closetLine = GetClosetLane(allLines, pipe.DiranPoint, frame);
-                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step);
-                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.DiranPoint, wallPolys);
-                resLines.AddRange(connectLine);
-            }
-
-            return resLines;
+            return resRoutes;
         }
 
         /// <summary>

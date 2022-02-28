@@ -6,10 +6,15 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSTableAnalysisService
     {
-        public void Analysis(List<ThPDSBlockInfo> tableInfo, List<int> distBoxFilter, ref List<string> nameFilter,
-            ref List<string> propertyFilter, ref List<string> distBoxKey)
+        /// <summary>
+        /// 配电箱序列
+        /// </summary>
+        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+
+        public void Analysis(List<ThPDSBlockInfo> tableInfo, ref List<string> nameFilter,ref List<string> propertyFilter,
+            ref List<string> distBoxKey)
         {
-            foreach (ThPDSBlockInfo o in tableInfo)
+            foreach (var o in tableInfo)
             {
                 if (string.IsNullOrEmpty(o.Properties))
                 {
@@ -22,7 +27,7 @@ namespace TianHua.Electrical.PDS.Service
             }
             for (var i = 0; i < propertyFilter.Count; i++)
             {
-                if (distBoxFilter.Contains(i))
+                if (DistBoxFilter.Contains(i))
                 {
                     distBoxKey.Add(propertyFilter[i]);
                 }

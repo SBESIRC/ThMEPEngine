@@ -22,12 +22,14 @@ namespace ThMEPEngineCore.Algorithm
         private DBObjectCollection tarFrames;   // 外参框线
         private DBObjectCollection srcFrames;   // 本图框线
         private Dictionary<int, Polyline> dicMp2Polyline;
+        private ThCADCoreNTSSpatialIndex srcFrameIndex;
         private ThCADCoreNTSSpatialIndex tarFrameIndex;
-        
+
         public ThMEPFrameComparer(DBObjectCollection source, DBObjectCollection target)
         {
             Init(source, target);
             CreateTarIndex();
+            CreateSrcIndex();
             DoCompare();
             SearchAppend();
             Recovery();
@@ -86,7 +88,6 @@ namespace ThMEPEngineCore.Algorithm
         }
         private void SearchAppend()
         {
-            var srcFrameIndex = CreateSrcIndex();
             foreach (Polyline pl in tarFrames)
             {
                 var res = srcFrameIndex.SelectCrossingPolygon(pl);
@@ -94,14 +95,14 @@ namespace ThMEPEngineCore.Algorithm
                     AppendedFrame.Add(pl);
             }
         }
-        private ThCADCoreNTSSpatialIndex CreateSrcIndex()
+        private void CreateSrcIndex()
         {
             var frames = new DBObjectCollection();
             foreach (Polyline frame in srcFrames)
             {
                 frames.Add(frame);
             }
-            return new ThCADCoreNTSSpatialIndex(frames);
+            srcFrameIndex = new ThCADCoreNTSSpatialIndex(frames);
         }
         private void CreateTarIndex()
         {
@@ -160,13 +161,36 @@ namespace ThMEPEngineCore.Algorithm
                 return Math.Abs(simpPl.Area - pl1.Area) < Math.Abs(simpPl.Area - pl2.Area) ? pl1 : pl2;
             }
         }
+        private void AddAppend(Polyline srcPl, DBObjectCollection crossPolygons)
+        {
+            foreach (MPolygon pl in crossPolygons)
+            {
+                var realPl = dicMp2Polyline[pl.GetHashCode()];
+                var res = srcFrameIndex.SelectCrossingPolygon(realPl);
+                res.Remove(srcPl);
+                if (res.Count == 0)
+                    AppendedFrame.Add(realPl);
+            }
+        }
         private void SelectMaxCrossArea(Polyline pl, DBObjectCollection crossPolygons)
         {
-            DetectCrossPl(pl, crossPolygons, out Polyline maxCrossPl, out Polyline minBoundPl);
+            DetectCrossPl(pl, crossPolygons, out Polyline maxCrossPl, out MPolygon maxCrossMPl, out Polyline minBoundPl);
             if (maxCrossPl.Area > 0)
             {
                 // 与复数个区域相交，直接将最大的面积并入变化的框线
-                AddChangedFrame(pl, maxCrossPl, pl.SimilarityMeasure(maxCrossPl));
+                var simCoef = pl.SimilarityMeasure(maxCrossPl);
+                if (simCoef < 0.6)
+                    return;
+                if (ChangedFrame.ContainsKey(maxCrossPl))
+                {
+                    if (ChangedFrame[maxCrossPl].Item2 > simCoef)
+                        return;
+                    else
+                        ChangedFrame.Remove(maxCrossPl);
+                }
+                ChangedFrame.Add(maxCrossPl, new Tuple<Polyline, double>(pl, simCoef));
+                crossPolygons.Remove(maxCrossMPl);
+                AddAppend(pl, crossPolygons);
             }
             else if (minBoundPl.Area > 0)
             {
@@ -175,9 +199,14 @@ namespace ThMEPEngineCore.Algorithm
             }
             //else 从crossPolygons中找到了unchanged，直接退出
         }
-        private void DetectCrossPl(Polyline pl, DBObjectCollection crossPolygons, out Polyline maxCrossPl, out Polyline minBoundPl)
+        private void DetectCrossPl(Polyline pl, 
+                                   DBObjectCollection crossPolygons, 
+                                   out Polyline maxCrossPl,
+                                   out MPolygon maxCrossMPl,
+                                   out Polyline minBoundPl)
         {
             maxCrossPl = new Polyline();
+            maxCrossMPl = new MPolygon();
             double maxCrossArea = double.MinValue;
             minBoundPl = new Polyline();
             double minBoundArea = double.MaxValue;
@@ -205,6 +234,7 @@ namespace ThMEPEngineCore.Algorithm
                 {
                     maxCrossArea = crossArea;
                     maxCrossPl = realCrossPl;
+                    maxCrossMPl = crossPl;
                 }
             }
         }

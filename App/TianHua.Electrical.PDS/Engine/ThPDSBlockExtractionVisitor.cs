@@ -8,6 +8,7 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -15,7 +16,7 @@ namespace TianHua.Electrical.PDS.Engine
     {
         public List<string> NameFilter { get; set; }
         public List<string> PropertyFilter { get; set; }
-        public List<int> DistBoxFilter { get; set; }
+        public List<string> DistBoxKey { get; set; }
 
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -53,7 +54,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 results.Add(new ThRawIfcDistributionElementData()
                 {
-                    Data = new ThBlockReferenceData(br.ObjectId, matrix),
+                    Data = br,  
                     Geometry = br.GetTransformedCopy(matrix).GeometricExtents.ToRectangle(),
                 });
             }
@@ -74,7 +75,7 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             for (var i = 0; i < PropertyFilter.Count; i++)
                             {
-                                if (DistBoxFilter.Contains(i))
+                                if (DistBoxKey.Contains(PropertyFilter[i]))
                                 {
                                     // 对配电箱进行首字匹配
                                     if (o.IndexOf(PropertyFilter[i]) == 0)

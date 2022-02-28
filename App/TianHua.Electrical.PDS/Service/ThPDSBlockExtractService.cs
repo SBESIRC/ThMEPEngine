@@ -6,6 +6,8 @@ using Dreambuild.AutoCAD;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Engine;
+using TianHua.Electrical.PDS.Model;
+using ThMEPEngineCore.CAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -14,67 +16,94 @@ namespace TianHua.Electrical.PDS.Service
         /// <summary>
         /// 标注块
         /// </summary>
-        public List<ThBlockReferenceData> MarkBlocks { get; set; } = new List<ThBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> MarkBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
 
         /// <summary>
         /// 负载块
         /// </summary>
-        public List<ThBlockReferenceData> LoadBlocks { get; set; } = new List<ThBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
 
         /// <summary>
         /// 配电箱
         /// </summary>
-        public List<ThBlockReferenceData> DistBoxBlocks { get; set; } = new List<ThBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
 
-        public void Extract(Database database, List<string> nameFilter, List<string> propertyFilter, List<int> distBoxFilter)
+        public void Extract(Database database, List<ThPDSBlockInfo> tableInfo, List<string> nameFilter,
+            List<string> propertyFilter, List<string> distBoxKey)
         {
             var engine = new ThPDSBlockExtractionEngine
             {
                 NameFilter = nameFilter.Distinct().ToList(),
                 PropertyFilter = propertyFilter.Distinct().ToList(),
-                DistBoxFilter = distBoxFilter,
+                DistBoxKey = distBoxKey,
             };
             engine.ExtractFromMS(database);
-            engine.Results.Select(o => o.Data as ThBlockReferenceData)
+            engine.Results.Select(o => o.Data as BlockReference)
                 .ForEach(block =>
                 {
-                    if (block.EffectiveName.IndexOf("负载标注") == 0
-                        || block.EffectiveName.Contains("水泵标注")
-                        || block.EffectiveName.Contains("E-电力平面-负荷明细"))
+                    var blockData = new ThPDSBlockReferenceData(block.ObjectId);
+                    if (blockData.EffectiveName.IndexOf("负载标注") == 0
+                        || blockData.EffectiveName.Contains("水泵标注")
+                        || blockData.EffectiveName.Contains("E-电力平面-负荷明细"))
                     {
-                        MarkBlocks.Add(block);
+                        MarkBlocks.Add(block, blockData);
                         return;
                     }
-                    else if (block.EffectiveName.Contains("E-BDB006-1"))
+                    else if (blockData.EffectiveName.Contains("E-BDB006-1"))
                     {
-                        DistBoxBlocks.Add(block);
+                        foreach (var row in tableInfo)
+                        {
+                            if (row.BlockName == blockData.EffectiveName)
+                            {
+                                blockData.Cat_1 = row.Cat_1;
+                                blockData.Cat_2 = row.Cat_2;
+                                blockData.DefaultCircuitType = row.DefaultCircuitType;
+                                break;
+                            }
+                        }
+                        DistBoxBlocks.Add(block, blockData);
                         return;
                     }
 
                     var checker = false;
-                    block.Attributes.Values.ForEach(o =>
+                    foreach (var value in blockData.Attributes.Values)
                     {
-                        if (!checker)
+                        for (var i = 0; i < distBoxKey.Count; i++)
                         {
-                            for (var i = 0; i < propertyFilter.Count; i++)
+                            if (value.IndexOf(distBoxKey[i]) == 0 && !checker)
                             {
-                                if (distBoxFilter.Contains(i))
+                                foreach (var row in tableInfo)
                                 {
-                                    if (o.IndexOf(propertyFilter[i]) == 0)
+                                    if (row.Properties == distBoxKey[i])
                                     {
+                                        blockData.Cat_1 = row.Cat_1;
+                                        blockData.Cat_2 = row.Cat_2;
+                                        blockData.DefaultCircuitType = row.DefaultCircuitType;
                                         checker = true;
+                                        break;
                                     }
                                 }
                             }
                         }
-                    });
+                    }
+
                     if (checker)
                     {
-                        DistBoxBlocks.Add(block);
+                        DistBoxBlocks.Add(block, blockData);
                     }
                     else
                     {
-                        LoadBlocks.Add(block);
+                        foreach (var row in tableInfo)
+                        {
+                            if (row.BlockName == blockData.EffectiveName)
+                            {
+                                blockData.Cat_1 = row.Cat_1;
+                                blockData.Cat_2 = row.Cat_2;
+                                blockData.DefaultCircuitType = row.DefaultCircuitType;
+                                break;
+                            }
+                        }
+                        LoadBlocks.Add(block, blockData);
                     }
                 });
         }

@@ -604,7 +604,7 @@ namespace ThMEPLighting.ViewModel
         public void ExtractTCD()
         {
             ThMEPLightingService.Instance.LanelineLayers = LaneLineLayers;
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCDX");
         }
         public void UpdateLaneLineLayers()
         {

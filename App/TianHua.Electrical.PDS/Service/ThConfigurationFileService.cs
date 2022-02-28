@@ -29,19 +29,38 @@ namespace TianHua.Electrical.PDS.Service
                 column++;
                 try
                 {
-                    var cat_1 = (ThPDSLoadType)Enum.Parse(typeof(ThPDSLoadType), StringFilter(table.Rows[row][column].ToString()));
+                    var cat_1 = (ThPDSLoadTypeCat_1)Enum.Parse(typeof(ThPDSLoadTypeCat_1), StringFilter(table.Rows[row][column].ToString()));
                     blockInfo.Cat_1 = cat_1;
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadType.None;
+                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
                 }
 
                 column++;
-                blockInfo.Cat_2 = StringFilter(table.Rows[row][column].ToString());
+                try
+                {
+                    var cat_2 = (ThPDSLoadTypeCat_2)Enum.Parse(typeof(ThPDSLoadTypeCat_2), StringFilter(table.Rows[row][column].ToString()));
+                    blockInfo.Cat_2 = cat_2;
+                }
+                catch
+                {
+                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                }
 
                 column++;
                 blockInfo.Properties = StringFilter(table.Rows[row][column].ToString());
+
+                column++;
+                try
+                {
+                    var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
+                    blockInfo.DefaultCircuitType = defaultCircuitType;
+                }
+                catch
+                {
+                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                }
 
                 blockInfos.Add(blockInfo);
             }

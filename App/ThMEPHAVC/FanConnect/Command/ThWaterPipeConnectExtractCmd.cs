@@ -164,37 +164,26 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    var remSurplusPipe = new ThRemSurplusPipe()
+                    ///处理数据---查找到需要删除的末端
+                    var handlePipeService = new ThHandleFanPipeService()
                     {
                         StartPoint = startPt,
-                        AllLine = allLines,
-                        AllFan = tmpFcus
+                        AllFan = tmpFcus,
+                        AllLine = allLines
                     };
-                    string layer;
-                    int colorIndex;
-                    remSurplusPipe.RemSurplusPipe(out layer,out colorIndex);
-
-                    foreach (var pl in plines)
+                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    if (tmpTree == null)
                     {
-                        pl.TransformBy(mt);
+                        return;
                     }
-                    var tempLineColl = cleanServiec.CleanNoding(plines.ToCollection());
-                    var tempPathes = new List<Line>();
-                    foreach(var l in tempLineColl)
-                    {
-                        if(l is Line)
-                        {
-                            tempPathes.Add(l as Line);
-                        }
-                    }
-                    tempPathes = ThFanConnectUtils.CleanLaneLines(tempPathes);
+                    var dbObjs = handlePipeService.GetDbPipes(out string layer, out int colorIndex);
+                    handlePipeService.RemoveDbPipe(tmpTree, dbObjs, mt);
+                    var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
                     var toDbServiece = new ThFanToDBServiece();
-                    foreach (var path in tempPathes)
+                    foreach (var path in rightLines)
                     {
-                        path.TransformBy(mt.Inverse());
                         toDbServiece.InsertEntity(path, layer, colorIndex);
                     }
-                    
                     return;
                 }
             }

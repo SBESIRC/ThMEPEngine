@@ -5,6 +5,11 @@ namespace TianHua.Electrical.PDS.Model
     public class ThPDSID
     {
         /// <summary>
+        /// 块名
+        /// </summary>
+        public string BlockName { get; set; }
+
+        /// <summary>
         /// 负载编号
         /// </summary>
         public string LoadID { get; set; }

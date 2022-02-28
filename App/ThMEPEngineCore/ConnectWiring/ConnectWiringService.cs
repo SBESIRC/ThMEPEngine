@@ -474,10 +474,9 @@ namespace ThMEPEngineCore.ConnectWiring
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {
-                var objIDs = new ObjectIdCollection();
                 var lines = acad.ModelSpace
-                            .OfType<Polyline>()
-                            .Where(p => layers.Contains(p.Layer));
+                    .OfType<Polyline>()
+                    .Where(p => layers.Contains(p.Layer));
                 var LineDic = lines.ToDictionary(key => key.Clone() as Polyline, value => value.Id);
                 var objs = new DBObjectCollection();
                 LineDic.ForEach(x =>
@@ -489,13 +488,10 @@ namespace ThMEPEngineCore.ConnectWiring
                 Transformer.Transform(Boundary);
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var dbobjs = spatialIndex.SelectWindowPolygon(Boundary);
-                objIDs =LineDic.Where(o => dbobjs.Contains(o.Key)).Select(o => o.Value).ToObjectIdCollection();
-                foreach (ObjectId objId in objs)
+                var objIDs =LineDic.Where(o => dbobjs.Contains(o.Key)).Select(o => o.Value).ToObjectIdCollection();
+                foreach (ObjectId objId in objIDs)
                 {
-                    var entity = acad.Element<Polyline>(objId);
-                    entity.UpgradeOpen();
-                    entity.Erase();
-                    entity.DowngradeOpen();
+                    acad.Element<Polyline>(objId, true).Erase();
                 }
             }
         }

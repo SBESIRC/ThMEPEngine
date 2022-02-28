@@ -26,8 +26,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             Polyline resPoly = new Polyline() { Closed = true };
             resPoly.AddVertexAt(0, firExtendLine.StartPoint.ToPoint2D(), 0, 0, 0);
             resPoly.AddVertexAt(1, firExtendLine.EndPoint.ToPoint2D(), 0, 0, 0);
-            resPoly.AddVertexAt(2, lastExtendLine.EndPoint.ToPoint2D(), 0, 0, 0);
-            resPoly.AddVertexAt(3, lastExtendLine.StartPoint.ToPoint2D(), 0, 0, 0);
+            resPoly.AddVertexAt(2, lastExtendLine.StartPoint.ToPoint2D(), 0, 0, 0);
+            resPoly.AddVertexAt(3, lastExtendLine.EndPoint.ToPoint2D(), 0, 0, 0);
             return resPoly;
         }
 
@@ -62,10 +62,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 x.EndPoint.DistanceTo(line.EndPoint) < tol).ToList();
             resLines.AddRange(connectLines);
             allLines = allLines.Except(connectLines).ToList();
+            var resConnectLines = new List<Line>();
             foreach (var rLine in resLines)
             {
-                resLines.AddRange(GetConenctLine(allLines, rLine, tol));
+                resConnectLines.AddRange(GetConenctLine(allLines, rLine, tol));
             }
+            resLines.AddRange(resConnectLines);
             return resLines;
         }
 

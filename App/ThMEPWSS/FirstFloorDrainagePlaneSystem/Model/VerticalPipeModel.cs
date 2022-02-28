@@ -46,6 +46,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         public DBText BText { get; set; }
 
         /// <summary>
+        /// 是否是洁具点位
+        /// </summary>
+        public bool IsEuiqmentPipe = false;
+
+        /// <summary>
         /// 立管类型
         /// </summary>
         public VerticalPipeType PipeType { get; set; }
@@ -53,18 +58,33 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 
     public enum VerticalPipeType
     {
+        /// <summary>
+        /// 污水立管
+        /// </summary>
         [Description("污水立管")]
         SewagePipe,
 
+        /// <summary>
+        /// 废水立管
+        /// </summary>
         [Description("废水立管")]
         WasteWaterPipe,
 
+        /// <summary>
+        /// 冷凝水立管
+        /// </summary>
         [Description("冷凝水立管")]
         CondensatePipe,
 
+        /// <summary>
+        /// 污废合流立管
+        /// </summary>
         [Description("污废合流立管")]
         ConfluencePipe,
 
+        /// <summary>
+        /// 雨水立管
+        /// </summary>
         [Description("雨水立管")]
         rainPipe,
     }

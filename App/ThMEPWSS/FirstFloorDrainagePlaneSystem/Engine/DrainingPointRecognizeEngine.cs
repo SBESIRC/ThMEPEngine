@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.DrainageSystemAG;
 using ThMEPWSS.DrainageSystemAG.Models;
@@ -23,6 +24,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         List<EquipmentBlcokVisitorModel> equipmentBlcokVisitorsModelSpace { get; }
         public DrainingPointRecognizeEngine(Dictionary<string, List<string>> layerNames)
         {
+            equipmentBlcokVisitors = new List<EquipmentBlcokVisitorModel>();
+            equipmentBlcokVisitorsModelSpace = new List<EquipmentBlcokVisitorModel>();
             ReadUIConfig(layerNames);
             InitBlockNames();
 
@@ -69,7 +72,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             }
         }
 
-        public List<DrainingEquipmentModel> Recognize(Polyline polyline, List<Polyline> wall)
+        public List<DrainingEquipmentModel> Recognize(Polyline polyline, List<Polyline> wall, ThMEPOriginTransformer originTransformer)
         {
             var resEquipments = new List<DrainingEquipmentModel>();
             var equipments = GetPolylineEquipmentBlocks(polyline);
@@ -77,22 +80,32 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             {
                 switch (equip.enumEquipmentType)
                 {
-                    case EnumEquipmentType.toilet:              //坐便器
+                    case EnumEquipmentType.toilet:                      //坐便器
                         resEquipments.AddRange(CalRectanglePoint(equip, wall, 350));
                         break;
-                    case EnumEquipmentType.mopPool:             //拖把池
-                    case EnumEquipmentType.kitchenBasin:        //厨房洗涤盆
-                    case EnumEquipmentType.washingMachine:      //洗衣机
+                    case EnumEquipmentType.mopPool:                     //拖把池
+                    case EnumEquipmentType.kitchenBasin:                //厨房洗涤盆
+                    case EnumEquipmentType.singleBasinWashingTable:     //单盆洗手台
                         resEquipments.AddRange(CalRectanglePoint(equip, wall, 150, false));
                         break;
-                    case EnumEquipmentType.floorDrain:          //地漏
+                    case EnumEquipmentType.floorDrain:                  //地漏
                         resEquipments.AddRange(CalCirclePoint(equip));
                         break;
                     default:
                         break;
                 }
             }
-            return resEquipments;
+            return TransEquipmentModel(resEquipments, originTransformer);
+        }
+
+        private List<DrainingEquipmentModel> TransEquipmentModel(List<DrainingEquipmentModel> models, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var model in models)
+            {
+                originTransformer.Transform(model.BlockReference);
+                model.DiranPoint = originTransformer.Transform(model.DiranPoint);
+            }
+            return models;
         }
 
         private List<DrainingEquipmentModel> CalRectanglePoint(EquipmentBlcokModel equipModel, List<Polyline> wall, double dis, bool isShortEdge = true)
@@ -100,14 +113,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();
             foreach (var geom in equipModel.blockReferences)
             {
-                var boundary = geom.ToOBB(geom.BlockTransform.PreMultiplyBy(Matrix3d.Identity));
+                var boundary = geom.ToOBB();
                 var allLines = boundary.GetAllLineByPolyline().OrderByDescending(x=>x.Length).ToList();
                 var edges = new List<Line>() { allLines[0], allLines[1] };
                 if (isShortEdge)
                 {
                     edges = new List<Line>() { allLines[2], allLines[3] };
                 }
-                var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x))).First();
+                var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x)).First().Distance(x)).First();
                 edges.Remove(checkEdge);
                 var otherEdge = edges.First();
 
@@ -289,22 +302,22 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
 
         private void InitBlockNames()
         {
-            //拖布池 - 块名称过滤
+            //拖布池
             Dictionary<string, int> mopPoolNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.mopPool, ref mopPoolNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
 
-            //洗衣机 - 块名称过滤
-            Dictionary<string, int> washingMachineNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.washingMachine, ref washingMachineNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.washingMachine, washingMachineNames));
+            //单盆洗手台
+            Dictionary<string, int> singleBasinWashingNames = new Dictionary<string, int>();
+            GetVisitorDictionary(EnumEquipmentType.singleBasinWashingTable, ref singleBasinWashingNames);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.singleBasinWashingTable, singleBasinWashingNames));
 
             //获取坐便器
             Dictionary<string, int> toiletNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
 
-            //获取台盆
+            //获取厨房台盆（洗涤盆）
             Dictionary<string, int> kitchenSinkNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.kitchenBasin, ref kitchenSinkNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
@@ -328,8 +341,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     case "拖把池":
                         thisType = (int)EnumEquipmentType.mopPool;
                         break;
-                    case "洗衣机":
-                        thisType = (int)EnumEquipmentType.washingMachine;
+                    case "单盆洗手台":
+                        thisType = (int)EnumEquipmentType.singleBasinWashingTable;
                         break;
                     case "坐便器":
                         thisType = (int)EnumEquipmentType.toilet;

@@ -46,9 +46,6 @@
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThMainBuildingLayerManager.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\TypeConvertor.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\WallConnect.cs" />
-    <Compile Include="GirderConnect\ConnectProcess\ConnectSndBeam.cs" />
-    <Compile Include="GirderConnect\ConnectProcess\ExtractInfo.cs" />
-    <Compile Include="GirderConnect\ConnectProcess\GenerateLine.cs" />
     <Compile Include="GirderConnect\Data\BeamConfig.cs" />
     <Compile Include="GirderConnect\Data\MainBeamPostProcess.cs" />
     <Compile Include="GirderConnect\Data\MainBeamPreProcess.cs" />

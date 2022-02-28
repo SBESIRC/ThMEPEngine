@@ -73,7 +73,7 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                         if (!frameComp.ChangedFrame.ContainsKey(pair.Key))
                         {
                             pair.Key.TransformBy(revMat);
-                            frameComp.ChangedFrame.Add(pair.Key, new Tuple<Polyline, double>(pair.Value, 1));
+                            frameComp.ChangedFrame.Add(pair.Key, new Tuple<Polyline, double>(pair.Value, 1.1));
                         }
                     }
                     else

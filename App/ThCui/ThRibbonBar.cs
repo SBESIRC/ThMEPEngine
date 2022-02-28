@@ -664,7 +664,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("提车道中心线",
                     "天华提车道中心线",
-                    "THTCD",
+                    "THTCDX",
                     "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
                     "IDI_THCAD_THTCD_SMALL",
                     "IDI_THCAD_THTCD_LARGE",

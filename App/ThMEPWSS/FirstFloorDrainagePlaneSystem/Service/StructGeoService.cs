@@ -32,7 +32,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         public static List<Line> GetAllLineByPolyline(this Polyline polyline)
         {
             var allLines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            int index = polyline.NumberOfVertices;
+            if (!polyline.Closed)
+            {
+                index = index - 1;
+            }
+            for (int i = 0; i < index; i++)
             {
                 allLines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }

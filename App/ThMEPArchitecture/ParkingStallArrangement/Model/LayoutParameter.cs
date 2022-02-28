@@ -13,6 +13,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ViewModel;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 
@@ -90,7 +91,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
         }
 
-        public LayoutParameter(OuterBrder outerBrder, Dictionary<int, List<int>> ptDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
+        public LayoutParameter(OuterBrder outerBrder, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
             int segAreasCnt = 0, bool usePline = true, Serilog.Core.Logger logger = null)
         {
             var outerBoundary = outerBrder.WallLine;
@@ -196,39 +197,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     tmpSegLines.Add(line);
                     tmpSegLineIndexDic.Add(i, line);
                 }
-                if (SeglineNeighborIndexDic is null)
-                {
-                    //If in automation mode
-                    areas.Add(tmpBoundary);
-
-                    //init splitting lines
-                    for (int i = 0; i < Genome.Count; i++)
-                    {
-                        Gene gene = Genome[i];
-                        Split(gene, ref areas);
-                    }
-                }
-                else
-                {
-                    //If in manual mode
-                    areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
-                }
-
-                if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
-                {
-                    return false;//必定是个不合理的解
-                }
-                if (IsInCorrectSegLine(tmpBoundary, SegLines))
+                if (IsInCorrectSegLine(tmpBoundary, tmpSegLines))
                 {
                     return false;
                 }
-                double areaTolerance = 1.0;//面积容差
-                double areasTotalArea = 0;//分割后区域总面积
-                areas.ForEach(a => areasTotalArea += a.Area);
-                if (areasTotalArea - areaTolerance > OuterBoundary.Area)
+                //If in manual mode
+                areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+
+                if (!IsReasonableAns(areas, tmpBoundary, tmpSegLines))
                 {
-                    return false;//分割后的总面积不能大于原始面积
+                    return false;
                 }
+
                 foreach (var area in areas)
                 {
                     //var areaSPIdx = new ThCADCoreNTSSpatialIndex(new List<Polyline> { area });
@@ -274,11 +254,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                var line = GetSegLine(gene);
+                var line = gene.ToLine();
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
-            
+
+            if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            {
+                return false;
+            }
+
             var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
 
             if(!IsReasonableAns(areas, tmpBoundary))
@@ -349,13 +334,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                var line = GetSegLine(gene);
+                var line = gene.ToLine();
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
 
             //If in manual mode
-            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+            var areas = SegLines.SplitArea(new List<Polyline>() { tmpBoundary });
 
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
@@ -394,13 +379,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             return true;
         }
 
-        private bool IsReasonableAns(List<Polyline> areas, Polyline tmpBoundary)
+        private bool IsReasonableAns(List<Polyline> areas, Polyline tmpBoundary, List<Line> tmpSeglines = null)
         {
             if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
-            {
-                return false;
-            }
-            if (IsInCorrectSegLine(tmpBoundary, SegLines))
             {
                 return false;
             }
@@ -463,33 +444,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
             return false;
-        }
-
-        private Line GetSegLine(Gene gene)
-        {
-            Point3d spt, ept;
-            if(gene.VerticalDirection)
-            {
-                spt = new Point3d(gene.Value, gene.StartValue, 0);
-                ept = new Point3d(gene.Value, gene.EndValue, 0);
-            }
-            else
-            {
-                spt = new Point3d(gene.StartValue, gene.Value, 0);
-                ept = new Point3d(gene.EndValue, gene.Value, 0);
-            }
-            return new Line(spt, ept);
-        }
-
-        private void Split(Gene gene, ref List<Polyline> areas)
-        {
-            var line = gene.ToLine();//对于每一条线
-            var rstSplitByOriginalLine = AreaSplit.SplitAreasByOrgiginLine(line, ref areas);//
-            if(!rstSplitByOriginalLine)
-            {
-                AreaSplit.SplitAreasByExtentedLine(line, ref areas);
-            }
-            line.Dispose();
         }
 
         private List<BlockReference> GetBuildings(Polyline area)
@@ -740,7 +694,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     }
                 }
             }
-            
             return plines;
         }
     }
