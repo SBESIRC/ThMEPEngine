@@ -54,6 +54,15 @@
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\StructGeoService.cs" />
+    <Compile Include="HydrantLayoutImprove\Command\ThHydrantLayoutImprove.cs" />
+    <Compile Include="HydrantLayoutImprove\Data\ThBlkVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayoutImprove\Data\ThCircleVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayoutImprove\Data\ThHydrantLayoutDataFactory.cs" />
+    <Compile Include="HydrantLayoutImprove\Data\ThHydrantLayoutDataQueryService.cs" />
+    <Compile Include="HydrantLayoutImprove\Data\ThTchVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayoutImprove\Service\ThHydrantUtil.cs" />
+    <Compile Include="HydrantLayoutImprove\Service\ThSelectFrameUtil.cs" />
+    <Compile Include="HydrantLayoutImprove\ThHydrantCommon.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -97,6 +106,7 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
+    <Compile Include="ThHydrantCmds.THXHSYH.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
@@ -724,7 +734,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
+    <Folder Include="HydrantLayoutImprove\Engine\" />
+    <Folder Include="HydrantLayoutImprove\Model\" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>

@@ -174,10 +174,13 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThMEPLoggingService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
-    <Compile Include="Engine\ThBlockPipeExtractionEngine.cs" />
-    <Compile Include="Engine\ThBlockPipeExtractionVisitor.cs" />
-    <Compile Include="Engine\ThBlockPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThBlockVPipeExtractionEngine.cs" />
+    <Compile Include="Engine\ThBlockVPipeExtractionVisitor.cs" />
+    <Compile Include="Engine\ThBlockVPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThAIDoorOutlineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThCircleVPipeExtractionEngine.cs" />
+    <Compile Include="Engine\ThCircleVPipeExtractionVisitor.cs" />
+    <Compile Include="Engine\ThCircleVPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractionEngine.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractor.cs" />
@@ -188,9 +191,9 @@
     <Compile Include="Engine\ThRawPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
-    <Compile Include="Engine\ThTCHPipeExtractionEngine.cs" />
-    <Compile Include="Engine\ThTCHPipeExtractionVisitor.cs" />
-    <Compile Include="Engine\ThTCHPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThTCHVPipeExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHVPipeExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHVPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThAIWindowOutlineRecognitionEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\CutGridRegionService.cs" />
@@ -212,6 +215,7 @@
     <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="IO\SVG\ThSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
+    <Compile Include="Model\Hvac\ThIfcTchVPipe.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />

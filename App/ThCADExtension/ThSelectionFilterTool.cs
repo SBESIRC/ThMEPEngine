@@ -14,9 +14,16 @@ namespace ThCADExtension
 
         public static SelectionFilter Build(string[] dxfNames, string[] layerNames)
         {
-            return OpFilter.Bulid(o =>
-            o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
-            o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
+            if (layerNames.Length > 0)
+            {
+                return OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
+            }
+            else
+            {
+                return Build(dxfNames);
+            }
         }
 
         /// <summary>
