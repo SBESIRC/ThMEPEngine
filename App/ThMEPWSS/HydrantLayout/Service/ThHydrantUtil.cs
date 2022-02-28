@@ -25,7 +25,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Service
+namespace ThMEPWSS.HydrantLayout.Service
 {
     internal class ThHydrantUtil
     {

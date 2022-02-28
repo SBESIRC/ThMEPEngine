@@ -9,7 +9,7 @@ using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Command
+namespace ThMEPWSS.HydrantLayout.Command
 {
     public class ThHydrantLayoutImproveCmd:ThMEPBaseCommand
     {

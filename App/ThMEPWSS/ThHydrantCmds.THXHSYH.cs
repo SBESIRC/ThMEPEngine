@@ -19,8 +19,8 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO;
 
-using ThMEPWSS.HydrantLayoutImprove.Service;
-using ThMEPWSS.HydrantLayoutImprove.Data;
+using ThMEPWSS.HydrantLayout.Service;
+using ThMEPWSS.HydrantLayout.Data;
 
 namespace ThMEPWSS
 {

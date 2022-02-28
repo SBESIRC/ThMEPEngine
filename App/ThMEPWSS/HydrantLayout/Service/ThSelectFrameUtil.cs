@@ -15,7 +15,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Service
+namespace ThMEPWSS.HydrantLayout.Service
 {
     internal class ThSelectFrameUtil
     {

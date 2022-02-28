@@ -14,7 +14,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Data
+namespace ThMEPWSS.HydrantLayout.Data
 {
     public class ThTchVerticalPipeExtractService
     {

@@ -16,7 +16,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Data
+namespace ThMEPWSS.HydrantLayout.Data
 {
     public class ThBlkVerticalPipeExtractService 
     {

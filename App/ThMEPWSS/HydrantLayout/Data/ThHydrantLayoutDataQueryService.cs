@@ -17,7 +17,7 @@ using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Diagnostics;
 
 
-namespace ThMEPWSS.HydrantLayoutImprove.Data
+namespace ThMEPWSS.HydrantLayout.Data
 {
     internal class ThHydrantLayoutDataQueryService
     {

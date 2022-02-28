@@ -22,7 +22,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.HydrantLayoutImprove.Data
+namespace ThMEPWSS.HydrantLayout.Data
 {
     public class ThCircleVerticalPipeExtractService
     {
