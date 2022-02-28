@@ -2,7 +2,7 @@
 
 namespace ThMEPElectrical.EarthingGrid.Model
 {
-    public class ThDownConductor : ThIfcDistributionElement
+    public class ThDownConductor : ThIfcDistributionFlowElement
     {
         //
     }
