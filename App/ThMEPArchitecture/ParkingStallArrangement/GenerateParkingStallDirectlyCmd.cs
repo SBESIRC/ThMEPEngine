@@ -72,10 +72,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var isDirectlyArrange = true;
             bool usePline = true;
 
-            var dataprocessingFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (!dataprocessingFlag) return;
+            var getOuterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
+            if (!getOuterBorderFlag) return;
             
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
+            if (!dataprocessingFlag) return;
 
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 

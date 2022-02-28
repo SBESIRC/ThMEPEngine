@@ -135,8 +135,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             if(isDirectlyArrange)//无迭代速排
             {
-                DirectlyArrangeParaGet(outerBrder, ref maxVals, ref minVals, out seglineIndexDic, out segAreasCnt);
-                return true;
+                var rst = DirectlyArrangeParaGet(outerBrder, ref maxVals, ref minVals, out seglineIndexDic, out segAreasCnt);
+                return rst;
             }
 
             var area = outerBrder.WallLine;
@@ -181,19 +181,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return true;
         }
 
-        public static void DirectlyArrangeParaGet(OuterBrder outerBrder, ref List<double> maxVals, ref List<double> minVals, 
+        public static bool DirectlyArrangeParaGet(OuterBrder outerBrder, ref List<double> maxVals, ref List<double> minVals, 
             out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt)
         {
+            seglineIndexDic = null;
             var areas = new List<Polyline>() { outerBrder.WallLine };
+            var buildingSpatialIndex = outerBrder.BuildingSpatialIndex;
             var segLines = outerBrder.SegLines;
             for(int i = 0; i < segLines.Count; i++)
             {
+                var segline = segLines[i];
+                var rect = segline.Buffer(2750);
+                var rst = buildingSpatialIndex.SelectCrossingPolygon(rect);
+                if(rst.Count > 0)
+                {
+                    Active.Editor.WriteMessage("分割线宽度小于车道宽！");
+                    segAreasCnt = 0;
+                    return false;
+                }
                 maxVals.Add(0);
                 minVals.Add(0);
             }
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
             segAreasCnt = rstAreas.Count;
-            seglineIndexDic = null;
+            return true;
         }
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex ptsIndex, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
