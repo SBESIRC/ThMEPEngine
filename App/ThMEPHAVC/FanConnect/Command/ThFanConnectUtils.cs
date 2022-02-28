@@ -475,7 +475,7 @@ namespace ThMEPHVAC.FanConnect.Command
             if(node.Children.Count == 0)
             {
                 var closetPt = fan.FanObb.GetClosestPointTo(node.Item.PLine.EndPoint, false);
-                if (closetPt.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
+                if (fan.FanPoint.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
                 {
                     fan.IsConnected = true;
                     node.Item.PipeWidth = 100.0;
@@ -593,6 +593,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 tmpFan.FanObb = GetBlockReferenceAABB(blk);
                 tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
                 tmpFan.FanObb.TransformBy(mt.Inverse());
+
+                tmpFan.FanPoint = tmpFan.FanPoint.ToPoint2d().ToPoint3d();
+                tmpFan.FanObb = tmpFan.FanObb.ToNTSLineString().ToDbPolyline();
             }
             blk.TransformBy(mt.Inverse());
             blk.DowngradeOpen();

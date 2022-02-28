@@ -164,6 +164,27 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
+                    ///处理数据---查找到需要删除的末端
+                    var handlePipeService = new ThHandleFanPipeService()
+                    {
+                        StartPoint = startPt,
+                        AllFan = tmpFcus,
+                        AllLine = allLines
+                    };
+                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    if (tmpTree == null)
+                    {
+                        return;
+                    }
+                    handlePipeService.RemoveDbPipe(out string layer, out int colorIndex);
+                    var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
+                    var toDbServiece = new ThFanToDBServiece();
+                    foreach (var path in rightLines)
+                    {
+                        toDbServiece.InsertEntity(path, layer, colorIndex);
+                    }
+                    return;
+                    /*
                     var remSurplusPipe = new ThRemSurplusPipe()
                     {
                         StartPoint = startPt,
@@ -173,7 +194,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     string layer;
                     int colorIndex;
                     remSurplusPipe.RemSurplusPipe(out layer,out colorIndex);
-
                     foreach (var pl in plines)
                     {
                         pl.TransformBy(mt);
@@ -194,8 +214,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         path.TransformBy(mt.Inverse());
                         toDbServiece.InsertEntity(path, layer, colorIndex);
                     }
-                    
-                    return;
+                    return;*/
                 }
             }
             catch (Exception ex)

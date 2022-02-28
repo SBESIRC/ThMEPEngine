@@ -1,11 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanConnect.Model;
@@ -82,8 +88,19 @@ namespace ThMEPHVAC.FanConnect.Service
                 f.FanObb.TransformBy(mt.Inverse());
                 f.FanPoint = f.FanPoint.TransformBy(mt.Inverse());
             }
-            StartPoint = StartPoint.TransformBy(mt);
+            StartPoint = StartPoint.TransformBy(mt.Inverse());
             return treeModel;
+        }
+        public void RemoveDbPipe(out string layer, out int colorIndex)
+        {
+            //找到图纸上对应的线，进行删除
+            var dbObjs = GetDbPipes(StartPoint, out layer, out colorIndex);
+            foreach (var obj in dbObjs)
+            {
+                obj.UpgradeOpen();
+                obj.Erase();
+                obj.DowngradeOpen();
+            }
         }
         private void FindBadNode(ThFanTreeNode<ThFanPipeModel> node)
         {
@@ -139,6 +156,44 @@ namespace ThMEPHVAC.FanConnect.Service
                 retLine.Add(node.Item.PLine);
             }
             return retLine;
+        }
+        private List<Entity> GetDbPipes(Point3d startPt, out string layer, out int colorIndex)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                string tmpLayer = "AI-水管路由";
+                int tmpIndex = 0;
+                var box = ThDrawTool.CreateSquare(startPt.TransformBy(Active.Editor.WCS2UCS()), 50.0);
+                //以pt为中心，做一个矩形
+                //找到改矩形内所有的Entity
+                //遍历Entity找到目标层
+                var psr = Active.Editor.SelectCrossingPolygon(box.Vertices());
+                if (psr.Status == PromptStatus.OK)
+                {
+                    foreach (var id in psr.Value.GetObjectIds())
+                    {
+                        var entity = database.Element<Entity>(id);
+                        if (entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
+                        {
+                            tmpLayer = entity.Layer;
+                            tmpIndex = entity.ColorIndex;
+                            break;
+                        }
+                    }
+                }
+                layer = tmpLayer;
+                colorIndex = tmpIndex;
+                var retLines = new List<Entity>();
+                var tmpLines = database.ModelSpace.OfType<Entity>();
+                foreach (var l in tmpLines)
+                {
+                    if (l.Layer.ToUpper() == tmpLayer && l.ColorIndex == tmpIndex)
+                    {
+                        retLines.Add(l);
+                    }
+                }
+                return retLines;
+            }
         }
     }
 }
