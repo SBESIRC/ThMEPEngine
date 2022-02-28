@@ -176,7 +176,8 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    handlePipeService.RemoveDbPipe(out string layer, out int colorIndex);
+                    var dbObjs = handlePipeService.GetDbPipes(out string layer, out int colorIndex);
+                    handlePipeService.RemoveDbPipe(tmpTree, dbObjs, mt);
                     var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
                     var toDbServiece = new ThFanToDBServiece();
                     foreach (var path in rightLines)
@@ -184,37 +185,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         toDbServiece.InsertEntity(path, layer, colorIndex);
                     }
                     return;
-                    /*
-                    var remSurplusPipe = new ThRemSurplusPipe()
-                    {
-                        StartPoint = startPt,
-                        AllLine = allLines,
-                        AllFan = tmpFcus
-                    };
-                    string layer;
-                    int colorIndex;
-                    remSurplusPipe.RemSurplusPipe(out layer,out colorIndex);
-                    foreach (var pl in plines)
-                    {
-                        pl.TransformBy(mt);
-                    }
-                    var tempLineColl = cleanServiec.CleanNoding(plines.ToCollection());
-                    var tempPathes = new List<Line>();
-                    foreach(var l in tempLineColl)
-                    {
-                        if(l is Line)
-                        {
-                            tempPathes.Add(l as Line);
-                        }
-                    }
-                    tempPathes = ThFanConnectUtils.CleanLaneLines(tempPathes);
-                    var toDbServiece = new ThFanToDBServiece();
-                    foreach (var path in tempPathes)
-                    {
-                        path.TransformBy(mt.Inverse());
-                        toDbServiece.InsertEntity(path, layer, colorIndex);
-                    }
-                    return;*/
                 }
             }
             catch (Exception ex)

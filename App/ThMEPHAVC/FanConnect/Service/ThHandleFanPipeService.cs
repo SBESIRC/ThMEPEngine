@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
@@ -91,16 +92,89 @@ namespace ThMEPHVAC.FanConnect.Service
             StartPoint = StartPoint.TransformBy(mt.Inverse());
             return treeModel;
         }
-        public void RemoveDbPipe(out string layer, out int colorIndex)
+        public List<Entity> GetDbPipes(out string layer, out int colorIndex)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                string tmpLayer = "AI-水管路由";
+                int tmpIndex = 0;
+                var box = ThDrawTool.CreateSquare(StartPoint.TransformBy(Active.Editor.WCS2UCS()), 50.0);
+                //以pt为中心，做一个矩形
+                //找到改矩形内所有的Entity
+                //遍历Entity找到目标层
+                var psr = Active.Editor.SelectCrossingPolygon(box.Vertices());
+                if (psr.Status == PromptStatus.OK)
+                {
+                    foreach (var id in psr.Value.GetObjectIds())
+                    {
+                        var entity = database.Element<Entity>(id);
+                        if (entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
+                        {
+                            tmpLayer = entity.Layer;
+                            tmpIndex = entity.ColorIndex;
+                            break;
+                        }
+                    }
+                }
+                layer = tmpLayer;
+                colorIndex = tmpIndex;
+                var retLines = new List<Entity>();
+                var tmpLines = database.ModelSpace.OfType<Entity>();
+                foreach (var l in tmpLines)
+                {
+                    if (l.Layer.ToUpper() == tmpLayer && l.ColorIndex == tmpIndex)
+                    {
+                        retLines.Add(l);
+                    }
+                }
+                return retLines;
+            }
+        }
+        public void RemoveDbPipe(ThFanTreeModel treeModel, List<Entity> dbObjs, Matrix3d mt)
         {
             //找到图纸上对应的线，进行删除
-            var dbObjs = GetDbPipes(StartPoint, out layer, out colorIndex);
-            foreach (var obj in dbObjs)
+            foreach(var obj in dbObjs)
+            {
+                obj.UpgradeOpen();
+                obj.TransformBy(mt);
+                obj.DowngradeOpen();
+            }
+            //找到与起点相连的线
+            var removeEntity = FindDbPipe(treeModel.RootNode, ref dbObjs);
+            foreach (var obj in removeEntity)
             {
                 obj.UpgradeOpen();
                 obj.Erase();
                 obj.DowngradeOpen();
             }
+            //删除所有相连的线
+            foreach (var obj in dbObjs)
+            {
+                obj.UpgradeOpen();
+                obj.TransformBy(mt.Inverse());
+                obj.DowngradeOpen();
+            }
+        }
+        public List<Entity> FindDbPipe(ThFanTreeNode<ThFanPipeModel> node, ref List<Entity> objs)
+        {
+            var retEntity = new List<Entity>();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs.ToCollection());
+
+            var box = node.Item.PLine.Buffer(10);
+            var dbObjs = spatialIndex.SelectCrossingPolygon(box);
+            foreach(var obj in dbObjs)
+            {
+                if(obj is Entity ent)
+                {
+                    retEntity.Add(ent);
+                }
+            }
+            objs = objs.Except(retEntity).ToList();
+            foreach(var child in node.Children)
+            {
+                retEntity.AddRange(FindDbPipe(child,ref objs));
+            }
+            return retEntity;
         }
         private void FindBadNode(ThFanTreeNode<ThFanPipeModel> node)
         {
@@ -156,44 +230,6 @@ namespace ThMEPHVAC.FanConnect.Service
                 retLine.Add(node.Item.PLine);
             }
             return retLine;
-        }
-        private List<Entity> GetDbPipes(Point3d startPt, out string layer, out int colorIndex)
-        {
-            using (var database = AcadDatabase.Active())
-            {
-                string tmpLayer = "AI-水管路由";
-                int tmpIndex = 0;
-                var box = ThDrawTool.CreateSquare(startPt.TransformBy(Active.Editor.WCS2UCS()), 50.0);
-                //以pt为中心，做一个矩形
-                //找到改矩形内所有的Entity
-                //遍历Entity找到目标层
-                var psr = Active.Editor.SelectCrossingPolygon(box.Vertices());
-                if (psr.Status == PromptStatus.OK)
-                {
-                    foreach (var id in psr.Value.GetObjectIds())
-                    {
-                        var entity = database.Element<Entity>(id);
-                        if (entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
-                        {
-                            tmpLayer = entity.Layer;
-                            tmpIndex = entity.ColorIndex;
-                            break;
-                        }
-                    }
-                }
-                layer = tmpLayer;
-                colorIndex = tmpIndex;
-                var retLines = new List<Entity>();
-                var tmpLines = database.ModelSpace.OfType<Entity>();
-                foreach (var l in tmpLines)
-                {
-                    if (l.Layer.ToUpper() == tmpLayer && l.ColorIndex == tmpIndex)
-                    {
-                        retLines.Add(l);
-                    }
-                }
-                return retLines;
-            }
         }
     }
 }

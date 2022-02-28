@@ -129,44 +129,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 return retModeles;
             }
         }
-        public static List<Line> SelectPipes()
-        {
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
-            {
-                List<Line> retLines = new List<Line>();
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择要布置的水管",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var result = Active.Editor.GetSelection(options);
-                if (result.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result.Value.GetObjectIds())
-                    {
-                        var entity = acadDb.Element<Entity>(obj);
-                        if(entity is Polyline)
-                        {
-                            var line = entity as Polyline;
-                            if(line.Layer.Contains("AI-水管路由"))
-                            {
-                                retLines.AddRange(line.ToLines());
-                            }
-                        }
-                        else if(entity is Line)
-                        {
-                            var line = entity as Line;
-                            if(line.Layer.Contains("AI-水管路由"))
-                            {
-                                retLines.Add(line);
-                            }
-                        }
-                    }
-                }
-                return retLines;
-            }
-        }
         public static List<Line> GetNearbyLine(Point3d pt, List<Line> lines, int N = 3)
         {
             List<Line> returnLines = new List<Line>();
