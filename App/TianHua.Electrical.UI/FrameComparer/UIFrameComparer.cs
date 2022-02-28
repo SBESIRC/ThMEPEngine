@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using Linq2Acad;
@@ -28,17 +29,31 @@ namespace TianHua.Electrical.UI.FrameComparer
             ids = new List<ObjectId>();
             AddPath();
         }
-        public void DoAddFrame(ThMEPFrameComparer comp, Dictionary<int, ObjectId> dicCode2Id, string frameType)
-        {
-            DoAddChangeFrame(comp.AppendedFrame.ToCollection(), dicCode2Id, "新增区域", frameType);
-            DoAddChangeFrame(comp.ErasedFrame, dicCode2Id, "删除区域", frameType);
-            DoAddChangeFrame(comp.ChangedFrame.Keys.ToCollection(), dicCode2Id, "变化区域", frameType);
-        }
+
         private void AddPath()
         {
             foreach (acadApp.Document document in acadApp.Application.DocumentManager)
             {
-                GraphPath.Items.Add(document.Name);
+                GraphPath.Items.Add(Path.GetFileName(document.Name));
+            }
+        }
+
+        public void DoAddFrame(ThMEPFrameComparer comp, Dictionary<int, ObjectId> dicCode2Id, string frameType)
+        {
+            DoAddChangeFrame(comp.AppendedFrame.ToCollection(), dicCode2Id, "新增区域", frameType);
+            DoAddChangeFrame(comp.ErasedFrame, dicCode2Id, "删除区域", frameType);
+            DoAddChangeFrame(comp.ChangedFrame, dicCode2Id, frameType);
+        }
+
+        private void DoAddChangeFrame(Dictionary<Polyline, Tuple<Polyline, double>> changedFrame, Dictionary<int, ObjectId> dicCode2Id, string frameType)
+        {
+            foreach (var it in changedFrame)
+            {
+                var item = new ListViewItem();
+                item.SubItems[0].Text = it.Value.Item2 > 1 ? "功能变化" : "框线变化";
+                item.SubItems.Add(frameType);
+                ids.Add(dicCode2Id[it.Key.GetHashCode()]);
+                listViewComparerRes.Items.Add(item);
             }
         }
 
@@ -49,7 +64,6 @@ namespace TianHua.Electrical.UI.FrameComparer
                 var item = new ListViewItem();
                 item.SubItems[0].Text = regionName;
                 item.SubItems.Add(frameType);
-                item.SubItems.Add("转到");
                 ids.Add(dicCode2Id[frame.GetHashCode()]);
                 listViewComparerRes.Items.Add(item);
             }
@@ -68,6 +82,7 @@ namespace TianHua.Electrical.UI.FrameComparer
                         if (entity != null)
                         {
                             Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
+                            entity.Highlight();
                         }
                     }
                 }
