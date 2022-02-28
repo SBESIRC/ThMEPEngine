@@ -46,17 +46,17 @@
     <Compile Include="Command\MainBeamCmd.cs" />
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
-    <Compile Include="HuaRunPeiJin\EdgeComponentDrawModel.cs" />
-    <Compile Include="HuaRunPeiJin\EdgeComponentDrawVM.cs" />
-    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetModel.cs" />
-    <Compile Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml.cs">
+    <Compile Include="Reinforcement\EdgeComponentDrawModel.cs" />
+    <Compile Include="Reinforcement\EdgeComponentDrawUI.xaml.cs">
       <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetUI.xaml.cs">
+    <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetUI.xaml.cs">
       <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HuaRunPeiJin\WallColumnReinforceSetVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetVM.cs" />
     <Compile Include="StructureWPFUIApp.cs" />
     <Compile Include="Validations\GreaterThanZeroRule.cs" />
   </ItemGroup>
@@ -73,11 +73,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="HuaRunPeiJin\EdgeComponentDrawUI.xaml">
+    <Page Include="Reinforcement\EdgeComponentDrawUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="HuaRunPeiJin\WallColumnReinforceSetUI.xaml">
+    <Page Include="Reinforcement\WallColumnReinforceSetUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -6,8 +6,7 @@
         public double Bw { get; set; }
         public double Hc1 { get; set; }
         public double Bf { get; set; }
-        public double Hc2s { get; set; }
-        public double Hc2l { get; set; }
+        public double Hc2 { get; set; }
         /// <summary>
         /// 拉筋
         /// 对应标注图中的数字2

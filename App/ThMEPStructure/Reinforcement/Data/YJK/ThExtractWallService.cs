@@ -53,16 +53,16 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
 
             // 造面
             var allPolygons = extendLines.PolygonsEx();
-            var results = allPolygons.PostProcess(SmallAreaTolerance);
-            var restPolygons = allPolygons.Difference(results);
             extendLines.DisposeEx();
+            var polygons = allPolygons.FilterSmallArea(SmallAreaTolerance);
+            var restPolygons = allPolygons.Difference(polygons);
             restPolygons.DisposeEx();
 
             // 还原到原始位置
-            transformer.Reset(results);
+            transformer.Reset(restPolygons);
 
             // 返回结果            
-            results.OfType<Entity>().ForEach(e => Elements.Add(e));
+            restPolygons.OfType<Entity>().ForEach(e => Elements.Add(e));
         }
     }
 }
