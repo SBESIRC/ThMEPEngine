@@ -391,6 +391,10 @@ namespace ThMEPLighting.Garage.Engine
                 return;
             }
             var branchPair = SortBranchPair(firstLine, verFirst, verSecond);
+            if(branchPair == null)
+            {
+                return;
+            }
             if (firstLine.Length >= collinearLine.Length)
             {
                 extendPairs.ForEach(p =>
