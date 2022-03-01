@@ -25,9 +25,11 @@ namespace ThMEPWSS.HydrantLayout.Data
         //public List<ThExtractorBase> InputExtractors { get; set; }
 
         //----output
-        public List<ThIfcTchVPipe> THCVerticalPipe { get;  set; } = new List<ThIfcTchVPipe>();
-        public List<ThIfcTchVPipe> BlkVerticalPipe { get;  set; } = new List<ThIfcTchVPipe>();
-        public List<ThIfcTchVPipe> CVerticalPipe { get; set; } = new List<ThIfcTchVPipe>();
+        public List<ThIfcVirticalPipe> THCVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+
+        public List<ThIfcDistributionFlowElement> Hydrant { get; set; } = new List<ThIfcDistributionFlowElement>();
 
         public ThHydrantLayoutDataQueryService()
         {
@@ -39,7 +41,7 @@ namespace ThMEPWSS.HydrantLayout.Data
             //var verticalPipeEx = InputExtractors.Where(o => o is ThTchVerticalPipeExtractService).First() as ThTchVerticalPipeExtractService;
             //var verticalPipeBlkEx = InputExtractors.Where(o => o is ThBlkVerticalPipeExtractor).First() as ThBlkVerticalPipeExtractor;
 
-           
+
             //THCVerticalPipe.AddRange(verticalPipeEx.TCHVerticalPipe);
             //BlkVerticalPipe.AddRange(verticalPipeBlkEx.VerticalPipe.Select(x => x.Value).ToList());
 
@@ -47,10 +49,10 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         public void Print()
         {
-            THCVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0THCVerticalPipe"));
-            BlkVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0blkVerticalPipe"));
-            CVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0cVerticalPipe"));
-
+            THCVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0THCVerticalPipe",140));
+            BlkVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0blkVerticalPipe", 140));
+            CVerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0cVerticalPipe", 140));
+            Hydrant.ForEach(x => DrawUtils.ShowGeometry((x.Outline as BlockReference).Position, "l0Hydrant", 140));
 
 
         }

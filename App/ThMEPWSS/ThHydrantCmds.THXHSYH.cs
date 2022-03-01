@@ -50,6 +50,7 @@ namespace ThMEPWSS
                     THCVerticalPipe = dataFactory.THCVerticalPipe,
                     BlkVerticalPipe = dataFactory.BlkVerticalPipe,
                     CVerticalPipe = dataFactory.CVerticalPipe,
+                    Hydrant = dataFactory.Hydrant,
                 };
 
                 dataQuery.ExtractData();

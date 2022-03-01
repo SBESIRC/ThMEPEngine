@@ -67,6 +67,36 @@ namespace ThMEPEngineCore.Engine
             return bReturn;
         }
 
+        public override  bool IsFlowSegmentBlock(BlockTableRecord blockTableRecord)
+        {
+            //忽略外参
+            if (blockTableRecord.IsFromExternalReference)
+            {
+                return false;
+            }
+
+            // 忽略动态块
+            if (blockTableRecord.IsDynamicBlock)
+            {
+                return false;
+            }
+
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
         private bool IsVerticalPipe(Entity dbObj)
         {
             var bIsVP = false;

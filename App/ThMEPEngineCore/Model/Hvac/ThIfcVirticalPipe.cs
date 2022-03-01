@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model.Hvac
 {
-    public class ThIfcTchVPipe : ThIfcPipeSegment
+    public class ThIfcVirticalPipe : ThIfcPipeSegment
     {
         public Entity Data { get; set; }
     }

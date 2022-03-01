@@ -22,11 +22,11 @@ namespace ThMEPWSS.HydrantLayout.Data
         //public List<string> LayerName { get; set; } = new List<string>();
         //public ThMEPOriginTransformer Transformer { get; set; }
         //---output
-        public List<ThIfcTchVPipe> TCHVerticalPipe { get; protected set; }
+        public List<ThIfcVirticalPipe> TCHVerticalPipe { get; protected set; }
 
         public ThTchVerticalPipeExtractService()
         {
-            TCHVerticalPipe = new List<ThIfcTchVPipe>();
+            TCHVerticalPipe = new List<ThIfcVirticalPipe>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -35,7 +35,7 @@ namespace ThMEPWSS.HydrantLayout.Data
             TCHVerticalPipe.AddRange(TCHResult);
         }
 
-        private List<ThIfcTchVPipe> ExtractTCHVPipe(Point3dCollection pts)
+        private List<ThIfcVirticalPipe> ExtractTCHVPipe(Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -44,7 +44,7 @@ namespace ThMEPWSS.HydrantLayout.Data
                     LayerFilter = new List<string> { ThHydrantCommon.Layer_Vertical },
                 };
                 TCHPipeRecognize.RecognizeMS(acadDatabase.Database, pts);
-                var TCHResult = TCHPipeRecognize.Elements.OfType<ThIfcTchVPipe>().ToList();
+                var TCHResult = TCHPipeRecognize.Elements.OfType<ThIfcVirticalPipe>().ToList();
 
                 return TCHResult;
             }

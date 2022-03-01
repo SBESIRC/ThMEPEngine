@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThCircleVPipeExtractionEngine: ThFlowSegmentExtractionEngine
+    public class ThCircleVPipeExtractionEngine : ThFlowSegmentExtractionEngine
     {
         public List<string> LayerFilter { get; set; } = new List<string>();
         public List<double> Radius { get; set; } = new List<double>();
@@ -32,11 +32,7 @@ namespace ThMEPEngineCore.Engine
             var extractor = new ThFlowSegmentExtractor();
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);
-
-            visitor.Results.ForEach(x =>
-            {
-                Results.Add(new ThRawIfcFlowSegmentData() { Data = x.Data, Geometry = x.Geometry });
-            });
+            Results.AddRange(visitor.Results);
         }
 
     }

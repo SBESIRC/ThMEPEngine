@@ -36,11 +36,7 @@ namespace ThMEPEngineCore.Engine
             extractor.Accept(visitor);
             extractor.Extract(database);
             extractor.ExtractFromMS(database);
-
-            visitor.Results.ForEach(x =>
-            {
-                Results.Add(new ThRawIfcFlowSegmentData() { Data = x.Data, Geometry = x.Geometry });
-            });
+            Results.AddRange(visitor.Results);
         }
     }
 }

@@ -11,8 +11,9 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPWSS.Hydrant.Engine;
 
 namespace ThMEPWSS.HydrantLayout.Data
 {
@@ -20,9 +21,11 @@ namespace ThMEPWSS.HydrantLayout.Data
     {
         //private ThMEPOriginTransformer Transformer { get; set; }
         //public List<ThExtractorBase> Extractors { get; set; }
-        public List<ThIfcTchVPipe> THCVerticalPipe { get; set; } = new List<ThIfcTchVPipe>();
-        public List<ThIfcTchVPipe> BlkVerticalPipe { get; set; } = new List<ThIfcTchVPipe>();
-        public List<ThIfcTchVPipe> CVerticalPipe { get; set; } = new List<ThIfcTchVPipe>();
+        public List<ThIfcVirticalPipe> THCVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+
+        public List<ThIfcDistributionFlowElement> Hydrant { get; set; } = new List<ThIfcDistributionFlowElement>();
         public ThHydrantLayoutDataFactory()
         {
 
@@ -79,6 +82,19 @@ namespace ThMEPWSS.HydrantLayout.Data
             var cVertical = new ThCircleVerticalPipeExtractService();
             cVertical.Extract(database, collection);
             CVerticalPipe = cVertical.VerticalPipe;
+
+
+            var hydrantVisitor = new ThHydrantExtractionVisitor()
+            {
+                BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher },
+            };
+            var hydrantRecog = new ThHydrantRecognitionEngine(hydrantVisitor);
+            hydrantRecog.RecognizeMS(database, collection);
+            Hydrant.AddRange(hydrantRecog.Elements);
+
+
+
+
 
         }
 
