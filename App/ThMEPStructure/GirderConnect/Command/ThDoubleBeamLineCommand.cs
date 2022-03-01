@@ -67,7 +67,11 @@ namespace ThMEPStructure.GirderConnect.Command
                     return;
                 }
                 //接入数据
-                var dataFactory = new ThBeamConnectorDataFactory();
+                var dataFactory = new ThBeamConnectorDataFactory()
+                {
+                    // 不外扩柱
+                    ExpandColumn = false,
+                };
                 dataFactory.Create(acad.Database, pts);
                 var columns = dataFactory.Columns;
                 var shearwalls = dataFactory.Shearwalls;

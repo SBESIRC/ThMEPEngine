@@ -50,6 +50,7 @@
     <Compile Include="GirderConnect\Data\MainBeamPostProcess.cs" />
     <Compile Include="GirderConnect\Data\MainBeamPreProcess.cs" />
     <Compile Include="GirderConnect\Data\ThBeamConnectorDataFactory.cs" />
+    <Compile Include="GirderConnect\Data\ThBeamConnectorExpandColumnOverride.cs" />
     <Compile Include="GirderConnect\Data\ThCurveExtractionVisitor.cs" />
     <Compile Include="GirderConnect\Data\ThMainBuildingHatchExtractionVisitor.cs" />
     <Compile Include="GirderConnect\Data\Utils\DataClassify.cs" />
