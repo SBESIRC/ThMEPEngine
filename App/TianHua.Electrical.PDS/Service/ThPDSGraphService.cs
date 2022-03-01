@@ -94,7 +94,8 @@ namespace TianHua.Electrical.PDS.Service
                 edge.Circuit.ID.CircuitNumber = circuitNumbers[0];
             }
 
-            if (!string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
+            if (source.Loads.Count > 0
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID) 
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {

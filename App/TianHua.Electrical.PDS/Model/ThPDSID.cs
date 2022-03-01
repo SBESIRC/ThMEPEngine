@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 负载编号
         /// </summary>
-        public string LoadID { get; set; }
+        public string LoadID { get; set; } = "";
 
         /// <summary>
         /// 用户自定义描述
