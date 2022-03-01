@@ -2986,8 +2986,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
             {
                 MessageBox.Show(THESAURUSREBATE);
-                drDatas = null;
-                return (null, null, INTRAVASCULARLY);
             }
             var (_drDatas, exInfo) = _CreateDrainageDrawingData(geoData, THESAURUSOBSTINACY);
             drDatas = _drDatas;
