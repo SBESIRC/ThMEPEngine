@@ -71,9 +71,9 @@ FocusToCAD();
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式排风扇"));
                 }
-                if (blockDb.Blocks.Contains("风口标注"))
+                if (blockDb.Blocks.Contains("AI-风口标注1"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("风口标注"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-风口标注1"));
                 }
                 if (blockDb.Blocks.Contains("AI-风口"))
                 {
@@ -122,6 +122,28 @@ FocusToCAD();
                 DbHelper.EnsureLayerOn("H-DUCT-VENT");
             }
         }
+        public bool GetTuplePoints(out Tuple<Point3d, Point3d> pts, string tips1, string tips2)
+        {
+            var point1 = Active.Editor.GetPoint(tips1);
+            if (point1.Status != PromptStatus.OK)
+            {
+                pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
+                return false;
+            }
+            var ppo = new PromptPointOptions(tips2);
+            ppo.UseBasePoint = true;
+            ppo.BasePoint = point1.Value;
+
+            var point2 = Active.Editor.GetPoint(ppo);
+            if (point2.Status != PromptStatus.OK)
+            {
+                pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
+                return false;
+            }
+
+            pts = Tuple.Create(point1.Value.TransformBy(Active.Editor.UCS2WCS()), point2.Value.TransformBy(Active.Editor.UCS2WCS()));
+            return true;
+        }
         public override void SubExecute()
         {
             try
@@ -152,28 +174,6 @@ FocusToCAD();
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public bool GetTuplePoints(out Tuple<Point3d, Point3d> pts ,string tips1,string tips2)
-        {
-            var point1 = Active.Editor.GetPoint(tips1);
-            if (point1.Status != PromptStatus.OK)
-            {
-                pts = Tuple.Create(new Point3d(0,0,0), new Point3d(0, 0, 0));
-                return false;
-            }
-            var ppo = new PromptPointOptions(tips2);
-            ppo.UseBasePoint = true;
-            ppo.BasePoint = point1.Value;
-
-            var point2 = Active.Editor.GetPoint(ppo);
-            if (point2.Status != PromptStatus.OK)
-            {
-                pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
-                return false;
-            }
-
-            pts = Tuple.Create(point1.Value.TransformBy(Active.Editor.UCS2WCS()), point2.Value.TransformBy(Active.Editor.UCS2WCS()));
-            return true;
-        }
         /// <summary>
         /// 壁式轴流风机
         /// </summary>
@@ -196,7 +196,7 @@ FocusToCAD();
 
             Vector3d basVector = new Vector3d(1, 0, 0);
             Vector3d refVector = new Vector3d(0, 0, 1);
-            Vector3d vector = point2.GetVectorTo(point1).GetNormal();
+            Vector3d vector = point1.GetVectorTo(point2).GetNormal();
             double fanAngle = basVector.GetAngleTo(vector, refVector) - Math.PI/2.0;
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
@@ -258,11 +258,9 @@ FocusToCAD();
             }
 
             //插入风口标记
-            Vector3d vector2 = new Vector3d(400, 1900, 0);
-            Point3d p2 = point3 + vector2;
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
-            InsertAirPortMark(acadDatabase, point3, p2, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
+            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
         }
         /// <summary>
         /// 插入壁式排气扇
@@ -284,7 +282,7 @@ FocusToCAD();
             var point2 = tuplePts1.Item2;
             Vector3d basVector = new Vector3d(1, 0, 0);
             Vector3d refVector = new Vector3d(0, 0, 1);
-            Vector3d vector = point2.GetVectorTo(point1).GetNormal();
+            Vector3d vector = point1.GetVectorTo(point2).GetNormal();
             double fanAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
             double fontScale = ThFanLayoutDealService.GetFontHeight(1, mapScale);
             double fontHeight = ThFanLayoutDealService.GetFontHeight(0, mapScale);
@@ -345,11 +343,9 @@ FocusToCAD();
             }
 
             //插入风口标记
-            Vector3d vector2 = new Vector3d(400, 1900, 0);
-            Point3d p2 = point3 + vector2;
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
-            InsertAirPortMark(acadDatabase, point3, p2, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
+            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
         }
         /// <summary>
         /// 吊顶式排气扇
@@ -453,11 +449,9 @@ FocusToCAD();
             }
 
             //插入风口标记
-            Vector3d vector2 = new Vector3d(400, 1900, 0);
-            Point3d p2 = point3 + vector2;
             string strAirPortMark = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
             string strAirPortMarkVolume = ThFanLayoutDealService.GetAirPortMarkVolume(info.FanSideConfigInfo.FanConfigInfo.FanVolume);
-            InsertAirPortMark(acadDatabase, point3, p2, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
+            InsertAirPortMark(acadDatabase, point3, point3, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
 
         }
         private void InsertWAFFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double fontHeight, double depth, double width, double length
