@@ -96,14 +96,9 @@ namespace ThCADExtension
             rotate = Matrix3d.Rotation(zAngle, Vector3d.ZAxis, Point3d.Origin);
 
             var identity = Matrix3d.Identity.ToArray();
-            if (Math.Sign(mat[0, 0] + mat[0, 1]) != Math.Sign(rotate[0, 0] + rotate[0, 1]))
-            {
-                identity[0] = -identity[0];
-            }
-            else if (Math.Sign(mat[1, 0] + mat[1, 1]) != Math.Sign(rotate[1, 0] + rotate[1, 1]))
-            {
-                identity[5] = -identity[5];
-            }
+            var mirrorTemp = mat.PreMultiplyBy(rotate.Inverse());
+            identity[0] = Math.Sign(mirrorTemp[0, 0]);
+            identity[5] = Math.Sign(mirrorTemp[1, 1]);
             mirror = new Matrix3d(identity);
         }
     }
