@@ -192,12 +192,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             {
                 var segline = segLines[i];
                 var rect = segline.Buffer(2750);
-                var rst = buildingSpatialIndex.SelectCrossingPolygon(rect);
-                if(rst.Count > 0)
+                var rsts = buildingSpatialIndex.SelectCrossingPolygon(rect);
+                if(rsts.Count > 0)
                 {
-                    Active.Editor.WriteMessage("分割线宽度小于车道宽！");
-                    segAreasCnt = 0;
-                    return false;
+                    var pts = new List<Point3d>();
+                    foreach(var rst in rsts)
+                    {
+                        var objs = new DBObjectCollection();
+                        var building = rst as BlockReference;
+                        building.Explode(objs);
+                        foreach(var obj in objs)
+                        {
+                            if(obj is Polyline pline)
+                            {
+                                pts.AddRange(pline.GetPoints());
+                            }
+                        }
+                    }
+                    var sortedPt = pts.OrderBy(p => segline.GetClosestPointTo(p, false).DistanceTo(p));
+                    var closedPt = sortedPt.First();
+                    if(segline.GetClosestPointTo(closedPt, false).DistanceTo(closedPt) < 2749)
+                    {
+                        Active.Editor.WriteMessage("分割线宽度小于车道宽！");
+                        segAreasCnt = 0;
+                        return false;
+                    }
                 }
                 maxVals.Add(0);
                 minVals.Add(0);
