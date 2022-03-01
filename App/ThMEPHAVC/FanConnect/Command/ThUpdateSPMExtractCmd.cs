@@ -143,7 +143,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    
+                    pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe, ref markes);
                     //标记流量
                     ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                     pipeMarkServiece.ConfigInfo = ConfigInfo;
@@ -154,7 +154,6 @@ namespace ThMEPHVAC.FanConnect.Command
             {
                 Active.Editor.WriteMessage(ex.Message);
             }
-
         }
         public void RemoveSPMLine(List<Line> baseLines, ref List<Entity> dims,ref List<Line> lines)
         {

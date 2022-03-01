@@ -43,5 +43,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 
             return false;
         }
+
+        /// <summary>
+        /// 判断框线是否和洞口相交
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="holes"></param>
+        /// <returns></returns>
+        public static bool CheckIntersectWithHoles(Curve line, List<Polyline> holes)
+        {
+            return holes.Any(x => x.IsIntersects(line));
+        }
     }
 }

@@ -136,7 +136,7 @@ namespace TianHua.Electrical.PDS.Command
                     transformer.Reset(block);
                 });
 
-                //PDSProject.Instance.PushGraphData(unionGraph);
+                PDSProject.Instance.PushGraphData(unionGraph);
             }
         }
 

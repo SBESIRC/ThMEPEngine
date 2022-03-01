@@ -202,7 +202,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 var polyline = ThPDSBufferService.Buffer(curve, Database);
                 // 首先遍历从桥架搭出去的线
-                var results = FindNextLine(curve, polyline);
+                var results = FindNextLine(curve, polyline).OfType<Line>();
                 foreach (Line findCurve in results)
                 {
                     var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))

@@ -514,7 +514,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     e.TransformBy(Matrix3d.Displacement(-vec * (DisLaneWidth / 2)));
                     return e;
                 })
-                .Where(e => IsConnectedToLane(e));
+                /*.Where(e => IsConnectedToLane(e))*/;
             bool generate = false;
             var quitcycle = false;
             foreach (var linesplitbound in linesplitbounds)
@@ -635,13 +635,25 @@ namespace ThMEPArchitecture.PartitionLayout
                         if (distnearbuilding != -1)
                         {
                             //贴近建筑物生成
-                            paras.SetNotBeMoved = i;
+                            bool removed=false;
+                            if (splitori.Length >= generate_lane_length && generate_lane_length > 0)
+                            {
+                                removed = true;
+                                generate_lane_length = splitori.Length;
+                            }
+                            else if (splitori.Length >= generate_lane_length)
+                                generate_lane_length = splitori.Length;
+                            else if (generate_lane_length > 0)
+                                removed = true;
+                            else
+                                continue;
+                            if(!removed)
+                                paras.SetNotBeMoved = i;
                             splitori.TransformBy(Matrix3d.Displacement(vec * distnearbuilding));
                             Lane lan = new Lane(splitori, vec);
                             paras.LanesToAdd.Add(lan);
                             paras.LanesToAdd.Add(new Lane(splitori, -vec));
-                            paras.CarBoxesToAdd.Add(CreatePolyFromLine(splitori));
-                            generate_lane_length = splitori.Length;
+                            paras.CarBoxesToAdd.Add(CreatePolyFromLine(splitori));               
                             quitcycle = true;
                             generate = true;
                             break;
@@ -653,12 +665,23 @@ namespace ThMEPArchitecture.PartitionLayout
                         plback.TransformBy(Matrix3d.Displacement(-vec * DisCarAndHalfLane));
                         var split_splitori_points = plback.Intersect(Boundary, Intersect.OnBothOperands).Select(e => splitori.GetClosestPointTo(e, false)).ToList();
                         var mod = new CarModule(plback, splitori, vec);
+                        if (split.Length >= generate_lane_length && generate_lane_length > 0)
+                        {
+                            paras.SetNotBeMoved = -1;
+                            generate_lane_length = split.Length;
+                        }
+                        else if (split.Length >= generate_lane_length)
+                            generate_lane_length = split.Length;
+                        else if (generate_lane_length > 0)
+                            paras.SetNotBeMoved = -1;
+                        else
+                            continue;
                         mod.IsInBackBackModule = true;
                         paras.CarModulesToAdd.Add(mod);
                         paras.CarBoxPlusToAdd.Add(new CarBoxPlus(plback));
                         paras.CarBoxesToAdd.Add(plback);
                         generate = true;
-                        generate_lane_length = split.Length;
+                        //generate_lane_length = split.Length;
                         double dis_to_move = 0;
                         Line perpLine = new Line(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
                         if (HasParallelLaneForwardExisted(split, vec, 28700 - 15700, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))

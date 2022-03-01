@@ -10,12 +10,16 @@ namespace TianHua.Electrical.PDS.UI.Project
     /// </summary>
     public class PDSProjectVM
     {
+        //==============SINGLETON============
+        //fourth version from:
+        //http://csharpindepth.com/Articles/General/Singleton.aspx
         private static PDSProjectVM instance = new PDSProjectVM();
         // Explicit static constructor to tell C# compiler
         // not to mark type as beforefieldinit    
         static PDSProjectVM() { }
         internal PDSProjectVM() { }
         public static PDSProjectVM Instance { get { return instance; } }
+        //-------------SINGLETON-----------------
 
         public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graphData;
         public Action ProjectViewModelChanged;

@@ -11,10 +11,10 @@ using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.HydrantLayout.Command
 {
-    public class ThHydrantLayoutImproveCmd:ThMEPBaseCommand
+    public class ThHydrantLayoutCmd:ThMEPBaseCommand
     {
         public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
-        public ThHydrantLayoutImproveCmd()
+        public ThHydrantLayoutCmd()
         {
             ActionName = "优化布置";
             CommandName = "THXHSYH";
@@ -22,10 +22,10 @@ namespace ThMEPWSS.HydrantLayout.Command
 
         public override void SubExecute()
         {
-            HydrantLayoutImproveExecute();
+            HydrantLayoutExecute();
         }
 
-        public void HydrantLayoutImproveExecute()
+        public void HydrantLayoutExecute()
         {
 
         }

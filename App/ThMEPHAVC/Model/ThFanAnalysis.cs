@@ -353,18 +353,18 @@ namespace ThMEPHVAC.CAD
             foreach (var l in roomLines)
             {
                 if (IsBypass(l))
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc});
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc, elevation = fanParam.roomElevation});
                 else
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.roomDuctSize, airVolume = fanParam.airVolume + inc });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.roomDuctSize, airVolume = fanParam.airVolume + inc, elevation = fanParam.roomElevation });
                 inc++;
             }
             inc = 0;
             foreach (var l in notRoomLines)
             {
                 if (IsBypass(l))
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc, elevation = fanParam.notRoomElevation });
                 else
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.notRoomDuctSize, airVolume = fanParam.airVolume + inc });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.notRoomDuctSize, airVolume = fanParam.airVolume + inc, elevation = fanParam.notRoomElevation });
                 inc++;
             }
         }

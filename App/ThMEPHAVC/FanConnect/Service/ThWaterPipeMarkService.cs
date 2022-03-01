@@ -330,7 +330,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 return;
             }
-            NodeMark(tree.RootNode.Children.First());
+//            NodeMark(tree.RootNode.Children.First());
             //遍历树
             BianLiTree(tree.RootNode);
         }

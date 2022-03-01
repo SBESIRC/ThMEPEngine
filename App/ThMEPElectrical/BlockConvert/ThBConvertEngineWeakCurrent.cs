@@ -139,7 +139,7 @@ namespace ThMEPElectrical.BlockConvert
                 var position = srcBlockData.Position;
                 var rotation = srcBlockData.Rotation;
 
-                srcBlockData.OwnerSpace2WCS.Decompose(out _, out var rotate,out _, out _);
+                srcBlockData.OwnerSpace2WCS.Decompose(out _, out var rotate, out _, out _);
 
                 if (srcBlockData.Normal == new Vector3d(0, 0, -1))
                 {

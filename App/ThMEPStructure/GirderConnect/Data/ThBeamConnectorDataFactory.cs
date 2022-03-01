@@ -22,6 +22,8 @@ namespace ThMEPStructure.GirderConnect.Data
 {
     class ThBeamConnectorDataFactory : ThMEPDataSetFactory
     {
+        public bool ExpandColumn { get; set; } = true;
+
         private List<ThGeometry> Geos { get; set; } = new List<ThGeometry>();
         public DBObjectCollection Columns { get; private set; } = new DBObjectCollection();
         public DBObjectCollection Shearwalls { get; private set; } = new DBObjectCollection();
@@ -34,7 +36,7 @@ namespace ThMEPStructure.GirderConnect.Data
         protected override ThMEPDataSet BuildDataSet()
         {
             var geos = new List<ThGeometry>();
-            geos.AddRange(Columns.OfType<Entity>().Select(e => new ThGeometry { Boundary= e}).ToList());
+            geos.AddRange(Columns.OfType<Entity>().Select(e => new ThGeometry { Boundary = e }).ToList());
             geos.AddRange(Shearwalls.OfType<Entity>().Select(e => new ThGeometry { Boundary = e }).ToList());
             geos.AddRange(MainBuildings.OfType<Entity>().Select(e => new ThGeometry { Boundary = e }).ToList());
             return new ThMEPDataSet() { Container = Geos };
@@ -52,7 +54,7 @@ namespace ThMEPStructure.GirderConnect.Data
             Shearwalls = Shearwalls.Union(shearwalls);
             Shearwalls = Shearwalls.Union(shearwalls1);
             MainBuildings = ExtractMainBuildings(database);
-            
+
             //Transformer = new ThMEPOriginTransformer(Point3d.Origin); // for test(正式发布的时候删除)`
 
             // 移动到原点
@@ -81,34 +83,40 @@ namespace ThMEPStructure.GirderConnect.Data
             Reset(Shearwalls, Transformer);
             Reset(MainBuildings, Transformer);
         }
-        private DBObjectCollection ExtractColumns(Database database,Point3dCollection pts)
+        private DBObjectCollection ExtractColumns(Database database, Point3dCollection pts)
         {
-            var columnBuilder = new ThColumnBuilderEngine();
-            columnBuilder.Build(database, pts);
-            return columnBuilder.Elements.Select(o => o.Outline).ToCollection();
+            using (var ov = new ThBeamConnectorExpandColumnOverride(false))
+            {
+                var columnBuilder = new ThColumnBuilderEngine();
+                columnBuilder.Build(database, pts);
+                return columnBuilder.Elements.Select(o => o.Outline).ToCollection();
+            }
         }
 
         private DBObjectCollection ExtractColumns1(Database database, Point3dCollection pts)
         {
-            var allLayers = GetAllLayers(database);
-            var coluLayers = allLayers.Where(o=>o.ToUpper().EndsWith("S_COLU")).ToList();
-            var columnVisitor = new ThCurveExtractionVisitor()
+            using (var ov = new ThBeamConnectorExpandColumnOverride(false))
             {
-                LayerFilter = coluLayers,
-            };
-            var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(columnVisitor);
-            extractor.Extract(database);
+                var allLayers = GetAllLayers(database);
+                var coluLayers = allLayers.Where(o => o.ToUpper().EndsWith("S_COLU")).ToList();
+                var columnVisitor = new ThCurveExtractionVisitor()
+                {
+                    LayerFilter = coluLayers,
+                };
+                var extractor = new ThBuildingElementExtractor();
+                extractor.Accept(columnVisitor);
+                extractor.Extract(database);
 
-            var transformer =new ThMEPOriginTransformer(columnVisitor.Results.Select(o=>o.Geometry).ToCollection());
-            columnVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
-            var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
+                var transformer = new ThMEPOriginTransformer(columnVisitor.Results.Select(o => o.Geometry).ToCollection());
+                columnVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
+                var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
 
-            var columnBuilderEngine = new ThColumnBuilderEngine();
-            columnBuilderEngine.Recognize(columnVisitor.Results, newPts);
-            var objs = columnBuilderEngine.Elements.Select(o => o.Outline).ToCollection();
-            transformer.Reset(objs);
-            return objs;
+                var columnBuilderEngine = new ThColumnBuilderEngine();
+                columnBuilderEngine.Recognize(columnVisitor.Results, newPts);
+                var objs = columnBuilderEngine.Elements.Select(o => o.Outline).ToCollection();
+                transformer.Reset(objs);
+                return objs;
+            }
         }
 
         private List<string> GetAllLayers(Database database)
@@ -205,7 +213,7 @@ namespace ThMEPStructure.GirderConnect.Data
             return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }
 
-        private  void Move(DBObjectCollection objs, ThMEPOriginTransformer transformer)
+        private void Move(DBObjectCollection objs, ThMEPOriginTransformer transformer)
         {
             transformer.Transform(objs);
         }
@@ -222,20 +230,20 @@ namespace ThMEPStructure.GirderConnect.Data
             return similarity.Results;
         }
     }
-    internal class PolygonSimilarityMeasure 
+    internal class PolygonSimilarityMeasure
     {
         private const double degree = 0.95;
         private DBObjectCollection Objs { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public DBObjectCollection Results { get; private set; }
         private DBObjectCollection Garbage { get; set; }
-        private Dictionary<Entity, Polygon>  PolygonDict { get; set; } = new Dictionary<Entity, Polygon>();
+        private Dictionary<Entity, Polygon> PolygonDict { get; set; } = new Dictionary<Entity, Polygon>();
 
         public PolygonSimilarityMeasure(DBObjectCollection objs)
         {
             Garbage = new DBObjectCollection();
             Results = new DBObjectCollection();
-            Objs = objs.OfType<Entity>().Where(o=>o.EntityArea()>0.0).ToCollection();
+            Objs = objs.OfType<Entity>().Where(o => o.EntityArea() > 0.0).ToCollection();
             SpatialIndex = new ThCADCoreNTSSpatialIndex(Objs);
             Objs.OfType<Entity>().ForEach(o => PolygonDict.Add(o, ToPolygon(o)));
         }
@@ -256,10 +264,10 @@ namespace ThMEPStructure.GirderConnect.Data
                 }
             });
         }
-        private bool IsClose(double a,double b)
+        private bool IsClose(double a, double b)
         {
-            return Math.Abs(a/b-1.0)<=(1- degree); 
-             
+            return Math.Abs(a / b - 1.0) <= (1 - degree);
+
         }
         private Polygon ToPolygon(Entity polygon)
         {
@@ -277,10 +285,10 @@ namespace ThMEPStructure.GirderConnect.Data
             }
         }
 
-        private bool IsSimilar(Polygon first,Polygon second)
+        private bool IsSimilar(Polygon first, Polygon second)
         {
             var measure = new HausdorffSimilarityMeasure();
-            return measure.Measure(first, second)>=degree;
+            return measure.Measure(first, second) >= degree;
         }
 
     }

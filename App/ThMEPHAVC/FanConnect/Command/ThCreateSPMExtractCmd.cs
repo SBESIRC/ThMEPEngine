@@ -121,6 +121,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
+                    pointTreeModel.RemEndNode(pointTreeModel.RootNode, PIPELEVEL.LEVEL2);
                     //标记流量
                     ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                     pipeMarkServiece.ConfigInfo = ConfigInfo;

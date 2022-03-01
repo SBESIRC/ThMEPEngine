@@ -116,6 +116,14 @@ Win10
 
 [Best Practices for Creating and Consuming Modal Dialogs in WinForms](https://joebuschmann.com/best-practices-for-creating-and-consuming-modal-dialogs-in-winforms/)
 
+## MVVM
+
+[The Model-View-ViewModel Pattern](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/mvvm)
+
+[Introduction to the MVVM Toolkit](https://docs.microsoft.com/en-us/windows/communitytoolkit/mvvm/introduction)
+
+[Data binding and MVVM](https://docs.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm)
+
 # AutoLoader
 We use AutoLoader for deployment, for detail information, check these links:
 

@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.Engine
             var pipes = spatialIndex.SelectCrossingPolygon(polygon);
             datas.Where(o => pipes.Contains(o.Geometry)).ForEach(o =>
             {
-                Elements.Add(new ThIfcTchVPipe()
+                Elements.Add(new ThIfcVirticalPipe()
                 {
                     Data = (Entity)o.Data,
                     Outline = o.Geometry,

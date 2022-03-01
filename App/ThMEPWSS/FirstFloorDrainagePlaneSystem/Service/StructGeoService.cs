@@ -12,11 +12,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
     public static class StructGeoService
     {
         /// <summary>
-        /// 计算墙方向
+        /// 计算polyline方向(用最长边)
         /// </summary>
         /// <param name="wall"></param>
         /// <returns></returns>
-        public static Vector3d GetWallDir(Polyline wall)
+        public static Vector3d GetPolylineDir(Polyline wall)
         {
             var allLines = GetAllLineByPolyline(wall);
             var firLine = allLines.OrderByDescending(x => x.Length).First();

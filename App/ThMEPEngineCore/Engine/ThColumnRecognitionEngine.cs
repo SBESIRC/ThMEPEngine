@@ -69,11 +69,18 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
                     {
-                        var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ColumnBufferDistance);
-                        if (bufferObjs.Count == 1)
+                        if (ThMEPEngineCoreService.Instance.ExpandColumn)
                         {
-                            var outline = bufferObjs[0] as Polyline;
-                            Elements.Add(ThIfcColumn.Create(outline));
+                            var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ColumnBufferDistance);
+                            if (bufferObjs.Count == 1)
+                            {
+                                var outline = bufferObjs[0] as Polyline;
+                                Elements.Add(ThIfcColumn.Create(outline));
+                            }
+                        }
+                        else
+                        {
+                            Elements.Add(ThIfcColumn.Create(o));
                         }
                     }
                 });

@@ -28,5 +28,11 @@ namespace ThMEPEngineCore
                 return new ThRawBeamRecognitionEngine();
             }
         }
+
+        /// <summary>
+        /// 在识别柱轮廓时是否扩大柱轮廓
+        /// 扩大柱轮廓可以帮助处理柱和梁的连接
+        /// </summary>
+        public bool ExpandColumn { get; set; } = true;
     }
 }

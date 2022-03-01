@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPHVAC.FanConnect.Command;
@@ -255,11 +256,7 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 CalNodeValue(RootNode, fan);
                 FindEndNode(RootNode);
-                //foreach (var fcu in fan)
-                //{
-                //    FindFcuNode(RootNode, fcu.FanPoint);
-                //}
-                RemBadNode(RootNode, PIPELEVEL.LEVEL2);
+//                RemEndNode(RootNode, PIPELEVEL.LEVEL2);
             }
         }
         ThFanTreeNode<ThFanPointModel> GetRootNode(ThFanTreeNode<ThFanPipeModel> treeModel)
@@ -415,17 +412,111 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
         }
-        public void RemBadNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level)
+        public void RemEndNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level)
+        {
+            foreach (var child in node.Children)
+            {
+                if (child.Item.Level != level)
+                {
+                    RemEndNode(child, level);
+                }
+            }
+            node.Children = node.Children.Where(o => o.Item.Level != level).ToList();
+        }
+        public void RemEndNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level,bool isCodeAndHotPipe,bool isCwPipe,ref List<Entity> marks)
         {
             var remChildren = new List<ThFanTreeNode<ThFanPointModel>>();
             foreach (var child in node.Children)
             {
                 if (child.Item.Level != level)
                 {
-                    RemBadNode(child, level);
+                    RemEndNode(child, level , isCodeAndHotPipe, isCwPipe, ref marks);
                 }
             }
-            node.Children = node.Children.Where(o => o.Item.Level != level).ToList();
+            foreach(var child in node.Children)
+            {
+                if(child.Item.Level == level)
+                {
+                    remChildren.Add(child);
+                    //删除该节点的mark
+                    if(isCodeAndHotPipe)
+                    {
+                        RemCodeAndHotPipeMark(child, ref marks);
+                    }
+                    if(isCwPipe)
+                    {
+                        RemCwPipeMark(child, ref marks);
+                    }
+                }
+            }
+            node.Children = node.Children.Except(remChildren).ToList();
+        }
+        public void RemCodeAndHotPipeMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
+        {
+            if (node.Parent != null)
+            {
+                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
+                var remMarks = FindMarkFromLine(line, ref marks);
+                foreach(var m in remMarks)
+                {
+                    m.UpgradeOpen();
+                    m.Erase();
+                    m.DowngradeOpen();
+                }
+            }
+        }
+        public void RemCwPipeMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
+        {
+            if (node.Parent != null)
+            {
+                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
+                var remMark = FindTextFromLine(line, ref marks);
+                foreach(var m in remMark)
+                {
+                    m.UpgradeOpen();
+                    m.Erase();
+                    m.DowngradeOpen();
+                }
+            }
+        }
+        public List<Entity> FindMarkFromLine(Line line, ref List<Entity> marks)
+        {
+            var box = line.Buffer(650);
+            var retMark = new List<Entity>();
+            foreach (var mark in marks)
+            {
+                if (mark is BlockReference)
+                {
+                    var blk = mark as BlockReference;
+                    if (box.Contains(blk.Position))
+                    {
+                        if (blk.GetEffectiveName().Contains("AI-水管多排标注"))
+                        {
+                            retMark.Add(mark);
+                        }
+                    }
+                }
+            }
+            marks = marks.Except(retMark).ToList();
+            return retMark;
+        }
+        public List<Entity> FindTextFromLine(Line line, ref List<Entity> marks)
+        {
+            var box = line.Buffer(400);
+            var retText = new List<Entity>();
+            foreach (var mark in marks)
+            {
+                if (mark is DBText)
+                {
+                    var text = mark as DBText;
+                    if (box.Contains(text.AlignmentPoint))
+                    {
+                        retText.Add(mark);
+                    }
+                }
+            }
+            marks = marks.Except(retText).ToList();
+            return retText;
         }
     }
 }
