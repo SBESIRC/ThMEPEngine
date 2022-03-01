@@ -344,6 +344,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     vModel.PipeType = VerticalPipeType.WasteWaterPipe;
                 }
+                resModels.Add(vModel);
             }
             return resModels;
         }

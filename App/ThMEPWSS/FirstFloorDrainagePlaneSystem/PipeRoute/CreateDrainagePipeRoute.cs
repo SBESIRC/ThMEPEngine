@@ -50,7 +50,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, wallPolys);
                 foreach (var line in connectLine)
                 {
-                    RouteModel route = new RouteModel(line, pipe.PipeType);
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
                     if (pipe.IsEuiqmentPipe)
                     {
                         route.printCircle = pipe.PipeCircle;
