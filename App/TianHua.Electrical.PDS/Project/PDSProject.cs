@@ -137,7 +137,7 @@ namespace TianHua.Electrical.PDS.Project
             var newNode = new ThPDSProjectGraphNode();
             newNode.NodeType = node.NodeType;
             newNode.IsStartVertexOfGraph = node.IsStartVertexOfGraph;
-            newNode.Load = node.Loads[0];
+            newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
             //newNode.Load.InstalledCapacity = node.Loads.Sum(O => O.InstalledCapacity);
             //newNode.nodeDetails.IsDualPower = node.Loads[0];
             newNode.nodeDetails = new NodeDetails();
