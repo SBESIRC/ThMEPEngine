@@ -215,7 +215,7 @@
     <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="IO\SVG\ThSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
-    <Compile Include="Model\Hvac\ThIfcTchVPipe.cs" />
+    <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
