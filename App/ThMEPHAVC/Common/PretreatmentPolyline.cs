@@ -150,7 +150,21 @@ namespace ThMEPHVAC.Common
             ExtendInnerCurves(headTailTolerance);
             //分割外包框线
             var cuvFrames = closedCurves.Cast<Curve>().ToList();
-            cuvFrames.AddRange(unClosedCurves);
+            foreach (var item in unClosedCurves) 
+            {
+                //这里只处理线
+                if (item is Line line)
+                {
+                    var sp = line.StartPoint;
+                    var ep = line.EndPoint;
+                    var dir = line.CurveDirection();
+                    cuvFrames.Add(new Line(sp - dir.MultiplyBy(2), ep + dir.MultiplyBy(2)));
+                }
+                else 
+                {
+                    cuvFrames.Add(item);
+                }
+            }
             var objs = cuvFrames.OfType<DBObject>().ToCollection();
             var obLst = objs.PolygonsEx();
 
