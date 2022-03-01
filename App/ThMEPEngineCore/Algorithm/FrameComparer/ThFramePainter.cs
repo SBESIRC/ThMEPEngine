@@ -10,13 +10,6 @@ using ThCADExtension;
 
 namespace ThMEPEngineCore.Algorithm.FrameComparer
 {
-    public static class AppendLayerInfo
-    {
-        public static string AppendDoorLayer = "AI-门-新增";
-        public static string AppendWindowLayer = "AI-窗-新增";
-        public static string AppendRoomFrameLayer = "AI-房间框线-新增";
-        public static string AppendFireComponentLayer = "AI-防火分区-新增";
-    }
     public static class LineTypeInfo
     {
         public static string Hidden = "Hidden";
@@ -46,14 +39,6 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                             db.Database.CreateAIRoomOutlineLayer();
                         if (!db.Layers.Contains(ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT))
                             db.Database.CreateAIFireCompartmentLayer();
-                        if (!db.Layers.Contains(AppendLayerInfo.AppendDoorLayer))
-                            db.Database.CreateAILayer(AppendLayerInfo.AppendDoorLayer, 30);
-                        if (!db.Layers.Contains(AppendLayerInfo.AppendWindowLayer))
-                            db.Database.CreateAILayer(AppendLayerInfo.AppendWindowLayer, 30);
-                        if (!db.Layers.Contains(AppendLayerInfo.AppendRoomFrameLayer))
-                            db.Database.CreateAILayer(AppendLayerInfo.AppendRoomFrameLayer, 30);
-                        if (!db.Layers.Contains(AppendLayerInfo.AppendFireComponentLayer))
-                            db.Database.CreateAILayer(AppendLayerInfo.AppendFireComponentLayer, 30);
                         db.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Hidden), true);
                         db.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Continuous), true);
                     }
@@ -85,13 +70,6 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             DrawDeleteLine(comp.ErasedFrame, dicCode2Id);
             DrawChangedLine(comp, dicCode2Id);
             DrawAppendLine(comp, type, dicCode2Id);
-            //DrawUnchangedLine(comp, type, dicCode2Id);
-        }
-
-        private void DrawUnchangedLine(ThMEPFrameComparer comp, CompareFrameType type, Dictionary<int, ObjectId> dicCode2Id)
-        {
-            var unchangedFrames = comp.unChangedFrame.Keys.ToCollection();
-            DrawLines(ref unchangedFrames, ColorIndex.Cyan, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
         }
 
         public void DrawDeleteLine(DBObjectCollection lines, Dictionary<int, ObjectId> dicCode2Id)
@@ -117,10 +95,10 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                     string layer;
                     switch (type)
                     {
-                        case CompareFrameType.DOOR: layer = AppendLayerInfo.AppendDoorLayer; break;
-                        case CompareFrameType.ROOM: layer = AppendLayerInfo.AppendRoomFrameLayer; break;
-                        case CompareFrameType.WINDOW: layer = AppendLayerInfo.AppendWindowLayer; break;
-                        case CompareFrameType.FIRECOMPONENT: layer = AppendLayerInfo.AppendFireComponentLayer; break;
+                        case CompareFrameType.DOOR: layer = ThMEPEngineCoreLayerUtils.DOOR; break;
+                        case CompareFrameType.ROOM: layer = ThMEPEngineCoreLayerUtils.ROOMOUTLINE; break;
+                        case CompareFrameType.WINDOW: layer = ThMEPEngineCoreLayerUtils.WINDOW; break;
+                        case CompareFrameType.FIRECOMPONENT: layer = ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT; break;
                         default: throw new NotImplementedException("不支持该类型框线");
                     }
                     DrawLines(ref appFrames, ColorIndex.Green, LineTypeInfo.Continuous, layer, dicCode2Id);
@@ -142,13 +120,11 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                         mapLines.Add(ppp.Item1);
                     DrawChangeMapLine(mapLines, dicCode2Id);
                     var frames = ChangedFrame.Keys.ToCollection();
-                    DrawLines(ref frames, ColorIndex.Magenta, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
+                    DrawLines(ref frames, ColorIndex.BYLAYER, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
                     var tChangedFrame = new Dictionary<Polyline, Tuple<Polyline, double>>();
                     int i = 0;
                     foreach (var frame in ChangedFrame.Values)
-                    {
                         tChangedFrame.Add(frames[i++] as Polyline, frame);
-                    }
                     comp.ChangedFrame = tChangedFrame;
                 }
             }
@@ -161,14 +137,12 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                 {
                     lines.OfType<Polyline>().ForEach(p =>
                     {
-                        var poly = db.Element<Polyline>(dicCode2Id[p.GetHashCode()], true);
-                        poly.ColorIndex = (int)ColorIndex.Yellow;
-                        poly.Linetype = LineTypeInfo.Continuous;
+                        Dreambuild.AutoCAD.Modify.Erase(dicCode2Id[p.GetHashCode()]);
                     });
                 }
             }
         }
-        public void DrawLines(ref DBObjectCollection lines, ColorIndex color, string lineType, string layer, Dictionary<int, ObjectId> dicCode2Id)
+        public void DrawLines(ref DBObjectCollection lines, ColorIndex colorIdx, string lineType, string layer, Dictionary<int, ObjectId> dicCode2Id)
         {
             // dicCode2Id主要用于将新画的多段线加到字典中
             using (var db = AcadDatabase.Active())
@@ -186,7 +160,7 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                             dicCode2Id.Add(shadow.GetHashCode(), id);
                             shadow.SetDatabaseDefaults();
                             shadow.Layer = layer;
-                            shadow.ColorIndex = (int)color;
+                            shadow.ColorIndex = (int)colorIdx;
                             shadow.Linetype = lineType;
                         }
                         lines.Clear();

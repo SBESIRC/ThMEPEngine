@@ -82,7 +82,6 @@ namespace TianHua.Electrical.UI.FrameComparer
                         if (entity != null)
                         {
                             Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
-                            entity.Highlight();
                         }
                     }
                 }
