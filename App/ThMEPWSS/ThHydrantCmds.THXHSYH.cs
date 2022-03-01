@@ -30,6 +30,7 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "THHydrantData", CommandFlags.Modal)]
         public void THHydrantData()
         {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 //画框，提数据，转数据
@@ -42,7 +43,7 @@ namespace ThMEPWSS
                 var transformer = ThHydrantUtil.GetTransformer(selectPts);
 
                 var dataFactory = new ThHydrantLayoutDataFactory();
-                //dataFactory.SetTransformer(transformer);
+                dataFactory.SetTransformer(transformer);
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
 
                 var dataQuery = new ThHydrantLayoutDataQueryService()
@@ -51,10 +52,12 @@ namespace ThMEPWSS
                     BlkVerticalPipe = dataFactory.BlkVerticalPipe,
                     CVerticalPipe = dataFactory.CVerticalPipe,
                     Hydrant = dataFactory.Hydrant,
+                    InputExtractors= dataFactory.Extractors ,
                 };
 
                 dataQuery.ExtractData();
                 dataQuery.Print();
+               // dataQuery.Clean();
 
 
             }

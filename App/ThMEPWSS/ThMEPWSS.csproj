@@ -39,6 +39,9 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="HydrantLayout\Data\ThHandleConflictService.cs" />
+    <Compile Include="HydrantLayout\Data\ThCleanEntityService.cs" />
+    <Compile Include="HydrantLayout\Data\ThHydrantDoorExtractor.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantExtractionVisitor.cs" />
     <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
     <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
@@ -55,7 +58,7 @@
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\StructGeoService.cs" />
-    <Compile Include="HydrantLayout\Command\ThHydrantLayoutImprove.cs" />
+    <Compile Include="HydrantLayout\Command\ThHydrantLayoutCmd.cs" />
     <Compile Include="HydrantLayout\Data\ThBlkVerticalPipeExtractService.cs" />
     <Compile Include="HydrantLayout\Data\ThCircleVerticalPipeExtractService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataFactory.cs" />
