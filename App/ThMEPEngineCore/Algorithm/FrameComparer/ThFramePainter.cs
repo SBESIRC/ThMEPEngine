@@ -120,7 +120,7 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                         mapLines.Add(ppp.Item1);
                     DrawChangeMapLine(mapLines, dicCode2Id);
                     var frames = ChangedFrame.Keys.ToCollection();
-                    DrawLines(ref frames, ColorIndex.BYLAYER, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
+                    DrawLines(ref frames, ColorIndex.Magenta, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
                     var tChangedFrame = new Dictionary<Polyline, Tuple<Polyline, double>>();
                     int i = 0;
                     foreach (var frame in ChangedFrame.Values)
@@ -137,7 +137,9 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                 {
                     lines.OfType<Polyline>().ForEach(p =>
                     {
-                        Dreambuild.AutoCAD.Modify.Erase(dicCode2Id[p.GetHashCode()]);
+                        var poly = db.Element<Polyline>(dicCode2Id[p.GetHashCode()], true);
+                        poly.ColorIndex = (int)ColorIndex.Yellow;
+                        poly.Linetype = LineTypeInfo.Continuous;
                     });
                 }
             }
