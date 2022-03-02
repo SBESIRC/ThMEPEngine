@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using DotNetARX;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Extension;
@@ -16,38 +16,41 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPWSS.Sprinkler.Data;
+using ThMEPWSS.SprinklerConnect.Data;
 
 namespace ThMEPWSS.HydrantLayout.Data
 {
     public class ThHydrantLayoutDataFactory
     {
-        private ThMEPOriginTransformer Transformer { get; set; }
+        //input
+        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+        public ThMEPOriginTransformer Transformer { get; set; }
+        //output
         public List<ThExtractorBase> Extractors { get; set; }
+
         public List<ThIfcVirticalPipe> THCVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
 
         public List<ThIfcDistributionFlowElement> Hydrant { get; set; } = new List<ThIfcDistributionFlowElement>();
+        public List<Entity> Car { get; set; } = new List<Entity>();
         public ThHydrantLayoutDataFactory()
         {
 
         }
-        public void SetTransformer(ThMEPOriginTransformer transformer)
-        {
-            Transformer = transformer;
-        }
-        public void GetElements(Database database, Point3dCollection collection)
+
+        public void GetElements(Database database, Point3dCollection framePts)
         {
             var thcVertical = new ThTchVerticalPipeExtractService();
-            thcVertical.Extract(database, collection);
+            thcVertical.Extract(database, framePts);
             THCVerticalPipe = thcVertical.TCHVerticalPipe;
 
             var blkVertical = new ThBlkVerticalPipeExtractService();
-            blkVertical.Extract(database, collection);
+            blkVertical.Extract(database, framePts);
             BlkVerticalPipe = blkVertical.VerticalPipe;
 
             var cVertical = new ThCircleVerticalPipeExtractService();
-            cVertical.Extract(database, collection);
+            cVertical.Extract(database, framePts);
             CVerticalPipe = cVertical.VerticalPipe;
 
 
@@ -56,7 +59,7 @@ namespace ThMEPWSS.HydrantLayout.Data
                 BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher },
             };
             var hydrantRecog = new ThHydrantRecognitionEngine(hydrantVisitor);
-            hydrantRecog.RecognizeMS(database, collection);
+            hydrantRecog.RecognizeMS(database, framePts);
             Hydrant.AddRange(hydrantRecog.Elements);
 
             var manger = Extract(database); // visitor manager,提取的是原始数据
@@ -98,13 +101,13 @@ namespace ThMEPWSS.HydrantLayout.Data
 
                 new ThSprinklerRoomExtractor()
                 {
-                    IsWithHole = false,
+                    IsWithHole = true,
                     UseDb3Engine = true,
                     Transformer = Transformer,
                 },
             };
 
-            Extractors.ForEach(o => o.Extract(database, collection));
+            Extractors.ForEach(o => o.Extract(database, framePts));
 
             // 移回原位
             Extractors.ForEach(o =>
@@ -114,6 +117,26 @@ namespace ThMEPWSS.HydrantLayout.Data
                     iTransformer.Reset();
                 }
             });
+
+
+            // 提取车位
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(framePts);
+            var parkingStallService = new ThSprinklerConnectParkingStallService
+            {
+                BlockNameDict = BlockNameDict
+            };
+            parkingStallService.ParkingStallExtractor(database, pline);
+
+            Car.AddRange(parkingStallService.ParkingStalls.Cast<Entity>().ToList());
+
+
+
+
+
         }
 
         private void MoveToOrigin(ThBuildingElementVisitorManager vm, ThMEPOriginTransformer transformer)

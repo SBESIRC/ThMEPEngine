@@ -29,11 +29,12 @@ namespace ThMEPWSS.HydrantLayout.Data
         public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcDistributionFlowElement> Hydrant { get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<Polyline> Room { get; set; } = new List<Polyline>();
-        public List<Entity> Wall { get; set; } = new List<Entity>();
+        public List<Entity> Room { get; set; } = new List<Entity>(); //mpolygon //polyline
+        public List<Entity> Wall { get; set; } = new List<Entity>(); //mpolygon //polyline
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         public List<Polyline> Door { get; set; } = new List<Polyline>();
         public List<Polyline> FireProof { get; set; } = new List<Polyline>();
+        public List<Entity> Car { get; set; } = new List<Entity>();
         public ThHydrantLayoutDataQueryService()
         {
 
@@ -53,7 +54,7 @@ namespace ThMEPWSS.HydrantLayout.Data
             Column.AddRange(columnExtractor.Columns);
             doorExtractor.Doors.ForEach(x => Door.Add(x.Outline as Polyline));
             FireProof.AddRange(fireproofshutterExtractor.FireproofShutter);
-            roomExtractor.Rooms.ForEach(x => Room.Add(x.Boundary as Polyline));
+            roomExtractor.Rooms.ForEach(x => Room.Add(x.Boundary as Entity));
 
         }
 
@@ -69,6 +70,8 @@ namespace ThMEPWSS.HydrantLayout.Data
             Door.ForEach(x => DrawUtils.ShowGeometry(x, "l0door", 6));
             FireProof.ForEach(x => DrawUtils.ShowGeometry(x, "l0fireProof", 6));
             Room.ForEach(x => DrawUtils.ShowGeometry(x, "l0room", 30));
+
+            Car.ForEach(x => DrawUtils.ShowGeometry(x, "l0car", 173));
         }
 
         public void Clean()

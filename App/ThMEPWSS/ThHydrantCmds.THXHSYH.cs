@@ -42,8 +42,12 @@ namespace ThMEPWSS
 
                 var transformer = ThHydrantUtil.GetTransformer(selectPts);
 
-                var dataFactory = new ThHydrantLayoutDataFactory();
-                dataFactory.SetTransformer(transformer);
+                var BlockNameDict = new Dictionary<string, List<string>>() { { "非机械车位", new List<string>() { "car0" } } };
+                var dataFactory = new ThHydrantLayoutDataFactory()
+                {
+                    Transformer = transformer,
+                    BlockNameDict = BlockNameDict,
+                };
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
 
                 var dataQuery = new ThHydrantLayoutDataQueryService()
@@ -52,12 +56,13 @@ namespace ThMEPWSS
                     BlkVerticalPipe = dataFactory.BlkVerticalPipe,
                     CVerticalPipe = dataFactory.CVerticalPipe,
                     Hydrant = dataFactory.Hydrant,
-                    InputExtractors= dataFactory.Extractors ,
+                    InputExtractors = dataFactory.Extractors,
+                    Car = dataFactory .Car, 
                 };
 
                 dataQuery.ExtractData();
                 dataQuery.Print();
-               // dataQuery.Clean();
+                // dataQuery.Clean();
 
 
             }
