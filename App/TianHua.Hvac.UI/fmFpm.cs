@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
@@ -206,7 +207,7 @@ namespace TianHua.Hvac.UI
                 ThMEPHVACService.GetWidthAndHeight(fanParam.roomDuctSize, out double w, out double h);
                 textRoomWidth.Text = w.ToString();
                 textRoomHeight.Text = h.ToString();
-                
+
             }
             if (fanParam.isNotRoomReCommandSize)
             {
@@ -247,20 +248,26 @@ namespace TianHua.Hvac.UI
         }
         private void GetAirVolume(out double airVolume, out double airHighVolume)
         {
-            if (textAirVolume.Text.Contains("/"))
+            var volume = textAirVolume.Text;
+            if (selectFansDic.Count > 0)
             {
-                string[] str = textAirVolume.Text.Split('/');
+                var fan = selectFansDic.Values.FirstOrDefault();
+                volume = fan.strAirVolume.Contains("/") ? fan.strAirVolume : volume;
+            }
+            if (volume.Contains("/"))
+            {
+                string[] str = volume.Split('/');
                 airVolume = Double.Parse(str[1]);
                 airHighVolume = Double.Parse(str[0]);
             }
             else
             {
-                airVolume = Double.Parse(textAirVolume.Text);
+                airVolume = Double.Parse(volume);
                 airHighVolume = 0;
             }
         }
-        private void GetPortInfo(out int portNum, 
-                                 out string scale, 
+        private void GetPortInfo(out int portNum,
+                                 out string scale,
                                  out string scenario,
                                  out string portSize,
                                  out string portName,
@@ -275,7 +282,7 @@ namespace TianHua.Hvac.UI
             portRange = (comboPortRange.Text == "") ? "下送风口" : comboPortRange.Text;
             if (portRange.Contains("侧"))
                 portNum /= 2;
-            airSpeed = Double.Parse(textAirSpeed.Text); 
+            airSpeed = Double.Parse(textAirSpeed.Text);
         }
         private void GetDuctSize(out string roomDuctSize, out string notRoomDuctSize)
         {
@@ -299,11 +306,11 @@ namespace TianHua.Hvac.UI
                 if (String.IsNullOrEmpty(textNotRoomWidth.Text) && String.IsNullOrEmpty(textNotRoomHeight.Text))
                     notRoomDuctSize = "2000x500";
                 else
-                notRoomDuctSize = textNotRoomWidth.Text + "x" + textNotRoomHeight.Text;
-            }             
+                    notRoomDuctSize = textNotRoomWidth.Text + "x" + textNotRoomHeight.Text;
+            }
         }
-        private void GetElevation(out string roomElevation, 
-                                  out string notRoomElevation, 
+        private void GetElevation(out string roomElevation,
+                                  out string notRoomElevation,
                                   out ElevationAlignStyle roomElevationStyle,
                                   out ElevationAlignStyle notRoomElevationStyle)
         {
@@ -400,7 +407,7 @@ namespace TianHua.Hvac.UI
         private void radioRoomRecommand_CheckedChanged(object sender, EventArgs e)
         {
             if (radioRoomRecommand.Checked)
-            {   
+            {
                 textRoomWidth.Enabled = false;
                 textRoomHeight.Enabled = false;
                 labelRoomAirSpeed.Enabled = false;
@@ -459,7 +466,7 @@ namespace TianHua.Hvac.UI
             if (String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
             var airVolume = (int)Double.Parse(textAirVolume.Text);
-            
+
             if (labelRoomAirSpeed.Enabled)
             {
                 if (String.IsNullOrEmpty(textRoomWidth.Text) || String.IsNullOrEmpty(textRoomHeight.Text))
@@ -649,7 +656,7 @@ namespace TianHua.Hvac.UI
                     l.TransformBy(reverseMat);
             }
         }
-        private void CollectFanConnectLine(FanParam fan, 
+        private void CollectFanConnectLine(FanParam fan,
                                            ThFanCenterLineDetector roomDetector,
                                            ThFanCenterLineDetector notRoomDetector)
         {
@@ -727,7 +734,7 @@ namespace TianHua.Hvac.UI
             else
                 SetPortSpeed();
         }
-        
+
         private void textBypassWidth_TextChanged(object sender, EventArgs e)
         {
             if (!ThHvacUIService.IsIntegerStr(textBypassWidth.Text))
