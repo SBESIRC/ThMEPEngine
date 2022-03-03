@@ -83,6 +83,13 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaConduit = true;
             }
+            if(edge.Circuit.Type == ThPDSCircuitType.None)
+            {
+                if(target.Loads.Count > 0)
+                {
+                    edge.Circuit.Type = target.Loads[0].DefaultCircuitType;
+                }
+            }
             var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
             if(circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID))
             {

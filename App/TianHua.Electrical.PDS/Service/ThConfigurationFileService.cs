@@ -52,15 +52,8 @@ namespace TianHua.Electrical.PDS.Service
                 blockInfo.Properties = StringFilter(table.Rows[row][column].ToString());
 
                 column++;
-                try
-                {
-                    var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
-                    blockInfo.DefaultCircuitType = defaultCircuitType;
-                }
-                catch
-                {
-                    blockInfo.DefaultCircuitType = ThPDSCircuitType.None;
-                }
+                var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
+                blockInfo.DefaultCircuitType = defaultCircuitType;
 
                 blockInfos.Add(blockInfo);
             }

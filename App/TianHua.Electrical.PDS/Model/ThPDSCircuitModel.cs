@@ -2,6 +2,11 @@
 {
     public class ThPDSCircuitModel
     {
+        public ThPDSCircuitModel()
+        {
+            CircuitType = ThPDSCircuitType.None;
+        }
+
         /// <summary>
         /// 回路类型
         /// </summary>

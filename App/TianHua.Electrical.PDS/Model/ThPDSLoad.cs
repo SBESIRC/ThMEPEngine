@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 一级负载类型
@@ -31,11 +29,6 @@ namespace TianHua.Electrical.PDS.Model
         /// 插座
         /// </summary>
         Socket,
-
-        /// <summary>
-        /// 未知
-        /// </summary>
-        None,
     }
 
     /// <summary>
@@ -208,7 +201,14 @@ namespace TianHua.Electrical.PDS.Model
         {
             AttributesCopy = "";
             InstalledCapacity = new ThInstalledCapacity();
+            DefaultCircuitType = ThPDSCircuitType.None;
+            LoadUID = System.Guid.NewGuid().ToString();
         }
+
+        /// <summary>
+        /// 负载GUID
+        /// </summary>
+        public string LoadUID { get; set; }
 
         /// <summary>
         /// 特征编号
@@ -219,6 +219,11 @@ namespace TianHua.Electrical.PDS.Model
         /// 额定电压
         /// </summary>
         public double KV { get; set; }
+
+        /// <summary>
+        /// 计算电流
+        /// </summary>
+        public double CalculateCurrent { get; set; }
 
         /// <summary>
         /// 一级负载类型

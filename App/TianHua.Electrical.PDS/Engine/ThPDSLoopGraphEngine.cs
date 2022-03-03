@@ -255,11 +255,19 @@ namespace TianHua.Electrical.PDS.Engine
                 }
 
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
+                if(newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
+                {
+                    newEdge.Circuit.Type = ThPDSLayerService.SelectCircuitType(circuit.Layer);
+                }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
                 {
                     var distBoxNode = CacheDistBoxes[box.Item2];
-                    var newDistBoxEdge = ThPDSGraphService.CreateEdge(newNode, distBoxNode, logos, DistBoxKey);
+                    var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3, DistBoxKey);
+                    if (newDistBoxEdge.Circuit.Type == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
+                    {
+                        newDistBoxEdge.Circuit.Type = ThPDSLayerService.SelectCircuitType(otherCircuit.Layer);
+                    }
                     PDSGraph.Graph.AddEdge(newDistBoxEdge);
 
                     FindGraph(box.Item1, box.Item2);
@@ -270,10 +278,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 寻路算法，sourceEntity表示连接上级，nextEntity表示自身
         /// </summary>
-        public List<Tuple<Entity, Entity>> Navigate(ThPDSCircuitGraphNode node, List<Entity> loads, List<string> logos,
-            Entity sourceEntity, Entity nextEntity)
+        public List<Tuple<Entity, Entity, List<string>>> Navigate(ThPDSCircuitGraphNode node, List<Entity> loads, 
+            List<string> logos, Entity sourceEntity, Entity nextEntity)
         {
-            var results = new List<Tuple<Entity, Entity>>();
+            var results = new List<Tuple<Entity, Entity, List<string>>>();
             var findLoop = FindRootNextElement(sourceEntity, nextEntity);
 
             if(findLoop.Count == 0)
@@ -330,11 +338,11 @@ namespace TianHua.Electrical.PDS.Engine
                         //负载搭着配电箱
                         if (item.Value.Count > 0)
                         {
-                            results.Add(Tuple.Create(item.Value.Last() as Entity, item.Key));
+                            results.Add(Tuple.Create(item.Value.Last() as Entity, item.Key, logos));
                         }
                         else
                         {
-                            results.Add(Tuple.Create(nextEntity, item.Key));
+                            results.Add(Tuple.Create(nextEntity, item.Key, logos));
                         }
                     }
                 }
@@ -438,6 +446,7 @@ namespace TianHua.Electrical.PDS.Engine
                 return FindPath;
             }
             sharedPath.Add(sourceElement);
+            var temp = sourceElement.StartPoint;
             var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThPDSCommon.AllowableTolerance);
             var probeResults = FindNext(sourceElement, probe);
             switch (probeResults.Count)
