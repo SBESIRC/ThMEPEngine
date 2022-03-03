@@ -116,6 +116,13 @@ Win10
 
 [Best Practices for Creating and Consuming Modal Dialogs in WinForms](https://joebuschmann.com/best-practices-for-creating-and-consuming-modal-dialogs-in-winforms/)
 
+
+## WPF
+
+[Controls](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/controls/?view=netframeworkdesktop-4.8)
+
+[WPF Graphics Rendering Overview](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/graphics-multimedia/wpf-graphics-rendering-overview?view=netframeworkdesktop-4.8)
+
 ## MVVM
 
 [The Model-View-ViewModel Pattern](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/mvvm)
