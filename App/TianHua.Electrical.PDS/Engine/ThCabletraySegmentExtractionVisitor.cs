@@ -36,7 +36,6 @@ namespace TianHua.Electrical.PDS.Engine
                 new ThRawIfcFlowSegmentData()
                 {
                     Data = clone,
-                    Geometry = clone,
                 }
             };
         }

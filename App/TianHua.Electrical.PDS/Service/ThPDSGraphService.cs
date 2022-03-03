@@ -30,12 +30,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService, 
-            List<string> distBoxKey)
+            List<string> distBoxKey, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
             var noneLoad = false;
-            entities.ForEach(e =>
+            foreach (var e in entities)
             {
                 if (e is Line line)
                 {
@@ -52,10 +52,10 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
-                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e]));
+                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
-            });
+            }
 
             node.Loads = loads;
             if (noneLoad)
@@ -105,9 +105,9 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode tatget, List<string> list)
+            ThPDSCircuitGraphNode target, List<string> list)
         {
-            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, tatget);
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(list);
             return edge;

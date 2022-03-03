@@ -29,7 +29,10 @@ namespace TianHua.Electrical.PDS.Service
         {
             return new List<string> 
             { 
-                "E-POWR-CMTB", 
+                "E-POWR-CMTB",
+                "E-LITE-CMTB",
+                "E-UNIV-EL2",
+                //"E-CTRL-CMTB",
             };
         }
 
@@ -47,7 +50,7 @@ namespace TianHua.Electrical.PDS.Service
                 "E-POWR-WIRE",
                 "E-POWR-WIRE2",
                 "E-POWR-WIRE3",
-                "E-CTRL-WIRE",
+                //"E-CTRL-WIRE",
             };
         }
 

@@ -52,9 +52,9 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         otherDistBoxID = cabletrayEdgeList[j].Target.Loads[0].ID.LoadID;
                     }
-                    if (circuitID.IndexOf(otherDistBoxID) == 0 && !string.IsNullOrEmpty(otherDistBoxID))
+                    if (!string.IsNullOrEmpty(otherDistBoxID) && circuitID.IndexOf(otherDistBoxID) == 0)
                     {
-                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[i].Target, cabletrayEdgeList[j].Target,
+                        var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
                             new List<string> { circuitID });
                         edge.Circuit.ViaCableTray = true;
                         if (cabletrayEdgeList[i].Circuit.ViaConduit || cabletrayEdgeList[j].Circuit.ViaConduit)

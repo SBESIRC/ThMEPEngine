@@ -42,13 +42,14 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData, 
+            ref string attributesCopy)
         {
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
             {
                 ID = CreateLoadID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
-                InstalledCapacity = AnalysisPower(marks, searchedString),
+                InstalledCapacity = AnalysisPower(marks, searchedString, out var needCopy),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -60,11 +61,16 @@ namespace TianHua.Electrical.PDS.Service
                 }
             };
 
-            var StandbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
-            if (StandbyRelationship.Item1)
+            if(needCopy)
             {
-                thPDSLoad.PrimaryAvail = StandbyRelationship.Item2;
-                thPDSLoad.SpareAvail = StandbyRelationship.Item3;
+                attributesCopy = distBoxData.EffectiveName;
+            }
+
+            var standbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
+            if (standbyRelationship.Item1)
+            {
+                thPDSLoad.PrimaryAvail = standbyRelationship.Item2;
+                thPDSLoad.SpareAvail = standbyRelationship.Item3;
             }
 
             var r = new Regex(@"[a-zA-Z]");
@@ -103,7 +109,7 @@ namespace TianHua.Electrical.PDS.Service
                         ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>())
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>(), out var needCopy)
             };
         }
 
@@ -343,12 +349,13 @@ namespace TianHua.Electrical.PDS.Service
             return result;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos, List<string> searchedString)
+        private ThInstalledCapacity AnalysisPower(List<string> infos, List<string> searchedString, out bool needCopy)
         {
             var results = new ThInstalledCapacity();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
-            infos.ForEach(info =>
+            needCopy = false;
+            foreach (var info in infos)
             {
                 var m = r.Match(info);
                 while (m.Success)
@@ -358,17 +365,25 @@ namespace TianHua.Electrical.PDS.Service
                     result = result.Replace("K", "");
                     result = result.Replace("w", "");
                     result = result.Replace("W", "");
-                    if (m.Value.Contains("k") || m.Value.Contains("K"))
+                    if (!m.Value.Contains("k") && !m.Value.Contains("K"))
                     {
-                        results.UsualPower.Add(double.Parse(result) * 1000);
+                        results.UsualPower.Add(double.Parse(result) / 1000.0);
                     }
                     else
                     {
                         results.UsualPower.Add(double.Parse(result));
                     }
+                    var numRegex = new Regex(@"[2-9][xX]");
+                    var numMatch = numRegex.Match(info);
+                    if (numMatch.Success)
+                    {
+                        needCopy = true;
+                    }
+
                     m = m.NextMatch();
                 }
-            });
+            }
+
             return results;
         }
 

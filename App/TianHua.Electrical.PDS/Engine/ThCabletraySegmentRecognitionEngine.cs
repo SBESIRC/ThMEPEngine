@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThCabletraySegmentRecognitionEngine : ThFlowSegmentRecognitionEngine
     {
-        public List<Line> Results { get; protected set; }
+        public List<Curve> Results { get; protected set; }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -35,7 +35,7 @@ namespace TianHua.Electrical.PDS.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
                 curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Results = curves.OfType<Line>().Where(o => o.GetLength() > 1.0).ToList();
+            Results = curves.OfType<Curve>().Where(o => o.GetLength() > 1.0).ToList();
         }
 
         public override void RecognizeEditor(Point3dCollection polygon)

@@ -8,19 +8,95 @@ namespace TianHua.Electrical.PDS.Model
     public enum ThPDSLoadTypeCat_1
     {
         /// <summary>
+        /// 配电箱
+        /// </summary>
+        DistributionPanel,
+
+        /// <summary>
         /// 电动机
         /// </summary>
         Motor,
 
         /// <summary>
+        /// 等效负载
+        /// </summary>
+        LumpedLoad,
+
+        /// <summary>
+        /// 灯具
+        /// </summary>
+        Luminaire,
+
+        /// <summary>
+        /// 插座
+        /// </summary>
+        Socket,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
+        None,
+    }
+
+    /// <summary>
+    /// 二级负载类型
+    /// </summary>
+    public enum ThPDSLoadTypeCat_2
+    {
+        /// <summary>
+        /// 住户配电箱
+        /// </summary>
+        ResidentialDistributionPanel,
+
+        /// <summary>
+        /// 照明配电箱
+        /// </summary>
+        LightingDistributionPanel,
+
+        /// <summary>
+        /// 动力配电箱
+        /// </summary>
+        PowerDistributionPanel,
+
+        /// <summary>
+        /// 应急照明配电箱
+        /// </summary>
+        EmergencyLightingDistributionPanel,
+
+        /// <summary>
+        /// 消防动力配电箱
+        /// </summary>
+        EmergencyPowerDistributionPanel,
+
+        /// <summary>
+        /// 电表箱
+        /// </summary>
+        ElectricalMeterPanel,
+
+        /// <summary>
+        /// 设备控制箱
+        /// </summary>
+        ElectricalControlPanel,
+
+        /// <summary>
+        /// 隔离开关箱
+        /// </summary>
+        IsolationSwitchPanel,
+
+        /// <summary>
+        /// 集中电源
+        /// </summary>
+        FireEmergencyLightingDistributionPanel,
+
+        /// <summary>
+        /// 泵
+        /// </summary>
+        Pump,
+
+        /// <summary>
         /// 风机
         /// </summary>
         Fan,
-
-        /// <summary>
-        /// 水泵
-        /// </summary>
-        Pump,
 
         /// <summary>
         /// 防火卷帘
@@ -38,19 +114,14 @@ namespace TianHua.Electrical.PDS.Model
         ElectricWindow,
 
         /// <summary>
-        /// 电梯
+        /// 交流充电桩
         /// </summary>
-        Elevator,
+        ACCharger,
 
         /// <summary>
-        /// 自动扶梯
+        /// 直流非车载充电机
         /// </summary>
-        Escalator,
-
-        /// <summary>
-        /// 自动人行道
-        /// </summary>
-        MovingSidewalk,
+        DCCharger,
 
         /// <summary>
         /// 机械停车设备
@@ -58,24 +129,19 @@ namespace TianHua.Electrical.PDS.Model
         MechanicalParkingDevice,
 
         /// <summary>
-        /// 配电箱（住户/租户配电箱、照明/动力配电箱、隔离开关箱）
+        /// 电梯
         /// </summary>
-        DistributionPanel,
+        Elevator,
 
         /// <summary>
-        /// 照明灯具
+        /// 扶梯
         /// </summary>
-        Luminaire,
+        Escalator,
 
         /// <summary>
-        /// 插座
+        /// 自动人行道
         /// </summary>
-        Socket,
-
-        /// <summary>
-        /// 等效负载
-        /// </summary>
-        LumpedLoad,
+        MovingSidewalk,
 
         /// <summary>
         /// 空调设备（空调机组、新风机组、冷却塔、多联机、冷冻/冷却水机组，风冷/地源热泵机组等）
@@ -88,41 +154,48 @@ namespace TianHua.Electrical.PDS.Model
         Boiler,
 
         /// <summary>
-        /// 充电桩（快充、慢充）
+        /// 车道灯具
         /// </summary>
-        Charger,
+        LaneLights,
 
         /// <summary>
-        /// 无
+        /// 防水灯具
         /// </summary>
-        None,
-    }
-
-    /// <summary>
-    /// 二级负载类型
-    /// </summary>
-    public enum ThPDSLoadTypeCat_2
-    {
-        ResidentialDistributionPanel,
-        LightingDistributionPanel,
-        PowerDistributionPanel,
-        EmergencyLightingDistributionPanel,
-        EmergencyPowerDistributionPanel,
-        ElectricalMeterPanel,
-        ElectricalControlPanel,
-        IsolationSwitchPanel,
-        FireEmergencyLightingDistributionPanel,
-        SubmersiblePump,
-        RollerShutter,
-        ElectricWindow,
-        ACCharger,
-        DCCharger,
-        LaneLights,
         WaterproofLights,
+
+        /// <summary>
+        /// 室外灯具
+        /// </summary>
         OutdoorLights,
+
+        /// <summary>
+        /// 消防应急照明灯具
+        /// </summary>
         FireEmergencyLuminaire,
+
+        /// <summary>
+        /// 备用照明灯具
+        /// </summary>
         EmergencyLuminaire,
+
+        /// <summary>
+        /// 单相插座
+        /// </summary>
+        OnePhaseSocket,
+
+        /// <summary>
+        /// 三相插座
+        /// </summary>
+        ThreePhaseSocket,
+
+        /// <summary>
+        /// 低压插座
+        /// </summary>
         LVSocket,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
         None,
     }
 
@@ -131,6 +204,12 @@ namespace TianHua.Electrical.PDS.Model
     /// </summary>
     public class ThPDSLoad
     {
+        public ThPDSLoad()
+        {
+            AttributesCopy = "";
+            InstalledCapacity = new ThInstalledCapacity();
+        }
+
         /// <summary>
         /// 特征编号
         /// </summary>
@@ -200,5 +279,10 @@ namespace TianHua.Electrical.PDS.Model
         /// 是否变频
         /// </summary>
         public bool FrequencyConversion { get; set; }
+
+        /// <summary>
+        /// 用于存储需要复制的块名
+        /// </summary>
+        public string AttributesCopy { get; set; }
     }
 }

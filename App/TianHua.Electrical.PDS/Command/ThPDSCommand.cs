@@ -110,6 +110,8 @@ namespace TianHua.Electrical.PDS.Command
                 var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
                     loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService, distBoxKey);
                 graphEngine.CreatGraph();
+                graphEngine.CopyAttributes();
+
                 var graph = graphEngine.GetGraph();
 
                 var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>
@@ -136,7 +138,7 @@ namespace TianHua.Electrical.PDS.Command
                     transformer.Reset(block);
                 });
 
-                PDSProject.Instance.PushGraphData(unionGraph);
+                //PDSProject.Instance.PushGraphData(unionGraph);
             }
         }
 
