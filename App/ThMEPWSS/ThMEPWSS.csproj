@@ -59,12 +59,14 @@
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\StructGeoService.cs" />
     <Compile Include="HydrantLayout\Command\ThHydrantLayoutCmd.cs" />
-    <Compile Include="HydrantLayout\Data\ThBlkVerticalPipeExtractService.cs" />
-    <Compile Include="HydrantLayout\Data\ThCircleVerticalPipeExtractService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataFactory.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataQueryService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantRecognitionEngine.cs" />
-    <Compile Include="HydrantLayout\Data\ThTchVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayout\Data\ThVerticalPipeExtractService.cs" />
+    <Compile Include="HydrantLayout\Engine\Class1.cs" />
+    <Compile Include="HydrantLayout\Model\HydrantLayoutSetting.cs" />
+    <Compile Include="HydrantLayout\Model\ThHydrantModel.cs" />
+    <Compile Include="HydrantLayout\Service\ThHydrantModelService.cs" />
     <Compile Include="HydrantLayout\Service\ThHydrantUtil.cs" />
     <Compile Include="HydrantLayout\Service\ThSelectFrameUtil.cs" />
     <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
@@ -738,8 +740,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
-    <Folder Include="HydrantLayout\Engine\" />
-    <Folder Include="HydrantLayout\Model\" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
