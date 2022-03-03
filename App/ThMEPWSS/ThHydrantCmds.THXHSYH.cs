@@ -28,7 +28,7 @@ namespace ThMEPWSS
 {
     public partial class ThHydrantCmds
     {
-        [CommandMethod("TIANHUACAD", "THHydrantLayoutNoUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THHydrantLayout", CommandFlags.Modal)]
         public void THHydrantLayout()
         {
             using (var cmd = new ThHydrantLayoutCmd())
