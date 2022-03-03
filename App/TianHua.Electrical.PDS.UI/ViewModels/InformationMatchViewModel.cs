@@ -10,17 +10,20 @@ using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Project;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class InformationMatchViewModel : NotifyPropertyChangedBase
     {
         //该ViewModel为测试的，后期删除
-        public InformationMatchViewModel(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> _graph)
+        public InformationMatchViewModel(ThPDSProjectVMGraphInfo GraphInfo)
         {
-            this.Graph = _graph;
+            this.graphInfo = GraphInfo;
+            this.Graph = GraphInfo.graphData;
             //this.Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
         }
+        private ThPDSProjectVMGraphInfo graphInfo { get; set; }
 
         private AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph;
         public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph

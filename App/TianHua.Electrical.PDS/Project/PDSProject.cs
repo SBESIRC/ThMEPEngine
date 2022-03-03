@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.Project
             if(string.IsNullOrEmpty(url))
             {
                 //Creat New Project
-                instance.graphData = new ThPDSProjectGraph() { Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>() };
+                this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>().CreatPDSProjectGraph();
                 if (!instance.DataChanged.IsNull())
                 {
                     instance.DataChanged();//推送消息告知VM刷新
@@ -74,58 +74,20 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public void PushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
         {
-            this.graphData.Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            var ProjectGraph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
-            graph.Vertices.ForEach(o => this.graphData.Graph.AddVertex(VertexDir[o]));
-            graph.Edges.ForEach(o => this.graphData.Graph.AddEdge(
+            graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
+            graph.Edges.ForEach(o => ProjectGraph.AddEdge(
                 new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
                 ));
-            this.graphData.Graph.Vertices.ForEach(node =>
+            if(!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
             {
-                if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
-                {
-                    node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
-                }
-                else
-                {
-                    var count = this.graphData.Graph.Edges.Count(o => o.Target.Equals(node));
-                    if (count == 1)
-                    {
-                        node.nodeDetails.CircuitFormType = CircuitFormInType.一路进线;
-                    }
-                    else if (count == 2)
-                    {
-                        node.nodeDetails.CircuitFormType = CircuitFormInType.二路进线ATSE;
-                    }
-                    else if (count == 3)
-                    {
-                        node.nodeDetails.CircuitFormType = CircuitFormInType.三路进线;
-                    }
-                }
-            });
-            this.graphData.Graph.Edges.ForEach(edge =>
+                this.graphData.Compatible(ProjectGraph);
+            }
+            else
             {
-                if(edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
-                {
-                    edge.circuitDetails.CircuitFormType = CircuitFormOutType.配电计量_上海CT;
-                }
-                else if(edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger|| edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
-                {
-                    edge.circuitDetails.CircuitFormType = CircuitFormOutType.漏电;
-                }
-                else if(edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
-                {
-                    edge.circuitDetails.CircuitFormType = CircuitFormOutType.消防应急照明回路WFEL;
-                }
-                else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket)
-                {
-                    edge.circuitDetails.CircuitFormType = CircuitFormOutType.漏电;
-                }
-                else
-                {
-                    edge.circuitDetails.CircuitFormType = CircuitFormOutType.常规;
-                }
-            });
+                this.graphData = ProjectGraph.CreatPDSProjectGraph();
+            }
             if (!instance.DataChanged.IsNull())
             {
                 instance.DataChanged();//推送消息告知VM刷新
@@ -140,7 +102,9 @@ namespace TianHua.Electrical.PDS.Project
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
             //newNode.Load.InstalledCapacity = node.Loads.Sum(O => O.InstalledCapacity);
             //newNode.nodeDetails.IsDualPower = node.Loads[0];
-            newNode.nodeDetails = new NodeDetails();
+            newNode.nodeDetails.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
+            newNode.nodeDetails.IsOnlyLoad = node.Loads.Count == 1;
+            //newNode.nodeDetails = new NodeDetails();
             return newNode;
         }
     }

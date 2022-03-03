@@ -21,7 +21,8 @@ namespace TianHua.Electrical.PDS.UI.Project
         public static PDSProjectVM Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graphData;
+        public ThPDSProjectVMGraphInfo graphInfo;
+
         public Action ProjectViewModelChanged;
 
         public void ProjectDataChanged()

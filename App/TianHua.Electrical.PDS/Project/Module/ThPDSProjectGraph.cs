@@ -33,8 +33,8 @@ namespace TianHua.Electrical.PDS.Project.Module
 
         public ThPDSProjectGraphEdge(T source, T target) : base(source, target)
         {
-            Circuit = new ThPDSCircuit();
-            circuitDetails = new CircuitDetails();
+            //Circuit = new ThPDSCircuit();
+            //circuitDetails = new CircuitDetails();
         }
 
         /// <summary>
@@ -48,8 +48,22 @@ namespace TianHua.Electrical.PDS.Project.Module
     [Serializable]
     public class ThPDSProjectGraph
     {
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
-        public Dictionary<ThPDSProjectGraphNode, CircuitDetails> CircuitInfo { get; set; }
+        public ThPDSProjectGraph()
+        {
+            Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            LoopInfo = new List<PDSDWGLoopInfo>();
+            LoadInfo = new List<PDSDWGLoadInfo>();
+        }
 
+        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
+
+        /// <summary>
+        /// 回路信息
+        /// </summary>
+        public List<PDSDWGLoopInfo> LoopInfo { get; set; }
+        /// <summary>
+        /// 负载信息
+        /// </summary>
+        public List<PDSDWGLoadInfo> LoadInfo { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
                 }
 
                 column++;
@@ -45,7 +45,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                    blockInfo.Cat_2 = ThPDSLoadTypeCat_2.None;
                 }
 
                 column++;
@@ -59,7 +59,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                    blockInfo.DefaultCircuitType = ThPDSCircuitType.None;
                 }
 
                 blockInfos.Add(blockInfo);

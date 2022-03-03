@@ -33,6 +33,7 @@
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
+    <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
