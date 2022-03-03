@@ -124,10 +124,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var rst = layoutPara.Set(Genome);
             if (!rst) return 0;
 
-            GeoUtilities.LogMomery("SolutionStart: ");
             if (!IsValidatedSolutions(layoutPara)) return -1;
             int result = GetParkingNums(layoutPara, parameterViewModel);
-            GeoUtilities.LogMomery("SolutionEnd: ");
             //Thread.Sleep(3);
             //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             ParkingStallCount = result;

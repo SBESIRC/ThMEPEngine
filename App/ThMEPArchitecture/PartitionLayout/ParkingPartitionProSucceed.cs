@@ -195,7 +195,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <param name="line"></param>
         /// <param name="vec"></param>
         /// <returns></returns>
-        private double IsEssentialToCloseToBuilding(Line line, Vector3d vec)
+        private double IsEssentialToCloseToBuildingOld(Line line, Vector3d vec)
         {
             if (!IsPerpVector(vec, Vector3d.XAxis)) return -1;
             if (vec.Y < 0) return -1;
@@ -227,6 +227,81 @@ namespace ThMEPArchitecture.PartitionLayout
             if (length >= line.Length / 3 || length >= 23000)
                 return dist - DisLaneWidth / 2;
             else return -1;
+        }
+
+        /// <summary>
+        /// 判断在该车道方向上是否需要生成贴近建筑物的车道
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="vec"></param>
+        /// <returns></returns>
+        private double IsEssentialToCloseToBuilding(Line line, Vector3d vec)
+        {
+            if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
+            if (!IsPerpVector(vec, Vector3d.XAxis)) return -1;
+            if (vec.Y < 0) return -1;
+            var bf = line.Buffer(DisLaneWidth / 2);
+            if (ObstaclesSpatialIndex.SelectCrossingPolygon(bf).Count > 0)
+            {
+                bf.Dispose();
+                return -1;
+            }
+            var linetest = CreateLine(line);
+            linetest.TransformBy(Matrix3d.Displacement(vec * MaxLength));
+            var pl = CreatPolyFromLines(line, linetest);
+            var points = new List<Point3d>();
+            points = ObstacleVertexes.Where(e => pl.IsPointInFast(e)).OrderBy(e => line.GetClosestPointTo(e, false).DistanceTo(e)).ToList();
+            if (points.Count() == 0) return -1;
+            var ltest_ob_near_boundary = CreateLineFromStartPtAndVector(points.First(), vec, DisVertCarLength);
+            if (ltest_ob_near_boundary.Intersect(Boundary, Intersect.OnBothOperands).Count > 0) return -1;
+            var dist = line.GetClosestPointTo(points.First(), false).DistanceTo(points.First());
+            var lperp = CreateLineFromStartPtAndVector(line.GetCenter().TransformBy(Matrix3d.Displacement(vec * 100)), vec, dist + 1);
+            var lanes = IniLanes.Where(e => IsParallelLine(e.Line, line))
+                .Where(e => e.Line.Intersect(lperp, Intersect.OnBothOperands).Count > 0);
+            if (lanes.Count() > 0) return -1;
+            var lt = CreateLine(line);
+            lt.TransformBy(Matrix3d.Displacement(vec * dist));
+            var ltbf = lt.Buffer(DisLaneWidth / 2);
+            points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
+            if (points.Count() == 0) return -1;
+            var length = points.Last().X - points.First().X;
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            int offsetcount = 0;
+            bool isvalid = false;
+            lt.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
+            int cyclecount = 5;
+            var moduledist = (dist - DisLaneWidth / 2) % DisModulus;
+            if (moduledist > 0 && moduledist <= DisVertCarLength)
+            {
+                dist = dist - DisLaneWidth / 2;
+                dist = dist - moduledist;
+                return dist;
+            }
+            for (int i = 0; i < cyclecount; i++)
+            {
+                var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, new Lane(lt, vec.GetNormal()));
+                double validlength = 0;
+                vertlanes.ForEach(e => validlength += e.Line.Length);
+                if (validlength >= length / 2)
+                {
+                    isvalid = true;
+                    break;
+                }
+                offsetcount++;
+                lt.TransformBy(Matrix3d.Displacement(-vec.GetNormal() * (DisVertCarLength / cyclecount)));
+            }
+            if (isvalid)
+            {
+                lt.AddToCurrentSpace();
+                dist = dist - DisLaneWidth / 2;
+                dist = dist - offsetcount * (DisVertCarLength / cyclecount);
+                return dist;
+            }
+            //var length = points.Last().X - points.First().X;
+            //if (length >= line.Length / 3 || length >= 23000)
+            //    return dist - DisLaneWidth / 2;
+            //else return -1;
+            return -1;
         }
 
         private bool CloseToWall(Point3d point)
@@ -336,10 +411,14 @@ namespace ThMEPArchitecture.PartitionLayout
         }
 
         //可以使用并行化操作
-        public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true)
+        public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
+            , Lane specialLane = null)
         {
             var lanes = new List<Lane>();
-            foreach (var lane in IniLanes)
+            var Lanes = IniLanes;
+            if (specialLane != null)
+                Lanes = new List<Lane>() { specialLane };
+            foreach (var lane in Lanes)
             {
                 var line = CreateLine(lane.Line);
                 var linetest = CreateLine(line);
@@ -509,34 +588,59 @@ namespace ThMEPArchitecture.PartitionLayout
         private void RemoveCarsIntersectedWithBoundary()
         {
             var obspls = Obstacles.Where(e => e.Closed).Where(e => e.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
-            CarSpots = CarSpots.Where(e =>
+            //CarSpots = CarSpots.Where(e =>
+            //{
+            //    var k = e.Clone() as Polyline;
+            //    k.Scale(k.GetRecCentroid(), ScareFactorForCollisionCheck);
+            //    var conda = Boundary.Contains(k.GetRecCentroid());
+            //    var condb = !IsInAnyPolys(k.GetRecCentroid(), obspls);
+            //    var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
+            //    if (conda && condb && condc) return true;
+            //    else return false;
+            //}).ToList();
+            var tmps = new List<Polyline>();
+            foreach (var e in CarSpots)
             {
                 var k = e.Clone() as Polyline;
                 k.Scale(k.GetRecCentroid(), ScareFactorForCollisionCheck);
                 var conda = Boundary.Contains(k.GetRecCentroid());
                 var condb = !IsInAnyPolys(k.GetRecCentroid(), obspls);
                 var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
-                if (conda && condb && condc) return true;
-                else return false;
-            }).ToList();
+                if (conda && condb && condc) tmps.Add(e);
+            }
+            CarSpots = tmps;
         }
 
         private void RemoveInvalidPillars()
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
-            Pillars = Pillars.Where(t =>
+            //Pillars = Pillars.Where(t =>
+            //{
+            //    var clone = t.Clone() as Polyline;
+            //    clone.Scale(clone.GetRecCentroid(), 0.5);
+            //    if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
+            //    {
+            //        clone.Dispose();
+            //        return false;
+            //    }
+            //    clone.Dispose();
+            //    return true;
+            //}).ToList();
+            List<Polyline> tmps = new List<Polyline>();
+            foreach (var t in Pillars)
             {
                 var clone = t.Clone() as Polyline;
                 clone.Scale(clone.GetRecCentroid(), 0.5);
                 if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
+                    clone.Dispose();
+                else
                 {
                     clone.Dispose();
-                    return false;
+                    tmps.Add(t);
                 }
-                clone.Dispose();
-                return true;
-            }).ToList();
+            }
+            Pillars = tmps;
             //List<Polyline> tmps = new List<Polyline>();
             //Pillars.AsParallel().ForAll(t =>
             //{

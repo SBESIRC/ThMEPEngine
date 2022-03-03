@@ -87,6 +87,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public static bool GeneratePillars = true;
         public static bool GenerateMiddlePillars = true;
         public static bool HasImpactOnDepthForPillarConstruct = true;
+        public static bool GenerateLaneForLayoutingCarsInShearWall = true;
         public static double PillarNetLength = 500;
         public static double PillarNetDepth = 500;
         public static double ThicknessOfPillarConstruct = 50;
@@ -659,6 +660,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             break;
                         }
                         if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false) && split.Length < LengthCanGIntegralModulesConnectDouble) continue;
+                        if (GetCommonLengthForTwoParallelLinesOnPerpDirection(split, lane) < 1) continue;
                         paras.SetNotBeMoved = i;
                         var pl = CreatPolyFromLines(split, splitback);
                         var plback = pl.Clone() as Polyline;
@@ -944,10 +946,7 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-        /// <summary>
-        /// 在车道线剩下的空间生成车位
-        /// </summary>
-        private void GenerateCarsOnRestLanes()
+        private void UpdateLaneBoxAndSpatialIndexForGenerateVertLanes()
         {
             LaneSpatialIndex.Update(IniLanes.Select(e => CreatePolyFromLine(e.Line)).ToCollection(), new DBObjectCollection());
             LaneBoxes.AddRange(IniLanes.Select(e =>
@@ -975,6 +974,14 @@ namespace ThMEPArchitecture.PartitionLayout
                 return py;
             }));
             LaneBufferSpatialIndex.Update(LaneBoxes.ToCollection(), new DBObjectCollection());
+        }
+
+        /// <summary>
+        /// 在车道线剩下的空间生成车位
+        /// </summary>
+        private void GenerateCarsOnRestLanes()
+        {
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
             foreach (var k in vertlanes)
             {
