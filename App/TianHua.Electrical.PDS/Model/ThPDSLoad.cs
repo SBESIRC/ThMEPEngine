@@ -192,6 +192,69 @@
         None,
     }
 
+    public enum ThPDSLoadTypeCat_3
+    {
+        /// <summary>
+        /// 消防排烟风机
+        /// </summary>
+        SmokeExhaustFan,
+
+        /// <summary>
+        /// 消防补风风机
+        /// </summary>
+        MakeupAirFan,
+
+        /// <summary>
+        /// 消防加压送风风机
+        /// </summary>
+        StaircasePressurizationFan,
+
+        /// <summary>
+        /// 消防排烟兼平时排风风机
+        /// </summary>
+        ExhaustFan_Smoke,
+
+        /// <summary>
+        /// 消防补风兼平时送风风机
+        /// </summary>
+        SupplyFan_Smoke,
+
+        /// <summary>
+        /// 平时排风风机
+        /// </summary>
+        ExhaustFan,
+
+        /// <summary>
+        /// 平时送风风机
+        /// </summary>
+        SupplyFan,
+
+        /// <summary>
+        /// 厨房排油烟风机
+        /// </summary>
+        KitchenExhaustFan,
+
+        /// <summary>
+        /// 生活水泵
+        /// </summary>
+        DomesticWaterPump,
+
+        /// <summary>
+        /// 消防泵/喷淋泵/消火栓泵
+        /// </summary>
+        FirePump,
+
+        /// <summary>
+        /// 潜水泵
+        /// </summary>
+        SubmersiblePump,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
+        None,
+    }
+
     /// <summary>
     /// 负载
     /// </summary>
@@ -203,6 +266,7 @@
             InstalledCapacity = new ThInstalledCapacity();
             DefaultCircuitType = ThPDSCircuitType.None;
             LoadUID = System.Guid.NewGuid().ToString();
+            LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
         }
 
         /// <summary>
@@ -234,6 +298,11 @@
         /// 二级负载类型
         /// </summary>
         public ThPDSLoadTypeCat_2 LoadTypeCat_2 { get; set; }
+
+        /// <summary>
+        /// 三级负载类型
+        /// </summary>
+        public ThPDSLoadTypeCat_3 LoadTypeCat_3 { get; set; }
 
         /// <summary>
         /// 默认回路类型

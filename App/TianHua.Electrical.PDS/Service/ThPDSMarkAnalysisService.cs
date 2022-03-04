@@ -42,7 +42,7 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData, 
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData,
             ref string attributesCopy)
         {
             var searchedString = new List<string>();
@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
             };
 
-            if(needCopy)
+            if (needCopy)
             {
                 attributesCopy = distBoxData.EffectiveName;
             }
@@ -76,9 +76,9 @@ namespace TianHua.Electrical.PDS.Service
             var r = new Regex(@"[a-zA-Z]");
             foreach (var str in marks.Except(searchedString))
             {
-                if(r.Match(str).Success)
+                if (r.Match(str).Success)
                 {
-                    if(distBoxData.EffectiveName.Equals("E-BL001-1"))
+                    if (distBoxData.EffectiveName.Equals("E-BL001-1"))
                     {
                         thPDSLoad.ID.CircuitID = str;
                     }
@@ -91,6 +91,15 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     thPDSLoad.ID.Description.Add(str);
                 }
+            }
+
+            if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchFanCat3(thPDSLoad.ID.LoadID);
+            }
+            else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
             }
 
             return thPDSLoad;
@@ -142,7 +151,7 @@ namespace TianHua.Electrical.PDS.Service
                                 idMarks.Add(m.Value);
                             }
                         }
-                        
+
                         toAdd = false;
                         break;
                     }
@@ -437,6 +446,63 @@ namespace TianHua.Electrical.PDS.Service
                 }
             });
             return Tuple.Create(exist, primaryAvail, spareAvail);
+        }
+
+        private static ThPDSLoadTypeCat_3 MatchFanCat3(string loadID)
+        {
+            if (loadID.Contains("ESF"))
+            {
+                return ThPDSLoadTypeCat_3.SmokeExhaustFan;
+            }
+            else if (loadID.Contains("SSF"))
+            {
+                return ThPDSLoadTypeCat_3.MakeupAirFan;
+            }
+            else if (loadID.Contains("SPF"))
+            {
+                return ThPDSLoadTypeCat_3.StaircasePressurizationFan;
+            }
+            else if (loadID.Contains("E(S)F"))
+            {
+                return ThPDSLoadTypeCat_3.ExhaustFan_Smoke;
+            }
+            else if (loadID.Contains("S(S)F"))
+            {
+                return ThPDSLoadTypeCat_3.SupplyFan_Smoke;
+            }
+            else if (loadID.Contains("EF"))
+            {
+                return ThPDSLoadTypeCat_3.ExhaustFan;
+            }
+            else if (loadID.Contains("SF"))
+            {
+                return ThPDSLoadTypeCat_3.SupplyFan;
+            }
+            else if (loadID.Contains("EKF"))
+            {
+                return ThPDSLoadTypeCat_3.KitchenExhaustFan;
+            }
+            return ThPDSLoadTypeCat_3.None;
+        }
+
+        public static ThPDSLoadTypeCat_3 MatchPumpCat3(List<string> description)
+        {
+            foreach (var item in description)
+            {
+                if (item.Contains("生活水泵"))
+                {
+                    return ThPDSLoadTypeCat_3.DomesticWaterPump;
+                }
+                else if (item.Contains("消防泵") || item.Contains("喷淋泵") || item.Contains("消火栓泵"))
+                {
+                    return ThPDSLoadTypeCat_3.FirePump;
+                }
+                else if (item.Contains("潜水泵"))
+                {
+                    return ThPDSLoadTypeCat_3.SubmersiblePump;
+                }
+            }
+            return ThPDSLoadTypeCat_3.None;
         }
     }
 }
