@@ -500,6 +500,18 @@ namespace ThMEPArchitecture.PartitionLayout
             return false;
         }
 
+        public static bool IsInExtent(Point3d pt, Extents3d ext)
+        {
+            return ext.IsPointIn(pt);
+        }
+
+        public static bool IsAnyInExtent(IEnumerable<Point3d> points, Extents3d ext)
+        {
+            foreach (var pt in points)
+                if (ext.IsPointIn(pt)) return true;
+            return false;
+        }
+
         public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes, bool true_on_edge = false)
         {
             if (boxes.Count == 0) return false;
@@ -569,6 +581,15 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (res > dis) res = dis;
             }
             return res;
+        }
+
+        public static bool ClosestPointInCurveInAllowDistance(Point3d pt, List<Polyline> crvs, double distance)
+        {
+            foreach (var t in crvs)
+            {
+                if (t.GetClosestPointTo(pt, false).DistanceTo(pt) < distance) return true;
+            }
+            return false;
         }
 
         public static double ClosestPointInCurvesFast(Point3d pt, List<Polyline> crvs)

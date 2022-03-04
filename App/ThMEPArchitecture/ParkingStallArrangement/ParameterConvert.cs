@@ -55,15 +55,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //图纸：齐少华:toyu0215.dwg
             var obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(bound).Cast<Polyline>().ToList();
             var buildingBoxes = new List<Polyline>();
+            var boundaryboundingbox = (Extents3d)boundary.Bounds;
             foreach (var obs in buildingObstacleList)
             {
                 Extents3d ext = new Extents3d();
                 foreach (var o in obs)
                 {
-                    if (boundary.Contains(o) || boundary.Intersect(o, Intersect.OnBothOperands).Count > 0)
+                    var vertices = o.Vertices().Cast<Point3d>();
+                    if (GeoUtilities.IsAnyInExtent(vertices, boundaryboundingbox))
                     {
-                        ext.AddExtents(o.GeometricExtents);
+                        foreach (var v in vertices)
+                            if (boundary.Contains(v))
+                            {
+                                ext.AddExtents(o.GeometricExtents);
+                                break;
+                            }
                     }
+                    //if (boundary.Contains(o) || boundary.Intersect(o, Intersect.OnBothOperands).Count > 0)
+                    //{
+                    //    ext.AddExtents(o.GeometricExtents);
+                    //}
                 }
                 if (ext.ToExtents2d().GetArea() >= 2 * 10e7 && ext.ToExtents2d().GetArea() < 10e15)
                     buildingBoxes.Add(ext.ToRectangle());

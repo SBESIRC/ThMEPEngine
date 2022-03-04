@@ -146,7 +146,7 @@ namespace ThMEPArchitecture.PartitionLayout
             var points = new List<Point3d>();
             foreach (var crv in splits)
                 points.AddRange(crv.EntityVertices().Cast<Point3d>());
-            points=points.Select(p => line.GetClosestPointTo(p,false)).ToList();
+            points = points.Select(p => line.GetClosestPointTo(p, false)).ToList();
             pl.Dispose();
             return SplitLine(line, points);
         }
@@ -292,7 +292,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             if (isvalid)
             {
-                lt.AddToCurrentSpace();
                 dist = dist - DisLaneWidth / 2;
                 dist = dist - offsetcount * (DisVertCarLength / cyclecount);
                 return dist;
@@ -605,8 +604,15 @@ namespace ThMEPArchitecture.PartitionLayout
                 k.Scale(k.GetRecCentroid(), ScareFactorForCollisionCheck);
                 var conda = Boundary.Contains(k.GetRecCentroid());
                 var condb = !IsInAnyPolys(k.GetRecCentroid(), obspls);
-                var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
-                if (conda && condb && condc) tmps.Add(e);
+                //var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
+                //if (conda && condb && condc) tmps.Add(e);
+                if (conda && condb)
+                {
+                    if (Boundary.GetClosestPointTo(k.GetRecCentroid(), false).DistanceTo(k.GetRecCentroid()) > DisVertCarLength)
+                        tmps.Add(e);
+                    else if (Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0)
+                        tmps.Add(e);
+                }
             }
             CarSpots = tmps;
         }
@@ -632,13 +638,13 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 var clone = t.Clone() as Polyline;
                 clone.Scale(clone.GetRecCentroid(), 0.5);
-                if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength + DisHalfCarToPillar)
-                    clone.Dispose();
-                else
+                if (ClosestPointInCurveInAllowDistance(clone.GetRecCentroid(), CarSpots, DisPillarLength + DisHalfCarToPillar))
                 {
                     clone.Dispose();
                     tmps.Add(t);
                 }
+                else
+                    clone.Dispose();
             }
             Pillars = tmps;
             //List<Polyline> tmps = new List<Polyline>();

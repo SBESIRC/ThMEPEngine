@@ -183,6 +183,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <returns></returns>
         public bool Validate()
         {
+            return true;
             double length_judge_lane_nextto_wall = 30000;
             var lines = IniLanes.Select(e => e.Line);
             var pls = lines.Select(l => l.Buffer(DisLaneWidth / 2));
