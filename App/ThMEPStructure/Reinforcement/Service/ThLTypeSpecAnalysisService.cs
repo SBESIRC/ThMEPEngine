@@ -6,24 +6,13 @@ namespace ThMEPStructure.Reinforcement.Service
 {
     internal class ThLTypeSpecAnalysisService : ThAnalysisService
     {
-        /// <summary>
-        /// 端口
-        /// </summary>
-        public Tuple<Point3d, Point3d> EdgeA { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        public Tuple<Point3d, Point3d> EdgeB { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        public Tuple<Point3d, Point3d> EdgeC { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        /// <summary>
-        /// 端口
-        /// </summary>
-        public Tuple<Point3d, Point3d> EdgeD { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        public Tuple<Point3d, Point3d> EdgeE { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        public Tuple<Point3d, Point3d> EdgeF { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
-        public int A => EdgeA.GetLineDistance().Round(); // 端口长度
-        public int B => EdgeB.GetLineDistance().Round();
-        public int C => EdgeC.GetLineDistance().Round();
-        public int D => EdgeD.GetLineDistance().Round(); // 端口长度
-        public int E => EdgeE.GetLineDistance().Round();
-        public int F => EdgeF.GetLineDistance().Round();
+        public int A { get; set; } // 端口长度
+        public int B { get; set; } // 
+
+        public int C { get; set; } // 
+        public int D { get; set; } // 端口长度
+        public int E { get; set; } // 
+        public int F { get; set; } // 
 
         public override void Analysis(Polyline lType)
         {
@@ -48,27 +37,29 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             var l1Groups = l1l2Edges[0];
             var l2Groups = l1l2Edges[1];
-            EdgeE = lines[l1Groups.Item1];
-            EdgeF = lines[l2Groups.Item1];
+            var e = lines[l1Groups.Item1];
+            var f = lines[l2Groups.Item1];
 
-            var linkPt = FindLinkPt(EdgeE, EdgeF);
+            var linkPt = FindLinkPt(e, f);
             if(!linkPt.HasValue)
             {
                 return;
             }
-           
+            E = e.GetLineDistance().Round();
+            F = f.GetLineDistance().Round();
+
             var newL1GroupsItem2 = l1Groups.Item2.SortEdgeIndexes(lines, linkPt.Value);
             var newL2GroupsItem2 = l2Groups.Item2.SortEdgeIndexes(lines, linkPt.Value);
 
             var aIndex = newL1GroupsItem2[0];
             var cIndex = newL1GroupsItem2[1];
-            EdgeA = lines[aIndex]; //端口
-            EdgeC = lines[cIndex];
+            A = lines[aIndex].GetLineDistance().Round(); //端口
+            C = lines[cIndex].GetLineDistance().Round();
 
             var dIndex = newL2GroupsItem2[0];
             var bIndex = newL2GroupsItem2[1];
-            EdgeD = lines[dIndex]; //端口
-            EdgeB = lines[bIndex]; 
+            D = lines[dIndex].GetLineDistance().Round(); //端口
+            B = lines[bIndex].GetLineDistance().Round(); 
         }
         private Point3d? FindLinkPt(Tuple<Point3d, Point3d> first, Tuple<Point3d, Point3d> second)
         {

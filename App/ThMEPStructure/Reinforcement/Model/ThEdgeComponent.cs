@@ -9,7 +9,7 @@
         /// <summary>
         /// 保护层厚度
         /// </summary>
-        public double C { get; set; }
+        public float C { get; set; }
         /// <summary>
         /// 箍筋规格
         /// </summary>
@@ -27,5 +27,9 @@
         /// 取值："A" or "B"
         /// </summary>
         public string Type { get; set; }
+        /// <summary>
+        /// 砼强度等级
+        /// </summary>
+        public string ConcreteStrengthGrade { get; set; }
     }
 }

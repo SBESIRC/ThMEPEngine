@@ -1,29 +1,19 @@
-﻿using System;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
     internal class ThRectangleSpecAnalysisService : ThAnalysisService
     {
-        public Tuple<Point3d, Point3d> EdgeA { get; private set; }
-        public Tuple<Point3d, Point3d> EdgeB { get; private set; }
-        public Tuple<Point3d, Point3d> EdgeC { get; private set; }
-        public Tuple<Point3d, Point3d> EdgeD { get; private set; }
-        public int A => EdgeA.GetLineDistance().Round();
-        public int B => EdgeB.GetLineDistance().Round();
-        public int C => EdgeC.GetLineDistance().Round();
-        public int D => EdgeD.GetLineDistance().Round();
-
+        public int L { get; set; } // 长度
+        public int W { get; set; } // 宽度
         public override void Analysis(Polyline rectangle)
         {
             /*
-             *          C
              *   --------------
-             * D |            | B
+             *   |            | (W)
              *   |            |
              *   --------------
-             *          A
+             *        (L)
              */
             var lines = rectangle.ToLines();
             if(lines.Count!=4)
@@ -34,29 +24,13 @@ namespace ThMEPStructure.Reinforcement.Service
             var secondDis= lines[1].GetLineDistance();
             if (firstDis.IsEqual(secondDis,1.0))
             {
-                // 正方形
-                EdgeA = lines[0];
-                EdgeB = lines[1];
-                EdgeC = lines[2];
-                EdgeD = lines[3];
+                L = firstDis.Round();
+                W = L;
             }
             else
-            { 
-                // 长方形
-                if(firstDis > secondDis)
-                {
-                    EdgeA = lines[0];
-                    EdgeB = lines[1];
-                    EdgeC = lines[2];
-                    EdgeD = lines[3];
-                }
-                else
-                {
-                    EdgeA = lines[1];
-                    EdgeB = lines[2];
-                    EdgeC = lines[3];
-                    EdgeD = lines[0];
-                }
+            {
+                L = firstDis > secondDis ? firstDis.Round() : secondDis.Round();
+                W = firstDis < secondDis ? firstDis.Round() : secondDis.Round();
             }
         }
     }

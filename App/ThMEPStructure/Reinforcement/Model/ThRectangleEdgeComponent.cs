@@ -2,8 +2,8 @@
 {
     public class ThRectangleEdgeComponent: ThEdgeComponent
     {
-        public double Bw { get; set; }
-        public double Hc { get; set; }        
+        public int Bw { get; set; }
+        public int Hc { get; set; }        
         
         /// <summary>
         /// 拉筋

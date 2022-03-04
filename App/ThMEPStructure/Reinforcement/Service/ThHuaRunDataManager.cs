@@ -1,57 +1,10 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
     internal class ThHuaRunDataManager
     {
-        private static readonly ThHuaRunDataManager instance = new ThHuaRunDataManager() { };
-        static ThHuaRunDataManager() { }
-        internal ThHuaRunDataManager() 
-        {
-            RectSpecInfos = GetRectSpecInfos();
-            LTypeSpecInfos = GetLTypeSpecInfos();
-            TTypeSpecInfos = GetTTypeSpecInfos();
-        }
-        public static ThHuaRunDataManager Instance { get { return instance; } }
-        public List<ThHuaRunRectComponentSpecInfo> RectSpecInfos { get; private set; }
-        public List<ThHuaRunLTypeComponentSpecInfo> LTypeSpecInfos { get; private set; }
-        public List<ThHuaRunTTypeComponentSpecInfo> TTypeSpecInfos { get; private set; }
-        public List<ThHuaRunRectComponentSpecInfo> QueryRect(string antiSeismicGrade,string code,int hc,int bw)
-        {
-            var upperCode = code.ToUpper();
-            return RectSpecInfos.Where(
-                o => o.AntiSeismicGrade == antiSeismicGrade &&
-                o.Code == upperCode &&
-                o.Hc == hc && 
-                o.Bw == bw)
-                .ToList();            
-        }
-        public List<ThHuaRunLTypeComponentSpecInfo> QueryLType(string antiSeismicGrade, string code, int hc1, int bw, int hc2, int bf)
-        {
-            var upperCode = code.ToUpper();
-            return LTypeSpecInfos.Where(
-                o => o.AntiSeismicGrade == antiSeismicGrade &&
-                o.Code == upperCode &&
-                o.Hc1 == hc1 &&
-                o.Bw == bw &&
-                 o.Hc2 == hc2 &&
-                o.Bf == bf)
-                .ToList();
-        }
-        public List<ThHuaRunTTypeComponentSpecInfo> QueryTType(string antiSeismicGrade, string code, int hc1, int bw, int hc2, int bf)
-        {
-            var upperCode = code.ToUpper();
-            return TTypeSpecInfos.Where(
-                o => o.AntiSeismicGrade == antiSeismicGrade &&
-                o.Code == upperCode &&
-                o.Hc1 == hc1 &&
-                o.Bw == bw &&
-                 o.Hc2 == hc2 &&
-                o.Bf == bf)
-                .ToList();
-        }
-        private List<ThHuaRunRectComponentSpecInfo> GetRectSpecInfos()
+        public static List<ThHuaRunRectComponentSpecInfo> GetRectSpecInfos()
         {
             var results = new List<ThHuaRunRectComponentSpecInfo>();
             results.Add(new ThHuaRunRectComponentSpecInfo("YBZ", "一级", 400, 180));
@@ -104,7 +57,7 @@ namespace ThMEPStructure.Reinforcement.Service
             results.Add(new ThHuaRunRectComponentSpecInfo("GBZ", "四级", 400, 400));
             return results;
         }
-        private List<ThHuaRunLTypeComponentSpecInfo> GetLTypeSpecInfos()
+        public static List<ThHuaRunLTypeComponentSpecInfo> GetLTypeSpecInfos()
         {
             var results = new List<ThHuaRunLTypeComponentSpecInfo>();
             #region ---------- YBZ一级 ----------
@@ -309,7 +262,7 @@ namespace ThMEPStructure.Reinforcement.Service
             #endregion
             return results; 
         }
-        private List<ThHuaRunTTypeComponentSpecInfo> GetTTypeSpecInfos()
+        public static List<ThHuaRunTTypeComponentSpecInfo> GetTTypeSpecInfos()
         {
             var results = new List<ThHuaRunTTypeComponentSpecInfo>();
             #region ---------- YBZ一级 ----------
