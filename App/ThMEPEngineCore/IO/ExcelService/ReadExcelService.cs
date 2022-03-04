@@ -4,6 +4,7 @@ using NPOI.SS.UserModel;
 using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
 using NPOI.HPSF;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO.ExcelService
 {
@@ -36,15 +37,21 @@ namespace ThMEPEngineCore.IO.ExcelService
                     {
                         IRow firstRow = sheet.GetRow(0);//获取第一行
                         int cellCount = firstRow.LastCellNum;//获取总列数
-
-                        //构建datatable的列
+                        var columnNums = new List<int>();//过滤隐藏列
                         for (int i = firstRow.FirstCellNum; i < cellCount; ++i)
+                        {
+                            if (sheet.IsColumnHidden(i))
+                                continue;
+                            columnNums.Add(i);
+                        }
+                        //构建datatable的列
+                        columnNums.ForEach(i =>
                         {
                             ICell cell = firstRow.GetCell(i);
                             string columnName = isFirstLineColumnName ? cell.StringCellValue : "column" + (i + 1);
                             DataColumn column = new DataColumn(columnName);
                             dataTable.Columns.Add(column);
-                        }
+                        });
 
                         int startRow = isFirstLineColumnName ? 1 : 0;
                         //填充行
@@ -54,9 +61,9 @@ namespace ThMEPEngineCore.IO.ExcelService
                             if (row == null) continue;
                             if (row.Hidden.Value==true) continue;
                             DataRow dataRow = dataTable.NewRow();
-                            for (int j = row.FirstCellNum; j < cellCount; ++j)
+                            for (int j = 0; j < columnNums.Count; j++)
                             {
-                                ICell cell = row.GetCell(j);
+                                ICell cell = row.GetCell(columnNums[j]);
                                 if (cell == null)
                                 {
                                     dataRow[j] = "";
