@@ -8,12 +8,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPStructure.Reinforcement.Data.YJK;
+using ThMEPStructure.Reinforcement.Model;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public class EdgeComponentDrawVM
     {
-        public ObservableCollection<EdgeComponentInfo> EdgeComponents { get; set; }
+        public ObservableCollection<EdgeComponentExtractInfo> EdgeComponents { get; set; }
         public EdgeComponentDrawModel DrawModel { get; set; }
         public ObservableCollection<string> DwgSources { get; set; }
         public ObservableCollection<string> SortWays { get; set; }
@@ -26,27 +27,29 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             SortWays = new ObservableCollection<string>() { "从左到右，从下到上" };
             LeaderTypes = new ObservableCollection<string>() { "折现引出" };
             MarkPositions = new ObservableCollection<string>() { "右上", "右下", "左上", "左下" };
-            EdgeComponents = new ObservableCollection<EdgeComponentInfo>();
+            EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
         }
-        private EdgeComponentInfo Create(string number, string spec, string shape, string type, double reinforceRatio, double stirrupRatio)
-        {
-            return new EdgeComponentInfo()
-            {
-                Number = number,
-                Spec = spec,
-                Shape = shape,
-                Type = type,
-                StirrupRatio = stirrupRatio,
-                ReinforceRatio = reinforceRatio,
-            };
-        }
+        //private EdgeComponentExtractInfo Create(string number, string spec, string shape, string type, double reinforceRatio, double stirrupRatio)
+        //{
+        //    return new EdgeComponentExtractInfo()
+        //    {
+        //        Number = number,
+        //        Spec = spec,
+        //        Shape = shape,
+        //        Type = type,
+        //        StirrupRatio = stirrupRatio,
+        //        ReinforceRatio = reinforceRatio,
+        //    };
+        //}
         public void Select()
         {
+            // 识别
             //ToDO
+
         }
         public void Clear()
         {
-            EdgeComponents = new ObservableCollection<EdgeComponentInfo>();
+            EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
         }
         public void Merge()
         {
@@ -55,6 +58,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public void Draw()
         {
             //TODO
+
         }
         public void SetWallColumnLayer()
         {

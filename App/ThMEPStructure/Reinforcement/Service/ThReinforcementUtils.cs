@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 
 namespace ThMEPStructure.Reinforcement.Service
@@ -37,6 +38,19 @@ namespace ThMEPStructure.Reinforcement.Service
                 var cleanInstance = new ThLaneLineCleanService();
                 return cleanInstance.CleanNoding(lines);
             }
+        }
+
+        public static DBObjectCollection PostProcess(this DBObjectCollection polygons, double areaTolerance = 1.0)
+        {
+            var results = polygons.FilterSmallArea(areaTolerance);
+            var roomSimplifier = new ThPolygonalElementSimplifier();
+            results = roomSimplifier.Normalize(results);
+            results = results.FilterSmallArea(areaTolerance);
+            results = roomSimplifier.MakeValid(results);
+            results = results.FilterSmallArea(areaTolerance);
+            results = roomSimplifier.Simplify(results);
+            results = results.FilterSmallArea(areaTolerance);
+            return results;
         }
 
         public static DBObjectCollection Extend(this DBObjectCollection lines, double length)
@@ -172,6 +186,36 @@ namespace ThMEPStructure.Reinforcement.Service
         public static double DirectionCompair(Point3d prePoint, Point3d curPoint, Point3d nxtPoint)
         {
             return (curPoint.X - prePoint.X) * (nxtPoint.Y - curPoint.Y) - (nxtPoint.X - curPoint.X) * (curPoint.Y - prePoint.Y);
+        }
+        public static bool IsEqual(this double first, double second, double tolerance = 1e-6)
+        {
+            return Math.Abs(first - second) <= tolerance;
+        }
+        public static int Round(this double length)
+        {
+            return (int)Math.Floor(length + 0.5);
+        }
+        public static List<Tuple<Point3d, Point3d>> ToLines(this Polyline poly)
+        {
+            var results = new List<Tuple<Point3d, Point3d>>();
+            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+            {
+                var st = poly.GetSegmentType(i);
+                if (st == SegmentType.Line)
+                {
+                    var lineSeg = poly.GetLineSegmentAt(i);
+                    results.Add(Tuple.Create(lineSeg.StartPoint, lineSeg.EndPoint));
+                }
+            }
+            return results;
+        }
+        public static Vector3d GetLineDirection(this Tuple<Point3d, Point3d> linePtPair)
+        {
+            return linePtPair.Item1.GetVectorTo(linePtPair.Item2).GetNormal();
+        }
+        public static double GetLineDistance(this Tuple<Point3d, Point3d> linePtPair)
+        {
+            return linePtPair.Item1.DistanceTo(linePtPair.Item2);
         }
     }
 }
