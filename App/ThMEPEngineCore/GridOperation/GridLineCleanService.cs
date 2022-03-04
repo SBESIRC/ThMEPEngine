@@ -16,6 +16,7 @@ namespace ThMEPEngineCore.GridOperation
     public class GridLineCleanService
     {
         double arcCenterTol = 100;
+        double angleTolerance = 1 * Math.PI / 180.0;
         public double lineExtendLength = 10000;
         /// <summary>
         /// 清洗轴网线
@@ -191,12 +192,29 @@ namespace ThMEPEngineCore.GridOperation
                 else
                 {
                     var dir = (line.EndPoint - line.StartPoint).GetNormal();
-                    var compareKey = lineGroup.Where(x => x.vecter.IsParallelTo(dir, new Tolerance(0.1, 0.1)) || Math.Abs(x.vecter.DotProduct(dir)) < 0.1).FirstOrDefault();
+                    var compareKey = lineGroup.Where(x => 
+                    {
+                        var angle = x.vecter.GetAngleTo(dir);
+                        angle %= Math.PI;
+                        if (angle <= angleTolerance || angle >= Math.PI - angleTolerance)
+                        {
+                            //平行
+                            return true;
+                        }
+                        else if(Math.Abs(angle - Math.PI/2)<=angleTolerance)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }).FirstOrDefault();
                     if (compareKey != null)
                     {
                         var lineKey = lineGroup.First(x => x == compareKey);
-                        if (lineKey.vecter.IsParallelTo(dir, new Tolerance(0.1, 0.1)))
+                        var angle = lineKey.vecter.GetAngleTo(dir);
+                        angle %= Math.PI;
+                        if (angle <= angleTolerance || angle >= Math.PI - angleTolerance)
                         {
+                            //平行
                             lineKey.xLines.Add(line);
                         }
                         else

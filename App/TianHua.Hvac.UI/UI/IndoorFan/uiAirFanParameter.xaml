@@ -321,7 +321,7 @@
                             <UniformGrid Columns="7" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
                                 <!--制冷工况制冷量-->
                                 <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolCoolingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox Text="{Binding CoolCoolingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
