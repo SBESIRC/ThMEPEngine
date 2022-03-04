@@ -23,8 +23,8 @@ namespace ThMEPHVAC.Model
             using (var acadDb = AcadDatabase.Active())
             {
                 string portSize = portWidth.ToString() + 'x' + portHeight.ToString();
-                double h = ThMEPHVACService.GetTextHeight(param.scale);
-                double scaleH = h * 2 / 3;
+                var strs = param.scale.Split(':');
+                double scaleH = (strs.Length == 2) ? Double.Parse(strs[1]) : 100;
                 int portNum = param.portNum;
                 if (param.portRange.Contains("侧"))
                     portNum *= 2;
