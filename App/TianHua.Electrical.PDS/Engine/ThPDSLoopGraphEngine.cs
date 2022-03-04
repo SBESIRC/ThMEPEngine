@@ -14,7 +14,6 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
-using ThMEPEngineCore;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -255,7 +254,7 @@ namespace TianHua.Electrical.PDS.Engine
                 }
 
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
-                if(newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
+                if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
                     newEdge.Circuit.Type = ThPDSLayerService.SelectCircuitType(circuit.Layer);
                 }
@@ -278,13 +277,13 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 寻路算法，sourceEntity表示连接上级，nextEntity表示自身
         /// </summary>
-        public List<Tuple<Entity, Entity, List<string>>> Navigate(ThPDSCircuitGraphNode node, List<Entity> loads, 
+        public List<Tuple<Entity, Entity, List<string>>> Navigate(ThPDSCircuitGraphNode node, List<Entity> loads,
             List<string> logos, Entity sourceEntity, Entity nextEntity)
         {
             var results = new List<Tuple<Entity, Entity, List<string>>>();
             var findLoop = FindRootNextElement(sourceEntity, nextEntity);
 
-            if(findLoop.Count == 0)
+            if (findLoop.Count == 0)
             {
                 return results;
             }
@@ -613,7 +612,10 @@ namespace TianHua.Electrical.PDS.Engine
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
                                                     FindRootNextPath(newsharedPath, secondCurve, false).ForEach(newPath =>
                                                     {
-                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                        if (!FindPath.ContainsKey(newPath.Key))
+                                                        {
+                                                            FindPath.Add(newPath.Key, newPath.Value);
+                                                        }
                                                     });
                                                 }
                                                 else if (secondCurve.EndPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.EndPoint, false))
@@ -623,7 +625,10 @@ namespace TianHua.Electrical.PDS.Engine
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
                                                     FindRootNextPath(newsharedPath, secondCurve, true).ForEach(newPath =>
                                                     {
-                                                        FindPath.Add(newPath.Key, newPath.Value);
+                                                        if (!FindPath.ContainsKey(newPath.Key))
+                                                        {
+                                                            FindPath.Add(newPath.Key, newPath.Value);
+                                                        }
                                                     });
                                                 }
                                             }
@@ -729,7 +734,7 @@ namespace TianHua.Electrical.PDS.Engine
                     var targetEdge = edgeList.Where(e => e.Target.Loads[0].InstalledCapacity.UsualPower.Count +
                         e.Target.Loads[0].InstalledCapacity.FirePower.Count == 0).ToList();
                     var sourceEdge = edgeList.Except(targetEdge).FirstOrDefault();
-                    if(sourceEdge == null)
+                    if (sourceEdge == null)
                     {
                         return;
                     }

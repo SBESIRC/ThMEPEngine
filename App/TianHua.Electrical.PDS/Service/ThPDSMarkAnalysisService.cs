@@ -128,14 +128,21 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (info.Contains(key))
                     {
-                        if (info.Contains("-W") || info.Contains("/W"))
+                        var check = "[a-zA-Z0-9-/]+";
+                        var r = new Regex(@check);
+                        var m = r.Match(info);
+                        if (m.Success)
                         {
-                            circuitMarks.Add(info);
+                            if (m.Value.Contains("-W") || m.Value.Contains("/W"))
+                            {
+                                circuitMarks.Add(m.Value);
+                            }
+                            else
+                            {
+                                idMarks.Add(m.Value);
+                            }
                         }
-                        else
-                        {
-                            idMarks.Add(info);
-                        }
+                        
                         toAdd = false;
                         break;
                     }
