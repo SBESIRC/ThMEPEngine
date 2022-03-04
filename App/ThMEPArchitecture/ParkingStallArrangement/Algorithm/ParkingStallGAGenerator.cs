@@ -470,14 +470,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double LowerBound = LowerUpperBound[i].Item1;
                     double UpperBound = LowerUpperBound[i].Item2;
                     double RandValue;
-                    if (RandDouble() > GoldenRatio)
-                    {
-                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
-                    }
-                    else
-                    {
-                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
-                    }
+                    //if (RandDouble() > GoldenRatio)
+                    //{
+                    //    RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
+                    //}
+                    //else
+                    //{
+                    //    RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
+                    //}
+                    RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
