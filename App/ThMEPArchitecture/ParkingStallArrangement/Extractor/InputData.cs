@@ -28,7 +28,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 return null;
             }
         }
+        public static DBObjectCollection SelectObstacles(AcadDatabase acadDatabase)
+        {
+            var entOpt = new PromptSelectionOptions { MessageForAdding = "\n请选择包含障碍物的块:" };
+            var result = Active.Editor.GetSelection(entOpt);
+            if (result.Status != PromptStatus.OK)
+            {
+                return null;
+            }
+            var objs = new DBObjectCollection();
+            foreach (var id in result.Value.GetObjectIds())
+            {
 
+                var obj = acadDatabase.Element<Entity>(id);
+                if(obj is BlockReference blk)
+                {
+                    objs.Add(blk);
+                }
+            }
+            return objs;
+        }
         public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null)
         {
             outerBrder = new OuterBrder();

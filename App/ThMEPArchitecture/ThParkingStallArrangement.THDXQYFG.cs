@@ -21,6 +21,15 @@ namespace ThMEPArchitecture
 {
     public partial class ThParkingStallArrangement
     {
+        [CommandMethod("TIANHUACAD", "-THDXCKYCL", CommandFlags.Modal)]
+        public void ThParkingStallPreprocess()
+        {
+            using (var cmd = new ThParkingStallPreprocessCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "-THFGXDD", CommandFlags.Modal)]
         public void ThBreakSegLines()
         {
