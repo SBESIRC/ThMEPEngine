@@ -26,12 +26,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SegBreakLog.txt");
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "PreProcessLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
-
-        
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
         public ThParkingStallPreprocessCmd()
@@ -112,8 +110,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //获取不重复的块名
             var blockName = acadDatabase.Database.GetBlockName(LayerName);
             // 创建块，并且插入到原位
-            acadDatabase.Database.AddBlockTableRecord(blockName, walls);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, new Point3d(0,0,0), new Scale3d(1), 0);
+            Point3d InsertPoint =acadDatabase.Database.AddBlockTableRecord(blockName, walls);
+            acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0);
+
         }
         private DBObjectCollection ExplodeToLines(DBObjectCollection input_blocks, out DBObjectCollection outwalls)
         {
@@ -207,6 +206,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 i += 1;
             }
             return blockName;
+        }
+        // 创建块并插入原位，插入点为中心点
+        public static Point3d AddBlockTableRecord(this Database db, string blockName, List<Entity> ents)
+        {
+            var center = ents.GetCenter();
+            //打开块表
+            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            if (!bt.Has(blockName)) //判断是否存在名为blockName的块
+            {
+                //创建一个BlockTableRecord类的对象，表示所要创建的块
+                BlockTableRecord btr = new BlockTableRecord();
+                btr.Name = blockName;//设置块名                
+                //将列表中的实体加入到新建的BlockTableRecord对象
+                ents.ForEach(ent => btr.AppendEntity(ent));
+                btr.Origin = center;
+                bt.UpgradeOpen();//切换块表为写的状态
+                bt.Add(btr);//在块表中加入blockName块
+                db.TransactionManager.AddNewlyCreatedDBObject(btr, true);//通知事务处理
+                bt.DowngradeOpen();//为了安全，将块表状态改为读
+            }
+            return center;//返回块表记录的Id
         }
     }
 }
