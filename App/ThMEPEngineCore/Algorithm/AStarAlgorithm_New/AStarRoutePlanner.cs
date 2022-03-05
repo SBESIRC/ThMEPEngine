@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm_New
 {
+    /*
+     * 用障碍物的点位建网格，障碍物较少的情况下速度会更快 
+     */
     /// <summary>
     /// AStarRoutePlanner A*路径规划。每个单元格Cell的位置用Point表示
     /// F = G + H 。

@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -15,7 +16,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<Polyline> mainRainPipes;                       //雨水主管
         List<VerticalPipeModel> verticalPipes;              //排雨水立管
         List<Polyline> wallPolys;                           //墙线
-        readonly double step = 90;                          //步长
+        readonly double step = 50;                          //步长
+        readonly double lineDis = 160;                      //连接线区域范围
+        readonly double lineWieght = 3;                     //连接线区域权重
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls)
         {
             frame = polyline;
@@ -34,6 +37,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var resRoutes = new List<RouteModel>();
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var holeConnectLines = new List<Polyline>();
             foreach (var pipe in verticalPipes)
             {
                 var allLines = sewageLines;
@@ -47,7 +51,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
                 var closetLine = GetClosetLane(allLines, pipe.Position, frame);
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step);
-                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, wallPolys);
+                Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
+                weightHoles.Add(wallPolys, double.MaxValue);
+                weightHoles.Add(holeConnectLines, lineWieght);
+                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
+                holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
@@ -60,6 +68,21 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             return resRoutes;
+        }
+
+        /// <summary>
+        /// 创建连接线加权区域
+        /// </summary>
+        /// <param name="polylines"></param>
+        /// <returns></returns>
+        public List<Polyline> CreateConnectLineHoles(List<Polyline> polylines)
+        {
+            var resLines = new List<Polyline>();
+            foreach (var polyline in polylines)
+            {
+                resLines.AddRange(polyline.BufferPL(lineDis).Cast<Polyline>().ToList());
+            }
+            return resLines;
         }
 
         /// <summary>

@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
 {
-    public class Point : AStarEntity , IEquatable<Point>
+    public class GloblePoint : AStarEntity, IEquatable<GloblePoint>
     {
-        public Point() { }
-        public Point(int xValue, int yValue)
+        public GloblePoint(double xValue, double yValue)
         {
-            this.x = xValue;
-            this.y = yValue;
+            this.x = Convert.ToDouble(xValue.ToString("0.000000"));
+            this.y = Convert.ToDouble(yValue.ToString("0.000000"));
         }
 
         /// <summary>
         /// column坐标
         /// </summary>
-        private int x;
-        public int X
+        private double x;
+        public double X
         {
             get
             {
@@ -30,8 +29,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
         /// <summary>
         /// Row坐标
         /// </summary>
-        private int y;
-        public int Y
+        private double y;
+        public double Y
         {
             get
             {
@@ -47,9 +46,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
             get; set;
         }
 
-        public bool Equals(Point other)
+        public bool Equals(GloblePoint other)
         {
-            if((x == other.x) && (y == other.y))
+            if ((x == other.x) && (y == other.y))
             {
                 return true;
             }

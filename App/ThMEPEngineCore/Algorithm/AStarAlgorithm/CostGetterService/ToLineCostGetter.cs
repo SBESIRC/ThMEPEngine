@@ -30,5 +30,17 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
             int costH = ((AStarLine)endLine).GetDistancePoint(cell) * 10;    //计算H值
             return costH;
         }
+
+        public double GetGCost(GlobleNode currentNode, GloblePoint nextNode)
+        {
+            double parentG = currentNode != null ? currentNode.CostG : 0;
+            return (Math.Abs(currentNode.Location.X - nextNode.X) + Math.Abs(currentNode.Location.Y - nextNode.Y)) * 10 + parentG;
+        }
+
+        public double GetHCost(GloblePoint cell, AStarEntity endLine)
+        {
+            double costH = ((GlobleLine)endLine).GetDistancePoint(cell) * 10;    //计算H值
+            return costH;
+        }
     }
 }

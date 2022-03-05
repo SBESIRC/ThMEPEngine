@@ -190,7 +190,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             //var bufferFrames = userFrames.Select(x => x.Buffer(100)[0] as Polyline).ToList();
             foreach (var room in rooms)
             {
-                var bufferRoom = room.Buffer(150)[0] as Polyline;
+                var bufferRoom = room.Buffer(50)[0] as Polyline;
                 var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
                 roomWallLst.Add(resMPoly);
                 //var checkFrame = bufferFrames.Where(x => room.IsIntersects(x)).ToList();
