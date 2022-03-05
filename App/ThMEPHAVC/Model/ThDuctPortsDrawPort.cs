@@ -34,6 +34,7 @@ namespace ThMEPHVAC.Model
                 double angle = ThMEPHVACService.GetPortRotateAngle(dirVec);
                 verticalPipes = new List<SegInfo>();
                 var h = GetVerticalPipeHeight(avgAirVolume);
+                var vec = Vector3d.ZAxis * ((h + 100) * 0.5);
                 foreach (var pos in info.portsInfo)
                 {
                     if (portParam.verticalPipeEnable)
@@ -41,15 +42,15 @@ namespace ThMEPHVAC.Model
                         GetSidePortInsertPos(dirVec, pos.position, h, out Point3d pL, out Point3d pR);
                         InsertPort(pR + orgDisVec, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
                         InsertPort(pL + orgDisVec, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                        var vec = dirVec * (portWidth * 0.5 + 100);
                         var sp = pos.position - vec;
                         var ep = pos.position + vec;
                         verticalPipes.Add(new SegInfo()
                         {
                             l = new Line(sp, ep),
+                            horizontalVec = dirVec,
                             airVolume = avgAirVolume,
-                            ductSize = h.ToString() + "x" + (portWidth + 200).ToString()
-                        }); ;
+                            ductSize = (portWidth + 200).ToString() + "x" + h.ToString()
+                        });
                     }
                     else
                     {

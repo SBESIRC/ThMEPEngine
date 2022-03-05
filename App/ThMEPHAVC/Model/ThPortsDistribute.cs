@@ -185,7 +185,9 @@ namespace ThMEPHVAC.Model
             // 注意末端管的最后一段管段一定有风口
             ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double w, out double h);
             var x = Math.Max(w, h);
-            var firstOftDis = 200 + x * 0.5;
+            var endInterval = 200;
+            var firstOftDis = portParam.verticalPipeEnable ? 
+                endInterval + (x + 200) * 0.5 : endInterval + x * 0.5;// 有立管时风口宽+200
             foreach (var endline in endlines)
             {
                 var endEndline = endline.endlines.Values.First();// 最后一段管段

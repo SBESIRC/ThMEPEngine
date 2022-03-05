@@ -197,6 +197,16 @@ namespace ThMEPHVAC.Model
             db.Database.UnLockLayer(layerName);
             db.Database.UnOffLayer(layerName);
         }
+        public void DrawVerticalPipe(List<SegInfo> centerLines, Matrix3d mat)
+        {
+            foreach (var seg in centerLines)
+            {
+                var duct = ThDuctPortsFactory.CreateVerticalPipe(seg, seg.ductSize);
+                DrawDuct(duct, mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
+                var ductParam = ThMEPHVACService.CreateDuctModifyParam(duct.centerLines, seg.ductSize, seg.elevation, seg.airVolume);
+                ThDuctPortsRecoder.CreateDuctGroup(geoIds, flgIds, centerIds, ductParam);
+            }
+        }
         public void DrawDuct(List<SegInfo> centerLines, Matrix3d mat)
         {
             foreach (var seg in centerLines)

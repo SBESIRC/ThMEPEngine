@@ -41,6 +41,7 @@ namespace ThMEPHVAC.Model
     public class SegInfo
     {
         public Line l;
+        public Vector3d horizontalVec;
         public string ductSize; //只用于主管段绘制, endline由ports控制大小
         public double srcShrink;
         public double dstShrink;

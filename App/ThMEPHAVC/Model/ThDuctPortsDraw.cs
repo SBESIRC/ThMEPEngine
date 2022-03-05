@@ -100,7 +100,7 @@ namespace ThMEPHVAC.Model
                 foreach (var seg in endline.endlines.Values)
                 {
                     service.portService.DrawPorts(seg, portParam, orgDisVec, portWidth, portHeight, avgAirVolume, out List<SegInfo> verticalPipes);
-                    service.DrawDuct(verticalPipes, orgDisMat);
+                    service.DrawVerticalPipe(verticalPipes, orgDisMat);
                 }
             }
         }
