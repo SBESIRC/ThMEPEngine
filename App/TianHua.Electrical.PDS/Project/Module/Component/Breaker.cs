@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TianHua.Electrical.PDS.Project.Module.Component
+﻿namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
     /// 断路器
     /// </summary>
-    public class BreakerComponent : Breaker
+    public class Breaker : BreakerBaseComponent
     {
-        public BreakerComponent()
+        public Breaker()
         {
             ComponentType = ComponentType.断路器;
         }

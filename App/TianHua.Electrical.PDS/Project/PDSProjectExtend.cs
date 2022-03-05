@@ -136,7 +136,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 circuitDetails.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new BreakerComponent() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
+                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
                 };
                 //edge.circuitDetails.CircuitFormType = CircuitFormOutType.常规;
             }
@@ -145,7 +145,7 @@ namespace TianHua.Electrical.PDS.Project
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
                 circuitDetails.CircuitForm = new MotorCircuit_DiscreteComponents()
                 {
-                    breaker = new BreakerComponent() { BreakerType = "MCB", FrameSpecifications = "32", PolesNum ="3P", RatedCurrent ="50", TripUnitType ="TM"},
+                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "32", PolesNum ="3P", RatedCurrent ="50", TripUnitType ="TM"},
                     contactor = new Contactor() { ContactorType = "CJ", PolesNum ="3P", RatedCurrent ="12" },
                     thermalRelay = new ThermalRelay() { ThermalRelayType = "KH", PolesNum ="3P", RatedCurrent ="7~10" },
                 };
@@ -154,7 +154,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 circuitDetails.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new BreakerComponent() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
+                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
                 };
             }
             //else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)

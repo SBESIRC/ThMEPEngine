@@ -55,7 +55,7 @@
     <Compile Include="Project\Module\Circuit\MotorCircuit_DiscreteComponents.cs" />
     <Compile Include="Project\Module\Circuit\PDSBaseCircuit.cs" />
     <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
-    <Compile Include="Project\Module\Component\BreakerComponent.cs" />
+    <Compile Include="Project\Module\Component\Breaker.cs" />
     <Compile Include="Project\Module\Component\PDSBaseComponent.cs" />
     <Compile Include="Project\Module\Component\ComponentConfig.cs" />
     <Compile Include="Project\Module\Component\ComponentExtend.cs" />

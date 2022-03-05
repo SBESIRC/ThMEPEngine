@@ -1,29 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TianHua.Electrical.PDS.Project.Module.Component
+﻿namespace TianHua.Electrical.PDS.Project.Module.Component
 {
-    /// <summary>
-    /// 元器件
-    /// </summary>
-    public class PDSBaseComponent
-    {
-        /// <summary>
-        /// 元器件类型
-        /// </summary>
-        public ComponentType ComponentType { get; set; }
-    }
-
-    /// <summary>
-    /// 断路器元器件
-    /// </summary>
-    public class Breaker : PDSBaseComponent
-    {
-    }
-
     /// <summary>
     /// 元器件类型
     /// </summary>
@@ -34,5 +10,24 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         热继电器,
         断路器,
         剩余电流断路器,
+    }
+
+    /// <summary>
+    /// 元器件（抽象基类）
+    /// </summary>
+    public abstract class PDSBaseComponent
+    {
+        /// <summary>
+        /// 元器件类型
+        /// </summary>
+        public ComponentType ComponentType { get; set; }
+    }
+
+    /// <summary>
+    /// 断路器（抽象基类）
+    /// </summary>
+    public abstract class BreakerBaseComponent : PDSBaseComponent
+    {
+
     }
 }

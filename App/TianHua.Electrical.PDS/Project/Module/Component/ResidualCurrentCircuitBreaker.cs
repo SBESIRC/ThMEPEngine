@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TianHua.Electrical.PDS.Project.Module.Component
+﻿namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
-    /// 剩余电流断路器
+    /// 剩余电流断路器（RCCB）
     /// </summary>
-    public class ResidualCurrentCircuitBreaker: Breaker
+    public class ResidualCurrentCircuitBreaker : BreakerBaseComponent
     {
         public ResidualCurrentCircuitBreaker()
         {
