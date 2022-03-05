@@ -97,13 +97,13 @@ namespace TianHua.Electrical.PDS.Project
         public ThPDSProjectGraphNode CreatProjectNode(ThPDSCircuitGraphNode node)
         {
             var newNode = new ThPDSProjectGraphNode();
-            newNode.NodeType = node.NodeType;
+            newNode.Type = node.NodeType;
             newNode.IsStartVertexOfGraph = node.IsStartVertexOfGraph;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
             //newNode.Load.InstalledCapacity = node.Loads.Sum(O => O.InstalledCapacity);
             //newNode.nodeDetails.IsDualPower = node.Loads[0];
-            newNode.nodeDetails.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
-            newNode.nodeDetails.IsOnlyLoad = node.Loads.Count == 1;
+            newNode.Details.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
+            newNode.Details.IsOnlyLoad = node.Loads.Count == 1;
             //newNode.nodeDetails = new NodeDetails();
             return newNode;
         }

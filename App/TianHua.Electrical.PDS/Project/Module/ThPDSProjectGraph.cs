@@ -1,35 +1,32 @@
-﻿using QuickGraph;
-using System;
+﻿using System;
+using QuickGraph;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
     public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>
     {
+        public ThPDSLoad Load { get; set; }
+        public PDSNodeType Type { get; set; }
+        public NodeDetails Details { get; set; }
+        public bool IsStartVertexOfGraph { get; set; }
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
             IsStartVertexOfGraph = false;
-            nodeDetails = new NodeDetails();
+            Details = new NodeDetails();
         }
-        public NodeDetails nodeDetails { get; set; }
-        public PDSNodeType NodeType { get; set; }
-        public bool IsStartVertexOfGraph { get; set; }
-        public ThPDSLoad Load { get; set; }
         public bool Equals(ThPDSProjectGraphNode other)
         {
-            return this.NodeType == other.NodeType && this.Load.Equals(other.Load);
+            return this.Type == other.Type && this.Load.Equals(other.Load);
         }
     }
 
     public class ThPDSProjectGraphEdge<T> : Edge<T> where T : ThPDSProjectGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
-        public CircuitDetails circuitDetails { get; set; }
+        public CircuitDetails Details { get; set; }
 
         public ThPDSProjectGraphEdge(T source, T target) : base(source, target)
         {
@@ -45,18 +42,14 @@ namespace TianHua.Electrical.PDS.Project.Module
 
         }
     }
+
     [Serializable]
     public class ThPDSProjectGraph
     {
-        public ThPDSProjectGraph()
-        {
-            Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
-            LoopInfo = new List<PDSDWGLoopInfo>();
-            LoadInfo = new List<PDSDWGLoadInfo>();
-        }
-
+        /// <summary>
+        /// 回路图
+        /// </summary>
         public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
-
         /// <summary>
         /// 回路信息
         /// </summary>
@@ -65,5 +58,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 负载信息
         /// </summary>
         public List<PDSDWGLoadInfo> LoadInfo { get; set; }
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public ThPDSProjectGraph()
+        {
+            Graph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            LoopInfo = new List<PDSDWGLoopInfo>();
+            LoadInfo = new List<PDSDWGLoadInfo>();
+        }
     }
 }

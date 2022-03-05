@@ -33,9 +33,9 @@ namespace TianHua.Electrical.PDS.Project
                     var superiorNode = edge.Source;
                     var edges = PDSProjectGraph.Graph.Edges.Where(o => o.Source.Equals(superiorNode));
                     edges.ForEach(e => Nodes.Remove(e.Target));
-                    if(!superiorNode.nodeDetails.IsDualPower && superiorNode.nodeDetails.LowPower <= 0)
+                    if(!superiorNode.Details.IsDualPower && superiorNode.Details.LowPower <= 0)
                     {
-                        superiorNode.nodeDetails.LowPower = edges.Sum(e => e.Target.nodeDetails.LowPower);
+                        superiorNode.Details.LowPower = edges.Sum(e => e.Target.Details.LowPower);
                     }
                     node = superiorNode;
                 }
@@ -71,22 +71,22 @@ namespace TianHua.Electrical.PDS.Project
                 if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
                 {
                     //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
-                    node.nodeDetails.CircuitFormType = "集中电源";
+                    node.Details.CircuitFormType = "集中电源";
                 }
                 else
                 {
                     var count = Graph.Edges.Count(o => o.Target.Equals(node));
                     if (count == 1)
                     {
-                        node.nodeDetails.CircuitFormType = "1路进线";
+                        node.Details.CircuitFormType = "1路进线";
                     }
                     else if (count == 2)
                     {
-                        node.nodeDetails.CircuitFormType = "2路进线ATSE";
+                        node.Details.CircuitFormType = "2路进线ATSE";
                     }
                     else if (count == 3)
                     {
-                        node.nodeDetails.CircuitFormType = "3路进线";
+                        node.Details.CircuitFormType = "3路进线";
                     }
                 }
             });
@@ -95,7 +95,7 @@ namespace TianHua.Electrical.PDS.Project
             ProjectGraph.Graph.Edges.ForEach(edge =>
             {
                 edge.Circuit = edge.Circuit.RichPDSCircuit();
-                edge.circuitDetails = edge.CreatCircuitDetails();
+                edge.Details = edge.CreatCircuitDetails();
                 edge.CalculateCircuitDetails();
             });
             //ProjectGraph.BalancedPhaseSequence();
@@ -132,7 +132,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             var circuitDetails = new CircuitDetails();
 
-            if (edge.Target.NodeType == PDSNodeType.None)
+            if (edge.Target.Type == PDSNodeType.None)
             {
                 circuitDetails.CircuitForm = new RegularCircuit()
                 {
