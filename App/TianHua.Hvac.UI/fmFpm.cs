@@ -78,6 +78,11 @@ namespace TianHua.Hvac.UI
                 if (!fans.ContainsKey(item))
                     fans.Add(item, param);
             }
+            if (scenarioCombox.Text == "消防排烟兼平时排风")
+            {
+                radioVerticalPipe.Enabled = true;
+                textPortElevation.Enabled = true;
+            }
             if (listBox1.Items.Count > 0)
             {
                 listBox1.SelectedIndex = 0;
@@ -243,6 +248,17 @@ namespace TianHua.Hvac.UI
         {
             bypassEnable();
             var scenario = (string)scenarioCombox.SelectedItem;
+            if (scenario == "消防排烟兼平时排风")
+            {
+                radioVerticalPipe.Enabled = true;
+                textPortElevation.Enabled = true;
+            }
+            else
+            {
+                radioVerticalPipe.Checked = false;
+                radioVerticalPipe.Enabled = false;
+                textPortElevation.Enabled = false;
+            }
             var speed = ThFanSelectionUtils.GetDefaultAirSpeed(scenario);
             textAirSpeed.Text = speed.ToString();
         }
@@ -280,7 +296,9 @@ namespace TianHua.Hvac.UI
             portSize = textPortWidth.Text + "x" + textPortHeight.Text;
             portName = scenario.Contains("排烟") ? "AH/D" : "AH";
             portRange = (comboPortRange.Text == "") ? "下送风口" : comboPortRange.Text;
-            if (portRange.Contains("侧"))
+            if (radioVerticalPipe.Checked)
+                portRange = "侧回风口";
+            if (portRange.Contains("侧") || radioVerticalPipe.Checked)
                 portNum /= 2;
             airSpeed = Double.Parse(textAirSpeed.Text);
         }
@@ -932,6 +950,7 @@ namespace TianHua.Hvac.UI
             };
             portParam = new PortParam()
             {
+                verticalPipeEnable = radioVerticalPipe.Checked,
                 param = p,
                 genStyle = genStyle,
                 srtPoint = srtPoint,
@@ -1034,6 +1053,23 @@ namespace TianHua.Hvac.UI
                 airVolume = ThMEPHVACService.RoundNum(airVolume, 50);
                 textAirVolume.Text = airVolume.ToString();
             }
+        }
+
+        private void groupBox4_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.Clear(BackColor);
+        }
+
+        private void radioVerticalPipe_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioVerticalPipe.Checked)
+                comboPortRange.Enabled = false;
+        }
+
+        private void radioPortRange_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioPortRange.Checked)
+                comboPortRange.Enabled = true;
         }
     }
 }

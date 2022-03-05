@@ -94,12 +94,13 @@ namespace ThMEPHVAC.Model
         private void DrawPort(List<EndlineInfo> endLinesInfos)
         {
             double avgAirVolume = portParam.param.airVolume / portParam.param.portNum;
-            avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
+            avgAirVolume = Math.Ceiling(avgAirVolume / 10) * 10;
             foreach (var endline in endLinesInfos)
             {
                 foreach (var seg in endline.endlines.Values)
                 {
-                    service.portService.DrawPorts(seg, portParam.param.portRange, orgDisVec, portWidth, portHeight, avgAirVolume);
+                    service.portService.DrawPorts(seg, portParam, orgDisVec, portWidth, portHeight, avgAirVolume, out List<SegInfo> verticalPipes);
+                    service.DrawDuct(verticalPipes, orgDisMat);
                 }
             }
         }

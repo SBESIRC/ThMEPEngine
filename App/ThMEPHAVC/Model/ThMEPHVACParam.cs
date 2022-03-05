@@ -84,6 +84,7 @@ namespace ThMEPHVAC.Model
         public Point3d srtPoint;
         public double portInterval; // 0->自动间距
         public ThMEPHVACParam param;
+        public bool verticalPipeEnable;
         public EndCompType endCompType;
         public GenerationStyle genStyle;
         public DBObjectCollection centerLines;

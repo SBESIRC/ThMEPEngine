@@ -201,6 +201,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "风管尺寸参数信息.json");
         }
 
+        // 风口尺寸规格信息
+        public static string PortSizeParametersPath()
+        {
+            return Path.Combine(SupportPath(), "风口尺寸参数信息.json");
+        }
+
         public static string DuctInOutMapping()
         {
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
