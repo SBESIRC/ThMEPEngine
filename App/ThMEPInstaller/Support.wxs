@@ -72,6 +72,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" Guid="{04686F39-60FC-434F-9863-CA6DC8DA0B45}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Duct_Port_Match" Source="$(var.AutoloaderContentsPath)\Support\管道内外段与进出风口对照.json" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Size_Parameter" Guid="{D2712100-C99C-492A-B36A-108195C8B972}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Duct_Port_Size_Parameter" Source="$(var.AutoloaderContentsPath)\Support\风口尺寸参数信息.json" KeyPath="yes" />
+            </Component>    
             <Component Id="CMP_Autoloader_PackageContents_Support_Room_Category" Guid="{445815C8-645E-44A3-90C9-BDE64D8D9352}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Room_Category" Source="$(var.AutoloaderContentsPath)\Support\房间名称分类处理.xlsx" KeyPath="yes" />
             </Component>
@@ -169,6 +172,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Size_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Room_Category" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" />
