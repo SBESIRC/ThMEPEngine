@@ -125,6 +125,7 @@
     <Folder Include="bin\Release-NET46\" />
     <Folder Include="bin\Release\" />
     <Folder Include="GirderConnect\ConnectMainBeam\Test\" />
+    <Folder Include="Reinforcement\Draw\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Debug-NET45\acad.err" />
