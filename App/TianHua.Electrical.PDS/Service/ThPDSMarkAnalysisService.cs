@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+using Linq2Acad;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
@@ -18,9 +20,11 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public ThPDSLoad DistBoxMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
         {
+            var searchedString = new List<string>();
             var thPDSDistBox = new ThPDSLoad
             {
-                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
+                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
+                InstalledCapacity = AnalysisPower(marks, searchedString, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -32,6 +36,10 @@ namespace TianHua.Electrical.PDS.Service
                 }
             };
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
+            foreach (var str in marks.Except(searchedString))
+            {
+                thPDSDistBox.ID.Description.Add(str);
+            }
 
             return thPDSDistBox;
         }
@@ -53,7 +61,7 @@ namespace TianHua.Electrical.PDS.Service
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
-                FireLoad = false,
+                FireLoad = marks.Contains("消防电源"),
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
@@ -118,11 +126,13 @@ namespace TianHua.Electrical.PDS.Service
                         ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>(), out var needCopy)
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>(), out var needCopy),
+                FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
+                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals("消防电源") : false,
             };
         }
 
-        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
+        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName, List<string> searchedString)
         {
             var id = new ThPDSID
             {
@@ -132,7 +142,6 @@ namespace TianHua.Electrical.PDS.Service
             var circuitMarks = new List<string>();
             infos.ForEach(info =>
             {
-                var toAdd = true;
                 foreach (var key in distBoxKey)
                 {
                     if (info.Contains(key))
@@ -142,6 +151,7 @@ namespace TianHua.Electrical.PDS.Service
                         var m = r.Match(info);
                         if (m.Success)
                         {
+                            searchedString.Add(info);
                             if (m.Value.Contains("-W") || m.Value.Contains("/W"))
                             {
                                 circuitMarks.Add(m.Value);
@@ -151,15 +161,8 @@ namespace TianHua.Electrical.PDS.Service
                                 idMarks.Add(m.Value);
                             }
                         }
-
-                        toAdd = false;
                         break;
                     }
-                }
-
-                if (toAdd)
-                {
-                    id.Description.Add(info);
                 }
             });
 
