@@ -217,5 +217,33 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             return linePtPair.Item1.DistanceTo(linePtPair.Item2);
         }
+        public static Point3d? FindLinkPt(this Line first,Line second,double tolerance=1.0)
+        {
+            var linkPts = new List<Point3d>();
+            if(first.StartPoint.DistanceTo(second.StartPoint)<= tolerance)
+            {
+                linkPts.Add(first.StartPoint);
+            }
+            if (first.StartPoint.DistanceTo(second.EndPoint) <= tolerance)
+            {
+                linkPts.Add(first.StartPoint);
+            }
+            if (first.EndPoint.DistanceTo(second.StartPoint) <= tolerance)
+            {
+                linkPts.Add(first.EndPoint);
+            }
+            if (first.EndPoint.DistanceTo(second.EndPoint) <= tolerance)
+            {
+                linkPts.Add(first.EndPoint);
+            }
+            if(linkPts.Count == 1)
+            {
+                return linkPts[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }
