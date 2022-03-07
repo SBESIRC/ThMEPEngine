@@ -56,7 +56,7 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
                 var shapeCode = Analysis(p);
                 if(shapeCode!=ShapeCode.Unknown)
                 {
-                    var spec = GetPolylineSpec(p, shapeCode,AntiSeismicGrade,);
+                    //var spec = GetPolylineSpec(p, shapeCode,AntiSeismicGrade,);
                 }
             });
         }
