@@ -50,31 +50,39 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
 
             // 识别墙柱轮廓、规格
             var markFindService = new ThEdgeComponentMarkFindService(leaderMarks.Item1, leaderMarks.Item2);
-            wallColumns.OfType<Polyline>().ForEach(p =>
+            foreach(var edgeComponent in wallColumns.OfType<Polyline>())
             {
-                var edgeComponent = p;
-                var shapeCode = Analysis(p);
-                if(shapeCode!=ShapeCode.Unknown)
+                var shapeCode = Analysis(edgeComponent);
+                if (shapeCode == ShapeCode.Unknown)
                 {
-                    //var spec = GetPolylineSpec(p, shapeCode,AntiSeismicGrade,);
+                    continue;
                 }
-            });
+                var leaderMarkInfs = markFindService.Find(edgeComponent);
+                if (leaderMarkInfs.Count != 1)
+                {
+                    continue;
+                }
+                var leaderMarkInf = leaderMarkInfs.First();
+                leaderMarkInf.ShapeCode = shapeCode;
+
+
+            };
         }
 
         private string GetPolylineSpec(Polyline polyline, ShapeCode shapeCode,
-            string antiSeismicGrade,string code)
+            string antiSeismicGrade,string code,DBObjectCollection walls)
         {
             var spec = "";
             switch (shapeCode)
             {
                 case ShapeCode.Rect:
-                    spec = GetRectSpec(polyline);
+                    spec = GetRectSpec(polyline, antiSeismicGrade, code, walls);
                     break;
                 case ShapeCode.L:
-                    spec = GetLTypeSpec(polyline);
+                    spec = GetLTypeSpec(polyline, antiSeismicGrade, code, walls);
                     break;
                 case ShapeCode.T:
-                    spec = GetTTypeSpec(polyline);
+                    spec = GetTTypeSpec(polyline, antiSeismicGrade, code, walls);
                     break;
                 default:
                     spec = "";
@@ -83,23 +91,23 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             return spec;
         }
 
-        private string GetRectSpec(Polyline polyline)
+        private string GetRectSpec(Polyline polyline, string antiSeismicGrade, string code, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunRectSecAnalysisService();
+            var specService = new ThHuaRunRectSecAnalysisService(walls, code, antiSeismicGrade);
             specService.Analysis(polyline);
             return specService.Spec;
         }
 
-        private string GetLTypeSpec(Polyline polyline)
+        private string GetLTypeSpec(Polyline polyline,string antiSeismicGrade, string code, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunLTypeSecAnalysisService();
+            var specService = new ThHuaRunLTypeSecAnalysisService(walls, code, antiSeismicGrade);
             specService.Analysis(polyline);
             return specService.Spec;
         }
 
-        private string GetTTypeSpec(Polyline polyline)
+        private string GetTTypeSpec(Polyline polyline, string antiSeismicGrade, string code, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunTTypeSecAnalysisService();
+            var specService = new ThHuaRunTTypeSecAnalysisService(walls, code, antiSeismicGrade);
             specService.Analysis(polyline);
             return specService.Spec;
         }

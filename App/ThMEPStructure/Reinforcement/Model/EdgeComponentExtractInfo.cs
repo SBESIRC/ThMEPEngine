@@ -45,6 +45,12 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public string TypeCode { get; set; }
         /// <summary>
+        /// 是计算书图层
+        /// </summary>
+
+        public bool IsCalculation { get; set; }
+
+        /// <summary>
         /// 配筋率
         /// </summary>
         public double ReinforceRatio { get; set; }
@@ -52,6 +58,11 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 配箍率
         /// </summary>
         public double StirrupRatio { get; set; }
+
+        /// <summary>
+        /// 全部纵筋面积
+        /// </summary>
+        public double AllReinforceArea { get; set; }
 
         private string ToString(ShapeCode shapeCode)
         {
