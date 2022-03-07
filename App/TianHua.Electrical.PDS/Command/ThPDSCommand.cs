@@ -16,6 +16,7 @@ using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Command
 {
@@ -110,7 +111,6 @@ namespace TianHua.Electrical.PDS.Command
                     loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService, distBoxKey);
                 graphEngine.CreatGraph();
                 graphEngine.CopyAttributes();
-
                 var graph = graphEngine.GetGraph();
 
                 var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>
