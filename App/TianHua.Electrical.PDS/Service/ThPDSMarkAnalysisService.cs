@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+using Linq2Acad;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
@@ -18,9 +20,11 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public ThPDSLoad DistBoxMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
         {
+            var searchedString = new List<string>();
             var thPDSDistBox = new ThPDSLoad
             {
-                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
+                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
+                InstalledCapacity = AnalysisPower(marks, searchedString, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -32,6 +36,10 @@ namespace TianHua.Electrical.PDS.Service
                 }
             };
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
+            foreach (var str in marks.Except(searchedString))
+            {
+                thPDSDistBox.ID.Description.Add(str);
+            }
 
             return thPDSDistBox;
         }
@@ -42,17 +50,18 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData)
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData,
+            ref string attributesCopy)
         {
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
             {
                 ID = CreateLoadID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
-                InstalledCapacity = AnalysisPower(marks, searchedString),
+                InstalledCapacity = AnalysisPower(marks, searchedString, out var needCopy),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
-                FireLoad = false,
+                FireLoad = marks.Contains("消防电源"),
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
@@ -60,19 +69,24 @@ namespace TianHua.Electrical.PDS.Service
                 }
             };
 
-            var StandbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
-            if (StandbyRelationship.Item1)
+            if (needCopy)
             {
-                thPDSLoad.PrimaryAvail = StandbyRelationship.Item2;
-                thPDSLoad.SpareAvail = StandbyRelationship.Item3;
+                attributesCopy = distBoxData.EffectiveName;
+            }
+
+            var standbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
+            if (standbyRelationship.Item1)
+            {
+                thPDSLoad.PrimaryAvail = standbyRelationship.Item2;
+                thPDSLoad.SpareAvail = standbyRelationship.Item3;
             }
 
             var r = new Regex(@"[a-zA-Z]");
             foreach (var str in marks.Except(searchedString))
             {
-                if(r.Match(str).Success)
+                if (r.Match(str).Success)
                 {
-                    if(distBoxData.EffectiveName.Equals("E-BL001-1"))
+                    if (distBoxData.EffectiveName.Equals("E-BL001-1"))
                     {
                         thPDSLoad.ID.CircuitID = str;
                     }
@@ -85,6 +99,15 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     thPDSLoad.ID.Description.Add(str);
                 }
+            }
+
+            if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchFanCat3(thPDSLoad.ID.LoadID);
+            }
+            else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
             }
 
             return thPDSLoad;
@@ -103,11 +126,13 @@ namespace TianHua.Electrical.PDS.Service
                         ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>())
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>(), out var needCopy),
+                FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
+                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals("消防电源") : false,
             };
         }
 
-        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
+        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName, List<string> searchedString)
         {
             var id = new ThPDSID
             {
@@ -117,27 +142,27 @@ namespace TianHua.Electrical.PDS.Service
             var circuitMarks = new List<string>();
             infos.ForEach(info =>
             {
-                var toAdd = true;
                 foreach (var key in distBoxKey)
                 {
                     if (info.Contains(key))
                     {
-                        if (info.Contains("-W") || info.Contains("/W"))
+                        var check = "[a-zA-Z0-9-/]+";
+                        var r = new Regex(@check);
+                        var m = r.Match(info);
+                        if (m.Success)
                         {
-                            circuitMarks.Add(info);
+                            searchedString.Add(info);
+                            if (m.Value.Contains("-W") || m.Value.Contains("/W"))
+                            {
+                                circuitMarks.Add(m.Value);
+                            }
+                            else
+                            {
+                                idMarks.Add(m.Value);
+                            }
                         }
-                        else
-                        {
-                            idMarks.Add(info);
-                        }
-                        toAdd = false;
                         break;
                     }
-                }
-
-                if (toAdd)
-                {
-                    id.Description.Add(info);
                 }
             });
 
@@ -343,12 +368,13 @@ namespace TianHua.Electrical.PDS.Service
             return result;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos, List<string> searchedString)
+        private ThInstalledCapacity AnalysisPower(List<string> infos, List<string> searchedString, out bool needCopy)
         {
             var results = new ThInstalledCapacity();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
-            infos.ForEach(info =>
+            needCopy = false;
+            foreach (var info in infos)
             {
                 var m = r.Match(info);
                 while (m.Success)
@@ -358,17 +384,25 @@ namespace TianHua.Electrical.PDS.Service
                     result = result.Replace("K", "");
                     result = result.Replace("w", "");
                     result = result.Replace("W", "");
-                    if (m.Value.Contains("k") || m.Value.Contains("K"))
+                    if (!m.Value.Contains("k") && !m.Value.Contains("K"))
                     {
-                        results.UsualPower.Add(double.Parse(result) * 1000);
+                        results.UsualPower.Add(double.Parse(result) / 1000.0);
                     }
                     else
                     {
                         results.UsualPower.Add(double.Parse(result));
                     }
+                    var numRegex = new Regex(@"[2-9][xX]");
+                    var numMatch = numRegex.Match(info);
+                    if (numMatch.Success)
+                    {
+                        needCopy = true;
+                    }
+
                     m = m.NextMatch();
                 }
-            });
+            }
+
             return results;
         }
 
@@ -415,6 +449,63 @@ namespace TianHua.Electrical.PDS.Service
                 }
             });
             return Tuple.Create(exist, primaryAvail, spareAvail);
+        }
+
+        private static ThPDSLoadTypeCat_3 MatchFanCat3(string loadID)
+        {
+            if (loadID.Contains("ESF"))
+            {
+                return ThPDSLoadTypeCat_3.SmokeExhaustFan;
+            }
+            else if (loadID.Contains("SSF"))
+            {
+                return ThPDSLoadTypeCat_3.MakeupAirFan;
+            }
+            else if (loadID.Contains("SPF"))
+            {
+                return ThPDSLoadTypeCat_3.StaircasePressurizationFan;
+            }
+            else if (loadID.Contains("E(S)F"))
+            {
+                return ThPDSLoadTypeCat_3.ExhaustFan_Smoke;
+            }
+            else if (loadID.Contains("S(S)F"))
+            {
+                return ThPDSLoadTypeCat_3.SupplyFan_Smoke;
+            }
+            else if (loadID.Contains("EF"))
+            {
+                return ThPDSLoadTypeCat_3.ExhaustFan;
+            }
+            else if (loadID.Contains("SF"))
+            {
+                return ThPDSLoadTypeCat_3.SupplyFan;
+            }
+            else if (loadID.Contains("EKF"))
+            {
+                return ThPDSLoadTypeCat_3.KitchenExhaustFan;
+            }
+            return ThPDSLoadTypeCat_3.None;
+        }
+
+        public static ThPDSLoadTypeCat_3 MatchPumpCat3(List<string> description)
+        {
+            foreach (var item in description)
+            {
+                if (item.Contains("生活水泵"))
+                {
+                    return ThPDSLoadTypeCat_3.DomesticWaterPump;
+                }
+                else if (item.Contains("消防泵") || item.Contains("喷淋泵") || item.Contains("消火栓泵"))
+                {
+                    return ThPDSLoadTypeCat_3.FirePump;
+                }
+                else if (item.Contains("潜水泵"))
+                {
+                    return ThPDSLoadTypeCat_3.SubmersiblePump;
+                }
+            }
+            return ThPDSLoadTypeCat_3.None;
         }
     }
 }

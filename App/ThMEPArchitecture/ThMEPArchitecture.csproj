@@ -29,6 +29,7 @@
     <Compile Include="CreateAllSeglinesCmd.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
+    <Compile Include="ParkingStallArrangement\CommandPreprocess.cs" />
     <Compile Include="ParkingStallArrangement\CommandBreakSegLines.cs" />
     <Compile Include="ParkingStallArrangement\CommandWithoutSegLine.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\InputData.cs" />

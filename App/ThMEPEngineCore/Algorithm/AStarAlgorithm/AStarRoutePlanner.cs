@@ -86,20 +86,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //获取路径点位
             var resPt = GetPath(lastNode);
 
-            //int index = 0;
-            //var pl = new Polyline();
-            //pl.ColorIndex = 6;
-            //foreach (var pt in resPt)
-            //{
-            //    if (pt.IsInflectionPoint)
-            //    {
-            //        var cellpt = map.mapHelper.TransformMapPoint(pt);
-            //        pl.AddVertexAt(index,cellpt.ToPoint2d(),0,0,0);
-            //    }
-            //}
-            //Draw.AddToCurrentSpace(pl);
             //调整路径
-            //AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
             resPt = PathAdjuster.AdjustPath<T>(resPt, routePlanData.CellMap);
 
             var path = map.CreatePath(resPt);

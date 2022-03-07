@@ -51,6 +51,16 @@
     /// </summary>
     public class ThPDSCircuit
     {
+        public ThPDSCircuit()
+        {
+            CircuitUID = System.Guid.NewGuid().ToString();
+        }
+
+        /// <summary>
+        /// 回路GUID
+        /// </summary>
+        public string CircuitUID { get; set; }
+
         /// <summary>
         /// 特征编号
         /// </summary>
@@ -99,11 +109,11 @@
         /// <summary>
         /// 回路是否利用桥架
         /// </summary>
-        public bool ViaCableTray { get; set; } = false;
+        public bool ViaCableTray { get; set; }
 
         /// <summary>
         /// 回路是否利用管线
         /// </summary>
-        public bool ViaConduit { get; set; } = false;
+        public bool ViaConduit { get; set; }
     }
 }

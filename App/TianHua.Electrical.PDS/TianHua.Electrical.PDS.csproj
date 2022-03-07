@@ -52,6 +52,17 @@
     <Compile Include="Model\ThPDSLocation.cs" />
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Project\Module\CircuitDetails.cs" />
+    <Compile Include="Project\Module\Circuit\MotorCircuit_DiscreteComponents.cs" />
+    <Compile Include="Project\Module\Circuit\PDSBaseCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
+    <Compile Include="Project\Module\Component\Breaker.cs" />
+    <Compile Include="Project\Module\Component\PDSBaseComponent.cs" />
+    <Compile Include="Project\Module\Component\ComponentConfig.cs" />
+    <Compile Include="Project\Module\Component\ComponentExtend.cs" />
+    <Compile Include="Project\Module\Component\Contactor.cs" />
+    <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
+    <Compile Include="Project\Module\Component\ResidualCurrentCircuitBreaker.cs" />
+    <Compile Include="Project\Module\Component\ThermalRelay.cs" />
     <Compile Include="Project\Module\InformationMatchViewerModule.cs" />
     <Compile Include="Project\Module\NodeDetails.cs" />
     <Compile Include="Project\Module\PDSBaseElement.cs" />
@@ -59,7 +70,9 @@
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
     <Compile Include="Project\Module\SmallBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Project\PDSProject.cs" />
+    <Compile Include="Project\PDSProjectExtend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThMarkService.cs" />
     <Compile Include="Service\ThPDSBufferService.cs" />

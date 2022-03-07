@@ -10,6 +10,13 @@ using ThCADExtension;
 
 namespace ThMEPEngineCore.Algorithm
 {
+    public static class FrameType
+    {
+        public static string ROOM = "房间框线";
+        public static string DOOR = "门";
+        public static string WINDOWS = "窗";
+        public static string FIRECOMP = "防火分区";
+    }
     public class ThMEPFrameComparer
     {
         public DBObjectCollection ErasedFrame;

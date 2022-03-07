@@ -21,7 +21,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 负载信息
         /// </summary>
         public List<PDSDWGLoadInfo> LoadInfo { get; set; }
-        public Action DataChanged;
     }
 
     [Serializable]

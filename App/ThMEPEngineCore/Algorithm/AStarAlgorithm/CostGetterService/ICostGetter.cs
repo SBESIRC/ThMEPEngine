@@ -11,6 +11,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
     {
         int GetGCost(AStarNode currentNode, CompassDirections moveDirection);
 
+        double GetGCost(GlobleNode currentNode, GloblePoint nextNode);
+
         int GetHCost(Point cell, AStarEntity endInfo);
+
+        double GetHCost(GloblePoint cell, AStarEntity endLine);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
@@ -35,7 +36,7 @@ namespace TianHua.Hvac.UI
         private ThHvacCmdService cmdService;
         private string preKey;//fan的listBox选项更新时需要延迟一下选择
         private double firstRange = 200;
-        public fmFpm()
+        public fmFpm(PortParam portParam)
         {
             InitializeComponent();
             initFlag = true;
@@ -50,6 +51,55 @@ namespace TianHua.Hvac.UI
             ThDuctPortsInterpreter.GetFanDic(out shadowFansDic);
             allFansDic = new Dictionary<Polyline, ObjectId>();
             SetPortSpeed();
+            if (portParam.param.airVolume > 0)
+                FillUIParam(portParam);
+        }
+
+        private void FillUIParam(PortParam portParam)
+        {
+            scenarioCombox.SelectedItem = portParam.param.scenario;
+            if (portParam.portInterval < 1)
+            {
+                radioPortInterval.Checked = true;
+                radioIntervalPortCustom.Checked = false;
+                textPortInterval.Enabled = false;
+            }
+            if (portParam.endCompType == EndCompType.None)
+                radioButton1.Checked = true;
+            else if (portParam.endCompType == EndCompType.VerticalPipe)
+                radioButton2.Checked = true;
+            else if (portParam.endCompType == EndCompType.RainProofShutter)
+                radioButton3.Checked = true;
+            else if (portParam.endCompType == EndCompType.DownFlip45)
+                radioButton4.Checked = true;
+
+            textAirVolume.Text = portParam.param.airVolume.ToString();
+            textAirSpeed.Text = portParam.param.airSpeed.ToString();
+            textPortNum.Text = portParam.param.portNum.ToString();
+            if (portParam.genStyle == GenerationStyle.Auto)
+                radioGenStyle3.Checked = true;
+            else if (portParam.genStyle == GenerationStyle.GenerationByPort)
+                radioGenStyle2.Checked = true;
+            else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
+                radioGenStyle1.Checked = true;
+            if (portParam.verticalPipeEnable)
+                radioVerticalPipe.Checked = true;
+            else
+            {
+                radioPortRange.Checked = true;
+                comboPortRange.SelectedItem = portParam.param.portRange;
+            }
+            comboScale.SelectedItem = portParam.param.scale;
+            ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double w, out double h);
+            textPortWidth.Text = w.ToString();
+            textPortHeight.Text = h.ToString();
+            // 默认填充到服务侧参数 风管Size填充到自定义
+            checkBoxRoom.Checked = true;
+            radioRoomCustom.Checked = true;
+            ThMEPHVACService.GetWidthAndHeight(portParam.param.inDuctSize, out w, out h);
+            textRoomWidth.Text = w.ToString();
+            textRoomHeight.Text = h.ToString();
+            textRoomElevation.Text = portParam.param.elevation.ToString("0.00");
         }
 
         private void btnSelectFan_Click(object sender, EventArgs e)
@@ -76,6 +126,11 @@ namespace TianHua.Hvac.UI
                 var param = RecordFanParam(item);
                 if (!fans.ContainsKey(item))
                     fans.Add(item, param);
+            }
+            if (scenarioCombox.Text == "消防排烟兼平时排风")
+            {
+                radioVerticalPipe.Enabled = true;
+                textPortElevation.Enabled = true;
             }
             if (listBox1.Items.Count > 0)
             {
@@ -206,7 +261,7 @@ namespace TianHua.Hvac.UI
                 ThMEPHVACService.GetWidthAndHeight(fanParam.roomDuctSize, out double w, out double h);
                 textRoomWidth.Text = w.ToString();
                 textRoomHeight.Text = h.ToString();
-                
+
             }
             if (fanParam.isNotRoomReCommandSize)
             {
@@ -228,6 +283,8 @@ namespace TianHua.Hvac.UI
             ThMEPHVACService.GetWidthAndHeight(listBoxRoomDuctSize.SelectedItem.ToString(), out double w, out double h);
             double speed = ThHvacUIService.CalcAirSpeed(airVolume, w, h);
             labelRoomAirSpeed.Text = speed.ToString("0.00");
+            var scenario = (string)scenarioCombox.SelectedItem;
+            SetPortEleByScenario(scenario);
         }
 
         private void notRoomDuctSize_SelectedIndexChanged(object sender, EventArgs e)
@@ -242,25 +299,84 @@ namespace TianHua.Hvac.UI
         {
             bypassEnable();
             var scenario = (string)scenarioCombox.SelectedItem;
+            if (scenario == "消防排烟兼平时排风")
+            {
+                radioVerticalPipe.Enabled = true;
+                textPortElevation.Enabled = true;
+            }
+            else
+            {
+                radioVerticalPipe.Checked = false;
+                radioVerticalPipe.Enabled = false;
+                textPortElevation.Enabled = false;
+            }
             var speed = ThFanSelectionUtils.GetDefaultAirSpeed(scenario);
             textAirSpeed.Text = speed.ToString();
+            SetPortRangeByScenario(scenario);
+            SetPortNumByScenario(scenario);
+            SetPortEleByScenario(scenario);
+        }
+
+        private void SetPortEleByScenario(string scenario)
+        {
+            if (!String.IsNullOrEmpty(textRoomElevation.Text) &&
+                (!String.IsNullOrEmpty(textRoomHeight.Text) || listBoxRoomDuctSize.SelectedItems.Count > 0))
+            {
+                var elevation = Double.Parse(textRoomElevation.Text) * 1000;
+                var height = radioRoomCustom.Checked ? Double.Parse(textRoomHeight.Text) : 
+                             ThMEPHVACService.GetHeight((string)listBoxRoomDuctSize.SelectedItem);
+                var idx = scenarioCombox.Items.IndexOf(scenario) + 50;
+                var num = (elevation + height + idx) / 1000;
+                textPortElevation.Text = num.ToString();
+            }
+        }
+
+        private void SetPortNumByScenario(string scenario)
+        {
+            int num;
+            if (scenario == "消防排烟")
+                num = 3;
+            else if (scenario == "平时排风" || scenario == "平时送风")
+                num = 2;
+            else if (scenario == "空调送风" || scenario == "空调新风")
+                num = 10;
+            else if (scenario == "消防排烟兼平时排风")
+                num = 19;
+            else
+                num = 1;
+            textPortNum.Text = num.ToString();
+        }
+
+        private void SetPortRangeByScenario(string scenario)
+        {
+            if (radioPortRange.Checked)
+            {
+                comboPortRange.SelectedItem = scenario.Contains("排") ?
+                    "下回风口" : "下送风口";
+            }
         }
         private void GetAirVolume(out double airVolume, out double airHighVolume)
         {
-            if (textAirVolume.Text.Contains("/"))
+            var volume = textAirVolume.Text;
+            if (selectFansDic.Count > 0)
             {
-                string[] str = textAirVolume.Text.Split('/');
+                var fan = selectFansDic.Values.FirstOrDefault();
+                volume = fan.strAirVolume.Contains("/") ? fan.strAirVolume : volume;
+            }
+            if (volume.Contains("/"))
+            {
+                string[] str = volume.Split('/');
                 airVolume = Double.Parse(str[1]);
                 airHighVolume = Double.Parse(str[0]);
             }
             else
             {
-                airVolume = Double.Parse(textAirVolume.Text);
+                airVolume = Double.Parse(volume);
                 airHighVolume = 0;
             }
         }
-        private void GetPortInfo(out int portNum, 
-                                 out string scale, 
+        private void GetPortInfo(out int portNum,
+                                 out string scale,
                                  out string scenario,
                                  out string portSize,
                                  out string portName,
@@ -273,9 +389,11 @@ namespace TianHua.Hvac.UI
             portSize = textPortWidth.Text + "x" + textPortHeight.Text;
             portName = scenario.Contains("排烟") ? "AH/D" : "AH";
             portRange = (comboPortRange.Text == "") ? "下送风口" : comboPortRange.Text;
-            if (portRange.Contains("侧"))
+            if (radioVerticalPipe.Checked)
+                portRange = "侧回风口";
+            if (portRange.Contains("侧") || radioVerticalPipe.Checked)
                 portNum /= 2;
-            airSpeed = Double.Parse(textAirSpeed.Text); 
+            airSpeed = Double.Parse(textAirSpeed.Text);
         }
         private void GetDuctSize(out string roomDuctSize, out string notRoomDuctSize)
         {
@@ -299,11 +417,11 @@ namespace TianHua.Hvac.UI
                 if (String.IsNullOrEmpty(textNotRoomWidth.Text) && String.IsNullOrEmpty(textNotRoomHeight.Text))
                     notRoomDuctSize = "2000x500";
                 else
-                notRoomDuctSize = textNotRoomWidth.Text + "x" + textNotRoomHeight.Text;
-            }             
+                    notRoomDuctSize = textNotRoomWidth.Text + "x" + textNotRoomHeight.Text;
+            }
         }
-        private void GetElevation(out string roomElevation, 
-                                  out string notRoomElevation, 
+        private void GetElevation(out string roomElevation,
+                                  out string notRoomElevation,
                                   out ElevationAlignStyle roomElevationStyle,
                                   out ElevationAlignStyle notRoomElevationStyle)
         {
@@ -400,7 +518,7 @@ namespace TianHua.Hvac.UI
         private void radioRoomRecommand_CheckedChanged(object sender, EventArgs e)
         {
             if (radioRoomRecommand.Checked)
-            {   
+            {
                 textRoomWidth.Enabled = false;
                 textRoomHeight.Enabled = false;
                 labelRoomAirSpeed.Enabled = false;
@@ -452,14 +570,18 @@ namespace TianHua.Hvac.UI
             if (!ThHvacUIService.IsIntegerStr(textRoomHeight.Text))
                 textRoomHeight.Text = "1000";
             else
+            {
                 SetRoomDuctSpeed();
+                var scenario = (string)scenarioCombox.SelectedItem;
+                SetPortEleByScenario(scenario);
+            }
         }
         private void SetRoomDuctSpeed()
         {
             if (String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
             var airVolume = (int)Double.Parse(textAirVolume.Text);
-            
+
             if (labelRoomAirSpeed.Enabled)
             {
                 if (String.IsNullOrEmpty(textRoomWidth.Text) || String.IsNullOrEmpty(textRoomHeight.Text))
@@ -649,7 +771,7 @@ namespace TianHua.Hvac.UI
                     l.TransformBy(reverseMat);
             }
         }
-        private void CollectFanConnectLine(FanParam fan, 
+        private void CollectFanConnectLine(FanParam fan,
                                            ThFanCenterLineDetector roomDetector,
                                            ThFanCenterLineDetector notRoomDetector)
         {
@@ -727,7 +849,7 @@ namespace TianHua.Hvac.UI
             else
                 SetPortSpeed();
         }
-        
+
         private void textBypassWidth_TextChanged(object sender, EventArgs e)
         {
             if (!ThHvacUIService.IsIntegerStr(textBypassWidth.Text))
@@ -925,6 +1047,7 @@ namespace TianHua.Hvac.UI
             };
             portParam = new PortParam()
             {
+                verticalPipeEnable = radioVerticalPipe.Checked,
                 param = p,
                 genStyle = genStyle,
                 srtPoint = srtPoint,
@@ -1027,6 +1150,23 @@ namespace TianHua.Hvac.UI
                 airVolume = ThMEPHVACService.RoundNum(airVolume, 50);
                 textAirVolume.Text = airVolume.ToString();
             }
+        }
+
+        private void groupBox4_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.Clear(BackColor);
+        }
+
+        private void radioVerticalPipe_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioVerticalPipe.Checked)
+                comboPortRange.Enabled = false;
+        }
+
+        private void radioPortRange_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioPortRange.Checked)
+                comboPortRange.Enabled = true;
         }
     }
 }

@@ -525,6 +525,26 @@ namespace ThMEPHVAC.Model
             flg.Add(new Line(l1.EndPoint, l2.EndPoint));
             centerLine.Add(l);
         }
+        public static LineGeoInfo CreateVerticalPipe(SegInfo seg, string ductSize)
+        {
+            ThMEPHVACService.GetWidthAndHeight(ductSize, out double w, out double h);
+            var vec = seg.horizontalVec * w * 0.5;
+            // SP是底部，EP是顶部
+            var topSp = seg.l.StartPoint - vec;// 水平起点
+            var topEp = seg.l.StartPoint + vec;  // 水平终点
+            var auxLine = new Line() { StartPoint = topSp, EndPoint = topEp };
+            var lVec = ThMEPHVACService.GetLeftVerticalVec(seg.horizontalVec);
+            var rVec = ThMEPHVACService.GetRightVerticalVec(seg.horizontalVec);
+            var sp1 = auxLine.StartPoint + lVec * 0.5 * h;
+            var sp2 = auxLine.StartPoint + rVec * 0.5 * h;
+            var ep1 = auxLine.EndPoint + lVec * 0.5 * h;
+            var ep2 = auxLine.EndPoint + rVec * 0.5 * h;
+
+            var geo = new DBObjectCollection() { new Line(sp1, ep1), new Line(sp2, ep2) };
+            var flg = new DBObjectCollection() { new Line(sp1, sp2), new Line(ep1, ep2) };
+            var centerLine = new DBObjectCollection() { seg.l };
+            return new LineGeoInfo(geo, flg, centerLine);
+        }
         public static LineGeoInfo CreateDuct(Point2d sp, Point2d ep, double width)
         {
             var sp3 = new Point3d(sp.X, sp.Y, 0);

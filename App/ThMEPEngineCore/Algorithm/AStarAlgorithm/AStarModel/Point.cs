@@ -8,6 +8,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
 {
     public class Point : AStarEntity , IEquatable<Point>
     {
+        public Point() { }
         public Point(int xValue, int yValue)
         {
             this.x = xValue;

@@ -30,12 +30,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService, 
-            List<string> distBoxKey)
+            List<string> distBoxKey, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
             var noneLoad = false;
-            entities.ForEach(e =>
+            foreach (var e in entities)
             {
                 if (e is Line line)
                 {
@@ -52,10 +52,10 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
-                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e]));
+                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
-            });
+            }
 
             node.Loads = loads;
             if (noneLoad)
@@ -83,6 +83,13 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaConduit = true;
             }
+            if(edge.Circuit.Type == ThPDSCircuitType.None)
+            {
+                if(target.Loads.Count > 0)
+                {
+                    edge.Circuit.Type = target.Loads[0].DefaultCircuitType;
+                }
+            }
             var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
             if(circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID))
             {
@@ -105,9 +112,9 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode tatget, List<string> list)
+            ThPDSCircuitGraphNode target, List<string> list)
         {
-            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, tatget);
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(list);
             return edge;

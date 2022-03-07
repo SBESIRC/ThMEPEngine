@@ -23,17 +23,17 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 一级负载类型
         /// </summary>
-        public ThPDSLoadTypeCat_1 Cat_1 { get; set; } = ThPDSLoadTypeCat_1.None;
+        public ThPDSLoadTypeCat_1 Cat_1 { get; set; }
 
         /// <summary>
         /// 二级负载类型
         /// </summary>
-        public ThPDSLoadTypeCat_2 Cat_2 { get; set; } = ThPDSLoadTypeCat_2.None;
+        public ThPDSLoadTypeCat_2 Cat_2 { get; set; }
 
         /// <summary>
         /// 默认回路类型
         /// </summary>
-        public ThPDSCircuitType DefaultCircuitType { get; set; } = ThPDSCircuitType.None;
+        public ThPDSCircuitType DefaultCircuitType { get; set; }
 
         public ThPDSBlockReferenceData(ObjectId blockRef)
         {
@@ -45,6 +45,8 @@ namespace TianHua.Electrical.PDS.Model
             EffectiveName = blockRef.GetBlockName();
             CustomProperties = blockRef.GetDynProperties();
             Attributes = blockRef.GetAttributesInBlockReference();
+            Cat_1 =  ThPDSLoadTypeCat_1.LumpedLoad;
+            Cat_2 = ThPDSLoadTypeCat_2.None;
         }
 
         public ThPDSBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)

@@ -209,11 +209,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                             }
                         }
                     }
-                    var sortedPt = pts.OrderBy(p => segline.GetClosestPointTo(p, false).DistanceTo(p));
+                    var sortedPt = pts
+                        .Where(pt => areas[0].Contains(pt))
+                        .OrderBy(p => segline.GetClosestPointTo(p, false).DistanceTo(p));
                     var closedPt = sortedPt.First();
-                    if(segline.GetClosestPointTo(closedPt, false).DistanceTo(closedPt) < 2749)
+                    if (segline.GetClosestPointTo(closedPt, false).DistanceTo(closedPt) < 2749)
                     {
                         Active.Editor.WriteMessage("分割线宽度小于车道宽！");
+                        var line= segline.Clone() as Line;
+                        line.ColorIndex = ((int)ColorIndex.Red);
+                        line.AddToCurrentSpace();
                         segAreasCnt = 0;
                         return false;
                     }
@@ -228,7 +233,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex ptsIndex, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
         {
-            double halfCarLaneWidth = 2751;
+            double halfCarLaneWidth = 2750;
             //var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
             //var dbPts = new List<DBPoint>();
             //areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));

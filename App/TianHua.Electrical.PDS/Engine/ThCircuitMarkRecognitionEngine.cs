@@ -53,15 +53,32 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 if(o is Polyline polyline)
                 {
-                    var lines = new DBObjectCollection();
-                    polyline.Explode(lines);
-                    lines.OfType<Line>().ForEach(e => Results.Add(e)); 
+                    if(!IsClosed(polyline))
+                    {
+                        var lines = new DBObjectCollection();
+                        polyline.Explode(lines);
+                        lines.OfType<Line>().ForEach(e => Results.Add(e));
+                    }
+                    else
+                    {
+                        Results.Add(polyline);
+                    }
                 }
                 else
                 {
                     Results.Add(o);
                 }
             });
+        }
+
+        /// <summary>
+        /// 若视觉闭合则返回true
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private bool IsClosed(Polyline polyline)
+        {
+            return polyline.Closed || polyline.StartPoint.DistanceTo(polyline.EndPoint) < 10.0;
         }
     }
 }

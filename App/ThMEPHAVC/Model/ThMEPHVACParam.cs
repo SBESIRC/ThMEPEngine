@@ -41,6 +41,7 @@ namespace ThMEPHVAC.Model
     public class SegInfo
     {
         public Line l;
+        public Vector3d horizontalVec;
         public string ductSize; //只用于主管段绘制, endline由ports控制大小
         public double srcShrink;
         public double dstShrink;
@@ -84,6 +85,7 @@ namespace ThMEPHVAC.Model
         public Point3d srtPoint;
         public double portInterval; // 0->自动间距
         public ThMEPHVACParam param;
+        public bool verticalPipeEnable;
         public EndCompType endCompType;
         public GenerationStyle genStyle;
         public DBObjectCollection centerLines;

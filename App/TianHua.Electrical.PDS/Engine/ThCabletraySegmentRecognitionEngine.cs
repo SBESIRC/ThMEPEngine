@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using NFox.Cad;
 
 using ThCADCore.NTS;
@@ -13,7 +14,12 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThCabletraySegmentRecognitionEngine : ThFlowSegmentRecognitionEngine
     {
-        public List<Line> Results { get; protected set; }
+        public ThCabletraySegmentRecognitionEngine()
+        {
+            Results = new List<Curve>();
+        }
+
+        public List<Curve> Results { get; protected set; }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -35,7 +41,19 @@ namespace TianHua.Electrical.PDS.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
                 curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Results = curves.OfType<Line>().Where(o => o.GetLength() > 1.0).ToList();
+            curves.OfType<Curve>().Where(o => o.GetLength() > 1.0).ForEach(o =>
+            {
+                if (o is Line || o is Arc || o is Polyline)
+                {
+                    Results.Add(o);
+                }
+                else
+                {
+                    var objs = new DBObjectCollection();
+                    o.Explode(objs);
+                    objs.OfType<Curve>().ForEach(e => Results.Add(e));
+                }
+            });
         }
 
         public override void RecognizeEditor(Point3dCollection polygon)

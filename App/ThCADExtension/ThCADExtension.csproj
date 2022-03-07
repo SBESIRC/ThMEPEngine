@@ -49,6 +49,7 @@
     <Compile Include="ThDbWorkingDatabaseSwitch.cs" />
     <Compile Include="ThDynamicBlockUtils.cs" />
     <Compile Include="ThEditorExtension.cs" />
+    <Compile Include="ThEnumExtension.cs" />
     <Compile Include="ThExtents3dExtension.cs" />
     <Compile Include="ThBlockImageTool.cs" />
     <Compile Include="ThLineExtension.cs" />

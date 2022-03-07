@@ -3,6 +3,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -29,7 +30,10 @@ namespace TianHua.Electrical.PDS.Service
         {
             return new List<string> 
             { 
-                "E-POWR-CMTB", 
+                "E-POWR-CMTB",
+                "E-LITE-CMTB",
+                "E-UNIV-EL2",
+                //"E-CTRL-CMTB",
             };
         }
 
@@ -47,8 +51,29 @@ namespace TianHua.Electrical.PDS.Service
                 "E-POWR-WIRE",
                 "E-POWR-WIRE2",
                 "E-POWR-WIRE3",
-                "E-CTRL-WIRE",
+                //"E-CTRL-WIRE",
             };
+        }
+
+        public static ThPDSCircuitType SelectCircuitType(string layer)
+        {
+            switch(layer)
+            {
+                case "E-POWR-WIRE":
+                    return ThPDSCircuitType.PowerEquipment;
+                case "E-POWR-WIRE2":
+                    return ThPDSCircuitType.Socket;
+                case "E-POWR-WIRE3":
+                    return ThPDSCircuitType.PowerEquipment;
+                case "E-LITE-WIRE":
+                    return ThPDSCircuitType.Lighting;
+                case "E-LITE-WIRE2":
+                    return ThPDSCircuitType.EmergencyLighting;
+                case "E-LITE-WIRE-LV":
+                    return ThPDSCircuitType.Lighting;
+                default:
+                    return ThPDSCircuitType.None;
+            }
         }
 
         public static ObjectId CreateAITestCableLayer(this Database database)

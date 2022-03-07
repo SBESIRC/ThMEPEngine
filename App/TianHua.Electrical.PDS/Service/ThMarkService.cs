@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
 
 using ThCADCore.NTS;
@@ -28,6 +29,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var lines = new DBObjectCollection();
             var texts = new DBObjectCollection();
+            MarkDic = new Dictionary<DBPoint, List<string>>();
             markDatas.ForEach(entity =>
             {
                 if (entity is DBText)
@@ -42,11 +44,51 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     lines.Add(entity);
                 }
-                else if (entity is Leader)
+                else if (entity is Leader leader)
                 {
                     var objs = new DBObjectCollection();
                     entity.Explode(objs);
-                    objs.OfType<Polyline>().ForEach(p => p.GetEdges().ForEach(l => lines.Add(l)));
+                    objs.OfType<Polyline>().ForEach(p =>
+                    {
+                        var lineList = p.GetEdges();
+                        for (var i = 0; i < lineList.Count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                lines.Add(new Line(leader.StartPoint, lineList[i].EndPoint));
+                            }
+                            else
+                            {
+                                lines.Add(lineList[i]);
+                            }
+                        }
+                    });
+                }
+                else if (entity is MLeader mLeader)
+                {
+                    var vertex = new Point3d();
+                    var continueDo = false;
+                    for (var i = 0; i < 5; i++)
+                    {
+                        try
+                        {
+                            vertex = mLeader.GetFirstVertex(i);
+                            continueDo = true;
+                            break;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                    if (continueDo)
+                    {
+                        var point = ToDbPoint(vertex);
+                        if (!MarkDic.ContainsKey(point))
+                        {
+                            MarkDic.Add(point, GetTexts(mLeader.MText));
+                        }
+                    }
                 }
                 else if (entity is MText)
                 {
@@ -54,38 +96,18 @@ namespace TianHua.Electrical.PDS.Service
                     entity.Explode(objs);
                     objs.OfType<DBText>().ForEach(l => texts.Add(l));
                 }
+                else if (entity is Table table)
+                {
+                    var objs = new DBObjectCollection();
+                    table.Explode(objs);
+                    var marks = new List<string>();
+                    objs.OfType<MText>().ForEach(t => marks.AddRange(GetTexts(t)));
+                    var obb = objs.OfType<Line>().ToCollection().GetMinimumRectangle();
+                    obb.Vertices().OfType<Point3d>().ForEach(pt => MarkDic.Add(ToDbPoint(pt), marks));
+                }
             });
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
             TextIndex = new ThCADCoreNTSSpatialIndex(texts);
-
-            MarkDic = new Dictionary<DBPoint, List<string>>();
-            var mLeader = markDatas.OfType<MLeader>();
-            mLeader.ForEach(e =>
-            {
-                var vertex = new Point3d();
-                var continueDo = false;
-                for (var i = 0; i < 5; i++)
-                {
-                    try
-                    {
-                        vertex = e.GetFirstVertex(i);
-                        continueDo = true;
-                        break;
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-                if (continueDo)
-                {
-                    var point = ToDbPoint(vertex);
-                    if (!MarkDic.ContainsKey(point))
-                    {
-                        MarkDic.Add(point, GetTexts(e.MText));
-                    }
-                }
-            });
 
             markBlocks.ForEach(o =>
             {
@@ -97,6 +119,15 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         MarkDic.Add(ToDbPoint(pt), marks);
                     });
+                }
+                else if (o.Value.EffectiveName.Contains("负载标注"))
+                {
+                    var value = GetTexts(o.Value);
+                    if (o.Value.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                    {
+                        value.Add(o.Value.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
+                    }
+                    MarkDic.Add(ToDbPoint(o.Value.Position), value);
                 }
                 else
                 {
@@ -132,15 +163,40 @@ namespace TianHua.Electrical.PDS.Service
             if (lineCollection.Count > 0)
             {
                 var line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
-                var bfLine = line.ExtendLine(10.0).Buffer(10.0);
-                lineCollection = LineIndex.SelectCrossingPolygon(bfLine);
+                var newframe = line.ExtendLine(10.0).Buffer(10.0);
+                lineCollection = LineIndex.SelectCrossingPolygon(newframe);
                 lineCollection.Remove(line);
-                if (lineCollection.Count > 0)
+
+                if (lineCollection.OfType<Polyline>().Count() > 0)
                 {
-                    line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
+                    var polyCollection = lineCollection.OfType<Polyline>();
+                    var polys = polyCollection.Select(p => ThPDSBufferService.Buffer(p)).ToCollection();
+                    newframe = polys.ToNTSMultiPolygon().Union().ToDbCollection().OfType<Polyline>().FirstOrDefault();
+
+                    var doSearch = true;
+                    while (doSearch && newframe != null)
+                    {
+                        var newPolyCollection = LineIndex.SelectCrossingPolygon(newframe).OfType<Polyline>();
+                        if (newPolyCollection.Count() <= polyCollection.Count())
+                        {
+                            doSearch = false;
+                            break;
+                        }
+                        polys = newPolyCollection.Select(p => ThPDSBufferService.Buffer(p)).ToCollection();
+                        newframe = polys.ToNTSMultiPolygon().Union().ToDbCollection().OfType<Polyline>().FirstOrDefault();
+                        polyCollection = newPolyCollection;
+                    }
                 }
-                bfLine = line.ExtendLine(200.0).Buffer(200.0);
-                var TextCollection = TextIndex.SelectCrossingPolygon(bfLine);//（Buffer200）+文字
+                else
+                {
+                    if (lineCollection.OfType<Line>().Count() > 0)
+                    {
+                        line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
+                    }
+                    newframe = line.ExtendLine(200.0).Buffer(200.0);
+                }
+
+                var TextCollection = TextIndex.SelectCrossingPolygon(newframe);//（Buffer200）+文字
                 if (TextCollection.Count > 0)
                 {
                     TextCollection.OfType<DBText>().ForEach(o =>
@@ -150,7 +206,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else
                 {
-                    var pointCollection = PointIndex.SelectWindowPolygon(bfLine);
+                    var pointCollection = PointIndex.SelectWindowPolygon(newframe);
                     if (pointCollection.Count > 0)
                     {
                         result = MarkDic[pointCollection[0] as DBPoint];

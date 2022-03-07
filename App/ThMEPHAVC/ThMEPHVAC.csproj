@@ -35,6 +35,7 @@
     <Compile Include="Algorithm\ThPolygonlizerCurveLine.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
+    <Compile Include="CAD\ThPortParameter.cs" />
     <Compile Include="Command\IndoorFanChange.cs" />
     <Compile Include="Command\IndoorFanCheck.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="IndoorFanModels\IndoorFanLayoutModel.cs" />
     <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
     <Compile Include="IndoorFanModels\VRFFan.cs" />
+    <Compile Include="IO\ThPortParameterJsonReader.cs" />
     <Compile Include="Model\ThAirPortParameter.cs" />
     <Compile Include="Model\ThFGDXParameter.cs" />
     <Compile Include="ParameterService\IndoorFanParameter.cs" />

@@ -8,6 +8,7 @@
         public static readonly string LOAD_ID = "负载编号";
         public static readonly string DESCRIPTION = "负载用途";
         public static readonly string ELECTRICITY = "电量";
+        public static readonly string POWER_CATEGORY = "电源类别";
 
         public const double AllowableTolerance = 25.0;//允许公差
     }

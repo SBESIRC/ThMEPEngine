@@ -73,6 +73,13 @@ namespace TianHua.Hvac.UI
             this.textRoomHeight = new System.Windows.Forms.TextBox();
             this.labelRoomAirSpeed = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.radioPortRange = new System.Windows.Forms.RadioButton();
+            this.radioVerticalPipe = new System.Windows.Forms.RadioButton();
+            this.comboPortRange = new System.Windows.Forms.ComboBox();
+            this.textPortElevation = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioGenStyle1 = new System.Windows.Forms.RadioButton();
             this.radioGenStyle2 = new System.Windows.Forms.RadioButton();
@@ -92,7 +99,6 @@ namespace TianHua.Hvac.UI
             this.label30 = new System.Windows.Forms.Label();
             this.label35 = new System.Windows.Forms.Label();
             this.textPortNum = new System.Windows.Forms.TextBox();
-            this.comboPortRange = new System.Windows.Forms.ComboBox();
             this.label32 = new System.Windows.Forms.Label();
             this.splitContainer6 = new System.Windows.Forms.SplitContainer();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -152,6 +158,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer5.Panel2.SuspendLayout();
             this.splitContainer5.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer6)).BeginInit();
             this.splitContainer6.Panel1.SuspendLayout();
@@ -174,7 +181,7 @@ namespace TianHua.Hvac.UI
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer1.Size = new System.Drawing.Size(621, 511);
+            this.splitContainer1.Size = new System.Drawing.Size(621, 551);
             this.splitContainer1.SplitterDistance = 118;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 0;
@@ -195,8 +202,8 @@ namespace TianHua.Hvac.UI
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.listBox1);
-            this.splitContainer2.Size = new System.Drawing.Size(116, 509);
-            this.splitContainer2.SplitterDistance = 122;
+            this.splitContainer2.Size = new System.Drawing.Size(116, 549);
+            this.splitContainer2.SplitterDistance = 131;
             this.splitContainer2.SplitterWidth = 1;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -236,7 +243,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(118, 386);
+            this.listBox1.Size = new System.Drawing.Size(118, 434);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -270,8 +277,8 @@ namespace TianHua.Hvac.UI
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer4);
-            this.splitContainer3.Size = new System.Drawing.Size(502, 511);
-            this.splitContainer3.SplitterDistance = 89;
+            this.splitContainer3.Size = new System.Drawing.Size(502, 551);
+            this.splitContainer3.SplitterDistance = 81;
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 18;
             // 
@@ -471,7 +478,7 @@ namespace TianHua.Hvac.UI
             // splitContainer4.Panel2
             // 
             this.splitContainer4.Panel2.Controls.Add(this.splitContainer6);
-            this.splitContainer4.Size = new System.Drawing.Size(502, 421);
+            this.splitContainer4.Size = new System.Drawing.Size(502, 469);
             this.splitContainer4.SplitterDistance = 247;
             this.splitContainer4.SplitterWidth = 1;
             this.splitContainer4.TabIndex = 0;
@@ -505,6 +512,10 @@ namespace TianHua.Hvac.UI
             // 
             // splitContainer5.Panel2
             // 
+            this.splitContainer5.Panel2.Controls.Add(this.groupBox4);
+            this.splitContainer5.Panel2.Controls.Add(this.textPortElevation);
+            this.splitContainer5.Panel2.Controls.Add(this.label15);
+            this.splitContainer5.Panel2.Controls.Add(this.label4);
             this.splitContainer5.Panel2.Controls.Add(this.groupBox3);
             this.splitContainer5.Panel2.Controls.Add(this.label39);
             this.splitContainer5.Panel2.Controls.Add(this.textPortInterval);
@@ -521,10 +532,9 @@ namespace TianHua.Hvac.UI
             this.splitContainer5.Panel2.Controls.Add(this.label30);
             this.splitContainer5.Panel2.Controls.Add(this.label35);
             this.splitContainer5.Panel2.Controls.Add(this.textPortNum);
-            this.splitContainer5.Panel2.Controls.Add(this.comboPortRange);
             this.splitContainer5.Panel2.Controls.Add(this.label32);
-            this.splitContainer5.Size = new System.Drawing.Size(247, 421);
-            this.splitContainer5.SplitterDistance = 234;
+            this.splitContainer5.Size = new System.Drawing.Size(247, 469);
+            this.splitContainer5.SplitterDistance = 230;
             this.splitContainer5.SplitterWidth = 1;
             this.splitContainer5.TabIndex = 28;
             // 
@@ -717,6 +727,85 @@ namespace TianHua.Hvac.UI
             this.label14.TabIndex = 35;
             this.label14.Text = "风速：";
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.radioPortRange);
+            this.groupBox4.Controls.Add(this.radioVerticalPipe);
+            this.groupBox4.Controls.Add(this.comboPortRange);
+            this.groupBox4.Location = new System.Drawing.Point(70, 91);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(161, 43);
+            this.groupBox4.TabIndex = 78;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Paint += new System.Windows.Forms.PaintEventHandler(this.groupBox4_Paint);
+            // 
+            // radioPortRange
+            // 
+            this.radioPortRange.AutoSize = true;
+            this.radioPortRange.Location = new System.Drawing.Point(18, 4);
+            this.radioPortRange.Name = "radioPortRange";
+            this.radioPortRange.Size = new System.Drawing.Size(14, 13);
+            this.radioPortRange.TabIndex = 75;
+            this.radioPortRange.TabStop = true;
+            this.radioPortRange.UseVisualStyleBackColor = true;
+            this.radioPortRange.CheckedChanged += new System.EventHandler(this.radioPortRange_CheckedChanged);
+            // 
+            // radioVerticalPipe
+            // 
+            this.radioVerticalPipe.AutoSize = true;
+            this.radioVerticalPipe.Enabled = false;
+            this.radioVerticalPipe.Location = new System.Drawing.Point(18, 27);
+            this.radioVerticalPipe.Name = "radioVerticalPipe";
+            this.radioVerticalPipe.Size = new System.Drawing.Size(113, 16);
+            this.radioVerticalPipe.TabIndex = 74;
+            this.radioVerticalPipe.TabStop = true;
+            this.radioVerticalPipe.Text = "立支管+侧回风口";
+            this.radioVerticalPipe.UseVisualStyleBackColor = true;
+            this.radioVerticalPipe.CheckedChanged += new System.EventHandler(this.radioVerticalPipe_CheckedChanged);
+            // 
+            // comboPortRange
+            // 
+            this.comboPortRange.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboPortRange.FormattingEnabled = true;
+            this.comboPortRange.Items.AddRange(new object[] {
+            "下送风口",
+            "下回风口",
+            "侧送风口",
+            "侧回风口",
+            "方形散流器",
+            "圆形风口"});
+            this.comboPortRange.Location = new System.Drawing.Point(37, 1);
+            this.comboPortRange.Name = "comboPortRange";
+            this.comboPortRange.Size = new System.Drawing.Size(119, 20);
+            this.comboPortRange.TabIndex = 27;
+            // 
+            // textPortElevation
+            // 
+            this.textPortElevation.Enabled = false;
+            this.textPortElevation.Location = new System.Drawing.Point(114, 187);
+            this.textPortElevation.Name = "textPortElevation";
+            this.textPortElevation.Size = new System.Drawing.Size(43, 21);
+            this.textPortElevation.TabIndex = 77;
+            this.textPortElevation.Text = "8";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(166, 194);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(11, 12);
+            this.label15.TabIndex = 76;
+            this.label15.Text = "m";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(11, 190);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(89, 12);
+            this.label4.TabIndex = 75;
+            this.label4.Text = "风口底边标高：";
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.radioGenStyle1);
@@ -769,7 +858,7 @@ namespace TianHua.Hvac.UI
             // label39
             // 
             this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(212, 160);
+            this.label39.Location = new System.Drawing.Point(212, 214);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(11, 12);
             this.label39.TabIndex = 57;
@@ -778,7 +867,7 @@ namespace TianHua.Hvac.UI
             // textPortInterval
             // 
             this.textPortInterval.Enabled = false;
-            this.textPortInterval.Location = new System.Drawing.Point(163, 155);
+            this.textPortInterval.Location = new System.Drawing.Point(163, 209);
             this.textPortInterval.Name = "textPortInterval";
             this.textPortInterval.Size = new System.Drawing.Size(43, 21);
             this.textPortInterval.TabIndex = 56;
@@ -788,7 +877,7 @@ namespace TianHua.Hvac.UI
             // radioIntervalPortCustom
             // 
             this.radioIntervalPortCustom.AutoSize = true;
-            this.radioIntervalPortCustom.Location = new System.Drawing.Point(98, 158);
+            this.radioIntervalPortCustom.Location = new System.Drawing.Point(98, 212);
             this.radioIntervalPortCustom.Name = "radioIntervalPortCustom";
             this.radioIntervalPortCustom.Size = new System.Drawing.Size(59, 16);
             this.radioIntervalPortCustom.TabIndex = 55;
@@ -800,7 +889,7 @@ namespace TianHua.Hvac.UI
             // 
             this.radioPortInterval.AutoSize = true;
             this.radioPortInterval.Checked = true;
-            this.radioPortInterval.Location = new System.Drawing.Point(45, 158);
+            this.radioPortInterval.Location = new System.Drawing.Point(45, 212);
             this.radioPortInterval.Name = "radioPortInterval";
             this.radioPortInterval.Size = new System.Drawing.Size(47, 16);
             this.radioPortInterval.TabIndex = 54;
@@ -812,7 +901,7 @@ namespace TianHua.Hvac.UI
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(9, 159);
+            this.label38.Location = new System.Drawing.Point(9, 213);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(41, 12);
             this.label38.TabIndex = 53;
@@ -821,7 +910,7 @@ namespace TianHua.Hvac.UI
             // label37
             // 
             this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(94, 138);
+            this.label37.Location = new System.Drawing.Point(94, 166);
             this.label37.Name = "label37";
             this.label37.Size = new System.Drawing.Size(11, 12);
             this.label37.TabIndex = 52;
@@ -829,7 +918,7 @@ namespace TianHua.Hvac.UI
             // 
             // textPortHeight
             // 
-            this.textPortHeight.Location = new System.Drawing.Point(114, 135);
+            this.textPortHeight.Location = new System.Drawing.Point(114, 163);
             this.textPortHeight.Name = "textPortHeight";
             this.textPortHeight.Size = new System.Drawing.Size(43, 21);
             this.textPortHeight.TabIndex = 51;
@@ -838,7 +927,7 @@ namespace TianHua.Hvac.UI
             // 
             // textPortWidth
             // 
-            this.textPortWidth.Location = new System.Drawing.Point(45, 135);
+            this.textPortWidth.Location = new System.Drawing.Point(45, 163);
             this.textPortWidth.Name = "textPortWidth";
             this.textPortWidth.Size = new System.Drawing.Size(43, 21);
             this.textPortWidth.TabIndex = 50;
@@ -848,7 +937,7 @@ namespace TianHua.Hvac.UI
             // label36
             // 
             this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(9, 138);
+            this.label36.Location = new System.Drawing.Point(9, 166);
             this.label36.Name = "label36";
             this.label36.Size = new System.Drawing.Size(41, 12);
             this.label36.TabIndex = 49;
@@ -857,7 +946,7 @@ namespace TianHua.Hvac.UI
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(202, 114);
+            this.label33.Location = new System.Drawing.Point(202, 142);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(23, 12);
             this.label33.TabIndex = 47;
@@ -866,7 +955,7 @@ namespace TianHua.Hvac.UI
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(94, 116);
+            this.label31.Location = new System.Drawing.Point(94, 144);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(17, 12);
             this.label31.TabIndex = 47;
@@ -875,7 +964,7 @@ namespace TianHua.Hvac.UI
             // labelPortSpeed
             // 
             this.labelPortSpeed.AutoSize = true;
-            this.labelPortSpeed.Location = new System.Drawing.Point(167, 116);
+            this.labelPortSpeed.Location = new System.Drawing.Point(167, 144);
             this.labelPortSpeed.Name = "labelPortSpeed";
             this.labelPortSpeed.Size = new System.Drawing.Size(29, 12);
             this.labelPortSpeed.TabIndex = 46;
@@ -884,7 +973,7 @@ namespace TianHua.Hvac.UI
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(9, 89);
+            this.label30.Location = new System.Drawing.Point(9, 94);
             this.label30.Name = "label30";
             this.label30.Size = new System.Drawing.Size(65, 12);
             this.label30.TabIndex = 26;
@@ -893,7 +982,7 @@ namespace TianHua.Hvac.UI
             // label35
             // 
             this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(123, 114);
+            this.label35.Location = new System.Drawing.Point(123, 142);
             this.label35.Name = "label35";
             this.label35.Size = new System.Drawing.Size(41, 12);
             this.label35.TabIndex = 45;
@@ -901,33 +990,17 @@ namespace TianHua.Hvac.UI
             // 
             // textPortNum
             // 
-            this.textPortNum.Location = new System.Drawing.Point(45, 110);
+            this.textPortNum.Location = new System.Drawing.Point(45, 138);
             this.textPortNum.Name = "textPortNum";
             this.textPortNum.Size = new System.Drawing.Size(43, 21);
             this.textPortNum.TabIndex = 46;
             this.textPortNum.Text = "8";
             this.textPortNum.TextChanged += new System.EventHandler(this.textPortNum_TextChanged);
             // 
-            // comboPortRange
-            // 
-            this.comboPortRange.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboPortRange.FormattingEnabled = true;
-            this.comboPortRange.Items.AddRange(new object[] {
-            "下送风口",
-            "下回风口",
-            "侧送风口",
-            "侧回风口",
-            "方形散流器",
-            "圆形风口"});
-            this.comboPortRange.Location = new System.Drawing.Point(75, 87);
-            this.comboPortRange.Name = "comboPortRange";
-            this.comboPortRange.Size = new System.Drawing.Size(119, 20);
-            this.comboPortRange.TabIndex = 27;
-            // 
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(9, 113);
+            this.label32.Location = new System.Drawing.Point(9, 141);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(41, 12);
             this.label32.TabIndex = 45;
@@ -979,8 +1052,8 @@ namespace TianHua.Hvac.UI
             this.splitContainer6.Panel2.Controls.Add(this.labelBypassNum);
             this.splitContainer6.Panel2.Controls.Add(this.label41);
             this.splitContainer6.Panel2.Controls.Add(this.label40);
-            this.splitContainer6.Size = new System.Drawing.Size(254, 421);
-            this.splitContainer6.SplitterDistance = 234;
+            this.splitContainer6.Size = new System.Drawing.Size(254, 469);
+            this.splitContainer6.SplitterDistance = 230;
             this.splitContainer6.SplitterWidth = 1;
             this.splitContainer6.TabIndex = 28;
             // 
@@ -1176,7 +1249,7 @@ namespace TianHua.Hvac.UI
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(90, 87);
+            this.label20.Location = new System.Drawing.Point(90, 100);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(23, 12);
             this.label20.TabIndex = 76;
@@ -1185,7 +1258,7 @@ namespace TianHua.Hvac.UI
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(125, 62);
+            this.label10.Location = new System.Drawing.Point(128, 71);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(11, 12);
             this.label10.TabIndex = 77;
@@ -1194,7 +1267,7 @@ namespace TianHua.Hvac.UI
             // labelBypassSpeed
             // 
             this.labelBypassSpeed.AutoSize = true;
-            this.labelBypassSpeed.Location = new System.Drawing.Point(55, 89);
+            this.labelBypassSpeed.Location = new System.Drawing.Point(55, 102);
             this.labelBypassSpeed.Name = "labelBypassSpeed";
             this.labelBypassSpeed.Size = new System.Drawing.Size(29, 12);
             this.labelBypassSpeed.TabIndex = 75;
@@ -1202,7 +1275,7 @@ namespace TianHua.Hvac.UI
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(91, 28);
+            this.button6.Location = new System.Drawing.Point(91, 33);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(72, 23);
             this.button6.TabIndex = 72;
@@ -1212,7 +1285,7 @@ namespace TianHua.Hvac.UI
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(11, 87);
+            this.label28.Location = new System.Drawing.Point(11, 100);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(41, 12);
             this.label28.TabIndex = 74;
@@ -1220,7 +1293,7 @@ namespace TianHua.Hvac.UI
             // 
             // textBypassHeight
             // 
-            this.textBypassHeight.Location = new System.Drawing.Point(145, 59);
+            this.textBypassHeight.Location = new System.Drawing.Point(148, 68);
             this.textBypassHeight.Name = "textBypassHeight";
             this.textBypassHeight.Size = new System.Drawing.Size(43, 21);
             this.textBypassHeight.TabIndex = 76;
@@ -1229,7 +1302,7 @@ namespace TianHua.Hvac.UI
             // 
             // btnSelectBypass
             // 
-            this.btnSelectBypass.Location = new System.Drawing.Point(10, 28);
+            this.btnSelectBypass.Location = new System.Drawing.Point(10, 33);
             this.btnSelectBypass.Name = "btnSelectBypass";
             this.btnSelectBypass.Size = new System.Drawing.Size(72, 23);
             this.btnSelectBypass.TabIndex = 71;
@@ -1239,7 +1312,7 @@ namespace TianHua.Hvac.UI
             // 
             // textBypassWidth
             // 
-            this.textBypassWidth.Location = new System.Drawing.Point(76, 59);
+            this.textBypassWidth.Location = new System.Drawing.Point(79, 68);
             this.textBypassWidth.Name = "textBypassWidth";
             this.textBypassWidth.Size = new System.Drawing.Size(43, 21);
             this.textBypassWidth.TabIndex = 75;
@@ -1248,7 +1321,7 @@ namespace TianHua.Hvac.UI
             // 
             // btn_Cancle
             // 
-            this.btn_Cancle.Location = new System.Drawing.Point(165, 150);
+            this.btn_Cancle.Location = new System.Drawing.Point(165, 203);
             this.btn_Cancle.Name = "btn_Cancle";
             this.btn_Cancle.Size = new System.Drawing.Size(80, 23);
             this.btn_Cancle.TabIndex = 70;
@@ -1259,7 +1332,7 @@ namespace TianHua.Hvac.UI
             // labelBypassSize
             // 
             this.labelBypassSize.AutoSize = true;
-            this.labelBypassSize.Location = new System.Drawing.Point(9, 62);
+            this.labelBypassSize.Location = new System.Drawing.Point(11, 71);
             this.labelBypassSize.Name = "labelBypassSize";
             this.labelBypassSize.Size = new System.Drawing.Size(65, 12);
             this.labelBypassSize.TabIndex = 74;
@@ -1267,7 +1340,7 @@ namespace TianHua.Hvac.UI
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(80, 150);
+            this.btnOK.Location = new System.Drawing.Point(80, 203);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(80, 23);
             this.btnOK.TabIndex = 69;
@@ -1283,7 +1356,7 @@ namespace TianHua.Hvac.UI
             "1:150",
             "1:100",
             "1:50"});
-            this.comboScale.Location = new System.Drawing.Point(72, 115);
+            this.comboScale.Location = new System.Drawing.Point(74, 127);
             this.comboScale.Name = "comboScale";
             this.comboScale.Size = new System.Drawing.Size(89, 20);
             this.comboScale.TabIndex = 68;
@@ -1291,7 +1364,7 @@ namespace TianHua.Hvac.UI
             // label44
             // 
             this.label44.AutoSize = true;
-            this.label44.Location = new System.Drawing.Point(8, 118);
+            this.label44.Location = new System.Drawing.Point(10, 130);
             this.label44.Name = "label44";
             this.label44.Size = new System.Drawing.Size(65, 12);
             this.label44.TabIndex = 67;
@@ -1337,7 +1410,7 @@ namespace TianHua.Hvac.UI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 511);
+            this.ClientSize = new System.Drawing.Size(621, 551);
             this.Controls.Add(this.splitContainer1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -1371,6 +1444,8 @@ namespace TianHua.Hvac.UI
             this.splitContainer5.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.splitContainer6.Panel1.ResumeLayout(false);
@@ -1489,5 +1564,11 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.TextBox textBypassWidth;
         private System.Windows.Forms.Label labelBypassSize;
         private System.Windows.Forms.Button btnTotalAirVolume;
+        private System.Windows.Forms.RadioButton radioVerticalPipe;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.TextBox textPortElevation;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.RadioButton radioPortRange;
     }
 }

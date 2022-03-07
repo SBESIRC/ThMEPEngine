@@ -32,13 +32,14 @@ namespace TianHua.Electrical.PDS.UI.Project
 
         public static void ConvertToViewModel()
         {
-            PDSProjectVM.Instance.graphData = PDSProject.Instance.graphData.Graph.Clone();
-            PDSProjectVM.Instance.InformationMatchViewModel = new ViewModels.InformationMatchViewModel(PDSProjectVM.Instance.graphData);
+            PDSProjectVM.Instance.graphInfo = new ThPDSProjectVMGraphInfo() ;
+            PDSProjectVM.Instance.graphInfo.graphData = PDSProject.Instance.graphData.Graph.Clone();
+            PDSProjectVM.Instance.InformationMatchViewModel = new ViewModels.InformationMatchViewModel(PDSProjectVM.Instance.graphInfo);
         }
 
         public static void ConvertToProject()
         {
-            PDSProject.Instance.graphData.Graph = PDSProjectVM.Instance.graphData.Clone();
+            PDSProject.Instance.graphData.Graph = PDSProjectVM.Instance.graphInfo.graphData.Clone();
         }
     }
 }

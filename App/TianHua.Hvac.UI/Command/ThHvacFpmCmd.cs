@@ -1,26 +1,31 @@
 ﻿using System;
-using System.Linq;
 using System.Windows.Forms;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using DotNetARX;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
 using ThMEPEngineCore.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using DotNetARX;
 
 namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacFpmCmd : ThMEPBaseCommand, IDisposable
     {
         ThHvacCmdService cmdService;
+        private static PortParam singleInstance;
         public ThHvacFpmCmd()
         {
             ActionName = "风平面";
             CommandName = "THFPM";
             cmdService = new ThHvacCmdService();
+            if (singleInstance == null)
+            {
+                singleInstance = new PortParam();
+                singleInstance.param = new ThMEPHVACParam(); ;
+            }
         }
         public void Dispose()
         {
@@ -131,7 +136,7 @@ namespace TianHua.Hvac.UI.Command
                                  out Dictionary<string, ThDbModelFan> dicModels,
                                  out Dictionary<Polyline, ObjectId> allFansDic)
         {
-            using (var dlg = new fmFpm())
+            using (var dlg = new fmFpm(singleInstance))
             {
                 startPoint = Point3d.Origin;
                 portParam = new PortParam();
@@ -152,6 +157,7 @@ namespace TianHua.Hvac.UI.Command
                         portParam.srtPoint = startPoint;
                         connNotRoomLines = dlg.connNotRoomLines;
                         allFansDic = dlg.allFansDic;
+                        RecordUIParam(dlg.portParam);
                         return true;
                     }
                     else
@@ -159,11 +165,32 @@ namespace TianHua.Hvac.UI.Command
                         startPoint = dlg.portParam.srtPoint;
                         portParam = dlg.portParam;
                         allFansDic = dlg.allFansDic;
+                        RecordUIParam(dlg.portParam);
                         return true;
                     }
                 }
                 return false;
             }
+        }
+        private void RecordUIParam(PortParam portParam)
+        {
+            singleInstance = portParam;
+            singleInstance.genStyle = portParam.genStyle;
+            singleInstance.endCompType = portParam.endCompType;
+            singleInstance.portInterval = portParam.portInterval;
+            singleInstance.verticalPipeEnable = portParam.verticalPipeEnable;
+            singleInstance.param.airSpeed = portParam.param.airSpeed;
+            singleInstance.param.airVolume = portParam.param.airVolume;
+            singleInstance.param.elevation = portParam.param.elevation;
+            singleInstance.param.highAirVolume = portParam.param.highAirVolume;
+            singleInstance.param.inDuctSize = portParam.param.inDuctSize;
+            singleInstance.param.mainHeight = portParam.param.mainHeight;
+            singleInstance.param.portName = portParam.param.portName;
+            singleInstance.param.portNum = portParam.param.portNum;
+            singleInstance.param.portRange = portParam.param.portRange;
+            singleInstance.param.portSize = portParam.param.portSize;
+            singleInstance.param.scale = portParam.param.scale;
+            singleInstance.param.scenario = portParam.param.scenario;
         }
     }
 }

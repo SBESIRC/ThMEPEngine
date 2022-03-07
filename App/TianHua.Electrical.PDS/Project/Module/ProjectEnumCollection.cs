@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -39,13 +35,21 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum CircuitFormInType
     {
+        [Description("None")]
+        None,
+        [Description("1路进线")]
         一路进线,
+        [Description("2路进线ATSE")]
         二路进线ATSE,
+        [Description("3路进线")]
         三路进线,
+        [Description("集中电源")]
         集中电源,
-        None
     }
 
+    /// <summary>
+    /// 错误信息
+    /// </summary>
     public enum PDSProjectErrorType
     {
         Alarm = 0,//报警，需要用户去关注并确认掉

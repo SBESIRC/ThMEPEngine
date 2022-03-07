@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
                 }
 
                 column++;
@@ -45,22 +45,15 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 catch
                 {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
+                    blockInfo.Cat_2 = ThPDSLoadTypeCat_2.None;
                 }
 
                 column++;
                 blockInfo.Properties = StringFilter(table.Rows[row][column].ToString());
 
                 column++;
-                try
-                {
-                    var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
-                    blockInfo.DefaultCircuitType = defaultCircuitType;
-                }
-                catch
-                {
-                    blockInfo.Cat_1 = ThPDSLoadTypeCat_1.None;
-                }
+                var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
+                blockInfo.DefaultCircuitType = defaultCircuitType;
 
                 blockInfos.Add(blockInfo);
             }

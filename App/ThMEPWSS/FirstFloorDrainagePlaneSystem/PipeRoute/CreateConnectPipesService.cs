@@ -8,16 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
     public class CreateConnectPipesService
     {
-        double distance = 300;
+        double distance = 50;
+        double inflectionWeight = 2;
         public CreateConnectPipesService(double step)
         {
-            distance = step;
+            distance = 100;// step;
         }
 
         /// <summary>
@@ -28,24 +30,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="blockPt"></param>
         /// <param name="holes"></param>
         /// <returns></returns>
-        public List<Polyline> CreatePipes(Polyline polyline, Line closetLane, Point3d blockPt, List<Polyline> holes)
+        public List<Polyline> CreatePipes(Polyline polyline, Line closetLane, Point3d blockPt, Dictionary<List<Polyline>, double> holes)
         {
             List<Polyline> resLines = new List<Polyline>();
+            var disHoles = holes.Where(x => x.Value == double.MaxValue).SelectMany(x => x.Key).ToList();
             //寻找起点
-            var startPt = CreateDistancePoint(polyline, holes, blockPt);
-
-            //创建延伸线
-            //----简单的一条延伸线且不穿洞
-            var extendLine = CreateSymbolExtendLine(polyline, closetLane, startPt, holes);
-            if (extendLine != null)
-            {
-                resLines.Add(extendLine);
-            }
-            else
-            {
-                //----用a*算法计算路径躲洞
-                resLines.AddRange(GetPathByAStar(polyline, closetLane, startPt, holes));
-            }
+            var startPt = CreateDistancePoint(polyline, disHoles, blockPt);
+            resLines.AddRange(GetPathByAStar(polyline, closetLane, startPt, holes));
 
             return resLines;
         }
@@ -83,31 +74,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         }
 
         /// <summary>
-        /// 计算简单的延伸线
-        /// </summary>
-        /// <param name="closetLane"></param>
-        /// <param name="startPt"></param>
-        /// <returns></returns>
-        private Polyline CreateSymbolExtendLine(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes)
-        {
-            var closetPt = closetLane.GetClosestPointTo(startPt, false);
-            Vector3d dir = Vector3d.ZAxis.CrossProduct((closetPt - startPt).GetNormal());
-            if ((closetLane.EndPoint - closetLane.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)) || closetPt.DistanceTo(startPt) < 1)
-            {
-                Polyline line = new Polyline();
-                line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
-                line.AddVertexAt(1, closetPt.ToPoint2D(), 0, 0, 0);
-                if (!CheckService.LineIntersctBySelect(holes, line, 200) && !CheckService.CheckIntersectWithFrame(line, frame))
-                {
-                    return line;
-                }
-
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// 使用a*算法寻路
         /// </summary>
         /// <param name="polyline"></param>
@@ -115,22 +81,26 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="startPt"></param>
         /// <param name="holes"></param>
         /// <returns></returns>
-        private List<Polyline> GetPathByAStar(Polyline polyline, Line closetLane, Point3d startPt, List<Polyline> holes)
+        private List<Polyline> GetPathByAStar(Polyline polyline, Line closetLane, Point3d startPt, Dictionary<List<Polyline>, double> holes)
         {
             List<Polyline> resLines = new List<Polyline>();
             //计算逃生路径(用A*算法)
             //----构建寻路地图框线
-            var mapFrame = CreateMapFrame(closetLane, startPt, holes, 2500);
+            var allHoles = holes.SelectMany(x => x.Key).ToList();
+            var mapFrame = CreateMapFrame(closetLane, startPt, allHoles, 2500);
             mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(mapFrame, dir, closetLane, distance, distance, distance);
+            GlobleAStarRoutePlanner<Line> aStarRoute = new GlobleAStarRoutePlanner<Line>(mapFrame, dir, closetLane, distance, distance, distance, inflectionWeight);
 
             //----设置障碍物
-            var resHoles = SelelctCrossing(holes, mapFrame);
-            aStarRoute.SetObstacle(resHoles);
-
+            foreach (var weightHole in holes)
+            {
+                var resHoles = SelelctCrossing(weightHole.Key, mapFrame);
+                aStarRoute.SetObstacle(resHoles, weightHole.Value);
+            }
+            
             //----计算路径
             var path = aStarRoute.Plan(startPt);
             if (path != null)

@@ -58,7 +58,7 @@ namespace ThMEPWSS.Command
 
                     //出户框线处路由后处理
                     ReprocessingPipe reprocessing = new ReprocessingPipe(routes, userOutFrame, holeWalls);
-                    routes = reprocessing.Reprocessing();
+                    //routes = reprocessing.Reprocessing();
 
                     using (acad.Database.GetDocument().LockDocument())
                     {

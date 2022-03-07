@@ -11,18 +11,21 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class NodeDetails
     {
-        public CircuitFormInType CircuitFormType { get; set; }
+        //public CircuitFormInType CircuitFormType { get; set; }
+        public string CircuitFormType { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
         public bool IsDualPower { get; set; }
         public double LowPower { get; set; }
         public double HighPower { get; set; }
+
+        public bool IsOnlyLoad { get; set; }
 
         public List<PDSBaseElement> Elements { get; set; } //元器件
 
         public int PhaseSequence { get; set; }//相序
         public NodeDetails()
         {
-            CircuitFormType = CircuitFormInType.None;
+            CircuitFormType = "1路进线";
         }
     }
 }

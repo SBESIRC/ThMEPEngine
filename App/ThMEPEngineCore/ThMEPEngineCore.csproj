@@ -52,6 +52,10 @@
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarLine.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarEntity.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarNode.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\AStarModel\GlobleLine.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\AStarModel\GlobleNode.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\AStarModel\GloblePoint.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\AStarModel\GlobleRoutePlanData.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\Point.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\RoutePlanData.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarRoutePlanner.cs" />
@@ -62,6 +66,10 @@
     <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ToLineCostGetterEx.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\CostGetterService\ToPointCostGetter.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\GeometryHelper.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\GlobleAdjustAStarPath.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\GlobleAStarAlgorithm\GlobleAStarRoutePlanner.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\MapService\GlobleMap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\MapService\GlobleMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\Map.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\MapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToCurveMapHelper.cs" />

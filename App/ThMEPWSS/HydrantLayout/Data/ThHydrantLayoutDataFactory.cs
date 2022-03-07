@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using DotNetARX;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Extension;
@@ -16,49 +16,43 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPWSS.Sprinkler.Data;
+using ThMEPWSS.SprinklerConnect.Data;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Engine;
 
 namespace ThMEPWSS.HydrantLayout.Data
 {
     public class ThHydrantLayoutDataFactory
     {
-        private ThMEPOriginTransformer Transformer { get; set; }
+        //input
+        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+        public ThMEPOriginTransformer Transformer { get; set; }
+        //output
         public List<ThExtractorBase> Extractors { get; set; }
-        public List<ThIfcVirticalPipe> THCVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
-        public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
-        public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> VerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+
+        //public List<ThIfcVirticalPipe> THCVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        //public List<ThIfcVirticalPipe> BlkVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
+        //public List<ThIfcVirticalPipe> CVerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
 
         public List<ThIfcDistributionFlowElement> Hydrant { get; set; } = new List<ThIfcDistributionFlowElement>();
+        public List<Polyline> Car { get; set; } = new List<Polyline>();
+        public List<Polyline> Well { get; set; } = new List<Polyline>();
+
         public ThHydrantLayoutDataFactory()
-        {
+        { }
 
+        public void GetElements(Database database, Point3dCollection framePts)
+        {
+            ExtractVerticalPipe(database, framePts);
+            ExtractHydrant(database, framePts);
+            ExtractBasicArchitechObject(database, framePts);
+            ExtractCar(database, framePts);
+            ExtractWells(database, framePts);
         }
-        public void SetTransformer(ThMEPOriginTransformer transformer)
+
+        private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
         {
-            Transformer = transformer;
-        }
-        public void GetElements(Database database, Point3dCollection collection)
-        {
-            var thcVertical = new ThTchVerticalPipeExtractService();
-            thcVertical.Extract(database, collection);
-            THCVerticalPipe = thcVertical.TCHVerticalPipe;
-
-            var blkVertical = new ThBlkVerticalPipeExtractService();
-            blkVertical.Extract(database, collection);
-            BlkVerticalPipe = blkVertical.VerticalPipe;
-
-            var cVertical = new ThCircleVerticalPipeExtractService();
-            cVertical.Extract(database, collection);
-            CVerticalPipe = cVertical.VerticalPipe;
-
-
-            var hydrantVisitor = new ThHydrantExtractionVisitor()
-            {
-                BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher },
-            };
-            var hydrantRecog = new ThHydrantRecognitionEngine(hydrantVisitor);
-            hydrantRecog.RecognizeMS(database, collection);
-            Hydrant.AddRange(hydrantRecog.Elements);
-
             var manger = Extract(database); // visitor manager,提取的是原始数据
             MoveToOrigin(manger, Transformer); // 移动到原点
 
@@ -98,13 +92,13 @@ namespace ThMEPWSS.HydrantLayout.Data
 
                 new ThSprinklerRoomExtractor()
                 {
-                    IsWithHole = false,
+                    IsWithHole = true,
                     UseDb3Engine = true,
                     Transformer = Transformer,
                 },
             };
 
-            Extractors.ForEach(o => o.Extract(database, collection));
+            Extractors.ForEach(o => o.Extract(database, framePts));
 
             // 移回原位
             Extractors.ForEach(o =>
@@ -114,6 +108,74 @@ namespace ThMEPWSS.HydrantLayout.Data
                     iTransformer.Reset();
                 }
             });
+
+        }
+        private void ExtractCar(Database database, Point3dCollection framePts)
+        {
+            // 提取车位
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(framePts);
+            var parkingStallService = new ThSprinklerConnectParkingStallService
+            {
+                BlockNameDict = BlockNameDict
+            };
+            parkingStallService.ParkingStallExtractor(database, pline);
+            Car.AddRange(parkingStallService.ParkingStalls.OfType<Polyline>().ToList());
+
+        }
+
+        private void ExtractWells(Database database, Point3dCollection framePts)
+        {
+
+            //创建集水井提取白名单
+            WaterWellIdentifyConfigInfo info = new WaterWellIdentifyConfigInfo();
+            info.WhiteList.Clear();
+            BlockNameDict["集水井"].ForEach(e => info.WhiteList.Add(e));
+
+            using (var waterwellEngine = new ThWWaterWellRecognitionEngine(info))
+            {
+                waterwellEngine.Recognize(database, framePts);
+                waterwellEngine.RecognizeMS(database, framePts);
+                foreach (var element in waterwellEngine.Datas)
+                {
+                    ThWWaterWell waterWell = ThWWaterWell.Create(element);
+                    waterWell.Init();
+                    var obb = waterWell.OBB;
+                    Well.Add(obb);
+                }
+            }
+
+        }
+
+        private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
+        {
+            var vertical = new ThVerticalPipeExtractService();
+            vertical.Extract(database, framePts);
+            VerticalPipe = vertical.VerticalPipe;
+
+            //var blkVertical = new ThBlkVerticalPipeExtractService();
+            //blkVertical.Extract(database, framePts);
+            //BlkVerticalPipe = blkVertical.VerticalPipe;
+
+            //var cVertical = new ThCircleVerticalPipeExtractService();
+            //cVertical.Extract(database, framePts);
+            //CVerticalPipe = cVertical.VerticalPipe;
+
+        }
+
+        private void ExtractHydrant(Database database, Point3dCollection framePts)
+        {
+            var hydrantVisitor = new ThHydrantExtractionVisitor()
+            {
+                BlkNames = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher },
+            };
+            var hydrantRecog = new ThHydrantRecognitionEngine(hydrantVisitor);
+            hydrantRecog.RecognizeMS(database, framePts);
+            Hydrant.AddRange(hydrantRecog.Elements);
+
         }
 
         private void MoveToOrigin(ThBuildingElementVisitorManager vm, ThMEPOriginTransformer transformer)

@@ -31,6 +31,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         public Dictionary<Point, double> roomCast = new Dictionary<Point, double>();
         public bool[][] obstacles = null; //障碍物位置，维度：Column * Line    
         public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex;
+        public Map() { }
+
         public Map(Polyline _polyline, Vector3d xDir, T _endInfo, double _step, double _avoidFrameDistance, double _avoidHoleDistance)
         {
             step = _step;
@@ -80,6 +82,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjColl);
         }
+
         /// <summary>
         /// 主要是为了解决c类型的ployline做Buffer以后，变成了两根ployline
         /// </summary>
@@ -89,6 +92,11 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             var mPolygons = _holes.SelectMany(x => x.Buffer(avoidHoleDistance,true).Cast<MPolygon>()).ToList();
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(mPolygons.ToCollection());
         }
+
+        /// <summary>
+        /// 设置房间
+        /// </summary>
+        /// <param name="_rooms"></param>
         public void SetRoom(List<Line> _rooms)
         {
             rooms = _rooms;
@@ -108,7 +116,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             }
         }
 
-        private Polyline CreatePolyline(Point3d pt, int tolerance = 10)
+        public Polyline CreatePolyline(Point3d pt, int tolerance = 10)
         {
             var pl = new Polyline();
             var pts = new Point2dCollection();
@@ -135,6 +143,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
             polyline.Dispose();
             return isObstacle;
         }
+
         public bool IsRoomWell(Point cell1,Point cell2)
         {
             Point3d cellPt1 = mapHelper.TransformMapPoint(cell1);
@@ -156,30 +165,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
                 }
             }
             return false;
-        }
-
-        /// <summary>
-        /// 计算障碍点位信息
-        /// </summary>
-        private void InitObstacle()
-        {
-            foreach (var cell in cells)
-            {
-                Point3d cellPt = mapHelper.TransformMapPoint(cell);
-                if (!polyline.Contains(cellPt))
-                {
-                    this.obstacles[cell.X][cell.Y] = true;
-                    continue;
-                }
-                foreach (var hole in holes)
-                {
-                    if (hole.Contains(cellPt))
-                    {
-                        this.obstacles[cell.X][cell.Y] = true;
-                        break;
-                    }
-                }
-            }
         }
 
         private void InitRoom()
@@ -314,7 +299,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<Point3d> GetBoungdingBox(Polyline polyline)
+        protected List<Point3d> GetBoungdingBox(Polyline polyline)
         {
             List<Point3d> allPts = new List<Point3d>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)

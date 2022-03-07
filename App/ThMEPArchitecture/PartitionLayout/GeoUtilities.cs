@@ -17,51 +17,21 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public static class GeoUtilities
     {
-        public static void LogMomery(string text, bool relog = false, string path = null)
-        {
-            return;
-            //if (path == null) path = Path.GetTempPath();
-            //string filepath = path + "\\MemoryLog.txt";
-            //Process proc = Process.GetCurrentProcess();
-            //long b = proc.PrivateMemorySize64;
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    b /= 1024;
-            //}
-            //b /= 2;
-            //if (!File.Exists(filepath))
-            //{
-            //    FileStream fs = new FileStream(filepath, FileMode.Create, FileAccess.Write);
-            //    fs.Close();
-            //    fs.Dispose();
-            //}
-            //if (relog)
-            //{
-            //    FileStream fsr = new FileStream(filepath, FileMode.Open, FileAccess.Write);
-            //    StreamWriter swr = new StreamWriter(fsr);
-            //    swr.WriteLine(text + b.ToString());
-            //    swr.Close();
-            //    fsr.Close();
-            //    swr.Dispose();
-            //    fsr.Dispose();
-            //}
-            //else
-            //{
-            //    FileStream fsc = new FileStream(filepath, FileMode.Append);
-            //    StreamWriter swc = new StreamWriter(fsc);
-            //    swc.WriteLine(text + b.ToString());
-            //    swc.Close();
-            //    fsc.Close();
-            //    swc.Dispose();
-            //    fsc.Dispose();
-            //}
-        }
-
         public static bool IsConnectedLines(Line a, Line b)
         {
             if (a.StartPoint.DistanceTo(b.StartPoint) < 1 || a.StartPoint.DistanceTo(b.EndPoint) < 1
                 || a.EndPoint.DistanceTo(b.StartPoint) < 1 || a.EndPoint.DistanceTo(b.EndPoint) < 1) return true;
             else return false;
+        }
+
+        public static double GetCommonLengthForTwoParallelLinesOnPerpDirection(Line a, Line b)
+        {
+            var project_a = new Line(b.GetClosestPointTo(a.StartPoint, true), b.GetClosestPointTo(a.EndPoint, true));
+            var buffer = project_a.Buffer(1);
+            var splits = SplitLine(b, buffer).Where(e => buffer.Contains(e.GetCenter()));
+            var length = 0.0;
+            splits.ForEach(e => length += e.Length);
+            return length;
         }
 
         public static void RemoveDuplicatedLines(List<Line> lines)
@@ -530,6 +500,18 @@ namespace ThMEPArchitecture.PartitionLayout
             return false;
         }
 
+        public static bool IsInExtent(Point3d pt, Extents3d ext)
+        {
+            return ext.IsPointIn(pt);
+        }
+
+        public static bool IsAnyInExtent(IEnumerable<Point3d> points, Extents3d ext)
+        {
+            foreach (var pt in points)
+                if (ext.IsPointIn(pt)) return true;
+            return false;
+        }
+
         public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes, bool true_on_edge = false)
         {
             if (boxes.Count == 0) return false;
@@ -599,6 +581,15 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (res > dis) res = dis;
             }
             return res;
+        }
+
+        public static bool ClosestPointInCurveInAllowDistance(Point3d pt, List<Polyline> crvs, double distance)
+        {
+            foreach (var t in crvs)
+            {
+                if (t.GetClosestPointTo(pt, false).DistanceTo(pt) < distance) return true;
+            }
+            return false;
         }
 
         public static double ClosestPointInCurvesFast(Point3d pt, List<Polyline> crvs)

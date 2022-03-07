@@ -1,7 +1,8 @@
-﻿using NFox.Cad;
-using System.Linq;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
+using System.Linq;
 
 namespace ThCADExtension
 {
@@ -14,7 +15,7 @@ namespace ThCADExtension
 
         public static Extents3d GeometricExtents(this DBObjectCollection coll)
         {
-            var extents = new Extents3d();
+            var extents = new Extents3d(Point3d.Origin, Point3d.Origin);
             coll.Cast<Entity>().ForEach(e => extents.AddExtents(e.GeometricExtents));
             return extents;
         }
@@ -53,9 +54,9 @@ namespace ThCADExtension
         public static DBObjectCollection Distinct(this DBObjectCollection objs)
         {
             var results = new DBObjectCollection();
-            foreach(DBObject dbObj in objs)
+            foreach (DBObject dbObj in objs)
             {
-                if(!results.Contains(dbObj))
+                if (!results.Contains(dbObj))
                 {
                     results.Add(dbObj);
                 }
