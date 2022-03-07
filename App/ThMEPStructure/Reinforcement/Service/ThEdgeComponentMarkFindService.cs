@@ -9,6 +9,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPStructure.Reinforcement.Model;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
@@ -37,15 +38,13 @@ namespace ThMEPStructure.Reinforcement.Service
             });
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
-        public List<LeaderMarkInfo> Find(Polyline edgeComponent)
+        public List<EdgeComponentExtractInfo> Find(Polyline edgeComponent)
         {
-            var results = new List<LeaderMarkInfo>();
+            var results = new List<EdgeComponentExtractInfo>();
             // 获取轮廓线附近的线
             var enlarge = Buffer(edgeComponent, 1.0);
             var crossObjs = enlarge.Area > 1.0 ? Query(enlarge) : Query(edgeComponent);
-
             var lines = crossObjs.OfType<Line>().Where(o=>IsValid(edgeComponent,o)).ToCollection();
-
             lines.OfType<Line>().ForEach(l =>
             {
                 var farwayPt = GetFarwayPoint(edgeComponent, l);
@@ -64,15 +63,16 @@ namespace ThMEPStructure.Reinforcement.Service
                             sourcePt = linkPt.Value;
                         }
                         var code = codes.OfType<DBText>().OrderBy(o => o.Position.DistanceTo(sourcePt)).First();
-
                         // 找到纵筋面积(配筋率)-配箍率 文字
                         var reinforceTexts = FindReinforceTexts(links.Last(), SearchMarkTextWidthTolerance);
                         if(reinforceTexts.Count>0)
                         {
                             var reinforceContent = "";
-                            if(reinforceTexts.Count == 1)
+                            bool isCal = false; 
+                            if (reinforceTexts.Count == 1)
                             {
                                 reinforceContent = reinforceTexts.OfType<DBText>().First().TextString;
+                                isCal = IsCalculationLayer(GetLayer(reinforceTexts.OfType<DBText>().First()));
                             }
                             else
                             {
@@ -81,26 +81,67 @@ namespace ThMEPStructure.Reinforcement.Service
                                 if(firstFilters.Count==1)
                                 {
                                     reinforceContent = reinforceTexts.OfType<DBText>().First().TextString;
+                                    isCal = IsCalculationLayer(GetLayer(reinforceTexts.OfType<DBText>().First()));
                                 }
                                 else if(firstFilters.Count>0)
                                 {
                                     // 有待进一步
                                     var codeCenter = GetCenter(code);
-                                    reinforceContent = firstFilters.OfType<DBText>().OrderBy(o => codeCenter.DistanceTo(GetCenter(o))).First().TextString;
+                                    firstFilters = firstFilters.OfType<DBText>().OrderBy(o => codeCenter.DistanceTo(GetCenter(o))).ToCollection();
+                                    reinforceContent = firstFilters.OfType<DBText>().First().TextString;
+                                    isCal = IsCalculationLayer(GetLayer(firstFilters.OfType<DBText>().First()));
                                 }
                                 rangePoly.Dispose();
                             }
                             var values = Parse(reinforceContent);
                             if(values.Count==3)
                             {
-                                results.Add(new LeaderMarkInfo(code.TextString, values[0],values[1],values[2]));
+                                results.Add(CreateEdgeComponent(edgeComponent, code.TextString, values[0], values[1], values[2], isCal));
                             }
                         }
                     }
                 }
             });
-
             return results;
+        }
+
+        private bool IsCalculationLayer(string layer)
+        {
+            var upper = layer.ToUpper();
+            return upper.EndsWith("CAL") || upper.EndsWith("CX");
+        }
+
+        private string GetLayer(Entity entity)
+        {
+            foreach(var item in MarkLines)
+            {
+                if(item.Value.Contains(entity))
+                {
+                    return item.Key;
+                }
+            }
+            foreach (var item in MarkTexts)
+            {
+                if (item.Value.Contains(entity))
+                {
+                    return item.Key;
+                }
+            }
+            return "";
+        }
+
+        private EdgeComponentExtractInfo CreateEdgeComponent(Polyline component,string number,
+            double allReinforceArea,double reinforceRatio,double stirrupRatio,bool isCalculation)
+        {
+            return new EdgeComponentExtractInfo
+            {
+                Number = number,
+                EdgeComponent = component,
+                AllReinforceArea = allReinforceArea,
+                ReinforceRatio = reinforceRatio,
+                StirrupRatio = stirrupRatio,
+                IsCalculation = isCalculation
+            };
         }
 
         private Polyline CreateRectangle(Line pre,Line next)
@@ -322,29 +363,6 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return new Polyline();
             }
-        }
-    }
-    internal class LeaderMarkInfo
-    {
-        public string Code { get; private set; }
-        /// <summary>
-        /// 全部纵筋面积
-        /// </summary>
-        public double AllReinforceArea  { get; set; }
-        /// <summary>
-        /// 配筋率
-        /// </summary>
-        public double ReinforceRatio { get; set; }
-        /// <summary>
-        /// 配箍率
-        /// </summary>
-        public double StirrupRatio { get; set; }
-        public LeaderMarkInfo(string code,double allReinforceArea,double reinforceRatio,double stirrupRatio)
-        {
-            Code = code;
-            StirrupRatio = stirrupRatio;
-            ReinforceRatio = reinforceRatio;
-            AllReinforceArea = allReinforceArea;
         }
     }
 }
