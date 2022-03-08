@@ -20,6 +20,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore;
 
 namespace ThMEPElectrical.Command
 {
@@ -117,7 +118,7 @@ namespace ThMEPElectrical.Command
                     // 从图纸中提取源图块
                     var rEngine = new ThBConvertElementExtractionEngine()
                     {
-                        NameFilter = srcNames,
+                        NameFilter = srcNames.Distinct().ToList(),
                     };
                     rEngine.Extract(currentDb.Database);
                     if (rEngine.Results.Count == 0)
@@ -162,10 +163,10 @@ namespace ThMEPElectrical.Command
 
                     var mapping = new Dictionary<ThBlockReferenceData, bool>();
                     srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
-                    XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
+                    var xrg = currentDb.Database.GetHostDwgXrefGraph(false);
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
-                        ConvertMode mode = Mode & rule.Mode;
+                        var mode = Mode & rule.Mode;
                         var block = rule.Transformation.Item1;
                         var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
@@ -192,6 +193,12 @@ namespace ThMEPElectrical.Command
                                 }
                             }).ForEach(o =>
                             {
+                                // 避免重复转换
+                                if (mapping[o] == true)
+                                {
+                                    return;
+                                }
+
                                 // 获取转换后的块信息
                                 ThBlockConvertBlock transformedBlock = null;
                                 switch (mode)
@@ -233,12 +240,6 @@ namespace ThMEPElectrical.Command
                                 // 转换
                                 if (transformedBlock != null)
                                 {
-                                    // 避免重复转换
-                                    if (mapping[o] == true)
-                                    {
-                                        return;
-                                    }
-
                                     // 标记已经转换的块
                                     mapping[o] = true;
 
@@ -378,6 +379,29 @@ namespace ThMEPElectrical.Command
                                 }
                             });
                     }
+
+                    // 强电模式下过滤多余的280度防火阀
+                    if (Mode == ConvertMode.STRONGCURRENT)
+                    {
+                        // 提取风管中心线
+                        var ductLineEngine = new ThBConvertDuctCenterLineExtractionEngine();
+                        ductLineEngine.Extract(currentDb.Database, frame.Vertices());
+                        var ductCenterLine = ductLineEngine.Results;
+
+                        // 提取280度防火阀
+                        var damperEngine = new ThBConvertBlockExtractionEngine()
+                        {
+                            NameFilter = new List<string> { "E-BFAS712" },
+                        };
+                        damperEngine.ExtractFromMS(currentDb.Database);
+                        var damperBlocks = SelectCrossingPolygon(damperEngine.Results, frame);
+
+
+
+                    }
+
+                    
+
                 }
             }
         }

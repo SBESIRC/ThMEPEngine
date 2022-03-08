@@ -47,6 +47,7 @@
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertDuctCenterLineExtractionEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
     <Compile Include="BlockConvert\ThBConvertElementExtractionEngine.cs" />

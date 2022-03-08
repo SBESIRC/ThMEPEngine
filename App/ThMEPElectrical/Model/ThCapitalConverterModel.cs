@@ -10,7 +10,7 @@ namespace ThMEPElectrical.Model
         {
             blkScale = "1:100";
             blkFrame = "标注带边框";
-            equipOps = CapitalOP.All;
+            equipOps = CapitalOP.Strong;
             havcOps = true;
             wssOps = true;
             BlkScales = new ObservableCollection<string>(new List<string> { "1:100", "1:150" });
