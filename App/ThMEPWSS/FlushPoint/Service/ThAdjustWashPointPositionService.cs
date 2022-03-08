@@ -57,15 +57,11 @@ namespace ThMEPWSS.FlushPoint.Service
                 if (objs.Count > 0)
                 {
                     var column = objs.Cast<Polyline>().OrderBy(o => o.Distance(pt)).First();
-                    var newPt = Adjust(column); 
-                    if(newPt!=null)
-                    {
-                        washPoints[i] = newPt.Value;
-                    }
+                    washPoints[i] = Adjust(column); 
                 }
             }
         }
-        private Point3d? Adjust(Polyline column)
+        private Point3d Adjust(Polyline column)
         {
             // 获取柱子所有边的朝向
             var outerEdgeDirs = BuildEdgeOuterDirection(column);
@@ -105,7 +101,11 @@ namespace ThMEPWSS.FlushPoint.Service
                 var first = farestWallEdgeSorts.First();
                 return first.Item2.GetMidPt(first.Item3);
             }
-            return null;
+            else
+            {
+                var first = outerEdgeDirs.First();
+                return first.Item2.GetMidPt(first.Item3);
+            }
         }
 
         private List<string> GetNotConflictToParkintStallEdges(List<Tuple<string, Point3d, Point3d, Vector3d>> edges)
@@ -143,7 +143,8 @@ namespace ThMEPWSS.FlushPoint.Service
         private List<Tuple<string, Point3d, Point3d, Vector3d>> OrderByDistanceToNearestEdge(
             List<Tuple<string, Point3d, Point3d, Vector3d>> edges, double detectLength)
         {
-            return edges.OrderByDescending(o => DistanceToNearestWallEdge(o.Item2.GetMidPt(o.Item3), o.Item4, detectLength)).ToList();
+            // 按照距离柱子边的长度，从小到大排序
+            return edges.OrderBy(o => DistanceToNearestWallEdge(o.Item2.GetMidPt(o.Item3), o.Item4, detectLength)).ToList();
         }
 
         private List<Tuple<string,Point3d, Point3d, Vector3d>> BuildEdgeOuterDirection(Polyline column)
@@ -173,7 +174,7 @@ namespace ThMEPWSS.FlushPoint.Service
         }
         private double DistanceToNearestWallEdge(Point3d pt,Vector3d dir,double findLength)
         {
-            // 查找距离哪个房间的边最近
+            // 查找距离哪个墙的边最近
             var walls = FindWalls(pt, dir, findLength);
             if (walls.Count > 0)
             {
