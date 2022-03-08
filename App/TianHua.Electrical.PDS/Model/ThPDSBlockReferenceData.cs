@@ -35,6 +35,21 @@ namespace TianHua.Electrical.PDS.Model
         /// </summary>
         public ThPDSCircuitType DefaultCircuitType { get; set; }
 
+        /// <summary>
+        /// 相数
+        /// </summary>
+        public int Phase { get; set; }
+
+        /// <summary>
+        /// 需要系数
+        /// </summary>
+        public double DemandFactor { get; set; }
+
+        /// <summary>
+        /// 功率因数
+        /// </summary>
+        public double PowerFactor { get; set; }
+
         public ThPDSBlockReferenceData(ObjectId blockRef)
         {
             ObjId = blockRef;
@@ -47,6 +62,9 @@ namespace TianHua.Electrical.PDS.Model
             Attributes = blockRef.GetAttributesInBlockReference();
             Cat_1 =  ThPDSLoadTypeCat_1.LumpedLoad;
             Cat_2 = ThPDSLoadTypeCat_2.None;
+            Phase = 1;
+            DemandFactor = 1.0;
+            PowerFactor = 1.0;
         }
 
         public ThPDSBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)

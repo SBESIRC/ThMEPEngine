@@ -55,9 +55,7 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             if (row.BlockName == blockData.EffectiveName)
                             {
-                                blockData.Cat_1 = row.Cat_1;
-                                blockData.Cat_2 = row.Cat_2;
-                                blockData.DefaultCircuitType = row.DefaultCircuitType;
+                                Assign(blockData, row);
                                 break;
                             }
                         }
@@ -76,9 +74,7 @@ namespace TianHua.Electrical.PDS.Service
                                 {
                                     if (row.Properties == distBoxKey[i])
                                     {
-                                        blockData.Cat_1 = row.Cat_1;
-                                        blockData.Cat_2 = row.Cat_2;
-                                        blockData.DefaultCircuitType = row.DefaultCircuitType;
+                                        Assign(blockData, row);
                                         checker = true;
                                         break;
                                     }
@@ -97,15 +93,23 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             if (row.BlockName == blockData.EffectiveName)
                             {
-                                blockData.Cat_1 = row.Cat_1;
-                                blockData.Cat_2 = row.Cat_2;
-                                blockData.DefaultCircuitType = row.DefaultCircuitType;
+                                Assign(blockData, row);
                                 break;
                             }
                         }
                         LoadBlocks.Add(block, blockData);
                     }
                 });
+        }
+
+        private void Assign(ThPDSBlockReferenceData blockData, ThPDSBlockInfo row)
+        {
+            blockData.Cat_1 = row.Cat_1;
+            blockData.Cat_2 = row.Cat_2;
+            blockData.DefaultCircuitType = row.DefaultCircuitType;
+            blockData.Phase = row.Phase;
+            blockData.DemandFactor = row.DemandFactor;
+            blockData.PowerFactor = row.PowerFactor;
         }
     }
 }
