@@ -585,7 +585,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "Conductor");
                                 if (item.Key != null)
                                 {
-                                    item.Key.Text = "'Conductor'在哪拿呢";
+                                    
                                 }
                             }
                             {
