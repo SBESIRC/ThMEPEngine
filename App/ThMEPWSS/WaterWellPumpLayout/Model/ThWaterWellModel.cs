@@ -6,6 +6,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Engine;
 
@@ -35,7 +36,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
                 waterWell.Geometry = blk;
                 waterWell.IsHavePump = false;
                 waterWell.WellObb = elementInfo.Outline;
-                waterWell.EffName = elementInfo.BlkEffectiveName;
+                waterWell.EffName = ThStructureUtils.OriginalFromXref(elementInfo.BlkEffectiveName);
                 waterWell.WellEdge = new List<Tuple<int, int>>();
                 waterWell.WellVertex = new List<Point3d>();
                 waterWell.NearWallEdge = new List<int>();

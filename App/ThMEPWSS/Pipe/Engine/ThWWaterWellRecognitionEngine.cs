@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
@@ -64,7 +65,10 @@ namespace ThMEPWSS.Pipe.Engine
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            var outline = blkref.ToOBB(blkref.BlockTransform.PreMultiplyBy(matrix)); 
+            //var outline = blkref.ToOBB(blkref.BlockTransform.PreMultiplyBy(matrix));
+            var curves = Explode(blkref).OfType<Curve>().Where(c=>c.Visible).ToCollection();
+            var outline = curves.GetMinimumRectangle().GetTransformedCopy(matrix) as Polyline;
+
             var elementInfo = new WWaterWellElementInfo()
             {
                 Outline = outline,
@@ -75,6 +79,26 @@ namespace ThMEPWSS.Pipe.Engine
                 Data = elementInfo,
                 Geometry = blkref.GetTransformedCopy(matrix),
             });
+        }
+
+        private DBObjectCollection Explode(BlockReference br)
+        {
+            var results = new DBObjectCollection();
+            var objs = new DBObjectCollection();
+            br.Explode(objs);
+            foreach(Entity entity in objs)
+            {
+                if(entity is BlockReference br1)
+                {
+                    var subObjs = Explode(br1);
+                    subObjs.OfType<Entity>().ForEach(e => results.Add(e));
+                }
+                else
+                {
+                    results.Add(entity);
+                }
+            }
+            return results;
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
