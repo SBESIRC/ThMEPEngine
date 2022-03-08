@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
@@ -19,6 +20,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -30,31 +32,158 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Component\ThPDSContactorModel.cs" />
+    <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
+    <Compile Include="Models\Component\ThPDSThermalRelayModel.cs" />
+    <Compile Include="Models\DrawUtils.cs" />
+    <Compile Include="Models\Component\ThPDSBreakerModel.cs" />
+    <Compile Include="Models\ThPDSCircuitGraphLayoutEngine.cs" />
+    <Compile Include="Models\ThPDSBranchBus.cs" />
+    <Compile Include="Models\ThPDSCircuitGraphGDIRenderer.cs" />
+    <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
+    <Compile Include="Models\ThPDSComponentGraph.cs" />
+    <Compile Include="Models\ThPDSComponentGraphEdge.cs" />
+    <Compile Include="Models\ThPDSComponentGraphNode.cs" />
+    <Compile Include="Models\Component\ThPDSComponentModel.cs" />
+    <Compile Include="Models\ThPDSContactorControl.cs" />
+    <Compile Include="Models\ThPDSControlSlaveContactor.cs" />
+    <Compile Include="Models\ThPDSControlSlaveCPS.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringCTMeterFirst.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringCTMeterLater.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringDirectMeterFirst.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringDirectMeterLater.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringShanghaiCT.cs" />
+    <Compile Include="Models\ThPDSDistributionMeteringShanghaiDirectMeter.cs" />
+    <Compile Include="Models\ThPDSElectricLeakage.cs" />
+    <Compile Include="Models\ThPDSFireEmergencyLightingCircuitWFEL.cs" />
+    <Compile Include="Models\ThPDSGraph.cs" />
+    <Compile Include="Models\ThPDSMotorCPS.cs" />
+    <Compile Include="Models\ThPDSMotorCPSStarDeltaStart.cs" />
+    <Compile Include="Models\ThPDSMotorDiscreteComponent.cs" />
+    <Compile Include="Models\ThPDSMotorDiscreteElementStarDeltaStart.cs" />
+    <Compile Include="Models\ThPDSNormal.cs" />
+    <Compile Include="Models\ThPDSSPD.cs" />
+    <Compile Include="Models\ThPDSThermalRelayProtection.cs" />
+    <Compile Include="Models\ThPDSTwoSpeedMotorCPSSankakuYY.cs" />
+    <Compile Include="Models\ThPDSTwoSpeedMotorCPSYY.cs" />
+    <Compile Include="Models\ThPDSTwoSpeedMotorDiscreteComponentYY.cs" />
+    <Compile Include="Models\ThPDSTwoSpeedMotorDiscreteElementSankakuYY.cs" />
+    <Compile Include="Models\TreeBuilder.cs" />
+    <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
+    <Compile Include="Project\Module\Circuit\ThPDSBlockInfo.cs" />
+    <Compile Include="Project\Module\Circuit\ThPDSCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
+    <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
+    <Compile Include="Services\ThPDSDistributionPanelService.cs" />
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserContorls\TestUControl.xaml.cs">
-      <DependentUpon>TestUControl.xaml</DependentUpon>
+    <Compile Include="UserContorls\ThPDSCircuitGraphCanvas.xaml.cs">
+      <DependentUpon>ThPDSCircuitGraphCanvas.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSCircuitGraphPropertyGrid.xaml.cs">
+      <DependentUpon>ThPDSCircuitGraphPropertyGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSCircuitGraphTreeView.xaml.cs">
+      <DependentUpon>ThPDSCircuitGraphTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSDistributionMeteringCTMeterLater.xaml.cs">
+      <DependentUpon>ThPDSDistributionMeteringCTMeterLater.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSDistributionPanel.xaml.cs">
+      <DependentUpon>ThPDSDistributionPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSDistributionSandPanel.xaml.cs">
+      <DependentUpon>ThPDSDistributionSandPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSExport.xaml.cs">
+      <DependentUpon>ThPDSExport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSHighPressurePanel.xaml.cs">
+      <DependentUpon>ThPDSHighPressurePanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSInfoCompare.xaml.cs">
+      <DependentUpon>ThPDSInfoCompare.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSLowPressurePanel.xaml.cs">
+      <DependentUpon>ThPDSLowPressurePanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSMainBusPanel.xaml.cs">
+      <DependentUpon>ThPDSMainBusPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSSingleLineImageDrawingPanel.xaml.cs">
+      <DependentUpon>ThPDSSingleLineImageDrawingPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserContorls\UESandboxParameter.xaml.cs">
       <DependentUpon>UESandboxParameter.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
-    <Compile Include="ViewModels\TestUControlViewModel.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphRenderContext.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphRenderer.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphTreeBuilder.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
+    <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ElecSandboxUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserContorls\TestUControl.xaml">
+    <Page Include="UserContorls\ThPDSCircuitGraphCanvas.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserContorls\ThPDSCircuitGraphPropertyGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserContorls\ThPDSCircuitGraphTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSDistributionMeteringCTMeterLater.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSDistributionPanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserContorls\ThPDSDistributionSandPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSExport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSHighPressurePanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSInfoCompare.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSLowPressurePanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSMainBusPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSSingleLineImageDrawingPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -86,6 +215,17 @@
       <Project>{5F8C3053-7048-4052-8160-6AD61C0C2ECB}</Project>
       <Name>TianHua.Electrical.PDS</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HandyControl">
+      <Version>3.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Project\Module\Component\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

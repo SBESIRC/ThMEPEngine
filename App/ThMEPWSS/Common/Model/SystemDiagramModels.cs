@@ -320,6 +320,10 @@ namespace ThMEPWSS.Uitl
     {
         public GRect Boundary;
         public string Text;
+        public CText OffsetXY(double dx,double dy)
+        {
+            return new CText() { Text = Text, Boundary = Boundary.OffsetXY(dx, dy) };
+        }
         public Polygon ToPolygon()
         {
             var pl = Boundary.ToPolygon();
@@ -770,6 +774,8 @@ namespace ThMEPWSS.Uitl
         public double StartAngle;
         public double EndAngle;
         public bool IsClockWise;
+        public GArc(Point2d center, double radius, double startAngle, double endAngle, bool isClockWise) : this(center.X, center.Y, radius, startAngle, endAngle, isClockWise) { }
+        public GArc(Point3d center, double radius, double startAngle, double endAngle, bool isClockWise) : this(center.X, center.Y, radius, startAngle, endAngle, isClockWise) { }
         public GArc(double x, double y, double radius, double startAngle, double endAngle, bool isClockWise)
         {
             X = x;
@@ -781,6 +787,10 @@ namespace ThMEPWSS.Uitl
         }
 
         public GCircle ToGCircle() => new(X, Y, Radius);
+        public GArc OffsetXY(double dx, double dy)
+        {
+            return new GArc(X + dx, Y + dy, Radius, StartAngle, EndAngle, IsClockWise);
+        }
     }
     public struct GCircle
     {
@@ -798,6 +808,10 @@ namespace ThMEPWSS.Uitl
         {
         }
         public Point2d Center => new Point2d(X, Y);
+        public GCircle OffsetXY(double dx, double dy)
+        {
+            return new GCircle(X + dx, Y + dy, Radius);
+        }
         public bool IsPointInMe(Point2d point)
         {
             return GeoAlgorithm.Distance(point, Center) < Radius;

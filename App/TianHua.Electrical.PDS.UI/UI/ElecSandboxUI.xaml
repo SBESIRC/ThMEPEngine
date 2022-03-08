@@ -111,7 +111,7 @@
         <CommandBinding Command="{StaticResource NewProjectCommand}" Executed="btnNewProject_Click"></CommandBinding>
         <CommandBinding Command="{StaticResource OpenProjectCommand}" Executed="btnOpenProject_Click"></CommandBinding>
         <CommandBinding Command="{StaticResource SaveProjectCommand}" Executed="btnSaveProject_Click"></CommandBinding>
-        <CommandBinding Command="{StaticResource SetCommand}" Executed="btnSet_Click"></CommandBinding>
+        <CommandBinding Command="{StaticResource SetCommand}" Executed="btnSetting_Click"></CommandBinding>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Key="F12" Modifiers="Ctrl" Command="{StaticResource NewProjectCommand}"></KeyBinding>
@@ -151,7 +151,7 @@
                                      Style="{DynamicResource titleImageBtnTheme}"
                                      ToolTip="设置"
                                      NormalImage="/ThControlLibraryWPF;component/Images/SettingIcon.png"
-                                     Click="btnSet_Click">
+                                     Click="btnSetting_Click">
                     </cus:ImageButton>
                     <cus:ImageButton ImageTextLocation="ImageOnly" x:Name="btnImportProject"
                                      Style="{DynamicResource titleImageBtnTheme}"
