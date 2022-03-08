@@ -1,13 +1,40 @@
-﻿namespace TianHua.Electrical.PDS.Project.Module.Component
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+
+namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
     /// 断路器
     /// </summary>
     public class Breaker : BreakerBaseComponent
     {
-        public Breaker()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="calculateCurrent">计算电流</param>
+        /// <param name="tripDevice">脱扣器类型</param>
+        /// <param name="polesNum">极数</param>
+        /// <param name="characteristics">瞬时脱扣器类型</param>
+        public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
         {
             ComponentType = ComponentType.断路器;
+            var breaker = BreakerConfiguration.breakerComponentInfos.
+                FirstOrDefault(o => o.DefaultPick 
+                && double.Parse(o.Amps.Split(';').Last())>calculateCurrent
+                && tripDevice.Contains(o.TripDevice)
+                && o.Poles == polesNum
+                && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics)));
+            if(breaker.IsNull())
+            {
+                throw new NotSupportedException();
+            }
+            BreakerType = breaker.Model;
+            FrameSpecifications = breaker.FrameSize;
+            PolesNum =breaker.Poles;
+            RatedCurrent =breaker.Amps.Split(';').Select(o => double.Parse(o)).First(o => o > calculateCurrent).ToString();
+            TripUnitType =breaker.TripDevice;
         }
 
         public string Content { get { return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}"; } }

@@ -9,10 +9,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// <summary>
     /// 出线回路
     /// </summary>
-    public class PDSBaseCircuit
+    public abstract class PDSBaseOutCircuit
     {
-        //public CircuitFormOutType CircuitFormType { get; set; }
-        public string CircuitFormType { get; set; }
+        public CircuitFormOutType CircuitFormType { get; set; }
     }
 
     /// <summary>

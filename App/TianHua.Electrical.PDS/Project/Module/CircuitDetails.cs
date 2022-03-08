@@ -14,7 +14,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class CircuitDetails
     {
         //public CircuitFormOutType CircuitFormType { get; set; }
-        public PDSBaseCircuit CircuitForm { get; set; }
+        public PDSBaseOutCircuit CircuitForm { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
         //public List<PDSBaseElement> Elements { get; set;} //元器件
         public PhaseSequence PhaseSequence { get; set; }//相序

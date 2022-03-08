@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -12,7 +14,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class NodeDetails
     {
         //public CircuitFormInType CircuitFormType { get; set; }
-        public string CircuitFormType { get; set; }
+        public PDSBaseInCircuit CircuitFormType { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
         public bool IsDualPower { get; set; }
         public double LowPower { get; set; }
@@ -25,7 +27,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public int PhaseSequence { get; set; }//相序
         public NodeDetails()
         {
-            CircuitFormType = "1路进线";
+            CircuitFormType = new OneWayInCircuit();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -11,9 +12,22 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// </summary>
     public class Contactor : PDSBaseComponent
     {
-        public Contactor()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="calculateCurrent">计算电流</param>
+        /// <param name="polesNum">级数</param>
+        public Contactor(double calculateCurrent, string polesNum)
         {
             ComponentType = ComponentType.接触器;
+            var contactor = ContactorConfiguration.contactorInfos.FirstOrDefault(o => o.Poles == polesNum && o.Amps > calculateCurrent);
+            if(contactor.IsNull())
+            {
+                throw new NotSupportedException();
+            }
+            ContactorType = contactor.ModelName;
+            PolesNum = contactor.Poles;
+            RatedCurrent = contactor.Amps.ToString();
         }
 
         public string Content { get { return $"{ContactorType} {RatedCurrent}/{PolesNum}"; } }

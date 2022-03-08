@@ -52,8 +52,13 @@
     <Compile Include="Model\ThPDSLocation.cs" />
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Project\Module\CircuitDetails.cs" />
+    <Compile Include="Project\Module\Circuit\IncomingCircuit\CentralizedPowerCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\IncomingCircuit\OneWayInCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\IncomingCircuit\PDSBaseInCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\IncomingCircuit\ThreeWayInCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\IncomingCircuit\TwoWayInCircuit.cs" />
     <Compile Include="Project\Module\Circuit\MotorCircuit_DiscreteComponents.cs" />
-    <Compile Include="Project\Module\Circuit\PDSBaseCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\PDSBaseOutCircuit.cs" />
     <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
     <Compile Include="Project\Module\Component\Breaker.cs" />
     <Compile Include="Project\Module\Component\PDSBaseComponent.cs" />
@@ -63,6 +68,12 @@
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
     <Compile Include="Project\Module\Component\ResidualCurrentCircuitBreaker.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
+    <Compile Include="Project\Module\Configure\ContactorConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\BreakerConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\IsolatorConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\PDSConfigExtension.cs" />
+    <Compile Include="Project\Module\Configure\ProjectGlobalConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\ThermalRelayConfiguration.cs" />
     <Compile Include="Project\Module\InformationMatchViewerModule.cs" />
     <Compile Include="Project\Module\NodeDetails.cs" />
     <Compile Include="Project\Module\PDSBaseElement.cs" />

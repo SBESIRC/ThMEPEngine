@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -11,11 +12,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// </summary>
     public class ThermalRelay : PDSBaseComponent
     {
-        public ThermalRelay()
+        /// <summary>
+        /// 计算电流
+        /// </summary>
+        /// <param name="calculateCurrent"></param>
+        public ThermalRelay(double calculateCurrent)
         {
             ComponentType = ComponentType.热继电器;
+            var thermalRelays = ThermalRelayConfiguration.thermalRelayInfos.
+                Where(o => o.MinAmps <= calculateCurrent && o.MaxAmps >= calculateCurrent);
+            var thermalRelay = thermalRelays.OrderBy(o => Math.Abs(2 * calculateCurrent - o.MinAmps - o.MaxAmps)).FirstOrDefault();
+            if (thermalRelay.IsNull())
+            {
+                throw new NotSupportedException();
+            }
+            ThermalRelayType = thermalRelay.ModelName;
+            PolesNum = thermalRelay.Poles;
+            RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
         }
-        public string Content { get { return $"{ThermalRelayType} {PolesNum}A"; } }
+        public string Content { get { return $"{ThermalRelayType} {RatedCurrent}A"; } }
         /// <summary>
         /// 热继电器类型
         /// </summary>

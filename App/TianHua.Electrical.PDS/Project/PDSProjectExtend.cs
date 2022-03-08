@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project
 {
     public static class PDSProjectExtend
     {
         /// <summary>
-        /// 统计功率
+        /// 计算功率
         /// </summary>
         public static void CalculatePower(this ThPDSProjectGraph PDSProjectGraph)
         {
@@ -40,6 +42,102 @@ namespace TianHua.Electrical.PDS.Project
                     node = superiorNode;
                 }
                 Nodes.Remove(node);
+            }
+        }
+
+        /// <summary>
+        /// 计算电流
+        /// </summary>
+        public static void CalculateCurrent(this ThPDSProjectGraph PDSProjectGraph)
+        {
+            PDSProjectGraph.Graph.Vertices.ForEach(v =>
+            {
+                //if单相/三相，因为还没有这部分的内容，所有默认所有都是三相
+                //单向：I_c=S_c/U_n =P_c/(cos⁡φ×U_n )=(P_n×K_d)/(cos⁡φ×U_n )
+                //三相：I_c=S_c/(√3 U_n )=P_c/(cos⁡φ×√3 U_n )=(P_n×K_d)/(cos⁡φ×√3 U_n )
+                var edge = PDSProjectGraph.Graph.Edges.FirstOrDefault(o => o.Target.Equals(v));
+                if (edge.IsNull())
+                {
+
+                }
+                else
+                {
+                    var Phase = edge.Circuit.Phase;
+                    if (Phase != 1 && Phase != 3)
+                    {
+                        v.Load.CalculateCurrent = 0;
+                    }
+                    else
+                    {
+                        var DemandFactor = edge.Circuit.DemandFactor;
+                        if (v.Details.IsOnlyLoad)
+                            DemandFactor = 1;
+                        var PowerFactor = edge.Circuit.PowerFactor;
+                        var KV = Phase == 1 ? 0.22 : 0.38;
+                        v.Load.CalculateCurrent =Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// 计算元器件选型
+        /// </summary>
+        public static void CalculateComponent(this ThPDSProjectGraph PDSProjectGraph)
+        {
+            var leafNodes = PDSProjectGraph.Graph.Vertices.Where(v => !PDSProjectGraph.Graph.Edges.Any(e => e.Source.Equals(v))).ToList();
+            leafNodes.ForEach(node =>
+            {
+                PDSProjectGraph.LeafComponentSelection(node);
+            });
+            while(leafNodes.Count > 0)
+            {
+                var node = leafNodes.First();
+                var superiorNodes = PDSProjectGraph.Graph.Edges.Where(e => e.Target.Equals(node)).Select(e => e.Source).ToList();//上级节点
+                foreach (var superiorNode in superiorNodes)
+                {
+                    PDSProjectGraph.Graph.Edges.Where(e => e.Source.Equals(superiorNode)).ForEach(e => leafNodes.Remove(e.Target));
+                    PDSProjectGraph.ComponentSelection(superiorNode);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 叶子节点元器件选型
+        /// </summary>
+        public static void LeafComponentSelection(this ThPDSProjectGraph PDSProjectGraph,ThPDSProjectGraphNode node)
+        {
+            if(node.Type == PDSNodeType.DistributionBox)
+            {
+                var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
+                var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+                if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+                {
+                    oneWayInCircuit.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, PolesNum);
+                }
+                else
+                {
+                    //暂未定义，后续补充
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 非叶子节点元器件选型
+        /// </summary>
+        public static void ComponentSelection(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
+        {
+            var edges = PDSProjectGraph.Graph.Edges.Where(e => e.Source.Equals(node));
+            foreach (var edge in edges)
+            {
+                edge.Details = edge.CreatCircuitDetails();
+            }
+            PDSProjectGraph.LeafComponentSelection(node);
+            var superiorNodes = PDSProjectGraph.Graph.Edges.Where(e => e.Target.Equals(node)).Select(e => e.Source).ToList();//上级节点
+            foreach (var superiorNode in superiorNodes)
+            {
+                PDSProjectGraph.ComponentSelection(superiorNode);
             }
         }
 
@@ -71,33 +169,35 @@ namespace TianHua.Electrical.PDS.Project
                 if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
                 {
                     //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
-                    node.Details.CircuitFormType = "集中电源";
+                    node.Details.CircuitFormType = new CentralizedPowerCircuit();
                 }
                 else
                 {
                     var count = Graph.Edges.Count(o => o.Target.Equals(node));
                     if (count == 1)
                     {
-                        node.Details.CircuitFormType = "1路进线";
+                        node.Details.CircuitFormType = new OneWayInCircuit();
                     }
                     else if (count == 2)
                     {
-                        node.Details.CircuitFormType = "2路进线ATSE";
+                        node.Details.CircuitFormType = new TwoWayInCircuit();
                     }
                     else if (count == 3)
                     {
-                        node.Details.CircuitFormType = "3路进线";
+                        node.Details.CircuitFormType = new ThreeWayInCircuit();
                     }
                 }
             });
             ProjectGraph.Graph = Graph;
             ProjectGraph.CalculatePower();
-            ProjectGraph.Graph.Edges.ForEach(edge =>
-            {
-                edge.Circuit = edge.Circuit.RichPDSCircuit();
-                edge.Details = edge.CreatCircuitDetails();
-                edge.CalculateCircuitDetails();
-            });
+            ProjectGraph.CalculateCurrent();
+            ProjectGraph.CalculateComponent();
+            //ProjectGraph.Graph.Edges.ForEach(edge =>
+            //{
+            //    edge.Circuit = edge.Circuit.RichPDSCircuit();
+            //    edge.Details = edge.CreatCircuitDetails();
+            //    edge.CalculateCircuitDetails();
+            //});
             //ProjectGraph.BalancedPhaseSequence();
             return ProjectGraph;
         }
@@ -131,12 +231,15 @@ namespace TianHua.Electrical.PDS.Project
         public static CircuitDetails CreatCircuitDetails(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             var circuitDetails = new CircuitDetails();
-
+            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            var Characteristics = "";//瞬时脱扣器类型
+            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
             if (edge.Target.Type == PDSNodeType.None)
             {
                 circuitDetails.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
+                    breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
                 };
                 //edge.circuitDetails.CircuitFormType = CircuitFormOutType.常规;
             }
@@ -145,16 +248,16 @@ namespace TianHua.Electrical.PDS.Project
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
                 circuitDetails.CircuitForm = new MotorCircuit_DiscreteComponents()
                 {
-                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "32", PolesNum ="3P", RatedCurrent ="50", TripUnitType ="TM"},
-                    contactor = new Contactor() { ContactorType = "CJ", PolesNum ="3P", RatedCurrent ="12" },
-                    thermalRelay = new ThermalRelay() { ThermalRelayType = "KH", PolesNum ="3P", RatedCurrent ="7~10" },
+                    breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    contactor = new Contactor(CalculateCurrent, PolesNum),
+                    thermalRelay = new ThermalRelay(CalculateCurrent),
                 };
             }
             else
             {
                 circuitDetails.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new Breaker() { BreakerType = "MCB", FrameSpecifications = "63", PolesNum ="3P", RatedCurrent ="32", TripUnitType ="TM" },
+                    breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
                 };
             }
             //else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
