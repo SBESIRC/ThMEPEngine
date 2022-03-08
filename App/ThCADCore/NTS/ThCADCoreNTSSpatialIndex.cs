@@ -19,12 +19,18 @@ namespace ThCADCore.NTS
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<Geometry> Engine { get; set; }
-        public bool AllowDuplicate { get; set; }
         private Dictionary<DBObject, Geometry> Geometries { get; set; }
         private Lookup<Geometry, DBObject> GeometryLookup { get; set; }
+        public bool AllowDuplicate { get; set; }
+        public bool PrecisionReduce { get; set; }
+        private ThCADCoreNTSSpatialIndex() { }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
             Reset(objs);
+            // 默认使用固定精度
+            PrecisionReduce = true;
+            // 默认忽略重复图元
+            AllowDuplicate = false;
         }
         public void Dispose()
         {
@@ -33,7 +39,6 @@ namespace ThCADCore.NTS
             GeometryLookup = null;
             Engine = null;
         }
-
         private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
             return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
@@ -74,7 +79,7 @@ namespace ThCADCore.NTS
 
         private Geometry ToNTSGeometry(DBObject obj)
         {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
+            using (var ov = new ThCADCoreNTSFixedPrecision(PrecisionReduce))
             {
                 if (obj is DBPoint dbPoint)
                 {
@@ -134,7 +139,7 @@ namespace ThCADCore.NTS
 
         private Polygon ToNTSPolygonalGeometry(DBObject obj)
         {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
+            using (var ov = new ThCADCoreNTSFixedPrecision(PrecisionReduce))
             {
                 if (obj is Polyline poly)
                 {
