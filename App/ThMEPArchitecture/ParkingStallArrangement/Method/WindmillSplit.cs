@@ -186,43 +186,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             seglineIndexDic = null;
             var areas = new List<Polyline>() { outerBrder.WallLine };
-            var buildingSpatialIndex = outerBrder.BuildingSpatialIndex;
+            var buildingSpatialIndex = outerBrder.BuildingWithoutRampSpatialIndex;
             var segLines = outerBrder.SegLines;
             for(int i = 0; i < segLines.Count; i++)
             {
-                var segline = segLines[i];
-                var rect = segline.Buffer(2750);
-                var rsts = buildingSpatialIndex.SelectCrossingPolygon(rect);
-                if(rsts.Count > 0)
-                {
-                    var pts = new List<Point3d>();
-                    foreach(var rst in rsts)
-                    {
-                        var objs = new DBObjectCollection();
-                        var building = rst as BlockReference;
-                        building.Explode(objs);
-                        foreach(var obj in objs)
-                        {
-                            if(obj is Polyline pline)
-                            {
-                                pts.AddRange(pline.GetPoints());
-                            }
-                        }
-                    }
-                    var sortedPt = pts
-                        .Where(pt => areas[0].Contains(pt))
-                        .OrderBy(p => segline.GetClosestPointTo(p, false).DistanceTo(p));
-                    var closedPt = sortedPt.First();
-                    if (segline.GetClosestPointTo(closedPt, false).DistanceTo(closedPt) < 2749)
-                    {
-                        Active.Editor.WriteMessage("分割线宽度小于车道宽！");
-                        var line= segline.Clone() as Line;
-                        line.ColorIndex = ((int)ColorIndex.Red);
-                        line.AddToCurrentSpace();
-                        segAreasCnt = 0;
-                        return false;
-                    }
-                }
+                //var segline = segLines[i];
+                //var rect = segline.Buffer(2750);
+                //var rsts = buildingSpatialIndex.SelectCrossingPolygon(rect);
+                //if(rsts.Count > 0)
+                //{
+                //    var pts = new List<Point3d>();
+                //    foreach(var rst in rsts)
+                //    {
+                //        var objs = new DBObjectCollection();
+                //        var building = rst as BlockReference;
+                //        building.Explode(objs);
+                //        foreach(var obj in objs)
+                //        {
+                //            if(obj is Polyline pline)
+                //            {
+                //                pts.AddRange(pline.GetPoints());
+                //            }
+                //        }
+                //    }
+                //    var sortedPt = pts
+                //        .Where(pt => areas[0].Contains(pt))
+                //        .OrderBy(p => segline.GetClosestPointTo(p, false).DistanceTo(p));
+                //    var closedPt = sortedPt.First();
+                //    if (segline.GetClosestPointTo(closedPt, false).DistanceTo(closedPt) < 2749)
+                //    {
+                //        Active.Editor.WriteMessage("分割线宽度小于车道宽！");
+                //        var line= segline.Clone() as Line;
+                //        line.ColorIndex = ((int)ColorIndex.Red);
+                //        line.AddToCurrentSpace();
+                //        segAreasCnt = 0;
+                //        return false;
+                //    }
+                //}
                 maxVals.Add(0);
                 minVals.Add(0);
             }

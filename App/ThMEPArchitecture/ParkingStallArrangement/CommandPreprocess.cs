@@ -34,7 +34,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
         public ThParkingStallPreprocessCmd()
         {
-            CommandName = "-THDXCKYCL";//天华地下车库预处理
+            CommandName = "-THZDCWYCL";//天华自动车位预处理
             ActionName = "生成";
             _CommandMode = CommandMode.WithoutUI;
         }
@@ -60,7 +60,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void AfterExecute()
         {
             base.AfterExecute();
-            Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+            Active.Editor.WriteMessage($"\nseconds: {_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
 
@@ -70,6 +70,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var blocks = InputData.SelectObstacles(acadDatabase);
             if (blocks is null || blocks.Count == 0)
             {
+                Active.Editor.WriteMessage("未拿到障碍物块");
                 return;
             }
             foreach (BlockReference block in blocks) PreprocessOneBlock(acadDatabase, block, tol);
@@ -84,6 +85,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 blocks = ExplodeToLines(blocks, out DBObjectCollection curwalls);
                 foreach (Line l in curwalls) lines.Add(l);
+            }
+            if (lines.Count == 0)
+            {
+                var centerpt = block.GetCenter();
+                Active.Editor.WriteMessage("\n中心点位于" + centerpt.ToString() + "的块未提取到障碍物");
+                return;// 没有拿到线
             }
 #if (DEBUG)
             foreach (Line l in lines) l.AddToCurrentSpace();// 测试用，把所有拿到的线打出来
@@ -103,10 +110,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var walls = new List<Entity>();
             foreach (Entity obj in objs) walls.Add(obj);
 
-            walls.ForEach(e =>{e.Layer = "AI-障碍物";e.ColorIndex = 10;});
             var LayerName = "AI-障碍物";
             if (!acadDatabase.Layers.Contains(LayerName))
-                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, LayerName, 0);
+                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, LayerName, 1);
+            walls.ForEach(e => { e.Layer = LayerName; e.ColorIndex = 1; });
             //获取不重复的块名
             var blockName = acadDatabase.Database.GetBlockName(LayerName);
             // 创建块，并且插入到原位
@@ -153,7 +160,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         private bool IsObstacle(Entity ent)
         {
-            return ent.Layer.ToUpper().Contains("WALL");
+            return ent.Layer.ToUpper().Contains("AI障碍物");
         }
         // 线转换到多段线，忽略洞
         private static DBObjectCollection LinesToPline(DBObjectCollection lines)

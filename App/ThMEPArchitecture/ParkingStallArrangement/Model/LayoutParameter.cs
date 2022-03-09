@@ -485,13 +485,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         private List<Line> GetAreaSegs(Polyline area, List<Line> allSegs, out List<Polyline> areaWalls)
         {
             var segLines = new List<Line>();
-            var lines = new HashSet<Line>();
+            var subAreaBoundaryLines = new HashSet<Line>();
             for(int i = 0; i < area.NumberOfVertices-1; i++)
             {
                 var line = new Line(area.GetPoint3dAt(i), area.GetPoint3dAt(i+1));
-                lines.Add(line);
+                subAreaBoundaryLines.Add(line);
             }
-            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(subAreaBoundaryLines.ToCollection());
+            
             foreach (var seg in allSegs)
             {
                 var rst = lineSpatialIndex.SelectFence(seg);
@@ -503,14 +504,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         if (l.Angle.IsParallel(seg.Angle))
                         {
                             segLines.Add(l);//把分割线添加进去
-                            lines.Remove(l);
+                            subAreaBoundaryLines.Remove(l);
                         }
                     }
                 }
             }
 
             var ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();
-            foreach(var line in lines)
+            foreach(var line in subAreaBoundaryLines)
             {
                 var spt = new Point3dEx(line.StartPoint);
                 var ept = new Point3dEx(line.EndPoint);

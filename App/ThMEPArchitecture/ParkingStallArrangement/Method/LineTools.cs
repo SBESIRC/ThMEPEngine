@@ -199,5 +199,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return true;
         }
+
+        public static bool IsVertical(this Line line)
+        {
+            if (Math.Abs(line.StartPoint.X - line.EndPoint.X) < 1e-4) return true;
+            else return false;
+        }
     }
 }
