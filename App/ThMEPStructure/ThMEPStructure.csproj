@@ -74,6 +74,17 @@
     <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
+    <Compile Include="Reinforcement\Draw\DrawMain.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectBase.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectLType.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectRectangle.cs" />
+    <Compile Include="Reinforcement\Draw\DrawObjectTType.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinBase.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinLink.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinReinforce.cs" />
+    <Compile Include="Reinforcement\Draw\GangJinStirrup.cs" />
+    <Compile Include="Reinforcement\Draw\Helper.cs" />
+    <Compile Include="Reinforcement\Draw\Test.cs" />
     <Compile Include="Reinforcement\Model\EdgeComponentExtractInfo.cs" />
     <Compile Include="Reinforcement\Model\ThEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
@@ -125,7 +136,6 @@
     <Folder Include="bin\Release-NET46\" />
     <Folder Include="bin\Release\" />
     <Folder Include="GirderConnect\ConnectMainBeam\Test\" />
-    <Folder Include="Reinforcement\Draw\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Debug-NET45\acad.err" />
