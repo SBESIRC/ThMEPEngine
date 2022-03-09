@@ -14,7 +14,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             throw new NotImplementedException();
         }
-        public static DBObjectCollection Draw(this ThTTypeEdgeComponent lTypeEdgeComponent)
+        public static DBObjectCollection Draw(this ThTTypeEdgeComponent tTypeEdgeComponent)
         {
             throw new NotImplementedException();
         }
