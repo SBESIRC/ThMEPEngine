@@ -1,0 +1,59 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Electrical.UI.ElectricalLoadCalculation.PowerNormConfig"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="用电指标">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Left" Focusable="False" Margin="0,15,0,10">
+            <RadioButton Name="RadioBtnTrue" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,5" IsChecked="True" Checked="RadioBtnTrue_Checked">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="70"></ColumnDefinition>
+                        <ColumnDefinition Width="50"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="按指标计算" Margin="0,0,5,0"></Label>
+                    <cus:InputTextBox Grid.Column="2" x:Name="NormTxt" TextBoxInputType="InputInteger" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                    <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="w/m2" ></Label>
+                </Grid>
+            </RadioButton>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"></ColumnDefinition>
+                    <ColumnDefinition Width="70"></ColumnDefinition>
+                    <ColumnDefinition Width="50"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="最小总量" Margin="0,0,5,0"></Label>
+                <cus:InputTextBox Grid.Column="2" x:Name="MinTotalTxt" TextBoxInputType="InputInteger" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KW" ></Label>
+            </Grid>
+            <RadioButton Name="RadioBtnFalse" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,5,0,0" IsChecked="False" Checked="RadioBtnFalse_Checked">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0*"></ColumnDefinition>
+                        <ColumnDefinition Width="70"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
+                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputInteger" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                    <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KW" ></Label>
+                </Grid>
+            </RadioButton>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,5">
+            <cus:ImageButton Content="保存" Width="50" Height="20" IsDefault="True" TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Width="50" Height="20" IsCancel="True" TabIndex="1" Margin="0,0,10,0" Click="CancleButton_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

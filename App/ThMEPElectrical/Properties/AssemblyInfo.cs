@@ -36,6 +36,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.9.7.0")]
 
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.ThElectricalLoadCalculationCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.THAFASDebugCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]

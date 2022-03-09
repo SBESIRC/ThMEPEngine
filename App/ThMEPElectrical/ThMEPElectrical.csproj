@@ -107,6 +107,8 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
+    <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
     <Compile Include="Command\TxtStrucInfoCommand.cs" />
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
@@ -161,6 +163,11 @@
     <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
     <Compile Include="EarthingGrid\ThEarthingGridCommon.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalConfigDataModel.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationConfig.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationService.cs" />
+    <Compile Include="ElectricalLoadCalculation\GetPrimitivesService.cs" />
+    <Compile Include="ElectricalLoadCalculation\LogicService.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
@@ -384,6 +391,7 @@
     <Compile Include="THAFASDebugCmds.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThElectricalLoadCalculationCmd.cs" />
     <Compile Include="ThGroundGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
