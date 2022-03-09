@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,64 @@ using System.Windows.Shapes;
 using TianHua.Electrical.PDS.UI.Models;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
+    public class EnumConverter : IValueConverter
+    {
+        public readonly Type Type;
+        readonly Dictionary<string, object> d1 = new();
+        readonly Dictionary<object, string> d2 = new();
+        public EnumConverter(Type type)
+        {
+            if (!type.IsEnum) throw new ArgumentException();
+            Type = type;
+            var values = Enum.GetValues(type);
+            var names = Enum.GetNames(type);
+            if (values.Length != names.Length) throw new ArgumentException();
+            string TryGetDescription(object enumerationValue)
+            {
+                var memberInfo = type.GetMember(enumerationValue.ToString());
+                if (memberInfo != null && memberInfo.Length > 0)
+                {
+                    object[] attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+                    if (attrs != null && attrs.Length > 0)
+                    {
+                        return ((DescriptionAttribute)attrs[0]).Description;
+                    }
+                }
+                return null;
+            }
+            for (int i = 0; i < names.Length; i++)
+            {
+                var v = values.GetValue(i);
+                d1[names[i]] = v;
+                var description = TryGetDescription(v);
+                if (!string.IsNullOrWhiteSpace(description))
+                {
+                    d1[description] = v;
+                    d2[v] = description;
+                }
+                else
+                {
+                    d2[v] = names[i];
+                }
+            }
+            ItemsSource = new string[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                ItemsSource[i] = Convert(values.GetValue(i));
+            }
+        }
+        public readonly string[] ItemsSource;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return d2[value];
+        }
+        public string Convert(object value) => d2[value];
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return d1[(string)value];
+        }
+        public object ConvertBack(string value) => d1[value];
+    }
     public struct GArc
     {
         public double X;
@@ -404,15 +463,20 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             bd.UpdateSourceTrigger = UpdateSourceTrigger.LostFocus;
                         }
-                        if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
+                        if (!p.CanWrite)
+                        {
+                            bd.Mode = BindingMode.OneWay;
+                            tbx.IsReadOnly = true;
+                        }
                         tbx.SetBinding(TextBox.TextProperty, bd);
                         gh.Add(tbx);
                     }
                     else if (p.PropertyType.IsEnum)
                     {
+                        var cvt = new EnumConverter(p.PropertyType);
                         var cbx = new ComboBox();
-                        cbx.ItemsSource = Enum.GetValues(p.PropertyType);
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                        cbx.ItemsSource = cvt.ItemsSource;
+                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Converter = cvt };
                         if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
                         cbx.SetBinding(ComboBox.SelectedItemProperty, bd);
                         gh.Add(cbx);
@@ -973,7 +1037,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 var vertice = graph.Vertices.ToList()[sel.Id];
                                 var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                UpdatePropertyGrid(edge.Circuit);
+                                if (edge != null)
+                                {
+                                    UpdatePropertyGrid(new Project.Module.Component.ThPDSCircuitModel(vertice, edge));
+                                }
+                                else
+                                {
+                                    UpdatePropertyGrid(null);
+                                }
                             }
                             else
                             {

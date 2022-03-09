@@ -76,6 +76,7 @@
     <Compile Include="Project\Module\Circuit\ThPDSBlockInfo.cs" />
     <Compile Include="Project\Module\Circuit\ThPDSCircuit.cs" />
     <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
