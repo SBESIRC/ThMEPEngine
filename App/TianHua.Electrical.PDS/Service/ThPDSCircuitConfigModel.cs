@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.EmergencyLighting,
                 TextKey = "WLE",
-                KV = 220,
+                KV = 0.22,
                 Phase = 1,
                 DemandFactor = 1.0,
                 PowerFactor =  0.85,
@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.Lighting,
                 TextKey = "WL",
-                KV = 220,
+                KV = 0.22,
                 Phase = 1,
                 DemandFactor = 0.8,
                 PowerFactor =  0.85,
@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.Socket,
                 TextKey = "WS",
-                KV = 220,
+                KV = 0.22,
                 Phase = 1,
                 DemandFactor = 0.8,
                 PowerFactor =  0.85,
@@ -42,7 +42,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WE*-*",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "W*-*",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
@@ -62,7 +62,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WM",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
@@ -72,7 +72,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WPE",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 1.0,
                 PowerFactor =  0.8,
@@ -82,7 +82,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WP",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WE",
-                KV = 380,
+                KV = 0.38,
                 Phase = 3,
                 DemandFactor = 1.0,
                 PowerFactor =  0.8,
@@ -102,7 +102,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WFEL",
-                KV = 36,
+                KV = 0.036,
                 Phase = 2, //实际不存在，为存储方便设为2
                 DemandFactor = 1.0,
                 PowerFactor =  0.85,
@@ -112,7 +112,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WC",
-                KV = 36,
+                KV = 0.036,
                 Phase = 2, //实际不存在，为存储方便设为2
                 DemandFactor = 2.0, //实际不存在，为存储方便设为2
                 PowerFactor =  2.0, //实际不存在，为存储方便设为2

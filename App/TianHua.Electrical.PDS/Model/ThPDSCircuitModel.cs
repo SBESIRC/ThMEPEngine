@@ -20,7 +20,7 @@
         /// <summary>
         /// 额定电压
         /// </summary>
-        public int KV { get; set; }
+        public double KV { get; set; }
 
         /// <summary>
         /// 相数
