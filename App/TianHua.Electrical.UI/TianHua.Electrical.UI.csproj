@@ -72,6 +72,18 @@
       <DependentUpon>CapitalConverterUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
+    <Compile Include="Command\ThElectricalLoadCalculationUICmd.cs" />
+    <Compile Include="ElectricalLoadCalculation\PowerNormConfig.xaml.cs">
+      <DependentUpon>PowerNormConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml.cs">
+      <DependentUpon>ElectricalLoadCalculationUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationViewModel.cs" />
+    <Compile Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml.cs">
+      <DependentUpon>RoomFunctionConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\SerializableHelper.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
     <Compile Include="FireAlarm\UIThFireAlarm.xaml.cs">
@@ -250,6 +262,18 @@
   <ItemGroup />
   <ItemGroup>
     <Page Include="CapitalConverter\CapitalConverterUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\PowerNormConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

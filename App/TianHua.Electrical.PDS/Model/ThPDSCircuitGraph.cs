@@ -2,26 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using QuickGraph;
+using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model
 {
     public enum PDSNodeType
     {
-        /// <summary>
-        /// 配电箱
-        /// </summary>
+        [Description("配电箱")]
         DistributionBox,
-        /// <summary>
-        /// 负载
-        /// </summary>
+        [Description("负载")]
         Load,
-        /// <summary>
-        /// 桥架
-        /// </summary>
+        [Description("桥架")]
         Cabletray,
-        /// <summary>
-        /// 未知
-        /// </summary>
+        [Description("未知")]
         None
     }
 

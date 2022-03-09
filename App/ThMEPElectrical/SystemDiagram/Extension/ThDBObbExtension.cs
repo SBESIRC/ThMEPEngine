@@ -42,16 +42,20 @@ namespace ThMEPElectrical.SystemDiagram.Extension
                     return !layerTableRecord.IsFrozen & !layerTableRecord.IsOff;
                 });
 
-                var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
-                // 考虑到多段线不能使用非比例的缩放
-                // 这里采用一个变通方法：
-                // 将矩形柱转化成2d Solid，缩放后再转回多段线
-                // 当实体存在时
-                if (rectangle.Area > 1e-6)
+                // 只在存在有效图元的情况下，取块定义中图元进行计算
+                if(entities.Count() > 0)
                 {
-                    var solid = rectangle.ToSolid();
-                    solid.TransformBy(br.BlockTransform);
-                    return solid.ToPolyline();
+                    var rectangle = entities.ToCollection().GeometricExtents().ToRectangle();
+                    // 考虑到多段线不能使用非比例的缩放
+                    // 这里采用一个变通方法：
+                    // 将矩形柱转化成2d Solid，缩放后再转回多段线
+                    // 当实体存在时
+                    if (rectangle.Area > 1e-6)
+                    {
+                        var solid = rectangle.ToSolid();
+                        solid.TransformBy(br.BlockTransform);
+                        return solid.ToPolyline();
+                    }
                 }
 
                 // 特殊情况：块定义图元全在隐藏图层上

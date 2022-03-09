@@ -30,7 +30,7 @@ namespace ThMEPWSS.Command
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {
-                var frameDic = CalStructrueService.GetFrame(acad);
+                var frameDic = CalStructrueService.GetFrameByCrosing(acad);
                 if (frameDic.Count <= 0)
                 {
                     return;
@@ -52,13 +52,10 @@ namespace ThMEPWSS.Command
                     verticalPipe.AddRange(drainingEquipment);
                     var sewagePipes = frame.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
+                    var gridLines = frame.GetAxis(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame);
                     var routes = createDrainageRoute.Routing();
-
-                    //出户框线处路由后处理
-                    ReprocessingPipe reprocessing = new ReprocessingPipe(routes, userOutFrame, holeWalls);
-                    //routes = reprocessing.Reprocessing();
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
@@ -120,7 +117,11 @@ namespace ThMEPWSS.Command
                 var interOutFrames = userOutFrame.Where(x => x.Intersects(obj)).ToList();
                 if (interOutFrames.Count > 0)
                 {
-                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => y.ExtendByLengthLine(200));
+                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => {
+                        var tempPoly = y.ExtendByLengthLine(150);
+                        tempPoly = tempPoly.ExtendByLengthLine(-100, false);
+                        return tempPoly;
+                    });
                     if (obj is MPolygon mPolygon)
                     {
                         allWalls.AddRange(mPolygon.Difference(bufferFrameDic.Values.ToCollection()).Cast<Entity>().ToList());

@@ -1,48 +1,27 @@
-﻿namespace TianHua.Electrical.PDS.Model
+﻿using System.ComponentModel;
+
+namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 回路类型
     /// </summary>
     public enum ThPDSCircuitType
     {
-        /// <summary>
-        /// 照明回路
-        /// </summary>
+        [Description("照明回路")]
         Lighting,
-
-        /// <summary>
-        /// 插座回路
-        /// </summary>
+        [Description("插座回路")]
         Socket,
-
-        /// <summary>
-        /// 动力回路
-        /// </summary>
+        [Description("动力回路")]
         PowerEquipment,
-
-        /// <summary>
-        /// 应急照明回路
-        /// </summary>
+        [Description("应急照明回路")]
         EmergencyLighting,
-
-        /// <summary>
-        /// 消防动力回路
-        /// </summary>
+        [Description("消防动力回路")]
         EmergencyPowerEquipment,
-
-        /// <summary>
-        /// 消防应急照明回路
-        /// </summary>
+        [Description("消防应急照明回路")]
         FireEmergencyLighting,
-
-        /// <summary>
-        /// 控制回路
-        /// </summary>
+        [Description("控制回路")]
         Control,
-
-        /// <summary>
-        /// 未知
-        /// </summary>
+        [Description("未知")]
         None,
     }
 
@@ -84,7 +63,7 @@
         /// <summary>
         /// 相数
         /// </summary>
-        public int Phase { get; set; }
+        public ThPDSPhase Phase { get; set; }
 
         /// <summary>
         /// 需要系数

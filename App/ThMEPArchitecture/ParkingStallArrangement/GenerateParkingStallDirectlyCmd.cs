@@ -47,6 +47,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            ParameterStock.Set(ParameterViewModel);
             try
             {
                 using (var docLock = Active.Document.LockDocument())

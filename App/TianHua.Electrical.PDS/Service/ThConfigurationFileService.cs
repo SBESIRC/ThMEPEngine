@@ -26,6 +26,12 @@ namespace TianHua.Electrical.PDS.Service
                 var column = 0;
                 blockInfo.BlockName = StringFilter(table.Rows[row][column].ToString());
 
+                if(string.IsNullOrEmpty(blockInfo.BlockName))
+                {
+                    continue;
+                }
+
+                // Cat.1
                 column++;
                 try
                 {
@@ -37,6 +43,7 @@ namespace TianHua.Electrical.PDS.Service
                     blockInfo.Cat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
                 }
 
+                // Cat.2
                 column++;
                 try
                 {
@@ -48,12 +55,29 @@ namespace TianHua.Electrical.PDS.Service
                     blockInfo.Cat_2 = ThPDSLoadTypeCat_2.None;
                 }
 
+                // Properties(Include)
                 column++;
                 blockInfo.Properties = StringFilter(table.Rows[row][column].ToString());
 
+                // Default Circuit Type
                 column++;
                 var defaultCircuitType = (ThPDSCircuitType)Enum.Parse(typeof(ThPDSCircuitType), StringFilter(table.Rows[row][column].ToString()));
                 blockInfo.DefaultCircuitType = defaultCircuitType;
+
+                // Remark
+                column++;
+
+                // Phase
+                column++;
+                blockInfo.Phase = TypeConvert(StringFilter(table.Rows[row][column].ToString()));
+
+                // Demand Factor
+                column++;
+                blockInfo.DemandFactor = Convert.ToDouble(StringFilter(table.Rows[row][column].ToString()));
+
+                // Power Factor
+                column++;
+                blockInfo.PowerFactor = Convert.ToDouble(StringFilter(table.Rows[row][column].ToString()));
 
                 blockInfos.Add(blockInfo);
             }
@@ -63,6 +87,22 @@ namespace TianHua.Electrical.PDS.Service
         private string StringFilter(string str)
         {
             return str.Replace(" ", "").Replace("\n", ""); ;
+        }
+
+        private ThPDSPhase TypeConvert(string value)
+        {
+            if(value == "1")
+            {
+                return ThPDSPhase.一相;
+            }
+            else if(value == "3")
+            {
+                return ThPDSPhase.三相;
+            }
+            else
+            {
+                return ThPDSPhase.None;
+            }
         }
     }
 }

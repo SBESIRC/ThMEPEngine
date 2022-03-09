@@ -51,6 +51,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            ParameterStock.Set(ParameterViewModel);
             Utils.SetSeed();
             try
             {

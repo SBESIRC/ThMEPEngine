@@ -58,5 +58,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// 更新图
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

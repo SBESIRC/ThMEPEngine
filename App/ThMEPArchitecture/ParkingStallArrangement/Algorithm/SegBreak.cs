@@ -466,10 +466,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                                                                                     // 将crossline线延长
                         if (pt.DistanceTo(crossline.StartPoint) > pt.DistanceTo(crossline.EndPoint)) SegLines[idx].EndPoint = pt;
                         else SegLines[idx].StartPoint = pt;
-
-
-
-
                     }
                 }
             }

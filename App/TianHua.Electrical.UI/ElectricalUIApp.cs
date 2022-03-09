@@ -15,6 +15,7 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
+using TianHua.Electrical.UI.Command;
 
 namespace TianHua.Electrical.UI
 {
@@ -168,6 +169,18 @@ namespace TianHua.Electrical.UI
         {
             var dlg = new UIFrameComparer();
             AcadApp.ShowModelessDialog(dlg);
+        }
+
+        /// <summary>
+        /// 用电负荷
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THYDFHJS", CommandFlags.Modal)]
+        public void ElectricalLoadUI()
+        {
+            using (var cmd = new ThElectricalLoadCalculationUICmd())
+            {
+                cmd.Execute();
+            }
         }
     }
 }

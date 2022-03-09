@@ -21,7 +21,7 @@ namespace ThMEPArchitecture
 {
     public partial class ThParkingStallArrangement
     {
-        [CommandMethod("TIANHUACAD", "-THDXCKYCL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THZDCWYCL", CommandFlags.Modal)]
         public void ThParkingStallPreprocess()
         {
             using (var cmd = new ThParkingStallPreprocessCmd())

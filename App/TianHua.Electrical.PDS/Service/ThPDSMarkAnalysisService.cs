@@ -28,6 +28,9 @@ namespace TianHua.Electrical.PDS.Service
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
+                Phase = distBoxData.Phase,
+                DemandFactor = distBoxData.DemandFactor,
+                PowerFactor = distBoxData.PowerFactor,
                 FireLoad = false,
                 Location = new ThPDSLocation
                 {
@@ -61,6 +64,9 @@ namespace TianHua.Electrical.PDS.Service
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
+                Phase = distBoxData.Phase,
+                DemandFactor = distBoxData.DemandFactor,
+                PowerFactor = distBoxData.PowerFactor,
                 FireLoad = marks.Contains("消防电源"),
                 Location = new ThPDSLocation
                 {

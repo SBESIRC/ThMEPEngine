@@ -32,5 +32,39 @@ namespace ThCADExtension
             //If we have no description attribute, just return the ToString of the enum
             return enumerationValue.ToString();
         }
+
+        public static T GetEnumName<T>(this string description)
+        {
+            Type _type = typeof(T);
+            foreach (FieldInfo field in _type.GetFields())
+            {
+                DescriptionAttribute[] _curDesc = field.GetDescriptAttr();
+                if (_curDesc != null && _curDesc.Length > 0)
+                {
+                    if (_curDesc[0].Description == description)
+                        return (T)field.GetValue(null);
+                }
+                else
+                {
+                    if (field.Name == description)
+                        return (T)field.GetValue(null);
+                }
+            }
+            throw new ArgumentException(string.Format("{0} Could not find corresponding enumeration.", description), "Description");
+        }
+
+        /// <summary>
+        /// 获取字段Description
+        /// </summary>
+        /// <param name="fieldInfo">FieldInfo</param>
+        /// <returns>DescriptionAttribute[] </returns>
+        public static DescriptionAttribute[] GetDescriptAttr(this FieldInfo fieldInfo)
+        {
+            if (fieldInfo != null)
+            {
+                return (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            }
+            return null;
+        }
     }
 }

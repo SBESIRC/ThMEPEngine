@@ -20,5 +20,6 @@ namespace ThMEPHVAC.FanLayout.Model
         public string AirPortMarkSize { set; get; }//尺寸
         public string AirPortMarkCount { set; get; }//风口数量
         public string AirPortMarkVolume { set; get; }//风量
+        public string AirPortHeightMark { set; get; }//标高
     }
 }

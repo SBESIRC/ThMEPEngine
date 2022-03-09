@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.GridOperation
         public void CleanGrid(List<Curve> grids, List<Polyline> columns, out List<LineGridModel> lineGridRes, out List<ArcGridModel> arcGridRes)
         {
             FilterLines(grids, out List<Line> lineGrids, out List<Arc> arcGrids);
-            
+
             //分组弧形轴网和直线轴网
             CalGridGroup(lineGrids, arcGrids, out List<LineGridModel> lineGroup, out List<ArcGridModel> arcGroup);
 
@@ -92,7 +92,7 @@ namespace ThMEPEngineCore.GridOperation
             {
                 var allLines = new List<Curve>(grid.xLines);
                 allLines.AddRange(grid.yLines);
-                if(allLines.ToCollection().PolygonsEx().Count <= 0)
+                if (allLines.ToCollection().PolygonsEx().Count <= 0)
                 {
                     discardLineGrids.Add(grid);
                 }
@@ -192,7 +192,7 @@ namespace ThMEPEngineCore.GridOperation
                 else
                 {
                     var dir = (line.EndPoint - line.StartPoint).GetNormal();
-                    var compareKey = lineGroup.Where(x => 
+                    var compareKey = lineGroup.Where(x =>
                     {
                         var angle = x.vecter.GetAngleTo(dir);
                         angle %= Math.PI;
@@ -201,7 +201,7 @@ namespace ThMEPEngineCore.GridOperation
                             //平行
                             return true;
                         }
-                        else if(Math.Abs(angle - Math.PI/2)<=angleTolerance)
+                        else if (Math.Abs(angle - Math.PI / 2) <= angleTolerance)
                         {
                             return true;
                         }

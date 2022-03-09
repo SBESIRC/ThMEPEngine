@@ -23,6 +23,7 @@ namespace ThMEPHVAC.FanLayout.Service
             attNameValues.Add("尺寸", airPortMark.AirPortMarkSize);
             attNameValues.Add("数量", airPortMark.AirPortMarkCount);
             attNameValues.Add("风量", airPortMark.AirPortMarkVolume);
+            attNameValues.Add("安装属性", airPortMark.AirPortHeightMark);
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-DIMS-DUCT", "AI-风口标注1", airPortMark.AirPortMarkPosition, new Scale3d(airPortMark.FontHeight, airPortMark.FontHeight, airPortMark.FontHeight), 0, attNameValues);
         }
         public void InsertAirPort(AcadDatabase acadDatabase,ThFanAirPortModel airPort)
@@ -79,8 +80,8 @@ namespace ThMEPHVAC.FanLayout.Service
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", cexh.FanNumber);
-            attNameValues.Add("风量", cexh.FanVolume);
-            attNameValues.Add("电量", cexh.FanPower);
+            //attNameValues.Add("风量", cexh.FanVolume);
+            //attNameValues.Add("电量", cexh.FanPower);
             var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-吊顶式排风扇", cexh.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
@@ -109,6 +110,8 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanPressure));
             tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanNoise));
             tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanWeight));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanVolume));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPower));
             blkId.AddXData("FanProperty", tvs);
         }
         public void InsertFireValve(AcadDatabase acadDatabase,ThFanFireValveModel valve)
@@ -135,7 +138,6 @@ namespace ThMEPHVAC.FanLayout.Service
                     {
                         property.Value = Math.PI;
                     }
-
                 }
             }
         }
@@ -169,9 +171,9 @@ namespace ThMEPHVAC.FanLayout.Service
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", waf.FanNumber);
-            attNameValues.Add("风量", waf.FanVolume);
-            attNameValues.Add("电量", waf.FanPower);
-            attNameValues.Add("标高", waf.FanMark);
+            //attNameValues.Add("风量", waf.FanVolume);
+            //attNameValues.Add("电量", waf.FanPower);
+            //attNameValues.Add("标高", waf.FanMark);
             var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式轴流风机", waf.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
@@ -200,15 +202,18 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPressure));
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanNoise));
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanVolume));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPower));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataAsciiString, waf.FanMark));
             blkId.AddXData("FanProperty", tvs);
         }
         public void InsertWEXHFan(AcadDatabase acadDatabase , ThFanWEXHModel wexh, ThFanConfigInfo info)
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", wexh.FanNumber);
-            attNameValues.Add("风量", wexh.FanVolume);
-            attNameValues.Add("电量", wexh.FanPower);
-            attNameValues.Add("标高", wexh.FanMark);
+            //attNameValues.Add("风量", wexh.FanVolume);
+            //attNameValues.Add("电量", wexh.FanPower);
+            //attNameValues.Add("标高", wexh.FanMark);
             var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-EQUP-FANS", "AI-壁式排风扇", wexh.FanPosition, new Scale3d(1, 1, 1), 0, attNameValues);
             var blk = acadDatabase.Element<BlockReference>(blkId, true);
             if (blk.IsDynamicBlock)
@@ -237,6 +242,9 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPressure));
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanNoise));
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanVolume));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPower));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataAsciiString, wexh.FanMark));
             blkId.AddXData("FanProperty", tvs);
         }
 

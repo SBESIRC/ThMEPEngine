@@ -20,12 +20,12 @@
         /// <summary>
         /// 额定电压
         /// </summary>
-        public int KV { get; set; }
+        public double KV { get; set; }
 
         /// <summary>
         /// 相数
         /// </summary>
-        public int Phase { get; set; }
+        public ThPDSPhase Phase { get; set; }
 
         /// <summary>
         /// 需要系数

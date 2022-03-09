@@ -226,9 +226,9 @@
         </ScrollViewer>
 
         <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
-            <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnExportSet" Click="btnExportSet_Click"></cus:ImageButton>
-            <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnImportSet" Click="btnImportSet_Click"></cus:ImageButton>
-            <cus:ImageButton Content="保存设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnSaveSet_Click"></cus:ImageButton>
+            <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
+            <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
+            <cus:ImageButton Content="保存设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnSaveSetting"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </UserControl>

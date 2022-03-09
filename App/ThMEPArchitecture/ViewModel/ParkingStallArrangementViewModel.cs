@@ -417,4 +417,77 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
     }
+
+    public static class ParameterStock
+    {
+        private static int _RoadWidth = 5500;
+        public static int RoadWidth
+        {
+            get 
+            {
+                if (Setted) return _RoadWidth;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        //平行车位尺寸,长度
+        private static int _ParallelSpotLength = 6000; //mm
+
+        public static int ParallelSpotLength
+        {
+            get 
+            { 
+                if (Setted) return _ParallelSpotLength;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        //平行车位尺寸,宽度
+        private static int _ParallelSpotWidth = 2400; //mm
+
+        public static int ParallelSpotWidth
+        {
+            get
+            {
+                if (Setted) return _ParallelSpotWidth;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        //垂直车位尺寸, 长度
+        private static int _VerticalSpotLength = 5100; //mm
+
+        public static int VerticalSpotLength
+        {
+            get
+            {
+                if (Setted) return _VerticalSpotLength;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        //垂直车位尺寸, 宽度
+        private static int _VerticalSpotWidth = 2400; //mm
+
+        public static int VerticalSpotWidth
+        {
+            get
+            {
+                if(Setted)
+                return _VerticalSpotWidth;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        private static bool Setted = false;
+        public static void Set(ParkingStallArrangementViewModel vm)
+        {
+            _RoadWidth = vm.RoadWidth;
+            _ParallelSpotLength = vm.ParallelSpotLength;
+            _ParallelSpotWidth = vm.ParallelSpotWidth;
+            _VerticalSpotLength = vm.VerticalSpotLength;
+            _VerticalSpotWidth = vm.VerticalSpotWidth;
+            Setted = true;
+        }
+    }
 }

@@ -43,6 +43,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            ParameterStock.Set(ParameterViewModel);
             Utils.SetSeed();
             Logger?.Information($"Random Seed:{Utils.GetSeed()}");
             try

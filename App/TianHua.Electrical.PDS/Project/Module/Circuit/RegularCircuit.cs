@@ -10,11 +10,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// <summary>
     /// 常规回路
     /// </summary>
-    public class RegularCircuit : PDSBaseCircuit
+    public class RegularCircuit : PDSBaseOutCircuit
     {
         public RegularCircuit()
         {
-            CircuitFormType = "常规";
+            CircuitFormType = CircuitFormOutType.常规;
         }
 
         /// <summary>

@@ -413,8 +413,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GC.WaitForFullGCComplete();
         }
 
-        #region
-        //第一代初始化
+        #region 第一代初始化
         private List<Gene> ConvertLineToGene(int index)
         {
             var genome = new List<Gene>();
@@ -527,8 +526,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
 
         #endregion
-        #region
-        // run代码部分
+        #region run代码部分
         public List<Chromosome> Run(List<Chromosome> histories, bool recordprevious)
         {
             Logger?.Information($"\n");
@@ -708,8 +706,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return newS;
         }
         #endregion
-        #region
-        //随机函数
+        #region 随机函数
         private List<int> RandChoice(int UpperBound, int n = -1, int LowerBound = 0)
         {
             return General.Utils.RandChoice(UpperBound, n, LowerBound);
@@ -761,8 +758,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
         }
         #endregion
-        #region
-        // run2代码部分
+        #region run2代码部分
         // 选择逻辑增强，除了选择一部分优秀解之外，对其余解随即保留
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。

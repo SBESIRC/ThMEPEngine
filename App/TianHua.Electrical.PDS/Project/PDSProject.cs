@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -23,10 +24,11 @@ namespace TianHua.Electrical.PDS.Project
         internal PDSProject() { }
         public static PDSProject Instance { get { return instance; } }
 
-        public InformationMatchViewerModule InformationMatch;
-        public testViewerModule test { get; set; }
-
         public ThPDSProjectGraph graphData;
+
+        //public BreakerComponentConfiguration breakerConfig;
+
+        private bool InitializedState;
 
         public Action DataChanged;
 
@@ -36,6 +38,11 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="url"></param>
         public void Load(string url)
         {
+            if(!InitializedState)
+            {
+                this.LoadGlobalConfig();
+                InitializedState = true;
+            }
             if(string.IsNullOrEmpty(url))
             {
                 //Creat New Project
@@ -82,7 +89,8 @@ namespace TianHua.Electrical.PDS.Project
                 ));
             if(!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
             {
-                this.graphData.Compatible(ProjectGraph);
+                this.graphData = ProjectGraph.CreatPDSProjectGraph();
+                //this.graphData.Compatible(ProjectGraph);暂未支持校验功能
             }
             else
             {

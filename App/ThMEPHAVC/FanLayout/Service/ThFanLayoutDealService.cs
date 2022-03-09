@@ -87,6 +87,20 @@ namespace ThMEPHVAC.FanLayout.Service
             }
             return fanHoleMark;
         }
+        public static string GetAirPortHeightMark(int type, double heigth = 800)
+        {
+            string fanHoleMark = "顶边贴梁底";
+            if (0 == type)
+            {
+                fanHoleMark = "顶边贴梁底";
+            }
+            else
+            {
+                string strHeigth = heigth.ToString("0.00");
+                fanHoleMark = "风口底边距地" + strHeigth + "m";
+            }
+            return fanHoleMark;
+        }
         public static double GetFontHeight(int type, string strScale)
         {
             double height = 0.0;

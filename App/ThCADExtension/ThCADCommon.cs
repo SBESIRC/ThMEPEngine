@@ -123,6 +123,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
 
+        // 电路系统图元素
+        public static string PDSComponentPath()
+        {
+            return Path.Combine(SupportPath(), "电力配电系统图元素.dwg");
+        }
+
         // 房间名称分类处理
         public static string RoomConfigPath()
         {

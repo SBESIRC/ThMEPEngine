@@ -10,11 +10,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// <summary>
     /// 电动机-分立元件 回路
     /// </summary>
-    public class MotorCircuit_DiscreteComponents : PDSBaseCircuit
+    public class MotorCircuit_DiscreteComponents : PDSBaseOutCircuit
     {
         public MotorCircuit_DiscreteComponents()
         {
-            CircuitFormType = "电动机(分立元件)";
+            CircuitFormType = CircuitFormOutType.电动机_分立元件;
         }
 
         /// <summary>

@@ -15,6 +15,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         private const int DEFAULT_CAPACITY = 100;
         private T[] mItems;
         private Comparer<T> mComparer;
+        // 堆中数据量
+        public int Count { get; private set; }
 
         public MinHeap() : this(DEFAULT_CAPACITY) { }
 
@@ -246,10 +248,5 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
 
             return -1;
         }
-
-        /// <summary>
-        /// 堆中数据量
-        /// </summary>
-        public int Count { get; private set; }
     }
 }

@@ -16,14 +16,13 @@ using System.Windows.Shapes;
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
     /// <summary>
-    /// TestUControl.xaml 的交互逻辑
+    /// ThPDSCircuitGraphTreeView.xaml 的交互逻辑
     /// </summary>
-    public partial class TestUControl : UserControl
+    public partial class ThPDSCircuitGraphTreeView : UserControl
     {
-        public TestUControl(string name)
+        public ThPDSCircuitGraphTreeView()
         {
             InitializeComponent();
-            labShowText.Content = "TestUserControl:" + name;
         }
     }
 }

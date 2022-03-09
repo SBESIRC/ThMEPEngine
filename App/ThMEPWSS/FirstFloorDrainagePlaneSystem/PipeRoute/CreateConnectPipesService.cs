@@ -17,9 +17,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     {
         double distance = 50;
         double inflectionWeight = 2;
-        public CreateConnectPipesService(double step)
+        double moveSpace = 100;
+        Dictionary<Vector3d, List<Line>> gridInfo;
+        public CreateConnectPipesService(double step, Dictionary<Vector3d, List<Line>> _gridInfo)
         {
-            distance = 100;// step;
+            distance = step;
+            gridInfo = _gridInfo;
         }
 
         /// <summary>
@@ -33,44 +36,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         public List<Polyline> CreatePipes(Polyline polyline, Line closetLane, Point3d blockPt, Dictionary<List<Polyline>, double> holes)
         {
             List<Polyline> resLines = new List<Polyline>();
-            var disHoles = holes.Where(x => x.Value == double.MaxValue).SelectMany(x => x.Key).ToList();
-            //寻找起点
-            var startPt = CreateDistancePoint(polyline, disHoles, blockPt);
-            resLines.AddRange(GetPathByAStar(polyline, closetLane, startPt, holes));
+            resLines.AddRange(GetPathByAStar(polyline, closetLane, blockPt, holes));
 
             return resLines;
-        }
-
-        /// <summary>
-        /// 计算起始点离外框线一定距离
-        /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="blockPt"></param>
-        /// <returns></returns>
-        private Point3d CreateDistancePoint(Polyline frame, List<Polyline> holes, Point3d blockPt)
-        {
-            Point3d resPt = blockPt;
-            List<Polyline> avoidPolys = new List<Polyline>(holes);
-            avoidPolys.Add(frame);
-            foreach (var poly in avoidPolys)
-            {
-                int i = 0;
-                while (i <= 4)
-                {
-                    i++;
-                    var closetPt = poly.GetClosestPointTo(resPt, false);
-                    var ptDistance = resPt.DistanceTo(closetPt);
-                    if (ptDistance >= distance)
-                    {
-                        break;
-                    }
-
-                    var moveDir = (resPt - closetPt).GetNormal();
-                    resPt = resPt + moveDir * (distance - ptDistance);
-                }
-            }
-
-            return resPt;
         }
 
         /// <summary>
@@ -131,7 +99,39 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
             var resPolyline = GeometryUtils.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
 
-            return resPolyline;
+            return AdjustMapFrame(resPolyline, lane);
+        }
+
+        /// <summary>
+        /// 移动框线保证连接线是轴网整数倍
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="closetLine"></param>
+        /// <returns></returns>
+        private Polyline AdjustMapFrame(Polyline frame, Line closetLine)
+        {
+            var lineDir = Vector3d.ZAxis.CrossProduct(closetLine.EndPoint - closetLine.StartPoint).GetNormal();
+
+            var grids = gridInfo.Where(x => x.Key.IsParallelTo(lineDir, new Tolerance(0.001, 0.001)))
+                .SelectMany(x => x.Value)
+                .OrderBy(x => x.Distance(closetLine)).ToList();
+            if (grids.Count > 0)
+            {
+                var checkDir = (grids.First().StartPoint - closetLine.StartPoint).GetNormal();
+                if (lineDir.DotProduct(checkDir) < 0)
+                {
+                    lineDir = -lineDir;
+                }
+                var moveDis = grids.First().Distance(closetLine) % moveSpace;
+                if (moveDis != 0)
+                {
+                    moveDis = moveSpace - moveDis;
+                }
+                var sPt = frame.StartPoint;
+                var toPt = sPt + lineDir * moveDis;
+                frame.Move(sPt, toPt);
+            }
+            return frame;
         }
 
         /// <summary>

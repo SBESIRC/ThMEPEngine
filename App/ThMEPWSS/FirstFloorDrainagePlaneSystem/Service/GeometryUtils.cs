@@ -16,9 +16,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="tol"></param>
-        public static Polyline ExtendByLengthLine(this Polyline polyline, double tol)
+        public static Polyline ExtendByLengthLine(this Polyline polyline, double tol, bool longEdge = true)
         {
             var allLines = StructGeoService.GetAllLineByPolyline(polyline).OrderBy(x => x.Length).ToList();
+            if (!longEdge)
+            {
+                allLines = StructGeoService.GetAllLineByPolyline(polyline).OrderByDescending(x => x.Length).ToList();
+            }
             var firLine = allLines[0];
             var lastLine = allLines[1];
             var firExtendLine = ExtendLine(firLine, tol);

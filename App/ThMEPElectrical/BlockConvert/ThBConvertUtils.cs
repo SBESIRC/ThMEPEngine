@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Runtime;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -152,7 +153,7 @@ namespace ThMEPElectrical.BlockConvert
             if (string.IsNullOrEmpty(name))
             {
                 // 2.如无，则采用块名，需要删除括号内值（括号不分中英文）
-                name = blockReference.EffectiveName;
+                name = ThMEPXRefService.OriginalFromXref(blockReference.EffectiveName);
                 Match match = Regex.Match(name, @"^.+([\(（].+[\)）]).*$");
                 if (match.Success)
                 {
