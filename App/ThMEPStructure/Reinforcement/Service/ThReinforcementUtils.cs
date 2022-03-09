@@ -217,6 +217,10 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             return linePtPair.Item1.DistanceTo(linePtPair.Item2);
         }
+        public static Polyline CreateRectangle(this Tuple<Point3d, Point3d> linePtPair,double width)
+        {
+            return ThDrawTool.ToRectangle(linePtPair.Item1, linePtPair.Item2, width);
+        }
         public static Point3d? FindLinkPt(this Line first,Line second,double tolerance=1.0)
         {
             var linkPts = new List<Point3d>();

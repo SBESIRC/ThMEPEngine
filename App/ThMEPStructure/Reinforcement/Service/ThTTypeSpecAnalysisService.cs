@@ -1,31 +1,51 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
     internal class ThTTypeSpecAnalysisService : ThAnalysisService
     {
-        public int A { get; set; } // 端口宽度
-        public int B { get; set; } // 端口宽度
-        public int C { get; set; } // 端口宽度
+        public Tuple<Point3d, Point3d> EdgeA { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        /// <summary>
+        /// 主分支端口
+        /// </summary>
+        public Tuple<Point3d, Point3d> EdgeB { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        public Tuple<Point3d, Point3d> EdgeC { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        public Tuple<Point3d, Point3d> EdgeD { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        /// <summary>
+        /// 分支端口
+        /// </summary>
+        public Tuple<Point3d, Point3d> EdgeE { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        public Tuple<Point3d, Point3d> EdgeF { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        public Tuple<Point3d, Point3d> EdgeG { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        /// <summary>
+        /// 主分支端口
+        /// </summary>
+        public Tuple<Point3d, Point3d> EdgeH { get; private set; } = Tuple.Create(Point3d.Origin, Point3d.Origin);
+        public int A => EdgeA.GetLineDistance().Round();
+        public int B => EdgeB.GetLineDistance().Round();
+        public int C => EdgeC.GetLineDistance().Round();
+        public int D => EdgeD.GetLineDistance().Round();
+        public int E => EdgeE.GetLineDistance().Round();
+        public int F => EdgeF.GetLineDistance().Round();
+        public int G => EdgeG.GetLineDistance().Round();
+        public int H => EdgeH.GetLineDistance().Round();
 
-        public int L { get; set; }
-        public int H1 { get; set; }
-        public int H2 { get; set; }
-        public int S1 { get; set; }
-        public int S2 { get; set; }
         public override void Analysis(Polyline lType)
         {
-            /*              A
+            /*              E
              *            ------
              *            |    |
-             *         H1 |    | H2
-             *    ___S1___|    |___S2___
-             *  B |                     | C
+             *          F |    | D
+             *    ___G____|    |___C____
+             *  H |                     | B
              *    |_____________________|
-             *               L       
+             *               A       
              */
             var lines = lType.ToLines();
-            if(lines.Count!=6)
+            if(lines.Count!=8)
             {
                 return;
             }
@@ -34,35 +54,21 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
-            var lIndex = l1l2Edges[0].Item1;
-            var s1Index = l1l2Edges[0].Item2[0];
-            var aIndex = l1l2Edges[0].Item2[1];
-            var s2Index = l1l2Edges[0].Item2[2];
-            L = lines[lIndex].GetLineDistance().Round(); 
-            S1 = lines[s1Index].GetLineDistance().Round(); 
-            A = lines[aIndex].GetLineDistance().Round(); //端口
-            S2 = lines[s2Index].GetLineDistance().Round();
-
-            var bIndex = lIndex.FindMiddleEdgeIndex(s1Index, lines.Count);
-            var cIndex = lIndex.FindMiddleEdgeIndex(s2Index, lines.Count);
-            var h1Index = s1Index.FindMiddleEdgeIndex(aIndex, lines.Count);
-            var h2Index = s2Index.FindMiddleEdgeIndex(aIndex, lines.Count);
-            if(bIndex!=-1)
+            var aIndex = l1l2Edges[0].Item1; // A边索引
+            var indexes = new List<int>();            
+            for(int i=1;i< lines.Count;i++)
             {
-                B= lines[bIndex].GetLineDistance().Round();
+                var nextIndex = (aIndex + i)/ lines.Count;
+                indexes.Add(nextIndex);
             }
-            if (cIndex != -1)
-            {
-                C = lines[cIndex].GetLineDistance().Round();
-            }
-            if (h1Index != -1)
-            {
-                H1 = lines[h1Index].GetLineDistance().Round();
-            }
-            if (h2Index != -1)
-            {
-                H2 = lines[h2Index].GetLineDistance().Round();
-            }
+            EdgeA = lines[indexes[0]];
+            EdgeB = lines[indexes[1]];
+            EdgeC = lines[indexes[2]];
+            EdgeD = lines[indexes[3]];
+            EdgeE = lines[indexes[4]];
+            EdgeF = lines[indexes[5]];
+            EdgeG = lines[indexes[6]];
+            EdgeH = lines[indexes[7]];
         }
     }
 }
