@@ -19,6 +19,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows" />
@@ -75,6 +76,7 @@
     <Compile Include="Project\Module\Circuit\ThPDSBlockInfo.cs" />
     <Compile Include="Project\Module\Circuit\ThPDSCircuit.cs" />
     <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -224,9 +226,7 @@
       <Version>13.0.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Project\Module\Component\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

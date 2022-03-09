@@ -25,6 +25,8 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THPDSUITest", CommandFlags.Modal)]
         public void THPDSUITest()
         {
+            var cmd = new ThPDSCommand();
+            cmd.Execute();
             var win = new ElecSandboxUI()
             {
                 Graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph,

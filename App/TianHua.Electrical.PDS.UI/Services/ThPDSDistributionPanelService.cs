@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -356,7 +357,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
                 {
                     var vertice = graph.Vertices.ToList()[sel.Id];
-                    UpdatePropertyGrid(vertice?.Details);
+                    var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
+                    if (edge != null)
+                    {
+                        UpdatePropertyGrid(new Project.Module.Component.ThPDSDistributionBoxModel(vertice, edge));
+                    }
+                    else
+                    {
+                        UpdatePropertyGrid(null);
+                    }
                 }
                 else
                 {
@@ -391,6 +400,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         var tbx = new TextBox() { };
                         var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                        if (p.GetCustomAttributes(typeof(RangeAttribute), false).OfType<RangeAttribute>().FirstOrDefault()?.OperandType == typeof(double))
+                        {
+                            bd.UpdateSourceTrigger = UpdateSourceTrigger.LostFocus;
+                        }
                         if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
                         tbx.SetBinding(TextBox.TextProperty, bd);
                         gh.Add(tbx);
@@ -415,7 +428,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     else if (p.PropertyType == typeof(int) || p.PropertyType == typeof(long) || p.PropertyType == typeof(float) || p.PropertyType == typeof(double) || p.PropertyType == typeof(decimal))
                     {
                         var tbx = new TextBox() { };
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.LostFocus, };
                         if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
                         tbx.SetBinding(TextBox.TextProperty, bd);
                         gh.Add(tbx);
@@ -488,8 +501,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             if (info.Height > 0)
                             {
                                 tbk.FontSize = info.Height;
-                                tbk.RenderTransform = new ScaleTransform(.7, 1);
                             }
+                            tbk.RenderTransform = new ScaleTransform(.7, 1);
                             tbk.Foreground = strockBrush;
                             Canvas.SetLeft(tbk, info.BasePoint.X);
                             Canvas.SetTop(tbk, -info.BasePoint.Y - tbk.FontSize);
@@ -585,7 +598,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "Conductor");
                                 if (item.Key != null)
                                 {
-                                    
                                 }
                             }
                             {
@@ -699,8 +711,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             if (info.Height > 0)
                             {
                                 tbk.FontSize = info.Height;
-                                tbk.RenderTransform = new ScaleTransform(.7, 1);
                             }
+                            tbk.RenderTransform = new ScaleTransform(.7, 1);
                             rightTemplates.Add(new KeyValuePair<TextBlock, int>(tbk, i));
                             tbk.Foreground = strockBrush;
                             Canvas.SetLeft(tbk, info.BasePoint.X);
@@ -1045,7 +1057,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         var vertice = graph.Vertices.ToList()[sel.Id];
                         var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
-                        UpdatePropertyGrid(edge?.Circuit);
+                        if (edge != null)
+                        {
+                            UpdatePropertyGrid(new Project.Module.Component.ThPDSDistributionBoxModel(vertice, edge));
+                        }
+                        else
+                        {
+                            UpdatePropertyGrid(null);
+                        }
                     }
                     else
                     {

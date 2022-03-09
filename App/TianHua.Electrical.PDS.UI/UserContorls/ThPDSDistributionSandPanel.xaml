@@ -9,6 +9,7 @@
     <Grid Width="950" Height="700">
         <Border  BorderBrush="Black" BorderThickness="1" Style="{x:Null}" Margin="4.02826855123675,3.23325635103926,182.614840989399,126.096997690531">
             <Grid>
+                <Image Source="E:\thepa_workingSpace\任务资料\220223\哈哈哈哈.png"></Image>
                 <InkCanvas Background="Transparent" x:Name="canvas" Style="{x:Null}"></InkCanvas>
             </Grid>
         </Border>
