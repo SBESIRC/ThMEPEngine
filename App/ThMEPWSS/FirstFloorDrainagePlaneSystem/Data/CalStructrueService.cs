@@ -3,6 +3,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -73,6 +76,33 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 frameLst.Add(boundary, new ObjectIdCollection() { obj });
             }
             return frameLst;
+        }
+
+        /// <summary>
+        /// 通过框选获取框线
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<Polyline, ObjectIdCollection> GetFrameByCrosing(AcadDatabase acadDatabase)
+        {
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return frameLst;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                frameLst.Add(frame, new ObjectIdCollection() { frame.Id });
+
+                return frameLst;
+            }
         }
 
         /// <summary>
@@ -372,14 +402,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     var pipe = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
                     originTransformer.Transform(pipe);
-                    if (polyline.Contains(pipe))
+                    if (polyline.Intersects(pipe))
                     {
                         pipeLst.Add(pipe);
                     }
                 }
             }
 
-            return pipeLst;
+            return pipeLst.SelectMany(x=> polyline.Trim(x).OfType<Polyline>()).ToList();
         }
 
         /// <summary>
@@ -413,6 +443,31 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             }
 
             return pipeLst;
+        }
+
+        /// <summary>
+        /// 获取轴网线
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static List<Curve> GetAxis(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        {
+            var outFrame = polyline.Clone() as Polyline;
+            originTransformer.Reset(outFrame);
+            var axisEngine = new ThAXISLineRecognitionEngine();
+            axisEngine.Recognize(acadDatabase.Database, outFrame.Vertices());
+            var retAxisCurves = new List<Curve>();
+            foreach (var item in axisEngine.Elements)
+            {
+                if (item == null || item.Outline == null)
+                    continue;
+                if (item.Outline is Curve curve)
+                {
+                    var copy = (Curve)curve.Clone();
+                    originTransformer.Transform(copy);
+                    retAxisCurves.Add(copy);
+                }
+            }
+            return retAxisCurves;
         }
     }
 }

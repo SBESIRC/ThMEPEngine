@@ -19,7 +19,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         public GlobleAdjustAStarPath PathAdjuster { set; get; }
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
-        public GlobleAStarRoutePlanner(Polyline polyline, Vector3d dir, T end,  double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800, double inflectionWeight = 1.5)
+        public GlobleAStarRoutePlanner(Polyline polyline, Vector3d dir, T end, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800, double inflectionWeight = 1.5)
         {
             _inflectionWeight = inflectionWeight;
             map = new GlobleMap<T>(polyline, dir, end, step, avoidFrameDistance, avoidHoleDistance);
@@ -59,7 +59,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
 
             //设置起点
             GlobleNode startNode = new GlobleNode(map.startPt, null, 0, 0);
-            routePlanData.OpenedList.Enqueue(startNode);
+            routePlanData.OpenedList.Add(startNode);
 
             GlobleNode currenNode = startNode;
             //从起始节点开始进行路径查找
@@ -116,15 +116,15 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
                             var nodeCostG = nextNode.CostG;
                             //如果新的路径代价更小，则更新该位置上的节点的原始路径
                             nextNode.ResetParentNode(currenNode, costG, direction);
-                            routePlanData.OpenedList.Remove(nextNode);
-                            routePlanData.OpenedList.Enqueue(nextNode);
+                            //routePlanData.OpenedList.Remove(nextNode);
+                            //routePlanData.OpenedList.Add(nextNode);
                         }
                     }
                     else
                     {
                         nextNode = new GlobleNode(nextCell, currenNode, costG, costH);
                         nextNode.Directions = direction;
-                        routePlanData.OpenedList.Enqueue(nextNode);
+                        routePlanData.OpenedList.Add(nextNode);
                     }
 
                     if (Math.Abs(costH) < 0.1) //costH为0，表示相邻点就是目的点，规划完成，构造结果路径(给一点点误差)
@@ -172,7 +172,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// </summary>       
         private GlobleNode GetNodeOnLocation(GloblePoint location, GlobleRoutePlanData<T> routePlanData)
         {
-            var node = routePlanData.OpenedList.Find(new GlobleNode(location, null, 0, 0));
+            var node = routePlanData.OpenedList.Find(x=>x.Location.X == location.X && x.Location.Y == location.Y);
             if (node != null)
             {
                 return node;
@@ -194,14 +194,14 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         /// <summary>
         /// 从开放列表中获取代价F最小的节点，以启动下一次递归
         /// </summary>      
-        private GlobleNode GetMinCostNode(MinHeap<GlobleNode> openedList)
+        private GlobleNode GetMinCostNode(List<GlobleNode> openedList)
         {
             if (openedList.Count == 0)
             {
                 return null;
             }
 
-            GlobleNode target = openedList.Dequeue();
+            GlobleNode target = openedList.OrderBy(x => x.CostF).First();// openedList.Dequeue();
             return target;
         }
         #endregion

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -16,16 +17,22 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<Polyline> mainRainPipes;                       //雨水主管
         List<VerticalPipeModel> verticalPipes;              //排雨水立管
         List<Polyline> wallPolys;                           //墙线
+        List<Polyline> outUserPoly;                         //出户框线
+        List<Curve> gridLines;                              //轴网线
         readonly double step = 50;                          //步长
-        readonly double lineDis = 160;                      //连接线区域范围
+        readonly double lineDis = 210;                      //连接线区域范围
         readonly double lineWieght = 3;                     //连接线区域权重
-        public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls)
+        double angleTolerance = 1 * Math.PI / 180.0;
+        public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
+            List<Curve> grids, List<Polyline> _outUserPoly)
         {
             frame = polyline;
             mainSewagePipes = sewagePolys;
             mainRainPipes = rainPolys;
             verticalPipes = verticalPipesModel;
             wallPolys = walls;
+            gridLines = grids;
+            outUserPoly = _outUserPoly;
         }
 
         /// <summary>
@@ -38,7 +45,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var holeConnectLines = new List<Polyline>();
-            foreach (var pipe in verticalPipes)
+            var gridInfo = ClassifyGridInfo();
+            var connecLines = new List<Line>(sewageLines);
+            connecLines.AddRange(rainLines);
+            var connectPipes = OrderPipeConnect(connecLines);
+            foreach (var pipe in connectPipes)
             {
                 var allLines = sewageLines;
                 if (pipe.PipeType == VerticalPipeType.rainPipe)
@@ -50,7 +61,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     continue;
                 }
                 var closetLine = GetClosetLane(allLines, pipe.Position, frame);
-                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step);
+                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, gridInfo);
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
                 weightHoles.Add(holeConnectLines, lineWieght);
@@ -86,6 +97,95 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         }
 
         /// <summary>
+        /// 排序连接顺序
+        /// </summary>
+        /// <param name="allLines"></param>
+        /// <returns></returns>
+        private List<VerticalPipeModel> OrderPipeConnect(List<Line> allLines)
+        {
+            var longLine = allLines.OrderByDescending(x => x.Length).FirstOrDefault();
+            if (longLine != null)
+            {
+                var closePoly = outUserPoly.OrderBy(x => x.Distance(longLine)).FirstOrDefault();
+                if (closePoly != null)
+                {
+                    var matrix = GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
+                    var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix.Inverse())).ToList();
+                    double minX = polyPts.OrderBy(x => x.X).First().X;
+                    double maxX = polyPts.OrderByDescending(x => x.X).First().X;
+                    var orderPipeDic = verticalPipes.ToDictionary(x => x, y => y.Position.TransformBy(matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
+                    var indexX = minX + 200;
+                    var leftPipes = new Dictionary<VerticalPipeModel, Point3d>();
+                    var rightPipes = new Dictionary<VerticalPipeModel, Point3d>();
+                    foreach (var pipe in orderPipeDic)
+                    {
+                        if (pipe.Value.X < indexX)
+                        {
+                            leftPipes.Add(pipe.Key, pipe.Value);
+                            indexX += 300;
+                        }
+                        else
+                        {
+                            rightPipes.Add(pipe.Key, pipe.Value);
+                        }
+                    }
+
+                    var resPipes = new List<VerticalPipeModel>();
+                    resPipes.AddRange(OrderDistance(matrix, leftPipes, closePoly));
+                    resPipes.AddRange(OrderDistance(matrix, rightPipes, closePoly));
+                    return resPipes;
+                }
+            }
+
+            return verticalPipes;
+        }
+
+        /// <summary>
+        /// 根据方向按距离排序管线连接顺序
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="pipes"></param>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private List<VerticalPipeModel> OrderDistance(Matrix3d matrix, Dictionary<VerticalPipeModel, Point3d> pipes, Polyline polyline)
+        {
+            var orderPipe = new List<VerticalPipeModel>();
+            if (pipes.Count <= 0)
+            {
+                return orderPipe;
+            }
+            var pipePt = pipes.First().Value;
+            var checkDir = (pipePt - polyline.GetClosestPointTo(pipePt, false)).GetNormal();
+            if (checkDir.DotProduct(matrix.CoordinateSystem3d.Yaxis) < 0)
+            {
+                return pipes.OrderBy(x => x.Value.Y).Select(x => x.Key).ToList();
+            }
+            else
+            {
+                return pipes.OrderByDescending(x => x.Value.Y).Select(x => x.Key).ToList();
+            }
+        }
+
+        /// <summary>
+        /// 根据某个方向排序点
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public Matrix3d GetMatrix(Vector3d dir)
+        {
+            var xDir = dir;
+            var yDir = Vector3d.ZAxis.CrossProduct(xDir);
+            var zDir = Vector3d.ZAxis;
+            Matrix3d matrix = new Matrix3d(new double[]{
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0});
+            return matrix;
+        }
+
+        /// <summary>
         /// 获取最近的线信息
         /// </summary>
         /// <param name="lanes"></param>
@@ -111,6 +211,51 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var closetPt = closetLine.GetClosestPointTo(startPt, false);
 
             return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
+        }
+
+        /// <summary>
+        /// 计算轴网方向信息并分类
+        /// </summary>
+        /// <returns></returns>
+        private Dictionary<Vector3d, List<Line>> ClassifyGridInfo()
+        {
+            var lineGrids = new List<Line>();
+            foreach (var grid in gridLines)
+            {
+                if (grid is Polyline polyline)
+                {
+                    lineGrids.AddRange(polyline.GetAllLineByPolyline());
+                }
+                else if (grid is Line line)
+                {
+                    lineGrids.Add(line);
+                }
+            }
+
+            var lineGroup = new Dictionary<Vector3d, List<Line>>();
+            foreach (var line in lineGrids)
+            {
+                var dir = (line.EndPoint - line.StartPoint).GetNormal();
+                var compareKey = lineGroup.Keys.Where(x =>
+                {
+                    var angle = x.GetAngleTo(dir);
+                    angle %= Math.PI;
+                    if (angle <= angleTolerance || angle >= Math.PI - angleTolerance)
+                    {
+                        return true;//平行
+                    }
+                    return false;
+                }).ToList();
+                if (compareKey.Count > 0)
+                {
+                    lineGroup[compareKey.First()].Add(line);
+                }
+                else
+                {
+                    lineGroup.Add(dir, new List<Line>() { line });
+                }
+            }
+            return lineGroup;
         }
     }
 }

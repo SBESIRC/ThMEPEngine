@@ -33,8 +33,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
         /// <summary>
         /// OpenedList 开放列表，即存放已经开发但是还未处理的节点。
         /// </summary>
-        private MinHeap<GlobleNode> openedList = new MinHeap<GlobleNode>();
-        public MinHeap<GlobleNode> OpenedList
+        private List<GlobleNode> openedList = new List<GlobleNode>();
+        public List<GlobleNode> OpenedList
         {
             get { return openedList; }
         }
