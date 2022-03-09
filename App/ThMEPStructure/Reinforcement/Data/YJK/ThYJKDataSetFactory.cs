@@ -62,8 +62,8 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
                 {
                     continue;
                 }
-                var leaderMarkInf = leaderMarkInfs.First();
-                leaderMarkInf.ShapeCode = shapeCode;
+                var edgeComponentInf = leaderMarkInfs.First();
+                edgeComponentInf.ShapeCode = shapeCode;
 
 
             };
