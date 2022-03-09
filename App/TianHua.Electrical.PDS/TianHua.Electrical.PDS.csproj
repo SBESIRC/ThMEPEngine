@@ -51,6 +51,7 @@
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
+    <Compile Include="Model\ThPDSPhase.cs" />
     <Compile Include="Project\Module\CircuitDetails.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\CentralizedPowerCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\OneWayInCircuit.cs" />

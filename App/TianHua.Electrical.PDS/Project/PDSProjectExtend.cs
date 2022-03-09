@@ -63,7 +63,7 @@ namespace TianHua.Electrical.PDS.Project
                 else
                 {
                     var Phase = edge.Circuit.Phase;
-                    if (Phase != 1 && Phase != 3)
+                    if (Phase != ThPDSPhase.一相 && Phase != ThPDSPhase.三相)
                     {
                         v.Load.CalculateCurrent = 0;
                     }
@@ -73,7 +73,7 @@ namespace TianHua.Electrical.PDS.Project
                         if (v.Details.IsOnlyLoad)
                             DemandFactor = 1;
                         var PowerFactor = edge.Circuit.PowerFactor;
-                        var KV = Phase == 1 ? 0.22 : 0.38;
+                        var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
                         v.Load.CalculateCurrent =Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
                     }
                 }

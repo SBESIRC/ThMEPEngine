@@ -84,7 +84,7 @@
         /// <summary>
         /// 相数
         /// </summary>
-        public int Phase { get; set; }
+        public ThPDSPhase Phase { get; set; }
 
         /// <summary>
         /// 需要系数

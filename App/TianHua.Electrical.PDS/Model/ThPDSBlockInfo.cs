@@ -7,7 +7,7 @@
         public ThPDSLoadTypeCat_2 Cat_2 { get; set; }
         public string Properties { get; set; }
         public ThPDSCircuitType DefaultCircuitType { get; set; }
-        public int Phase { get; set; }
+        public ThPDSPhase Phase { get; set; }
         public double DemandFactor { get; set; }
         public double PowerFactor { get; set; }
 

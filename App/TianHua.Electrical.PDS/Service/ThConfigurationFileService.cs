@@ -69,7 +69,7 @@ namespace TianHua.Electrical.PDS.Service
 
                 // Phase
                 column++;
-                blockInfo.Phase = Convert.ToInt16(StringFilter(table.Rows[row][column].ToString()));
+                blockInfo.Phase = TypeConvert(StringFilter(table.Rows[row][column].ToString()));
 
                 // Demand Factor
                 column++;
@@ -87,6 +87,22 @@ namespace TianHua.Electrical.PDS.Service
         private string StringFilter(string str)
         {
             return str.Replace(" ", "").Replace("\n", ""); ;
+        }
+
+        private ThPDSPhase TypeConvert(string value)
+        {
+            if(value == "1")
+            {
+                return ThPDSPhase.一相;
+            }
+            else if(value == "3")
+            {
+                return ThPDSPhase.三相;
+            }
+            else
+            {
+                return ThPDSPhase.None;
+            }
         }
     }
 }
