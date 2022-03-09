@@ -44,7 +44,6 @@
     <Compile Include="ParkingStallArrangement\General\Utils.cs" />
     <Compile Include="ParkingStallArrangement\IO\ThParkingStallDataSetFactory.cs" />
     <Compile Include="ParkingStallArrangement\Method\AngleTools.cs" />
-    <Compile Include="ParkingStallArrangement\Method\CircleTools.cs" />
     <Compile Include="ParkingStallArrangement\Method\Dfs.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
