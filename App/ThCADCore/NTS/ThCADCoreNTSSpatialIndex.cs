@@ -24,13 +24,14 @@ namespace ThCADCore.NTS
         public bool AllowDuplicate { get; set; }
         public bool PrecisionReduce { get; set; }
         private ThCADCoreNTSSpatialIndex() { }
-        public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
+        public ThCADCoreNTSSpatialIndex(DBObjectCollection objs, bool precisionReduce = false, bool allowDuplicate = false)
         {
-            Reset(objs);
             // 默认使用固定精度
-            PrecisionReduce = true;
+            PrecisionReduce = precisionReduce;
             // 默认忽略重复图元
-            AllowDuplicate = false;
+            AllowDuplicate = allowDuplicate;
+
+            Reset(objs);
         }
         public void Dispose()
         {
