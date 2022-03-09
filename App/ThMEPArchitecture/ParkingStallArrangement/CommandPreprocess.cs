@@ -160,7 +160,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         private bool IsObstacle(Entity ent)
         {
-            return ent.Layer.ToUpper().Contains("AI障碍物");
+            return ent.Layer.ToUpper().Contains("AI描边");
         }
         // 线转换到多段线，忽略洞
         private static DBObjectCollection LinesToPline(DBObjectCollection lines)
