@@ -6,15 +6,15 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     public static class ThEdgeComponentExtension
     {
-        public static DBObjectCollection Draw(this ThRectangleEdgeComponent rectEdgeComponent)
+        public static DBObjectCollection Draw(ThRectangleEdgeComponent rectEdgeComponent)
         {
             throw new NotImplementedException();
         }
-        public static DBObjectCollection Draw(this ThLTypeEdgeComponent lTypeEdgeComponent)
+        public static DBObjectCollection Draw(ThLTypeEdgeComponent lTypeEdgeComponent)
         {
             throw new NotImplementedException();
         }
-        public static DBObjectCollection Draw(this ThTTypeEdgeComponent tTypeEdgeComponent)
+        public static DBObjectCollection Draw(ThTTypeEdgeComponent lTypeEdgeComponent)
         {
             throw new NotImplementedException();
         }
