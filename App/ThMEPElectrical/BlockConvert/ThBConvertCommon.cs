@@ -42,5 +42,8 @@
 
         public static readonly string STRONG_CURRENT = "强电";
         public static readonly string WEAK_CURRENT = "弱电";
+
+        public static readonly string MOTOR_AND_LOAD_DIMENSION = "电动机及负载标注";
+        public static readonly string LOAD_DIMENSION = "负载标注";
     }
 }

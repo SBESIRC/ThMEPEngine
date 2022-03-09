@@ -45,13 +45,13 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, Tuple<string, string> insertMode)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, Tuple<ThBConvertInsertMode, string> insertMode)
         {
-            if(insertMode.Item1 .Contains("OBBCenter"))
+            if(insertMode.Item1 == ThBConvertInsertMode.OBBCenter)
             {
                 TransformByCenter(blkRef, srcBlockData, insertMode.Item2);
             }
-            else if(insertMode.Item1.Contains("BottomCenter"))
+            else if(insertMode.Item1 == ThBConvertInsertMode.BottomCenter)
             {
                 TransformHYDT(blkRef, srcBlockData);
             }

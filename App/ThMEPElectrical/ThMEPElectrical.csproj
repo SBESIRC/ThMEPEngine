@@ -54,6 +54,7 @@
     <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertExcelExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertInsertMode.cs" />
     <Compile Include="BlockConvert\ThBConvertManager.cs" />
     <Compile Include="BlockConvert\ThBConvertParameter.cs" />
     <Compile Include="BlockConvert\ThBConvertRule.cs" />

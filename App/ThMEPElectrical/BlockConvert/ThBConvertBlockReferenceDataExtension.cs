@@ -11,19 +11,28 @@ using NFox.Cad;
 
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public static class ThBConvertBlockReferenceDataExtension
     {
+        public static List<ThBConvertRule> BConvertRules;
+
         public static Point3d GetCentroidPoint(this ThBlockReferenceData data)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(data.Database))
+            using (var acadDatabase = AcadDatabase.Use(data.Database))
             {
+                var name = ThMEPXRefService.OriginalFromXref(data.EffectiveName);
+                BConvertRules.Where(rule =>
+                    (rule.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
+                    .ForEach();
+
+
                 var entities = new DBObjectCollection();
                 var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
                 blkref.ExplodeWithVisible(entities);
-                var name = data.EffectiveName;
+                
                 if (name.Contains("风机") ||
                          name.Contains("组合式空调器") ||
                          name.Contains("暖通其他设备标注") ||

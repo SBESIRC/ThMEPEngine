@@ -100,6 +100,8 @@ namespace ThMEPElectrical.Command
 
                 using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
+                    // 获取配置表信息
+                    // 将源块-转换前的块的信息存进rule.Transformation.Item1中，目标块-转换后的块的信息存进rule.Transformation.Item2中
                     var manager = ThBConvertManager.CreateManager(BConvertConfigUrl, Mode);
                     if (manager.Rules.Count == 0)
                     {
@@ -117,7 +119,7 @@ namespace ThMEPElectrical.Command
                     // 从图纸中提取源图块
                     var rEngine = new ThBConvertElementExtractionEngine()
                     {
-                        NameFilter = srcNames,
+                        NameFilter = srcNames.Distinct().ToList(),
                     };
                     rEngine.Extract(currentDb.Database);
                     if (rEngine.Results.Count == 0)
@@ -130,6 +132,8 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
+                    ThBConvertBlockReferenceDataExtension.BConvertRules = manager.Rules;
+
                     // 从图纸中提取集水井提资表表身
                     var collectingWellEngine = new ThBConvertElementExtractionEngine()
                     {
@@ -137,35 +141,38 @@ namespace ThMEPElectrical.Command
                     };
                     collectingWellEngine.Extract(currentDb.Database);
 
-                    // 获取目标块图块名
+                    // 获取目标块图块名，以便后续去重
                     var targetNames = new List<String>();
                     manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
                     {
                         var targetBlock = o.Transformation.Item2;
                         targetNames.Add(targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
 
+                        // 获取内含图块块名
                         var str = targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL);
                         if (!str.IsNullOrEmpty())
                         {
                             targetNames.AddRange(str.Split(','));
                         }
                     });
-                    targetNames = targetNames.Distinct().ToList();
 
                     // 从图纸中提取目标块
                     var targetEngine = new ThBConvertBlockExtractionEngine()
                     {
-                        NameFilter = targetNames,
+                        NameFilter = targetNames.Distinct().ToList(),
                     };
                     targetEngine.ExtractFromMS(currentDb.Database);
-                    var targetBlocks = SelectCrossingPolygon(targetEngine.Results, frame);
+                    var targetBlocks = targetEngine.Results.Count > 0 
+                        ? SelectCrossingPolygon(targetEngine.Results, frame) : new List<ThRawIfcDistributionElementData>();
 
+                    // 记录块转换情况，避免重复转换
                     var mapping = new Dictionary<ThBlockReferenceData, bool>();
                     srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
-                    XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
+                    var xrg = currentDb.Database.GetHostDwgXrefGraph(false);
+                    // 对所有块，遍历每一条转换规则
                     foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
                     {
-                        ConvertMode mode = Mode & rule.Mode;
+                        var mode = Mode & rule.Mode;
                         var block = rule.Transformation.Item1;
                         var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                         var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
@@ -173,10 +180,11 @@ namespace ThMEPElectrical.Command
                             .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
                             .Where(o =>
                             {
-                                string name = "";
+                                // 仅转换指定外参上的图块
+                                var name = "";
                                 ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
-                                Regex r = new Regex(@"([a-zA-Z])");
-                                Match m = r.Match(name);
+                                var r = new Regex(@"([a-zA-Z])");
+                                var m = r.Match(name);
                                 if (!m.Success)
                                 {
                                     return false;
@@ -184,9 +192,9 @@ namespace ThMEPElectrical.Command
                                 switch (Category)
                                 {
                                     case ConvertCategory.WSS:
-                                        return m.Groups[1].Value.ToUpper() == "W";
+                                        return m.Value.ToUpper() == "W";
                                     case ConvertCategory.HVAC:
-                                        return m.Groups[1].Value.ToUpper() == "H";
+                                        return m.Value.ToUpper() == "H";
                                     default:
                                         return true;
                                 }
@@ -230,11 +238,11 @@ namespace ThMEPElectrical.Command
                                         throw new NotSupportedException();
                                 }
 
-                                // 转换
+                                // 开始块转换
                                 if (transformedBlock != null)
                                 {
-                                    // 避免重复转换
-                                    if (mapping[o] == true)
+                                    // 检测块是否已转换
+                                    if (mapping[o])
                                     {
                                         return;
                                     }
@@ -242,10 +250,12 @@ namespace ThMEPElectrical.Command
                                     // 标记已经转换的块
                                     mapping[o] = true;
 
-                                    // 导入目标图块
+                                    // 获取需要导入的块名、图层，导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
-                                    if (FrameStyle == "标注无边框" && (targetBlockName == "电动机及负载标注" || targetBlockName == "负载标注"))
+                                    if (FrameStyle == "标注无边框" 
+                                        && (targetBlockName == ThBConvertCommon.MOTOR_AND_LOAD_DIMENSION 
+                                            || targetBlockName == ThBConvertCommon.LOAD_DIMENSION))
                                     {
                                         targetBlockName += "2";
                                     }
@@ -254,7 +264,7 @@ namespace ThMEPElectrical.Command
 
                                     // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                                     // 修正插入动态块的图层顺序
-                                    if (targetBlockName.Contains("电动机及负载标注"))
+                                    if (targetBlockName.Contains(ThBConvertCommon.MOTOR_AND_LOAD_DIMENSION))
                                     {
                                         var wipeOut = new ThBConvertWipeOut();
                                         wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);

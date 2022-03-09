@@ -53,6 +53,12 @@ namespace ThMEPElectrical.BlockConvert
                 int column = 0;
                 source.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] = StringFilter(table.Rows[row][column].ToString());
 
+                // 过滤空行
+                if(string.IsNullOrEmpty(source.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string))
+                {
+                    continue;
+                }
+
                 // 源块图示
                 column++;
 
@@ -74,7 +80,8 @@ namespace ThMEPElectrical.BlockConvert
 
                 // 是否炸开
                 column++;
-                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE] = StringFilter(table.Rows[row][column].ToString());
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE] = 
+                    string.Equals(StringFilter(table.Rows[row][column].ToString()), "1");
 
                 // 目标图层
                 column++;
@@ -84,11 +91,12 @@ namespace ThMEPElectrical.BlockConvert
                 column++;
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL] = StringFilter(table.Rows[row][column].ToString());
 
-                // 内含图块
+                // 插入模式
                 column++;
-                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INSERT_MODE] = StringFilter(table.Rows[row][column].ToString());
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INSERT_MODE] =
+                    (ThBConvertInsertMode)Enum.Parse(typeof(ThBConvertInsertMode), StringFilter(table.Rows[row][column].ToString()));
 
-                // 内含图块
+                // 外形图层
                 column++;
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] = StringFilter(table.Rows[row][column].ToString());
 

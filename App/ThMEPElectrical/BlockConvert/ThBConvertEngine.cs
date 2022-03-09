@@ -22,7 +22,7 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 位置变换
         /// </summary>
-        public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, Tuple<string, string> insertMode);
+        public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, Tuple<ThBConvertInsertMode, string> insertMode);
 
         public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThRawIfcDistributionElementData> list, Scale3d scale);
 

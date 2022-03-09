@@ -77,8 +77,17 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, Tuple<string, string> insertMode)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, Tuple<ThBConvertInsertMode, string> insertMode)
         {
+            if(insertMode.Item1 == ThBConvertInsertMode.OBBCenter)
+            {
+                TransformByOBBCenter(blkRef, srcBlockData, insertMode.Item2);
+            }
+            else if(insertMode.Item1 == ThBConvertInsertMode.BasePoint)
+            {
+                TransformByBasePoint(blkRef, srcBlockData);
+            }
+
             var name = srcBlockData.EffectiveName;
             if (name.Contains("风机") ||
                 name.Contains("组合式空调器") ||
@@ -89,9 +98,9 @@ namespace ThMEPElectrical.BlockConvert
             {
                 TransformByFansCenter(blkRef, srcBlockData, insertMode.Item2);
             }
-            else if (insertMode.Item1.Contains("Basepoint"))
+            else if (insertMode.Item1 == ThBConvertInsertMode.BasePoint)
             {
-                TransformByPosition(blkRef, srcBlockData);
+                
             }
             else
             {
@@ -102,7 +111,7 @@ namespace ThMEPElectrical.BlockConvert
         public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
         {
             // 先做泵的常规处理
-            TransformByPosition(blkRef, srcBlockData);
+            TransformByBasePoint(blkRef, srcBlockData);
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
@@ -238,7 +247,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        private void TransformByBasePoint(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
