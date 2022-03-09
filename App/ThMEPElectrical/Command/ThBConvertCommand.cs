@@ -20,7 +20,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore;
+using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Command
 {
@@ -94,7 +94,7 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
-                Point3dCollection winCorners = pc.CollectedPoints;
+                var winCorners = pc.CollectedPoints;
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
@@ -125,8 +125,8 @@ namespace ThMEPElectrical.Command
                     {
                         return;
                     }
-                    var srcBlocks = SelectCrossingPolygon(rEngine.Results, frame);
-                    if (srcBlocks.Count == 0)
+                    var srcRawBlocks = SelectCrossingPolygon(rEngine.Results, frame);
+                    if (srcRawBlocks.Count == 0)
                     {
                         return;
                     }
@@ -161,248 +161,265 @@ namespace ThMEPElectrical.Command
                     targetEngine.ExtractFromMS(currentDb.Database);
                     var targetBlocks = SelectCrossingPolygon(targetEngine.Results, frame);
 
-                    var mapping = new Dictionary<ThBlockReferenceData, bool>();
-                    srcBlocks.Select(o => o.Data as ThBlockReferenceData).ForEach(o => mapping[o] = false);
-                    var xrg = currentDb.Database.GetHostDwgXrefGraph(false);
-                    foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
-                    {
-                        var mode = Mode & rule.Mode;
-                        var block = rule.Transformation.Item1;
-                        var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                        var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
-                        srcBlocks.Select(o => o.Data as ThBlockReferenceData)
-                            .Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
-                            .Where(o =>
-                            {
-                                string name = "";
-                                ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
-                                Regex r = new Regex(@"([a-zA-Z])");
-                                Match m = r.Match(name);
-                                if (!m.Success)
-                                {
-                                    return false;
-                                }
-                                switch (Category)
-                                {
-                                    case ConvertCategory.WSS:
-                                        return m.Groups[1].Value.ToUpper() == "W";
-                                    case ConvertCategory.HVAC:
-                                        return m.Groups[1].Value.ToUpper() == "H";
-                                    default:
-                                        return true;
-                                }
-                            }).ForEach(o =>
-                            {
-                                // 避免重复转换
-                                if (mapping[o] == true)
-                                {
-                                    return;
-                                }
-
-                                // 获取转换后的块信息
-                                ThBlockConvertBlock transformedBlock = null;
-                                switch (mode)
-                                {
-                                    case ConvertMode.STRONGCURRENT:
-                                        {
-                                            if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
-                                            {
-                                                // 当配置表中可见性为空时，则按图块名转换
-                                                transformedBlock = manager.TransformRule(srcName);
-                                            }
-                                            else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
-                                            {
-                                                // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
-                                                transformedBlock = manager.TransformRule(
-                                                    srcName,
-                                                    o.CurrentVisibilityStateValue());
-                                            }
-                                        }
-                                        break;
-                                    case ConvertMode.WEAKCURRENT:
-                                        {
-                                            if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
-                                            {
-                                                transformedBlock = manager.TransformRule(srcName);
-                                            }
-                                            else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
-                                            {
-                                                transformedBlock = manager.TransformRule(
-                                                    srcName,
-                                                    o.CurrentVisibilityStateValue());
-                                            }
-                                        }
-                                        break;
-                                    default:
-                                        throw new NotSupportedException();
-                                }
-
-                                // 转换
-                                if (transformedBlock != null)
-                                {
-                                    // 标记已经转换的块
-                                    mapping[o] = true;
-
-                                    // 导入目标图块
-                                    var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
-                                    var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
-                                    if (FrameStyle == "标注无边框" && (targetBlockName == "电动机及负载标注" || targetBlockName == "负载标注"))
-                                    {
-                                        targetBlockName += "2";
-                                    }
-                                    currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
-                                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
-
-                                    // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
-                                    // 修正插入动态块的图层顺序
-                                    if (targetBlockName.Contains("电动机及负载标注"))
-                                    {
-                                        var wipeOut = new ThBConvertWipeOut();
-                                        wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
-                                    }
-
-                                    // 插入新的块引用
-                                    var scale = new Scale3d(Scale);
-                                    var engine = CreateConvertEngine(mode);
-                                    var objId = engine.Insert(targetBlockName, scale, o);
-                                    if (objId == ObjectId.Null)
-                                    {
-                                        return;
-                                    }
-
-                                    // 设置新插入的块引用的镜像变化
-                                    engine.Mirror(objId, o);
-
-                                    // 设置新插入的块引用的角度
-                                    engine.Rotate(objId, o);
-
-                                    // 设置新插入的块引用位置
-                                    if (o.EffectiveName.Contains("潜水泵-AI"))
-                                    {
-                                        currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("水泵标注"), false);
-                                        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("E-UNIV-NOTE"), false);
-                                        engine.Displacement(objId, o, collectingWellEngine.Results, scale);
-                                    }
-                                    else
-                                    {
-                                        engine.Displacement(objId, o);
-                                    }
-
-                                    var targetBlockData = new ThBlockReferenceData(objId);
-                                    targetBlocks.Select(t => t.Data as ThBlockReferenceData)
-                                                .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == targetBlockData.EffectiveName)
-                                                .ForEach(t =>
-                                                {
-                                                    if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
-                                                    {
-                                                        var e = currentDb.Element<Entity>(objId, true);
-                                                        e.Erase();
-                                                    }
-                                                });
-                                    // 对电动机及负载标注、负载标注单独处理
-                                    if (!objId.IsErased && targetBlockName.Contains("负载标注"))
-                                    {
-                                        var name = KeepChinese(targetBlockName);
-                                        targetBlocks.Select(t => t.Data as ThBlockReferenceData)
-                                                .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName).Contains(name))
-                                                .ForEach(t =>
-                                                {
-                                                    if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
-                                                    {
-                                                        var e = currentDb.Element<Entity>(t.ObjId, true);
-                                                        e.Erase();
-                                                    }
-                                                });
-                                    }
-
-                                    // 设置动态块可见性
-                                    if (!objId.IsErased)
-                                    {
-                                        engine.SetVisibilityState(objId, o);
-
-                                        // 将源块引用的属性“刷”到新的块引用
-                                        engine.MatchProperties(objId, o);
-
-                                        // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
-                                        // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
-                                        var refIds = new ObjectIdCollection();
-                                        if (rule.Explodable())
-                                        {
-                                            ExplodeWithErase(objId, refIds);
-
-                                            // 如果是“单台潜水泵”，继续炸一次
-                                            var objIds = new ObjectIdCollection();
-                                            foreach (ObjectId item in refIds)
-                                            {
-                                                if (item.GetBlockName().Contains("单台潜水泵"))
-                                                {
-                                                    ExplodeWithErase(item, objIds);
-                                                }
-                                                else
-                                                {
-                                                    objIds.Add(item);
-                                                }
-                                            }
-
-                                            // 获取最终结果
-                                            refIds = objIds;
-
-                                            foreach (ObjectId id in refIds)
-                                            {
-                                                var explodeBlockData = new ThBlockReferenceData(id);
-                                                targetBlocks.Select(t => t.Data as ThBlockReferenceData)
-                                                            .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == explodeBlockData.EffectiveName)
-                                                            .ForEach(t =>
-                                                            {
-                                                                if (t.Position.DistanceTo(explodeBlockData.Position) < 10.0)
-                                                                {
-                                                                    var e = currentDb.Element<Entity>(id, true);
-                                                                    e.Erase();
-                                                                }
-                                                            });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            refIds.Add(objId);
-                                        }
-
-                                        // 设置块引用的数据库属性
-                                        refIds.Cast<ObjectId>().ForEach(b =>
-                                        {
-                                            if (!b.IsErased)
-                                            {
-                                                engine.SetDatabaseProperties(b, o, targetBlockLayer);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                    }
-
                     // 强电模式下过滤多余的280度防火阀
                     if (Mode == ConvertMode.STRONGCURRENT)
                     {
-                        // 提取风管中心线
-                        var ductLineEngine = new ThBConvertDuctCenterLineExtractionEngine();
-                        ductLineEngine.Extract(currentDb.Database, frame.Vertices());
-                        var ductCenterLine = ductLineEngine.Results;
-
-                        // 提取280度防火阀
-                        var damperEngine = new ThBConvertBlockExtractionEngine()
+                        var fanPoints = new List<ThBConvertFanPoints>();
+                        var normalRawSrcBlocks = srcRawBlocks.Where(o =>
                         {
-                            NameFilter = new List<string> { "E-BFAS712" },
-                        };
-                        damperEngine.ExtractFromMS(currentDb.Database);
-                        var damperBlocks = SelectCrossingPolygon(damperEngine.Results, frame);
+                            var blockName = ThMEPXRefService.OriginalFromXref((o.Data as ThBlockReferenceData).EffectiveName);
+                            return blockName != "防火阀" && blockName != "新建防火阀";
+                        }).ToList();
+
+                        var normalSrcBlocks = normalRawSrcBlocks.Select(o => o.Data as ThBlockReferenceData).ToList();
+                        Convert(currentDb, blockDb, normalSrcBlocks, manager, collectingWellEngine.Results, targetBlocks, fanPoints);
+
+                        var damperRawBlocks = srcRawBlocks.Except(normalRawSrcBlocks).ToList();
+                        if (damperRawBlocks.Count > 0)
+                        {
+                            // 提取风管中心线
+                            var ductLineEngine = new ThBConvertDuctCenterLineExtractionEngine();
+                            ductLineEngine.Extract(currentDb.Database, frame.Vertices());
+
+                            // to search
+                            var searcher = new ThBConvertDamperSearcher();
+                            searcher.Search(damperRawBlocks, ductLineEngine.Results, fanPoints);
 
 
-
+                            Convert(currentDb, blockDb, searcher.Results, manager, collectingWellEngine.Results, targetBlocks,
+                                new List<ThBConvertFanPoints>());
+                        }
                     }
-
-                    
-
+                    else
+                    {
+                        var srcBlocks = srcRawBlocks.Select(o => o.Data as ThBlockReferenceData).ToList();
+                        Convert(currentDb, blockDb, srcBlocks, manager, collectingWellEngine.Results, targetBlocks,
+                            new List<ThBConvertFanPoints>());
+                    }
                 }
+            }
+        }
+
+        private void Convert(AcadDatabase currentDb, AcadDatabase blockDb, List<ThBlockReferenceData> srcBlocks,
+            ThBConvertManager manager, List<ThRawIfcDistributionElementData> collectingWell,
+            List<ThRawIfcDistributionElementData> targetBlocks, List<ThBConvertFanPoints> fanPoints)
+        {
+            var mapping = new Dictionary<ThBlockReferenceData, bool>();
+            srcBlocks.ForEach(o => mapping[o] = false);
+            var xrg = currentDb.Database.GetHostDwgXrefGraph(false);
+            foreach (var rule in manager.Rules.Where(o => (o.Mode & Mode) != 0))
+            {
+                var mode = Mode & rule.Mode;
+                var block = rule.Transformation.Item1;
+                var srcName = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
+                var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
+                srcBlocks.Where(o => ThMEPXRefService.OriginalFromXref(o.EffectiveName) == srcName)
+                    .Where(o =>
+                    {
+                        string name = "";
+                        ThXrefDbExtension.XRefNodeName(xrg.RootNode, o.Database, ref name);
+                        Regex r = new Regex(@"([a-zA-Z])");
+                        Match m = r.Match(name);
+                        if (!m.Success)
+                        {
+                            return false;
+                        }
+                        switch (Category)
+                        {
+                            case ConvertCategory.WSS:
+                                return m.Groups[1].Value.ToUpper() == "W";
+                            case ConvertCategory.HVAC:
+                                return m.Groups[1].Value.ToUpper() == "H";
+                            default:
+                                return true;
+                        }
+                    }).ForEach(o =>
+                    {
+                        // 避免重复转换
+                        if (mapping[o] == true)
+                        {
+                            return;
+                        }
+
+                        // 获取转换后的块信息
+                        ThBlockConvertBlock transformedBlock = null;
+                        switch (mode)
+                        {
+                            case ConvertMode.STRONGCURRENT:
+                                {
+                                    if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
+                                    {
+                                        // 当配置表中可见性为空时，则按图块名转换
+                                        transformedBlock = manager.TransformRule(srcName);
+                                    }
+                                    else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                    {
+                                        // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
+                                        transformedBlock = manager.TransformRule(
+                                    srcName,
+                                    o.CurrentVisibilityStateValue());
+                                    }
+                                }
+                                break;
+                            case ConvertMode.WEAKCURRENT:
+                                {
+                                    if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
+                                    {
+                                        transformedBlock = manager.TransformRule(srcName);
+                                    }
+                                    else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                    {
+                                        transformedBlock = manager.TransformRule(
+                                            srcName,
+                                            o.CurrentVisibilityStateValue());
+                                    }
+                                }
+                                break;
+                            default:
+                                throw new NotSupportedException();
+                        }
+
+                        // 转换
+                        if (transformedBlock != null)
+                        {
+                            // 标记已经转换的块
+                            mapping[o] = true;
+
+                            // 导入目标图块
+                            var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
+                            var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                            if (FrameStyle == "标注无边框" && (targetBlockName == "电动机及负载标注" || targetBlockName == "负载标注"))
+                            {
+                                targetBlockName += "2";
+                            }
+                            currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
+                            currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+
+                            // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
+                            // 修正插入动态块的图层顺序
+                            if (targetBlockName.Contains("电动机及负载标注"))
+                            {
+                                var wipeOut = new ThBConvertWipeOut();
+                                wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
+                            }
+
+                            // 插入新的块引用
+                            var scale = new Scale3d(Scale);
+                            var engine = CreateConvertEngine(mode);
+                            var objId = engine.Insert(targetBlockName, scale, o);
+                            if (objId == ObjectId.Null)
+                            {
+                                return;
+                            }
+
+                            // 设置新插入的块引用的镜像变化
+                            engine.Mirror(objId, o);
+
+                            // 设置新插入的块引用的角度
+                            engine.Rotate(objId, o);
+
+                            // 设置新插入的块引用位置
+                            if (o.EffectiveName.Contains("潜水泵-AI"))
+                            {
+                                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("水泵标注"), false);
+                                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("E-UNIV-NOTE"), false);
+                                engine.Displacement(objId, o, collectingWell, scale);
+                            }
+                            else
+                            {
+                                engine.Displacement(objId, o, fanPoints);
+                            }
+
+                            var targetBlockData = new ThBlockReferenceData(objId);
+                            targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                        .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == targetBlockData.EffectiveName)
+                                        .ForEach(t =>
+                                        {
+                                            if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                                            {
+                                                var e = currentDb.Element<Entity>(objId, true);
+                                                e.Erase();
+                                            }
+                                        });
+                            // 对电动机及负载标注、负载标注单独处理
+                            if (!objId.IsErased && targetBlockName.Contains("负载标注"))
+                            {
+                                var name = KeepChinese(targetBlockName);
+                                targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                        .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName).Contains(name))
+                                        .ForEach(t =>
+                                        {
+                                            if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                                            {
+                                                var e = currentDb.Element<Entity>(t.ObjId, true);
+                                                e.Erase();
+                                            }
+                                        });
+                            }
+
+                            // 设置动态块可见性
+                            if (!objId.IsErased)
+                            {
+                                engine.SetVisibilityState(objId, o);
+
+                                // 将源块引用的属性“刷”到新的块引用
+                                engine.MatchProperties(objId, o);
+
+                                // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
+                                // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
+                                var refIds = new ObjectIdCollection();
+                                if (rule.Explodable())
+                                {
+                                    ExplodeWithErase(objId, refIds);
+
+                                    // 如果是“单台潜水泵”，继续炸一次
+                                    var objIds = new ObjectIdCollection();
+                                    foreach (ObjectId item in refIds)
+                                    {
+                                        if (item.GetBlockName().Contains("单台潜水泵"))
+                                        {
+                                            ExplodeWithErase(item, objIds);
+                                        }
+                                        else
+                                        {
+                                            objIds.Add(item);
+                                        }
+                                    }
+
+                                    // 获取最终结果
+                                    refIds = objIds;
+
+                                    foreach (ObjectId id in refIds)
+                                    {
+                                        var explodeBlockData = new ThBlockReferenceData(id);
+                                        targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                                    .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == explodeBlockData.EffectiveName)
+                                                    .ForEach(t =>
+                                                    {
+                                                        if (t.Position.DistanceTo(explodeBlockData.Position) < 200.0)
+                                                        {
+                                                            var e = currentDb.Element<Entity>(id, true);
+                                                            e.Erase();
+                                                        }
+                                                    });
+                                    }
+                                }
+                                else
+                                {
+                                    refIds.Add(objId);
+                                }
+
+                                // 设置块引用的数据库属性
+                                refIds.Cast<ObjectId>().ForEach(b =>
+                                {
+                                    if (!b.IsErased)
+                                    {
+                                        engine.SetDatabaseProperties(b, o, targetBlockLayer);
+                                    }
+                                });
+                            }
+                        }
+                    });
             }
         }
 

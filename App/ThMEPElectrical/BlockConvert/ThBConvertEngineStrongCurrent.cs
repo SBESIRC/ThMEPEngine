@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -77,7 +78,7 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, List<ThBConvertFanPoints> fanPoints)
         {
             var name = srcBlockData.EffectiveName;
             if (name.Contains("风机") ||
@@ -87,7 +88,7 @@ namespace ThMEPElectrical.BlockConvert
                 name.Contains("冷水机组") ||
                 name.Contains("冷却塔"))
             {
-                TransformByFansCenter(blkRef, srcBlockData);
+                TransformByFansCenter(blkRef, srcBlockData, fanPoints);
             }
             else if (name.Contains("潜水泵"))
             {
@@ -175,7 +176,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByFansCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        private void TransformByFansCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData, List<ThBConvertFanPoints> fanPoints)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
@@ -188,8 +189,8 @@ namespace ThMEPElectrical.BlockConvert
 
                 var targetProperties = targetBlockData.CustomProperties;
                 var srcProperties = srcBlockData.CustomProperties;
-                double base_x = 0, base_y = 0;
-                double label_x = 0, label_y = 0;
+                double base_x = 0.0, base_y = 0.0;
+                double label_x = 0.0, label_y = 0.0;
                 if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
                 {
                     base_x = (double)srcProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X);
@@ -215,11 +216,10 @@ namespace ThMEPElectrical.BlockConvert
                     label_y = (double)srcProperties.GetValue("位置1 Y");
                 }
 
-                double rotation = srcBlockData.Rotation;
                 var labelPoint = new Vector3d(label_x - base_x, label_y - base_y, 0);
                 if (targetProperties.Contains("位置1 X") && targetProperties.Contains("位置1 Y"))
                 {
-                    if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                    if (srcBlockData.Rotation > Math.PI / 2 && srcBlockData.Rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
                     {
                         targetProperties.SetValue("位置1 X", -labelPoint.X);
                         targetProperties.SetValue("位置1 Y", -labelPoint.Y);
@@ -229,6 +229,12 @@ namespace ThMEPElectrical.BlockConvert
                         targetProperties.SetValue("位置1 X", labelPoint.X);
                         targetProperties.SetValue("位置1 Y", labelPoint.Y);
                     }
+                }
+
+                if(srcBlockData.EffectiveName.Contains("风机"))
+                {
+                    var service = new ThBConvertFanPointsRecognition();
+                    fanPoints.Add(service.Recognize(srcBlockData, srcBlockData.OwnerSpace2WCS));
                 }
             }
         }

@@ -1,9 +1,12 @@
 ﻿using System;
-using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
+using ThCADExtension;
+using ThMEPElectrical.Model;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -22,7 +25,7 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 位置变换
         /// </summary>
-        public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference);
+        public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThBConvertFanPoints> fanPoints);
 
         public abstract void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThRawIfcDistributionElementData> list, Scale3d scale);
 

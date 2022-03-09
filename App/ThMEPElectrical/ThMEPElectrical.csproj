@@ -46,6 +46,7 @@
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
+    <Compile Include="BlockConvert\ThBConvertDamperSearcher.cs" />
     <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertDuctCenterLineExtractionEngine.cs" />
     <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertExcelExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertFanPointsRecognition.cs" />
     <Compile Include="BlockConvert\ThBConvertManager.cs" />
     <Compile Include="BlockConvert\ThBConvertParameter.cs" />
     <Compile Include="BlockConvert\ThBConvertRule.cs" />
@@ -244,6 +246,7 @@
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
+    <Compile Include="Model\ThBConvertFanPoints.cs" />
     <Compile Include="Model\ThCapitalConverterModel.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />

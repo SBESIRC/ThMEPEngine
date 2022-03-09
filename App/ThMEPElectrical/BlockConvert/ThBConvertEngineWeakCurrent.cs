@@ -1,11 +1,14 @@
 ﻿using System;
-using Linq2Acad;
-using DotNetARX;
-using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Linq2Acad;
+
+using ThCADExtension;
+using ThMEPElectrical.Model;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -45,7 +48,7 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, List<ThBConvertFanPoints> fanPoints)
         {
             if (srcBlockData.EffectiveName.Contains("自动扫描射水高空水炮") ||
                 srcBlockData.EffectiveName.Contains("消防炮") ||

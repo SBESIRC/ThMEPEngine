@@ -48,7 +48,7 @@ namespace ThMEPElectrical.BlockConvert
                 results.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = new ThBlockReferenceData(br.ObjectId, matrix),
-                    Geometry = br.GetTransformedCopy(matrix).GeometricExtents.ToRectangle(),
+                    Geometry = br.ToOBB(br.BlockTransform).GetTransformedCopy(matrix),
                 });
             }
             return results;

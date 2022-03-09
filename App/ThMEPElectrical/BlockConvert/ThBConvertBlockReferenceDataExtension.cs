@@ -31,7 +31,7 @@ namespace ThMEPElectrical.BlockConvert
                          name.Contains("冷水机组") ||
                          name.Contains("冷却塔"))
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer == "0" || e.Layer.Contains("H-EQUP"))
                         .Where(e => !e.Layer.Contains("DIMS"))
                         .Where(e => e is Curve || e is BlockReference)
@@ -39,14 +39,14 @@ namespace ThMEPElectrical.BlockConvert
                 }
                 else if (name.Contains("防火阀"))
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer != "DEFPOINTS")
                         .Where(e => e is Circle || e is BlockReference)
                         .ToCollection();
                 }
                 else
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer != "DEFPOINTS")
                         .Where(e => e is Curve || e is BlockReference)
                         .ToCollection();
