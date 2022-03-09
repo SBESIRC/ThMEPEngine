@@ -32,13 +32,13 @@ namespace ThMEPHVAC.FanLayout.Engine
                     ThBlockReferenceData brData = new ThBlockReferenceData(b.Id);
                     var attributes = brData.Attributes;
                     info.FanNumber = attributes["设备编号"];
-                    info.FanVolume = ThFanLayoutDealService.GetFanVolum(attributes["风量"]);
-                    info.FanPower = ThFanLayoutDealService.GetFanPower(attributes["电量"]);
 
                     var values = b.Id.GetXData("FanProperty");
                     info.FanPressure = (double)values[1].Value;
                     info.FanNoise = (double)values[2].Value;
                     info.FanWeight = (double)values[3].Value;
+                    info.FanVolume = (double)values[4].Value;
+                    info.FanPower = (double)values[5].Value;
                     resList.Add(info);
                 }
                 return resList;
