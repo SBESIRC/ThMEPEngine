@@ -16,15 +16,25 @@ namespace TianHua.Electrical.PDS.Project.Module
         //public CircuitFormInType CircuitFormType { get; set; }
         public PDSBaseInCircuit CircuitFormType { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
+
+        /// <summary>
+        /// 是否是双功率
+        /// </summary>
         public bool IsDualPower { get; set; }
+        /// <summary>
+        /// 是否已统计功率
+        /// </summary>
+        public bool IsStatisticalPower { get; set; }
         public double LowPower { get; set; }
         public double HighPower { get; set; }
 
         public bool IsOnlyLoad { get; set; }
 
-        public List<PDSBaseElement> Elements { get; set; } //元器件
+        /// <summary>
+        /// 相序
+        /// </summary>
+        public PhaseSequence PhaseSequence { get; set; }
 
-        public int PhaseSequence { get; set; }//相序
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();

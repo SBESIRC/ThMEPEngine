@@ -13,14 +13,19 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class CircuitDetails
     {
-        //public CircuitFormOutType CircuitFormType { get; set; }
         public PDSBaseOutCircuit CircuitForm { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
-        //public List<PDSBaseElement> Elements { get; set;} //元器件
-        public PhaseSequence PhaseSequence { get; set; }//相序
+
+        
+
+        /// <summary>
+        /// 回路锁
+        /// </summary>
+        public bool CircuitLock { get; set; }
+
         public CircuitDetails()
         {
-            //PhaseSequence = PhaseSequence.L123;
+            CircuitLock = false;
         }
     }
 
