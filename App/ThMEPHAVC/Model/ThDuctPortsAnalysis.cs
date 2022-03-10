@@ -37,6 +37,10 @@ namespace ThMEPHVAC.Model
         private DBObjectCollection excludeLines;
         private Dictionary<Polyline, ObjectId> allFansDic;
         private ThCADCoreNTSSpatialIndex portIndex;
+        // 标准管径大小
+        private HashSet<double> ductMods = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3000, 3500, 4000 };
+        // 需要新增的风管高度
+        private HashSet<double> ductHeights = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500};
         // start_point_ == (0,0,0) -> center_lines_ is near (0,0,0)
         // start_point_ != (0,0,0) -> center_lines_ need to move
         public ThDuctPortsAnalysis() { }
@@ -44,6 +48,8 @@ namespace ThMEPHVAC.Model
         {
             Init(portParam, excludeLines, allFansDic);
             GetMainLineAndEndLine();
+            if (endLines.Count() == 0)
+                throw new NotImplementedException("未搜索到任何中心线");
             if (portParam.genStyle == GenerationStyle.Auto)
                 AutoDistributePort();
             else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
@@ -95,7 +101,7 @@ namespace ThMEPHVAC.Model
         }
         private List<Handle> DeleteOrgGraph()
         {
-            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllComponent(portParam.srtPoint);
+            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllTCHComponent(portParam.srtPoint);
             var groupBounds = bounds2IdDic.Keys.ToCollection();
             var index = new ThCADCoreNTSSpatialIndex(groupBounds);
             var conns = new List<Handle>();
@@ -141,9 +147,13 @@ namespace ThMEPHVAC.Model
             bool isAxis = false;
             foreach (var r in reducingInfos)
             {
-                var big = ThMEPHVACService.GetWidth(r.bigSize);
-                var small = ThMEPHVACService.GetWidth(r.smallSize);
-                reducings.Add(ThDuctPortsFactory.CreateReducing(r.l, big, small, isAxis));
+                ThMEPHVACService.GetWidthAndHeight(r.bigSize, out double bWidth, out double bHeight);
+                ThMEPHVACService.GetWidthAndHeight(r.smallSize, out double sWidth, out double sHeight);
+                var disVec = new Vector3d(0, 0, bHeight);
+                var sp = r.l.StartPoint + disVec;
+                disVec = new Vector3d(0, 0, sHeight);
+                var ep = r.l.EndPoint + disVec;
+                reducings.Add(ThDuctPortsFactory.CreateReducing(new Line(sp, ep), bWidth, sWidth, isAxis));
             }
         }
 
@@ -419,6 +429,7 @@ namespace ThMEPHVAC.Model
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
                 if (size == favorite)
                     return size;
+            AddNotNormalDuctSize(ductInfo, inW, inH);
             string s = String.Empty;
             double minRatio = Double.MaxValue;
             var r = GetWHRatio(airVolume, portParam.param.scenario);
@@ -426,7 +437,7 @@ namespace ThMEPHVAC.Model
             {
                 ThMEPHVACService.GetWidthAndHeight(size, out double w, out double h);
                 var ratio = w / h;
-                if (h <= inH && w < inW)
+                if (h <= inH && w <= inW)
                 {
                     var t = Math.Abs(ratio - r);
                     if (t < minRatio)
@@ -436,8 +447,27 @@ namespace ThMEPHVAC.Model
                     }
                 }
             }
-            return (!s.IsNullOrEmpty()) ? s : ductInfo.DuctSizeInfor.RecommendOuterDuctSize;
+            return (!s.IsNullOrEmpty()) ? s : favorite;
         }
+
+        private void AddNotNormalDuctSize(ThDuctParameter ductInfo, double inW, double inH)
+        {
+            if (!ductMods.Contains(inW))
+            {
+                foreach (var h in ductHeights)
+                {
+                    ductInfo.DuctSizeInfor.DefaultDuctsSizeString.Add(inW.ToString() + "x" + h.ToString());
+                }
+            }
+            if (!ductHeights.Contains(inH))
+            {
+                foreach (var w in ductMods)
+                {
+                    ductInfo.DuctSizeInfor.DefaultDuctsSizeString.Add(w.ToString() + "x" + inH.ToString());
+                }
+            }
+        }
+
         public double GetWHRatio(double airVolume, string scenario)
         {
             if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")

@@ -111,9 +111,9 @@ namespace ThMEPEngineCore.Service.Hvac
             return param;
         }
 
-        private static Dictionary<Point3d, double> CreatePortMap(List<Line> centerLines, List<double> portWidths)
+        private static Dictionary<Point3d, string> CreatePortMap(List<Line> centerLines, List<string> portWidths)
         {
-            var dic = new Dictionary<Point3d, double>();
+            var dic = new Dictionary<Point3d, string>();
             if (centerLines.Count == 1)
             {
                 // Reducing
@@ -128,7 +128,7 @@ namespace ThMEPEngineCore.Service.Hvac
             return dic;
         }
         
-        private static List<double> GetConnectorPortWidth(IEnumerable<ObjectId> ids, GroupIdx idxInfo)
+        private static List<string> GetConnectorPortWidth(IEnumerable<ObjectId> ids, GroupIdx idxInfo)
         {
             var lineIds = ids.ToArray();
             switch (ids.Count())
@@ -144,7 +144,7 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
-        private static List<double> GetReducingWidths(ObjectId[] lineIds, GroupIdx idxInfo)
+        private static List<string> GetReducingWidths(ObjectId[] lineIds, GroupIdx idxInfo)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -152,11 +152,11 @@ namespace ThMEPEngineCore.Service.Hvac
                 var flg2 = db.Element<Line>(lineIds[idxInfo.flgIdx + 1]);
                 var dis1 = ShrinkFlg(flg1);
                 var dis2 = ShrinkFlg(flg2);
-                return new List<double>() { dis1, dis2 };
+                return new List<string>() { dis1, dis2 };
             }
         }
 
-        private static List<double> CreateCrossWidths(ObjectId[] lineIds, GroupIdx idxInfo)
+        private static List<string> CreateCrossWidths(ObjectId[] lineIds, GroupIdx idxInfo)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -169,11 +169,11 @@ namespace ThMEPEngineCore.Service.Hvac
                 var outDis = ShrinkFlg(outFlg);
                 var outterBranchDis = ShrinkFlg(outterBranchFlg);
                 var innerBranchDis = ShrinkFlg(innerBranchFlg);
-                return new List<double>() { mainDis, outDis, outterBranchDis, innerBranchDis };
+                return new List<string>() { mainDis, outDis, outterBranchDis, innerBranchDis };
             }
         }
         
-        private static List<double> GetTeeWidths(ObjectId[] lineIds, GroupIdx idxInfo)
+        private static List<string> GetTeeWidths(ObjectId[] lineIds, GroupIdx idxInfo)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -184,23 +184,23 @@ namespace ThMEPEngineCore.Service.Hvac
                 var mainDis = ShrinkFlg(mainFlg);
                 var innerBranchDis = ShrinkFlg(innerBranchFlg);
                 var otherBranchDis = ShrinkFlg(otherBranchFlg);
-                return new List<double>() { mainDis, innerBranchDis, otherBranchDis };
+                return new List<string>() { mainDis, innerBranchDis, otherBranchDis };
             }
         }
 
-        private static List<double> GetElbowWidths(ObjectId[] lineIds, GroupIdx idxInfo)
+        private static List<string> GetElbowWidths(ObjectId[] lineIds, GroupIdx idxInfo)
         {
             using (var db = AcadDatabase.Active())
             {
                 var flgLine = db.Element<Line>(lineIds[idxInfo.flgIdx]);
                 var dis = ShrinkFlg(flgLine);
-                return new List<double>() { dis, dis };
+                return new List<string>() { dis, dis };
             }
         }
-        private static double ShrinkFlg(Line l)
+        private static string ShrinkFlg(Line l)
         {
             var flgExtendLen = 45;
-            return l.Length - 2 * flgExtendLen;
+            return (l.Length - 2 * flgExtendLen).ToString() + "x" + "0";
         }
         private static List<Line> GetConnectorCenterLine(IEnumerable<ObjectId> ids, GroupIdx idxInfo)
         {

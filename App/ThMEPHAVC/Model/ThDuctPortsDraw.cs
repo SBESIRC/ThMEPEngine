@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
-using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
 {
@@ -15,9 +16,11 @@ namespace ThMEPHVAC.Model
         private PortParam portParam;
         private Vector3d orgDisVec;
         private Matrix3d orgDisMat;
-        public ThDuctPortsDraw(PortParam portParam)
+        public ThTCHDrawFactory tchDrawService;
+        public ThDuctPortsDraw(PortParam portParam, string curDbPath)
         {
             Init(portParam);
+            tchDrawService = new ThTCHDrawFactory(curDbPath, portParam.param.scenario);
         }
         private void Init(PortParam portParam)
         {
@@ -29,14 +32,18 @@ namespace ThMEPHVAC.Model
             orgDisVec = portParam.srtPoint.GetAsVector();
             orgDisMat = Matrix3d.Displacement(orgDisVec);
         }
-        public void Draw(ThDuctPortsAnalysis anayRes)
+        public void Draw(ThDuctPortsAnalysis anayRes, ref ulong gId)
         {
             if (portParam.genStyle == GenerationStyle.Auto && portParam.param.portNum > 0)
                 DrawPortMark(anayRes.endLinesInfos); // DrawEndlines的DrawDimension会改变风口个数，所以先插标注
-            DrawEndlines(anayRes);
-            DrawMainlines(anayRes.mainLinesInfos);
-            service.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat);
-            
+
+            tchDrawService.ductService.Draw(anayRes.breakedDucts, orgDisMat, true, portParam.param, ref gId);
+            tchDrawService.ductService.Draw(anayRes.mainLinesInfos.Values.ToList(), orgDisMat, false, portParam.param, ref gId);
+            tchDrawService.reducingService.Draw(anayRes.reducings, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
+            tchDrawService.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
+
+            DrawEndlines(anayRes, ref gId);
+
             if (portParam.param.scenario == "消防排烟" || portParam.param.scenario == "消防补风" || portParam.param.scenario == "消防加压送风")
                 service.fireValveService.InsertValves(portParam.srtPoint, anayRes.endLinesInfos, ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_BEC);
             else
@@ -78,29 +85,39 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        private void DrawEndlines(ThDuctPortsAnalysis anayRes)
+        private void DrawEndlines(ThDuctPortsAnalysis anayRes, ref ulong gId)
         {
-            service.DrawDuct(anayRes.breakedDucts, orgDisMat);
-            service.DrawReducing(anayRes.reducings, orgDisMat);
-            service.DrawSideDuctText(anayRes.textAlignment, portParam.srtPoint, portParam.param);
             if (portParam.genStyle != GenerationStyle.GenerationWithPortVolume)
             {
-                DrawPort(anayRes.endLinesInfos);
+                DrawPort(anayRes.endLinesInfos, ref gId);
                 // 画Dimension需要插入风口，所以必须先画风口再画Dimension
                 service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
             }
         }
 
-        private void DrawPort(List<EndlineInfo> endLinesInfos)
+        private void DrawPort(List<EndlineInfo> endLinesInfos, ref ulong gId)
         {
             double avgAirVolume = portParam.param.airVolume / portParam.param.portNum;
             avgAirVolume = Math.Ceiling(avgAirVolume / 10) * 10;
-            foreach (var endline in endLinesInfos)
+            if (portParam.verticalPipeEnable)
             {
-                foreach (var seg in endline.endlines.Values)
+                foreach (var endline in endLinesInfos)
                 {
-                    service.portService.DrawPorts(seg, portParam, orgDisVec, portWidth, portHeight, avgAirVolume, out List<SegInfo> verticalPipes);
-                    service.DrawVerticalPipe(verticalPipes, orgDisMat);
+                    foreach (var seg in endline.endlines.Values)
+                    {
+                        service.portService.DrawVerticalPipePorts(seg, portParam.param, orgDisVec, portWidth, portHeight, avgAirVolume, out List<SegInfo> verticalPipes);
+                        tchDrawService.ductService.DrawVerticalPipe(verticalPipes, orgDisMat, portParam.param, ref gId);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var endline in endLinesInfos)
+                {
+                    foreach (var seg in endline.endlines.Values)
+                    {
+                        service.portService.DrawPorts(seg, portParam.param, orgDisVec, portWidth, portHeight, avgAirVolume);
+                    }
                 }
             }
         }
@@ -109,57 +126,27 @@ namespace ThMEPHVAC.Model
             if (endlines.Count == 0)
                 return;
             var p = Point3d.Origin;
-            double textAngle = 0;
             foreach (var seg in endlines[0].endlines.Values)
             {
                 if (seg.portNum > 0)
                 {
                     p = seg.portsInfo[0].position;
                     var dir = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
-                    textAngle = ThMEPHVACService.GetPortRotateAngle(dir);
+                    var leftDir = ThMEPHVACService.GetLeftVerticalVec(dir);
+                    var w = ThMEPHVACService.GetWidth(seg.portsInfo[0].ductSize) * 0.5;
+                    if (leftDir.X > 0)
+                    {
+                        p += (w * leftDir);
+                    }
+                    else
+                    {
+                        p += (-w * leftDir);
+                    }
                     break;
                 }
             }
             var markP = p + orgDisVec;
-            service.markService.InsertMark(portParam.param, portWidth, portHeight, textAngle - 0.5 * Math.PI, markP);
-            //service.markService.InsertLeader(p + orgDisVec, markP);
-        }
-        private void DrawMainlines(Dictionary<int, SegInfo> mainLinesInfos)
-        {
-            foreach (var info in mainLinesInfos.Values)
-            {
-                var l = info.GetShrinkedLine();
-                var mainlines = GetMainDuct(info);
-                if (mainlines.centerLines.Count < 1)
-                    continue;// 管长太小
-                ThMEPHVACService.GetLinePosInfo(l, out double angle, out Point3d centerPoint);
-                var mat = Matrix3d.Displacement(centerPoint.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
-                mat = orgDisMat * mat;
-                ThDuctPortsDrawService.DrawLines(mainlines.geo, mat, service.geoLayer, out ObjectIdList geoIds);
-                ThDuctPortsDrawService.DrawLines(mainlines.flg, mat, service.geoLayer, out ObjectIdList flgIds);
-                ThDuctPortsDrawService.DrawLines(mainlines.centerLines, orgDisMat, service.centerLayer, out ObjectIdList centerIds);
-                // port根据中心线变化
-                var elevation = portParam.param.elevation.ToString();
-                double airVolume = ThMEPHVACService.RoundNum(info.airVolume, 50);
-                var param = ThMEPHVACService.CreateDuctModifyParam(mainlines.centerLines, info.ductSize, elevation, airVolume);
-                ThDuctPortsRecoder.CreateDuctGroup(geoIds, flgIds, centerIds, param);
-                var dirVec = (l.EndPoint - l.StartPoint).GetNormal();
-                service.textService.DrawMainlineTextInfo(angle, info.ductSize, centerPoint, dirVec, orgDisMat, portParam);
-            }
-        }
-        private LineGeoInfo GetMainDuct(SegInfo info)
-        {
-            var l = info.GetShrinkedLine();
-            if (l.Length < 10)
-                return new LineGeoInfo();
-            var ductWidth = ThMEPHVACService.GetWidth(info.ductSize);
-            var outlines = ThDuctPortsFactory.CreateDuct(l.Length, ductWidth);
-            var centerLine = new DBObjectCollection { l };
-            var outline1 = outlines[0] as Line;
-            var outline2 = outlines[1] as Line;
-            var flg = new DBObjectCollection{new Line(outline1.StartPoint, outline2.StartPoint),
-                                             new Line(outline1.EndPoint, outline2.EndPoint)};
-            return new LineGeoInfo(outlines, flg, centerLine);
+            service.markService.InsertMark(portParam.param, portWidth, portHeight, 0, markP);
         }
     }
 }

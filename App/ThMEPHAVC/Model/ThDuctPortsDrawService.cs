@@ -47,6 +47,7 @@ namespace ThMEPHVAC.Model
         public ThDuctPortsDrawPort portService;
         public ThDuctPortsDrawPortMark markService;
         public ThDuctPortsDrawEndComp endCompService;
+        
         public ThDuctPortsDrawService(string scenario, string scale)
         {
             airValveName = "风阀";
@@ -666,7 +667,10 @@ namespace ThMEPHVAC.Model
         protected void DrawCross(EntityModifyParam info, Matrix3d orgDisMat)
         {
             var crossInfo = GetCrossInfo(info);
-            var cross = ThDuctPortsFactory.CreateCross(crossInfo.iWidth, crossInfo.innerWidth, crossInfo.coWidth, crossInfo.outterWidth);
+            var cross = ThDuctPortsFactory.CreateCross(ThMEPHVACService.GetWidth(crossInfo.iWidth),
+                                                       ThMEPHVACService.GetWidth(crossInfo.innerWidth),
+                                                       ThMEPHVACService.GetWidth(crossInfo.coWidth),
+                                                       ThMEPHVACService.GetWidth(crossInfo.outterWidth));
             var mat = GetTransMat(crossInfo.trans);
             DrawShape(cross, orgDisMat * mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
             ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Cross");
@@ -699,16 +703,14 @@ namespace ThMEPHVAC.Model
         private CrossInfo GetCrossInfo(EntityModifyParam info)
         {
             var points = info.portWidths.Keys.ToList();
-            double iWidth = info.portWidths[points[0]];
             var inVec = (points[0] - info.centerP).GetNormal();
             SepCrossIdx(inVec, points, info.centerP, out int collinearIdx, out int other1Idx, out int other2Idx);
-            double collinearWidth = info.portWidths[points[collinearIdx]];
             var branchVec = (points[other1Idx] - info.centerP).GetNormal();
             var flag = inVec.CrossProduct(branchVec).Z > 0;
             var innerIdx = flag ? other1Idx : other2Idx;
             var outterIdx = flag ? other2Idx : other1Idx;
-            double innerWidth = info.portWidths[points[innerIdx]];
-            double outterWidth = info.portWidths[points[outterIdx]];
+            double innerWidth = ThMEPHVACService.GetWidth(info.portWidths[points[innerIdx]]);
+            double outterWidth = ThMEPHVACService.GetWidth(info.portWidths[points[outterIdx]]);
             double rotateAngle = ThDuctPortsShapeService.GetCrossRotateAngle(inVec);
             var innerVec = (points[innerIdx] - info.centerP).GetNormal();
             var judgeVec = (Vector3d.XAxis).RotateBy(rotateAngle, -Vector3d.ZAxis);
@@ -719,14 +721,19 @@ namespace ThMEPHVAC.Model
             if (outterWidth < innerWidth)
                 flip = true;
             var trans = new TransInfo() { rotateAngle = rotateAngle, centerPoint = info.centerP, flip = flip};
-            return new CrossInfo() { iWidth = iWidth, innerWidth = innerWidth, coWidth = collinearWidth, outterWidth = outterWidth, trans = trans };
+            return new CrossInfo() { iWidth = info.portWidths[points[0]], 
+                                     innerWidth = info.portWidths[points[innerIdx]], 
+                                     coWidth = info.portWidths[points[collinearIdx]], 
+                                     outterWidth = info.portWidths[points[outterIdx]], trans = trans };
         }
         protected void DrawTee(EntityModifyParam info, Matrix3d orgDisMat)
         {
             var points = info.portWidths.Keys.ToList();
             var type = ThDuctPortsShapeService.GetTeeType(info.centerP, points[1], points[2]);
             var teeInfo = GetTeeInfo(info, type);
-            var tee = ThDuctPortsFactory.CreateTee(teeInfo.mainWidth, teeInfo.branch, teeInfo.other, type);
+            var tee = ThDuctPortsFactory.CreateTee(ThMEPHVACService.GetWidth(teeInfo.mainWidth),
+                                                   ThMEPHVACService.GetWidth(teeInfo.branch),
+                                                   ThMEPHVACService.GetWidth(teeInfo.other), type);
             var mat = GetTransMat(teeInfo.trans);
             DrawShape(tee, orgDisMat * mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
             ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Tee");
@@ -736,14 +743,12 @@ namespace ThMEPHVAC.Model
             var points = info.portWidths.Keys.ToList();
             var inVec = (points[0] - info.centerP).GetNormal();
             double rotateAngle = ThDuctPortsShapeService.GetTeeRotateAngle(inVec);
-            double inWidth = info.portWidths[points[0]];
+            double inWidth = ThMEPHVACService.GetWidth(info.portWidths[points[0]]);
             var vec = (points[1] - info.centerP).GetNormal();
             var flag = (type == TeeType.BRANCH_VERTICAL_WITH_OTTER) ? 
                         ThMEPHVACService.IsCollinear(inVec, vec) : inVec.CrossProduct(vec).Z > 0;
             var otherIdx = flag ? 1 : 2;
             var branchIdx = flag ? 2 : 1;
-            double other = info.portWidths[points[otherIdx]];
-            double branch = info.portWidths[points[branchIdx]];
             var branchVec = (points[branchIdx] - info.centerP).GetNormal();
             var judgeVec = (Vector3d.XAxis).RotateBy(rotateAngle, -Vector3d.ZAxis);
             var theta = branchVec.GetAngleTo(judgeVec);
@@ -752,12 +757,12 @@ namespace ThMEPHVAC.Model
             if (theta > tor)
                 flip = true;
             var trans = new TransInfo() { rotateAngle = rotateAngle, centerPoint = info.centerP , flip = flip};
-            return new TeeInfo() { mainWidth = inWidth, branch = branch, other = other, trans = trans };
+            return new TeeInfo() { mainWidth = info.portWidths[points[0]], branch = info.portWidths[points[branchIdx]], other = info.portWidths[points[otherIdx]], trans = trans };
         }
         protected void DrawElbow(EntityModifyParam info, Matrix3d orgDisMat)
         {
             var elbowInfo = GetElbowInfo(info);
-            var elbow = ThDuctPortsFactory.CreateElbow(elbowInfo.openAngle, elbowInfo.ductWidth);
+            var elbow = ThDuctPortsFactory.CreateElbow(elbowInfo.openAngle, ThMEPHVACService.GetWidth(elbowInfo.ductWidth));
             var mat = GetTransMat(elbowInfo.trans);
             DrawShape(elbow, orgDisMat * mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
             ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Elbow");
@@ -767,8 +772,8 @@ namespace ThMEPHVAC.Model
             var points = info.portWidths.Keys.ToList();
             var inP = points.FirstOrDefault();
             var outP = points.LastOrDefault();
-            double inWidth = info.portWidths[inP];
-            double outWidth = info.portWidths[outP];
+            double inWidth = ThMEPHVACService.GetWidth(info.portWidths[inP]);
+            double outWidth = ThMEPHVACService.GetWidth(info.portWidths[outP]);
             var inVec = (inP - info.centerP).GetNormal();
             var outVec = (outP - info.centerP).GetNormal();
             double openAngle = Math.PI - inVec.GetAngleTo(outVec);
@@ -780,7 +785,7 @@ namespace ThMEPHVAC.Model
             var tor = new Tolerance(1e-3, 1e-3);
             if (!judgeVec.IsEqualTo(outVec, tor))
                 rotateAngle -= (inVec.GetAngleTo(outVec));
-            var w = Math.Min(inWidth, outWidth);
+            var w = inWidth < outWidth ? info.portWidths[inP] : info.portWidths[outP];
             // Matrix rotate->顺时针转
             var trans = new TransInfo() { rotateAngle = rotateAngle, centerPoint = info.centerP };
             return new ElbowInfo() { openAngle = openAngle, ductWidth = w, trans = trans };

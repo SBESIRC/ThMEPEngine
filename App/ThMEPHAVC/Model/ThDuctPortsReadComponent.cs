@@ -11,6 +11,8 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Model.Hvac;
 using NFox.Cad;
 using ThCADExtension;
+using ThMEPEngineCore.Engine;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPHVAC.Model
 {
@@ -28,6 +30,90 @@ namespace ThMEPHVAC.Model
                 foreach (var d in ductsDic)
                     bounds2IdDic.Add(d.Key, d.Value.handle);
                 return bounds2IdDic;
+            }
+        }
+        public static Dictionary<Polyline, Handle> ReadAllTCHComponent(Point3d srtP)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var bounds2IdDic = new Dictionary<Polyline, Handle>();
+                var connector = ReadTCHGroupId2geoDic(srtP);
+                foreach (var c in connector)
+                    bounds2IdDic.Add(c.Value, c.Key.Handle);
+                GetTCHDuctBounds(srtP, out _, out Dictionary<Polyline, DuctModifyParam> ductsDic);
+                foreach (var d in ductsDic)
+                    bounds2IdDic.Add(d.Key, d.Value.handle);
+                return bounds2IdDic;
+            }
+        }
+        public static void GetTCHDuctBounds(Point3d srtP, out ThCADCoreNTSSpatialIndex ductsIndex, out Dictionary<Polyline, DuctModifyParam> ductsDic)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+                var visitor = new ThTCHDuctExtractionVisitor();
+                var elements = new List<ThRawIfcDistributionElementData>();
+                var ids = new List<ObjectId>();
+                var tDuctsDic = new Dictionary<Polyline, DuctModifyParam>();
+                db.ModelSpace.OfType<Entity>().ForEach(e =>
+                {
+                    if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+                    {
+                        var param = GetTCHDuctParam(e.Id);
+                        param.sp = ThMEPHVACService.RoundPoint(param.sp.TransformBy(mat), 6);
+                        param.ep = ThMEPHVACService.RoundPoint(param.ep.TransformBy(mat), 6);
+                        var l = new Line(param.sp, param.ep);
+                        var w =ThMEPHVACService.GetWidth(param.ductSize);
+                        var pl = l.Buffer(w * 0.5);
+                        tDuctsDic.Add(pl, param);
+                    }
+                });
+                ductsDic = tDuctsDic;
+                ductsIndex = new ThCADCoreNTSSpatialIndex(ductsDic.Keys.ToCollection());
+            }
+        }
+        private static DuctModifyParam GetTCHDuctParam(ObjectId id)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var data = ThOPMTools.GetOPMProperties(id);
+                var dic = data as Dictionary<string, object>;
+                var w = Convert.ToDouble(dic["宽度"]);
+                var h = Convert.ToDouble(dic["厚度"]);
+                var sp = new Point3d(Convert.ToDouble(dic["始端 X 坐标"]),
+                                     Convert.ToDouble(dic["始端 Y 坐标"]), 0);
+                var ep = new Point3d(Convert.ToDouble(dic["末端 X 坐标"]),
+                                     Convert.ToDouble(dic["末端 Y 坐标"]), 0);
+                return new DuctModifyParam() { sp = sp, ep = ep, ductSize = w.ToString() + "x" + h.ToString(), handle = id.Handle, type = "Duct" };
+            }
+        }
+        public static Dictionary<ObjectId, Polyline> ReadTCHGroupId2geoDic(Point3d srtP)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var dic = new Dictionary<ObjectId, Polyline>();
+                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+                var visitor = new ThTCHFittingExtractionVisitor();
+                var elements = new List<ThRawIfcDistributionElementData>();
+                db.ModelSpace.OfType<Entity>().ForEach(e =>
+                {
+                    if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+                    {
+                        var objs = new DBObjectCollection();
+                        e.Explode(objs);
+                        var results = objs
+                        .OfType<Line>()
+                        .Where(o => (o.Layer.Contains("DUCT-净化中心线") || o.Layer.Contains("DUCT-净化法兰")))
+                        .ToCollection();
+                        var pl = ThMEPHAVCBounds.GetConnectorBounds(results, 1);
+                        if (pl.Bounds != null)
+                        {
+                            pl.TransformBy(mat);
+                            dic.Add(e.Id, pl);
+                        }
+                    }
+                });
+                return dic;
             }
         }
         public static Dictionary<ObjectId, Polyline> ReadGroupId2geoDic(Point3d srtP)

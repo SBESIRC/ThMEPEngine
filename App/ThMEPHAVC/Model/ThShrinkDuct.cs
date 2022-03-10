@@ -112,7 +112,7 @@ namespace ThMEPHVAC.Model
         }
         private void CreateConnector(Point3d centerP, DBObjectCollection lines, Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
-            var portWidths = new Dictionary<Point3d, double>();
+            var portWidths = new Dictionary<Point3d, string>();
             double maxAirVolume = 0.0;
             var inLine = new Line();
             // 通过管道宽度判入口只适用于三通和四通
@@ -134,12 +134,12 @@ namespace ThMEPHVAC.Model
             }
             connectors.Add(new EntityModifyParam() { centerP = centerP, portWidths = portWidths });
         }
-        private void Record(Dictionary<Point3d, double> portWidths, Point3d centerP, Line inLine,
+        private void Record(Dictionary<Point3d, string> portWidths, Point3d centerP, Line inLine,
                             Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
             var ductSize = dic[inLine.GetHashCode()][centerP].Item2;
-            portWidths.Add(otherP, ThMEPHVACService.GetWidth(ductSize));
+            portWidths.Add(otherP, ductSize);
         }
         private void ShrinkElbow(Line currLine,
                                  Point3d detectP,

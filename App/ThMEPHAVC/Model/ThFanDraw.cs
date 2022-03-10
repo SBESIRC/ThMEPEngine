@@ -1,11 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Linq2Acad;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
+using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
 {
@@ -14,26 +19,77 @@ namespace ThMEPHVAC.Model
         public ThDbModelFan fan;
         public FanParam fanParam;
         public DBObjectCollection bypass;
+        public ObjectIdList brokenLineIds;
         private Matrix3d disMat;
-        private ThDuctPortsDrawService service;
-        public ThFanDraw(ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable)
+        private ThTCHDrawFactory tchDrawService;
+        public ThFanDraw(ref ulong gId, ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable, string curDbPath)
         {
-            Init(anayRes);
+            Init(anayRes, curDbPath);
             DrawCenterLine(anayRes);
-            service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
-            service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
-            service.DrawDuct(anayRes.UpDownVertivalPipe, disMat);
-            service.DrawReducing(anayRes.reducings, disMat);
-            service.DrawSideDuctText(anayRes, anayRes.moveSrtP, fanParam);
+            DrawFanTCHEntity(anayRes.specialShapesInfo, disMat, ref gId);
+            DrawFanTCHDuct(anayRes, ref gId);
+            DrawFanTCHReducing(anayRes.reducings, disMat, ref gId);
             DrawHose(roomEnable, notRoomEnable);
         }
-        private void Init(ThFanAnalysis anayRes)
+
+        private void DrawFanTCHEntity(List<EntityWithType> entitys, Matrix3d disMat, ref ulong gId)
+        {
+            var roomEntInfos = new List<EntityModifyParam>();
+            var notRoomEntInfos = new List<EntityModifyParam>();
+            foreach (var e in entitys)
+                if (e.isRoom)
+                    roomEntInfos.Add(e.entity);
+                else
+                    notRoomEntInfos.Add(e.entity);
+            var mainHeight = ThMEPHVACService.GetHeight(fanParam.roomDuctSize);
+            var elevation = Double.Parse(fanParam.roomElevation);
+            tchDrawService.DrawSpecialShape(roomEntInfos, disMat, mainHeight, elevation, ref gId);
+            mainHeight = ThMEPHVACService.GetHeight(fanParam.notRoomDuctSize);
+            elevation = Double.Parse(fanParam.notRoomElevation);
+            tchDrawService.DrawSpecialShape(notRoomEntInfos, disMat, mainHeight, elevation, ref gId);
+        }
+
+        private void DrawFanTCHReducing(List<ReducingWithType> reducings, Matrix3d disMat, ref ulong gId)
+        {
+            var roomRedInfos = new List<LineGeoInfo>();
+            var notRoomRedInfos = new List<LineGeoInfo>();
+            foreach (var red in reducings)
+                if (red.isRoom)
+                    roomRedInfos.Add(red.bounds);
+                else
+                    notRoomRedInfos.Add(red.bounds);
+            var mainHeight = ThMEPHVACService.GetHeight(fanParam.roomDuctSize);
+            var elevation = Double.Parse(fanParam.roomElevation);
+            tchDrawService.reducingService.Draw(roomRedInfos, disMat, mainHeight, elevation, ref gId);
+            mainHeight = ThMEPHVACService.GetHeight(fanParam.notRoomDuctSize);
+            elevation = Double.Parse(fanParam.notRoomElevation);
+            tchDrawService.reducingService.Draw(notRoomRedInfos, disMat, mainHeight, elevation, ref gId);
+        }
+
+        private void DrawFanTCHDuct(ThFanAnalysis anayRes, ref ulong gId)
+        {
+            var roomParam = new ThMEPHVACParam() { scale = fanParam.scale, elevation = Double.Parse(fanParam.roomElevation), inDuctSize = fanParam.roomDuctSize };
+            var notRoomParam = new ThMEPHVACParam() { scale = fanParam.scale, elevation = Double.Parse(fanParam.notRoomElevation), inDuctSize = fanParam.notRoomDuctSize };
+            int roomLineCount = anayRes.roomLines.Count();
+            var segInfos = new List<SegInfo>();
+            var totalLines = anayRes.centerLines.Values.ToList();
+            for (int i = 0; i < roomLineCount; ++i)
+                segInfos.Add(totalLines[i]);
+            tchDrawService.ductService.Draw(segInfos, disMat, false, roomParam, ref gId);
+            segInfos.Clear();
+            for (int i = roomLineCount; i < anayRes.centerLines.Count(); ++i)
+                segInfos.Add(totalLines[i]);
+            tchDrawService.ductService.Draw(segInfos, disMat, false, notRoomParam, ref gId);
+            tchDrawService.ductService.Draw(anayRes.UpDownVertivalPipe, disMat, false, roomParam, ref gId);
+        }
+        private void Init(ThFanAnalysis anayRes, string curDbPath)
         {
             disMat = Matrix3d.Displacement(anayRes.moveSrtP.GetAsVector());
             fan = anayRes.fan;
             fanParam = anayRes.fanParam;
             bypass = anayRes.bypass;
-            service = new ThDuctPortsDrawService(fan.scenario, fanParam.scale);
+            brokenLineIds = new ObjectIdList();
+            tchDrawService = new ThTCHDrawFactory(curDbPath, fanParam.scenario);
         }
         private void DrawCenterLine(ThFanAnalysis anayRes)
         {
@@ -47,12 +103,14 @@ namespace ThMEPHVAC.Model
                     lines.Add(l);
                 foreach (var l in anayRes.auxLines)
                     lines.Add(l);
-                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out _);
+                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out ObjectIdList ids);
+                brokenLineIds.AddRange(ids);
                 lines.Clear();
                 disMat = Matrix3d.Displacement(anayRes.fanBreakP.GetAsVector());
                 foreach (Line l in anayRes.outCenterLine)
                     lines.Add(l);
-                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out _);
+                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out ObjectIdList outIds);
+                brokenLineIds.AddRange(outIds);
             }   
         }
         public ObjectId InsertElectricValve(Vector3d fan_cp_vec, double valvewidth, double angle)

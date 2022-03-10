@@ -18,6 +18,7 @@ namespace TianHua.Hvac.UI
     public partial class fmFpm : Form
     {
         public bool isSelectFan;// 选择风机还是选择起点
+        public bool isReadAllFans = false;
         public bool isSelectAllFans = false;
         public PortParam portParam;
         public Point3d RoomStartPoint;
@@ -48,8 +49,8 @@ namespace TianHua.Hvac.UI
             bypassEnable();
             scenarioCombox.SelectedItem = "平时排风";
             comboScale.SelectedItem = "1:100";
-            ThDuctPortsInterpreter.GetFanDic(out shadowFansDic);
             allFansDic = new Dictionary<Polyline, ObjectId>();
+            SetPortSize();
             SetPortSpeed();
             if (portParam.param.airVolume > 0)
                 FillUIParam(portParam);
@@ -279,7 +280,7 @@ namespace TianHua.Hvac.UI
         }
         private void roomDuctSize_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
             ThMEPHVACService.GetWidthAndHeight(listBoxRoomDuctSize.SelectedItem.ToString(), out double w, out double h);
             double speed = ThHvacUIService.CalcAirSpeed(airVolume, w, h);
             labelRoomAirSpeed.Text = speed.ToString("0.00");
@@ -289,7 +290,7 @@ namespace TianHua.Hvac.UI
 
         private void notRoomDuctSize_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
             ThMEPHVACService.GetWidthAndHeight(listBoxNotRoomDuctSize.SelectedItem.ToString(), out double w, out double h);
             double speed = ThHvacUIService.CalcAirSpeed(airVolume, w, h);
             labelNotRoomAirSpeed.Text = speed.ToString("0.00");
@@ -351,8 +352,7 @@ namespace TianHua.Hvac.UI
         {
             if (radioPortRange.Checked)
             {
-                comboPortRange.SelectedItem = scenario.Contains("排") ?
-                    "下回风口" : "下送风口";
+                comboPortRange.SelectedItem = scenario.Contains("排") ? "下回风口" : "下送风口";
             }
         }
         private void GetAirVolume(out double airVolume, out double airHighVolume)
@@ -580,7 +580,7 @@ namespace TianHua.Hvac.UI
         {
             if (String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
 
             if (labelRoomAirSpeed.Enabled)
             {
@@ -616,7 +616,7 @@ namespace TianHua.Hvac.UI
         {
             if (String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
             if (labelNotRoomAirSpeed.Enabled)
             {
                 if (String.IsNullOrEmpty(textNotRoomWidth.Text) || String.IsNullOrEmpty(textNotRoomHeight.Text))
@@ -828,7 +828,10 @@ namespace TianHua.Hvac.UI
             if (ThHvacUIService.IsIntegerStr(textPortNum.Text))
             {
                 if (!String.IsNullOrEmpty(textPortNum.Text))
+                {
                     SetPortSpeed();
+                    SetPortSize();
+                }
             }
             else
                 textPortNum.Text = "3";
@@ -868,7 +871,7 @@ namespace TianHua.Hvac.UI
         {
             if (!isSelectFan)
             {
-                if (!ThHvacUIService.IsIntegerStr(textAirVolume.Text))
+                if (!ThHvacUIService.IsIntegerStr(textAirVolume.Text) && !textAirVolume.Text.Contains("/"))
                     textAirVolume.Text = "20000";
                 else
                 {
@@ -899,17 +902,39 @@ namespace TianHua.Hvac.UI
             if (String.IsNullOrEmpty(textBypassWidth.Text) || String.IsNullOrEmpty(textBypassHeight.Text) ||
                 String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
             double speed = ThHvacUIService.CalcAirSpeed(airVolume, Double.Parse(textBypassWidth.Text), Double.Parse(textBypassHeight.Text));
             labelBypassSpeed.Text = speed.ToString("0.00");
         }
+
+        private void SetPortSize()
+        {
+            if (String.IsNullOrEmpty(textPortWidth.Text) || String.IsNullOrEmpty(textPortHeight.Text) ||
+                String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
+                return;
+            var portNum = (int)Double.Parse(textPortNum.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
+            if (portNum == 0)
+                return;
+            double avgAirVolume = airVolume / portNum;
+            var size = GetPortHeight(avgAirVolume);
+            textPortWidth.Text = size.Item1.ToString();
+            textPortHeight.Text = size.Item2.ToString();
+        }
+
+        private Tuple<double, double> GetPortHeight(double airVolume)
+        {
+            var selector = new ThPortParameter(airVolume, PortRecommendType.PORT);
+            return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight) ;
+        }
+
         private void SetPortSpeed()
         {
             if (String.IsNullOrEmpty(textPortWidth.Text) || String.IsNullOrEmpty(textPortHeight.Text) ||
                 String.IsNullOrEmpty(textAirVolume.Text) || String.IsNullOrEmpty(textAirSpeed.Text))
                 return;
             var portNum = (int)Double.Parse(textPortNum.Text);
-            var airVolume = (int)Double.Parse(textAirVolume.Text);
+            var airVolume = GetAirVolume(textAirVolume.Text);
             if (portNum == 0)
                 return;
             double avgAirVolume = airVolume / portNum;
@@ -962,6 +987,11 @@ namespace TianHua.Hvac.UI
         }
         private void DetectCrossFan()
         {
+            if (!isReadAllFans)
+            {
+                ThDuctPortsInterpreter.GetFanDic(out shadowFansDic);
+                isReadAllFans = true;
+            }
             var toZeroMat = Matrix3d.Displacement(-srtPoint.GetAsVector());
             allFansDic.Clear();
             foreach (var fan in shadowFansDic)
@@ -1024,12 +1054,12 @@ namespace TianHua.Hvac.UI
             GetDuctSize(out string roomDuctSize, out string notRoomDuctSize);
             GetAirVolume(out double airVolume, out double airHighVolume);
             double portInterval = radioPortInterval.Checked ? 0 : (Double.Parse(textPortInterval.Text) * 1000);
-            GetElevation(out string roomElevation, out string notRoomElevation,
-                         out ElevationAlignStyle roomElevationStyle, out ElevationAlignStyle notRoomElevationStyle);
+            GetElevation(out string roomElevation, out string notRoomElevation, out ElevationAlignStyle _, out ElevationAlignStyle _);
             var flag = checkBoxRoom.Checked;
             var elevation = flag ? roomElevation : notRoomElevation;
             var ductSize = flag ? roomDuctSize : notRoomDuctSize;
             var endCompType = GetEndCompType();
+            var portBottomEle = Double.Parse(textPortElevation.Text);
             var p = new ThMEPHVACParam()
             {
                 portNum = portNum,
@@ -1043,7 +1073,8 @@ namespace TianHua.Hvac.UI
                 portSize = portSize,
                 portName = portName,
                 portRange = portRange,
-                inDuctSize = ductSize
+                inDuctSize = ductSize,
+                portBottomEle = portBottomEle,
             };
             portParam = new PortParam()
             {
@@ -1166,7 +1197,28 @@ namespace TianHua.Hvac.UI
         private void radioPortRange_CheckedChanged(object sender, EventArgs e)
         {
             if (radioPortRange.Checked)
+            {
                 comboPortRange.Enabled = true;
+            }
+        }
+
+        private double GetAirVolume(string strVolume)
+        {
+            if (strVolume.Contains("/"))
+            {
+                var strs = strVolume.Split('/');
+                if (strs.Count() == 2 && ThHvacUIService.IsIntegerStr(strs[1]))
+                    return Double.Parse(strs[1]);
+                else
+                    return 20000;
+            }
+            return Double.Parse(strVolume);
+        }
+
+        private void textPortElevation_TextChanged(object sender, EventArgs e)
+        {
+            if (!ThHvacUIService.IsFloat2Decimal(textPortElevation.Text))
+                textPortElevation.Text = "3";
         }
     }
 }

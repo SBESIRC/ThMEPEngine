@@ -248,7 +248,7 @@ namespace ThMEPHVAC.Model
                     type = shapesDic[b].type,
                     centerP = ThMEPHVACService.RoundPoint(shapesDic[b].centerP.TransformBy(toZeroMat), 6),
                     handle = shapesDic[b].handle,
-                    portWidths = new Dictionary<Point3d, double>()
+                    portWidths = new Dictionary<Point3d, string>()
                 });
                 foreach (Point3d p in shapesDic[b].portWidths.Keys)
                     shapes[b].portWidths.Add(ThMEPHVACService.RoundPoint(p.TransformBy(toZeroMat), 6), shapesDic[b].portWidths[p]);
@@ -284,8 +284,7 @@ namespace ThMEPHVAC.Model
                 }
             }
             // 修改变径相连端的大小
-            var w = ThMEPHVACService.GetWidth(curDuct.modifySize);
-            reducing.portWidths[detectP] = w;
+            reducing.portWidths[detectP] = curDuct.modifySize;
             service.DrawReducingByReducing(reducing);
             ThDuctPortsDrawService.ClearGraph(reducing.handle);
             UpdateCurDuctConnText();
@@ -306,12 +305,12 @@ namespace ThMEPHVAC.Model
                                                handle = curDuct.curDuctParam.handle};
             curDuct.curDuctParam = duct;// 只更新参数
         }
-        private void CreateReducingAndDraw(Point3d sp, Point3d ep, double srtW, double endW)
+        private void CreateReducingAndDraw(Point3d sp, Point3d ep, string srtW, string endW)
         {
             var dis = sp.DistanceTo(ep);
             if (dis > 200)
             {
-                var portWidths = new Dictionary<Point3d, double>
+                var portWidths = new Dictionary<Point3d, string>
                 {
                     { sp, srtW },
                     { ep, endW }
@@ -320,7 +319,7 @@ namespace ThMEPHVAC.Model
                 service.DrawReducingByReducing(reducing);
             }
         }
-        private Point3d SearchNearP(Dictionary<Point3d, double> portWidths, Point3d detectP)
+        private Point3d SearchNearP(Dictionary<Point3d, string> portWidths, Point3d detectP)
         {
             var tor = new Tolerance(20, 20);
             foreach (Point3d p in portWidths.Keys)
@@ -337,7 +336,7 @@ namespace ThMEPHVAC.Model
             detectP = SearchNearP(cross.portWidths, detectP);
             var orgDuctSize = cross.portWidths[detectP];
             ThDuctPortsDrawService.ClearGraph(cross.handle);
-            cross.portWidths[detectP] = modifyWidth;
+            cross.portWidths[detectP] = curDuct.modifySize;
             service.DrawCrossByCross(cross);
             cross.portWidths[detectP] = orgDuctSize;
             UpdateCross(cross, detectP);
@@ -346,11 +345,10 @@ namespace ThMEPHVAC.Model
         private void DoProcTee(EntityModifyParam tee, Point3d detectP)
         {
             // 将cross对应处的端口修改并更新管段
-            var modifyWidth = ThMEPHVACService.GetWidth(curDuct.modifySize);
             detectP = SearchNearP(tee.portWidths, detectP);
             var orgDuctSize = tee.portWidths[detectP];
             ThDuctPortsDrawService.ClearGraph(tee.handle);
-            tee.portWidths[detectP] = modifyWidth;
+            tee.portWidths[detectP] = curDuct.modifySize;
             service.DrawTeeByTee(tee);
             tee.portWidths[detectP] = orgDuctSize;
             UpdateTee(tee, detectP);
@@ -358,13 +356,14 @@ namespace ThMEPHVAC.Model
         private void DoProcElbow(EntityModifyParam elbow, Point3d detectP)
         {
             var modifyWidth = ThMEPHVACService.GetWidth(curDuct.modifySize);
+            var elbowWidth = ThMEPHVACService.GetWidth(elbow.portWidths[detectP]);
             detectP = SearchNearP(elbow.portWidths, detectP);
-            if (elbow.portWidths[detectP] > modifyWidth)
+            if (elbowWidth > modifyWidth)
             {
                 var otherP = GetElbowOtherP(elbow, detectP);
                 var pl = CreateDetectPl(otherP);
                 // 弯头缩小
-                var dicUpdatePoint = UpdateElbow(elbow, modifyWidth);
+                var dicUpdatePoint = UpdateElbow(elbow, curDuct.modifySize);
                 // 用otherP判断弯头的旋转角
                 ThDuctPortsDrawService.ClearGraph(elbow.handle);
                 service.DrawElbowByElbow(elbow);
@@ -392,13 +391,13 @@ namespace ThMEPHVAC.Model
                     {
                         var dirVec = (curDuct.curDuctParam.ep - detectP).GetNormal();
                         curDuct.curDuctParam.sp += (dirVec * len);// 更新当前管段
-                        CreateReducingAndDraw(detectP, curDuct.curDuctParam.sp, orgW, modifyW);// 插入变径
+                        CreateReducingAndDraw(detectP, curDuct.curDuctParam.sp, curDuct.curDuctParam.ductSize, curDuct.modifySize);// 插入变径
                     }
                     else
                     {
                         var dirVec = (curDuct.curDuctParam.sp - detectP).GetNormal();
                         curDuct.curDuctParam.ep += (dirVec * len);
-                        CreateReducingAndDraw(detectP, curDuct.curDuctParam.ep, orgW, modifyW);
+                        CreateReducingAndDraw(detectP, curDuct.curDuctParam.ep, curDuct.curDuctParam.ductSize, curDuct.modifySize);
                     }
                 }
             }
@@ -411,9 +410,7 @@ namespace ThMEPHVAC.Model
                 // Line: srtP  endP // 插点加变径和直管
                 var connDuctBounds = res[0] as Polyline;
                 var connDuctParam = ductsDic[connDuctBounds];
-                var orgW = ThMEPHVACService.GetWidth(connDuctParam.ductSize);
-                var modifyW = ThMEPHVACService.GetWidth(curDuct.modifySize);
-                CreateReducingAndDraw(detectP, srtP, orgW, modifyW);
+                CreateReducingAndDraw(detectP, srtP, connDuctParam.ductSize, curDuct.modifySize);
             }
         }
         private bool UpdateReducingWithElbow(Point3d detectP,
@@ -431,8 +428,7 @@ namespace ThMEPHVAC.Model
                         // 改变相连端变径的宽度
                         var reducing = shapesDic[polyline];
                         var otherP = GetReducingOtherP(reducing, detectP);
-                        var modifyW = ThMEPHVACService.GetWidth(curDuct.curDuctParam.ductSize);
-                        CreateReducingAndDraw(otherP, dicUpdatePoint[detectP], reducing.portWidths[otherP], modifyW);
+                        CreateReducingAndDraw(otherP, dicUpdatePoint[detectP], reducing.portWidths[otherP], curDuct.curDuctParam.ductSize);
                         ThDuctPortsDrawService.ClearGraph(reducing.handle);
                         return true;
                     }
@@ -534,7 +530,7 @@ namespace ThMEPHVAC.Model
                 connLines.Add(param);
             }
         }
-        private Dictionary<Point3d, Point3d> UpdateElbow(EntityModifyParam elbow, double modifyWidth)
+        private Dictionary<Point3d, Point3d> UpdateElbow(EntityModifyParam elbow, string modifyWidth)
         {
             // 缩小弯头的宽度
             var points = elbow.portWidths.Keys.ToList();
@@ -543,8 +539,10 @@ namespace ThMEPHVAC.Model
             var dir1 = (p1 - elbow.centerP).GetNormal();
             var dir2 = (p2 - elbow.centerP).GetNormal();
             var angle = dir1.GetAngleTo(dir2);
-            var orgElbowShrink = ThDuctPortsShapeService.GetElbowShrink(angle, elbow.portWidths[p1]);
-            var modifyElbowShrink = ThDuctPortsShapeService.GetElbowShrink(angle, modifyWidth);
+            var w = ThMEPHVACService.GetWidth(elbow.portWidths[p1]);
+            var orgElbowShrink = ThDuctPortsShapeService.GetElbowShrink(angle, w);
+            w = ThMEPHVACService.GetWidth(modifyWidth);
+            var modifyElbowShrink = ThDuctPortsShapeService.GetElbowShrink(angle, w);
             var shrinkLen = orgElbowShrink - modifyElbowShrink;
             var newP1 = p1 - dir1 * shrinkLen;
             var newP2 = p2 - dir2 * shrinkLen;

@@ -597,17 +597,20 @@ namespace ThMEPHVAC.Model
         }
         private static DBObjectCollection CreateReducingGeo(Line centerLine, double bigWidth, double smallWidth, bool isAxis)
         {
-            var dir_vec = ThMEPHVACService.GetEdgeDirection(centerLine);
+            var sp = new Point3d(centerLine.StartPoint.X, centerLine.StartPoint.Y, 0);
+            var ep = new Point3d(centerLine.EndPoint.X, centerLine.EndPoint.Y, 0);
+            var l = new Line(sp, ep);
+            var dir_vec = ThMEPHVACService.GetEdgeDirection(l);
             var left = ThMEPHVACService.GetLeftVerticalVec(dir_vec);
             var right = ThMEPHVACService.GetRightVerticalVec(dir_vec);
-            var p1 = centerLine.StartPoint + left * bigWidth * 0.5;
-            var p2 = centerLine.StartPoint + right * bigWidth * 0.5;
-            var p3 = centerLine.EndPoint + left * smallWidth * 0.5;
-            var p4 = centerLine.EndPoint + right * smallWidth * 0.5;
+            var p1 = l.StartPoint + left * bigWidth * 0.5;
+            var p2 = l.StartPoint + right * bigWidth * 0.5;
+            var p3 = l.EndPoint + left * smallWidth * 0.5;
+            var p4 = l.EndPoint + right * smallWidth * 0.5;
             var upHypotenuse = new Line(p1, p3);
             var downHypotenuse = new Line(p2, p4);
-            var innerUpHypotenuse = new Line(centerLine.StartPoint, p3);
-            var innerDownHypotenuse = new Line(centerLine.StartPoint, p4);
+            var innerUpHypotenuse = new Line(l.StartPoint, p3);
+            var innerDownHypotenuse = new Line(l.StartPoint, p4);
             return isAxis ? new DBObjectCollection() { upHypotenuse, downHypotenuse, innerUpHypotenuse, innerDownHypotenuse } :
                             new DBObjectCollection() { upHypotenuse, downHypotenuse };
         }

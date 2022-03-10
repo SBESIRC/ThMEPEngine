@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.Model.Hvac
         public Handle handle;                         //读图时解析
         public Point3d centerP;                       //读图时解析
         // 端点到端口宽度的映射
-        public Dictionary<Point3d, double> portWidths;//读图时解析
+        public Dictionary<Point3d, string> portWidths;//读图时解析
     }
     public class DuctModifyParam
     {

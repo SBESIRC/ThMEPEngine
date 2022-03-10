@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using Linq2Acad;
@@ -11,6 +12,8 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
+using ThMEPHVAC.TCH;
+using DotNetARX;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -101,12 +104,15 @@ namespace TianHua.Hvac.UI.Command
             }
             return true;
         }
-        public void NotPressurizedAirSupply(FanParam fanParam, 
+        public void NotPressurizedAirSupply(ref ulong gId, 
+                                            string curDbPath,
+                                            FanParam fanParam, 
                                             ThDbModelFan fan,
                                             DBObjectCollection wallLines, 
                                             PortParam portParam, 
                                             bool haveMultiFan,
-                                            Dictionary<Polyline, ObjectId> allFansDic)
+                                            Dictionary<Polyline, ObjectId> allFansDic,
+                                            ObjectIdList brokenLineIds)
         {
             var bypassLines = new DBObjectCollection();
             var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
@@ -114,23 +120,27 @@ namespace TianHua.Hvac.UI.Command
                 return;
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            _ = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
+            var painter = new ThFanDraw(ref gId, anayRes, fanParam.roomEnable, fanParam.notRoomEnable, curDbPath);
+            brokenLineIds.AddRange(painter.brokenLineIds);
             if (isIntegrate)
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
-                ductPort.Execute();
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId);
             }
         }
 
-        public void PressurizedAirSupply(FanParam fanParam,
+        public void PressurizedAirSupply(ref ulong gId, 
+                                         string curDbPath, 
+                                         FanParam fanParam,
                                          ThDbModelFan fan,
                                          DBObjectCollection wallLines,
                                          PortParam portParam,
                                          ref DBObjectCollection bypassLines,
                                          bool haveMultiFan,
-                                         Dictionary<Polyline, ObjectId> allFansDic)
+                                         Dictionary<Polyline, ObjectId> allFansDic,
+                                         ObjectIdList brokenLineIds)
 
         {
             ProcBypass(fanParam.bypassPattern, ioBypassSepDis, ref bypassLines, out Line maxBypass);
@@ -146,8 +156,9 @@ namespace TianHua.Hvac.UI.Command
             // 先画阀，pinter会移动中心线导致墙线与中心线交不上
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            var pinter = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
-            InsertElectricValve(fanParam, fan, maxBypass, pinter);
+            var painter = new ThFanDraw(ref gId, anayRes, fanParam.roomEnable, fanParam.notRoomEnable, curDbPath);
+            brokenLineIds.AddRange(painter.brokenLineIds);
+            InsertElectricValve(fanParam, fan, maxBypass, painter);
             if (fanParam.bypassPattern == "RBType4" || fanParam.bypassPattern == "RBType5")
             {
                 var vtPinter = new ThDrawVBypass(fan.airVolume, fanParam.scale, fan.scenario, anayRes.moveSrtP, fanParam.bypassSize, fanParam.roomElevation);
@@ -160,9 +171,19 @@ namespace TianHua.Hvac.UI.Command
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
-                ductPort.Execute();
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId);
             }
+        }
+        public static void InitTables(string curDbPath, string templateDbPath, ref ulong gId)
+        {
+            if (File.Exists(curDbPath))
+                File.Delete(curDbPath);
+            File.Copy(templateDbPath, curDbPath);
+            var tchService = new ThTCHDrawFactory(curDbPath);
+            tchService.materialsService.InsertMaterials(ref gId);
+            tchService.subSystemService.InsertSubSystem(ref gId);
+            tchService.sqliteHelper.db.Close();
         }
 
         private void TransFanParamToPortParam(PortParam portParam, FanParam fanParam, Point3d srtP, Line realSrtOftLine)

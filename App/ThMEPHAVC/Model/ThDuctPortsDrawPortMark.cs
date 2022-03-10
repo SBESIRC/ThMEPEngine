@@ -28,22 +28,23 @@ namespace ThMEPHVAC.Model
                 int portNum = param.portNum;
                 if (param.portRange.Contains("侧"))
                     portNum *= 2;
-                double avgAirVolume = param.airVolume / param.portNum;
+                double avgAirVolume = param.airVolume / portNum;
                 avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
                 var strVolume = avgAirVolume.ToString();
                 if (param.highAirVolume > 0)
                 {
-                    double av = param.highAirVolume / param.portNum;
+                    double av = param.highAirVolume / portNum;
                     av = (Math.Ceiling(av / 10)) * 10;
                     strVolume = av.ToString("0.") + "/" + strVolume;
                 }
                 if (textAngle >= Math.PI)
                     textAngle -= Math.PI;
+                var num = param.elevation + param.portBottomEle + ThMEPHVACService.GetHeight(param.inDuctSize) / 1000;
                 var attr = new Dictionary<string, string> { { "风口名称", param.portName },
                                                             { "尺寸", portSize },
                                                             { "数量", portNum.ToString() },
                                                             { "风量", strVolume},
-                                                            { "安装属性", "风口底边距地*.**m"} };
+                                                            { "安装属性", "风口底边距地" + num.ToString() + "m"} };
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(
                     portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), textAngle, attr);
                 ThMEPHVACService.SetAttr(obj, attr, textAngle);

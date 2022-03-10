@@ -48,7 +48,7 @@ namespace ThMEPHVAC.Model
             var end_p = l.EndPoint;
             var edge_vec = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
             angle = edge_vec.Angle;
-            centerPoint = new Point3d(0.5 * (srt_p.X + end_p.X), 0.5 * (srt_p.Y + end_p.Y), 0);
+            centerPoint = GetMidPoint(srt_p, end_p);
         }
         public static Point2d GetVerticalPoint(Point2d p, Line l)
         {
@@ -523,6 +523,10 @@ namespace ThMEPHVAC.Model
             foreach (Line l in lines)
                 t.Add(l);
             return t;
+        }
+        public static Vector3d GetEleDis(double mmElevation, double mainHeight, double height)
+        {
+            return new Vector3d(0, 0, mmElevation + (mainHeight - height) + height * 0.5);
         }
     }
 }

@@ -138,6 +138,7 @@ namespace ThMEPHVAC.Model
         public double highAirVolume;
         public double elevation;
         public double mainHeight;
+        public double portBottomEle;// 风口底标高
         public string scale;
         public string scenario;
         public string portSize;
@@ -160,22 +161,22 @@ namespace ThMEPHVAC.Model
     public class ElbowInfo
     {
         public double openAngle;
-        public double ductWidth;
+        public string ductWidth;
         public TransInfo trans;
     }
     public class TeeInfo
     {
-        public double mainWidth;
-        public double branch;
-        public double other;
+        public string mainWidth;
+        public string branch;
+        public string other;
         public TransInfo trans;
     }
     public class CrossInfo
     {
-        public double iWidth;
-        public double innerWidth;
-        public double coWidth;
-        public double outterWidth;
+        public string iWidth;
+        public string innerWidth;
+        public string coWidth;
+        public string outterWidth;
         public TransInfo trans;
     }
     public class SidePortInfo
