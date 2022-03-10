@@ -12,6 +12,7 @@ using ThMEPEngineCore.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using AcHelper;
 using ThMEPHVAC.TCH;
+using Autodesk.AutoCAD.Runtime;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -85,7 +86,15 @@ namespace TianHua.Hvac.UI.Command
                 ductPort.Execute(ref gId);
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
+#if ACAD_ABOVE_2014
             Active.Editor.Command("TIMPORTTG20HVAC", curDbPath, " ");
+#else
+            ResultBuffer args = new ResultBuffer(
+               new TypedValue((int)LispDataType.Text, "_.TIMPORTTG20HVAC"),
+               new TypedValue((int)LispDataType.Text, curDbPath),
+               new TypedValue((int)LispDataType.Text, " "));
+            Active.Editor.AcedCmd(args);
+#endif
         }
         private DBObjectCollection GetWalls(Point3d p, ThCADCoreNTSSpatialIndex index)
         {
