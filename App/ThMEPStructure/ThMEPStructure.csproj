@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -74,6 +74,7 @@
     <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
+    <Compile Include="Reinforcement\Draw\Class1.cs" />
     <Compile Include="Reinforcement\Draw\DrawMain.cs" />
     <Compile Include="Reinforcement\Draw\DrawObjectBase.cs" />
     <Compile Include="Reinforcement\Draw\DrawObjectLType.cs" />
@@ -85,8 +86,8 @@
     <Compile Include="Reinforcement\Draw\GangJinStirrup.cs" />
     <Compile Include="Reinforcement\Draw\Helper.cs" />
     <Compile Include="Reinforcement\Draw\Test.cs" />
-	<Compile Include="Reinforcement\Draw\ThEdgeComponentExtension.cs" />
-	<Compile Include="Reinforcement\Draw\ThReinforceTableBuilder.cs" />
+    <Compile Include="Reinforcement\Draw\ThEdgeComponentExtension.cs" />
+    <Compile Include="Reinforcement\Draw\ThReinforceTableBuilder.cs" />
     <Compile Include="Reinforcement\Model\EdgeComponentExtractInfo.cs" />
     <Compile Include="Reinforcement\Model\ThEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
