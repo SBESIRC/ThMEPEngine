@@ -10,91 +10,100 @@ using Linq2Acad;
 using NFox.Cad;
 
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public static class ThBConvertBlockReferenceDataExtension
     {
-        public static List<ThBConvertRule> BConvertRules;
+        public static List<ThBlockConvertBlock> BConvertRules;
 
-        public static Point3d GetCentroidPoint(this ThBlockReferenceData data)
+        public static Point3d GetNewBasePoint(this ThBlockReferenceData data)
         {
             using (var acadDatabase = AcadDatabase.Use(data.Database))
             {
                 var name = ThMEPXRefService.OriginalFromXref(data.EffectiveName);
-                BConvertRules.Where(rule =>
-                    (rule.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
-                    .ForEach();
-
-
-                var entities = new DBObjectCollection();
-                var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                blkref.ExplodeWithVisible(entities);
-                
-                if (name.Contains("风机") ||
-                         name.Contains("组合式空调器") ||
-                         name.Contains("暖通其他设备标注") ||
-                         name.Contains("风冷热泵") ||
-                         name.Contains("冷水机组") ||
-                         name.Contains("冷却塔"))
+                var convertRule = BConvertRules
+                    .Where(rule => (rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
+                    .First();
+                var positionMode = (ThBConvertInsertMode)convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION_MODE];
+                if (positionMode == ThBConvertInsertMode.BasePoint)
                 {
-                    entities = entities.OfType<Entity>()
-                        .Where(e => e.Layer == "0" || e.Layer.Contains("H-EQUP"))
-                        .Where(e => !e.Layer.Contains("DIMS"))
-                        .Where(e => e is Curve || e is BlockReference)
-                        .ToCollection();
+                    return data.Position;
                 }
-                else if (name.Contains("防火阀"))
+                else if (positionMode == ThBConvertInsertMode.OBBCenter)
                 {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.ExplodeWithVisible(entities);
                     entities = entities.OfType<Entity>()
-                        .Where(e => e.Layer != "DEFPOINTS")
-                        .Where(e => e is Circle || e is BlockReference)
+                        .Where(e => e.Layer == convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] as string)
                         .ToCollection();
+                    if (entities.Count > 0)
+                    {
+                        return entities.GeometricExtents().CenterPoint();
+                    }
+                    else
+                    {
+                        return blkref.GeometricExtents.CenterPoint();
+                    }
+                }
+                else if (positionMode == ThBConvertInsertMode.BottomCenter)
+                {
+                    var entities = new DBObjectCollection();
+                    var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                    blkref.ExplodeWithVisible(entities);
+                    if (name.Contains("室内消火栓平面"))
+                    {
+                        var lines = entities.OfType<Line>()
+                            .Where(e => e.Layer == "0")
+                            .ToList();
+                        if (lines.Count == 1)
+                        {
+                            return GetLineCenter(lines[0].StartPoint, lines[0].EndPoint);
+                        }
+                        else if (lines.Count > 1)
+                        {
+                            lines = lines.OrderBy(l => l.DistanceTo(data.Position, false)).ToList();
+                            var closeLine = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
+                            return GetLineCenter(closeLine.StartPoint, closeLine.EndPoint);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                    }
+                    else if (name.Contains("E-BFAS610"))
+                    {
+                        var centerLine = entities.OfType<Line>().Where(line => line.Layer.Contains("E-UNIV-EL")).First();
+                        var centerPtTidal = GetLineCenter(centerLine.StartPoint, centerLine.EndPoint);
+                        var pline = entities.OfType<Polyline>().Where(line => line.Layer.Contains("0")).First();
+                        var outlines = new DBObjectCollection();
+                        pline.Explode(outlines);
+                        var closeDist = -1.0;
+                        var closePt = new Point3d();
+                        outlines.OfType<Line>().ForEach(line =>
+                        {
+                            var lineCenter = GetLineCenter(line.StartPoint, line.EndPoint);
+                            var distance = centerPtTidal.DistanceTo(lineCenter);
+                            if (closeDist < 0 || distance < closeDist + 1.0)
+                            {
+                                closeDist = distance;
+                                closePt = lineCenter;
+                            }
+                        });
+                        return closePt;
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else
                 {
-                    entities = entities.OfType<Entity>()
-                        .Where(e => e.Layer != "DEFPOINTS")
-                        .Where(e => e is Curve || e is BlockReference)
-                        .ToCollection();
+                    throw new NotImplementedException();
                 }
-                if (entities.Count == 0)
-                {
-                    return Point3d.Origin;
-                }
-                return entities.GeometricExtents().CenterPoint();
-            }
-        }
-
-        public static Point3d GetCentroidPoint(this ThBlockReferenceData data, string geometryLayer)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(data.Database))
-            {
-                var entities = new DBObjectCollection();
-                var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                blkref.ExplodeWithVisible(entities);
-                var name = data.EffectiveName;
-                if (name.Contains("防火阀"))
-                {
-                    entities = entities.OfType<Entity>()
-                        .Where(e => e.Layer == geometryLayer)
-                        .Where(e => e is Circle || e is BlockReference)
-                        .ToCollection();
-                }
-                else
-                {
-                    entities = entities.OfType<Entity>()
-                        .Where(e => e.Layer == geometryLayer)
-                        .Where(e => e is Curve || e is BlockReference)
-                        .ToCollection();
-                }
-                if (entities.Count == 0)
-                {
-                    return Point3d.Origin;
-                }
-                return entities.GeometricExtents().CenterPoint();
             }
         }
 
@@ -108,63 +117,6 @@ namespace ThMEPElectrical.BlockConvert
                 return entities.GeometricExtents().ToRectangle();
             }
             return new Polyline();
-        }
-
-        public static Point3d GetBottomCenter(this ThBlockReferenceData data)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(data.Database))
-            {
-                var entities = new DBObjectCollection();
-                var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
-                blkref.ExplodeWithVisible(entities);
-                var name = data.EffectiveName;
-                if (name.Contains("室内消火栓平面"))
-                {
-                    var lines = new List<Line>();
-                    lines = entities.OfType<Line>()
-                        .Where(e => e.Layer == "0")
-                        .ToList();
-                    if(lines.Count == 1)
-                    {
-                        return GetLineCenter(lines[0].StartPoint, lines[0].EndPoint);
-                    }
-                    else if(lines.Count > 1)
-                    {
-                        lines = lines.OrderBy(l => l.DistanceTo(data.Position, false)).ToList();
-                        var closeLine = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
-                        return GetLineCenter(closeLine.StartPoint, closeLine.EndPoint);
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
-                }
-                else if (name.Contains("E-BFAS610"))
-                {
-                    var centerLine = entities.OfType<Line>().Where(line => line.Layer.Contains("E-UNIV-EL")).First();
-                    var centerPtTidal = GetLineCenter(centerLine.StartPoint, centerLine.EndPoint);
-                    var pline = entities.OfType<Polyline>().Where(line => line.Layer.Contains("0")).First();
-                    var outlines = new DBObjectCollection();
-                    pline.Explode(outlines);
-                    var closeDist = -1.0;
-                    var closePt = new Point3d();
-                    outlines.OfType<Line>().ForEach(line =>
-                    {
-                        var lineCenter = GetLineCenter(line.StartPoint, line.EndPoint);
-                        var distance = centerPtTidal.DistanceTo(lineCenter);
-                        if (closeDist < 0 || distance < closeDist + 1.0)
-                        {
-                            closeDist = distance;
-                            closePt = lineCenter;
-                        }
-                    });
-                    return closePt;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
         }
 
         public static void AdjustLoadLabel(this BlockReference targetBlock)

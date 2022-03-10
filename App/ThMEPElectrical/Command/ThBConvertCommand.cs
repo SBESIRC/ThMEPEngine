@@ -132,7 +132,14 @@ namespace ThMEPElectrical.Command
                         return;
                     }
 
-                    ThBConvertBlockReferenceDataExtension.BConvertRules = manager.Rules;
+                    // 初始化ThBConvertBlockReferenceDataExtension
+                    var convertRules = new List<ThBlockConvertBlock>();
+                    manager.Rules.Select(r => r.Transformation).ForEach(t =>
+                    {
+                        convertRules.Add(t.Item1);
+                        convertRules.Add(t.Item2);
+                    });
+                    ThBConvertBlockReferenceDataExtension.BConvertRules = convertRules;
 
                     // 从图纸中提取集水井提资表表身
                     var collectingWellEngine = new ThBConvertElementExtractionEngine()
@@ -278,26 +285,26 @@ namespace ThMEPElectrical.Command
                                     {
                                         return;
                                     }
+                                    var targetBlockData = new ThBlockReferenceData(objId);
 
                                     // 设置新插入的块引用的镜像变化
-                                    engine.Mirror(objId, o);
+                                    engine.Mirror(targetBlockData, o);
 
                                     // 设置新插入的块引用的角度
-                                    engine.Rotate(objId, o);
+                                    engine.Rotate(targetBlockData, o);
 
                                     // 设置新插入的块引用位置
                                     if (o.EffectiveName.Contains("潜水泵-AI"))
                                     {
                                         currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("水泵标注"), false);
                                         currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("E-UNIV-NOTE"), false);
-                                        engine.Displacement(objId, o, collectingWellEngine.Results, scale);
+                                        engine.Displacement(targetBlockData, o, collectingWellEngine.Results, scale);
                                     }
                                     else
                                     {
-                                        engine.Displacement(objId, o, rule.InsertMode());
+                                        engine.Displacement(targetBlockData, o);
                                     }
 
-                                    var targetBlockData = new ThBlockReferenceData(objId);
                                     targetBlocks.Select(t => t.Data as ThBlockReferenceData)
                                                 .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName) == targetBlockData.EffectiveName)
                                                 .ForEach(t =>
@@ -327,10 +334,10 @@ namespace ThMEPElectrical.Command
                                     // 设置动态块可见性
                                     if (!objId.IsErased)
                                     {
-                                        engine.SetVisibilityState(objId, o);
+                                        engine.SetVisibilityState(targetBlockData, o);
 
                                         // 将源块引用的属性“刷”到新的块引用
-                                        engine.MatchProperties(objId, o);
+                                        engine.MatchProperties(targetBlockData, o);
 
                                         // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
                                         // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
@@ -381,7 +388,7 @@ namespace ThMEPElectrical.Command
                                         {
                                             if (!b.IsErased)
                                             {
-                                                engine.SetDatabaseProperties(b, o, targetBlockLayer);
+                                                engine.SetDatabaseProperties(targetBlockData, targetBlockLayer);
                                             }
                                         });
                                     }
