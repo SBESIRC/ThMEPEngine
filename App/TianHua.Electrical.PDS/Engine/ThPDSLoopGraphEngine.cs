@@ -256,7 +256,7 @@ namespace TianHua.Electrical.PDS.Engine
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
                 if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
-                    newEdge.Circuit.Type = ThPDSLayerService.SelectCircuitType(circuit.Layer);
+                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, circuit.Layer);
                 }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
@@ -265,7 +265,7 @@ namespace TianHua.Electrical.PDS.Engine
                     var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3, DistBoxKey);
                     if (newDistBoxEdge.Circuit.Type == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
                     {
-                        newDistBoxEdge.Circuit.Type = ThPDSLayerService.SelectCircuitType(otherCircuit.Layer);
+                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Circuit, otherCircuit.Layer);
                     }
                     PDSGraph.Graph.AddEdge(newDistBoxEdge);
 
@@ -750,10 +750,10 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             e.Target.Loads[0].SpareAvail = sourceEdge.Target.Loads[0].SpareAvail;
                         }
-                        //if (sourceEdge.Target.Loads[0].ID.Description.Count > 0)
-                        //{
-                        //    e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
-                        //}
+                        if (string.IsNullOrEmpty(sourceEdge.Target.Loads[0].ID.Description))
+                        {
+                            e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
+                        }
                     });
                 }
             });

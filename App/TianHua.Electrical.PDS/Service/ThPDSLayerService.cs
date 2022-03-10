@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore;
@@ -55,24 +55,43 @@ namespace TianHua.Electrical.PDS.Service
             };
         }
 
-        public static ThPDSCircuitType SelectCircuitType(string layer)
+        public static void SelectCircuitType(ThPDSCircuit circuit, string layer)
         {
             switch(layer)
             {
                 case "E-POWR-WIRE":
-                    return ThPDSCircuitType.PowerEquipment;
+                    circuit.Type = ThPDSCircuitType.PowerEquipment;
+                    break;
                 case "E-POWR-WIRE2":
-                    return ThPDSCircuitType.Socket;
+                    circuit.Type = ThPDSCircuitType.Socket;
+                    break;
                 case "E-POWR-WIRE3":
-                    return ThPDSCircuitType.PowerEquipment;
+                    circuit.Type = ThPDSCircuitType.PowerEquipment;
+                    break;
                 case "E-LITE-WIRE":
-                    return ThPDSCircuitType.Lighting;
+                    circuit.Type = ThPDSCircuitType.Lighting;
+                    break;
                 case "E-LITE-WIRE2":
-                    return ThPDSCircuitType.EmergencyLighting;
+                    circuit.Type = ThPDSCircuitType.EmergencyLighting;
+                    break;
                 case "E-LITE-WIRE-LV":
-                    return ThPDSCircuitType.Lighting;
+                    circuit.Type = ThPDSCircuitType.Lighting;
+                    break;
                 default:
-                    return ThPDSCircuitType.None;
+                    circuit.Type = ThPDSCircuitType.None;
+                    break;
+            }
+            Assign(circuit);
+        }
+
+        private static void Assign(ThPDSCircuit circuit )
+        {
+            if(circuit.Type != ThPDSCircuitType.None)
+            {
+                var config = ThPDSCircuitConfigModel.BlockConfig.Where(o => o.CircuitType == circuit.Type).First();
+                circuit.Phase = config.Phase;
+                circuit.DemandFactor = config.DemandFactor;
+                circuit.PowerFactor = config.PowerFactor;
             }
         }
 

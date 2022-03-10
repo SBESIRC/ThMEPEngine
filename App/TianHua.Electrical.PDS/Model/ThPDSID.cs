@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
     public class ThPDSID
     {
+        public ThPDSID()
+        {
+            LoadID = "";
+            Description = "";
+            CircuitNumber = "";
+        }
+
         /// <summary>
         /// 块名
         /// </summary>
@@ -12,12 +17,12 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 负载编号
         /// </summary>
-        public string LoadID { get; set; } = "";
+        public string LoadID { get; set; }
 
         /// <summary>
         /// 用户自定义描述
         /// </summary>
-        public string Description { get; set; } = "";
+        public string Description { get; set; }
 
         /// <summary>
         /// 回路ID
@@ -27,7 +32,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 回路编号
         /// </summary>
-        public string CircuitNumber { get; set; } = "";
+        public string CircuitNumber { get; set; }
 
         /// <summary>
         /// 上级配电箱编号

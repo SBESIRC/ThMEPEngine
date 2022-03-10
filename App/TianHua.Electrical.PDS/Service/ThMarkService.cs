@@ -127,11 +127,11 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         value.Add(o.Value.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
                     }
-                    MarkDic.Add(ToDbPoint(o.Value.Position), value);
+                    MarkDic.Add(ToDbPoint((o.Key as BlockReference).Position), value);
                 }
                 else
                 {
-                    MarkDic.Add(ToDbPoint(o.Value.Position), GetTexts(o.Value));
+                    MarkDic.Add(ToDbPoint((o.Key as BlockReference).Position), GetTexts(o.Value));
                 }
             });
 
