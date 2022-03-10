@@ -109,11 +109,15 @@ namespace TianHua.Electrical.PDS.Service
 
             if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchFanCat3(thPDSLoad.ID.LoadID);
+                thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+                if(thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+                {
+                    thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                }
             }
             else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
             {
-                //thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
             }
 
             return thPDSLoad;
@@ -468,7 +472,7 @@ namespace TianHua.Electrical.PDS.Service
             return Tuple.Create(exist, primaryAvail, spareAvail);
         }
 
-        private static ThPDSLoadTypeCat_3 MatchFanCat3(string loadID)
+        private static ThPDSLoadTypeCat_3 MatchFanIDCat3(string loadID)
         {
             if (loadID.Contains("ESF"))
             {
@@ -503,6 +507,18 @@ namespace TianHua.Electrical.PDS.Service
                 return ThPDSLoadTypeCat_3.KitchenExhaustFan;
             }
             return ThPDSLoadTypeCat_3.None;
+        }
+
+        public static ThPDSLoadTypeCat_3 MatchFanDescriptionCat3(string description)
+        {
+            if (description.Contains("事故风机"))
+            {
+                return ThPDSLoadTypeCat_3.EmergencyFan;
+            }
+            else
+            {
+                return ThPDSLoadTypeCat_3.None;
+            }
         }
 
         public static ThPDSLoadTypeCat_3 MatchPumpCat3(string description)
