@@ -89,10 +89,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
 
             var groups = new ObservableCollection<ThWaterWellConfigInfo>();
-            while(WaterWellList.Count>0)
+            var tmpList = WaterWellList.Select(o => o).ToList();
+            while(tmpList.Count>0)
             {
-                var first = WaterWellList.First();
-                var sameTypes = WaterWellList.Where(o => o.IsSameType(first)).ToList();
+                var first = tmpList.First();
+                var sameTypes = tmpList.Where(o => o.IsSameType(first)).ToList();
 
                 ThWaterWellConfigInfo info = new ThWaterWellConfigInfo();
                 info.WellCount = sameTypes.Count;
@@ -100,7 +101,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 info.BlockName = first.EffName;
                 info.WellSize = first.GetWellSize();
                 info.WellModelList = sameTypes;
-                sameTypes.ForEach(s => WaterWellList.Remove(s));
+                sameTypes.ForEach(s => tmpList.Remove(s));
                 groups.Add(info);
             }
             //处理viewModel里面的数据
