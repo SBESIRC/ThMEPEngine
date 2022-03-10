@@ -53,7 +53,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
                     {
                         var blks = new List<BlockReference>();
                         var entity = database.Element<Entity>(ner.ObjectId);
-                        if (entity is BlockReference blk && blk.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName)
+                        if (entity is BlockReference blk && (blk.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName || blk.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New))
                         {
                             blks.Add(blk);
                         }
@@ -80,7 +80,8 @@ namespace ThMEPHVAC.LoadCalculation.Command
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                             };
                             var filterlist = OpFilter.Bulid(o =>
-                            o.Dxf((int)DxfCode.BlockName) == LoadCalculationParameterFromConfig.RoomFunctionBlockName &
+                            (o.Dxf((int)DxfCode.BlockName) == LoadCalculationParameterFromConfig.RoomFunctionBlockName |
+                            o.Dxf((int)DxfCode.BlockName) == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New) &
                             o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
                             var result2 = Active.Editor.GetSelection(options2, filterlist);
                             if (result2.Status != PromptStatus.OK)

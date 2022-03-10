@@ -15,6 +15,8 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -96,6 +98,7 @@
     <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
     <Compile Include="IndoorFanModels\VRFFan.cs" />
     <Compile Include="IO\ThPortParameterJsonReader.cs" />
+    <Compile Include="LoadCalculation\Command\ThExportExcelCmd.cs" />
     <Compile Include="Model\ThAirPortParameter.cs" />
     <Compile Include="Model\ThFGDXParameter.cs" />
     <Compile Include="ParameterService\IndoorFanParameter.cs" />

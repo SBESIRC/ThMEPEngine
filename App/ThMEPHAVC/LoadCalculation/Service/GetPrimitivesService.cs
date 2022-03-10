@@ -25,7 +25,11 @@ namespace ThMEPHVAC.LoadCalculation.Service
             {
                 var roomFunctionBlks = acdb.ModelSpace
                 .OfType<BlockReference>()
-                .Where(o => o.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName)
+                .Where(o =>
+                {
+                    var blockName = o.GetEffectiveName();
+                    return blockName== LoadCalculationParameterFromConfig.RoomFunctionBlockName | blockName == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New;
+                })
                 .ToList();
                 roomFunctionBlks.ForEach(o =>
                 {

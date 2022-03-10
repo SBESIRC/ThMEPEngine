@@ -7,7 +7,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
     {
         public static string Room_Layer_Name = "AI-房间框线";
         public static string RoomFunctionLayer = "AI-暖通-房间功能";
+        public static string RoomFunctionLayer_New = "AI-房间功能";
         public static string RoomFunctionBlockName = "AI-暖通-房间功能";
+        public static string RoomFunctionBlockName_New = "AI-房间功能";
 
         public static string LoadCalculationTableName = "天华负荷计算表";
         public static string LoadCalculationTableLayer = "AI-负荷通风标注";

@@ -24,14 +24,16 @@ namespace ThMEPHVAC.LoadCalculation.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.RoomFunctionLayer);
+                acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.RoomFunctionLayer_New);
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.LoadCalculationTableLayer);
                 acadDatabase.Database.ImportBlock(LoadCalculationParameterFromConfig.RoomFunctionBlockName);
+                acadDatabase.Database.ImportBlock(LoadCalculationParameterFromConfig.RoomFunctionBlockName_New);
                 acadDatabase.Database.ImportTextStyle(LoadCalculationParameterFromConfig.DefaultTableTextStyle);
                 acadDatabase.Database.ImportTableStyles(LoadCalculationParameterFromConfig.LoadCalculationTableName);
                 try
                 {
                     acadDatabase.Database.CreateAILayer("0", 255);
-                    acadDatabase.Database.CreateAILayer(LoadCalculationParameterFromConfig.RoomFunctionLayer, (short)ColorIndex.BYLAYER);
+                    acadDatabase.Database.CreateAILayer(LoadCalculationParameterFromConfig.RoomFunctionLayer_New, (short)ColorIndex.BYLAYER);
                     acadDatabase.Database.CreateAILayer(LoadCalculationParameterFromConfig.LoadCalculationTableLayer, (short)ColorIndex.BYLAYER);
                 }
                 catch { }
@@ -78,8 +80,8 @@ namespace ThMEPHVAC.LoadCalculation.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var objId = acadDatabase.Database.InsertBlock(
-                    LoadCalculationParameterFromConfig.RoomFunctionLayer,
-                    LoadCalculationParameterFromConfig.RoomFunctionBlockName,
+                    LoadCalculationParameterFromConfig.RoomFunctionLayer_New,
+                    LoadCalculationParameterFromConfig.RoomFunctionLayer_New,
                     point.TransformBy(Active.Editor.WCS2UCS()),
                     new Scale3d(),
                     0,

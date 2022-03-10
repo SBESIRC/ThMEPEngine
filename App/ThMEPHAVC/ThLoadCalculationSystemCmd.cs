@@ -39,5 +39,15 @@ namespace ThMEPHVAC
                 cmd.Execute();
             }
         }
+        
+        [CommandMethod("TIANHUACAD", "THDCFHJSB", CommandFlags.Modal)]
+        //天华导出负荷通风计算表
+        public void THFHDC()
+        {
+            using (var cmd = new ThExportExcelCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
