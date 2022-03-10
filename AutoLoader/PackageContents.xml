@@ -318,6 +318,7 @@
                 <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJDC" Global="THSNJDC" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
+                <Command Local="THDCFHJSB" Global="THDCFHJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -335,6 +336,7 @@
                 <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJDC" Global="THSNJDC" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
+                <Command Local="THDCFHJSB" Global="THDCFHJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -352,6 +354,7 @@
                 <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJDC" Global="THSNJDC" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
+                <Command Local="THDCFHJSB" Global="THDCFHJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -428,6 +431,7 @@
                 <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
+                <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -444,6 +448,7 @@
                 <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
+                <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -460,6 +465,7 @@
                 <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
+                <Command Local="THYDFHJS" Global="THYDFHJS" />
             </Commands>
         </ComponentEntry>
     </Components>

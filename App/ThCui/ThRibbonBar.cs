@@ -764,6 +764,20 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THKXDB_LARGE",
                     RibbonButtonStyle.LargeWithText);
             }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 用电负荷计算
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("用电负荷\r\n计算",
+                    "天华用电负荷计算",
+                    "THYDFHJS",
+                    "天华用电负荷计算",
+                    "IDI_THCAD_THYDFHJS_SMALL",
+                    "IDI_THCAD_THYDFHJS_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
         }
 
         private static void CreateHelpPanel(RibbonTabSource tab)
