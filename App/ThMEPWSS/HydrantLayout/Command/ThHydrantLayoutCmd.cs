@@ -24,6 +24,7 @@ using ThMEPWSS.HydrantLayout.Data;
 using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Engine;
+using ThMEPWSS.HydrantLayout.tmp.Engine;
 
 namespace ThMEPWSS.HydrantLayout.Command
 {
@@ -77,7 +78,9 @@ namespace ThMEPWSS.HydrantLayout.Command
                 }
 
                 //转换器
-                var transformer = ThHydrantUtil.GetTransformer(selectPts);
+                //var transformer = ThHydrantUtil.GetTransformer(selectPts);
+                var transformer = new ThMEPOriginTransformer(new Point3d(0,0,0));
+
 
                 //提取数据
                 var dataFactory = new ThHydrantLayoutDataFactory()
@@ -102,13 +105,18 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 //转换到原点
                 dataQuery.Transform(transformer);
+
+                //Engine start
+                Run run0 = new Run(dataQuery);
+
+                //
                 //打印
-                dataQuery.Print();
+                dataQuery.Print(); //for debug
 
                 //转回到原位置
                 dataQuery.Reset(transformer);
                 dataQuery.Print();
-                // dataQuery.Clean();
+                 //dataQuery.Clean();
 
 
             }

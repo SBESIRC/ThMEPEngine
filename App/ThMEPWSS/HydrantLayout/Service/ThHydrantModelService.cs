@@ -204,7 +204,7 @@ namespace ThMEPWSS.HydrantLayout.Service
         /// <param name="angleB"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public static bool IsOrthogonalAngle(double angleA, double angleB, double tol)
+        private static bool IsOrthogonalAngle(double angleA, double angleB, double tol)
         {
             var bReturn = false;
             var angleDelta = angleA - angleB;

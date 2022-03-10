@@ -70,6 +70,16 @@
     <Compile Include="HydrantLayout\Service\ThHydrantUtil.cs" />
     <Compile Include="HydrantLayout\Service\ThSelectFrameUtil.cs" />
     <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
+    <Compile Include="HydrantLayout\tmp\Engine\InputDataProcess.cs" />
+    <Compile Include="HydrantLayout\tmp\Engine\Run.cs" />
+    <Compile Include="HydrantLayout\tmp\Engine\SingleFireHydrant.cs" />
+    <Compile Include="HydrantLayout\tmp\Model\DataPackage.cs" />
+    <Compile Include="HydrantLayout\tmp\Model\FireHydrant.cs" />
+    <Compile Include="HydrantLayout\tmp\Service\CreateBoundaryService.cs" />
+    <Compile Include="HydrantLayout\tmp\Service\FeasibilityCheck.cs" />
+    <Compile Include="HydrantLayout\tmp\Service\IndexCompute.cs" />
+    <Compile Include="HydrantLayout\tmp\Service\SearchPoint.cs" />
+    <Compile Include="HydrantLayout\tmp\Service\SearchRangeFrame.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
