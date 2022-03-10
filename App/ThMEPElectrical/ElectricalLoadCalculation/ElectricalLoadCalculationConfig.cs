@@ -11,7 +11,7 @@ namespace ThMEPElectrical.ElectricalLoadCalculation
         public static List<DynamicLoadCalculationModelData> ModelDataList { get; set; } = new List<DynamicLoadCalculationModelData>();
         public static string RoomFunctionName { get; set; }
         public static string Room_Layer_Name = "AI-房间框线";
-        public static string RoomFunctionLayer = "AI-暖通-房间功能";
+        public static string RoomFunctionLayer = "AI-房间功能";
         public static string RoomFunctionBlockName = "AI-房间功能";
 
         public static string LoadCalculationTableName = "天华负荷计算表";

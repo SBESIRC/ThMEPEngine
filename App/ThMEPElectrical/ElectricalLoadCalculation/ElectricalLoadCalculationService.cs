@@ -47,7 +47,7 @@ namespace ThMEPElectrical.ElectricalLoadCalculation
                     table.Position = table.Position.TransformBy(Active.Editor.WCS2UCS());
                     table.TableStyle = acad.TableStyles.ElementOrDefault(ElectricalLoadCalculationConfig.LoadCalculationTableName).ObjectId;
                     table.Layer = ElectricalLoadCalculationConfig.LoadCalculationTableLayer;
-                    table.ColorIndex = (int)ColorIndex.BYLAYER;
+                    table.ColorIndex = 2;
                     table.TransformBy(Active.Editor.UCS2WCS());
                     for (int i = 0; i < table.Rows.Count(); i++)
                     {
