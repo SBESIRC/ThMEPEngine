@@ -119,7 +119,11 @@ Win10
 
 ## WPF
 
+[Windows Presentation Foundation documentation](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/?view=netdesktop-6.0)
+
 [Controls](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/controls/?view=netframeworkdesktop-4.8)
+
+[Data binding overview in WPF](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/data/data-binding-overview?view=netframeworkdesktop-4.8)
 
 [WPF Graphics Rendering Overview](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/graphics-multimedia/wpf-graphics-rendering-overview?view=netframeworkdesktop-4.8)
 
