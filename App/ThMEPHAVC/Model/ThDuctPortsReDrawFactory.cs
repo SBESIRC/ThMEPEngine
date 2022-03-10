@@ -48,16 +48,7 @@ namespace ThMEPHVAC.Model
             var ports = reducing.portWidths;
             var points = ports.Keys.ToList();
             var l = new Line(points[0], points[1]);
-            return ThDuctPortsFactory.CreateReducing(l, ports[points[0]], ports[points[1]], isAxis);
-        }
-        public static LineGeoInfo CreateElbow(EntityModifyParam elbow)
-        {
-            var endPoints = elbow.portWidths.Keys.ToList();
-            var vec1 = endPoints[0] - elbow.centerP;
-            var vec2 = endPoints[1] - elbow.centerP;
-            var angle = vec1.GetAngleTo(vec2);
-            var w = elbow.portWidths.Values.ToList().FirstOrDefault();
-            return ThDuctPortsFactory.CreateElbow(angle, w);
+            return ThDuctPortsFactory.CreateReducing(l, ThMEPHVACService.GetWidth(ports[points[0]]), ThMEPHVACService.GetWidth(ports[points[1]]), isAxis);
         }
     }
 }

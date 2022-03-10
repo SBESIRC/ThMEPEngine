@@ -36,6 +36,16 @@ namespace ThMEPHVAC.CAD
         public Line bypass;
         public Point3d crossP;
     }
+    public class ReducingWithType
+    {
+        public bool isRoom;
+        public LineGeoInfo bounds;
+    }
+    public class EntityWithType
+    {
+        public bool isRoom;
+        public EntityModifyParam entity;
+    }
     public class ThFanAnalysis
     {
         public Tolerance tor;
@@ -49,10 +59,10 @@ namespace ThMEPHVAC.CAD
         public HashSet<Line> roomLines;
         public HashSet<Line> notRoomLines;
         public Dictionary<int, SegInfo> centerLines;      // 不直接用Line是因为src和dst的shrink是不同时间获得的
-        public List<LineGeoInfo> reducings;
+        public List<ReducingWithType> reducings;
         public List<TextAlignLine> textRoomAlignment;
         public List<TextAlignLine> textNotRoomAlignment;
-        public List<EntityModifyParam> specialShapesInfo;
+        public List<EntityWithType> specialShapesInfo;
         public DBObjectCollection bypass;
         public DBObjectCollection outCenterLine;
         public ThVTee vt;
@@ -62,7 +72,7 @@ namespace ThMEPHVAC.CAD
         private double ioBypassSepDis;
         private List<BypassTee> bypassTees;
         private ThCADCoreNTSSpatialIndex spatialIndex;
-        private ThShrinkDuct shrinkService;
+        public ThShrinkDuct shrinkService;
         public ThFanAnalysis(double ioBypassSepDis,
                              ThDbModelFan fan,
                              FanParam param,
@@ -151,11 +161,11 @@ namespace ThMEPHVAC.CAD
             notRoomLines = new HashSet<Line>(comp);
             textRoomAlignment = new List<TextAlignLine>();
             textNotRoomAlignment = new List<TextAlignLine>();
-            reducings = new List<LineGeoInfo>();
+            reducings = new List<ReducingWithType>();
             centerLines = new Dictionary<int, SegInfo>();
             outCenterLine = new DBObjectCollection();
             UpDownVertivalPipe = new List<SegInfo>();
-            specialShapesInfo = new List<EntityModifyParam>();
+            specialShapesInfo =  new List<EntityWithType>();
         }
         private void AddNotRoomEndComp()
         {
@@ -375,6 +385,8 @@ namespace ThMEPHVAC.CAD
             var reducingInfos = new List<ReducingInfo>();
             shrinkService = new ThShrinkDuct(endLinesInfos, reducingInfos, centerLines);
             shrinkService.SetLinesShrink(lines, dic);
+            foreach (var e in shrinkService.connectors)
+                specialShapesInfo.Add(new EntityWithType() { entity = e, isRoom = (e.portWidths.Values.FirstOrDefault() == fanParam.roomDuctSize) });
         }
         private DBObjectCollection CreateMainEndlineIndex(out Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
@@ -412,42 +424,39 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-        private void DoSearchSpecialShape(Point3d search_point, Line current_line, string duct_size)
+        private void DoSearchSpecialShape(Point3d searchPoint, Line currentLine, string ductSize)
         {
-            var res = DetectCrossLine(search_point, current_line);
+            var res = DetectCrossLine(searchPoint, currentLine);
             if (res.Count == 0)
             {
                 return;
             }
             foreach (Line l in res)
             {
-                var step_p = search_point.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
-                DoSearchSpecialShape(step_p, l, duct_size);
+                var step_p = searchPoint.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
+                DoSearchSpecialShape(step_p, l, ductSize);
             }
             if (res.Count >= 1)
             {
-                RecordShapeParameter(search_point, current_line, res, duct_size);
+                RecordShapeParameter(searchPoint, currentLine, res, ductSize);
             }
         }
         private void RecordShapeParameter(Point3d centerP, Line inLine, DBObjectCollection outLines, string ductSize)
         {
-            var portWidths = new Dictionary<Point3d, double>();
-            var shapePortWidths = new List<double>();
+            var portWidths = new Dictionary<Point3d, string>();
+            var shapePortWidths = new List<string>();
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
-            var ductWidth = ThMEPHVACService.GetWidth(ductSize);
-            var bypassWidth = ThMEPHVACService.GetWidth(fanParam.bypassSize);
-            var w = IsBypass(inLine) ? bypassWidth : ductWidth;
+            var w = IsBypass(inLine) ? fanParam.bypassSize : ductSize;
             portWidths.Add(otherP, w);
 
             foreach (Line l in outLines)
             {
-                string size = ductSize;
-                w = IsBypass(l) ? bypassWidth : ductWidth;
+                w = IsBypass(l) ? fanParam.bypassSize : ductSize;
                 shapePortWidths.Add(w);
                 otherP = centerP.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
                 portWidths.Add(otherP, w);
             }
-            specialShapesInfo.Add(new EntityModifyParam() { centerP = centerP, portWidths = portWidths});
+            specialShapesInfo.Add(new EntityWithType() { entity = new EntityModifyParam() { centerP = centerP, portWidths = portWidths }, isRoom = (ductSize == fanParam.roomDuctSize) } );
         }
         private void SetRoomInfo(Point3d iRoomP, Point3d roomP)
         {
@@ -712,8 +721,9 @@ namespace ThMEPHVAC.CAD
                                         ref Line startLine,
                                         ref Point3d srtP)
         {
-            double shrinkDis = (isRoom) ? GetShrinkDis(info.roomDuctSize, fanWidth, out double ductWidth) :
-                                          GetShrinkDis(info.notRoomDuctSize, fanWidth, out ductWidth);
+            double shrinkDis = (isRoom) ? GetShrinkDis(info.roomDuctSize, fanWidth, out double ductWidth, out double ductHeight) :
+                                          GetShrinkDis(info.notRoomDuctSize, fanWidth, out ductWidth, out ductHeight);
+            var highDisVec = new Vector3d(0, 0, ductHeight);
             if (shrinkDis < 0)
                 return;
             var dirVec = ThMEPHVACService.GetEdgeDirection(startLine);
@@ -722,14 +732,16 @@ namespace ThMEPHVAC.CAD
             //srtP = startLine.StartPoint + dirVec * (shrinkDis + hoseLen);// ThDuctPortsAnaylysis.cs Line:253
             var reducing = new Line(startLine.StartPoint + (dirVec * hoseLen), srtP);
             var isAxis = (fan.Name.Contains("轴流风机"));
-            reducings.Add(ThDuctPortsFactory.CreateReducing(reducing, fanWidth, ductWidth, isAxis));
+            reducing.StartPoint += highDisVec;
+            reducing.EndPoint += highDisVec;
+            reducings.Add(new ReducingWithType() { bounds = ThDuctPortsFactory.CreateReducing(reducing, fanWidth, ductWidth, isAxis) , isRoom = isRoom} );
             lines.Remove(startLine);
             startLine = new Line(srtP, startLine.EndPoint);
             lines.Add(startLine);
         }
-        private double GetShrinkDis(string ductSize, double fanWidth, out double ductWidth)
+        private double GetShrinkDis(string ductSize, double fanWidth, out double ductWidth, out double ductHeight)
         {
-            ductWidth = ThMEPHVACService.GetWidth(ductSize);
+            ThMEPHVACService.GetWidthAndHeight(ductSize, out ductWidth, out ductHeight);
             var bigWidth = Math.Max(ductWidth, fanWidth);
             var smallWidth = Math.Min(ductWidth, fanWidth);
             return ThDuctPortsShapeService.GetReducingLen(bigWidth, smallWidth);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using DotNetARX;
@@ -9,6 +10,9 @@ using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
 using ThMEPEngineCore.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using AcHelper;
+using ThMEPHVAC.TCH;
+using Autodesk.AutoCAD.Runtime;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -33,6 +37,10 @@ namespace TianHua.Hvac.UI.Command
         }
         public override void SubExecute()
         {
+            string curDbPath = Path.GetTempPath() + "TG20.db";
+            string templateDbPath = "D:/qyx-res/TZ/sys/TG20.db";
+            ulong gId = 0;
+            ThHvacCmdService.InitTables(curDbPath, templateDbPath, ref gId);
             var status = GetFanParam(out bool isSelectFan,
                                      out Point3d startPoint,
                                      out PortParam portParam,
@@ -55,7 +63,7 @@ namespace TianHua.Hvac.UI.Command
                 {
                     var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
                     ThNotRoomStartComp.DrawEndLineEndComp(ref anay.fanDucts, startPoint, portParam, service);// 先插入comp
-                    DrawMultiFanMainDuct(anay, knife, startPoint, fanParam, service);                        // 会改变线信息
+                    DrawMultiFanMainDuct(ref gId, anay, startPoint, fanParam, curDbPath, portParam);                        // 会改变线信息
                 }
                 var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var wallIndex = ThMEPHVACService.CreateRoomOutlineIndex(portParam.srtPoint);
@@ -67,17 +75,26 @@ namespace TianHua.Hvac.UI.Command
                     var wallLines = GetWalls(p, wallIndex);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
-                        cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
+                        cmdService.PressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic, brokenLineIds);
                     else
-                        cmdService.NotPressurizedAirSupply(fan, model, wallLines, portParam, flag, allFansDic);
+                        cmdService.NotPressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic, brokenLineIds);
                 }
             }
             else
             {
-                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
-                ductPort.Execute();
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId);
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
+#if ACAD_ABOVE_2014
+            Active.Editor.Command("TIMPORTTG20HVAC", curDbPath, " ");
+#else
+            ResultBuffer args = new ResultBuffer(
+               new TypedValue((int)LispDataType.Text, "_.TIMPORTTG20HVAC"),
+               new TypedValue((int)LispDataType.Text, curDbPath),
+               new TypedValue((int)LispDataType.Text, " "));
+            Active.Editor.AcedCmd(args);
+#endif
         }
         private DBObjectCollection GetWalls(Point3d p, ThCADCoreNTSSpatialIndex index)
         {
@@ -95,31 +112,15 @@ namespace TianHua.Hvac.UI.Command
             ThDuctPortsDrawService.DrawLines(portParam.centerLines, mat, "0", out ids);
         }
 
-        private void DrawMultiFanMainDuct(ThFansMainDuctAnalysis anay, ThSepereateFansDuct knife, Point3d startPoint, FanParam fanParam, ThDuctPortsDrawService service)
+        private void DrawMultiFanMainDuct(ref ulong gId, ThFansMainDuctAnalysis anay, Point3d startPoint, FanParam fanParam, string curDbPath, PortParam portParam)
         {
+            // 非服务侧
+            var tchDrawService = new ThTCHDrawFactory(curDbPath, fanParam.scenario);
             var mat = Matrix3d.Displacement(startPoint.GetAsVector());
-            service.DrawSpecialShape(anay.connectors, mat);
-            service.DrawDuct(anay.fanDucts, mat);
-            // mainHeight是anay.textAlignment中的最大值
-            double mainHeight = GetMainHeight(anay.textAlignment);
-            service.DrawMainDuctText(anay.textAlignment, startPoint, fanParam, mainHeight);
-            service.DrawMainDuctText(knife.textAlignment, startPoint, fanParam, mainHeight);
-        }
-
-        private double GetMainHeight(List<TextAlignLine> textAlignment)
-        {
-            double maxW = 0;
-            var maxDuctSize = String.Empty;
-            foreach (var text in textAlignment)
-            {
-                var w = ThMEPHVACService.GetWidth(text.ductSize);
-                if (maxW < w)
-                {
-                    maxW = w;
-                    maxDuctSize = text.ductSize;
-                }
-            }
-            return ThMEPHVACService.GetHeight(maxDuctSize);
+            var mainHeight = ThMEPHVACService.GetHeight(fanParam.notRoomDuctSize);
+            var elevation = Double.Parse(fanParam.notRoomElevation);
+            tchDrawService.DrawSpecialShape(anay.connectors, mat, mainHeight, elevation, ref gId);
+            tchDrawService.ductService.Draw(anay.fanDucts, mat, false, portParam.param, ref gId);
         }
 
         private FanParam GetInfo(Dictionary<string, FanParam> dicFans)
@@ -174,7 +175,6 @@ namespace TianHua.Hvac.UI.Command
         }
         private void RecordUIParam(PortParam portParam)
         {
-            singleInstance = portParam;
             singleInstance.genStyle = portParam.genStyle;
             singleInstance.endCompType = portParam.endCompType;
             singleInstance.portInterval = portParam.portInterval;
@@ -186,11 +186,13 @@ namespace TianHua.Hvac.UI.Command
             singleInstance.param.inDuctSize = portParam.param.inDuctSize;
             singleInstance.param.mainHeight = portParam.param.mainHeight;
             singleInstance.param.portName = portParam.param.portName;
-            singleInstance.param.portNum = portParam.param.portNum;
             singleInstance.param.portRange = portParam.param.portRange;
+            singleInstance.param.portNum = portParam.param.portNum;
             singleInstance.param.portSize = portParam.param.portSize;
             singleInstance.param.scale = portParam.param.scale;
             singleInstance.param.scenario = portParam.param.scenario;
+            if (portParam.param.portRange.Contains("侧"))
+                singleInstance.param.portNum *= 2;
         }
     }
 }

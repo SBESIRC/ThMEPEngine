@@ -88,6 +88,9 @@ namespace TianHua.Electrical.PDS.Service
                 if(target.Loads.Count > 0)
                 {
                     edge.Circuit.Type = target.Loads[0].DefaultCircuitType;
+                    edge.Circuit.Phase = target.Loads[0].Phase;
+                    edge.Circuit.DemandFactor = target.Loads[0].DemandFactor;
+                    edge.Circuit.PowerFactor = target.Loads[0].PowerFactor;
                 }
             }
             var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();

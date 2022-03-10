@@ -742,6 +742,7 @@ namespace TianHua.Hvac.UI
             // radioPortRange
             // 
             this.radioPortRange.AutoSize = true;
+            this.radioPortRange.Checked = true;
             this.radioPortRange.Location = new System.Drawing.Point(18, 4);
             this.radioPortRange.Name = "radioPortRange";
             this.radioPortRange.Size = new System.Drawing.Size(14, 13);
@@ -758,7 +759,6 @@ namespace TianHua.Hvac.UI
             this.radioVerticalPipe.Name = "radioVerticalPipe";
             this.radioVerticalPipe.Size = new System.Drawing.Size(113, 16);
             this.radioVerticalPipe.TabIndex = 74;
-            this.radioVerticalPipe.TabStop = true;
             this.radioVerticalPipe.Text = "立支管+侧回风口";
             this.radioVerticalPipe.UseVisualStyleBackColor = true;
             this.radioVerticalPipe.CheckedChanged += new System.EventHandler(this.radioVerticalPipe_CheckedChanged);
@@ -787,6 +787,7 @@ namespace TianHua.Hvac.UI
             this.textPortElevation.Size = new System.Drawing.Size(43, 21);
             this.textPortElevation.TabIndex = 77;
             this.textPortElevation.Text = "8";
+            this.textPortElevation.TextChanged += new System.EventHandler(this.textPortElevation_TextChanged);
             // 
             // label15
             // 

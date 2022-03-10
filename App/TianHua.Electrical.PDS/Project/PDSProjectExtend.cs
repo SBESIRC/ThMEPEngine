@@ -18,30 +18,64 @@ namespace TianHua.Electrical.PDS.Project
     {
         /// <summary>
         /// 计算功率
+        /// 算法更新：由自上而下改成自下而上，用类似于前序遍历的方式去遍历图
         /// </summary>
         public static void CalculatePower(this ThPDSProjectGraph PDSProjectGraph)
         {
-            var Nodes = PDSProjectGraph.Graph.Vertices.ToList();
-            ThPDSProjectGraphNode node = null;
-            while (!(node = Nodes.FirstOrDefault()).IsNull())
+            var RootNodes = PDSProjectGraph.Graph.Vertices.Where(x => x.IsStartVertexOfGraph);
+            foreach (var rootNode in RootNodes)
             {
-                ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge;
-                while (!(edge = PDSProjectGraph.Graph.Edges.FirstOrDefault(o => o.Source.Equals(node))).IsNull())
+                rootNode.Details.LowPower =  PDSProjectGraph.CalculatePower(rootNode);
+            }
+        }
+
+        /// <summary>
+        /// 计算功率
+        /// </summary>
+        public static double CalculatePower(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
+        {
+            if(node.Details.IsStatisticalPower)
+            {
+                return node.Details.LowPower;
+            }
+            var edges = PDSProjectGraph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+            if(edges.Count == 0)
+            {
+                PDSProjectGraph.CalculateCircuitFormInType(node);
+                node.Details.IsStatisticalPower = true;
+                return node.Details.LowPower;
+            }
+            node.Details.LowPower = edges.Sum(e => PDSProjectGraph.CalculatePower(e.Target));
+            node.Details.IsStatisticalPower = true;
+            PDSProjectGraph.CalculateCircuitFormInType(node);
+            return node.Details.LowPower;
+        }
+
+        /// <summary>
+        /// 计算功率
+        /// </summary>
+        public static void CalculateCircuitFormInType(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
+        {
+            if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
+            {
+                //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
+                node.Details.CircuitFormType = new CentralizedPowerCircuit();
+            }
+            else
+            {
+                var count = PDSProjectGraph.Graph.Edges.Count(o => o.Target.Equals(node));
+                if (count == 1)
                 {
-                    node = edge.Target;
+                    node.Details.CircuitFormType = new OneWayInCircuit();
                 }
-                while(!(edge = PDSProjectGraph.Graph.Edges.FirstOrDefault(o => o.Target.Equals(node))).IsNull())
+                else if (count == 2)
                 {
-                    var superiorNode = edge.Source;
-                    var edges = PDSProjectGraph.Graph.Edges.Where(o => o.Source.Equals(superiorNode));
-                    edges.ForEach(e => Nodes.Remove(e.Target));
-                    if(!superiorNode.Details.IsDualPower && superiorNode.Details.LowPower <= 0)
-                    {
-                        superiorNode.Details.LowPower = edges.Sum(e => e.Target.Details.LowPower);
-                    }
-                    node = superiorNode;
+                    node.Details.CircuitFormType = new TwoWayInCircuit();
                 }
-                Nodes.Remove(node);
+                else if (count == 3)
+                {
+                    node.Details.CircuitFormType = new ThreeWayInCircuit();
+                }
             }
         }
 
@@ -55,27 +89,19 @@ namespace TianHua.Electrical.PDS.Project
                 //if单相/三相，因为还没有这部分的内容，所有默认所有都是三相
                 //单向：I_c=S_c/U_n =P_c/(cos⁡φ×U_n )=(P_n×K_d)/(cos⁡φ×U_n )
                 //三相：I_c=S_c/(√3 U_n )=P_c/(cos⁡φ×√3 U_n )=(P_n×K_d)/(cos⁡φ×√3 U_n )
-                var edge = PDSProjectGraph.Graph.Edges.FirstOrDefault(o => o.Target.Equals(v));
-                if (edge.IsNull())
+                var Phase = v.Load.Phase;
+                if (Phase != ThPDSPhase.一相 && Phase != ThPDSPhase.三相)
                 {
-
+                    v.Load.CalculateCurrent = 0;
                 }
                 else
                 {
-                    var Phase = edge.Circuit.Phase;
-                    if (Phase != ThPDSPhase.一相 && Phase != ThPDSPhase.三相)
-                    {
-                        v.Load.CalculateCurrent = 0;
-                    }
-                    else
-                    {
-                        var DemandFactor = edge.Circuit.DemandFactor;
-                        if (v.Details.IsOnlyLoad)
-                            DemandFactor = 1;
-                        var PowerFactor = edge.Circuit.PowerFactor;
-                        var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
-                        v.Load.CalculateCurrent =Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
-                    }
+                    var DemandFactor = v.Load.DemandFactor;
+                    if (v.Details.IsOnlyLoad)
+                        DemandFactor = 1;
+                    var PowerFactor = v.Load.PowerFactor;
+                    var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
+                    v.Load.CalculateCurrent =Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
                 }
             });
         }
@@ -161,34 +187,9 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
         {
-            var ProjectGraph = new ThPDSProjectGraph();
-            Graph.Vertices.ForEach(node =>
-            {
-                if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
-                {
-                    //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
-                    node.Details.CircuitFormType = new CentralizedPowerCircuit();
-                }
-                else
-                {
-                    var count = Graph.Edges.Count(o => o.Target.Equals(node));
-                    if (count == 1)
-                    {
-                        node.Details.CircuitFormType = new OneWayInCircuit();
-                    }
-                    else if (count == 2)
-                    {
-                        node.Details.CircuitFormType = new TwoWayInCircuit();
-                    }
-                    else if (count == 3)
-                    {
-                        node.Details.CircuitFormType = new ThreeWayInCircuit();
-                    }
-                }
-            });
-            ProjectGraph.Graph = Graph;
+            var ProjectGraph = new ThPDSProjectGraph() { Graph = graph };
             ProjectGraph.CalculatePower();
             ProjectGraph.CalculateCurrent();
             ProjectGraph.CalculateComponent();

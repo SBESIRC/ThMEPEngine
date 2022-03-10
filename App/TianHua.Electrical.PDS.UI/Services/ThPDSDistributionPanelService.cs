@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -410,21 +408,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
                 this.TreeView.DataContext = builder.Build(graph);
             }
+            Project.Module.Component.ThPDSDistributionBoxModel boxVM = null;
             this.TreeView.SelectedItemChanged += (s, e) =>
             {
-                UpdatePropertyGrid(null);
                 if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
                 {
                     var vertice = graph.Vertices.ToList()[sel.Id];
-                    var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
-                    if (edge != null)
-                    {
-                        UpdatePropertyGrid(new Project.Module.Component.ThPDSDistributionBoxModel(vertice, edge));
-                    }
-                    else
-                    {
-                        UpdatePropertyGrid(null);
-                    }
+                    boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                    UpdatePropertyGrid(boxVM);
                 }
                 else
                 {
@@ -452,8 +443,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 foreach (var p in obj.GetType().GetProperties())
                 {
                     if (!p.CanRead) continue;
+                    var attr = p.GetCustomAttributes(typeof(DisplayNameAttribute), false).OfType<DisplayNameAttribute>().FirstOrDefault();
+                    string name = null;
+                    if (attr != null)
+                    {
+                        if (attr.DisplayName == null) continue;
+                        name = attr.DisplayName;
+                    }
+                    name ??= p.Name;
                     gh.AddRowDef();
-                    var name = p.GetCustomAttributes(typeof(DisplayNameAttribute), false).OfType<DisplayNameAttribute>().FirstOrDefault()?.DisplayName ?? p.Name;
                     gh.Add(new TextBlock() { Text = name, HorizontalAlignment = HorizontalAlignment.Center, });
                     if (p.PropertyType == typeof(string))
                     {
@@ -493,7 +491,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         var tbx = new TextBox() { };
                         var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.LostFocus, };
-                        if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
+                        if (!p.CanWrite)
+                        {
+                            bd.Mode = BindingMode.OneWay;
+                            tbx.IsReadOnly = true;
+                        }
                         tbx.SetBinding(TextBox.TextProperty, bd);
                         gh.Add(tbx);
                     }
@@ -596,20 +598,48 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         cvs.Background = Brushes.Transparent;
                                     };
+                                    Action cb = null;
+                                    render += () =>
+                                    {
+                                        var vertice = graph.Vertices.ToList()[sel.Id];
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.Text == "进线回路编号");
+                                            if (item != null)
+                                            {
+                                                var v = ThCADExtension.ThEnumExtension.GetDescription(vertice.Details.CircuitFormType.CircuitFormType);
+                                                if (!string.IsNullOrEmpty(v))
+                                                {
+                                                    item.Text = v;
+                                                }
+                                            }
+                                        }
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.Text == "QL");
+                                            if (item != null)
+                                            {
+                                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                                {
+                                                    var isolatingSwitch = oneway.isolatingSwitch;
+                                                    if (isolatingSwitch != null)
+                                                    {
+                                                        var vm = new Project.Module.Component.IsolatingSwitchModel(isolatingSwitch);
+                                                        var bd = new Binding() { Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        item.SetBinding(TextBlock.TextProperty, bd);
+                                                        cb += () => UpdatePropertyGrid(vm);
+                                                    }
+                                                    else
+                                                    {
+                                                        cb += () => UpdatePropertyGrid(null);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    };
                                     cvs.MouseUp += (s, e) =>
                                     {
                                         if (e.ChangedButton != MouseButton.Left) return;
                                         setSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
-                                        if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
-                                        {
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
-                                            UpdatePropertyGrid(edge?.Circuit);
-                                        }
-                                        else
-                                        {
-                                            UpdatePropertyGrid(null);
-                                        }
+                                        cb?.Invoke();
                                         e.Handled = true;
                                     };
                                     cvs.Cursor = Cursors.Hand;
@@ -624,103 +654,62 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var dy = .0;
                 var insertGaps = new List<GLineSegment>();
                 insertGaps.Add(new GLineSegment(busEnd, busEnd.OffsetXY(500, 0)));
-                render += () =>
-                {
-                    var vertice = graph.Vertices.ToList()[sel.Id];
-                    {
-                        var item = leftTemplates.FirstOrDefault(x => x.Text == "进线回路编号");
-                        if (item != null)
-                        {
-                            var v = ThCADExtension.ThEnumExtension.GetDescription(vertice.Details.CircuitFormType.CircuitFormType);
-                            if (!string.IsNullOrEmpty(v))
-                            {
-                                item.Text = v;
-                            }
-                        }
-                    }
-                    {
-                        var item = leftTemplates.FirstOrDefault(x => x.Text == "QL");
-                        if (item != null)
-                        {
-                            if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
-                            {
-                                item.Text = oneway.isolatingSwitch.Content;
-                            }
-                        }
-                    }
-                };
                 foreach (var i in Enumerable.Range(0, rights.Count))
                 {
                     var name = rights[i];
                     var item = PDSItemInfo.Create(name, new Point(busStart.X, dy));
+                    var vertice = graph.Vertices.ToList()[sel.Id];
+                    var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
+                    var circuitVM = new Project.Module.Component.ThPDSCircuitModel(vertice, edge);
+                    render += () =>
                     {
-                        var vertice = graph.Vertices.ToList()[sel.Id];
-                        var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                        render += () =>
                         {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "Conductor");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "Conductor");
-                                if (item.Key != null)
-                                {
-                                }
                             }
+                        }
+                        {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "回路编号");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "回路编号");
-                                if (item.Key != null)
-                                {
-                                    var v = edge?.Circuit?.ID?.CircuitID;
-                                    if (!string.IsNullOrEmpty(v))
-                                    {
-                                        item.Key.Text = v;
-                                    }
-                                }
+                                var bd = new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                item.Key.SetBinding(TextBlock.TextProperty, bd);
                             }
+                        }
+                        {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "功率");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "功率");
-                                if (item.Key != null)
-                                {
-                                    var v = vertice?.Details?.LowPower;
-                                    if (v.HasValue)
-                                    {
-                                        item.Key.Text = v.Value.ToString();
-                                    }
-                                }
+                                var bd = new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                item.Key.SetBinding(TextBlock.TextProperty, bd);
                             }
+                        }
+                        {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "相序");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "相序");
-                                if (item.Key != null)
-                                {
-                                    var v = edge?.Circuit?.Phase;
-                                    if (v.HasValue)
-                                    {
-                                        item.Key.Text = v.Value.ToString();
-                                    }
-                                }
+                                var bd = new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Phase)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                item.Key.SetBinding(TextBlock.TextProperty, bd);
                             }
+                        }
+                        {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "负载编号");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "负载编号");
-                                if (item.Key != null)
-                                {
-                                    var v = vertice?.Load?.ID?.LoadID;
-                                    if (!string.IsNullOrEmpty(v))
-                                    {
-                                        item.Key.Text = v;
-                                    }
-                                }
+                                var bd = new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                item.Key.SetBinding(TextBlock.TextProperty, bd);
                             }
+                        }
+                        {
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "功能用途");
+                            if (item.Key != null)
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "功能用途");
-                                if (item.Key != null)
-                                {
-                                    var v = string.Join(",", vertice?.Load?.ID?.Description ?? new List<string>());
-                                    if (!string.IsNullOrEmpty(v))
-                                    {
-                                        item.Key.Text = v;
-                                    }
-                                }
+                                var bd = new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                item.Key.SetBinding(TextBlock.TextProperty, bd);
                             }
-                        };
-                    }
+                        }
+                    };
                     {
                         var _info = PDSItemInfo.GetBlockDefInfo(name);
                         if (_info != null)
@@ -823,17 +812,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 breaker = motorCircuit_DiscreteComponents.breaker;
                                             }
-                                            cb += () => UpdatePropertyGrid(breaker);
                                             if (breaker != null)
                                             {
+                                                var vm = new Project.Module.Component.BreakerModel(breaker);
+                                                cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
                                                     var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "CB");
                                                     if (item.Key != null)
                                                     {
-                                                        item.Key.Text = breaker.Content;
+                                                        var bd = new Binding() { Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        item.Key.SetBinding(TextBlock.TextProperty, bd);
                                                     }
                                                 };
+                                            }
+                                            else
+                                            {
+                                                cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
                                         else if (info.BlockName == "Contactor")
@@ -846,17 +841,24 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 contactor = motorCircuit_DiscreteComponents.contactor;
                                             }
-                                            cb += () => UpdatePropertyGrid(contactor);
                                             if (contactor != null)
                                             {
+                                                var vm = new Project.Module.Component.ContactorModel(contactor);
+                                                cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
                                                     var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "QAC");
                                                     if (item.Key != null)
                                                     {
-                                                        item.Key.Text = contactor.Content;
+                                                        var bd = new Binding() { Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        item.Key.SetBinding(TextBlock.TextProperty, bd);
+                                                        item.Key.DataContext = vm;
                                                     }
                                                 };
+                                            }
+                                            else
+                                            {
+                                                cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
                                         else if (info.BlockName == "ThermalRelay")
@@ -869,17 +871,24 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 thermalRelay = motorCircuit_DiscreteComponents.thermalRelay;
                                             }
-                                            cb += () => UpdatePropertyGrid(thermalRelay);
                                             if (thermalRelay != null)
                                             {
+                                                var vm = new Project.Module.Component.ThermalRelayModel(thermalRelay);
+                                                cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
                                                     var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Text == "KH");
                                                     if (item.Key != null)
                                                     {
-                                                        item.Key.Text = thermalRelay.Content;
+                                                        var bd = new Binding() { Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        item.Key.SetBinding(TextBlock.TextProperty, bd);
+                                                        item.Key.DataContext = vm;
                                                     }
                                                 };
+                                            }
+                                            else
+                                            {
+                                                cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
                                         else if (info.BlockName == "Motor")
@@ -1039,7 +1048,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                 if (edge != null)
                                 {
-                                    UpdatePropertyGrid(new Project.Module.Component.ThPDSCircuitModel(vertice, edge));
+                                    UpdatePropertyGrid(circuitVM);
                                 }
                                 else
                                 {
@@ -1105,16 +1114,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         if (e.ChangedButton != MouseButton.Left) return;
                         setSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
-                        if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
-                        {
-                            var vertice = graph.Vertices.ToList()[sel.Id];
-                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
-                            UpdatePropertyGrid(edge?.Details);
-                        }
-                        else
-                        {
-                            UpdatePropertyGrid(null);
-                        }
+                        UpdatePropertyGrid(boxVM);
                         e.Handled = true;
                     };
                     cvs.Cursor = Cursors.Hand;
@@ -1124,23 +1124,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     if (e.ChangedButton != MouseButton.Left) return;
                     setSel(default);
-                    if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
-                    {
-                        var vertice = graph.Vertices.ToList()[sel.Id];
-                        var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).FirstOrDefault();
-                        if (edge != null)
-                        {
-                            UpdatePropertyGrid(new Project.Module.Component.ThPDSDistributionBoxModel(vertice, edge));
-                        }
-                        else
-                        {
-                            UpdatePropertyGrid(null);
-                        }
-                    }
-                    else
-                    {
-                        UpdatePropertyGrid(null);
-                    }
+                    UpdatePropertyGrid(boxVM);
                     e.Handled = true;
                 }
                 canvas.MouseUp += f;

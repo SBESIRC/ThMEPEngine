@@ -501,6 +501,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 .Where(e =>
                 {
                     var l = CreateLine(e);
+                    l.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
                     l.StartPoint = l.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(l).GetNormal() * 10));
                     l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
                     var bf = l.Buffer(DisLaneWidth / 2 - 1);

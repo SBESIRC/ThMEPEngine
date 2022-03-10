@@ -13,12 +13,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
     public class ThPDSDistributionBoxModel : NotifyPropertyChangedBase
     {
         ThPDSProjectGraphNode vertice;
-        ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge;
 
-        public ThPDSDistributionBoxModel(ThPDSProjectGraphNode vertice, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public ThPDSDistributionBoxModel(ThPDSProjectGraphNode vertice)
         {
             this.vertice = vertice;
-            this.edge = edge;
         }
         [DisplayName("配电箱编号")]
         public string ID
@@ -35,8 +33,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("相数")]
         public Model.ThPDSPhase Phase
         {
-            get => edge.Circuit.Phase;
-            set => edge.Circuit.Phase = value;
+            get => vertice.Load.Phase;
+            set => vertice.Load.Phase = value;
         }
         string lastDemandFactorValue = "1.00";
         [DisplayName("需要系数")]
@@ -45,7 +43,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get
             {
-                var v = edge.Circuit.DemandFactor;
+                var v = vertice.Load.DemandFactor;
                 if (v > 0 && v <= 1)
                 {
                     var s = $"{v:F2}";
@@ -53,7 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                     lastDemandFactorValue = s;
                     return s;
                 }
-                edge.Circuit.DemandFactor = double.Parse(lastDemandFactorValue);
+                vertice.Load.DemandFactor = double.Parse(lastDemandFactorValue);
                 return lastDemandFactorValue;
             }
             set
@@ -62,7 +60,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 {
                     if (v > 0 && v <= 1)
                     {
-                        edge.Circuit.DemandFactor = v;
+                        vertice.Load.DemandFactor = v;
                         lastDemandFactorValue = $"{v:F2}";
                     }
                 }
@@ -76,7 +74,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get
             {
-                var v = edge.Circuit.PowerFactor;
+                var v = vertice.Load.PowerFactor;
                 if (v > 0 && v <= 1)
                 {
                     var s = $"{v:F2}";
@@ -84,7 +82,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                     lastPowerFactorValue = s;
                     return s;
                 }
-                edge.Circuit.PowerFactor = double.Parse(lastPowerFactorValue);
+                vertice.Load.PowerFactor = double.Parse(lastPowerFactorValue);
                 return lastPowerFactorValue;
             }
             set
@@ -93,7 +91,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 {
                     if (v > 0 && v <= 1)
                     {
-                        edge.Circuit.PowerFactor = v;
+                        vertice.Load.PowerFactor = v;
                         lastPowerFactorValue = $"{v:F2}";
                     }
                 }
@@ -104,12 +102,16 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public double CalculateCurrent
         {
             get => vertice.Load.CalculateCurrent;
-            set => vertice.Load.CalculateCurrent = value;
         }
         [DisplayName("用途描述")]
         public string Description
         {
-            get => string.Join(",", vertice.Load.ID.Description);
+            get => vertice.Load.ID.Description;
+            set
+            {
+                vertice.Load.ID.Description = value;
+                OnPropertyChanged(nameof(Description));
+            }
         }
         [DisplayName("箱体尺寸")]
         public string OverallDimensions

@@ -19,65 +19,83 @@ namespace ThMEPHVAC.Model
             this.textAngle = textAngle;
             this.portLayer = portLayer;
         }
-        public void DrawPorts(EndlineSegInfo info, 
-                              PortParam portParam, 
-                              Vector3d orgDisVec, 
-                              double portWidth, 
-                              double portHeight, 
-                              double avgAirVolume,
-                              out List<SegInfo> verticalPipes)
+        public void DrawVerticalPipePorts(EndlineSegInfo info,
+                                          ThMEPHVACParam portParam,
+                                          Vector3d orgDisVec,
+                                          double portWidth,
+                                          double portHeight,
+                                          double avgAirVolume,
+                                          out List<SegInfo> verticalPipes)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var portRange = portParam.param.portRange;
+                var portRange = portParam.portRange;
                 var dirVec = ThMEPHVACService.GetEdgeDirection(info.seg.l);
                 double angle = ThMEPHVACService.GetPortRotateAngle(dirVec);
                 verticalPipes = new List<SegInfo>();
-                var h = GetVerticalPipeHeight(avgAirVolume);
+                var size =  GetVerticalPipeHeight(avgAirVolume);
+                var h = size.Item2;
                 var vec = Vector3d.ZAxis * ((h + 100) * 0.5);
+                var portSelfEleVec = vec * 2;
+                var mmElevation = portParam.elevation * 1000;
+                var mainHeight = ThMEPHVACService.GetHeight(portParam.inDuctSize);
+                var selfEleOftVec = Vector3d.ZAxis * (portParam.portBottomEle * 1000 + mmElevation + mainHeight);
                 foreach (var pos in info.portsInfo)
                 {
-                    if (portParam.verticalPipeEnable)
+                    var ductHeight = ThMEPHVACService.GetHeight(pos.ductSize);
+                    GetSidePortInsertPos(dirVec, pos.position, h, out Point3d pL, out Point3d pR);
+                    InsertPort(pR + orgDisVec + selfEleOftVec, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
+                    InsertPort(pL + orgDisVec + selfEleOftVec, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
+                    var sp = pos.position - vec;
+                    var ep = pos.position + vec;
+                    verticalPipes.Add(new SegInfo()
                     {
-                        GetSidePortInsertPos(dirVec, pos.position, h, out Point3d pL, out Point3d pR);
-                        InsertPort(pR + orgDisVec, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                        InsertPort(pL + orgDisVec, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                        var sp = pos.position - vec;
-                        var ep = pos.position + vec;
-                        verticalPipes.Add(new SegInfo()
-                        {
-                            l = new Line(sp, ep),
-                            horizontalVec = dirVec,
-                            airVolume = avgAirVolume,
-                            ductSize = (portWidth + 200).ToString() + "x" + h.ToString()
-                        });
-                    }
-                    else
-                    {
-                        if (portRange.Contains("下"))
-                        {
-                            var p = pos.position + orgDisVec;
-                            InsertPort(p, angle + (Math.PI * 0.5), portWidth, portHeight, portRange, avgAirVolume);
-                        }
-                        else
-                        {
-                            var curDuctW = ThMEPHVACService.GetWidth(pos.ductSize);
-                            GetSidePortInsertPos(dirVec, pos.position, curDuctW, out Point3d pL, out Point3d pR);
-                            pL += orgDisVec;
-                            pR += orgDisVec;
-                            if (pos.haveRight)
-                                InsertPort(pR, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                            if (pos.haveLeft)
-                                InsertPort(pL, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                        }
-                    }
+                        l = new Line(sp, ep),
+                        horizontalVec = dirVec,
+                        airVolume = avgAirVolume,
+                        ductSize = (portWidth + 200).ToString() + "x" + h.ToString()
+                    });
                 }
             }
         }
-        private double GetVerticalPipeHeight(double airVolume)
+
+        private Tuple<double, double> GetVerticalPipeHeight(double airVolume)
         {
-            var selector = new ThPortParameter(airVolume);
-            return selector.DuctSizeInfor.DuctHeight;
+            var selector = new ThPortParameter(airVolume, PortRecommendType.VERTICAL_PIPE);
+            return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight);
+        }
+
+        public void DrawPorts(EndlineSegInfo info, ThMEPHVACParam portParam, Vector3d orgDisVec, double portWidth, double portHeight, double avgAirVolume)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                var portRange = portParam.portRange;
+                var dirVec = ThMEPHVACService.GetEdgeDirection(info.seg.l);
+                double angle = ThMEPHVACService.GetPortRotateAngle(dirVec);
+                var mmElevation = portParam.elevation * 1000;
+                var mainHeight = ThMEPHVACService.GetHeight(portParam.inDuctSize);
+                foreach (var pos in info.portsInfo)
+                {
+                    var ductHeight = ThMEPHVACService.GetHeight(pos.ductSize);
+                    var selfEleOftVec = Vector3d.ZAxis * (mmElevation + mainHeight - ductHeight);
+                    if (portRange.Contains("下"))
+                    {
+                        var p = pos.position + orgDisVec;
+                        InsertPort(p + selfEleOftVec, angle + (Math.PI * 0.5), portWidth, portHeight, portRange, avgAirVolume);
+                    }
+                    else
+                    {
+                        var curDuctW = ThMEPHVACService.GetWidth(pos.ductSize);
+                        GetSidePortInsertPos(dirVec, pos.position, curDuctW, out Point3d pL, out Point3d pR);
+                        pL += orgDisVec;
+                        pR += orgDisVec;
+                        if (pos.haveRight)
+                            InsertPort(pR + selfEleOftVec, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
+                        if (pos.haveLeft)
+                            InsertPort(pL + selfEleOftVec, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
+                    }
+                }
+            }
         }
         public void InsertPort(PortModifyParam param)
         {

@@ -57,6 +57,10 @@ panels:
         items:
           - text: "框线对比"
             attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "用电负荷\r\n计算"
+            attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWGROUNDSYSTEM"
     name: "WGROUNDSYSTEM"

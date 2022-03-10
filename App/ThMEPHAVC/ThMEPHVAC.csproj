@@ -15,6 +15,8 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -96,6 +98,7 @@
     <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
     <Compile Include="IndoorFanModels\VRFFan.cs" />
     <Compile Include="IO\ThPortParameterJsonReader.cs" />
+    <Compile Include="LoadCalculation\Command\ThExportExcelCmd.cs" />
     <Compile Include="Model\ThAirPortParameter.cs" />
     <Compile Include="Model\ThFGDXParameter.cs" />
     <Compile Include="ParameterService\IndoorFanParameter.cs" />
@@ -221,6 +224,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
     <Compile Include="Service\ThRoomSelector.cs" />
+    <Compile Include="TCH\ThDrawTCHCross.cs" />
+    <Compile Include="TCH\ThDrawTCHDuct.cs" />
+    <Compile Include="TCH\ThDrawTCHElbow.cs" />
+    <Compile Include="TCH\ThDrawTCHFlanges.cs" />
+    <Compile Include="TCH\ThDrawTCHMaterials.cs" />
+    <Compile Include="TCH\ThDrawTCHReducing.cs" />
+    <Compile Include="TCH\ThDrawTCHSubSystemTypes.cs" />
+    <Compile Include="TCH\ThDrawTCHTee.cs" />
+    <Compile Include="TCH\ThSQLiteHelper.cs" />
+    <Compile Include="TCH\ThTCHCommonTables.cs" />
+    <Compile Include="TCH\ThTCHDrawFactory.cs" />
+    <Compile Include="TCH\ThTCHService.cs" />
     <Compile Include="ThHAVCIndoorFanCmds.cs" />
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
@@ -304,6 +319,15 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.8.116</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.bundle_green">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3">
+      <Version>2.0.4</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,113 +1,704 @@
 [
-{"DuctWidth":120,"DuctHeight":120,"SectionArea":0.0144,"AspectRatio":1},
-{"DuctWidth":160,"DuctHeight":120,"SectionArea":0.0192,"AspectRatio":1.33},
-{"DuctWidth":200,"DuctHeight":120,"SectionArea":0.024,"AspectRatio":1.67},
-{"DuctWidth":160,"DuctHeight":160,"SectionArea":0.0256,"AspectRatio":1},
-{"DuctWidth":250,"DuctHeight":120,"SectionArea":0.03,"AspectRatio":2.08},
-{"DuctWidth":200,"DuctHeight":160,"SectionArea":0.032,"AspectRatio":1.25},
-{"DuctWidth":320,"DuctHeight":120,"SectionArea":0.0384,"AspectRatio":2.67},
-{"DuctWidth":200,"DuctHeight":200,"SectionArea":0.04,"AspectRatio":1},
-{"DuctWidth":250,"DuctHeight":160,"SectionArea":0.04,"AspectRatio":1.56},
-{"DuctWidth":400,"DuctHeight":120,"SectionArea":0.048,"AspectRatio":3.33},
-{"DuctWidth":250,"DuctHeight":200,"SectionArea":0.05,"AspectRatio":1.25},
-{"DuctWidth":320,"DuctHeight":160,"SectionArea":0.0512,"AspectRatio":2},
-{"DuctWidth":500,"DuctHeight":120,"SectionArea":0.06,"AspectRatio":4.17},
-{"DuctWidth":250,"DuctHeight":250,"SectionArea":0.0625,"AspectRatio":1},
-{"DuctWidth":320,"DuctHeight":200,"SectionArea":0.064,"AspectRatio":1.6},
-{"DuctWidth":400,"DuctHeight":160,"SectionArea":0.064,"AspectRatio":2.5},
-{"DuctWidth":630,"DuctHeight":120,"SectionArea":0.0756,"AspectRatio":5.25},
-{"DuctWidth":320,"DuctHeight":250,"SectionArea":0.08,"AspectRatio":1.28},
-{"DuctWidth":400,"DuctHeight":200,"SectionArea":0.08,"AspectRatio":2},
-{"DuctWidth":500,"DuctHeight":160,"SectionArea":0.08,"AspectRatio":3.13},
-{"DuctWidth":400,"DuctHeight":250,"SectionArea":0.1,"AspectRatio":1.6},
-{"DuctWidth":500,"DuctHeight":200,"SectionArea":0.1,"AspectRatio":2.5},
-{"DuctWidth":630,"DuctHeight":160,"SectionArea":0.1008,"AspectRatio":3.94},
-{"DuctWidth":320,"DuctHeight":320,"SectionArea":0.1024,"AspectRatio":1},
-{"DuctWidth":500,"DuctHeight":250,"SectionArea":0.125,"AspectRatio":2},
-{"DuctWidth":630,"DuctHeight":200,"SectionArea":0.126,"AspectRatio":3.15},
-{"DuctWidth":400,"DuctHeight":320,"SectionArea":0.128,"AspectRatio":1.25},
-{"DuctWidth":500,"DuctHeight":160,"SectionArea":0.128,"AspectRatio":5},
-{"DuctWidth":630,"DuctHeight":250,"SectionArea":0.1575,"AspectRatio":2.52},
-{"DuctWidth":400,"DuctHeight":400,"SectionArea":0.16,"AspectRatio":1},
-{"DuctWidth":500,"DuctHeight":320,"SectionArea":0.16,"AspectRatio":1.56},
-{"DuctWidth":800,"DuctHeight":200,"SectionArea":0.16,"AspectRatio":4},
-{"DuctWidth":500,"DuctHeight":400,"SectionArea":0.2,"AspectRatio":1.25},
-{"DuctWidth":800,"DuctHeight":250,"SectionArea":0.2,"AspectRatio":3.2},
-{"DuctWidth":1000,"DuctHeight":200,"SectionArea":0.2,"AspectRatio":5},
-{"DuctWidth":630,"DuctHeight":320,"SectionArea":0.2016,"AspectRatio":1.97},
-{"DuctWidth":500,"DuctHeight":500,"SectionArea":0.25,"AspectRatio":1},
-{"DuctWidth":1000,"DuctHeight":250,"SectionArea":0.25,"AspectRatio":4},
-{"DuctWidth":630,"DuctHeight":400,"SectionArea":0.252,"AspectRatio":1.58},
-{"DuctWidth":800,"DuctHeight":320,"SectionArea":0.256,"AspectRatio":2.5},
-{"DuctWidth":1250,"DuctHeight":250,"SectionArea":0.3125,"AspectRatio":5},
-{"DuctWidth":630,"DuctHeight":500,"SectionArea":0.315,"AspectRatio":1.26},
-{"DuctWidth":800,"DuctHeight":400,"SectionArea":0.32,"AspectRatio":2},
-{"DuctWidth":1000,"DuctHeight":320,"SectionArea":0.32,"AspectRatio":3.13},
-{"DuctWidth":630,"DuctHeight":630,"SectionArea":0.3969,"AspectRatio":1},
-{"DuctWidth":800,"DuctHeight":500,"SectionArea":0.4,"AspectRatio":1.6},
-{"DuctWidth":1000,"DuctHeight":400,"SectionArea":0.4,"AspectRatio":2.5},
-{"DuctWidth":1250,"DuctHeight":320,"SectionArea":0.4,"AspectRatio":3.91},
-{"DuctWidth":1000,"DuctHeight":500,"SectionArea":0.5,"AspectRatio":2},
-{"DuctWidth":1250,"DuctHeight":400,"SectionArea":0.5,"AspectRatio":3.13},
-{"DuctWidth":800,"DuctHeight":630,"SectionArea":0.504,"AspectRatio":1.27},
-{"DuctWidth":1600,"DuctHeight":320,"SectionArea":0.512,"AspectRatio":5},
-{"DuctWidth":1250,"DuctHeight":500,"SectionArea":0.625,"AspectRatio":2.5},
-{"DuctWidth":1000,"DuctHeight":630,"SectionArea":0.63,"AspectRatio":1.59},
-{"DuctWidth":800,"DuctHeight":800,"SectionArea":0.64,"AspectRatio":1},
-{"DuctWidth":1600,"DuctHeight":400,"SectionArea":0.64,"AspectRatio":4},
-{"DuctWidth":1250,"DuctHeight":630,"SectionArea":0.7875,"AspectRatio":1.98},
-{"DuctWidth":1000,"DuctHeight":800,"SectionArea":0.8,"AspectRatio":1.25},
-{"DuctWidth":1600,"DuctHeight":500,"SectionArea":0.8,"AspectRatio":3.2},
-{"DuctWidth":2000,"DuctHeight":400,"SectionArea":0.8,"AspectRatio":5},
-{"DuctWidth":1000,"DuctHeight":1000,"SectionArea":1,"AspectRatio":1},
-{"DuctWidth":1250,"DuctHeight":800,"SectionArea":1,"AspectRatio":1.56},
-{"DuctWidth":2000,"DuctHeight":500,"SectionArea":1,"AspectRatio":4},
-{"DuctWidth":1600,"DuctHeight":630,"SectionArea":1.008,"AspectRatio":2.54},
-{"DuctWidth":1250,"DuctHeight":1000,"SectionArea":1.25,"AspectRatio":1.25},
-{"DuctWidth":2500,"DuctHeight":500,"SectionArea":1.25,"AspectRatio":5},
-{"DuctWidth":2000,"DuctHeight":630,"SectionArea":1.26,"AspectRatio":3.17},
-{"DuctWidth":1600,"DuctHeight":800,"SectionArea":1.28,"AspectRatio":2},
-{"DuctWidth":3000,"DuctHeight":500,"SectionArea":1.5,"AspectRatio":6},
-{"DuctWidth":1250,"DuctHeight":1250,"SectionArea":1.5625,"AspectRatio":1},
-{"DuctWidth":2500,"DuctHeight":630,"SectionArea":1.575,"AspectRatio":3.97},
-{"DuctWidth":1600,"DuctHeight":1000,"SectionArea":1.6,"AspectRatio":1.6},
-{"DuctWidth":2000,"DuctHeight":800,"SectionArea":1.6,"AspectRatio":2.5},
-{"DuctWidth":3000,"DuctHeight":630,"SectionArea":1.89,"AspectRatio":4.76},
-{"DuctWidth":1600,"DuctHeight":1250,"SectionArea":2,"AspectRatio":1.28},
-{"DuctWidth":2000,"DuctHeight":1000,"SectionArea":2,"AspectRatio":2},
-{"DuctWidth":2500,"DuctHeight":800,"SectionArea":2,"AspectRatio":3.13},
-{"DuctWidth":3500,"DuctHeight":630,"SectionArea":2.205,"AspectRatio":5.56},
-{"DuctWidth":3000,"DuctHeight":800,"SectionArea":2.4,"AspectRatio":3.75},
-{"DuctWidth":2000,"DuctHeight":1250,"SectionArea":2.5,"AspectRatio":1.6},
-{"DuctWidth":2500,"DuctHeight":1000,"SectionArea":2.5,"AspectRatio":2.5},
-{"DuctWidth":1600,"DuctHeight":1600,"SectionArea":2.56,"AspectRatio":1},
-{"DuctWidth":3500,"DuctHeight":800,"SectionArea":2.8,"AspectRatio":4.38},
-{"DuctWidth":3000,"DuctHeight":1000,"SectionArea":3,"AspectRatio":3},
-{"DuctWidth":2500,"DuctHeight":1250,"SectionArea":3.125,"AspectRatio":2},
-{"DuctWidth":2000,"DuctHeight":1600,"SectionArea":3.2,"AspectRatio":1.25},
-{"DuctWidth":4000,"DuctHeight":800,"SectionArea":3.2,"AspectRatio":5},
-{"DuctWidth":3500,"DuctHeight":1000,"SectionArea":3.5,"AspectRatio":3.5},
-{"DuctWidth":3000,"DuctHeight":1250,"SectionArea":3.75,"AspectRatio":2.4},
-{"DuctWidth":2000,"DuctHeight":2000,"SectionArea":4,"AspectRatio":1},
-{"DuctWidth":2500,"DuctHeight":1600,"SectionArea":4,"AspectRatio":1.56},
-{"DuctWidth":4000,"DuctHeight":1000,"SectionArea":4,"AspectRatio":4},
-{"DuctWidth":3500,"DuctHeight":1250,"SectionArea":4.375,"AspectRatio":2.8},
-{"DuctWidth":3000,"DuctHeight":1600,"SectionArea":4.8,"AspectRatio":1.88},
-{"DuctWidth":2500,"DuctHeight":2000,"SectionArea":5,"AspectRatio":1.25},
-{"DuctWidth":4000,"DuctHeight":1250,"SectionArea":5,"AspectRatio":3.2},
-{"DuctWidth":3500,"DuctHeight":1600,"SectionArea":5.6,"AspectRatio":2.19},
-{"DuctWidth":3000,"DuctHeight":2000,"SectionArea":6,"AspectRatio":1.5},
-{"DuctWidth":2500,"DuctHeight":2500,"SectionArea":6.25,"AspectRatio":1},
-{"DuctWidth":4000,"DuctHeight":1600,"SectionArea":6.4,"AspectRatio":2.5},
-{"DuctWidth":3500,"DuctHeight":2000,"SectionArea":7,"AspectRatio":1.75},
-{"DuctWidth":3000,"DuctHeight":2500,"SectionArea":7.5,"AspectRatio":1.2},
-{"DuctWidth":4000,"DuctHeight":2000,"SectionArea":8,"AspectRatio":2},
-{"DuctWidth":3500,"DuctHeight":2500,"SectionArea":8.75,"AspectRatio":1.4},
-{"DuctWidth":3000,"DuctHeight":3000,"SectionArea":9,"AspectRatio":1},
-{"DuctWidth":4000,"DuctHeight":2500,"SectionArea":10,"AspectRatio":1.6},
-{"DuctWidth":3500,"DuctHeight":3000,"SectionArea":10.5,"AspectRatio":1.17},
-{"DuctWidth":4000,"DuctHeight":3000,"SectionArea":12,"AspectRatio":1.33},
-{"DuctWidth":3500,"DuctHeight":3500,"SectionArea":12.25,"AspectRatio":1},
-{"DuctWidth":4000,"DuctHeight":3500,"SectionArea":14,"AspectRatio":1.14},
-{"DuctWidth":4000,"DuctHeight":4000,"SectionArea":16,"AspectRatio":1}
+  {
+    "DuctWidth": 120,
+    "DuctHeight": 120,
+    "SectionArea": 0.0144,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 160,
+    "DuctHeight": 120,
+    "SectionArea": 0.0192,
+    "AspectRatio": 1.33
+  },
+  {
+    "DuctWidth": 200,
+    "DuctHeight": 120,
+    "SectionArea": 0.024,
+    "AspectRatio": 1.67
+  },
+  {
+    "DuctWidth": 160,
+    "DuctHeight": 160,
+    "SectionArea": 0.0256,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 250,
+    "DuctHeight": 120,
+    "SectionArea": 0.03,
+    "AspectRatio": 2.08
+  },
+  {
+    "DuctWidth": 200,
+    "DuctHeight": 160,
+    "SectionArea": 0.032,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 320,
+    "DuctHeight": 120,
+    "SectionArea": 0.0384,
+    "AspectRatio": 2.67
+  },
+  {
+    "DuctWidth": 200,
+    "DuctHeight": 200,
+    "SectionArea": 0.04,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 250,
+    "DuctHeight": 160,
+    "SectionArea": 0.04,
+    "AspectRatio": 1.56
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 120,
+    "SectionArea": 0.048,
+    "AspectRatio": 3.33
+  },
+  {
+    "DuctWidth": 250,
+    "DuctHeight": 200,
+    "SectionArea": 0.05,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 320,
+    "DuctHeight": 160,
+    "SectionArea": 0.0512,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 120,
+    "SectionArea": 0.06,
+    "AspectRatio": 4.17
+  },
+  {
+    "DuctWidth": 250,
+    "DuctHeight": 250,
+    "SectionArea": 0.0625,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 320,
+    "DuctHeight": 200,
+    "SectionArea": 0.064,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 160,
+    "SectionArea": 0.064,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 120,
+    "SectionArea": 0.0756,
+    "AspectRatio": 5.25
+  },
+  {
+    "DuctWidth": 320,
+    "DuctHeight": 250,
+    "SectionArea": 0.08,
+    "AspectRatio": 1.28
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 200,
+    "SectionArea": 0.08,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 160,
+    "SectionArea": 0.08,
+    "AspectRatio": 3.13
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 250,
+    "SectionArea": 0.1,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 200,
+    "SectionArea": 0.1,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 160,
+    "SectionArea": 0.1008,
+    "AspectRatio": 3.94
+  },
+  {
+    "DuctWidth": 320,
+    "DuctHeight": 320,
+    "SectionArea": 0.1024,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 250,
+    "SectionArea": 0.125,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 200,
+    "SectionArea": 0.126,
+    "AspectRatio": 3.15
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 320,
+    "SectionArea": 0.128,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 160,
+    "SectionArea": 0.128,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 250,
+    "SectionArea": 0.1575,
+    "AspectRatio": 2.52
+  },
+  {
+    "DuctWidth": 400,
+    "DuctHeight": 400,
+    "SectionArea": 0.16,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 320,
+    "SectionArea": 0.16,
+    "AspectRatio": 1.56
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 200,
+    "SectionArea": 0.16,
+    "AspectRatio": 4
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 400,
+    "SectionArea": 0.2,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 250,
+    "SectionArea": 0.2,
+    "AspectRatio": 3.2
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 200,
+    "SectionArea": 0.2,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 320,
+    "SectionArea": 0.2016,
+    "AspectRatio": 1.97
+  },
+  {
+    "DuctWidth": 500,
+    "DuctHeight": 500,
+    "SectionArea": 0.25,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 250,
+    "SectionArea": 0.25,
+    "AspectRatio": 4
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 400,
+    "SectionArea": 0.252,
+    "AspectRatio": 1.58
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 320,
+    "SectionArea": 0.256,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 250,
+    "SectionArea": 0.3125,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 500,
+    "SectionArea": 0.315,
+    "AspectRatio": 1.26
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 400,
+    "SectionArea": 0.32,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 320,
+    "SectionArea": 0.32,
+    "AspectRatio": 3.13
+  },
+  {
+    "DuctWidth": 630,
+    "DuctHeight": 630,
+    "SectionArea": 0.3969,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 500,
+    "SectionArea": 0.4,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 400,
+    "SectionArea": 0.4,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 320,
+    "SectionArea": 0.4,
+    "AspectRatio": 3.91
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 500,
+    "SectionArea": 0.5,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 400,
+    "SectionArea": 0.5,
+    "AspectRatio": 3.13
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 630,
+    "SectionArea": 0.504,
+    "AspectRatio": 1.27
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 320,
+    "SectionArea": 0.512,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 500,
+    "SectionArea": 0.625,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 630,
+    "SectionArea": 0.63,
+    "AspectRatio": 1.59
+  },
+  {
+    "DuctWidth": 800,
+    "DuctHeight": 800,
+    "SectionArea": 0.64,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 400,
+    "SectionArea": 0.64,
+    "AspectRatio": 4
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 630,
+    "SectionArea": 0.7875,
+    "AspectRatio": 1.98
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 800,
+    "SectionArea": 0.8,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 500,
+    "SectionArea": 0.8,
+    "AspectRatio": 3.2
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 400,
+    "SectionArea": 0.8,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 320,
+    "SectionArea": 0.8,
+    "AspectRatio": 7.81
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 400,
+    "SectionArea": 1,
+    "AspectRatio": 6.25
+  },
+  {
+    "DuctWidth": 1000,
+    "DuctHeight": 1000,
+    "SectionArea": 1,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 800,
+    "SectionArea": 1,
+    "AspectRatio": 1.56
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 500,
+    "SectionArea": 1,
+    "AspectRatio": 4
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 630,
+    "SectionArea": 1.008,
+    "AspectRatio": 2.54
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 400,
+    "SectionArea": 1.2,
+    "AspectRatio": 7.5
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 1000,
+    "SectionArea": 1.25,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 500,
+    "SectionArea": 1.25,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 630,
+    "SectionArea": 1.26,
+    "AspectRatio": 3.17
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 800,
+    "SectionArea": 1.28,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 500,
+    "SectionArea": 1.5,
+    "AspectRatio": 6
+  },
+  {
+    "DuctWidth": 1250,
+    "DuctHeight": 1250,
+    "SectionArea": 1.5625,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 630,
+    "SectionArea": 1.575,
+    "AspectRatio": 3.97
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 1000,
+    "SectionArea": 1.6,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 800,
+    "SectionArea": 1.6,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 500,
+    "SectionArea": 1.75,
+    "AspectRatio": 7
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 630,
+    "SectionArea": 1.89,
+    "AspectRatio": 4.76
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 1250,
+    "SectionArea": 2,
+    "AspectRatio": 1.28
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 1000,
+    "SectionArea": 2,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 800,
+    "SectionArea": 2,
+    "AspectRatio": 3.13
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 500,
+    "SectionArea": 2,
+    "AspectRatio": 8
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 630,
+    "SectionArea": 2.205,
+    "AspectRatio": 5.56
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 800,
+    "SectionArea": 2.4,
+    "AspectRatio": 3.75
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 1250,
+    "SectionArea": 2.5,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 1000,
+    "SectionArea": 2.5,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 630,
+    "SectionArea": 2.52,
+    "AspectRatio": 6.35
+  },
+  {
+    "DuctWidth": 1600,
+    "DuctHeight": 1600,
+    "SectionArea": 2.56,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 800,
+    "SectionArea": 2.8,
+    "AspectRatio": 4.38
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 1000,
+    "SectionArea": 3,
+    "AspectRatio": 3
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 1250,
+    "SectionArea": 3.125,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 1600,
+    "SectionArea": 3.2,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 800,
+    "SectionArea": 3.2,
+    "AspectRatio": 5
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 1000,
+    "SectionArea": 3.5,
+    "AspectRatio": 3.5
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 1250,
+    "SectionArea": 3.75,
+    "AspectRatio": 2.4
+  },
+  {
+    "DuctWidth": 2000,
+    "DuctHeight": 2000,
+    "SectionArea": 4,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 1600,
+    "SectionArea": 4,
+    "AspectRatio": 1.56
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 1000,
+    "SectionArea": 4,
+    "AspectRatio": 4
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 1250,
+    "SectionArea": 4.375,
+    "AspectRatio": 2.8
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 1600,
+    "SectionArea": 4.8,
+    "AspectRatio": 1.88
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 2000,
+    "SectionArea": 5,
+    "AspectRatio": 1.25
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 1250,
+    "SectionArea": 5,
+    "AspectRatio": 3.2
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 1600,
+    "SectionArea": 5.6,
+    "AspectRatio": 2.19
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 2000,
+    "SectionArea": 6,
+    "AspectRatio": 1.5
+  },
+  {
+    "DuctWidth": 2500,
+    "DuctHeight": 2500,
+    "SectionArea": 6.25,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 1600,
+    "SectionArea": 6.4,
+    "AspectRatio": 2.5
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 2000,
+    "SectionArea": 7,
+    "AspectRatio": 1.75
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 2500,
+    "SectionArea": 7.5,
+    "AspectRatio": 1.2
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 2000,
+    "SectionArea": 8,
+    "AspectRatio": 2
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 2500,
+    "SectionArea": 8.75,
+    "AspectRatio": 1.4
+  },
+  {
+    "DuctWidth": 3000,
+    "DuctHeight": 3000,
+    "SectionArea": 9,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 2500,
+    "SectionArea": 10,
+    "AspectRatio": 1.6
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 3000,
+    "SectionArea": 10.5,
+    "AspectRatio": 1.17
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 3000,
+    "SectionArea": 12,
+    "AspectRatio": 1.33
+  },
+  {
+    "DuctWidth": 3500,
+    "DuctHeight": 3500,
+    "SectionArea": 12.25,
+    "AspectRatio": 1
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 3500,
+    "SectionArea": 14,
+    "AspectRatio": 1.14
+  },
+  {
+    "DuctWidth": 4000,
+    "DuctHeight": 4000,
+    "SectionArea": 16,
+    "AspectRatio": 1
+  }
 ]

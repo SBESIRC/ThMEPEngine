@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class IsolatingSwitch : PDSBaseComponent
     {
         /// <summary>
-        /// 
+        /// 隔离开关
         /// </summary>
         /// <param name="calculateCurrent">计算电流</param>
         /// <param name="polesNum">极数</param>

@@ -141,6 +141,47 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 return false;
         }
 
+        public System.Data.DataSet StatisticalData(List<Entity> rooms, List<BlockReference> roomFunctionBlocks)
+        {
+            System.Data.DataTable dataTable = new System.Data.DataTable();
+            dataTable.TableName = "房间信息";
+            System.Data.DataColumn column1 = new System.Data.DataColumn("房间编号");
+            dataTable.Columns.Add(column1);
+            System.Data.DataColumn column2 = new System.Data.DataColumn("房间功能");
+            dataTable.Columns.Add(column2);
+            System.Data.DataColumn column3 = new System.Data.DataColumn("面积");
+            dataTable.Columns.Add(column3);
+
+            Dictionary<DBPoint, BlockReference> BlocksDic = roomFunctionBlocks.ToDictionary(key => new DBPoint(key.Position), value => value);
+            ThCADCoreNTSSpatialIndex blkSpatialIndex = new ThCADCoreNTSSpatialIndex(BlocksDic.Keys.ToCollection());
+            foreach (Entity roomBoundary in rooms)
+            {
+                var SelectWindowobjs = blkSpatialIndex.SelectCrossingPolygon(roomBoundary);
+                if (SelectWindowobjs.Count == 1)
+                {
+                    DBPoint dBPoint = SelectWindowobjs[0] as DBPoint;
+                    BlockReference roomFunction = BlocksDic[dBPoint];
+                    var blockAttDic = roomFunction.Id.GetAttributesInBlockReference();
+                    string roomFunctionName = blockAttDic["房间功能"];
+                    string roomID = blockAttDic["房间编号"];
+                    var Area = 0;
+                    if (roomBoundary is Polyline polyline)
+                    {
+                        Area = (int)Math.Ceiling(polyline.Area * 1E-6);
+                    }
+                    else if (roomBoundary is MPolygon mPolygon)
+                    {
+                        Area = (int)Math.Ceiling(mPolygon.Area * 1E-6);
+                    }
+                    
+                    dataTable.Rows.Add(roomID, roomFunctionName, Area);
+                }
+            }
+
+            System.Data.DataSet dataSet = new System.Data.DataSet();
+            dataSet.Tables.Add(dataTable);
+            return dataSet;
+        }
         /// <summary>
         /// 填充表格数据
         /// </summary>

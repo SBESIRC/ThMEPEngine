@@ -52,6 +52,7 @@
                                     <Directory Id="DIR_Autoloader_Contents_Support_BeamStructure" Name="BeamStructure" />
                                     <Directory Id="DIR_Autoloader_Contents_Support_SecurityPlaneConfig" Name="SecurityPlaneConfig" />
                                     <Directory Id="DIR_Autoloader_Contents_Support_LoadCalculationConfig" Name="LoadCalculationConfig" />
+                                    <Directory Id="DIR_Autoloader_Contents_Support_ElectricalLoadCalculation" Name="ElectricalLoadCalculation" />                                  
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Standards" Name="Standards">
                                 </Directory>

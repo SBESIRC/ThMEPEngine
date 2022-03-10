@@ -66,6 +66,16 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     //该模块有挂块
                     Result.AddRange(DrawSpecialBlock16(CurrentIndex));
                 }
+                else if (CurrentIndex == this.SpecialBlockIndex[7])
+                {
+                    //该模块有挂块
+                    Result.AddRange(DrawSpecialBlock19(CurrentIndex));
+                }
+                else if (CurrentIndex == this.SpecialBlockIndex[8])
+                {
+                    //该模块有挂块
+                    Result.AddRange(DrawSpecialBlock20(CurrentIndex));
+                }
                 else
                 {
                     //该模块没有挂块，那就画一条直线
@@ -233,6 +243,34 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             return result;
         }
 
+        private List<Entity> DrawSpecialBlock19(int currentIndex)
+        {
+            List<Entity> result = new List<Entity>();
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["消火栓泵"] > 0)
+            {
+                var BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "消火栓泵").AssociatedBlocks[1].Position;
+                result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset)));
+                Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + BlockPosition.Y + 150, 0));
+                result.Add(Midline1);
+            }
+            result.Add(DrawStraightLine(currentIndex));
+            return result;
+        }
+
+        private List<Entity> DrawSpecialBlock20(int currentIndex)
+        {
+            List<Entity> result = new List<Entity>();
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["喷淋泵"] > 0)
+            {
+                var BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName == "喷淋泵").AssociatedBlocks[1].Position;
+                result.Add(DrawFilledCircle(new Point2d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset)));
+                Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition.X, OuterFrameLength * (FloorIndex - 1) + BlockPosition.Y + 150, 0));
+                result.Add(Midline1);
+            }
+            result.Add(DrawStraightLine(currentIndex));
+            return result;
+        }
+
         public override void InitCircuitConnection()
         {
             this.CircuitColorIndex = (int)ColorIndex.BYLAYER;
@@ -242,7 +280,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             this.StartIndexBlock = 3;
             this.Offset = 1850;
             this.EndIndexBlock = 21;
-            SpecialBlockIndex = new int[] { 5, 6, 11, 12, 13, 15, 16 };
+            SpecialBlockIndex = new int[] { 5, 6, 11, 12, 13, 15, 16 ,19 ,20 };
         }
     }
 }

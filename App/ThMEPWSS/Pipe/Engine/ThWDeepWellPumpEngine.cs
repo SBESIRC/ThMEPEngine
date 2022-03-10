@@ -39,7 +39,7 @@ namespace ThMEPWSS.Pipe.Engine
             if (entity is BlockReference reference)
             {
                 var name = reference.GetEffectiveName();
-                if (name.Contains("潜水泵-AI"))
+                if (name.Contains("潜水泵"))
                 {
                     return true;
                 }

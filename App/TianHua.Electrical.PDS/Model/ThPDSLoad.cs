@@ -235,6 +235,11 @@
         KitchenExhaustFan,
 
         /// <summary>
+        /// 事故风机
+        /// </summary>
+        EmergencyFan,
+
+        /// <summary>
         /// 生活水泵
         /// </summary>
         DomesticWaterPump,

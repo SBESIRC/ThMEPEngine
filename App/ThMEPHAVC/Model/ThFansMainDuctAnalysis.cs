@@ -11,7 +11,6 @@ namespace ThMEPHVAC.Model
     {
         public List<SegInfo> fanDucts;
         public Dictionary<int, SegInfo> ducts;
-        public List<TextAlignLine> textAlignment;
         public List<EntityModifyParam> connectors;
         private Tolerance tor;
         private HashSet<Point3d> points;
@@ -32,7 +31,6 @@ namespace ThMEPHVAC.Model
             fanDucts = new List<SegInfo>();
             points = new HashSet<Point3d>();            
             ducts = new Dictionary<int, SegInfo>();
-            textAlignment = new List<TextAlignLine>();
             connectors = new List<EntityModifyParam>();
             index = new ThCADCoreNTSSpatialIndex(mainDucts);
         }
@@ -45,10 +43,6 @@ namespace ThMEPHVAC.Model
                 {
                     fanDucts.Add(duct);
                 }
-            }
-            foreach (var duct in fanDucts)
-            {
-                textAlignment.Add(new TextAlignLine() { l = duct.l, isRoom = false, ductSize = duct.ductSize });
             }
             ducts.Clear();
         }
@@ -141,7 +135,7 @@ namespace ThMEPHVAC.Model
 
         private void CreateConnector(Point3d centerP, DBObjectCollection lines)
         {
-            var portWidths = new Dictionary<Point3d, double>();
+            var portWidths = new Dictionary<Point3d, string>();
             double maxW = 0.0;
             var inLine = new Line();
             foreach (Line l in lines)
@@ -163,11 +157,11 @@ namespace ThMEPHVAC.Model
             }
             connectors.Add(new EntityModifyParam() { centerP = centerP, portWidths = portWidths });
         }
-        private void Record(Dictionary<Point3d, double> portWidths, Point3d centerP, Line inLine)
+        private void Record(Dictionary<Point3d, string> portWidths, Point3d centerP, Line inLine)
         {
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
             var param = dicLineParam[inLine.GetHashCode()];
-            portWidths.Add(otherP, ThMEPHVACService.GetWidth(param.notRoomDuctSize));
+            portWidths.Add(otherP, param.notRoomDuctSize);
         }
     }
 }

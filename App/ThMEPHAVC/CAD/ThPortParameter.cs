@@ -4,22 +4,31 @@ using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
+    public enum PortRecommendType
+    {
+        PORT,
+        VERTICAL_PIPE
+    }
     public class ThPortParameter
     {
         public PortSizeParameter DuctSizeInfor { get; set; }
-        public ThPortParameter(double airVolume)
+        public ThPortParameter(double airVolume, PortRecommendType type)
         {
-            DuctSizeInfor = GetCandidateDucts(airVolume);
+            if (type == PortRecommendType.PORT)
+                DuctSizeInfor = GetCandidatePortSize(airVolume, 2.0);
+            if (type == PortRecommendType.VERTICAL_PIPE)
+                DuctSizeInfor = GetCandidatePortSize(airVolume, 3.0);
         }
-        private PortSizeParameter GetCandidateDucts(double airVolume)
+        private PortSizeParameter GetCandidatePortSize(double airVolume, double speed)
         {
-            double speed = 3.0;
             double area = Round2float(airVolume / 3600.0 / speed);
             var jsonReader = new ThPortParameterJsonReader();
             var sizeFloor = jsonReader.Parameters.Where(d => d.SectionArea >= area).OrderBy(d => d.SectionArea);
-            if (sizeFloor.Count() == 0)
+            // 规定最大长宽比为4
+            var filterSize = sizeFloor.Where(e => e.AspectRatio <= 4);
+            if (filterSize.Count() == 0)
                 return new PortSizeParameter() { DuctWidth = 500, DuctHeight = 200, SectionArea = 0.1, AspectRatio = 2.5};
-            return sizeFloor.First(d => d.DuctHeight == sizeFloor.Min(f => f.DuctHeight));
+            return filterSize.First(d => d.DuctHeight == filterSize.Min(f => f.DuctHeight));
         }
         private double Round2float(double f)
         {

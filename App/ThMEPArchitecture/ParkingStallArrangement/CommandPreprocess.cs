@@ -26,12 +26,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "PreProcessLog.txt");
+        //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "PreProcessLog.txt");
 
-        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
+        //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+        //    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
+        private string LayerKeyWord;
         public ThParkingStallPreprocessCmd()
         {
             CommandName = "-THZDCWYCL";//天华自动车位预处理
@@ -67,7 +68,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public void Run(AcadDatabase acadDatabase)
         {
             double tol = 5.0;
-            var blocks = InputData.SelectObstacles(acadDatabase);
+            var blocks = InputData.SelectObstacles(acadDatabase, out string layerKeyWord);
+            LayerKeyWord = layerKeyWord;
             if (blocks is null || blocks.Count == 0)
             {
                 Active.Editor.WriteMessage("未拿到障碍物块");
@@ -88,8 +90,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             if (lines.Count == 0)
             {
-                var centerpt = block.GetCenter();
-                Active.Editor.WriteMessage("\n中心点位于" + centerpt.ToString() + "的块未提取到障碍物");
+                Active.Editor.WriteMessage("\n块名为" + block.Name + "的块未提取到障碍物");
                 return;// 没有拿到线
             }
 #if (DEBUG)
@@ -105,6 +106,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 l.EndPoint = newl.EndPoint;
             }
             var objs = LinesToPline(lines);// 线转换为多段线
+            if(objs.Count == 0)
+            {
+                Active.Editor.WriteMessage("\n块名为" + block.Name + "的块中的元素不包含闭合区域");
+                return;// 没有拿到线
+            }
             objs = objs.ToNTSMultiPolygon().Union().ToDbCollection();// union操作,获取合并后的多段线
 
             var walls = new List<Entity>();
@@ -160,7 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         private bool IsObstacle(Entity ent)
         {
-            return ent.Layer.ToUpper().Contains("AI描边");
+            return ent.Layer.ToUpper().Contains(LayerKeyWord);
         }
         // 线转换到多段线，忽略洞
         private static DBObjectCollection LinesToPline(DBObjectCollection lines)
