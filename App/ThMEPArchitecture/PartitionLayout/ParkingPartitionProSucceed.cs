@@ -251,7 +251,15 @@ namespace ThMEPArchitecture.PartitionLayout
             var pl = CreatPolyFromLines(line, linetest);
             var points = new List<Point3d>();
             points = ObstacleVertexes.Where(e => pl.IsPointInFast(e)).OrderBy(e => line.GetClosestPointTo(e, false).DistanceTo(e)).ToList();
-            if (points.Count() == 0) return -1;
+            if (points.Count() < 1) return -1;
+            var crossedplys = ObstaclesSpatialIndex.SelectCrossingPolygon(pl).Cast<Polyline>();
+            double crossedlength = 0;
+            foreach (var c in crossedplys)
+            {
+                var crossededges = SplitCurve(c, pl).Where(e => pl.IsPointInFast(e.GetCenter()));
+                foreach (var ed in crossededges) crossedlength += ed.GetLength();
+            }
+            if (crossedlength < 10000) return -1;
             var ltest_ob_near_boundary = CreateLineFromStartPtAndVector(points.First(), vec, DisVertCarLength);
             if (ltest_ob_near_boundary.Intersect(Boundary, Intersect.OnBothOperands).Count > 0) return -1;
             var dist = line.GetClosestPointTo(points.First(), false).DistanceTo(points.First());
@@ -263,7 +271,7 @@ namespace ThMEPArchitecture.PartitionLayout
             lt.TransformBy(Matrix3d.Displacement(vec * dist));
             var ltbf = lt.Buffer(DisLaneWidth / 2);
             points = points.Where(e => ltbf.IsPointInFast(e)).OrderBy(e => e.X).ToList();
-            if (points.Count() == 0) return -1;
+            if (points.Count() < 1) return -1;
             var length = points.Last().X - points.First().X;
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             int offsetcount = 0;
