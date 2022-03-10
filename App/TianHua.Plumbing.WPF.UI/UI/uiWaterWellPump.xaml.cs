@@ -113,10 +113,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
         private void btnSelectWell_Click(object sender, RoutedEventArgs e)
         {
-            WaterWellIdentifyConfigInfo identifyInfo = new WaterWellIdentifyConfigInfo();
-            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            identifyInfo.WhiteList = config["集水井"];
-            WellInfoWidget.IdentifyInfo = identifyInfo;
             WellInfoWidget.HighlightWell();
             AcadApp.ShowModelessWindow(WellInfoWidget);
         }

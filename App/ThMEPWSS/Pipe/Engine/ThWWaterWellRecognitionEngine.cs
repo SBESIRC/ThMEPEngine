@@ -66,7 +66,9 @@ namespace ThMEPWSS.Pipe.Engine
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
             //var outline = blkref.ToOBB(blkref.BlockTransform.PreMultiplyBy(matrix));
-            var curves = Explode(blkref).OfType<Curve>().Where(c=>c.Visible).ToCollection();
+            var curves = Explode(blkref).OfType<Curve>()
+                .Where(o=> o is Line || o is Polyline)
+                .Where(c=>c.Visible).ToCollection();
             var outline = curves.GetMinimumRectangle().GetTransformedCopy(matrix) as Polyline;
 
             var elementInfo = new WWaterWellElementInfo()
