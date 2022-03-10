@@ -750,10 +750,10 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             e.Target.Loads[0].SpareAvail = sourceEdge.Target.Loads[0].SpareAvail;
                         }
-                        if (sourceEdge.Target.Loads[0].ID.Description.Count > 0)
-                        {
-                            e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
-                        }
+                        //if (sourceEdge.Target.Loads[0].ID.Description.Count > 0)
+                        //{
+                        //    e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
+                        //}
                     });
                 }
             });

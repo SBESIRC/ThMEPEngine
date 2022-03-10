@@ -17,7 +17,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 用户自定义描述
         /// </summary>
-        public List<string> Description { get; set; } = new List<string>();
+        public string Description { get; set; } = "";
 
         /// <summary>
         /// 回路ID

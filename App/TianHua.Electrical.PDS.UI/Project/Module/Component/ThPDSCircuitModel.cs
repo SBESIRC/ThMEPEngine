@@ -24,42 +24,71 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string CircuitId
         {
             get => edge.Circuit.ID.CircuitID;
-            set => edge.Circuit.ID.CircuitID = value;
+            set
+            {
+                edge.Circuit.ID.CircuitID = value;
+                OnPropertyChanged(nameof(CircuitId));
+            }
         }
         [DisplayName("回路形式")]
         public Model.ThPDSCircuitType CircuitType
         {
             get => edge.Circuit.Type;
-            set => edge.Circuit.Type = value;
+            set
+            {
+                edge.Circuit.Type = value;
+                OnPropertyChanged(nameof(CircuitType));
+            }
         }
         [DisplayName("功率")]
         public double Power
         {
             get => edge.Target.Details.LowPower;
-            set => edge.Target.Details.LowPower = value;
+            set
+            {
+                edge.Target.Details.LowPower = value;
+                OnPropertyChanged(nameof(Power));
+            }
         }
         [DisplayName("相序")]
         public Model.ThPDSPhase Phase
         {
             get => edge.Circuit.Phase;
-            set => edge.Circuit.Phase = value;
+            set
+            {
+                edge.Circuit.Phase = value;
+                OnPropertyChanged(nameof(Phase));
+            }
         }
         [DisplayName("负载类型")]
         public Model.PDSNodeType LoadType
         {
             get => edge.Target.Type;
-            set => edge.Target.Type = value;
+            set
+            {
+                edge.Target.Type = value;
+                OnPropertyChanged(nameof(LoadType));
+            }
         }
         [DisplayName("负载编号")]
         public string LoadId
         {
             get => edge.Circuit.ID.LoadID;
-            set => edge.Circuit.ID.LoadID = value;
+            set
+            {
+                edge.Circuit.ID.LoadID = value;
+                OnPropertyChanged(nameof(LoadId));
+            }
         }
         [DisplayName("功能描述")]
         public string Description
         {
-            get => string.Join(",", edge.Target.Load.ID.Description);
+            get => edge.Target.Load.ID.Description;
+            set
+            {
+                edge.Target.Load.ID.Description = value;
+                OnPropertyChanged(nameof(Description));
+            }
         }
         string lastDemandFactorValue = "1.00";
         [DisplayName("需要系数")]
@@ -127,7 +156,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public double CalculateCurrent
         {
             get => edge.Target.Load.CalculateCurrent;
-            set => edge.Target.Load.CalculateCurrent = value;
         }
 
     }

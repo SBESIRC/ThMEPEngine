@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.Service
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
             foreach (var str in marks.Except(searchedString))
             {
-                thPDSDistBox.ID.Description.Add(str);
+                thPDSDistBox.ID.Description += str;
             }
 
             return thPDSDistBox;
@@ -103,7 +103,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else
                 {
-                    thPDSLoad.ID.Description.Add(str);
+                    thPDSLoad.ID.Description += str;
                 }
             }
 
@@ -113,7 +113,7 @@ namespace TianHua.Electrical.PDS.Service
             }
             else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                //thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
             }
 
             return thPDSLoad;
@@ -128,8 +128,8 @@ namespace TianHua.Electrical.PDS.Service
                     BlockName = distBoxData.EffectiveName,
                     LoadID = distBoxData.Attributes.ContainsKey(ThPDSCommon.LOAD_ID)
                         ? distBoxData.Attributes[ThPDSCommon.LOAD_ID] : "",
-                    Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
-                        ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
+                    //Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
+                    //    ? new List<string> { distBoxData.Attributes[ThPDSCommon.DESCRIPTION] } : new List<string> { "" },
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                         ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, new List<string>(), out var needCopy),
