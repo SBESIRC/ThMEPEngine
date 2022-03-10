@@ -28,8 +28,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 return null;
             }
         }
-        public static DBObjectCollection SelectObstacles(AcadDatabase acadDatabase)
+        public static DBObjectCollection SelectObstacles(AcadDatabase acadDatabase,out string layerKeyWord)
         {
+            layerKeyWord = "AI描边";
+            //var msg = Active.Editor.GetString("\n 请输入目标图层关键字:");
+            //if (msg.Status == PromptStatus.OK )
+            //{ 
+            //    if (msg.StringResult != "") layerKeyWord = msg.StringResult.ToUpper(); 
+            //}
             var entOpt = new PromptSelectionOptions { MessageForAdding = "\n请选择包含障碍物的块:" };
             var result = Active.Editor.GetSelection(entOpt);
             if (result.Status != PromptStatus.OK)
