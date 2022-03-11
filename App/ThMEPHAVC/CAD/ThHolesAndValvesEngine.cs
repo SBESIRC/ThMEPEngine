@@ -12,8 +12,8 @@ namespace ThMEPHVAC.CAD
     {
         public List<ThValveGroup> roomValves { get; set; }
         public List<ThValveGroup> notRoomValves { get; set; }
-        private Matrix3d disMat;
         private Point3d srtP;
+        private Matrix3d disMat;
         private ThCADCoreNTSSpatialIndex index;
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
                                       DBObjectCollection wallobjects,

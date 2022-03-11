@@ -139,7 +139,8 @@ namespace ThMEPHVAC.Model
         {
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
             var ductSize = dic[inLine.GetHashCode()][centerP].Item2;
-            portWidths.Add(otherP, ductSize);
+            if (!portWidths.ContainsKey(otherP))
+                portWidths.Add(otherP, ductSize);
         }
         private void ShrinkElbow(Line currLine,
                                  Point3d detectP,

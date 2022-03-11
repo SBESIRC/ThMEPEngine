@@ -18,7 +18,7 @@ namespace ThMEPHVAC.Model
         public string geoLayer;
         public string flgLayer;
         public string portLayer;
-        public string airValveLayer;
+        public string airValveLayer;// (除加压送风场景)止回阀 多叶调节风阀 防火阀 消声器同图层
         public string fireValveLayer;
         public string electrycityValveLayer;
         public string startLayer;
@@ -31,7 +31,6 @@ namespace ThMEPHVAC.Model
         public string fireValveName;
         public string electrycityValveName;
         public string portName;
-        public string startName;
         public string portMarkName;
         public string brokenLine;
         public string verticalPipe;
@@ -52,7 +51,6 @@ namespace ThMEPHVAC.Model
         {
             airValveName = "风阀";
             fireValveName = "防火阀";
-            startName = "AI-风管起点";
             portMarkName = "AI-风口标注1";
             portName = "AI-风口";
             airValveVisibility = "多叶调节风阀";
@@ -87,66 +85,44 @@ namespace ThMEPHVAC.Model
         }
         private void SetLayer(string scenario)
         {
+            string layerFlag;
             switch (scenario)
             {
-                case "消防排烟兼平时排风":
-                case "消防补风兼平时送风":
-                    geoLayer = "H-DUCT-DUAL";
-                    flgLayer = "H-DAPP-DAPP";
-                    portLayer = "H-DAPP-DGRIL";
-                    centerLayer = "H-DUCT-DUAL-MID";
-                    airValveLayer = "H-DAPP-DDAMP";
-                    ductSizeLayer = "H-DIMS-DUAL";
-                    dimensionLayer = "H-DIMS-DUAL";
-                    portMarkLayer = "H-DIMS-DUAL";
+                case "消防排烟兼平时排风": case "消防补风兼平时送风":
+                    layerFlag = "DUAL";
                     break;
-                case "消防排烟":
-                case "消防补风":
-                case "消防加压送风":
-                    geoLayer = "H-DUCT-FIRE";
-                    flgLayer = "H-DAPP-FAPP";
-                    portLayer = "H-DAPP-FGRIL";
-                    centerLayer = "H-DUCT-FIRE-MID";
-                    airValveLayer = "H-DAPP-FDAMP";
-                    ductSizeLayer = "H-DIMS-FIRE";
-                    dimensionLayer = "H-DIMS-FIRE";
-                    portMarkLayer = "H-DIMS-FIRE";
-                    holeLayer = "H-HOLE";
+                case "消防排烟": case "消防补风": case "消防加压送风":
+                    layerFlag = "FIRE";
                     break;
-                case "平时送风":
-                case "平时排风":
-                case "事故排风":
-                case "事故补风":
-                case "平时送风兼事故补风":
-                case "平时排风兼事故排风":
-                case "厨房排油烟补风":
-                case "厨房排油烟":
-                    geoLayer = "H-DUCT-VENT";
-                    flgLayer = "H-DAPP-AAPP";
-                    portLayer = "H-DAPP-GRIL";
-                    centerLayer = "H-DUCT-VENT-MID";
-                    airValveLayer = "H-DAPP-DAMP";
-                    ductSizeLayer = "H-DIMS-DUCT";
-                    dimensionLayer = "H-DIMS-DUCT";
-                    portMarkLayer = "H-DIMS-DUCT";
+                case "平时送风": case "平时排风":
+                    layerFlag = "VENT";
                     break;
-                case "空调送风":
-                case "空调回风":
+                case "事故排风": case "事故补风": case "平时送风兼事故补风": case "平时排风兼事故排风":
+                    layerFlag = "EVENT";
+                    break;
+                case "厨房排油烟补风": case "厨房排油烟":
+                    layerFlag = "KVENT";
+                    break;
+                case "空调送风": case "空调回风":
+                    layerFlag = "ACON";
+                    break;
                 case "空调新风":
-                    geoLayer = "H-DUCT-ACON";
-                    flgLayer = "H-DAPP-AAPP";
-                    portLayer = "H-DAPP-GRIL";
-                    centerLayer = "H-DUCT-ACON-MID";
-                    airValveLayer = "H-DAPP-DAMP";
-                    ductSizeLayer = "H-DIMS-DUCT";
-                    dimensionLayer = "H-DIMS-DUCT";
-                    portMarkLayer = "H-DIMS-DUCT";
+                    layerFlag = "FCON";
                     break;
-                default:throw new NotImplementedException("No such scenior!");
+                default:throw new NotImplementedException("No such scenario!");
             }
+            geoLayer = "H-" + layerFlag + "-DUCT";
+            centerLayer = "H-" + layerFlag + "-DUCT-MID";
+            portLayer = "H-" + layerFlag + "-GRIL";
+            flgLayer = "H-" + layerFlag + "-DAPP";
+            airValveLayer = "H-" + layerFlag + "-DAMP";
+            fireValveLayer = airValveLayer;
+            ductSizeLayer = "H-" + layerFlag + "-DIMS";
+            dimensionLayer = ductSizeLayer;
+            portMarkLayer = ductSizeLayer;
             startLayer = "AI-风管起点";
-            fireValveLayer = "H-DAPP-FDAMP";
-            electrycityValveLayer = "H-DAPP-FDAMP";
+            holeLayer = "H-HOLE";
+            electrycityValveLayer = "H-FIRE-EDAMP";
         }
         private void ImportLayerBlock()
         {
@@ -167,7 +143,6 @@ namespace ThMEPHVAC.Model
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(airValveName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(fireValveName), true);
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(startName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(flipDown45), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(brokenLine), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(verticalPipe), true);

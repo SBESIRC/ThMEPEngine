@@ -21,10 +21,11 @@ namespace ThMEPHVAC.Model
         public DBObjectCollection bypass;
         public ObjectIdList brokenLineIds;
         private Matrix3d disMat;
+        private ThDuctPortsDrawService service;
         private ThTCHDrawFactory tchDrawService;
-        public ThFanDraw(ref ulong gId, ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable, string curDbPath)
+        public ThFanDraw(ref ulong gId, ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable, string curDbPath, ThDuctPortsDrawService service)
         {
-            Init(anayRes, curDbPath);
+            Init(anayRes, curDbPath, service);
             DrawCenterLine(anayRes);
             DrawFanTCHEntity(anayRes.specialShapesInfo, disMat, ref gId);
             DrawFanTCHDuct(anayRes, ref gId);
@@ -82,12 +83,13 @@ namespace ThMEPHVAC.Model
             tchDrawService.ductService.Draw(segInfos, disMat, false, notRoomParam, ref gId);
             tchDrawService.ductService.Draw(anayRes.UpDownVertivalPipe, disMat, false, roomParam, ref gId);
         }
-        private void Init(ThFanAnalysis anayRes, string curDbPath)
+        private void Init(ThFanAnalysis anayRes, string curDbPath, ThDuctPortsDrawService service)
         {
-            disMat = Matrix3d.Displacement(anayRes.moveSrtP.GetAsVector());
             fan = anayRes.fan;
-            fanParam = anayRes.fanParam;
+            this.service = service;
             bypass = anayRes.bypass;
+            fanParam = anayRes.fanParam;
+            disMat = Matrix3d.Displacement(anayRes.moveSrtP.GetAsVector());
             brokenLineIds = new ObjectIdList();
             tchDrawService = new ThTCHDrawFactory(curDbPath, fanParam.scenario);
         }
@@ -115,19 +117,19 @@ namespace ThMEPHVAC.Model
         }
         public ObjectId InsertElectricValve(Vector3d fan_cp_vec, double valvewidth, double angle)
         {
-            var e = new ThValve()
-            {
-                Length = 200,
-                Width = valvewidth,
-                ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
-                ValveBlockLayer = "H-DAPP-EDAMP",
-                ValveVisibility = ThDuctUtils.ElectricValveModelName(),
-                WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
-                LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
-                VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
-            };
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var e = new ThValve()
+                {
+                    Length = 200,
+                    Width = valvewidth,
+                    ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
+                    ValveBlockLayer = service.electrycityValveLayer,
+                    ValveVisibility = ThDuctUtils.ElectricValveModelName(),
+                    WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
+                    LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
+                    VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
+                };
                 var blockName = e.ValveBlockName;
                 var layerName = e.ValveBlockLayer;
                 Active.Database.ImportLayer(layerName, true);
@@ -147,7 +149,7 @@ namespace ThMEPHVAC.Model
         }
         private void DrawHose(bool roomEnable, bool notRoomEnable)
         {
-            _ = new ThInletOutletDuctDrawEngine(fan, roomEnable, notRoomEnable);
+            _ = new ThInletOutletDuctDrawEngine(fan, roomEnable, notRoomEnable, service);
         }
     }
 }

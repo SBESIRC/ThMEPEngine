@@ -12,14 +12,15 @@ namespace ThMEPHVAC.Model
     {
         private double portWidth;
         private double portHeight;
-        private ThDuctPortsDrawService service;
         private PortParam portParam;
         private Vector3d orgDisVec;
         private Matrix3d orgDisMat;
+        private ThDuctPortsDrawService service;
         public ThTCHDrawFactory tchDrawService;
-        public ThDuctPortsDraw(PortParam portParam, string curDbPath)
+        public ThDuctPortsDraw(PortParam portParam, string curDbPath, ThDuctPortsDrawService service)
         {
             Init(portParam);
+            this.service = service;
             tchDrawService = new ThTCHDrawFactory(curDbPath, portParam.param.scenario);
         }
         private void Init(PortParam portParam)
@@ -28,7 +29,6 @@ namespace ThMEPHVAC.Model
             ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double width, out double height);
             portWidth = width;
             portHeight = height;
-            service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             orgDisVec = portParam.srtPoint.GetAsVector();
             orgDisMat = Matrix3d.Displacement(orgDisVec);
         }

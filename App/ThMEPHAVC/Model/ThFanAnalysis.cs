@@ -72,6 +72,7 @@ namespace ThMEPHVAC.CAD
         private double ioBypassSepDis;
         private List<BypassTee> bypassTees;
         private ThCADCoreNTSSpatialIndex spatialIndex;
+        private ThDuctPortsDrawService service;
         public ThShrinkDuct shrinkService;
         public ThFanAnalysis(double ioBypassSepDis,
                              ThDbModelFan fan,
@@ -79,9 +80,10 @@ namespace ThMEPHVAC.CAD
                              PortParam portParam,
                              DBObjectCollection bypass,
                              DBObjectCollection wallLines,
-                             bool haveMultiFan)
+                             bool haveMultiFan,
+                             ThDuctPortsDrawService service)
         {
-            Init(ioBypassSepDis, fan, param, bypass, portParam);
+            Init(ioBypassSepDis, fan, param, bypass, portParam, service);
             MoveToZero(fan.FanInletBasePoint, fan.FanOutletBasePoint, param.centerLines, wallLines, out Point3d roomP, out Point3d notRoomP);
             MergeBypassCenterLine(ref param.centerLines, bypass);
             UpdateSearchPoint(roomP, notRoomP, param, ref param.centerLines, out Point3d iRoomP, out Point3d iNotRoomP, out Line roomLine, out Line notRoomLine);
@@ -145,8 +147,14 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-        private void Init(double ioBypassSepDis, ThDbModelFan fan, FanParam param, DBObjectCollection bypass, PortParam portParam)
+        private void Init(double ioBypassSepDis, 
+                          ThDbModelFan fan, 
+                          FanParam param, 
+                          DBObjectCollection bypass, 
+                          PortParam portParam,
+                          ThDuctPortsDrawService service)
         {
+            this.service = service;
             this.fan = fan;
             this.fanParam = param;
             this.bypass = bypass;
@@ -172,7 +180,6 @@ namespace ThMEPHVAC.CAD
             var rootDuct = centerLines.Values.ToList().LastOrDefault();
             var insertP = rootDuct.l.EndPoint;
             var dirVec = (rootDuct.l.EndPoint - rootDuct.l.StartPoint).GetNormal();
-            var service = new ThDuctPortsDrawService(fanParam.scenario, fanParam.scale);
             if (portParam.genStyle == GenerationStyle.Auto)
                 ThNotRoomStartComp.InsertComp(rootDuct, dirVec, moveSrtP, insertP, portParam, service);
         }

@@ -429,7 +429,8 @@ namespace ThMEPHVAC.Model
             var index = new ThCADCoreNTSSpatialIndex(centerLine);
             foreach (Line l in bypassLine)
             {
-                var pl = GetLineExtend(l, 1);
+                var dir = ThMEPHVACService.GetEdgeDirection(l);
+                var pl = GetLineExtend(new Line(l.StartPoint - dir, l.EndPoint + dir), 5);
                 var res = index.SelectCrossingPolygon(pl);
                 if (res.Count > 0)
                     return true;

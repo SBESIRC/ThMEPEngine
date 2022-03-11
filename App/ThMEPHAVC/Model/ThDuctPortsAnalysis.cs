@@ -101,7 +101,7 @@ namespace ThMEPHVAC.Model
         }
         private List<Handle> DeleteOrgGraph()
         {
-            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllTCHComponent(portParam.srtPoint);
+            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllTCHComponent(portParam);
             var groupBounds = bounds2IdDic.Keys.ToCollection();
             var index = new ThCADCoreNTSSpatialIndex(groupBounds);
             var conns = new List<Handle>();

@@ -32,15 +32,15 @@ namespace ThMEPHVAC.Model
                 return bounds2IdDic;
             }
         }
-        public static Dictionary<Polyline, Handle> ReadAllTCHComponent(Point3d srtP)
+        public static Dictionary<Polyline, Handle> ReadAllTCHComponent(PortParam portParam)
         {
             using (var db = AcadDatabase.Active())
             {
                 var bounds2IdDic = new Dictionary<Polyline, Handle>();
-                var connector = ReadTCHGroupId2geoDic(srtP);
+                var connector = ReadTCHGroupId2geoDic(portParam);
                 foreach (var c in connector)
                     bounds2IdDic.Add(c.Value, c.Key.Handle);
-                GetTCHDuctBounds(srtP, out _, out Dictionary<Polyline, DuctModifyParam> ductsDic);
+                GetTCHDuctBounds(portParam.srtPoint, out _, out Dictionary<Polyline, DuctModifyParam> ductsDic);
                 foreach (var d in ductsDic)
                     bounds2IdDic.Add(d.Key, d.Value.handle);
                 return bounds2IdDic;
@@ -87,32 +87,59 @@ namespace ThMEPHVAC.Model
                 return new DuctModifyParam() { sp = sp, ep = ep, ductSize = w.ToString() + "x" + h.ToString(), handle = id.Handle, type = "Duct" };
             }
         }
-        public static Dictionary<ObjectId, Polyline> ReadTCHGroupId2geoDic(Point3d srtP)
+        private static Tuple<string, string> GetLayerInfo(string scenario)
+        {
+            switch (scenario)
+            {
+                case "消防排烟兼平时排风":
+                case "消防补风兼平时送风":
+                    return new Tuple<string, string>("H-DUAL-DUCT-MID", "H-DAPP-DAPP");
+                case "消防排烟":
+                case "消防补风":
+                case "消防加压送风":
+                    return new Tuple<string, string>("H-FIRE-DUCT-MID", "H-DAPP-FAPP");
+                case "平时送风":
+                case "平时排风":
+                case "事故排风":
+                case "事故补风":
+                case "平时送风兼事故补风":
+                case "平时排风兼事故排风":
+                case "厨房排油烟补风":
+                case "厨房排油烟":
+                    return new Tuple<string, string>("H-VENT-DUCT-MID", "H-DAPP-AAPP");
+                case "空调送风":
+                case "空调回风":
+                case "空调新风":
+                    return new Tuple<string, string>("H-ACON-DUCT-MID", "H-DAPP-AAPP");
+                default: throw new NotImplementedException("No such scenior!");
+            }
+        }
+        public static Dictionary<ObjectId, Polyline> ReadTCHGroupId2geoDic(PortParam portParam)
         {
             using (var db = AcadDatabase.Active())
             {
+                var layerInfo = GetLayerInfo(portParam.param.scenario);
                 var dic = new Dictionary<ObjectId, Polyline>();
-                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+                var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var visitor = new ThTCHFittingExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
-                db.ModelSpace.OfType<Entity>().ForEach(e =>
+                var a = db.ModelSpace.OfType<Curve>();
+                foreach (var b in a)
                 {
-                    if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+                    if (b is Line || b is Arc)
+                        continue;
+                    var objs = new DBObjectCollection();
+                    b.Explode(objs);
+                    var results = objs.OfType<Line>()
+                                      .Where(o => (o.Layer.Contains(layerInfo.Item1) || o.Layer.Contains(layerInfo.Item2)))
+                                      .ToCollection();
+                    var pl = ThMEPHAVCBounds.GetConnectorBounds(results, 1);
+                    if (pl.Bounds != null)
                     {
-                        var objs = new DBObjectCollection();
-                        e.Explode(objs);
-                        var results = objs
-                        .OfType<Line>()
-                        .Where(o => (o.Layer.Contains("DUCT-净化中心线") || o.Layer.Contains("DUCT-净化法兰")))
-                        .ToCollection();
-                        var pl = ThMEPHAVCBounds.GetConnectorBounds(results, 1);
-                        if (pl.Bounds != null)
-                        {
-                            pl.TransformBy(mat);
-                            dic.Add(e.Id, pl);
-                        }
+                        pl.TransformBy(mat);
+                        dic.Add(b.Id, pl);
                     }
-                });
+                }
                 return dic;
             }
         }
@@ -368,7 +395,7 @@ namespace ThMEPHVAC.Model
                 var centerLines = new DBObjectCollection();
                 var lines = db.ModelSpace.OfType<Curve>();
                 foreach (var l in lines)
-                    if (l.Layer == layerName)
+                    if (l.Visible && l.Layer == layerName)
                         centerLines.Add(l.Clone() as Curve);
                 return centerLines;
             }
