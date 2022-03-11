@@ -8,6 +8,11 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectLType:DrawObjectBase
     {
+        /// <summary>
+        /// 计算纵筋位置
+        /// </summary>
+        /// <param name="pointNum"></param>
+        /// <param name="points"></param>
         void CalReinforcePosition(int pointNum,List<Point3d> points)
         {
 
