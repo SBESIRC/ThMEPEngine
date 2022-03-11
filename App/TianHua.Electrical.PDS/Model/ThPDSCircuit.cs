@@ -51,39 +51,9 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSCircuitType Type { get; set; }
 
         /// <summary>
-        /// 额定电压
-        /// </summary>
-        public double KV { get; set; }
-
-        /// <summary>
-        /// 安装功率
-        /// </summary>
-        public ThInstalledCapacity InstalledCapacity { get; set; }
-
-        /// <summary>
-        /// 相数
-        /// </summary>
-        public ThPDSPhase Phase { get; set; }
-
-        /// <summary>
-        /// 需要系数
-        /// </summary>
-        public double DemandFactor { get; set; }
-
-        /// <summary>
-        /// 功率因数
-        /// </summary>
-        public double PowerFactor { get; set; }
-
-        /// <summary>
         /// 位置信息
         /// </summary>
         public ThPDSLocation Location { get; set; }
-
-        /// <summary>
-        /// 是否消防回路
-        /// </summary>
-        public bool FireLoad { get; set; }
 
         /// <summary>
         /// 回路是否利用桥架

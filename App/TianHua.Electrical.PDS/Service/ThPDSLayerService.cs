@@ -17,7 +17,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             return new List<string>
             {
-                "E-UNIV-NOTE", 
+                "E-UNIV-NOTE",
                 "E-*-DIMS",
             };
         }
@@ -28,8 +28,8 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public static List<string> CabletrayLayers()
         {
-            return new List<string> 
-            { 
+            return new List<string>
+            {
                 "E-POWR-CMTB",
                 "E-LITE-CMTB",
                 "E-UNIV-EL2",
@@ -43,9 +43,9 @@ namespace TianHua.Electrical.PDS.Service
         /// <returns></returns>
         public static List<string> CableLayers()
         {
-            return new List<string> 
-            { 
-                "E-LITE-WIRE", 
+            return new List<string>
+            {
+                "E-LITE-WIRE",
                 "E-LITE-WIRE2",
                 "E-LITE-WIRE-LV",
                 "E-POWR-WIRE",
@@ -55,9 +55,9 @@ namespace TianHua.Electrical.PDS.Service
             };
         }
 
-        public static void SelectCircuitType(ThPDSCircuit circuit, string layer)
+        public static void SelectCircuitType(ThPDSCircuit circuit, ThPDSLoad load, string layer, bool needAssign)
         {
-            switch(layer)
+            switch (layer)
             {
                 case "E-POWR-WIRE":
                     circuit.Type = ThPDSCircuitType.PowerEquipment;
@@ -81,17 +81,20 @@ namespace TianHua.Electrical.PDS.Service
                     circuit.Type = ThPDSCircuitType.None;
                     break;
             }
-            Assign(circuit);
+            if(needAssign)
+            {
+                Assign(circuit, load);
+            }
         }
 
-        private static void Assign(ThPDSCircuit circuit )
+        private static void Assign(ThPDSCircuit circuit, ThPDSLoad load)
         {
-            if(circuit.Type != ThPDSCircuitType.None)
+            if (circuit.Type != ThPDSCircuitType.None)
             {
                 var config = ThPDSCircuitConfigModel.BlockConfig.Where(o => o.CircuitType == circuit.Type).First();
-                circuit.Phase = config.Phase;
-                circuit.DemandFactor = config.DemandFactor;
-                circuit.PowerFactor = config.PowerFactor;
+                load.Phase = config.Phase;
+                load.DemandFactor = config.DemandFactor;
+                load.PowerFactor = config.PowerFactor;
             }
         }
 

@@ -264,11 +264,6 @@ namespace TianHua.Electrical.PDS.Service
             {
                 ID = id,
                 Type = circuitModel.CircuitType,
-                KV = circuitModel.KV,
-                Phase = circuitModel.Phase,
-                DemandFactor = circuitModel.DemandFactor,
-                PowerFactor = circuitModel.PowerFactor,
-                FireLoad = circuitModel.FireLoad,
             };
             return circuit;
         }
@@ -281,11 +276,6 @@ namespace TianHua.Electrical.PDS.Service
             {
                 ID = id,
                 Type = circuitModel.CircuitType,
-                KV = circuitModel.KV,
-                Phase = circuitModel.Phase,
-                DemandFactor = circuitModel.DemandFactor,
-                PowerFactor = circuitModel.PowerFactor,
-                FireLoad = circuitModel.FireLoad,
             };
             return circuit;
         }

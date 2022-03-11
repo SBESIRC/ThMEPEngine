@@ -68,13 +68,13 @@ namespace TianHua.Electrical.PDS.Engine
         private ThCADCoreNTSSpatialIndex LoadIndex;
         private ThCADCoreNTSSpatialIndex CableIndex;
         private ThCADCoreNTSSpatialIndex CableTrayIndex;
-        public ThPDSCircuitGraphNode CabletrayNode;//桥架节点
+        public ThPDSCircuitGraphNode CableTrayNode;//桥架节点
         private ThMarkService MarkService;
         private Database Database;
 
         public ThPDSLoopGraphEngine(Database database, List<Entity> distBoxes,
             List<Entity> loads, List<Curve> cabletrays, List<Curve> cables, ThMarkService markService,
-            List<string> distBoxKey)
+            List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode)
         {
             Database = database;
             MarkService = markService;
@@ -97,11 +97,8 @@ namespace TianHua.Electrical.PDS.Engine
                 {
                     Graph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
                 };
-                CabletrayNode = new ThPDSCircuitGraphNode
-                {
-                    NodeType = PDSNodeType.Cabletray,
-                };
-                PDSGraph.Graph.AddVertex(CabletrayNode);
+                CableTrayNode = cableTrayNode;
+                PDSGraph.Graph.AddVertex(CableTrayNode);
             }
         }
 
@@ -212,7 +209,7 @@ namespace TianHua.Electrical.PDS.Engine
                     //都不相邻即无关系，都相邻即近似平行，都不符合
                     if (IsStart != IsEnd)
                     {
-                        PrepareNavigate(CabletrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
+                        PrepareNavigate(CableTrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
                     }
                 }
 
@@ -226,7 +223,7 @@ namespace TianHua.Electrical.PDS.Engine
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = ThPDSGraphService.CreateEdge(CabletrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
+                        var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
                         PDSGraph.Graph.AddEdge(newEdge);
 
                         FindGraph(startingEntity, distBox);
@@ -256,7 +253,13 @@ namespace TianHua.Electrical.PDS.Engine
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
                 if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
-                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, circuit.Layer);
+                    var needAssign = false;
+                    if(newEdge.Target.Loads.Count == 0)
+                    {
+                        newEdge.Target.Loads.Add(new ThPDSLoad());
+                        needAssign = true;
+                    }
+                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, newEdge.Target.Loads[0], circuit.Layer, needAssign);
                 }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
@@ -265,7 +268,14 @@ namespace TianHua.Electrical.PDS.Engine
                     var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3, DistBoxKey);
                     if (newDistBoxEdge.Circuit.Type == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
                     {
-                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Circuit, otherCircuit.Layer);
+                        var needAssign = false;
+                        if (newDistBoxEdge.Target.Loads.Count == 0)
+                        {
+                            newDistBoxEdge.Target.Loads.Add(new ThPDSLoad());
+                            needAssign = true;
+                        }
+                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Circuit, newDistBoxEdge.Target.Loads[0], 
+                            otherCircuit.Layer, needAssign);
                     }
                     PDSGraph.Graph.AddEdge(newDistBoxEdge);
 
