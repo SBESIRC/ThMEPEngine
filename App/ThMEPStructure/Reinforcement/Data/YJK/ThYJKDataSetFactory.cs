@@ -1,17 +1,16 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Data;
+using ThMEPEngineCore.Model;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
 
 namespace ThMEPStructure.Reinforcement.Data.YJK
 {
-    public class ThYJKDataSetFactory
+    public class ThYJKDataSetFactory : ThMEPDataSetFactory
     {
         #region ---------- 外部传入 -----------
         /// <summary>
@@ -41,7 +40,14 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             Results= new List<EdgeComponentExtractInfo>();
             AnalysisService = new ThShapeAnalysisService();
         }
-        public void GetElements(Database database, Point3dCollection collection)
+        protected override ThMEPDataSet BuildDataSet()
+        {
+            return new ThMEPDataSet()
+            {
+                Container = new List<ThGeometry>(),
+            };
+        }
+        protected override void GetElements(Database database, Point3dCollection collection)
         {
             // 获取数据
             var wallColumns = GetWallColumns(database, collection); // 墙柱
@@ -64,62 +70,46 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
                 }
                 var edgeComponentInf = leaderMarkInfs.First();
                 edgeComponentInf.ShapeCode = shapeCode;
-
-
+                // 解析的结果存在于edgeComponentInf中
+                GetOutlineSpecAndLinkWallPos(edgeComponentInf, walls);
             };
         }
 
-        private string GetPolylineSpec(Polyline polyline, ShapeCode shapeCode,
-            string antiSeismicGrade,string code,DBObjectCollection walls)
+        private void GetOutlineSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf,DBObjectCollection walls)
         {
-            var spec = "";
-            switch (shapeCode)
+            // 解析的结果会放在componentInf对应的属性上
+            switch (componentInf.ShapeCode)
             {
                 case ShapeCode.Rect:
-                    spec = GetRectSpec(polyline, antiSeismicGrade, code, walls);
+                    GetRectSpecAndLinkWallPos(componentInf, walls);
                     break;
                 case ShapeCode.L:
-                    spec = GetLTypeSpec(polyline, antiSeismicGrade, code, walls);
+                    GetLTypeSpecAndLinkWallPos(componentInf, walls);
                     break;
                 case ShapeCode.T:
-                    spec = GetTTypeSpec(polyline, antiSeismicGrade, code, walls);
+                    GetTTypeSpecAndLinkWallPos(componentInf, walls);
                     break;
                 default:
-                    spec = "";
                     break;
             }
-            return spec;
         }
 
-        private string GetRectSpec(Polyline polyline, string antiSeismicGrade, string code, DBObjectCollection walls)
+        private void GetRectSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunRectSecAnalysisService(walls, code, antiSeismicGrade);
-            specService.Analysis(polyline);
-            return specService.Spec;
+            var specService = new ThHuaRunRectSecAnalysisService(walls,AntiSeismicGrade);
+            specService.Analysis(componentInf);
         }
 
-        private string GetLTypeSpec(Polyline polyline,string antiSeismicGrade, string code, DBObjectCollection walls)
+        private void GetLTypeSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunLTypeSecAnalysisService(walls, code, antiSeismicGrade);
-            specService.Analysis(polyline);
-            return specService.Spec;
+            var specService = new ThHuaRunLTypeSecAnalysisService(walls, AntiSeismicGrade);
+            specService.Analysis(componentInf);
         }
 
-        private string GetTTypeSpec(Polyline polyline, string antiSeismicGrade, string code, DBObjectCollection walls)
+        private void GetTTypeSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf, DBObjectCollection walls)
         {
-            var specService = new ThHuaRunTTypeSecAnalysisService(walls, code, antiSeismicGrade);
-            specService.Analysis(polyline);
-            return specService.Spec;
-        }
-
-        private EdgeComponentExtractInfo CreateEdgeComponentExtractInfo(
-            Polyline outline,ShapeCode shapeCode)
-        {
-            return new EdgeComponentExtractInfo
-            {
-                EdgeComponent = outline,
-                ShapeCode = shapeCode,
-            };
+            var specService = new ThHuaRunTTypeSecAnalysisService(walls, AntiSeismicGrade);
+            specService.Analysis(componentInf);
         }
 
         private ShapeCode Analysis(Entity wallColumn)
