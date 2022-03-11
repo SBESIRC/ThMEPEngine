@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Model
         }
     }
 
-    public class ThPDSCircuitGraphEdge<T> : Edge<T> where T : ThPDSCircuitGraphNode
+    public class ThPDSCircuitGraphEdge<T> : EquatableEdge<T> where T : ThPDSCircuitGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
         public ThPDSCircuitGraphEdge(T source, T target) : base(source, target)
