@@ -506,6 +506,18 @@ namespace ThMEPArchitecture.PartitionLayout
                     l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
                     var bf = l.Buffer(DisLaneWidth / 2 - 1);
                     var result = bf.Intersect(Boundary, Intersect.OnBothOperands).Count == 0;
+                    l.TransformBy(Matrix3d.Displacement(vec * DisLaneWidth / 2));
+                    l.StartPoint = l.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(l).GetNormal() * 10));
+                    l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
+                    bf = l.Buffer(DisLaneWidth / 2 - 1);
+                    foreach (var wl in Walls)
+                    {
+                        if (bf.Intersect(wl, Intersect.OnBothOperands).Count > 0)
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
                     bf.Dispose();
                     l.Dispose();
                     return result;
