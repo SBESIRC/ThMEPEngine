@@ -60,6 +60,50 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 插入过欠电压保护
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void InsertUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 移除过欠电压保护
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void RemoveUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 插入电能表
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void InsertEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 移除电能表
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void RemoveEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// 更新图
         /// </summary>
         /// <param name="graph"></param>
