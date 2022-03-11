@@ -1,9 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.Reinforcement.Model
 {
     public class EdgeComponentExtractInfo
     {
+        public Dictionary<string, int> SpecDict { get; set; }=new Dictionary<string, int>();
         /// <summary>
         /// 边构
         /// </summary>
@@ -12,12 +14,12 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 编号
         /// eg. GBZ24,GBZ1
         /// </summary>
-        public string Number { get; set; }
+        public string Number { get; set; } = "";
         /// <summary>
         /// 规格
         /// eg. 一字型: 1650x200,L型：200x800,200,300
         /// </summary>
-        public string Spec { get; set; }
+        public string Spec { get; set; } = "";
         /// <summary>
         /// 形状
         /// eg. 一形，L形，T形
@@ -33,17 +35,16 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 外形代号
         /// </summary>
         internal ShapeCode ShapeCode { get; set; }
-
         /// <summary>
-        /// 类型
-        /// eg 标准，标准C,非标
+        /// 是否是标准构件
         /// </summary>
-        public string Type { get; set; }
+        public bool IsStandard { get; set; }
         /// <summary>
         /// 类型代号，用于标识标准-A,标准-B,标准Cal-A,标准Cal-B
         /// 取值为: A 或 B
         /// </summary>
-        public string TypeCode { get; set; }
+        public string TypeCode { get; set; } = "";
+        public string LinkWallPos { get; set; } = "";
         /// <summary>
         /// 是计算书图层
         /// </summary>
@@ -83,6 +84,15 @@ namespace ThMEPStructure.Reinforcement.Model
                     break;
             }
             return result;
+        }
+        public string GetCode()
+        {
+            //GBZ11->GBZ, 
+            if (string.IsNullOrEmpty(Number) || Number.Length<3)
+            {
+                return "";
+            }
+            return Number.Substring(0, 3).ToUpper();
         }
     }
     internal enum ShapeCode
