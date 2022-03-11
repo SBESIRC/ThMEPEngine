@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
-    public class ThermalRelayModel : NotifyPropertyChangedBase
+    public class ThPDSThermalRelayModel : NotifyPropertyChangedBase
     {
         readonly ThermalRelay thermalRelay;
 
-        public ThermalRelayModel(ThermalRelay thermalRelay)
+        public ThPDSThermalRelayModel(ThermalRelay thermalRelay)
         {
             this.thermalRelay = thermalRelay;
         }

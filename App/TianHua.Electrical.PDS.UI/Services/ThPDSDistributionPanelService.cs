@@ -641,7 +641,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     var isolatingSwitch = oneway.isolatingSwitch;
                                                     if (isolatingSwitch != null)
                                                     {
-                                                        var vm = new Project.Module.Component.IsolatingSwitchModel(isolatingSwitch);
+                                                        var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
                                                         var bd = new Binding() { Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                         item.SetBinding(TextBlock.TextProperty, bd);
                                                         cb += () => UpdatePropertyGrid(vm);
@@ -833,7 +833,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             if (breaker != null)
                                             {
-                                                var vm = new Project.Module.Component.BreakerModel(breaker);
+                                                var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
                                                 cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
@@ -862,7 +862,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             if (contactor != null)
                                             {
-                                                var vm = new Project.Module.Component.ContactorModel(contactor);
+                                                var vm = new Project.Module.Component.ThPDSContactorModel(contactor);
                                                 cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
@@ -892,7 +892,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             if (thermalRelay != null)
                                             {
-                                                var vm = new Project.Module.Component.ThermalRelayModel(thermalRelay);
+                                                var vm = new Project.Module.Component.ThPDSThermalRelayModel(thermalRelay);
                                                 cb += () => UpdatePropertyGrid(vm);
                                                 render += () =>
                                                 {
