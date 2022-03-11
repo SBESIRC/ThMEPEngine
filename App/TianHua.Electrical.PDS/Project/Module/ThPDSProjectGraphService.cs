@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void AddCircuit(ThPDSProjectGraph graph, CircuitFormOutType type)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void UpdateFormInType(ThPDSProjectGraph graph, CircuitFormInType type)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="type"></param>
         public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="doLock"></param>
         public static void Lock(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, bool doLock)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

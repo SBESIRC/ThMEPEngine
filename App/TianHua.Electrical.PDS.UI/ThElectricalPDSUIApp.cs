@@ -14,7 +14,7 @@ namespace TianHua.Electrical.PDS.UI
             {
                 ElecSandboxUI.InitPDSProjectData();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -25,13 +25,14 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THPDSUITest", CommandFlags.Modal)]
         public void THPDSUITest()
         {
+            var win = ElecSandboxUI.TryGetSingleWindow();
+            if (win == null) return;
             var cmd = new ThPDSCommand();
             cmd.Execute();
-            var win = new ElecSandboxUI()
-            {
-                Graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph,
-            };
-            AcadApp.ShowModalWindow(win);
+            var g = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            if (g == null) return;
+            win.Graph = g;
+            AcadApp.ShowModelessWindow(win);
         }
         [CommandMethod("TIANHUACAD", "THPDSTest", CommandFlags.Modal)]
         public void THPDSTest()

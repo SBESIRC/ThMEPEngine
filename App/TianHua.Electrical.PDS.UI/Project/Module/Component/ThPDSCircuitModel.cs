@@ -24,11 +24,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string CircuitId
         {
             get => edge.Circuit.ID.CircuitID;
-            set
-            {
-                edge.Circuit.ID.CircuitID = value;
-                OnPropertyChanged(nameof(CircuitId));
-            }
+            //set
+            //{
+            //    edge.Circuit.ID.CircuitID = value;
+            //    OnPropertyChanged(nameof(CircuitId));
+            //}
         }
         [DisplayName("回路形式")]
         public Model.ThPDSCircuitType CircuitType
@@ -74,11 +74,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string LoadId
         {
             get => edge.Circuit.ID.LoadID;
-            set
-            {
-                edge.Circuit.ID.LoadID = value;
-                OnPropertyChanged(nameof(LoadId));
-            }
+            //set
+            //{
+            //    edge.Circuit.ID.LoadID = value;
+            //    OnPropertyChanged(nameof(LoadId));
+            //}
         }
         [DisplayName("功能描述")]
         public string Description
