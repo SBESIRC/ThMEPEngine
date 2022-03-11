@@ -28,8 +28,24 @@
         /// </summary>
         public string Type { get; set; }
         /// <summary>
+        /// 是否为计算型
+        /// </summary>
+        public bool IsCalculation { get; set; }
+        /// <summary>
+        /// 连接墙的位置说明
+        /// </summary>
+        public string LinkWallPos { get; set; }
+        /// <summary>
         /// 砼强度等级
         /// </summary>
         public string ConcreteStrengthGrade { get; set; }
+        /// <summary>
+        /// 点筋宽度
+        /// </summary>
+        public double PointReinforceLineWeight { get; set; }
+        /// <summary>
+        /// 箍筋线宽
+        /// </summary>
+        public double StirrupLineWeight { get; set; }
     }
 }
