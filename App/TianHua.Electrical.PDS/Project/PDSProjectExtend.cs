@@ -244,7 +244,7 @@ namespace TianHua.Electrical.PDS.Project
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
             {
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
-                circuitDetails.CircuitForm = new MotorCircuit_DiscreteComponents()
+                circuitDetails.CircuitForm = new Motor_DiscreteComponentsCircuit()
                 {
                     breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
                     contactor = new Contactor(CalculateCurrent, PolesNum),

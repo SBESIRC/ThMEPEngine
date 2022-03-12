@@ -827,7 +827,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 breaker = regularCircuit.breaker;
                                             }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.MotorCircuit_DiscreteComponents motorCircuit_DiscreteComponents)
+                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
                                             {
                                                 breaker = motorCircuit_DiscreteComponents.breaker;
                                             }
@@ -856,7 +856,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var vertice = graph.Vertices.ToList()[sel.Id];
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                             PDS.Project.Module.Component.Contactor contactor = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.MotorCircuit_DiscreteComponents motorCircuit_DiscreteComponents)
+                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
                                             {
                                                 contactor = motorCircuit_DiscreteComponents.contactor;
                                             }
@@ -886,7 +886,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var vertice = graph.Vertices.ToList()[sel.Id];
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                             PDS.Project.Module.Component.ThermalRelay thermalRelay = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.MotorCircuit_DiscreteComponents motorCircuit_DiscreteComponents)
+                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
                                             {
                                                 thermalRelay = motorCircuit_DiscreteComponents.thermalRelay;
                                             }

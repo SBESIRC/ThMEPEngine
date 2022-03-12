@@ -3,19 +3,19 @@
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
-    /// 常规回路
+    /// 漏电回路
     /// </summary>
-    public class RegularCircuit : PDSBaseOutCircuit
+    public class LeakageCircuit : PDSBaseOutCircuit
     {
-        public RegularCircuit()
+        public LeakageCircuit()
         {
-            CircuitFormType = CircuitFormOutType.常规;
+            CircuitFormType = CircuitFormOutType.漏电;
         }
 
         /// <summary>
         /// 坑位1: 断路器
         /// </summary>
-        public Breaker breaker { get; set; }
+        public BreakerBaseComponent breaker { get; set; }
 
         /// <summary>
         /// 坑位2：预留
