@@ -48,6 +48,7 @@
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSCircuitModel.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
+    <Compile Include="Model\ThPDSDBText.cs" />
     <Compile Include="Model\ThPDSID.cs" />
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />

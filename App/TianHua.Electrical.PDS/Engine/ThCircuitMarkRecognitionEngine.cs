@@ -53,16 +53,9 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 if(o is Polyline polyline)
                 {
-                    if(!IsClosed(polyline))
-                    {
-                        var lines = new DBObjectCollection();
-                        polyline.Explode(lines);
-                        lines.OfType<Line>().ForEach(e => Results.Add(e));
-                    }
-                    else
-                    {
-                        Results.Add(polyline);
-                    }
+                    var lines = new DBObjectCollection();
+                    polyline.Explode(lines);
+                    lines.OfType<Line>().Where(e => e.Length > 1.0).ForEach(e => Results.Add(e));
                 }
                 else
                 {

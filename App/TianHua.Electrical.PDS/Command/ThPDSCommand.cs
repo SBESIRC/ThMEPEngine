@@ -129,14 +129,19 @@ namespace TianHua.Electrical.PDS.Command
                         ThMEPEntityExtension.ProjectOntoXYPlane(block);
                     });
 
+                    // 提取配电箱框线
+                    var distBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database);
+
                     //做一个标注的Service
                     var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks, tchWireDimExtractor.Results);
 
                     ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                     ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
                     var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
-                        loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService, 
+                        loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService,
                         distBoxKey, cableTrayNode);
+
+                    graphEngine.MultiDistBoxAnalysis(distBoxFrame);
                     graphEngine.CreatGraph();
                     graphEngine.CopyAttributes();
 

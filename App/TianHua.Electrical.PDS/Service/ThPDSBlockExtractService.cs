@@ -7,26 +7,32 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
-using ThMEPEngineCore.CAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSBlockExtractService
     {
+        public ThPDSBlockExtractService()
+        {
+            MarkBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
+            LoadBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
+            DistBoxBlocks = new Dictionary<Entity, ThPDSBlockReferenceData>();
+        }
+
         /// <summary>
         /// 标注块
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> MarkBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> MarkBlocks { get; set; }
 
         /// <summary>
         /// 负载块
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
 
         /// <summary>
         /// 配电箱
         /// </summary>
-        public Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; } = new Dictionary<Entity, ThPDSBlockReferenceData>();
+        public Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
 
         public void Extract(Database database, List<ThPDSBlockInfo> tableInfo, List<string> nameFilter,
             List<string> propertyFilter, List<string> distBoxKey)

@@ -55,6 +55,11 @@ namespace TianHua.Electrical.PDS.Service
             };
         }
 
+        public static string DistBoxFrameLayer()
+        {
+            return "E-REQU-WALL";
+        }
+
         public static void SelectCircuitType(ThPDSCircuit circuit, ThPDSLoad load, string layer, bool needAssign)
         {
             switch (layer)

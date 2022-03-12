@@ -158,60 +158,64 @@ namespace TianHua.Electrical.PDS.Service
 
         public List<string> GetMarks(Polyline frame)
         {
-            var result = new List<string>();
-            var lineCollection = LineIndex.SelectFence(frame);
-            if (lineCollection.Count > 0)
+            var dbTexts = new List<DBText>();
+            var result = GetMarks(frame, dbTexts);
+            dbTexts.Distinct().ForEach(o => result.Add(o.TextString));
+            return result;
+        }
+
+        public List<List<string>> GetMultiMarks(Polyline frame)
+        {
+            var multiList = new List<List<string>>();
+            var dbTexts = new List<DBText>();
+            var result = GetMarks(frame, dbTexts);
+            if (result.Count > 0)
             {
-                var line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
-                var newframe = line.ExtendLine(10.0).Buffer(10.0);
-                lineCollection = LineIndex.SelectCrossingPolygon(newframe);
-                lineCollection.Remove(line);
-
-                if (lineCollection.OfType<Polyline>().Count() > 0)
+                result.ForEach(o =>
                 {
-                    var polyCollection = lineCollection.OfType<Polyline>();
-                    var polys = polyCollection.Select(p => ThPDSBufferService.Buffer(p)).ToCollection();
-                    newframe = polys.ToNTSMultiPolygon().Union().ToDbCollection().OfType<Polyline>().FirstOrDefault();
+                    multiList.Add(new List<string> { o });
+                });
+            }
 
-                    var doSearch = true;
-                    while (doSearch && newframe != null)
+            multiList.AddRange(DBTextSort(dbTexts.Distinct().ToList()));
+            return multiList;
+        }
+
+        private List<string> GetMarks(Polyline frame, List<DBText> dbTexts)
+        {
+            var result = new List<string>();
+            var textLeads = new List<Line>();
+            SearchMarkLine(frame, textLeads);
+            if (textLeads.Count > 0)
+            {
+                var tolerence = 3.0 * Math.PI / 180.0;
+                textLeads.ForEach(o =>
+                {
+                    var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
+                    var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
+                    if (TextCollection.Count > 0)
                     {
-                        var newPolyCollection = LineIndex.SelectCrossingPolygon(newframe).OfType<Polyline>();
-                        if (newPolyCollection.Count() <= polyCollection.Count())
+                        TextCollection.OfType<DBText>().ForEach(t =>
                         {
-                            doSearch = false;
-                            break;
+                            // 只取与引线方向相同的文字
+                            var rad = t.Rotation * Math.PI / 180.0;
+                            var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
+                            var lineAngle = o.Angle % Math.PI;
+                            if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
+                            {
+                                dbTexts.Add(t);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
+                        if (pointCollection.Count > 0)
+                        {
+                            result.AddRange(MarkDic[pointCollection[0] as DBPoint]);
                         }
-                        polys = newPolyCollection.Select(p => ThPDSBufferService.Buffer(p)).ToCollection();
-                        newframe = polys.ToNTSMultiPolygon().Union().ToDbCollection().OfType<Polyline>().FirstOrDefault();
-                        polyCollection = newPolyCollection;
                     }
-                }
-                else
-                {
-                    if (lineCollection.OfType<Line>().Count() > 0)
-                    {
-                        line = lineCollection.OfType<Line>().OrderByDescending(o => o.Length).First();
-                    }
-                    newframe = line.ExtendLine(200.0).Buffer(200.0);
-                }
-
-                var TextCollection = TextIndex.SelectCrossingPolygon(newframe);//（Buffer200）+文字
-                if (TextCollection.Count > 0)
-                {
-                    TextCollection.OfType<DBText>().ForEach(o =>
-                    {
-                        result.Add(o.TextString);
-                    });
-                }
-                else
-                {
-                    var pointCollection = PointIndex.SelectWindowPolygon(newframe);
-                    if (pointCollection.Count > 0)
-                    {
-                        result = MarkDic[pointCollection[0] as DBPoint];
-                    }
-                }
+                });
             }
             else
             {
@@ -233,7 +237,70 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             }
-            return result.Select(o => Filter(o)).ToList();
+
+            return result.Distinct().Select(o => Filter(o)).ToList();
+        }
+
+        private void SearchMarkLine(Polyline frame, List<Line> textLeads)
+        {
+            var lineCollection = LineIndex.SelectFence(frame);
+            if (lineCollection.Count == 0)
+            {
+                return;
+            }
+            lineCollection.OfType<Line>().ForEach(o =>
+            {
+                if (!textLeads.Contains(o))
+                {
+                    textLeads.Add(o);
+                    var newFrame = ThPDSBufferService.Buffer(o);
+                    SearchMarkLine(newFrame, textLeads);
+                }
+            });
+        }
+
+        private List<List<string>> DBTextSort(List<DBText> texts)
+        {
+            var results = new List<ThPDSDBText>();
+            foreach (var text in texts)
+            {
+                var rad = text.Rotation * Math.PI / 180.0;
+                var direction = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
+                if (results.Count == 0)
+                {
+                    var pdsDBText = new ThPDSDBText
+                    {
+                        FirstPosition = text.Position,
+                        Direction = direction,
+                        Texts = new List<string> { text.TextString },
+                    };
+                    results.Add(pdsDBText);
+                }
+                else
+                {
+                    var i = 0;
+                    for (; i < results.Count; i++)
+                    {
+                        if (Math.Abs((results[i].FirstPosition - text.Position).GetNormal().DotProduct(results[i].Direction)) > 0.995)
+                        {
+                            results[i].Texts.Add(text.TextString);
+                            break;
+                        }
+                    }
+                    if (i == results.Count)
+                    {
+                        var pdsDBText = new ThPDSDBText
+                        {
+                            FirstPosition = text.Position,
+                            Direction = direction,
+                            Texts = new List<string> { text.TextString },
+                        };
+                        results.Add(pdsDBText);
+                    }
+                }
+            }
+
+            return results.Select(x => x.Texts).ToList();
         }
 
         private DBPoint ToDbPoint(Point3d point)

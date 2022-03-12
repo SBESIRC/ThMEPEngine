@@ -1,29 +1,30 @@
 ﻿using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 
-using ThCADExtension;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSDistBoxFrameExtraction
     {
-        public static List<Polyline> GetDistBoxFrame(Database database, Polyline frame, string layer)
+        public static List<Polyline> GetDistBoxFrame(Database database)
         {
-            var polyList = new List<Polyline>();
             using (var acadDatabase = AcadDatabase.Use(database))
             {
+                var results = new List<Polyline>();
                 var extractService = new ThExtractPolylineService()
                 {
-                    ElementLayer = layer,
+                    ElementLayer = ThPDSLayerService.DistBoxFrameLayer(),
                 };
-                extractService.Extract(acadDatabase.Database, frame.Vertices());
-                polyList.AddRange(extractService.Polys);
-            }
+                extractService.Extract(acadDatabase.Database, new Point3dCollection());
+                results.AddRange(extractService.Polys);
 
-            return polyList;
+                return results;
+            }
         }
     }
 }
