@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using QuickGraph;
+using QuikGraph;
 using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model

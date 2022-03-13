@@ -1,4 +1,4 @@
-﻿using QuickGraph;
+﻿using QuikGraph;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.Project.Module;
 using System;

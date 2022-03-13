@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
-using QuickGraph;
+using QuikGraph;
 
 using ThCADCore.NTS;
 using ThCADExtension;

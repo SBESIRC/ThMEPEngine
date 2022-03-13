@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.ApplicationServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using QuickGraph;
+using QuikGraph;
 
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
