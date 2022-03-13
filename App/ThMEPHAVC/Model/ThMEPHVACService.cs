@@ -410,17 +410,17 @@ namespace ThMEPHVAC.Model
         }
         public static Line GetMaxLine(DBObjectCollection lines)
         {
-            var max_line = new Line();
-            double max_len = 0;
+            var maxLine = new Line();
+            double maxLen = 0;
             foreach (Line l in lines)
             {
-                if (max_len < l.Length)
+                if (maxLen < l.Length)
                 {
-                    max_len = l.Length;
-                    max_line = l;
+                    maxLen = l.Length;
+                    maxLine = l;
                 }
             }
-            return max_line;
+            return maxLine;
         }
         public static bool IsCross(DBObjectCollection centerLine, DBObjectCollection bypassLine)
         {

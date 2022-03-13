@@ -37,6 +37,7 @@ namespace ThMEPHVAC.CAD
         public string IntakeForm;
         public string strAirVolume;
         public bool isExhaust;
+        public string installStyle;
         public ThDbModelFan(ObjectId FanObjectId)
         {
             using (var db = AcadDatabase.Active())// 立即显示重绘效果
@@ -59,7 +60,7 @@ namespace ThMEPHVAC.CAD
                 FanInlet = GetFanInlet();
                 isExhaust = !(scenario.Contains("补") || scenario.Contains("送"));
                 var isAxis = (Name.Contains("轴流风机"));
-                ThDuctPortsDrawService.GetFanDynBlockProperity(Data, isAxis, out fanInWidth, out fanOutWidth);
+                ThDuctPortsDrawService.GetFanDynBlockProperity(Data, isAxis, out fanInWidth, out fanOutWidth, out installStyle);
             } 
         }
         private string GetIntakeForm()

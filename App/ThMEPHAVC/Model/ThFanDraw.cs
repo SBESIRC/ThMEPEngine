@@ -76,12 +76,12 @@ namespace ThMEPHVAC.Model
             var totalLines = anayRes.centerLines.Values.ToList();
             for (int i = 0; i < roomLineCount; ++i)
                 segInfos.Add(totalLines[i]);
-            tchDrawService.ductService.Draw(segInfos, disMat, false, roomParam, ref gId);
+            tchDrawService.ductService.DrawDuct(segInfos, disMat, false, roomParam, ref gId);
             segInfos.Clear();
             for (int i = roomLineCount; i < anayRes.centerLines.Count(); ++i)
                 segInfos.Add(totalLines[i]);
-            tchDrawService.ductService.Draw(segInfos, disMat, false, notRoomParam, ref gId);
-            tchDrawService.ductService.Draw(anayRes.UpDownVertivalPipe, disMat, false, roomParam, ref gId);
+            tchDrawService.ductService.DrawDuct(segInfos, disMat, false, notRoomParam, ref gId);
+            tchDrawService.ductService.DrawVerticalPipe(anayRes.UpDownVertivalPipe, disMat, ref gId);
         }
         private void Init(ThFanAnalysis anayRes, string curDbPath, ThDuctPortsDrawService service)
         {
@@ -115,7 +115,7 @@ namespace ThMEPHVAC.Model
                 brokenLineIds.AddRange(outIds);
             }   
         }
-        public ObjectId InsertElectricValve(Vector3d fan_cp_vec, double valvewidth, double angle)
+        public ObjectId InsertElectricValve(Vector3d fan_cp_vec, double valvewidth, double angle, string electrycityValveLayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

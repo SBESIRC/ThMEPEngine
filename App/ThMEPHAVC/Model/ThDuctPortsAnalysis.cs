@@ -37,10 +37,6 @@ namespace ThMEPHVAC.Model
         private DBObjectCollection excludeLines;
         private Dictionary<Polyline, ObjectId> allFansDic;
         private ThCADCoreNTSSpatialIndex portIndex;
-        // 标准管径大小
-        private HashSet<double> ductMods = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3000, 3500, 4000 };
-        // 需要新增的风管高度
-        private HashSet<double> ductHeights = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500};
         // start_point_ == (0,0,0) -> center_lines_ is near (0,0,0)
         // start_point_ != (0,0,0) -> center_lines_ need to move
         public ThDuctPortsAnalysis() { }
@@ -418,18 +414,34 @@ namespace ThMEPHVAC.Model
                 var info = infos[i];
                 if (!String.IsNullOrEmpty(info.ductSize))
                     continue;//根管段
-                info.ductSize = SelectASize(info.airVolume, limit);
+                info.ductSize = SelectAMainSize(info.airVolume, limit);
                 limit = info.ductSize;
             }
         }
-        private string SelectASize(double airVolume, string favorite)
+        private string SelectAMainSize(double airVolume, string favorite)
         {
-            ThMEPHVACService.GetWidthAndHeight(favorite, out double inW, out double inH);
             var ductInfo = new ThDuctParameter(airVolume, portParam.param.scenario);
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
                 if (size == favorite)
                     return size;
-            AddNotNormalDuctSize(ductInfo, inW, inH);
+            ThMEPHVACService.GetWidthAndHeight(favorite, out double inW, out double inH);
+            ductInfo = (!ThDuctParameter.ductMods.Contains(inW) || 
+                        !ThDuctParameter.ductHeights.Contains(inH)) ?
+                new ThDuctParameter(airVolume, portParam.param.scenario, inW, inH) :
+                new ThDuctParameter(airVolume, portParam.param.scenario);
+            return SelectClostRatioSize(ductInfo, favorite, airVolume);
+        }
+        private string SelectASize(double airVolume, string favorite)
+        {
+            var ductInfo = new ThDuctParameter(airVolume, portParam.param.scenario);
+            foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
+                if (size == favorite)
+                    return size;
+            return SelectClostRatioSize(ductInfo, favorite, airVolume);
+        }
+        private string SelectClostRatioSize(ThDuctParameter ductInfo, string favorite, double airVolume)
+        {
+            ThMEPHVACService.GetWidthAndHeight(favorite, out double inW, out double inH);
             string s = String.Empty;
             double minRatio = Double.MaxValue;
             var r = GetWHRatio(airVolume, portParam.param.scenario);
@@ -448,24 +460,6 @@ namespace ThMEPHVAC.Model
                 }
             }
             return (!s.IsNullOrEmpty()) ? s : favorite;
-        }
-
-        private void AddNotNormalDuctSize(ThDuctParameter ductInfo, double inW, double inH)
-        {
-            if (!ductMods.Contains(inW))
-            {
-                foreach (var h in ductHeights)
-                {
-                    ductInfo.DuctSizeInfor.DefaultDuctsSizeString.Add(inW.ToString() + "x" + h.ToString());
-                }
-            }
-            if (!ductHeights.Contains(inH))
-            {
-                foreach (var w in ductMods)
-                {
-                    ductInfo.DuctSizeInfor.DefaultDuctsSizeString.Add(w.ToString() + "x" + inH.ToString());
-                }
-            }
         }
 
         public double GetWHRatio(double airVolume, string scenario)
@@ -1100,6 +1094,8 @@ namespace ThMEPHVAC.Model
             mainLines = pointDetector.connectLines;
             foreach (Line l in tmpEndLines)
                 mainLines.Remove(l);
+            if (mainLines.Count == 0 && endLines.Count == 0)
+                endLines.Add(new DBObjectCollection() { startLine });
         }
         private void FilterNoPortCenterLine(DBObjectCollection orgLines, 
                                             DBObjectCollection addLines,

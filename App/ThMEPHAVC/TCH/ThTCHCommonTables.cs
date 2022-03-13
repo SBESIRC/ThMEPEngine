@@ -2,7 +2,8 @@
 {
     public static class ThTCHCommonTables
     {
-        public const double flgThickness = 0.2;
+        public const double radRatio = 0.7;
+        public const double flgThickness = 0.0; // 如果要加法兰变成0.2
         public const string ductTableName = "Ducts";
         public const string elbowTableName = "DuctElbows";
         public const string reducingTableName = "DuctReducers";

@@ -53,7 +53,7 @@ namespace TianHua.Hvac.UI.Command
                 if (excludeLines.Count >= portParam.centerLines.Count)
                 {
                     ThMEPHVACService.PromptMsg("没有选择要布置风口的管段");
-                    return new DBObjectCollection ();
+                    return new DBObjectCollection();
                 }
                 ThDuctPortsDrawService.MoveToZero(portParam.srtPoint, excludeLines);
                 return excludeLines;

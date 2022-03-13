@@ -1,10 +1,11 @@
 ﻿using System;
-using ThMEPHVAC.Duct;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPHVAC.Model;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.Duct;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {
@@ -14,14 +15,18 @@ namespace ThMEPHVAC.CAD
         public List<ThValveGroup> notRoomValves { get; set; }
         private Point3d srtP;
         private Matrix3d disMat;
+        private FanParam param;
         private ThCADCoreNTSSpatialIndex index;
+        private ThDuctPortsDrawService service;
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
                                       DBObjectCollection wallobjects,
                                       DBObjectCollection bypassobjects,
                                       FanParam param,
-                                      ThFanAnalysis anayRes)
+                                      ThFanAnalysis anayRes,
+                                      ThDuctPortsDrawService service)
         {
-            double teeWidth = ThMEPHVACService.GetWidth(param.bypassSize);
+            this.param = param;
+            this.service = service;
             double roomWidth = ThMEPHVACService.GetWidth(param.roomDuctSize);
             double notRoomWidth = ThMEPHVACService.GetWidth(param.notRoomDuctSize);
             srtP = fanmodel.isExhaust ? fanmodel.FanInletBasePoint : fanmodel.FanOutletBasePoint;
@@ -32,8 +37,8 @@ namespace ThMEPHVAC.CAD
             notRoomValves = GetNotRoomValveGroupWithoutWall(notRoomWidth, fanmodel);
             if (wallobjects.Count > 0)
             {
-                roomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, teeWidth, anayRes.roomLines, true));
-                notRoomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, teeWidth, anayRes.notRoomLines, false));
+                roomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, anayRes.roomLines, true, service));
+                notRoomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, anayRes.notRoomLines, false, service));
             }
         }
         private DBObjectCollection CollectCenterlines(List<Line> ls)
@@ -52,7 +57,7 @@ namespace ThMEPHVAC.CAD
                 {
                     if (ThDuctUtils.IsHoleModel(model.ValveBlockName))
                     {
-                        ThValvesAndHolesInsertEngine.InsertHole(model);
+                        ThValvesAndHolesInsertEngine.InsertHole(model, service, param.roomDuctSize, param.roomElevation);
                     }
                     else
                     {
@@ -71,7 +76,7 @@ namespace ThMEPHVAC.CAD
                 {
                     if (ThDuctUtils.IsHoleModel(model.ValveBlockName))
                     {
-                        ThValvesAndHolesInsertEngine.InsertHole(model);
+                        ThValvesAndHolesInsertEngine.InsertHole(model, service, param.notRoomDuctSize, param.notRoomElevation);
                     }
                     else
                     {
@@ -99,10 +104,11 @@ namespace ThMEPHVAC.CAD
                                                           DBObjectCollection wallobjects,
                                                           DBObjectCollection bypassobjects,
                                                           double ductWidth,
-                                                          double teeWidth,
                                                           HashSet<Line> lines,
-                                                          bool isRoom)
+                                                          bool isRoom,
+                                                          ThDuctPortsDrawService service)
         {
+            double teeWidth = ThMEPHVACService.GetWidth(param.bypassSize);
             // wallobjects一定有值
             var valveGroups = new List<ThValveGroup>();
             foreach (MPolygon pl in wallobjects)
@@ -126,9 +132,9 @@ namespace ThMEPHVAC.CAD
                             var groupparameters = new ThValveGroupParameters() { GroupInsertPoint = insertP, DuctWidth = width, RotationAngle = holeAngle, FanScenario = fanmodel.scenario, ValveToFanSpacing = 2000 };
                             // 排烟场景room侧是入风口，非排烟场景room侧是出风口
                             var isIn = fanmodel.isExhaust ? isRoom : !isRoom;
-                            var valvegroup = new ThValveGroup(groupparameters, fanmodel.isExhaust, isIn);
-                            valvegroup.SetFireHoleGroup(fanmodel.Data.BlockLayer);
-                            valveGroups.Add(valvegroup);
+                            var valveGroup = new ThValveGroup(groupparameters, service, fanmodel.isExhaust, isIn);
+                            valveGroup.SetFireHoleGroup();
+                            valveGroups.Add(valveGroup);
                         }
                     }
                 }
@@ -161,7 +167,8 @@ namespace ThMEPHVAC.CAD
             var startOft = CalcStartOft(fanWidth, notRoomWidth, fanmodel, false);
             // 非服务侧，排风风机对应出风口，非排风风机对应入风口
             var isIn = fanmodel.isExhaust ? false : true;
-            var valveGroup = new ThValveGroup(param, fanmodel.Data.BlockLayer, isIn, fanmodel.isExhaust);
+            var valveGroup = new ThValveGroup(param, service, isIn, fanmodel.isExhaust);
+            valveGroup.CreateValvesFromValveGroup();
             CorrectValveOft(valveGroup, dirVec, startOft);
             valvegroups.Add(valveGroup);
             return valvegroups;
@@ -203,10 +210,11 @@ namespace ThMEPHVAC.CAD
             };
             var startOft = CalcStartOft(fanWidth, roomWidth, fanmodel, true);
             // 服务侧，排风风机对应入风口，非排风风机对应出风口
-            var isIn = fanmodel.isExhaust ? true : false;
-            var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer, isIn, fanmodel.isExhaust);
-            CorrectValveOft(valvegroup, dirVec, startOft);
-            valvegroups.Add(valvegroup);
+            var isIn = fanmodel.isExhaust;
+            var valveGroup = new ThValveGroup(groupparameters, service, isIn, fanmodel.isExhaust);
+            valveGroup.CreateValvesFromValveGroup();
+            CorrectValveOft(valveGroup, dirVec, startOft);
+            valvegroups.Add(valveGroup);
             return valvegroups;
         }
         private double CalcStartOft(double fanWidth, double ductWidth, ThDbModelFan fan, bool isRoom)
@@ -214,18 +222,19 @@ namespace ThMEPHVAC.CAD
             var scenario = fan.scenario;
             var intakeform = fan.IntakeForm;
             var flag = (scenario == "消防补风" || scenario == "消防排烟" || scenario == "消防加压送风");
+            var hoseLen = flag ? 0 : 200;
             // 500 预留阀到上下翻的距离
             // 排风风机进风口是room侧
             var fanFlag = isRoom ? fan.isExhaust : !fan.isExhaust;
             if (fanFlag)
             {
                 return (intakeform.Contains("上进") || intakeform.Contains("下进")) ?
-                        500 : CalcReducingLen(flag, fanWidth, ductWidth);
+                        500 : (CalcReducingLen(flag, fanWidth, ductWidth) + hoseLen);
             }
             else
             {
                 return (intakeform.Contains("上出") || intakeform.Contains("下出")) ?
-                        500 : CalcReducingLen(flag, fanWidth, ductWidth);
+                        500 : (CalcReducingLen(flag, fanWidth, ductWidth) + hoseLen);
             }
             throw new NotImplementedException("[CheckError]: ValveGroupPosionType ");
         }
@@ -250,7 +259,7 @@ namespace ThMEPHVAC.CAD
             var fire = new ThValve();
             foreach (var v in valvegroup.ValvesInGroup)
             {
-                if (v.ValveBlockName == "洞口")
+                if (v.ValveBlockName == ThHvacCommon.AI_HOLE)
                     hole = v;
                 else
                 {

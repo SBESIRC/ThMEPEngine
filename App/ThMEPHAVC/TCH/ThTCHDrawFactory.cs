@@ -169,9 +169,9 @@ namespace ThMEPHVAC.TCH
                 dbScenario = "排风兼排烟";
             else if (scenario == "消防补风兼平时送风")
                 dbScenario = "送风兼补风";
-            else if (scenario == "平时排风" || scenario == "平时排风兼事故送风")
+            else if (scenario == "平时排风")
                 dbScenario = "排风";
-            else if (scenario == "平时送风" || scenario == "平时送风兼事故补风")
+            else if (scenario == "平时送风")
                 dbScenario = "送风";
             else if (scenario == "空调送风")
                 dbScenario = "空调送风";
@@ -183,7 +183,7 @@ namespace ThMEPHVAC.TCH
                 dbScenario = "排油烟";
             else if (scenario == "厨房排油烟补风")
                 dbScenario = "厨房补风";
-            else if (scenario == "事故排风" || scenario == "事故补风")
+            else if (scenario == "事故排风" || scenario == "事故补风" || scenario == "平时排风兼事故排风" || scenario == "平时送风兼事故补风")
                 dbScenario = "事故排风";
             else
                 throw new NotImplementedException("请检查输入场景！！！");

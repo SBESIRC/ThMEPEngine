@@ -89,31 +89,37 @@ namespace ThMEPHVAC.Model
         }
         private static Tuple<string, string> GetLayerInfo(string scenario)
         {
+            string layerFlag;
             switch (scenario)
             {
-                case "消防排烟兼平时排风":
-                case "消防补风兼平时送风":
-                    return new Tuple<string, string>("H-DUAL-DUCT-MID", "H-DAPP-DAPP");
-                case "消防排烟":
-                case "消防补风":
-                case "消防加压送风":
-                    return new Tuple<string, string>("H-FIRE-DUCT-MID", "H-DAPP-FAPP");
-                case "平时送风":
-                case "平时排风":
-                case "事故排风":
-                case "事故补风":
-                case "平时送风兼事故补风":
-                case "平时排风兼事故排风":
-                case "厨房排油烟补风":
-                case "厨房排油烟":
-                    return new Tuple<string, string>("H-VENT-DUCT-MID", "H-DAPP-AAPP");
-                case "空调送风":
-                case "空调回风":
+                case "消防排烟兼平时排风": case "消防补风兼平时送风":
+                    layerFlag = "DUAL";
+                    break;
+                case "消防排烟": case "消防补风": case "消防加压送风":
+                    layerFlag = "FIRE";
+                    break;
+                case "平时送风": case "平时排风":
+                    layerFlag = "VENT";
+                    break;
+                case "事故排风": case "事故补风": case "平时送风兼事故补风": case "平时排风兼事故排风":
+                    layerFlag = "EVENT";
+                    break;
+                case "厨房排油烟补风": case "厨房排油烟":
+                    layerFlag = "KVENT";
+                    break;
+                case "空调送风": case "空调回风":
+                    layerFlag = "ACON";
+                    break;
                 case "空调新风":
-                    return new Tuple<string, string>("H-ACON-DUCT-MID", "H-DAPP-AAPP");
-                default: throw new NotImplementedException("No such scenior!");
+                    layerFlag = "FCON";
+                    break;
+                default: throw new NotImplementedException("No such scenario!");
             }
+            var centerLayer = "H-" + layerFlag + "-DUCT-MID";
+            var flgLayer = "H-" + layerFlag + "-DAPP";
+            return new Tuple<string, string>(centerLayer, flgLayer);
         }
+
         public static Dictionary<ObjectId, Polyline> ReadTCHGroupId2geoDic(PortParam portParam)
         {
             using (var db = AcadDatabase.Active())
@@ -123,13 +129,13 @@ namespace ThMEPHVAC.Model
                 var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var visitor = new ThTCHFittingExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
-                var a = db.ModelSpace.OfType<Curve>();
-                foreach (var b in a)
+                var eles = db.ModelSpace.OfType<Curve>();
+                foreach (var e in eles)
                 {
-                    if (b is Line || b is Arc)
+                    if (e is Line || e is Arc || e is Circle)
                         continue;
                     var objs = new DBObjectCollection();
-                    b.Explode(objs);
+                    e.Explode(objs);
                     var results = objs.OfType<Line>()
                                       .Where(o => (o.Layer.Contains(layerInfo.Item1) || o.Layer.Contains(layerInfo.Item2)))
                                       .ToCollection();
@@ -137,7 +143,7 @@ namespace ThMEPHVAC.Model
                     if (pl.Bounds != null)
                     {
                         pl.TransformBy(mat);
-                        dic.Add(b.Id, pl);
+                        dic.Add(e.Id, pl);
                     }
                 }
                 return dic;

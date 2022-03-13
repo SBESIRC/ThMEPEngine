@@ -33,21 +33,23 @@ namespace ThMEPHVAC.Model
                 var dirVec = ThMEPHVACService.GetEdgeDirection(info.seg.l);
                 double angle = ThMEPHVACService.GetPortRotateAngle(dirVec);
                 verticalPipes = new List<SegInfo>();
-                var size =  GetVerticalPipeHeight(avgAirVolume);
+                // 立管长为风口长左右各加100
+                var size =  GetVerticalPipeHeight(avgAirVolume, portWidth + 200);
                 var h = size.Item2;
-                var vec = Vector3d.ZAxis * ((h + 100) * 0.5);
+                var vec = Vector3d.ZAxis * ((portHeight + 100) * 0.5);
                 var portSelfEleVec = vec * 2;
                 var mmElevation = portParam.elevation * 1000;
                 var mainHeight = ThMEPHVACService.GetHeight(portParam.inDuctSize);
-                var selfEleOftVec = Vector3d.ZAxis * (portParam.portBottomEle * 1000 + mmElevation + mainHeight);
+                var selfEleOftVec = Vector3d.ZAxis * (portParam.portBottomEle * 1000);
                 foreach (var pos in info.portsInfo)
                 {
                     var ductHeight = ThMEPHVACService.GetHeight(pos.ductSize);
                     GetSidePortInsertPos(dirVec, pos.position, h, out Point3d pL, out Point3d pR);
                     InsertPort(pR + orgDisVec + selfEleOftVec, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
                     InsertPort(pL + orgDisVec + selfEleOftVec, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
-                    var sp = pos.position - vec;
-                    var ep = pos.position + vec;
+                    var t = Math.Max(portParam.portBottomEle * 1000 - mmElevation - mainHeight, 50);
+                    var sp = pos.position + (mmElevation + mainHeight) * Vector3d.ZAxis;
+                    var ep = sp + (portHeight + 50 + t) * Vector3d.ZAxis;
                     verticalPipes.Add(new SegInfo()
                     {
                         l = new Line(sp, ep),
@@ -59,9 +61,9 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        private Tuple<double, double> GetVerticalPipeHeight(double airVolume)
+        private Tuple<double, double> GetVerticalPipeHeight(double airVolume, double verticalPipeWidth)
         {
-            var selector = new ThPortParameter(airVolume, PortRecommendType.VERTICAL_PIPE);
+            var selector = new ThPortParameter(airVolume, verticalPipeWidth, PortRecommendType.VERTICAL_PIPE);
             return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight);
         }
 

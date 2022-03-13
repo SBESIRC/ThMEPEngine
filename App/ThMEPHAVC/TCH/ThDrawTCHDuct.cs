@@ -18,7 +18,43 @@ namespace ThMEPHVAC.TCH
             this.subSysId = subSysId;
             this.sqliteHelper = sqliteHelper;
         }
-        public void DrawVerticalPipe(List<SegInfo> segInfos, Matrix3d mat, ThMEPHVACParam param, ref ulong gId)
+        public void DrawVerticalPipe(List<SegInfo> segInfos, Matrix3d mat, ref ulong gId)
+        {
+            sqliteHelper.Conn();
+            foreach (var seg in segInfos)
+            {
+                RecordDuctInfo(seg.airVolume, ref gId);
+                GetWidthAndHeight(seg.ductSize, out double width, out double height);
+                var centerEleDisVec = seg.l.StartPoint.Z * Vector3d.ZAxis;
+                var sp = new Point3d(seg.l.StartPoint.X, seg.l.StartPoint.Y, 0);
+                var ep = new Point3d(seg.l.EndPoint.X, seg.l.EndPoint.Y, 0);
+                // 低点向上指，高点向下指
+                var sEndParam = new TCHInterfaceParam()
+                {
+                    ID = ductParam.startFaceID,
+                    sectionType = ductParam.sectionType,
+                    height = height,
+                    width = width,
+                    normalVector = new Vector3d(0, 0, 1),
+                    heighVector = seg.horizontalVec,
+                    centerPoint = sp.TransformBy(mat) + centerEleDisVec
+                };
+                centerEleDisVec =  + seg.l.EndPoint.Z * Vector3d.ZAxis;
+                var eEndParam = new TCHInterfaceParam()
+                {
+                    ID = ductParam.endFaceID,
+                    sectionType = ductParam.sectionType,
+                    height = height,
+                    width = width,
+                    normalVector = new Vector3d(0, 0, -1),
+                    heighVector = seg.horizontalVec,
+                    centerPoint = ep.TransformBy(mat) + centerEleDisVec
+                };
+                ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
+            }
+            sqliteHelper.db.Close();
+        }
+        public void DrawPortVerticalPipe(List<SegInfo> segInfos, Matrix3d mat, ThMEPHVACParam param, ref ulong gId)
         {
             sqliteHelper.Conn();
             var mmElevation = param.elevation * 1000;
@@ -41,8 +77,8 @@ namespace ThMEPHVAC.TCH
                     width = width,
                     normalVector = new Vector3d(0, 0, 1),
                     heighVector = dirVec,
-                    centerPoint = sp.TransformBy(mat) + centerEleDisVec + selfEleOftVec
-                };
+                    centerPoint = sp.TransformBy(mat) + seg.l.StartPoint.Z * Vector3d.ZAxis
+            };
                 centerEleDisVec = ThMEPHVACService.GetEleDis(mmElevation, mainHeight, seg.l.Length) + seg.l.EndPoint.Z * Vector3d.ZAxis;
                 var eEndParam = new TCHInterfaceParam()
                 {
@@ -52,13 +88,51 @@ namespace ThMEPHVAC.TCH
                     width = width,
                     normalVector = new Vector3d(0, 0, -1),
                     heighVector = dirVec,
-                    centerPoint = ep.TransformBy(mat) + centerEleDisVec + selfEleOftVec
+                    centerPoint = ep.TransformBy(mat) + seg.l.EndPoint.Z * Vector3d.ZAxis
                 };
                 ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
             }
             sqliteHelper.db.Close(); 
         }
-        public void Draw(List<SegInfo> segInfos, Matrix3d mat, bool isTextSide, ThMEPHVACParam param, ref ulong gId)
+        public void DrawVTDuct(List<SegInfo> segInfos, Matrix3d mat, bool isTextSide, ThMEPHVACParam param, ref ulong gId)
+        {
+            sqliteHelper.Conn();
+            var gap = ThTCHCommonTables.flgThickness * 0.5;
+            foreach (var seg in segInfos)
+            {
+                var l = seg.GetShrinkedLine();
+                if (l.Length < lineLimition)
+                    continue;
+                RecordDuctInfo(seg.airVolume, ref gId);
+                RecordDuctDimContents(ref gId);
+                RecordDuctDimensions(mat, seg, param, isTextSide, ref gId);
+                GetWidthAndHeight(seg.ductSize, out double width, out double height);
+                var dirVec = (l.EndPoint - l.StartPoint).GetNormal();
+                var sEndParam = new TCHInterfaceParam()
+                {
+                    ID = ductParam.startFaceID,
+                    sectionType = ductParam.sectionType,
+                    height = height,
+                    width = width,
+                    normalVector = dirVec,
+                    heighVector = new Vector3d(0, 0, 1),
+                    centerPoint = (l.StartPoint.TransformBy(mat) + (gap * dirVec)),
+                };
+                var eEndParam = new TCHInterfaceParam()
+                {
+                    ID = ductParam.endFaceID,
+                    sectionType = ductParam.sectionType,
+                    height = height,
+                    width = width,
+                    normalVector = -dirVec,
+                    heighVector = new Vector3d(0, 0, 1),
+                    centerPoint = (l.EndPoint.TransformBy(mat) - (gap * dirVec))
+                };
+                ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { sEndParam, eEndParam });
+            }
+            sqliteHelper.db.Close();
+        }
+        public void DrawDuct(List<SegInfo> segInfos, Matrix3d mat, bool isTextSide, ThMEPHVACParam param, ref ulong gId)
         {
             sqliteHelper.Conn();
             var gap = ThTCHCommonTables.flgThickness * 0.5;

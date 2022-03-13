@@ -53,7 +53,7 @@ namespace ThMEPHVAC.Model
                 case 1: ShrinkElbow(currLine, p, crossLines, dic); break;
                 case 2: ShrinkTee(currLine, p, crossLines, dic); break;
                 case 3: ShrinkCross(currLine, p, crossLines, dic); break;
-                default: throw new NotImplementedException("[CheckError]: Just support connector less than 4!");
+                default: throw new NotImplementedException("路由有环路或者未选择旁通路由，请重新选择。");
             }
         }
         private void ShrinkCross(Line currLine,

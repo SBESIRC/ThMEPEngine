@@ -27,9 +27,11 @@ namespace ThMEPHVAC.Model
         public string dimensionLayer;
         public string portMarkLayer;
         public string holeLayer;
+        public string silencerLayer;
         public string airValveName;
         public string fireValveName;
         public string electrycityValveName;
+        public string holeName;
         public string portName;
         public string portMarkName;
         public string brokenLine;
@@ -52,6 +54,7 @@ namespace ThMEPHVAC.Model
             airValveName = "风阀";
             fireValveName = "防火阀";
             portMarkName = "AI-风口标注1";
+            holeName = "AI-洞口";
             portName = "AI-风口";
             airValveVisibility = "多叶调节风阀";
             electrycityValveVisibility = "电动多叶调节风阀";
@@ -118,11 +121,13 @@ namespace ThMEPHVAC.Model
             airValveLayer = "H-" + layerFlag + "-DAMP";
             fireValveLayer = airValveLayer;
             ductSizeLayer = "H-" + layerFlag + "-DIMS";
+            silencerLayer = (scenario == "空调新风") ? "H-ACON-DAMP" : airValveLayer;
             dimensionLayer = ductSizeLayer;
             portMarkLayer = ductSizeLayer;
             startLayer = "AI-风管起点";
             holeLayer = "H-HOLE";
             electrycityValveLayer = "H-FIRE-EDAMP";
+            
         }
         private void ImportLayerBlock()
         {
@@ -503,7 +508,8 @@ namespace ThMEPHVAC.Model
         public static void GetFanDynBlockProperity(ThBlockReferenceData fanData,
                                                    bool isAxis,
                                                    out double fanInWidth,
-                                                   out double fanOutWidth)
+                                                   out double fanOutWidth,
+                                                   out string installStyle)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -522,7 +528,20 @@ namespace ThMEPHVAC.Model
                     fanOutWidth = properity.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL) ?
                             (double)properity.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL) : 0;
                 }
+                installStyle = fanData.Attributes.Keys.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INSTALL_STYLE) ?
+                        GetInstallStyle(fanData.Attributes[ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INSTALL_STYLE]) : "吊装";
             }
+        }
+        private static string GetInstallStyle(string style)
+        {
+            if (!String.IsNullOrEmpty(style))
+            {
+                if (style.Contains("吊装"))
+                    return "吊装";
+                else if (style.Contains("落地"))
+                    return "落地";
+            }
+            return "吊装";
         }
         public static void MoveToZero(Point3d alignP, DBObjectCollection lineSet)
         {

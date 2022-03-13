@@ -213,6 +213,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "风口尺寸参数信息.json");
         }
 
+        public static string TCHHVACDBPath()
+        {
+            return Path.Combine(SupportPath(), "TG20.db");
+        }
+
         public static string DuctInOutMapping()
         {
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");

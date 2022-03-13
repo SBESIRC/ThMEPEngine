@@ -15,6 +15,7 @@ namespace ThMEPHVAC.TCH
 
         public void Draw(Point3d p, Vector3d dirVec, double width, double height,ref ulong gId)
         {
+#if false
             sqliteHelper.Conn();
             RecordFlangesInfo(ref gId);
             var gap = ThTCHCommonTables.flgThickness * 0.5;
@@ -39,6 +40,7 @@ namespace ThMEPHVAC.TCH
             };
             ThTCHService.RecordPortInfo(sqliteHelper, new List<TCHInterfaceParam>() { param1, param2 });
             sqliteHelper.db.Close();
+#endif
         }
 
         private void RecordFlangesInfo(ref ulong gId)

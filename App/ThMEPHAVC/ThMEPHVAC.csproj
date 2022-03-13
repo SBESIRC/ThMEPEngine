@@ -202,7 +202,6 @@
     <Compile Include="Model\ThModifyFanConnComponent.cs" />
     <Compile Include="Model\ThSepereateFansDuct.cs" />
     <Compile Include="Model\ThShrinkDuct.cs" />
-    <Compile Include="Model\ThVerticalBypassFactory.cs" />
     <Compile Include="Model\ThVTee.cs" />
     <Compile Include="CAD\ThDuctParameter.cs" />
     <Compile Include="CAD\ThDbModelFan.cs" />

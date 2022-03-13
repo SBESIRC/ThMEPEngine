@@ -118,37 +118,31 @@ namespace ThMEPHVAC.Model
         public ThValveGroupParameters Parameters { get; set; }
         private bool isIn;
         private bool isExhaust;
-        
-        public ThValveGroup(ThValveGroupParameters parameters, bool isExhaust, bool isIn)
+        private ThDuctPortsDrawService service;
+
+        public ThValveGroup(ThValveGroupParameters parameters, ThDuctPortsDrawService service, bool isIn, bool isExhaust)
         {
             this.isIn = isIn;
             Parameters = parameters;
             this.isExhaust = isExhaust;
-            ValvesInGroup = new List<ThValve>();
+            this.service = service;
         }
-        public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool isIn, bool isExhaust)
-        {
-            this.isIn = isIn;
-            Parameters = parameters;
-            this.isExhaust = isExhaust;
-            ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
-        }
-        private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
+        public void CreateValvesFromValveGroup()
         {
             List<ThValve> valves = new List<ThValve>();
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == Parameters.FanScenario).InnerRoomDuctType;
             if (isIn)
-                return SetInnerValveGroup(fanlayer);
+                ValvesInGroup = SetInnerValveGroup();
             else
-                return SetOuterValveGroup(fanlayer);
+                ValvesInGroup = SetOuterValveGroup();
         }
-        public void SetFireHoleGroup(string fanlayer)
+        public void SetFireHoleGroup()
         {
             // 进风口不布置止回阀
-            List<ThValve> valves = new List<ThValve>();
+            var valves = new List<ThValve>();
             var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
+            var firevalve = CreateFireValve();
             if (Parameters.ValveToFanSpacing >  firevalve.Length)
             {
                 firevalve.ValveOffsetFromCenter = 0;
@@ -164,11 +158,11 @@ namespace ThMEPHVAC.Model
             ValvesInGroup = valves;
         }
         //设置机房内管段阀组
-        private List<ThValve> SetInnerValveGroup(string fanlayer)
+        private List<ThValve> SetInnerValveGroup()
         {
             // 进风口不布置止回阀
             List<ThValve> valves = new List<ThValve>();
-            var silencer = CreateSilencer(fanlayer);// 如果是非送风场景，进风口和room相连需要布置消声器
+            var silencer = CreateSilencer();// 如果是非送风场景，进风口和room相连需要布置消声器
             var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || 
                                  Parameters.FanScenario == "消防加压送风");
             if (!isExhaust || !haveSilencer)
@@ -190,12 +184,12 @@ namespace ThMEPHVAC.Model
         }
         
         //设置机房外管段阀组
-        private List<ThValve> SetOuterValveGroup(string fanlayer)
+        private List<ThValve> SetOuterValveGroup()
         {
             List<ThValve> valves = new List<ThValve>();
 
-            var silencer = CreateSilencer(fanlayer);
-            var checkvalve = CreateCheckValve(fanlayer);
+            var silencer = CreateSilencer();
+            var checkvalve = CreateCheckValve();
             var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
             if (isExhaust || !haveSilencer)// 如果是非送风场景，出风口不布置消声器
                 silencer.Length = 0;
@@ -229,7 +223,7 @@ namespace ThMEPHVAC.Model
             return valves;
         }
         
-        private ThValve CreateSilencer(string fanlayer)
+        private ThValve CreateSilencer()
         {
             return new ThValve()
             {
@@ -238,7 +232,7 @@ namespace ThMEPHVAC.Model
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
-                ValveBlockLayer = ThDuctUtils.SilencerLayerName(fanlayer),
+                ValveBlockLayer = service.silencerLayer,
                 ValveVisibility = ThDuctUtils.SilencerModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
@@ -252,18 +246,18 @@ namespace ThMEPHVAC.Model
             {
                 Length = 200,
                 Width = Parameters.DuctWidth + 100,
-                RotationAngle = Parameters.RotationAngle,
+                RotationAngle = Parameters.RotationAngle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,
-                ValveBlockName = ThHvacCommon.WALLHOLE_BLOCK_NAME,
-                ValveBlockLayer = ThHvacCommon.WALLHOLE_LAYER,
+                ValveBlockName = service.holeName,
+                ValveBlockLayer = service.holeLayer,
                 ValveVisibility = "",
-                WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
-                LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
+                WidthPropertyName = ThHvacCommon.AI_HOLE_WIDTH,
+                LengthPropertyName = ThHvacCommon.AI_HOLE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
             };
         }
 
-        private ThValve CreateFireValve(string fanlayer)
+        private ThValve CreateFireValve()
         {
             return new ThValve()
             {
@@ -272,7 +266,7 @@ namespace ThMEPHVAC.Model
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThDuctUtils.FireValveBlockName(),
-                ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),
+                ValveBlockLayer = service.airValveLayer,
                 ValveVisibility = ThDuctUtils.FireValveModelName(Parameters.FanScenario),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
@@ -280,7 +274,7 @@ namespace ThMEPHVAC.Model
             };
         }
 
-        private ThValve CreateCheckValve(string fanlayer)
+        private ThValve CreateCheckValve()
         {
             var angle = Parameters.RotationAngle;
             return new ThValve()
@@ -290,7 +284,7 @@ namespace ThMEPHVAC.Model
                 RotationAngle = isExhaust ? angle : angle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
-                ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),
+                ValveBlockLayer = service.airValveLayer,
                 ValveVisibility = ThDuctUtils.CheckValveModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_CHECK_VALVE_HEIGHT,
