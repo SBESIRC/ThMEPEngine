@@ -89,7 +89,7 @@ namespace TianHua.Electrical.PDS.Service
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
-            if (source.NodeType == PDSNodeType.Cabletray)
+            if (source.NodeType == PDSNodeType.CableCarrier)
             {
                 edge.Circuit.ViaCableTray = true;
             }

@@ -372,7 +372,7 @@ namespace TianHua.Electrical.PDS.Engine
                         if (item.Value.Count > 0)
                         {
                             newEdge.Circuit.ViaConduit = true;
-                            if (node.NodeType == PDSNodeType.Cabletray)
+                            if (node.NodeType == PDSNodeType.CableCarrier)
                             {
                                 newEdge.Circuit.ViaCableTray = true;
                             }

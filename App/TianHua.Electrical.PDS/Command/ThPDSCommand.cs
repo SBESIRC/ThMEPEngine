@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.Command
             var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>();
             var cableTrayNode = new ThPDSCircuitGraphNode
             {
-                NodeType = PDSNodeType.Cabletray,
+                NodeType = PDSNodeType.CableCarrier,
             };
 
             //加载所有已打开的文件
