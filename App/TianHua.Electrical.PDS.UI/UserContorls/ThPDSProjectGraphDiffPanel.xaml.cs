@@ -2,8 +2,12 @@
 using QuikGraph.MSAGL;
 using System.Windows.Controls;
 using Microsoft.Msagl.Drawing;
+using Microsoft.Msagl.Core.Layout;
 using Microsoft.Msagl.WpfGraphControl;
 using TianHua.Electrical.PDS.Project.Module;
+using Microsoft.Msagl.Prototype.Ranking;
+using Microsoft.Msagl.Routing.Rectilinear;
+using Microsoft.Msagl.Core.Routing;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -21,7 +25,6 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         private GraphViewer Viewer { get; set; }
         private DockPanel GraphViewerPanel { get; set; }
-
         private Graph _msaglGraph;
         private Graph MsaglGraph
         {
@@ -34,9 +37,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
                 return _msaglGraph;
             }
         }
-
         public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; private set; }
-
         public ThPDSProjectGraphDiffPanel(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
         {
             Graph = graph;
@@ -52,6 +53,13 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             MainGrid.Children.Add(GraphViewerPanel);
             Viewer.BindToPanel(GraphViewerPanel);
             Viewer.Graph = MsaglGraph;
+            Viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings()
+            {
+                EdgeRoutingSettings = new EdgeRoutingSettings()
+                {
+                    EdgeRoutingMode = EdgeRoutingMode.Rectilinear,
+                },
+            };
         }
     }
 }
