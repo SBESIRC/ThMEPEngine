@@ -75,11 +75,11 @@ namespace ThMEPStructure.Reinforcement.Draw
                 numbers.Clear();
                 for (int j = 0; j <= i; j++)
                 {
-                    numbers.Add(disY / (i + 1));
+                    numbers.Add(disY / (double)(i + 1));
                 }
-                for (int k = 0; k < pointsPair - i; k++)
+                for (int k = 0; k <= pointsPair - i; k++)
                 {
-                    numbers.Add(disX / (pointsPair - i + 1));
+                    numbers.Add(disX / (double)(pointsPair - i + 1));
                 }
                 double tmp = Helper.calVariance(numbers);
                 if (tmp < minVar)
@@ -90,8 +90,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
 
             //每次新增的间隔距离
-            double deltaY = disY / (result + 1);
-            double deltaX = disX / (pointsPair - result + 1);
+            double deltaY = disY / (double)(result + 1);
+            double deltaX = disX / (double)(pointsPair - result + 1);
             //把一对对点的位置计算出来，计算竖直方向BW上的位置,0，3号点每次向下偏移deltaY,水平方向0，1号点每次向右偏移deltaX
             for (int i=0;i<result;i++)
             {
