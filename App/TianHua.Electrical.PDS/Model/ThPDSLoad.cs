@@ -267,11 +267,12 @@
     {
         public ThPDSLoad()
         {
+            ID = new ThPDSID();
             AttributesCopy = "";
-            InstalledCapacity = new ThInstalledCapacity();
-            DefaultCircuitType = ThPDSCircuitType.None;
-            LoadUID = System.Guid.NewGuid().ToString();
             LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+            LoadUID = System.Guid.NewGuid().ToString();
+            DefaultCircuitType = ThPDSCircuitType.None;
+            InstalledCapacity = new ThInstalledCapacity();
         }
 
         /// <summary>
