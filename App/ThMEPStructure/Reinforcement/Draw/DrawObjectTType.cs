@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPEngineCore.CAD;
-
+using Autodesk.AutoCAD.DatabaseServices;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectTType : DrawObjectBase
