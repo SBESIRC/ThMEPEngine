@@ -371,6 +371,11 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="QuikGraph">
+      <Version>2.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
@@ -415,9 +420,6 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if $(Configuration)==Debug-NET45 (

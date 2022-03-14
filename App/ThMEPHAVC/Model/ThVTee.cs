@@ -1,59 +1,157 @@
 ﻿using System;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.Model
 {
     public class ThVTee
     {
         private string bypassSize;
-        private Point3d inVtPos;
-        private Point3d outVtPos;
-        public List<LineGeoInfo> vtElbow;
-        public ThVTee(Point3d in_vt_pos, Point3d out_vt_pos, string bypass_size)
+        private FanParam fanParam;
+        private Point3d roomVtPos;   //   room侧
+        private Point3d notRoomVtPos;// 非room侧
+        public static double roomVerticalPipeHeight = 600;// 服务侧立管高600
+        public List<SegInfo> vtDuct;
+        public List<SegInfo> vtElbow;
+
+        public ThVTee(Point3d roomVtPos, Point3d notRoomVtPos, FanParam fanParam, string installStyle)
         {
-            this.bypassSize = bypass_size;
-            this.inVtPos = in_vt_pos;
-            this.outVtPos = out_vt_pos;
-            vtElbow = new List<LineGeoInfo>();
-            Create_vt_elbow();
+            this.fanParam = fanParam;
+            this.roomVtPos = roomVtPos;
+            this.notRoomVtPos = notRoomVtPos;
+            bypassSize = fanParam.bypassSize;
+            vtDuct = new List<SegInfo>();
+            vtElbow = new List<SegInfo>();
+            if (installStyle == "落地")
+            {
+                CreateGroundVtDuct();
+                CreateGroundVtElbow();
+            }
+            else
+            {
+                CreateTopVtDuct();
+                CreateTopVtElbow();
+            }
         }
-        public void Create_vt_elbow()
+
+        private void CreateTopVtDuct()
         {
-            ThMEPHVACService.GetWidthAndHeight(bypassSize, out double w, out double h);
-            Get_vt_rotate_angle(out double i_vt_angle, out double o_vt_angle);
-            Record_vt_elbow_info(w, h, i_vt_angle, inVtPos);
-            Record_vt_elbow_info(w, h, o_vt_angle, outVtPos);
+            var roomElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var h = ThMEPHVACService.GetHeight(bypassSize);
+            var ele = roomElevation - roomVerticalPipeHeight;
+            var selfEleVec = (ele - h * 0.5) * Vector3d.ZAxis; // 上升半个h，退到中心点位置
+            var dirVec = (notRoomVtPos - roomVtPos).GetNormal();
+            var roomP = roomVtPos - dirVec * h * 0.5;
+            var notRoomP = notRoomVtPos + dirVec * h * 0.5;
+            var info = new SegInfo()
+            {
+                l = new Line(roomP + selfEleVec, notRoomP + selfEleVec),
+                ductSize = bypassSize,
+                airVolume = fanParam.airVolume * 0.3,
+                elevation = ele.ToString("0.00")
+            };
+            vtDuct.Add(info);
         }
-        private void Get_vt_rotate_angle(out double i_vt_angle, out double o_vt_angle)
+
+        private void CreateTopVtElbow()
         {
-            var dir_vec = (outVtPos - inVtPos).GetNormal();
-            i_vt_angle = dir_vec.GetAngleTo(-Vector3d.XAxis);
-            var z = dir_vec.CrossProduct(-Vector3d.XAxis).Z;
-            if (Math.Abs(z) < 1e-3)
-                z = 0;
-            if (z > 0)
-                i_vt_angle = 2 * Math.PI - i_vt_angle;
-            dir_vec = -dir_vec;
-            o_vt_angle = dir_vec.GetAngleTo(-Vector3d.XAxis);
-            z = dir_vec.CrossProduct(-Vector3d.XAxis).Z;
-            if (Math.Abs(z) < 1e-3)
-                z = 0;
-            if (z > 0)
-                o_vt_angle = 2 * Math.PI - o_vt_angle;
+            var dirVec = (notRoomVtPos - roomVtPos).GetNormal();
+            RecordTopRoomVtElbowInfo(dirVec);
+            RecordTopNotRoomVtElbowInfo(-dirVec);
         }
-        private void Record_vt_elbow_info(double w, double h, double ro_angle, Point3d ext_p)
+
+        private void RecordTopNotRoomVtElbowInfo(Vector3d dirVec)
         {
-            var dis_mat = Matrix3d.Displacement(ext_p.GetAsVector()) *
-                          Matrix3d.Rotation(ro_angle, Vector3d.ZAxis, Point3d.Origin);
-            var geo = ThVerticalBypassFactory.Create_vt_elbow_geo(w, h);
-            foreach (Line l in geo)
-                l.TransformBy(dis_mat);
-            var flg = ThVerticalBypassFactory.Create_vt_elbow_flg(w, h);
-            foreach (Line l in flg)
-                l.TransformBy(dis_mat);
-            vtElbow.Add(new LineGeoInfo(geo, flg, null));
+            var roomElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var notRoomElevation = Double.Parse(fanParam.notRoomElevation) * 1000;
+            var ep = notRoomVtPos + new Vector3d(0, 0, notRoomElevation);
+            var sp = notRoomVtPos + new Vector3d(0, 0, roomElevation - roomVerticalPipeHeight);
+            var l = new Line(sp, ep);
+            // 立管风量为1/3的风机风量
+            vtElbow.Add(new SegInfo()
+            {
+                l = l,
+                horizontalVec = dirVec,
+                airVolume = fanParam.airVolume * 0.3,
+                ductSize = bypassSize
+            });
+        }
+
+        private void RecordTopRoomVtElbowInfo(Vector3d dirVec)
+        {
+            var mmElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var ep = roomVtPos + new Vector3d(0, 0, mmElevation);
+            var sp = roomVtPos + new Vector3d(0, 0, mmElevation - roomVerticalPipeHeight);
+            var l = new Line(sp, ep);
+            // 立管风量为1/3的风机风量
+            vtElbow.Add(new SegInfo()
+            {
+                l = l,
+                horizontalVec = dirVec,
+                airVolume = fanParam.airVolume * 0.3,
+                ductSize = bypassSize
+            });
+        }
+
+        private void CreateGroundVtDuct()
+        {
+            var roomH = ThMEPHVACService.GetHeight(fanParam.roomDuctSize);
+            var roomElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var h = ThMEPHVACService.GetHeight(bypassSize);
+            var ele = roomH + roomElevation + roomVerticalPipeHeight;
+            var selfEleVec = (ele + h * 0.5) * Vector3d.ZAxis; // 上升半个h，退到中心点位置
+            var dirVec = (notRoomVtPos - roomVtPos).GetNormal();
+            var roomP = roomVtPos - dirVec * h * 0.5;
+            var notRoomP = notRoomVtPos + dirVec * h * 0.5;
+            var info = new SegInfo() { l = new Line(roomP + selfEleVec, notRoomP + selfEleVec), 
+                                       ductSize = bypassSize, 
+                                       airVolume = fanParam.airVolume * 0.3,
+                                       elevation = ele.ToString("0.00") };
+            vtDuct.Add(info);
+        }
+
+        public void CreateGroundVtElbow()
+        {
+            var dirVec = (notRoomVtPos - roomVtPos).GetNormal();
+            RecordGroundRoomVtElbowInfo(dirVec);
+            RecordGroundNotRoomVtElbowInfo(-dirVec);
+        }
+
+        private void RecordGroundRoomVtElbowInfo(Vector3d dirVec)
+        {
+            var h = ThMEPHVACService.GetHeight(fanParam.roomDuctSize);
+            var mmElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var ep = roomVtPos + new Vector3d(0, 0, h + mmElevation + roomVerticalPipeHeight);
+            var sp = roomVtPos + new Vector3d(0, 0, h + mmElevation);
+            var l = new Line(sp, ep);
+            // 立管风量为1/3的风机风量
+            vtElbow.Add(new SegInfo() {
+                l = l,
+                horizontalVec = dirVec,
+                airVolume = fanParam.airVolume * 0.3,
+                ductSize = bypassSize
+            });
+        }
+
+        private void RecordGroundNotRoomVtElbowInfo(Vector3d dirVec)
+        {
+            var roomH = ThMEPHVACService.GetHeight(fanParam.roomDuctSize);
+            var roomElevation = Double.Parse(fanParam.roomElevation) * 1000;
+            var notRoomH = ThMEPHVACService.GetHeight(fanParam.notRoomDuctSize);
+            var notRoomElevation = Double.Parse(fanParam.notRoomElevation) * 1000;
+            var ep = notRoomVtPos + new Vector3d(0, 0, roomH + roomElevation + roomVerticalPipeHeight);
+            var diff = (notRoomElevation + notRoomH) - (roomElevation + roomH);
+            var sp = ep - (diff + roomVerticalPipeHeight) * Vector3d.ZAxis;
+            var l = new Line(sp, ep);
+            // 立管风量为1/3的风机风量
+            vtElbow.Add(new SegInfo()
+            {
+                l = l,
+                horizontalVec = dirVec,
+                airVolume = fanParam.airVolume * 0.3,
+                ductSize = bypassSize
+            });
         }
     }
 }

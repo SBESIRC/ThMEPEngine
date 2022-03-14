@@ -18,11 +18,44 @@ namespace ThMEPHVAC.CAD
     public class ThDuctParameter
     {
         public ThDuctSizeInfor DuctSizeInfor { get; set; }
+        // 标准管径大小
+        public static HashSet<double> ductMods = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3000, 3500, 4000 };
+        // 需要新增的风管高度
+        public static HashSet<double> ductHeights = new HashSet<double>() { 120, 160, 200, 250, 320, 400, 500 };
+        public ThDuctParameter(double airVolume, string scenario, double inW, double inH)// 添加非标的风管参数
+        {
+            GetAirSpeedRange(airVolume, scenario, out double ceiling, out double floor);
+            var ratio = GetWHRatio(airVolume, scenario);
+            var candidate = GetCandidateDucts(airVolume, ceiling, floor, inW, inH);
+            DoSelectSize(candidate, ratio);
+        }
         public ThDuctParameter(double airVolume, string scenario)
         {
             GetAirSpeedRange(airVolume, scenario, out double ceiling, out double floor);
             var ratio = GetWHRatio(airVolume, scenario);
             var candidate = GetCandidateDucts(airVolume, ceiling, floor);
+            DoSelectSize(candidate, ratio);
+        }
+        private void AddNotNormalDuctSize(List<DuctSizeParameter> candidate, double inW, double inH)
+        {
+            candidate.Add(new DuctSizeParameter() { DuctWidth = inW, DuctHeight = inH, SectionArea = (inW * inH) / 1e6, AspectRatio = inW / inH });
+            if (!ductMods.Contains(inW))
+            {
+                foreach (var h in ductHeights)
+                {
+                    candidate.Add(new DuctSizeParameter() { DuctWidth = inW, DuctHeight = h, SectionArea = (inW * h) / 1e6, AspectRatio = inW / h  });
+                }
+            }
+            if (!ductHeights.Contains(inH))
+            {
+                foreach (var w in ductMods)
+                {
+                    candidate.Add(new DuctSizeParameter() { DuctWidth = w, DuctHeight = inH, SectionArea = (w * inH) / 1e6, AspectRatio = w / inH });
+                }
+            }
+        }
+        public void DoSelectSize(List<DuctSizeParameter> candidate, double ratio)
+        {
             if (candidate.Count > 0)
             {
                 var recommendOuterDuct = candidate.First(d => d.AspectRatio == candidate.Max(f => f.AspectRatio));
@@ -101,7 +134,28 @@ namespace ThMEPHVAC.CAD
                 else { return 2; }
             }
         }
+        private List<DuctSizeParameter> GetCandidateDucts(double airVolume, double airSpeedCeiling, double airSpeedFloor, double inW, double inH)
+        {
+            double ductAreaFloor = airVolume / 3600.0 / airSpeedFloor;
+            double ductAreaCeiling = airVolume / 3600.0 / airSpeedCeiling;
+            Round2float(ref ductAreaFloor);
+            Round2float(ref ductAreaCeiling);
+            var jsonReader = new ThDuctParameterJsonReader();
+            AddNotNormalDuctSize(jsonReader.Parameters, inW, inH);
+            var sizeFloor = jsonReader.Parameters.Where(d => d.SectionArea >= ductAreaCeiling).OrderBy(d => d.SectionArea);
+            var satisfiedDucts = sizeFloor.Where(d => d.SectionArea <= ductAreaFloor).ToList();
 
+            if (satisfiedDucts.Count == 0)
+            {
+                if (sizeFloor.Count() == 0)
+                {
+                    return new List<DuctSizeParameter>();
+                }
+                return new List<DuctSizeParameter>() { sizeFloor.First() };
+            }
+            return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
+        }
+        
         private List<DuctSizeParameter> GetCandidateDucts(double airVolume, double airSpeedCeiling, double airSpeedFloor)
         {
             double ductAreaFloor = airVolume / 3600.0 / airSpeedFloor;

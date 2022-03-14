@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -70,7 +71,8 @@ namespace ThMEPHVAC.Model
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP, new Scale3d(), angle);
+                var layer = (visibility == ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_BEC) ? "H-FIRE-EDAMP" : valveLayer;
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(layer, valveName, insertP, new Scale3d(), angle);
                 ThDuctPortsDrawService.SetValveDynBlockProperity(obj, width, 250, textAngle, visibility);
             }
         }

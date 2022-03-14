@@ -130,6 +130,12 @@ namespace ThMEPHVAC.TCH
             if (outterWidth < innerWidth)
                 flip = true;
             var trans = new TransInfo() { rotateAngle = rotateAngle, centerPoint = info.centerP, flip = flip };
+            if (flip)
+            {
+                var t = innerIdx;
+                innerIdx = outterIdx;
+                outterIdx = t;
+            }
             return new CrossInfo() { iWidth = info.portWidths[points[0]], 
                                      innerWidth = info.portWidths[points[innerIdx]], 
                                      coWidth = info.portWidths[points[collinearIdx]], 
@@ -174,7 +180,7 @@ namespace ThMEPHVAC.TCH
                 subSystemID = subSysId,
                 materialID = 0,
                 type = 4,
-                radRatio = 0.8
+                radRatio = ThTCHCommonTables.radRatio
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.crossTableName +
                           " VALUES ('" + crossParam.ID.ToString() + "'," +

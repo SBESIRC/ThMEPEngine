@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using QuickGraph;
+using QuikGraph;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 

@@ -109,6 +109,7 @@
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL = "出风口竖";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL = "出风口横";
         public const string BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE_FIRE = "字旋转";
+        public const string BLOCK_DYNAMIC_PROPERTY_INSTALL_STYLE = "安装方式";
 
         //阀块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY = "可见性";
@@ -193,5 +194,11 @@
         public const string AI_ROOM_BOUNDS = "AI-房间框线";
         public const string AI_DUCT_ROUTINE = "AI-风管路由";
         public const string AI_SMOKE_BROKE = "AI-挡烟垂壁";
+
+        public const string AI_HOLE = "AI-洞口";
+        public const string AI_HOLE_WIDTH = "洞口宽度";
+        public const string AI_HOLE_LENGTH = "洞口长度";
+        public const string AI_HOLE_ROTATION = "洞口角度";
+        public const string AI_HOLE_TEXT_HEIGHT = "文字高度";
     }
 }

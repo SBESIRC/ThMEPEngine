@@ -6,12 +6,20 @@ using TianHua.Electrical.PDS.Project.Module.Configure;
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
+    /// 断路器（抽象基类）
+    /// </summary>
+    public abstract class BreakerBaseComponent : PDSBaseComponent
+    {
+
+    }
+
+    /// <summary>
     /// 断路器
     /// </summary>
     public class Breaker : BreakerBaseComponent
     {
         /// <summary>
-        /// 
+        /// 断路器
         /// </summary>
         /// <param name="calculateCurrent">计算电流</param>
         /// <param name="tripDevice">脱扣器类型</param>
@@ -68,5 +76,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 附件
         /// </summary>
         public string Appendix { get; set; }
+    }
+
+    /// <summary>
+    /// 剩余电流断路器（RCCB）
+    /// </summary>
+    public class ResidualCurrentCircuitBreaker : BreakerBaseComponent
+    {
+        public ResidualCurrentCircuitBreaker()
+        {
+            ComponentType = ComponentType.剩余电流断路器;
+        }
     }
 }

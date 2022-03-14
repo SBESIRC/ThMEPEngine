@@ -40,10 +40,25 @@
                             <Directory Id="DIR_Autoloader_Contents" Name="Contents">
                                 <Directory Id="DIR_Autoloader_Contents_App_Win64" Name="Win64">
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R19" Name="2014">
+                                        <Directory Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes" Name="runtimes">
+                                            <Directory Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64" Name="win-x64">
+                                                <Directory Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native" Name="native" />
+                                            </Directory>
+                                        </Directory>
                                     </Directory>
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R20" Name="2016">
+                                        <Directory Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes" Name="runtimes">
+                                            <Directory Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64" Name="win-x64">
+                                                <Directory Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native" Name="native" />
+                                            </Directory>
+                                        </Directory>
                                     </Directory>
                                     <Directory Id="DIR_Autoloader_Contents_App_Win64_R22" Name="2018">
+                                        <Directory Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes" Name="runtimes">
+                                            <Directory Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64" Name="win-x64">
+                                                <Directory Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native" Name="native" />
+                                            </Directory>
+                                        </Directory>
                                     </Directory>
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Resources" Name="Resources" />

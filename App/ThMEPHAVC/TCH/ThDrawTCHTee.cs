@@ -132,7 +132,7 @@ namespace ThMEPHVAC.TCH
                 subSystemID = subSysId,
                 materialID = 0,
                 type = (type == TeeType.BRANCH_VERTICAL_WITH_OTTER) ? 3 : 5,
-                radRatio = 0.8
+                radRatio = ThTCHCommonTables.radRatio
             };
             string recordDuct = (type == TeeType.BRANCH_VERTICAL_WITH_OTTER) ?
                          $"INSERT INTO " + ThTCHCommonTables.teeTableName +

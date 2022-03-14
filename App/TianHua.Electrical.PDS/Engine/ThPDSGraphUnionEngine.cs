@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Dreambuild.AutoCAD;
-using QuickGraph;
+using QuikGraph;
 
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
@@ -10,19 +10,14 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSGraphUnionEngine
     {
-        /// <summary>
-        /// 配电箱关键字
-        /// </summary>
-        public List<string> DistBoxKey { get; set; }
-
-        public ThPDSGraphUnionEngine(List<string> distBoxKey)
+        public ThPDSGraphUnionEngine()
         {
-            DistBoxKey = distBoxKey;
+            //
         }
 
         public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
             List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
-            ThPDSCircuitGraphNode cabletrayNode)
+            ThPDSCircuitGraphNode cableTrayNode)
         {
             var cabletrayEdgeList = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             var addEdgeList = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
@@ -30,7 +25,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 graph.Edges.ForEach(e =>
                 {
-                    if (e.Source == cabletrayNode)
+                    if (e.Source == cableTrayNode)
                     {
                         cabletrayEdgeList.Add(e);
                     }

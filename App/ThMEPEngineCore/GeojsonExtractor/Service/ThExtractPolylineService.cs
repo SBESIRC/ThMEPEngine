@@ -1,13 +1,12 @@
-﻿using NFox.Cad;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
+using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {

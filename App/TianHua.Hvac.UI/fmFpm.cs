@@ -91,6 +91,13 @@ namespace TianHua.Hvac.UI
                 comboPortRange.SelectedItem = portParam.param.portRange;
             }
             comboScale.SelectedItem = portParam.param.scale;
+            // 默认填充到服务侧参数 风管Size填充到自定义
+            checkBoxRoom.Checked = true;
+            // portParam.notRoomDuctSize为NULL是无风机的情况
+            radioRoomRecommand.Checked = true;
+            ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double portW, out double portH);
+            textPortWidth.Text = portW.ToString();
+            textPortHeight.Text = portH.ToString();
             ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double w, out double h);
             textPortWidth.Text = w.ToString();
             textPortHeight.Text = h.ToString();
@@ -101,6 +108,7 @@ namespace TianHua.Hvac.UI
             textRoomWidth.Text = w.ToString();
             textRoomHeight.Text = h.ToString();
             textRoomElevation.Text = portParam.param.elevation.ToString("0.00");
+            textPortElevation.Text = portParam.param.portBottomEle.ToString();
         }
 
         private void btnSelectFan_Click(object sender, EventArgs e)
@@ -403,10 +411,6 @@ namespace TianHua.Hvac.UI
                     roomDuctSize = listBoxRoomDuctSize.SelectedItem.ToString();
                 else
                     roomDuctSize = "2000x500";
-                if (listBoxNotRoomDuctSize.Items.Count > 0)
-                    notRoomDuctSize = listBoxNotRoomDuctSize.SelectedItem.ToString();
-                else
-                    notRoomDuctSize = "2000x500";
             }
             else
             {
@@ -414,6 +418,16 @@ namespace TianHua.Hvac.UI
                     roomDuctSize = "2000x500";
                 else
                     roomDuctSize = textRoomWidth.Text + "x" + textRoomHeight.Text;
+            }
+            if (radioNotRoomRecommand.Checked)
+            {
+                if (listBoxNotRoomDuctSize.Items.Count > 0)
+                    notRoomDuctSize = listBoxNotRoomDuctSize.SelectedItem.ToString();
+                else
+                    notRoomDuctSize = "2000x500";
+            }
+            else
+            {
                 if (String.IsNullOrEmpty(textNotRoomWidth.Text) && String.IsNullOrEmpty(textNotRoomHeight.Text))
                     notRoomDuctSize = "2000x500";
                 else
@@ -493,7 +507,7 @@ namespace TianHua.Hvac.UI
                 label41.Enabled = false;
                 labelBypassNum.Enabled = false;
                 label43.Enabled = false;
-                button6.Enabled = false;
+                btnClearSelectBypass.Enabled = false;
                 btnSelectBypass.Enabled = false;
                 textBypassWidth.Enabled = false;
                 textBypassHeight.Enabled = false;
@@ -506,7 +520,7 @@ namespace TianHua.Hvac.UI
                 label41.Enabled = true;
                 labelBypassNum.Enabled = true;
                 label43.Enabled = true;
-                button6.Enabled = true;
+                btnClearSelectBypass.Enabled = true;
                 btnSelectBypass.Enabled = true;
                 textBypassWidth.Enabled = true;
                 textBypassHeight.Enabled = true;
@@ -924,7 +938,7 @@ namespace TianHua.Hvac.UI
 
         private Tuple<double, double> GetPortHeight(double airVolume)
         {
-            var selector = new ThPortParameter(airVolume, PortRecommendType.PORT);
+            var selector = new ThPortParameter(airVolume, 0, PortRecommendType.PORT);
             return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight) ;
         }
 
@@ -1128,6 +1142,7 @@ namespace TianHua.Hvac.UI
             {
                 UpdateUIPortInfo(false);
                 btnTotalAirVolume.Enabled = true;
+                comboPortRange.Enabled = false;
             }
         }
 
@@ -1137,6 +1152,7 @@ namespace TianHua.Hvac.UI
             {
                 UpdateUIPortInfo(false);
                 btnTotalAirVolume.Enabled = false;
+                comboPortRange.Enabled = false;
             }
         }
 
@@ -1146,6 +1162,7 @@ namespace TianHua.Hvac.UI
             {
                 UpdateUIPortInfo(true);
                 btnTotalAirVolume.Enabled = false;
+                comboPortRange.Enabled = true;
             }
         }
         private void UpdateUIPortInfo(bool status)
@@ -1219,6 +1236,21 @@ namespace TianHua.Hvac.UI
         {
             if (!ThHvacUIService.IsFloat2Decimal(textPortElevation.Text))
                 textPortElevation.Text = "3";
+        }
+
+        private void btnClearSelectBypass_Click(object sender, EventArgs e)
+        {
+            var key = (string)listBox1.SelectedItem;
+            if (fans.ContainsKey(key))
+            {
+                fans[key].bypassLines.Clear();
+                labelBypassNum.Text = fans[key].bypassLines.Count.ToString();
+                ThMEPHVACService.PromptMsg("清除 " + key + " 旁通");
+            }
+            else
+            {
+                ThMEPHVACService.PromptMsg("当前风机：" + key + " 路由未包含旁通");
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using QuickGraph;
+using QuikGraph;
 
 namespace ThMEPHVAC.Duct
 {

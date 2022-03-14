@@ -13,9 +13,9 @@ Win10
 
 # C# code styles
 
-[C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions)
+[Microsoft’s C# naming guidelines](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/inside-a-program/coding-conventions)
 
-[The Official raywenderlich.com C# Style Guide](https://github.com/raywenderlich/c-sharp-style-guide)
+[C# at Google Style Guide](https://google.github.io/styleguide/csharp-style.html)
 
 # Debug tips
 

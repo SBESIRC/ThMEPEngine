@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
-using QuickGraph;
+using QuikGraph;
 
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -68,18 +68,18 @@ namespace TianHua.Electrical.PDS.Engine
         private ThCADCoreNTSSpatialIndex LoadIndex;
         private ThCADCoreNTSSpatialIndex CableIndex;
         private ThCADCoreNTSSpatialIndex CableTrayIndex;
-        public ThPDSCircuitGraphNode CabletrayNode;//桥架节点
+        public ThPDSCircuitGraphNode CableTrayNode;//桥架节点
         private ThMarkService MarkService;
         private Database Database;
 
         public ThPDSLoopGraphEngine(Database database, List<Entity> distBoxes,
             List<Entity> loads, List<Curve> cabletrays, List<Curve> cables, ThMarkService markService,
-            List<string> distBoxKey)
+            List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode)
         {
             Database = database;
             MarkService = markService;
             DistBoxKey = distBoxKey;
-            using (AcadDatabase acad = AcadDatabase.Use(this.Database))
+            using (var acad = AcadDatabase.Use(this.Database))
             {
                 DistBoxes = distBoxes;
                 Loads = loads;
@@ -97,12 +97,53 @@ namespace TianHua.Electrical.PDS.Engine
                 {
                     Graph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
                 };
-                CabletrayNode = new ThPDSCircuitGraphNode
-                {
-                    NodeType = PDSNodeType.Cabletray,
-                };
-                PDSGraph.Graph.AddVertex(CabletrayNode);
+                CableTrayNode = cableTrayNode;
+                PDSGraph.Graph.AddVertex(CableTrayNode);
             }
+        }
+
+        public void MultiDistBoxAnalysis(List<Polyline> distBoxFrames)
+        {
+            distBoxFrames.ForEach(frame =>
+            {
+                // 搜索框线中的配电箱
+                var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
+
+                // 搜索框线周围的标注
+                var markList = MarkService.GetMultiMarks(ThPDSBufferService.Buffer(frame));
+
+                distBoxes.OfType<BlockReference>().ForEach(distBox =>
+                {
+                    var distBoxKey = "";
+                    ThPDSGraphService.DistBoxBlocks[distBox].Attributes.ForEach(attri =>
+                    {
+                        DistBoxKey.ForEach(key =>
+                        {
+                            if (attri.Value.Contains(key))
+                            {
+                                distBoxKey = attri.Value;
+                            }
+                        });
+                    });
+                    var thisMark = new List<string>();
+                    markList.ForEach(mark =>
+                    {
+                        mark.ForEach(str =>
+                        {
+                            if (str.Contains(distBoxKey))
+                            {
+                                thisMark = mark;
+                            }
+                        });
+                    });
+                    var newNode = ThPDSGraphService.CreateNode(distBox, thisMark, DistBoxKey);
+                    CacheDistBoxes.Add(distBox, newNode);
+                    PDSGraph.Graph.AddVertex(newNode);
+
+                    var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string>(), DistBoxKey);
+                    PDSGraph.Graph.AddEdge(newEdge);
+                });
+            });
         }
 
         /// <summary>
@@ -212,7 +253,7 @@ namespace TianHua.Electrical.PDS.Engine
                     //都不相邻即无关系，都相邻即近似平行，都不符合
                     if (IsStart != IsEnd)
                     {
-                        PrepareNavigate(CabletrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
+                        PrepareNavigate(CableTrayNode, new List<Entity>(), new List<string>(), curve, findCurve);
                     }
                 }
 
@@ -226,7 +267,8 @@ namespace TianHua.Electrical.PDS.Engine
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = ThPDSGraphService.CreateEdge(CabletrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
+                        // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
+                        var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
                         PDSGraph.Graph.AddEdge(newEdge);
 
                         FindGraph(startingEntity, distBox);
@@ -256,7 +298,13 @@ namespace TianHua.Electrical.PDS.Engine
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
                 if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
-                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, circuit.Layer);
+                    var needAssign = false;
+                    if (newEdge.Target.Loads.Count == 0)
+                    {
+                        newEdge.Target.Loads.Add(new ThPDSLoad());
+                        needAssign = true;
+                    }
+                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, newEdge.Target.Loads[0], circuit.Layer, needAssign);
                 }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
@@ -265,7 +313,14 @@ namespace TianHua.Electrical.PDS.Engine
                     var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3, DistBoxKey);
                     if (newDistBoxEdge.Circuit.Type == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
                     {
-                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Circuit, otherCircuit.Layer);
+                        var needAssign = false;
+                        if (newDistBoxEdge.Target.Loads.Count == 0)
+                        {
+                            newDistBoxEdge.Target.Loads.Add(new ThPDSLoad());
+                            needAssign = true;
+                        }
+                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Circuit, newDistBoxEdge.Target.Loads[0],
+                            otherCircuit.Layer, needAssign);
                     }
                     PDSGraph.Graph.AddEdge(newDistBoxEdge);
 
@@ -317,7 +372,7 @@ namespace TianHua.Electrical.PDS.Engine
                         if (item.Value.Count > 0)
                         {
                             newEdge.Circuit.ViaConduit = true;
-                            if (node.NodeType == PDSNodeType.Cabletray)
+                            if (node.NodeType == PDSNodeType.CableCarrier)
                             {
                                 newEdge.Circuit.ViaCableTray = true;
                             }

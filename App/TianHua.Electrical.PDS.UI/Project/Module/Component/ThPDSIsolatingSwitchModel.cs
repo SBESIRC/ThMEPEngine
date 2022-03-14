@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
-    public class IsolatingSwitchModel : NotifyPropertyChangedBase
+    public class ThPDSIsolatingSwitchModel : NotifyPropertyChangedBase
     {
         readonly IsolatingSwitch isolatingSwitch;
-        public IsolatingSwitchModel(IsolatingSwitch isolatingSwitch)
+        public ThPDSIsolatingSwitchModel(IsolatingSwitch isolatingSwitch)
         {
             this.isolatingSwitch = isolatingSwitch;
         }

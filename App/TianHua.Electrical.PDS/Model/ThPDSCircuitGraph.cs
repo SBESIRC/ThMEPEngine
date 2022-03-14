@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using QuickGraph;
+using QuikGraph;
 using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model
 {
     public enum PDSNodeType
     {
+        [Description("未知")]
+        None,
         [Description("配电箱")]
         DistributionBox,
         [Description("负载")]
         Load,
         [Description("桥架")]
-        Cabletray,
-        [Description("未知")]
-        None
+        CableCarrier,
+        [Description("变压器")]
+        PowerTransformer,
+        [Description("馈线母排")]
+        FeederBusbar
     }
 
     public class ThPDSCircuitGraphNode : IEquatable<ThPDSCircuitGraphNode>
@@ -34,7 +38,7 @@ namespace TianHua.Electrical.PDS.Model
         }
     }
 
-    public class ThPDSCircuitGraphEdge<T> : Edge<T> where T : ThPDSCircuitGraphNode
+    public class ThPDSCircuitGraphEdge<T> : EquatableEdge<T> where T : ThPDSCircuitGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
         public ThPDSCircuitGraphEdge(T source, T target) : base(source, target)

@@ -15,10 +15,12 @@ namespace TianHua.Hvac.UI.Command
     {
         private string curDbPath;
         private PortParam portParam;
+        private ThDuctPortsDrawService service;
         private Dictionary<Polyline, ObjectId> allFansDic;
         public ThHvacDuctPortsCmd() { }
-        public ThHvacDuctPortsCmd(string curDbPath, PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic)
+        public ThHvacDuctPortsCmd(string curDbPath, PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic, ThDuctPortsDrawService service)
         {
+            this.service = service;
             this.curDbPath = curDbPath;
             this.portParam = portParam;
             this.allFansDic = allFansDic;
@@ -40,7 +42,7 @@ namespace TianHua.Hvac.UI.Command
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);
             anayRes.CreatePortDuctGeo();// 获得风口位置后再调用(同时获得管段间变径)
             anayRes.CreateReducing();
-            var painter = new ThDuctPortsDraw(portParam, curDbPath);
+            var painter = new ThDuctPortsDraw(portParam, curDbPath, service);
             painter.Draw(anayRes, ref gId);
         }
         private DBObjectCollection GetExcludeLine()
@@ -51,7 +53,7 @@ namespace TianHua.Hvac.UI.Command
                 if (excludeLines.Count >= portParam.centerLines.Count)
                 {
                     ThMEPHVACService.PromptMsg("没有选择要布置风口的管段");
-                    return new DBObjectCollection ();
+                    return new DBObjectCollection();
                 }
                 ThDuctPortsDrawService.MoveToZero(portParam.srtPoint, excludeLines);
                 return excludeLines;

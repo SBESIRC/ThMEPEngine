@@ -1,10 +1,7 @@
 ﻿using Dreambuild.AutoCAD;
-using QuickGraph;
+using QuikGraph;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
@@ -25,7 +22,7 @@ namespace TianHua.Electrical.PDS.Project
             var RootNodes = PDSProjectGraph.Graph.Vertices.Where(x => x.IsStartVertexOfGraph);
             foreach (var rootNode in RootNodes)
             {
-                rootNode.Details.LowPower =  PDSProjectGraph.CalculatePower(rootNode);
+                rootNode.Details.LowPower = PDSProjectGraph.CalculatePower(rootNode);
             }
         }
 
@@ -34,12 +31,12 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static double CalculatePower(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
         {
-            if(node.Details.IsStatisticalPower)
+            if (node.Details.IsStatisticalPower)
             {
                 return node.Details.LowPower;
             }
             var edges = PDSProjectGraph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
-            if(edges.Count == 0)
+            if (edges.Count == 0)
             {
                 PDSProjectGraph.CalculateCircuitFormInType(node);
                 node.Details.IsStatisticalPower = true;
@@ -56,7 +53,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void CalculateCircuitFormInType(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
         {
-            if (node.Load.LoadTypeCat_1 ==ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 ==ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
+            if (node.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
             {
                 //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
                 node.Details.CircuitFormType = new CentralizedPowerCircuit();
@@ -101,7 +98,7 @@ namespace TianHua.Electrical.PDS.Project
                         DemandFactor = 1;
                     var PowerFactor = v.Load.PowerFactor;
                     var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
-                    v.Load.CalculateCurrent =Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
+                    v.Load.CalculateCurrent = Math.Round(v.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
                 }
             });
         }
@@ -116,7 +113,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 PDSProjectGraph.LeafComponentSelection(node);
             });
-            while(leafNodes.Count > 0)
+            while (leafNodes.Count > 0)
             {
                 var node = leafNodes.First();
                 var superiorNodes = PDSProjectGraph.Graph.Edges.Where(e => e.Target.Equals(node)).Select(e => e.Source).ToList();//上级节点
@@ -131,9 +128,9 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 叶子节点元器件选型
         /// </summary>
-        public static void LeafComponentSelection(this ThPDSProjectGraph PDSProjectGraph,ThPDSProjectGraphNode node)
+        public static void LeafComponentSelection(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
         {
-            if(node.Type == PDSNodeType.DistributionBox)
+            if (node.Type == PDSNodeType.DistributionBox)
             {
                 var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
                 var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -247,7 +244,7 @@ namespace TianHua.Electrical.PDS.Project
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
             {
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
-                circuitDetails.CircuitForm = new MotorCircuit_DiscreteComponents()
+                circuitDetails.CircuitForm = new Motor_DiscreteComponentsCircuit()
                 {
                     breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
                     contactor = new Contactor(CalculateCurrent, PolesNum),

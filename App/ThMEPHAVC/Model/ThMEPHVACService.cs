@@ -410,17 +410,17 @@ namespace ThMEPHVAC.Model
         }
         public static Line GetMaxLine(DBObjectCollection lines)
         {
-            var max_line = new Line();
-            double max_len = 0;
+            var maxLine = new Line();
+            double maxLen = 0;
             foreach (Line l in lines)
             {
-                if (max_len < l.Length)
+                if (maxLen < l.Length)
                 {
-                    max_len = l.Length;
-                    max_line = l;
+                    maxLen = l.Length;
+                    maxLine = l;
                 }
             }
-            return max_line;
+            return maxLine;
         }
         public static bool IsCross(DBObjectCollection centerLine, DBObjectCollection bypassLine)
         {
@@ -429,7 +429,8 @@ namespace ThMEPHVAC.Model
             var index = new ThCADCoreNTSSpatialIndex(centerLine);
             foreach (Line l in bypassLine)
             {
-                var pl = GetLineExtend(l, 1);
+                var dir = ThMEPHVACService.GetEdgeDirection(l);
+                var pl = GetLineExtend(new Line(l.StartPoint - dir, l.EndPoint + dir), 5);
                 var res = index.SelectCrossingPolygon(pl);
                 if (res.Count > 0)
                     return true;

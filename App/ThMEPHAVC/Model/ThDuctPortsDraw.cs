@@ -12,14 +12,15 @@ namespace ThMEPHVAC.Model
     {
         private double portWidth;
         private double portHeight;
-        private ThDuctPortsDrawService service;
         private PortParam portParam;
         private Vector3d orgDisVec;
         private Matrix3d orgDisMat;
+        private ThDuctPortsDrawService service;
         public ThTCHDrawFactory tchDrawService;
-        public ThDuctPortsDraw(PortParam portParam, string curDbPath)
+        public ThDuctPortsDraw(PortParam portParam, string curDbPath, ThDuctPortsDrawService service)
         {
             Init(portParam);
+            this.service = service;
             tchDrawService = new ThTCHDrawFactory(curDbPath, portParam.param.scenario);
         }
         private void Init(PortParam portParam)
@@ -28,7 +29,6 @@ namespace ThMEPHVAC.Model
             ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double width, out double height);
             portWidth = width;
             portHeight = height;
-            service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             orgDisVec = portParam.srtPoint.GetAsVector();
             orgDisMat = Matrix3d.Displacement(orgDisVec);
         }
@@ -37,8 +37,8 @@ namespace ThMEPHVAC.Model
             if (portParam.genStyle == GenerationStyle.Auto && portParam.param.portNum > 0)
                 DrawPortMark(anayRes.endLinesInfos); // DrawEndlines的DrawDimension会改变风口个数，所以先插标注
 
-            tchDrawService.ductService.Draw(anayRes.breakedDucts, orgDisMat, true, portParam.param, ref gId);
-            tchDrawService.ductService.Draw(anayRes.mainLinesInfos.Values.ToList(), orgDisMat, false, portParam.param, ref gId);
+            tchDrawService.ductService.DrawDuct(anayRes.breakedDucts, orgDisMat, true, portParam.param, ref gId);
+            tchDrawService.ductService.DrawDuct(anayRes.mainLinesInfos.Values.ToList(), orgDisMat, false, portParam.param, ref gId);
             tchDrawService.reducingService.Draw(anayRes.reducings, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
             tchDrawService.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
 
@@ -62,7 +62,14 @@ namespace ThMEPHVAC.Model
                 {
                     var param = dicPlToAirVolume[code];
                     var b = adb.Element<BlockReference>(param.id, true);
-                    b.Layer = service.portLayer;
+                    if (param.effectiveName == ThHvacCommon.AI_BROKEN_LINE || param.effectiveName == ThHvacCommon.AI_VERTICAL_PIPE)
+                    {
+                        b.Layer = service.geoLayer;
+                    }
+                    else
+                    {
+                        b.Layer = service.portLayer;
+                    }
                     if (param.effectiveName == ThHvacCommon.AI_BROKEN_LINE)
                     {
                         var s = ThMEPHVACService.GetADuctSize(param.portAirVolume, portParam.param.scenario);
@@ -106,7 +113,7 @@ namespace ThMEPHVAC.Model
                     foreach (var seg in endline.endlines.Values)
                     {
                         service.portService.DrawVerticalPipePorts(seg, portParam.param, orgDisVec, portWidth, portHeight, avgAirVolume, out List<SegInfo> verticalPipes);
-                        tchDrawService.ductService.DrawVerticalPipe(verticalPipes, orgDisMat, portParam.param, ref gId);
+                        tchDrawService.ductService.DrawPortVerticalPipe(verticalPipes, orgDisMat, portParam.param, ref gId);
                     }
                 }
             }
@@ -131,22 +138,25 @@ namespace ThMEPHVAC.Model
                 if (seg.portNum > 0)
                 {
                     p = seg.portsInfo[0].position;
-                    var dir = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
-                    var leftDir = ThMEPHVACService.GetLeftVerticalVec(dir);
-                    var w = ThMEPHVACService.GetWidth(seg.portsInfo[0].ductSize) * 0.5;
-                    if (leftDir.X > 0)
+                    if (portParam.param.portRange.Contains("侧"))
                     {
-                        p += (w * leftDir);
-                    }
-                    else
-                    {
-                        p += (-w * leftDir);
+                        var dir = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
+                        var leftDir = ThMEPHVACService.GetLeftVerticalVec(dir);
+                        var w = ThMEPHVACService.GetWidth(seg.portsInfo[0].ductSize) * 0.5;
+                        if (leftDir.X > 0)
+                        {
+                            p += (w * leftDir);
+                        }
+                        else
+                        {
+                            p += (-w * leftDir);
+                        }
                     }
                     break;
                 }
             }
             var markP = p + orgDisVec;
-            service.markService.InsertMark(portParam.param, portWidth, portHeight, 0, markP);
+            service.markService.InsertMark(portParam, portWidth, portHeight, 0, markP);
         }
     }
 }

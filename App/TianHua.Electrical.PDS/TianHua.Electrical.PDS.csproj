@@ -34,6 +34,7 @@
     <Compile Include="Engine\ThCabletraySegmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThCircuitMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircuitMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThPDSDistBoxFrameExtraction.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
     <Compile Include="Engine\ThPDSBlockExtractionEngine.cs" />
@@ -47,28 +48,47 @@
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSCircuitModel.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
+    <Compile Include="Model\ThPDSDBText.cs" />
     <Compile Include="Model\ThPDSID.cs" />
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />
     <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Model\ThPDSPhase.cs" />
     <Compile Include="Project\Module\CircuitDetails.cs" />
+    <Compile Include="Project\Module\Circuit\ContactorControlCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_MTInBehindCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_CTInBehindCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_CTInFrontCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_MTInFrontCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_ShanghaiCTCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\DistributionMetering_ShanghaiMTCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\CentralizedPowerCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\LeakageCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\OneWayInCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\PDSBaseInCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\ThreeWayInCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\TwoWayInCircuit.cs" />
-    <Compile Include="Project\Module\Circuit\MotorCircuit_DiscreteComponents.cs" />
+    <Compile Include="Project\Module\Circuit\TwoSpeedMotor_CPSDYYCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\TwoSpeedMotor_DiscreteComponentsDYYCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\TwoSpeedMotor_CPSYYCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\TwoSpeedMotor_DiscreteComponentsYYCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\Motor_DiscreteComponentsStarTriangleStartCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\Motor_CPSStarTriangleStartCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\Motor_CPSCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\Motor_DiscreteComponentsCircuit.cs" />
     <Compile Include="Project\Module\Circuit\PDSBaseOutCircuit.cs" />
     <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\ThermalRelayProtectionCircuit.cs" />
     <Compile Include="Project\Module\Component\Breaker.cs" />
+    <Compile Include="Project\Module\Component\CPS.cs" />
+    <Compile Include="Project\Module\Component\Meter.cs" />
     <Compile Include="Project\Module\Component\PDSBaseComponent.cs" />
     <Compile Include="Project\Module\Component\ComponentConfig.cs" />
     <Compile Include="Project\Module\Component\ComponentExtend.cs" />
     <Compile Include="Project\Module\Component\Contactor.cs" />
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
-    <Compile Include="Project\Module\Component\ResidualCurrentCircuitBreaker.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
+    <Compile Include="Project\Module\Component\TransferSwitch.cs" />
     <Compile Include="Project\Module\Configure\ContactorConfiguration.cs" />
     <Compile Include="Project\Module\Configure\BreakerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\IsolatorConfiguration.cs" />
@@ -99,7 +119,11 @@
     <Compile Include="Service\ThPDSPolylineService.cs" />
     <Compile Include="Service\ThPDSTableAnalysisService.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="QuikGraph">
+      <Version>2.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
@@ -125,11 +149,6 @@
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="QuickGraph">
-      <Version>3.6.61119.7</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

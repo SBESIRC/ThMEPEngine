@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.ApplicationServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using QuickGraph;
+using QuikGraph;
 
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -28,6 +28,13 @@ namespace TianHua.Electrical.PDS.Command
 
         public override void SubExecute()
         {
+            // 记录所有图纸中的图
+            var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>();
+            var cableTrayNode = new ThPDSCircuitGraphNode
+            {
+                NodeType = PDSNodeType.CableCarrier,
+            };
+
             //加载所有已打开的文件
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
@@ -122,24 +129,24 @@ namespace TianHua.Electrical.PDS.Command
                         ThMEPEntityExtension.ProjectOntoXYPlane(block);
                     });
 
+                    // 提取配电箱框线
+                    var distBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database);
+
                     //做一个标注的Service
                     var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks, tchWireDimExtractor.Results);
 
                     ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                     ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
                     var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
-                        loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService, distBoxKey);
+                        loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService,
+                        distBoxKey, cableTrayNode);
+
+                    graphEngine.MultiDistBoxAnalysis(distBoxFrame);
                     graphEngine.CreatGraph();
                     graphEngine.CopyAttributes();
 
                     var graph = graphEngine.GetGraph();
-
-                    var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>
-                    {
-                        graph,
-                    };
-                    var unionEngine = new ThPDSGraphUnionEngine(distBoxKey);
-                    var unionGraph = unionEngine.GraphUnion(graphList, graphEngine.CabletrayNode);
+                    graphList.Add(graph);
 
                     // 移动回原位
                     loadExtractService.MarkBlocks.ForEach(o =>
@@ -157,10 +164,12 @@ namespace TianHua.Electrical.PDS.Command
                         var block = acad.Element<BlockReference>(o.Value.ObjId, true);
                         transformer.Reset(block);
                     });
-
-                    PDSProject.Instance.PushGraphData(unionGraph);
                 }
             }
+
+            var unionEngine = new ThPDSGraphUnionEngine();
+            var unionGraph = unionEngine.GraphUnion(graphList, cableTrayNode);
+            PDSProject.Instance.PushGraphData(unionGraph);
         }
 
         public void Dispose()

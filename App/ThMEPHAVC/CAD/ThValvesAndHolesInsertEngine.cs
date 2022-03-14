@@ -1,4 +1,6 @@
-﻿using AcHelper;
+﻿using System;
+using System.Collections.Generic;
+using AcHelper;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -6,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Model;
+using DotNetARX;
 
 namespace ThMEPHVAC.CAD
 {
@@ -44,35 +47,42 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public static ObjectId InsertHole(ThValve HoleModel)
+        public static ObjectId InsertHole(ThValve HoleModel, ThDuctPortsDrawService service, string ductSize, string elevation)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockName = HoleModel.ValveBlockName;
                 var layerName = HoleModel.ValveBlockLayer;
-                Active.Database.ImportLayer(layerName);
-                Active.Database.ImportValve(blockName);
-                var objId = Active.Database.InsertValve(blockName, layerName);
-                objId.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
-                objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
-                objId.SetValveModel(HoleModel.ValveVisibility);
-
-                // 插入图块时，图块被放置在WCS的原点
-                // 为了在WCS中正确放置图块，图块需要完成转换：
-                //  1. 基于图块插入点将图块旋转到管线的角度
-                //  2. 将图块平移到管线上指定位置
-                var blockRef = acadDatabase.Element<BlockReference>(objId, true);
-                Point3d holeinsertpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, HoleModel.ValveOffsetFromCenter, 0)));
-                Point3d valvecenterpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, -0.5 * HoleModel.Length, 0)));
-                Matrix3d matrix = Matrix3d.Identity
-                    .PreMultiplyBy(Matrix3d.Rotation(HoleModel.RotationAngle, Vector3d.ZAxis, holeinsertpoint))
-                    .PreMultiplyBy(Matrix3d.Displacement(holeinsertpoint.GetVectorTo(HoleModel.ValvePosition)));
-
-                blockRef.TransformBy(matrix);
+                var mmElevation = Double.Parse(elevation) * 1000;
+                var h = ThMEPHVACService.GetHeight(ductSize);
+                // 洞口高 = 风管高 + 100
+                var holeSelfEleVec = (mmElevation + h + 100) * Vector3d.ZAxis;
+                // 洞底标高 = 风管底标高-0.05
+                var holeEle = ((mmElevation - 50) / 1000).ToString("0.00");
+                var attr = new Dictionary<string, string> { { "洞口尺寸", "留洞：" + HoleModel.Width.ToString() + "x" + HoleModel.Length.ToString() + "(H)"},
+                                                            { "标高", "洞底标高：h+" + holeEle }};
+                var obj = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                    layerName, blockName, HoleModel.ValvePosition + holeSelfEleVec, new Scale3d(1, 1, 1), 0, attr);
+                obj.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
+                obj.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
+                obj.SetValveModel(HoleModel.ValveVisibility);
+                obj.SetValveTextRotate(HoleModel.RotationAngle, ThHvacCommon.AI_HOLE_ROTATION);
+                obj.SetValveTextHeight(GetTextHeight(service.dimService.scale), ThHvacCommon.AI_HOLE_TEXT_HEIGHT);
 
                 // 返回图块
-                return objId;
+                return obj;
             }
+        }
+
+        private static double GetTextHeight(string scale)
+        {
+            if (scale == "1:150")
+                return 450;
+            if (scale == "1:100")
+                return 300;
+            if (scale == "1:50")
+                return 150;
+            throw new NotImplementedException("不支持 "+ scale + " 出图比例");
         }
 
         public static ObjectId InsertHose(ThIfcDuctHose hose,string layerName)

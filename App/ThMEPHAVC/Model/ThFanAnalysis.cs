@@ -66,12 +66,13 @@ namespace ThMEPHVAC.CAD
         public DBObjectCollection bypass;
         public DBObjectCollection outCenterLine;
         public ThVTee vt;
-        public Point3d inVtPos;
-        public Point3d outVtPos;
+        public Point3d roomVtPos;
+        public Point3d notRoomVtPos;
         private bool isExhaust;
         private double ioBypassSepDis;
         private List<BypassTee> bypassTees;
         private ThCADCoreNTSSpatialIndex spatialIndex;
+        private ThDuctPortsDrawService service;
         public ThShrinkDuct shrinkService;
         public ThFanAnalysis(double ioBypassSepDis,
                              ThDbModelFan fan,
@@ -79,9 +80,10 @@ namespace ThMEPHVAC.CAD
                              PortParam portParam,
                              DBObjectCollection bypass,
                              DBObjectCollection wallLines,
-                             bool haveMultiFan)
+                             bool haveMultiFan,
+                             ThDuctPortsDrawService service)
         {
-            Init(ioBypassSepDis, fan, param, bypass, portParam);
+            Init(ioBypassSepDis, fan, param, bypass, portParam, service);
             MoveToZero(fan.FanInletBasePoint, fan.FanOutletBasePoint, param.centerLines, wallLines, out Point3d roomP, out Point3d notRoomP);
             MergeBypassCenterLine(ref param.centerLines, bypass);
             UpdateSearchPoint(roomP, notRoomP, param, ref param.centerLines, out Point3d iRoomP, out Point3d iNotRoomP, out Line roomLine, out Line notRoomLine);
@@ -102,7 +104,7 @@ namespace ThMEPHVAC.CAD
             if (bypass.Count == 0 && param.bypassSize != null)
             {
                 GetVtElbowPos(iRoomP, iNotRoomP, buffer);
-                vt = new ThVTee(inVtPos, outVtPos, param.bypassSize);
+                vt = new ThVTee(roomVtPos, notRoomVtPos, param, fan.installStyle);
             }
             param.centerLines.Clear();
             param.centerLines = outCenterLine;
@@ -145,8 +147,14 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-        private void Init(double ioBypassSepDis, ThDbModelFan fan, FanParam param, DBObjectCollection bypass, PortParam portParam)
+        private void Init(double ioBypassSepDis, 
+                          ThDbModelFan fan, 
+                          FanParam param, 
+                          DBObjectCollection bypass, 
+                          PortParam portParam,
+                          ThDuctPortsDrawService service)
         {
+            this.service = service;
             this.fan = fan;
             this.fanParam = param;
             this.bypass = bypass;
@@ -172,7 +180,6 @@ namespace ThMEPHVAC.CAD
             var rootDuct = centerLines.Values.ToList().LastOrDefault();
             var insertP = rootDuct.l.EndPoint;
             var dirVec = (rootDuct.l.EndPoint - rootDuct.l.StartPoint).GetNormal();
-            var service = new ThDuctPortsDrawService(fanParam.scenario, fanParam.scale);
             if (portParam.genStyle == GenerationStyle.Auto)
                 ThNotRoomStartComp.InsertComp(rootDuct, dirVec, moveSrtP, insertP, portParam, service);
         }
@@ -286,11 +293,20 @@ namespace ThMEPHVAC.CAD
         }
         private void DoAddInnerDuct(Line startLine, Point3d srtP, string ductSize)
         {
-            var dir_vec = ThMEPHVACService.GetEdgeDirection(startLine);
-            var height = ThMEPHVACService.GetHeight(ductSize);
-            var sp = srtP - (dir_vec * height);
-            var l = new Line(sp, srtP);
-            UpDownVertivalPipe.Add(new SegInfo() { l = l, ductSize = ductSize });
+            var dirVec = ThMEPHVACService.GetEdgeDirection(startLine);
+            var h = ThMEPHVACService.GetHeight(ductSize);
+            var mmElevation = portParam.param.elevation * 1000;
+            var cp = srtP - (dirVec * 0.5 * h);
+            var ep = cp + new Vector3d(0, 0, h + mmElevation);
+            var sp = ep - new Vector3d(0, 0, h + 1000);
+            var l = new Line(sp, ep);
+            UpDownVertivalPipe.Add(new SegInfo() 
+            { 
+                l = l, 
+                horizontalVec = dirVec, 
+                airVolume = portParam.param.airVolume, 
+                ductSize = ductSize 
+            });
         }
         private void MoveToOrg()
         {
@@ -335,8 +351,8 @@ namespace ThMEPHVAC.CAD
         }
         private void GetVtElbowPos(Point3d inSearchPoint, Point3d outSearchPoint, DBObjectCollection lines)
         {
-            inVtPos = RecordVtElbowPos(inSearchPoint, lines);
-            outVtPos = RecordVtElbowPos(outSearchPoint, lines);
+            roomVtPos = RecordVtElbowPos(inSearchPoint, lines);
+            notRoomVtPos = RecordVtElbowPos(outSearchPoint, lines);
         }
         private Point3d RecordVtElbowPos(Point3d searchPoint, DBObjectCollection lines)
         {
@@ -527,12 +543,13 @@ namespace ThMEPHVAC.CAD
                         var res = wallIndex.SelectCrossingPolygon(pl);
                         if (res.Count > 0)
                         {
-                            var line = res[0] as Line;
-                            fanBreakP = ThMEPHVACService.IntersectPoint(e_l, line);
-                            if (fanBreakP.IsEqualTo(Point3d.Origin))
-                                continue;
                             if (!IsBypass(l))
                             {
+                                // 不是旁通再更新风机与墙的打断点
+                                var line = res[0] as Line;
+                                fanBreakP = ThMEPHVACService.IntersectPoint(e_l, line);
+                                if (fanBreakP.IsEqualTo(Point3d.Origin))
+                                    continue;
                                 crossLine = l;
                                 break;
                             }
@@ -729,7 +746,7 @@ namespace ThMEPHVAC.CAD
             var dirVec = ThMEPHVACService.GetEdgeDirection(startLine);
             srtP = startLine.StartPoint + dirVec * shrinkDis;// reducing长度一定大于软接长度
             var hoseLen = (fan.scenario == "消防补风" || fan.scenario == "消防排烟" || fan.scenario == "消防加压送风") ? 0 : 200;
-            //srtP = startLine.StartPoint + dirVec * (shrinkDis + hoseLen);// ThDuctPortsAnaylysis.cs Line:253
+            srtP = startLine.StartPoint + dirVec * (shrinkDis + hoseLen);// ThDuctPortsAnaylysis.cs Line:253
             var reducing = new Line(startLine.StartPoint + (dirVec * hoseLen), srtP);
             var isAxis = (fan.Name.Contains("轴流风机"));
             reducing.StartPoint += highDisVec;

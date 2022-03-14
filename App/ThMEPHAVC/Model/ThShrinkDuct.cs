@@ -53,7 +53,7 @@ namespace ThMEPHVAC.Model
                 case 1: ShrinkElbow(currLine, p, crossLines, dic); break;
                 case 2: ShrinkTee(currLine, p, crossLines, dic); break;
                 case 3: ShrinkCross(currLine, p, crossLines, dic); break;
-                default: throw new NotImplementedException("[CheckError]: Just support connector less than 4!");
+                default: throw new NotImplementedException("路由有环路或者未选择旁通路由，请重新选择。");
             }
         }
         private void ShrinkCross(Line currLine,
@@ -139,7 +139,8 @@ namespace ThMEPHVAC.Model
         {
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
             var ductSize = dic[inLine.GetHashCode()][centerP].Item2;
-            portWidths.Add(otherP, ductSize);
+            if (!portWidths.ContainsKey(otherP))
+                portWidths.Add(otherP, ductSize);
         }
         private void ShrinkElbow(Line currLine,
                                  Point3d detectP,

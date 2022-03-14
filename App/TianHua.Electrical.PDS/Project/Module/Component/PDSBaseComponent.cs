@@ -10,6 +10,12 @@
         热继电器,
         断路器,
         剩余电流断路器,
+        ATSE,
+        MTSE,
+        MT,
+        CT,
+        CPS,
+        RCD,
     }
 
     /// <summary>
@@ -21,13 +27,5 @@
         /// 元器件类型
         /// </summary>
         public ComponentType ComponentType { get; set; }
-    }
-
-    /// <summary>
-    /// 断路器（抽象基类）
-    /// </summary>
-    public abstract class BreakerBaseComponent : PDSBaseComponent
-    {
-
     }
 }

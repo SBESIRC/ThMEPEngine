@@ -24,11 +24,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string CircuitId
         {
             get => edge.Circuit.ID.CircuitID;
-            set
-            {
-                edge.Circuit.ID.CircuitID = value;
-                OnPropertyChanged(nameof(CircuitId));
-            }
+            //set
+            //{
+            //    edge.Circuit.ID.CircuitID = value;
+            //    OnPropertyChanged(nameof(CircuitId));
+            //}
         }
         [DisplayName("回路形式")]
         public Model.ThPDSCircuitType CircuitType
@@ -53,10 +53,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("相序")]
         public Model.ThPDSPhase Phase
         {
-            get => edge.Circuit.Phase;
+            get => edge.Target.Load.Phase;
             set
             {
-                edge.Circuit.Phase = value;
+                edge.Target.Load.Phase = value;
                 OnPropertyChanged(nameof(Phase));
             }
         }
@@ -74,11 +74,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string LoadId
         {
             get => edge.Circuit.ID.LoadID;
-            set
-            {
-                edge.Circuit.ID.LoadID = value;
-                OnPropertyChanged(nameof(LoadId));
-            }
+            //set
+            //{
+            //    edge.Circuit.ID.LoadID = value;
+            //    OnPropertyChanged(nameof(LoadId));
+            //}
         }
         [DisplayName("功能描述")]
         public string Description
@@ -97,7 +97,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get
             {
-                var v = edge.Circuit.DemandFactor;
+                var v = edge.Target.Load.DemandFactor;
                 if (v > 0 && v <= 1)
                 {
                     var s = $"{v:F2}";
@@ -105,7 +105,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                     lastDemandFactorValue = s;
                     return s;
                 }
-                edge.Circuit.DemandFactor = double.Parse(lastDemandFactorValue);
+                edge.Target.Load.DemandFactor = double.Parse(lastDemandFactorValue);
                 return lastDemandFactorValue;
             }
             set
@@ -114,7 +114,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 {
                     if (v > 0 && v <= 1)
                     {
-                        edge.Circuit.DemandFactor = v;
+                        edge.Target.Load.DemandFactor = v;
                         lastDemandFactorValue = $"{v:F2}";
                     }
                 }
@@ -128,7 +128,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get
             {
-                var v = edge.Circuit.PowerFactor;
+                var v = edge.Target.Load.PowerFactor;
                 if (v > 0 && v <= 1)
                 {
                     var s = $"{v:F2}";
@@ -136,7 +136,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                     lastPowerFactorValue = s;
                     return s;
                 }
-                edge.Circuit.PowerFactor = double.Parse(lastPowerFactorValue);
+                edge.Target.Load.PowerFactor = double.Parse(lastPowerFactorValue);
                 return lastPowerFactorValue;
             }
             set
@@ -145,7 +145,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 {
                     if (v > 0 && v <= 1)
                     {
-                        edge.Circuit.PowerFactor = v;
+                        edge.Target.Load.PowerFactor = v;
                         lastPowerFactorValue = $"{v:F2}";
                     }
                 }

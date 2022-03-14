@@ -1,5 +1,5 @@
 ﻿using System;
-using QuickGraph;
+using QuikGraph;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 
@@ -23,23 +23,13 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
     }
 
-    public class ThPDSProjectGraphEdge<T> : Edge<T> where T : ThPDSProjectGraphNode
+    public class ThPDSProjectGraphEdge<T> : EquatableEdge<T> where T : ThPDSProjectGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
         public CircuitDetails Details { get; set; }
-
         public ThPDSProjectGraphEdge(T source, T target) : base(source, target)
         {
-            //Circuit = new ThPDSCircuit();
-            //circuitDetails = new CircuitDetails();
-        }
-
-        /// <summary>
-        /// 计算回路详情
-        /// </summary>
-        public void CalculateCircuitDetails()
-        {
-
+            //
         }
     }
 

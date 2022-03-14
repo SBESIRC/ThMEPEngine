@@ -87,7 +87,7 @@ namespace ThMEPHVAC.TCH
                 subSystemID = subSysId,
                 materialID = 0,
                 type = 1,
-                radRatio = 0.8,
+                radRatio = ThTCHCommonTables.radRatio,
                 segments = 2
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.elbowTableName +

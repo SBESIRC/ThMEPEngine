@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string ID
         {
             get => vertice.Load.ID.LoadID;
-            set => vertice.Load.ID.LoadID = value;
+            //set => vertice.Load.ID.LoadID = value;
         }
         [DisplayName("功率")]
         public double InstallCapacity

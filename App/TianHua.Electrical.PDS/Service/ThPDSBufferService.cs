@@ -18,7 +18,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (curve is Line line)
                 {
-                    return line.Buffer(distance);
+                    return line.ExtendLine(distance).Buffer(distance);
                 }
                 else if (curve is Arc arc)
                 {
@@ -60,7 +60,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (curve is Line line)
                 {
-                    return line.Buffer(distance);
+                    return line.ExtendLine(distance).Buffer(distance);
                 }
                 else if (curve is Arc arc)
                 {

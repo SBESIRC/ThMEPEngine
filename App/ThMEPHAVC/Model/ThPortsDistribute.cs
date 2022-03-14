@@ -137,14 +137,17 @@ namespace ThMEPHVAC.Model
         }
         private List<int> CollectPortYCoor(List<PortInfo> portsInfo, out Dictionary<int, Point3d> dicYtoPoint)
         {
-            var Ys = new List<int>();
+            var Ys = new HashSet<int>();
             dicYtoPoint = new Dictionary<int, Point3d>();
             foreach (var port in portsInfo)
             {
-                Ys.Add((int)port.position.Y);
+                int key = (int)port.position.Y;
+                if (Ys.Contains(key))
+                    continue;
+                Ys.Add(key);
                 dicYtoPoint.Add((int)port.position.Y, port.position);
             }
-            return Ys;
+            return Ys.ToList();
         }
         private List<int> CollectPortXCoor(List<PortInfo> portsInfo, out Dictionary<int, Point3d> dicXtoPoint)
         {

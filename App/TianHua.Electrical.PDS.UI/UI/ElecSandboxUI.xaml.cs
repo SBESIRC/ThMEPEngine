@@ -1,4 +1,4 @@
-﻿using QuickGraph;
+﻿using QuikGraph;
 using System;
 using System.Windows;
 using ThControlLibraryWPF.CustomControl;

@@ -1,4 +1,4 @@
-﻿using QuickGraph;
+﻿using QuikGraph;
 using System.Collections.Generic;
 using System.Linq;
 using TianHua.Electrical.PDS.Project.Module;

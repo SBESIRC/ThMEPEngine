@@ -7,6 +7,7 @@
             LoadID = "";
             Description = "";
             CircuitNumber = "";
+            BlockName = "";
         }
 
         /// <summary>

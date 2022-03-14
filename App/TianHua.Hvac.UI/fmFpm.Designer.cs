@@ -123,7 +123,7 @@ namespace TianHua.Hvac.UI
             this.label20 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.labelBypassSpeed = new System.Windows.Forms.Label();
-            this.button6 = new System.Windows.Forms.Button();
+            this.btnClearSelectBypass = new System.Windows.Forms.Button();
             this.label28 = new System.Windows.Forms.Label();
             this.textBypassHeight = new System.Windows.Forms.TextBox();
             this.btnSelectBypass = new System.Windows.Forms.Button();
@@ -1039,7 +1039,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer6.Panel2.Controls.Add(this.label20);
             this.splitContainer6.Panel2.Controls.Add(this.label10);
             this.splitContainer6.Panel2.Controls.Add(this.labelBypassSpeed);
-            this.splitContainer6.Panel2.Controls.Add(this.button6);
+            this.splitContainer6.Panel2.Controls.Add(this.btnClearSelectBypass);
             this.splitContainer6.Panel2.Controls.Add(this.label28);
             this.splitContainer6.Panel2.Controls.Add(this.textBypassHeight);
             this.splitContainer6.Panel2.Controls.Add(this.btnSelectBypass);
@@ -1274,14 +1274,15 @@ namespace TianHua.Hvac.UI
             this.labelBypassSpeed.TabIndex = 75;
             this.labelBypassSpeed.Text = "xx.x";
             // 
-            // button6
+            // btnClearSelectBypass
             // 
-            this.button6.Location = new System.Drawing.Point(91, 33);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(72, 23);
-            this.button6.TabIndex = 72;
-            this.button6.Text = "清除";
-            this.button6.UseVisualStyleBackColor = true;
+            this.btnClearSelectBypass.Location = new System.Drawing.Point(91, 33);
+            this.btnClearSelectBypass.Name = "btnClearSelectBypass";
+            this.btnClearSelectBypass.Size = new System.Drawing.Size(72, 23);
+            this.btnClearSelectBypass.TabIndex = 72;
+            this.btnClearSelectBypass.Text = "清除";
+            this.btnClearSelectBypass.UseVisualStyleBackColor = true;
+            this.btnClearSelectBypass.Click += new System.EventHandler(this.btnClearSelectBypass_Click);
             // 
             // label28
             // 
@@ -1550,7 +1551,7 @@ namespace TianHua.Hvac.UI
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btn_Cancle;
         private System.Windows.Forms.Button btnSelectBypass;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button btnClearSelectBypass;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RadioButton radioNotRoomCustom;

@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
-using QuickGraph;
+using QuikGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -149,7 +149,7 @@ namespace ThMEPHVAC.Duct
 
         public static bool IsHoleModel(string name)
         {
-            return ThHvacCommon.WALLHOLE_BLOCK_NAME == name;
+            return ThHvacCommon.AI_HOLE == name;
         }
     }
 }

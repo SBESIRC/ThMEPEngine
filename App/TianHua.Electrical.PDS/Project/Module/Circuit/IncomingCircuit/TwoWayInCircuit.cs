@@ -23,8 +23,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         public IsolatingSwitch isolatingSwitch1 { get; set; }
         
         /// <summary>
-        /// 坑位1: 隔离开关2
+        /// 坑位2: 隔离开关2
         /// </summary>
         public IsolatingSwitch isolatingSwitch2 { get; set; }
+
+        /// <summary>
+        /// 坑位3: 转换开关
+        /// </summary>
+        public TransferSwitch transferSwitch { get; set; }
     }
 }

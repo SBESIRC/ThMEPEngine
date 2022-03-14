@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Duct;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {
@@ -22,9 +23,10 @@ namespace ThMEPHVAC.CAD
         public string FanInOutType { get; set; }
         public List<ThIfcDistributionElement> InletDuctHoses { get; set; }
         public List<ThIfcDistributionElement> OutletDuctHoses { get; set; }
-        public ThInletOutletDuctDrawEngine(ThDbModelFan fan, bool roomEnable, bool notRoomEnable)
+        private ThDuctPortsDrawService service;
+        public ThInletOutletDuctDrawEngine(ThDbModelFan fan, bool roomEnable, bool notRoomEnable, ThDuctPortsDrawService service)
         {
-            Init(fan);
+            Init(fan, service);
             SetInOutHoses(fan.scenario);
             InsertHose(fan, roomEnable, notRoomEnable);
         }
@@ -56,8 +58,9 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-        private void Init(ThDbModelFan fanmodel)
+        private void Init(ThDbModelFan fanmodel, ThDuctPortsDrawService service)
         {
+            this.service = service;
             FanInOutType = fanmodel.IntakeForm;
             InletOpening = new FanOpeningInfo()
             {
@@ -114,7 +117,7 @@ namespace ThMEPHVAC.CAD
 
         private void DrawHoseInDWG(List<ThIfcDistributionElement> hoses, string modellayer)
         {
-            var hoseLayer = ThDuctUtils.HoseLayerName(modellayer);
+            var hoseLayer = service.airValveLayer;
             foreach (ThIfcDuctHose hose in hoses)
             {
                 ThValvesAndHolesInsertEngine.InsertHose(hose, hoseLayer);
