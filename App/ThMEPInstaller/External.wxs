@@ -90,6 +90,12 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\SQLite-net.dll" />
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Debug" Guid="{EAD3DB21-6F31-40E9-AC6C-E9BE3EB7B16A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" Guid="{96E812A6-8965-4A38-AC5C-43F43163EDEA}" Win64="yes">
@@ -177,6 +183,12 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\SQLite-net.dll" />
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Debug" Guid="{CB4CE2C9-8B52-44AA-A2BF-ED825FF43304}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" Guid="{F87274EE-C61F-4A74-BF31-6E30C9397133}" Win64="yes">
@@ -262,6 +274,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SQLite_Net_Debug" Guid="{AA24D19E-6E8F-4EEA-AC61-7BD4566FFF10}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\SQLite-net.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Debug" Guid="{12567583-6AD3-4A3F-BF1E-4C95158A39FB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\runtimes\win-x64\native\e_sqlite3.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -352,6 +370,12 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\SQLite-net.dll" />
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Release" Guid="{9E6F05C9-6795-4EFC-BC44-F7A90BF4236E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" Guid="{4EBDB786-B7C7-4619-BC68-EA67A1D4DF9F}" Win64="yes">
@@ -439,6 +463,12 @@
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\SQLite-net.dll" />
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Release" Guid="{EC8546F6-DCFB-4BB7-AA76-9665EE147399}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\runtimes\win-x64\native\e_sqlite3.dll" />
+            </Component>
+        </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" Guid="{A152E4EC-8C71-475E-B1D1-1B359E743813}" Win64="yes">
@@ -524,6 +554,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SQLite_Net_Release" Guid="{B92B3165-FA6D-4F1A-91DD-DDB52AC4D42B}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\SQLite-net.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Release" Guid="{A947E95D-1AB1-4058-90B6-E633FE038FF1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\runtimes\win-x64\native\e_sqlite3.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -616,6 +652,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -702,6 +741,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_SQLite_Net_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_SQLite_Net_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

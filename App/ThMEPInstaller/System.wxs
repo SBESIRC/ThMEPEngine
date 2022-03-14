@@ -1,82 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?include Variable.wxi ?>
-  <Fragment>
-    <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" Guid="{4BFB5AD0-8661-404A-918A-9257A01EE14E}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" Guid="{F18B5C4E-38F0-4DAF-8DD4-E1FA18FAF7B3}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" Guid="{FB74E738-0CBB-4B11-99C0-C203CA593D19}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" Guid="{9966093C-0918-4FB8-9E44-FE109CB429D7}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" Guid="{33B3ADE0-DA4D-4FD5-B5E5-6572445A2979}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" Guid="{75BB3E62-2C14-4FD1-8E24-99E0D07F5188}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" Guid="{6EB39952-D10F-4626-A854-DFB4D37B555E}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" Guid="{638C6AFF-1BC7-455D-AAB9-8C712AE2493C}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" Guid="{A3B6D2D5-50E2-46A8-A51D-85DF2412E8CE}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" Guid="{F9C80FB7-6821-4AC2-BB24-53DB4A9B096E}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" Guid="{AFB1D9EA-E857-4468-9418-919BABFA6415}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Buffers.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" Guid="{4CAD2FF9-DC92-47D8-ABCE-4E71788EBAB8}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Memory.dll" />
-      </Component>
-    </DirectoryRef>
-    <?endif?>
-  </Fragment>
-  <Fragment>
-    <ComponentGroup Id="ProductComponentsAppSystem">
-      <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" />
-      <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" />
-      <?endif?>
-    </ComponentGroup>
-  </Fragment>
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" Guid="{4BFB5AD0-8661-404A-918A-9257A01EE14E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" Guid="{F18B5C4E-38F0-4DAF-8DD4-E1FA18FAF7B3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" Guid="{3A86EAE5-7857-4C26-A139-3DA5B43E0BE6}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" Guid="{FB74E738-0CBB-4B11-99C0-C203CA593D19}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" Guid="{9966093C-0918-4FB8-9E44-FE109CB429D7}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" Guid="{40CB951E-636D-4602-ADA2-BD1CEE12EB3A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" Guid="{33B3ADE0-DA4D-4FD5-B5E5-6572445A2979}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" Guid="{75BB3E62-2C14-4FD1-8E24-99E0D07F5188}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" Guid="{20545542-66DB-4829-A18E-CBDA3392213D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" Guid="{6EB39952-D10F-4626-A854-DFB4D37B555E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" Guid="{638C6AFF-1BC7-455D-AAB9-8C712AE2493C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" Guid="{08418D5F-E4EA-4995-8542-F4EF1254C14E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" Guid="{A3B6D2D5-50E2-46A8-A51D-85DF2412E8CE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" Guid="{F9C80FB7-6821-4AC2-BB24-53DB4A9B096E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" Guid="{33826F69-4401-45C6-AD98-8702202C1D2E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" Guid="{AFB1D9EA-E857-4468-9418-919BABFA6415}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Buffers.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" Guid="{4CAD2FF9-DC92-47D8-ABCE-4E71788EBAB8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Memory.dll" />
+            </Component>
+
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" Guid="{5FFAA0B3-EDD4-4103-8092-389136AD447F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppSystem">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
 </Wix>
