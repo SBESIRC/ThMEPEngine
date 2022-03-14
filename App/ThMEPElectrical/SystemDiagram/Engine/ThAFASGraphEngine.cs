@@ -1,7 +1,7 @@
 ﻿using System;
 using NFox.Cad;
 using Linq2Acad;
-using QuickGraph;
+using QuikGraph;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;

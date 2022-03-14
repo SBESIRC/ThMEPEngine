@@ -32,8 +32,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" Guid="{E89533EA-5033-4401-98AA-AB95C1990841}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuickGraph_Debug" Guid="{B23EC3F0-9CBB-4EC3-882A-E0AB20A92D51}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuickGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" Guid="{A14FD45E-1BDC-48AE-BB95-94FD6A9DF234}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" Guid="{5B689620-B2C7-4D1B-A16D-E8072889B76A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\RestSharp.dll" />
@@ -104,8 +104,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" Guid="{41A86DB9-B06A-4630-AFB7-D1B34C559E49}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuickGraph_Debug" Guid="{EFA034C6-5F4B-4679-A387-7CB9FCFEC451}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuickGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" Guid="{B8D1B2EC-C8E0-4E69-B9D6-B1523BC2EABE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" Guid="{C12A5181-7DB1-4A08-A67F-311B8FD0DC31}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\RestSharp.dll" />
@@ -176,8 +176,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" Guid="{35C3DEE7-AF2A-495C-A72A-DE2D96C6F42A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Debug" Guid="{65D4F933-869C-499E-97A0-AABC15F17C0C}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuickGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" Guid="{D3C3F5ED-72D5-408C-91FA-D941F0AC07C8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" Guid="{31F3CF65-CC06-42B5-BAEF-9A722C034F78}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\RestSharp.dll" />
@@ -249,8 +249,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" Guid="{3D99CBBA-2951-4C2C-84BC-67450D37F4F5}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuickGraph_Release" Guid="{5EE5EE70-35F6-4CFF-9ABE-E5749DA1F2CD}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuickGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" Guid="{4F7A3338-2713-4F30-B8FA-D38B181EAAD8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" Guid="{1766ED68-7672-477C-8353-178F681C179D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\RestSharp.dll" />
@@ -321,8 +321,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" Guid="{1A953CCD-9883-4B72-81BA-D5D8A4FB7EBD}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuickGraph_Release" Guid="{FF7E3EFF-67A9-47F9-9600-53E61C72F8E2}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuickGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" Guid="{0733FE9D-B92A-45D6-A3FD-710695F1A03F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Release" Guid="{2C960364-40B3-4D5F-AA33-4CFF750B40B2}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\RestSharp.dll" />
@@ -393,8 +393,8 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" Guid="{0675244C-1263-47C1-A6C3-BCC4546D0EC9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\EPPlus.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Release" Guid="{D1DAA6CD-43F5-48B5-8D93-D46C133C2348}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuickGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\QuickGraph.dll" />
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" Guid="{6F50C334-472D-4CC0-9998-0CA04845B6FF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\QuikGraph.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" Guid="{0CA94593-1388-485E-9E0D-8EC29AF85F2C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\RestSharp.dll" />
@@ -449,7 +449,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuickGraph_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Debug" />
@@ -459,7 +459,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuickGraph_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Debug" />
@@ -470,7 +470,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Debug" />
@@ -520,7 +520,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuickGraph_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" />
@@ -530,7 +530,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuickGraph_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Release" />
@@ -541,7 +541,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuickGraph_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_OOXML_Release" />
