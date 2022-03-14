@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
 namespace ThMEPStructure.Reinforcement.Draw
@@ -25,14 +26,14 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         }
 
-        public void DrawOutline()
-        {
+        /// <summary>
+        /// 绘制轮廓
+        /// </summary>
+        /// <param name="drawingScale"></param>
+        public abstract void DrawOutline(string drawingScale);
 
-        }
-
-
-
-
+        public Point3d TableStartPt;
+        public Polyline Outline;
         public List<GangJinBase> GangJinBases;
         
 

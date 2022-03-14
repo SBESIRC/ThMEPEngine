@@ -1,11 +1,14 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPStructure.Reinforcement.Service;
+using ThMEPEngineCore.CAD;
+
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectRectangle:DrawObjectBase
@@ -147,6 +150,19 @@ namespace ThMEPStructure.Reinforcement.Draw
                     CalLinkPosition();
                 }
             }
+        }
+
+        public override void DrawOutline(string drawingScale)
+        {
+            int scale = 100 / int.Parse(drawingScale.Substring(2));
+            var pts = new Point3dCollection
+            {
+                TableStartPt + new Vector3d(450, -1500, 0) * scale,
+                TableStartPt + new Vector3d(450, -1500 - thRectangleEdgeComponent.Bw, 0) * scale,
+                TableStartPt + new Vector3d(450 + thRectangleEdgeComponent.Hc, -1500 - thRectangleEdgeComponent.Bw, 0) * scale,
+                TableStartPt + new Vector3d(450 + thRectangleEdgeComponent.Hc, -1500, 0) * scale
+            };
+            Outline = pts.CreatePolyline();
         }
     }
 }
