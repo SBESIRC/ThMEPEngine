@@ -99,6 +99,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Fan_Indoor_BOM" Guid="{424DC815-C91D-42CD-8C2D-727FE34BA2F1}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Fan_Indoor_BOM" Source="$(var.AutoloaderContentsPath)\Support\室内机材料表模板.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_TG20_DB" Guid="{3512ECA8-E62B-47D5-A4C6-9ECCDF863E9E}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_TG20_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20.db" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -149,6 +152,7 @@
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_TG20_DB" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" />
