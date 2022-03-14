@@ -20,7 +20,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 TableStartPt + new Vector3d(200, -1500, 0)* scale,
                 TableStartPt + new Vector3d(200, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
                 //TableStartPt + new Vector3d(200, -1500 - thTTypeEdgeComponent.Bw, 0),
-            }
+            };
         }
         /// <summary>
         /// T型钢筋确定位置，轮廓上10个点
