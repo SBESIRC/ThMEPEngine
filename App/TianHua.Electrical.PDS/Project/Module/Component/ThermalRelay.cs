@@ -24,7 +24,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var thermalRelay = thermalRelays.OrderBy(o => Math.Abs(2 * calculateCurrent - o.MinAmps - o.MaxAmps)).FirstOrDefault();
             if (thermalRelay.IsNull())
             {
-                throw new NotSupportedException();
+                thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
+                //throw new NotSupportedException();
             }
             ThermalRelayType = thermalRelay.ModelName;
             PolesNum = thermalRelay.Poles;

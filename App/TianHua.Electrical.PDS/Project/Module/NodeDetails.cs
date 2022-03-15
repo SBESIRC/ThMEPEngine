@@ -22,9 +22,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public bool IsDualPower { get; set; }
         /// <summary>
-        /// 是否已统计功率
+        /// 是否已统计
         /// </summary>
-        public bool IsStatisticalPower { get; set; }
+        public bool IsStatistical { get; set; }
         public double LowPower { get; set; }
         public double HighPower { get; set; }
 

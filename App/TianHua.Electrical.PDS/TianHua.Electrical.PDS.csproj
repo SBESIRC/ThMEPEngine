@@ -62,6 +62,7 @@
     <Compile Include="Project\Module\Circuit\DistributionMetering_MTInFrontCircuit.cs" />
     <Compile Include="Project\Module\Circuit\DistributionMetering_ShanghaiCTCircuit.cs" />
     <Compile Include="Project\Module\Circuit\DistributionMetering_ShanghaiMTCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\FireEmergencyLighting.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\CentralizedPowerCircuit.cs" />
     <Compile Include="Project\Module\Circuit\LeakageCircuit.cs" />
     <Compile Include="Project\Module\Circuit\IncomingCircuit\OneWayInCircuit.cs" />
@@ -89,6 +90,8 @@
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
     <Compile Include="Project\Module\Component\TransferSwitch.cs" />
+    <Compile Include="Project\Module\Configure\MTSEConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\ATSEConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ContactorConfiguration.cs" />
     <Compile Include="Project\Module\Configure\BreakerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\IsolatorConfiguration.cs" />

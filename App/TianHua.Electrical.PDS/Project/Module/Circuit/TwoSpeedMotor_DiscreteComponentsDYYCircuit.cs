@@ -43,7 +43,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         public ThermalRelay thermalRelay2 { get; set; }
 
         /// <summary>
-        /// 坑位6：接触器3
+        /// 坑位6：接触器3 
         /// </summary>
         public Contactor contactor3 { get; set; }
     }

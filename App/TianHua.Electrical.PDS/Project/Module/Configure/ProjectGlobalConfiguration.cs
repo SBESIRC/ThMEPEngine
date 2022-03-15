@@ -19,5 +19,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static string ThermalRelayUrl = Path.Combine(urlFolder, "LV_AC_ThermalRelay_19DX101.xlsx");
         public static string BuswayUrl = Path.Combine(urlFolder, "LV_Busway_Selector_Default.xlsx");
         public static string ConductorUrl = Path.Combine(urlFolder, "LV_Conductor_Selector_Default.xlsx");
+
+        //以下内容为暂定，因为全局参数配置UI还没做好
+        public static string MotorUIChoise = "分立元件";
+        public static double MotorPower = 10;//kw
     }
 }
