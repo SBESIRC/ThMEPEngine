@@ -82,6 +82,10 @@ namespace ThCADCore.NTS
             {
                 return ellipse.ToNTSLineString();
             }
+            else if (curve is Spline spline)
+            {
+                return spline.ToNTSLineString();
+            }
             else
             {
                 throw new NotSupportedException();

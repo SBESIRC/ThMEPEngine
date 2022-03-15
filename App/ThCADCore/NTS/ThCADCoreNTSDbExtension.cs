@@ -303,6 +303,19 @@ namespace ThCADCore.NTS
             return ellipse.ToNTSPolygon().Shell;
         }
 
+        public static LineString ToNTSLineString(this Spline spline)
+        {
+            var curve = spline.ToPolylineWithPrecision(10, true, true);
+            if (curve is Polyline polyline)
+            {
+                return polyline.ToNTSLineString();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static LineString ToNTSLineString(this Arc arc)
         {
             var arcLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
