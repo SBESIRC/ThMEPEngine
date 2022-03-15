@@ -275,6 +275,9 @@
     <PackageReference Include="Microsoft.Toolkit">
       <Version>7.1.2</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.1.2</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <Choose>
