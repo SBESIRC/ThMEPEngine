@@ -103,7 +103,6 @@ namespace TianHua.Hvac.UI
             textPortHeight.Text = h.ToString();
             // 默认填充到服务侧参数 风管Size填充到自定义
             checkBoxRoom.Checked = true;
-            radioRoomCustom.Checked = true;
             ThMEPHVACService.GetWidthAndHeight(portParam.param.inDuctSize, out w, out h);
             textRoomWidth.Text = w.ToString();
             textRoomHeight.Text = h.ToString();
@@ -323,7 +322,6 @@ namespace TianHua.Hvac.UI
             textAirSpeed.Text = speed.ToString();
             SetPortRangeByScenario(scenario);
             SetPortNumByScenario(scenario);
-            SetPortEleByScenario(scenario);
         }
 
         private void SetPortEleByScenario(string scenario)

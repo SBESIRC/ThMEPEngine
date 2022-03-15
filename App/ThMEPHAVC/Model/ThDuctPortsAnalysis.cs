@@ -468,27 +468,27 @@ namespace ThMEPHVAC.Model
             {
                 if (airVolume >= 100000) { return 6; }
                 else if (airVolume >= 80000) { return 5; }
-                else if (airVolume >= 50000) { return 3; }
-                else if (airVolume >= 8000) { return 2.5; }
-                else { return 2; }
+                else if (airVolume >= 50000) { return 3.5; }
+                else if (airVolume >= 8000) { return 3.5; }
+                else { return 2.5; }
             }
             else if (scenario == "厨房排油烟")
             {
                 if (airVolume >= 60000) { return 6; }
                 else if (airVolume >= 50000) { return 5; }
                 else if (airVolume >= 40000) { return 4; }
-                else if (airVolume >= 30000) { return 3; }
-                else if (airVolume >= 5000) { return 2.5; }
-                else { return 2; }
+                else if (airVolume >= 30000) { return 3.5; }
+                else if (airVolume >= 5000) { return 3.5; }
+                else { return 2.5; }
             }
             else
             {
                 if (airVolume >= 40000) { return 6; }
                 else if (airVolume >= 35000) { return 5; }
                 else if (airVolume >= 30000) { return 4; }
-                else if (airVolume >= 12000) { return 3; }
-                else if (airVolume >= 2000) { return 2.5; }
-                else { return 2; }
+                else if (airVolume >= 12000) { return 3.5; }
+                else if (airVolume >= 2000) { return 3.5; }
+                else { return 2.5; }
             }
         }
         private void SetFirstDuctSize()
