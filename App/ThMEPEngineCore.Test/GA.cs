@@ -51,6 +51,11 @@ namespace ThCADCore.Test
         {
             return Math.Abs(X - other.X) < tolerance && Math.Abs(Y - other.Y) < tolerance;// && Math.Abs(Z - other.Z) < tolerance;
         }
+
+        public Point3d ToPoint3d()
+        {
+            return new Point3d(X, Y, Z);
+        }
     }
 
     public class GeneKey : IEquatable<GeneKey>
@@ -163,6 +168,11 @@ namespace ThCADCore.Test
 
         //Range
         Point3dEx Low, High;
+
+        private List<double> XPositionList = new List<double>();
+        private List<double> YPositionList = new List<double>();
+        private Dictionary<Point3dEx, Tuple<int, int>> ptExToIndexDic = new Dictionary<Point3dEx, Tuple<int, int>>();
+
         public GA(List<Point3d> pts, Point3d rangeLowPt, Point3d rangeHighPt, List<Extents3d> obstacles, int popSize = 10)
         {
             Rand = new Random(System.DateTime.Now.Millisecond);
@@ -170,10 +180,40 @@ namespace ThCADCore.Test
             MaxTime = 100;
             CrossRate = 0.8;
             MutationRate = 0.2;
-            StartPt = new Point3dEx( pts.First());
-            pts.RemoveAt(0);
-            pts.ForEach(p => EndPts.Add(new Point3dEx(p)));
-            Obstacles = obstacles;
+            StartPt = new Point3dEx(pts.First());
+            //pts.RemoveAt(0);
+            pts.GetRange(1,pts.Count-1).ForEach(p => EndPts.Add(new Point3dEx(p)));
+            
+            Obstacles = obstacles.Select(e=>e.Expand(1.2)).ToList();
+
+            //init coordinates
+            var obstaclesPts = new List<Point3d>();
+            var minPts = obstacles.Select(e=>e.MinPoint).ToList();
+            var maxPts = obstacles.Select(e=>e.MaxPoint).ToList();
+            obstaclesPts.AddRange(minPts);
+            obstaclesPts.AddRange(maxPts);
+            
+            var orderedXPositionList = pts.Select(pt => pt.X).Distinct().ToList();
+            orderedXPositionList.AddRange(obstaclesPts.Select(pt => pt.X).Distinct());
+
+            orderedXPositionList.Sort();
+            XPositionList.AddRange(orderedXPositionList);
+            
+            var orderedYPositionList = pts.Select(pt => pt.Y).Distinct().ToList();
+            orderedXPositionList = pts.Select(pt => pt.Y).Distinct().ToList();
+            orderedYPositionList.Sort();
+            YPositionList.AddRange(orderedYPositionList);
+            
+            for(int i = 0; i < XPositionList.Count; i++)
+            {
+                for(int j = 0; j < YPositionList.Count; j++)
+                {
+                    var pt = new Point3d(XPositionList[i], YPositionList[j], 0);
+                    NoDraw.Circle(pt, 0.8).AddToCurrentSpace();
+                    var ptEx = new Point3dEx(XPositionList[i], YPositionList[j],0);
+                    ptExToIndexDic.Add(ptEx, Tuple.Create(i, j));
+                }
+            }
 
             Low = new Point3dEx(rangeLowPt);
             High = new Point3dEx(rangeHighPt);
@@ -181,7 +221,7 @@ namespace ThCADCore.Test
          
         public List<Chromosome> Run()
         {
-             List<Chromosome> selected = new List<Chromosome>();
+            List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();
 
@@ -251,12 +291,13 @@ namespace ThCADCore.Test
 
         private bool IsPtInRange(Point3dEx pt)
         {
-            return pt.X > Low.X && pt.X < High.X && pt.Y > Low.Y && pt.Y < High.X;
+            return true;
+            //return pt.X > Low.X && pt.X < High.X && pt.Y > Low.Y && pt.Y < High.X;
         }
         private List<Point3dEx> GetPtAdjs(Point3dEx pt, int dirPriority)
         {
             var pts = new List<Point3dEx>();
-            var step = 1;
+            var step = 0.1;
             var leftPt = new Point3dEx(pt.X - step, pt.Y, pt.Z);
             var downPt = new Point3dEx(pt.X, pt.Y - step, pt.Z);
             var rightPt = new Point3dEx(pt.X + step, pt.Y, pt.Z);
@@ -327,6 +368,79 @@ namespace ThCADCore.Test
             return pts;
         }
 
+        private List<Point3dEx> GetPtAdjs3(Point3dEx pt, int firstDir)
+        {
+            var pts = new List<Point3dEx>();
+            var step = 1;
+
+            var ijTuple = ptExToIndexDic[pt];
+            var i = ijTuple.Item1;
+            var j = ijTuple.Item2;
+
+            Point3dEx leftPt = null;
+            Point3dEx downPt = null;
+            Point3dEx rightPt = null;
+            Point3dEx topPt = null;
+            if(i - 1 >=0) 
+                leftPt = new Point3dEx(XPositionList[i-1], YPositionList[j], 0);
+
+            if(j+1 < YPositionList.Count)
+                downPt = new Point3dEx(XPositionList[i], YPositionList[j+1], 0);
+
+            if(i+1 < XPositionList.Count)
+                rightPt = new Point3dEx(XPositionList[i+1], YPositionList[j], 0);
+
+            if(j-1 >=0)
+                topPt = new Point3dEx(XPositionList[i], YPositionList[j-1], 0);
+
+            switch (firstDir)
+            {
+                case 0:
+                    if(leftPt != null)
+                        pts.Add(leftPt);
+                    if(downPt != null)
+                        pts.Add(downPt);
+                    if (rightPt != null)
+                        pts.Add(rightPt);
+                    if(topPt != null)
+                        pts.Add(topPt);
+                    break;
+                case 1:
+                    if(downPt != null)
+                        pts.Add(downPt);
+                    if(rightPt != null)
+                        pts.Add(rightPt);
+                    if(topPt != null)
+                        pts.Add(topPt);
+                    if(leftPt != null)
+                        pts.Add(leftPt);
+                    break;
+                case 2:
+                    if(rightPt != null)
+                        pts.Add(rightPt);
+                    if(topPt!= null)
+                        pts.Add(topPt);
+                    if(leftPt!= null)
+                        pts.Add(leftPt);
+                    if(downPt!= null)
+                        pts.Add(downPt);
+                    break;
+                case 3:
+                    if(topPt != null)
+                        pts.Add(topPt);
+                    if(leftPt != null)
+                        pts.Add(leftPt);
+                    if(downPt !=null)
+                        pts.Add(downPt);
+                    if(rightPt!= null)
+                        pts.Add(rightPt);
+                    break;
+                default:
+                    break;
+            }
+
+            return pts;
+        }
 
         Dictionary<GeneKey,Gene> GlobalChromdic = new Dictionary<GeneKey, Gene>();
         public Gene FindAChromByBfs(Point3dEx startPt, Point3dEx endPt, int dir = 0)
@@ -444,8 +558,8 @@ namespace ThCADCore.Test
                         var curPt = preDic[pt];
                         while (preDic.ContainsKey(curPt))
                         {
-                            curPt = preDic[curPt];
                             chrome.pts.Add(curPt);
+                            curPt = preDic[curPt];
                         }
 
                         chrome.pts.Add(startPt);
@@ -456,7 +570,7 @@ namespace ThCADCore.Test
                     }
                     Active.Editor.WriteMessageWithReturn($"found node: {cnt}");
                 }
-                var adjs = GetPtAdjs2(pt, firstDir);
+                var adjs = GetPtAdjs3(pt, firstDir);
                 foreach (var adj in adjs)
                 {
                     if (IsPtInObstacles(new Point3d(adj.X,adj.Y ,adj.Z)))

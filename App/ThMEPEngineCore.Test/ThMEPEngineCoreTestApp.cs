@@ -687,7 +687,7 @@ namespace ThMEPEngineCore.Test
                 var endRst = Active.Editor.GetPoint("\nSpecify next end Point:");
                 if (endRst.Status != PromptStatus.OK)
                     break;
-                var end = new Point3d((int)endRst.Value.X, (int)endRst.Value.Y, 0);
+                var end = new Point3d(endRst.Value.X, endRst.Value.Y, 0);
                 Draw.Circle(end, 1);
                 pts.Add(end);
             }
@@ -707,7 +707,7 @@ namespace ThMEPEngineCore.Test
 
                 var rect = NoDraw.Rectang(startRst.Value, endRst.Value);
                 rect.AddToCurrentSpace();
-                obstacles.Add(rect.GeometricExtents.Expand(1.2));
+                obstacles.Add(rect.GeometricExtents);
             }
 
             //var start = new Point3d(50, 100, 0);
@@ -726,9 +726,11 @@ namespace ThMEPEngineCore.Test
                 foreach (var c in s.Genome)
                 {
                     Active.Editor.WriteLine($"First Direction:{c.FirstDir}");
-                    foreach (var p in c.pts)
+                    for(int i = 0; i < c.pts.Count - 1; ++i)
                     {
-                        var id = NoDraw.Circle(new Point3d(p.X, p.Y, 0), 0.1).AddToCurrentSpace();
+                        var curPt = c.pts[i];
+                        var nextPt = c.pts[i + 1];
+                        var id = NoDraw.Line(curPt.ToPoint3d(), nextPt.ToPoint3d()).AddToCurrentSpace();
                         ids.Add(id);
                     }
                 }
