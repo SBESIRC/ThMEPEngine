@@ -18,6 +18,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using NetTopologySuite.Geometries;
+using System.Collections.Concurrent;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -130,7 +131,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public void Run(AcadDatabase acadDatabase)
         {
             Active.Editor.WriteMessage($"线求交点\n");
-            NTSLineTest2();
+            NTSLineTest4();
         }
         private void ParallelTest()
         {
@@ -184,14 +185,51 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var t0 = _stopwatch.Elapsed.TotalSeconds;
             foreach (var l in lineLis1)
             {
-                InsectMore(l.Item1,l.Item2);
+                ToLineMore(l.Item1,l.Item2);
             }
             var t1 = _stopwatch.Elapsed.TotalSeconds;
             Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
-            Parallel.ForEach(lineLis1, l => InsectMore(l.Item1, l.Item2));
+            Parallel.ForEach(lineLis1, l => ToLineMore(l.Item1, l.Item2));
             var t2 = _stopwatch.Elapsed.TotalSeconds;
             Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
         }
+        private void NTSLineTest3()
+        {
+            var lineLis1 = new List<(LineSegment, LineSegment)>();
+            for (int i = 0; i < 6; i++)
+            {
+                lineLis1.Add((RandomLine().ToNTSLineSegment(), RandomLine().ToNTSLineSegment()));
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var l in lineLis1)
+            {
+                ClosestMore(l.Item1, l.Item2);
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis1, l => ClosestMore(l.Item1, l.Item2));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        private void NTSLineTest4()
+        {
+            var lineLis1 = new ConcurrentBag<(LineSegment, LineSegment)>();
+            for (int i = 0; i < 6; i++)
+            {
+                lineLis1.Add((RandomLine().ToNTSLineSegment(), RandomLine().ToNTSLineSegment()));
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var l in lineLis1)
+            {
+                ClosestMore(l.Item1, l.Item2);
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis1, l => ClosestMore(l.Item1, l.Item2));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        //基本无增速
         private void LineTest()
         {
             var lineLis1 = new List<Line>();
@@ -255,11 +293,60 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 lstr.Buffer(100);
             }
         }
-        private void InsectMore(LineString lstr1, LineString lstr2, int n = 100000)
+        private void InsectMore(LineString lstr1, LineString lstr2, int n = 1000000)
         {
             for (int i = 0; i < n; ++i)
             {
                 lstr1.Intersects(lstr2);
+            }
+        }
+        private void InsectMore(LineSegment l1, LineSegment l2, int n = 1000000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                l1.Intersection(l2);
+            }
+        }
+        private void UnionMore(LineString lstr1, LineString lstr2, int n = 100000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.Union(lstr2);
+            }
+        }
+        private void DistMore(LineString lstr1, LineString lstr2, int n = 10000000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.Distance(lstr2);
+            }
+        }
+        private void DistMore(LineSegment lstr1, LineSegment lstr2, int n = 200000000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.Distance(lstr2);
+            }
+        }
+        private void IsDistMore(LineString lstr1, LineString lstr2, int n = 10000000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.IsWithinDistance(lstr2,10);
+            }
+        }
+        private void ToLineMore(LineString lstr1, LineString lstr2, int n = 100000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.ToDbline();
+            }
+        }
+        private void ClosestMore(LineSegment lstr1, LineSegment lstr2, int n = 10000000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.ClosestPoints(lstr2);
             }
         }
     }
