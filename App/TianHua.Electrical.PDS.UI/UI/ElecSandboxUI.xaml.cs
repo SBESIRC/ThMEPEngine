@@ -83,7 +83,7 @@ namespace TianHua.Electrical.PDS.UI.UI
             topTableItemViewModel = new SandBoxTableItemViewModel();
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电沙盘界面", new ThPDSDistributionSandPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("单线图绘制界面", new ThPDSSingleLineImageDrawingPanel()));
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电箱编辑界面", new ThPDSDistributionPanel() { Graph = Graph, }));
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电箱编辑界面", new ThPDSDistributionPanel(Graph)));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("干线编辑界面", new ThPDSMainBusPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("低压柜编辑界面", new ThPDSLowPressurePanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("高压压柜编辑界面", new ThPDSHighPressurePanel()));
