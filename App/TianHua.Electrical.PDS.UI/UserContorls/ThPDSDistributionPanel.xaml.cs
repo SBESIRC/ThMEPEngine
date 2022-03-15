@@ -70,15 +70,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         public void UpdatePropertyGrid(object vm)
         {
-            if (vm is null)
-            {
-                propertyGrid.Tag = null;
-                propertyGrid.Content = null;
-                return;
-            }
-            var gh = ConvertObjToUi(vm);
-            propertyGrid.Tag = vm;
-            propertyGrid.Content = gh.Grid;
+            propertyGrid.SelectedObject = vm;
         }
         private void btnSelectFast(object sender, RoutedEventArgs e)
         {
@@ -89,53 +81,5 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void btnGenSingle(object sender, RoutedEventArgs e)
         {
         }
-        public static ThPDSCircuitGraphLayoutEngine ConvertObjToUi(object obj)
-        {
-            var gh = new ThPDSCircuitGraphLayoutEngine();
-            gh.AddColDef_ByPixel(80);
-            gh.AddColDef_ByPixel(90);
-            foreach (var p in obj.GetType().GetProperties())
-            {
-                gh.AddRowDef();
-                var name = p.GetCustomAttributes(typeof(DisplayNameAttribute), false).OfType<DisplayNameAttribute>().FirstOrDefault()?.DisplayName ?? p.Name;
-                gh.Add(new TextBlock() { Text = name, HorizontalAlignment = HorizontalAlignment.Center, });
-                if (p.PropertyType == typeof(string))
-                {
-                    var tbx = new TextBox() { };
-                    var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                    tbx.SetBinding(TextBox.TextProperty, bd);
-                    gh.Add(tbx);
-                }
-                else if (p.PropertyType.IsEnum)
-                {
-                    var cbx = new ComboBox();
-                    cbx.ItemsSource = Enum.GetValues(p.PropertyType);
-                    var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                    cbx.SetBinding(ComboBox.SelectedItemProperty, bd);
-                    gh.Add(cbx);
-                }
-                else if (p.PropertyType == typeof(bool))
-                {
-                    var cbx = new CheckBox();
-                    var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                    cbx.SetBinding(CheckBox.IsCheckedProperty, bd);
-                    gh.Add(cbx);
-                }
-                else if (p.PropertyType == typeof(int) || p.PropertyType == typeof(long) || p.PropertyType == typeof(float) || p.PropertyType == typeof(double) || p.PropertyType == typeof(decimal))
-                {
-                    var tbx = new TextBox() { };
-                    var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                    tbx.SetBinding(TextBox.TextProperty, bd);
-                    gh.Add(tbx);
-                }
-                else
-                {
-                    gh.Add(new TextBox() { Text = p.GetValue(obj)?.ToString(), });
-                }
-                gh.MoveToNextRow();
-            }
-            return gh;
-        }
-
     }
 }

@@ -2,12 +2,17 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d" 
-             d:DesignHeight="1000" d:DesignWidth="1000"
-             >
+             d:DesignHeight="1000" d:DesignWidth="1000">
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom"  FontSize="14">
@@ -58,7 +63,7 @@
                 </TreeView.ItemTemplate>
             </TreeView>
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="759.58904109589,262.603550295858,12.3287671232877,143.313609467456">
-                <ContentControl x:Name="propertyGrid" Style="{x:Null}"></ContentControl>
+                <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>
             <CheckBox Style="{x:Null}" Margin="731,572,125,107">消防负荷</CheckBox>

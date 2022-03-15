@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using HandyControl.Controls;
 using TianHua.Electrical.PDS.UI.Models;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
@@ -407,7 +408,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
         public TreeView TreeView;
         public Canvas Canvas;
         public ThPDSContext Context;
-        public ContentControl propertyGrid;
+        public PropertyGrid propertyGrid;
         public AdjacencyGraph<PDS.Project.Module.ThPDSProjectGraphNode, PDS.Project.Module.ThPDSProjectGraphEdge<PDS.Project.Module.ThPDSProjectGraphNode>> Graph;
         public void Init()
         {
@@ -444,87 +445,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             };
             void UpdatePropertyGrid(object vm)
             {
-                if (vm is null)
-                {
-                    propertyGrid.Tag = null;
-                    propertyGrid.Content = null;
-                    return;
-                }
-                var gh = ConvertObjToUi(vm);
-                propertyGrid.Tag = vm;
-                propertyGrid.Content = gh.Grid;
-            }
-            ThPDSCircuitGraphLayoutEngine ConvertObjToUi(object obj)
-            {
-                var gh = new ThPDSCircuitGraphLayoutEngine();
-                gh.AddColDef_ByPixel(80);
-                gh.AddColDef_ByPixel(90);
-                foreach (var p in obj.GetType().GetProperties())
-                {
-                    if (!p.CanRead) continue;
-                    var attr = p.GetCustomAttributes(typeof(DisplayNameAttribute), false).OfType<DisplayNameAttribute>().FirstOrDefault();
-                    string name = null;
-                    if (attr != null)
-                    {
-                        if (attr.DisplayName == null) continue;
-                        name = attr.DisplayName;
-                    }
-                    name ??= p.Name;
-                    gh.AddRowDef();
-                    gh.Add(new TextBlock() { Text = name, HorizontalAlignment = HorizontalAlignment.Center, });
-                    if (p.PropertyType == typeof(string))
-                    {
-                        var tbx = new TextBox() { };
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                        if (p.GetCustomAttributes(typeof(RangeAttribute), false).OfType<RangeAttribute>().FirstOrDefault()?.OperandType == typeof(double))
-                        {
-                            bd.UpdateSourceTrigger = UpdateSourceTrigger.LostFocus;
-                        }
-                        if (!p.CanWrite)
-                        {
-                            bd.Mode = BindingMode.OneWay;
-                            tbx.IsReadOnly = true;
-                        }
-                        tbx.SetBinding(TextBox.TextProperty, bd);
-                        gh.Add(tbx);
-                    }
-                    else if (p.PropertyType.IsEnum)
-                    {
-                        var cvt = new EnumConverter(p.PropertyType);
-                        var cbx = new ComboBox();
-                        cbx.ItemsSource = cvt.ItemsSource;
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, Converter = cvt };
-                        if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
-                        cbx.SetBinding(ComboBox.SelectedItemProperty, bd);
-                        gh.Add(cbx);
-                    }
-                    else if (p.PropertyType == typeof(bool))
-                    {
-                        var cbx = new CheckBox();
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                        if (!p.CanWrite) bd.Mode = BindingMode.OneWay;
-                        cbx.SetBinding(CheckBox.IsCheckedProperty, bd);
-                        gh.Add(cbx);
-                    }
-                    else if (p.PropertyType == typeof(int) || p.PropertyType == typeof(long) || p.PropertyType == typeof(float) || p.PropertyType == typeof(double) || p.PropertyType == typeof(decimal))
-                    {
-                        var tbx = new TextBox() { };
-                        var bd = new Binding() { Path = new PropertyPath(p.Name), Source = obj, UpdateSourceTrigger = UpdateSourceTrigger.LostFocus, };
-                        if (!p.CanWrite)
-                        {
-                            bd.Mode = BindingMode.OneWay;
-                            tbx.IsReadOnly = true;
-                        }
-                        tbx.SetBinding(TextBox.TextProperty, bd);
-                        gh.Add(tbx);
-                    }
-                    else
-                    {
-                        gh.Add(new TextBox() { Text = p.GetValue(obj)?.ToString(), IsReadOnly = true, });
-                    }
-                    gh.MoveToNextRow();
-                }
-                return gh;
+                propertyGrid.SelectedObject = vm;
             }
             void UpdateCanvas()
             {
