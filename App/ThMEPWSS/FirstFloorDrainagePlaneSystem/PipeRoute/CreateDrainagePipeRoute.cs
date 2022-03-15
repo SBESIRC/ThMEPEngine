@@ -7,6 +7,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
@@ -19,12 +20,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<Polyline> wallPolys;                           //墙线
         List<Polyline> outUserPoly;                         //出户框线
         List<Curve> gridLines;                              //轴网线
+        ParamSettingViewModel paramSetting = null;          //
         readonly double step = 50;                          //步长
         readonly double lineDis = 210;                      //连接线区域范围
         readonly double lineWieght = 3;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
-            List<Curve> grids, List<Polyline> _outUserPoly)
+            List<Curve> grids, List<Polyline> _outUserPoly, ParamSettingViewModel _paramSetting)
         {
             frame = polyline;
             mainSewagePipes = sewagePolys;
@@ -33,6 +35,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             wallPolys = walls;
             gridLines = grids;
             outUserPoly = _outUserPoly;
+            paramSetting = _paramSetting;
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var allLines = sewageLines;
                 if (pipe.PipeType == VerticalPipeType.rainPipe)
                 {
-                    allLines = rainLines;
+                    //allLines = rainLines;
                 }
                 if (allLines.Count <= 0)
                 {
@@ -78,6 +81,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
+            ReprocessingPipe reprocessingPipe = new ReprocessingPipe(resRoutes, outUserPoly);
+            resRoutes = reprocessingPipe.Reprocessing();
             return resRoutes;
         }
 
@@ -158,11 +163,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var checkDir = (pipePt - polyline.GetClosestPointTo(pipePt, false)).GetNormal();
             if (checkDir.DotProduct(matrix.CoordinateSystem3d.Yaxis) < 0)
             {
-                return pipes.OrderBy(x => x.Value.Y).Select(x => x.Key).ToList();
+                return pipes.OrderByDescending(x => x.Value.Y).Select(x => x.Key).ToList();
             }
             else
             {
-                return pipes.OrderByDescending(x => x.Value.Y).Select(x => x.Key).ToList();
+                return pipes.OrderBy(x => x.Value.Y).Select(x => x.Key).ToList();
             }
         }
 

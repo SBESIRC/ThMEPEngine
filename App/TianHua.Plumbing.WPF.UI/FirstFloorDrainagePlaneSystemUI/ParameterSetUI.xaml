@@ -4,9 +4,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
                     Title="参数设置" SizeToContent="Manual" 
                     Height="420" Width="180" MaxWidth="180" MaxHeight="420"
              mc:Ignorable="d">
+    <Window.Resources>
+        <converters:SewageWasteWaterConvert x:Key="sewageWasteRadioCheckd"/>
+        <converters:DrainSettingConverter x:Key="drainRadioCheckd"/>
+        <converters:SingleRowSettingConverter x:Key="singleRowRadioCheckd"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -21,27 +27,39 @@
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Margin="5,5,5,0">
-            <CheckBox Margin="5" x:Name="chkSewageWasteWater" Content="污废水" IsThreeState="False" FontSize="14" FontWeight="Bold"></CheckBox>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="污废合流"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="污废分流"/>
+            <CheckBox Margin="5" x:Name="chkSewageWasteWater" Content="污废水" IsThreeState="False" FontSize="14" FontWeight="Bold"
+                         IsChecked="{Binding WasteWaterChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="污废合流" IsThreeState="False"
+                                 IsChecked="{Binding SewageWasteWater,Converter={StaticResource sewageWasteRadioCheckd},ConverterParameter=0}" />
+            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="污废分流" IsThreeState="False"
+                                 IsChecked="{Binding SewageWasteWater,Converter={StaticResource sewageWasteRadioCheckd},ConverterParameter=1}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Margin="5,5,5,0">
-            <CheckBox Margin="5" x:Name="chkRainWater" Content="雨水" IsThreeState="False" FontSize="14" FontWeight="Bold"></CheckBox>
-            <CheckBox Margin="5" x:Name="chkCondensateWater" Content="冷凝水" IsThreeState="False" FontSize="14" FontWeight="Bold"></CheckBox>
+            <CheckBox Margin="5" x:Name="chkRainWater" Content="雨水" IsThreeState="False" FontSize="14" FontWeight="Bold"
+                      IsChecked="{Binding RainWaterChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+            <CheckBox Margin="5" x:Name="chkCondensateWater" Content="冷凝水" IsThreeState="False" FontSize="14" FontWeight="Bold"
+                      IsChecked="{Binding CondensateChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
         </StackPanel>
         <StackPanel Grid.Row="2" Margin="5,5,5,10">
             <Label>间接排水设置：</Label>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="标注&quot;接至雨水口&quot;"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="13#雨水口"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="室外水封井"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="不考虑间接排水"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="标注&quot;接至雨水口&quot;" IsThreeState="False"
+                                 IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=0}"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="13#雨水口" IsThreeState="False"
+                                 IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=1}"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="室外水封井" IsThreeState="False"
+                                 IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=2}"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbIndirectDrainage" Content="不考虑间接排水" IsThreeState="False"
+                                 IsChecked="{Binding IndirectDrainageSetting,Converter={StaticResource drainRadioCheckd},ConverterParameter=3}"/>
         </StackPanel>
         <Line Grid.Row="3" X1="5" Y1="0" X2="170" Y2="0" StrokeDashArray="5" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center"/>
         <StackPanel Grid.Row="4" Margin="5,10,5,0">
             <Label>一层单排设置：</Label>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="预留堵头"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="绘制详图"/>
-            <RadioButton Margin="5,3,3,3" GroupName="rbSewageWasteWater" Content="不考虑单排"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbSingleRowSetting" Content="预留堵头" IsThreeState="False"
+                                 IsChecked="{Binding SingleRowSetting,Converter={StaticResource singleRowRadioCheckd},ConverterParameter=0}"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbSingleRowSetting" Content="绘制详图" IsThreeState="False"
+                                 IsChecked="{Binding SingleRowSetting,Converter={StaticResource singleRowRadioCheckd},ConverterParameter=1}"/>
+            <RadioButton Margin="5,3,3,3" GroupName="rbSingleRowSetting" Content="不考虑单排" IsThreeState="False"
+                                 IsChecked="{Binding SingleRowSetting,Converter={StaticResource singleRowRadioCheckd},ConverterParameter=2}"/>
         </StackPanel>
         <StackPanel Grid.Row="5">
             <cus:ImageButton HorizontalAlignment="Right"  IsTabStop="True" Focusable="True" 

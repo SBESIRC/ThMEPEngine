@@ -323,8 +323,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 }
                 else
                 {
-                    var pts = o.GeometricExtents;
-                    position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                    try
+                    {
+                        var pts = o.GeometricExtents;
+                        position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                    }
+                    catch (System.Exception)
+                    {
+                        return false;
+                    }
+                    
                 }
                 return polyline.Contains(position);
             }).ToList();

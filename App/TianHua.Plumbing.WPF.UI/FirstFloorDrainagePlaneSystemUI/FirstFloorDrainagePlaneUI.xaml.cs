@@ -36,13 +36,14 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
         private void btnPipeLine_Click(object sender, RoutedEventArgs e)
         {
             var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config);
+            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config, ParameterSetUI.paramSetting); 
             drainageCmd.Execute();
         }
 
-        private void btnSltFloor_Click(object sender, RoutedEventArgs e)
+        private void btnParamSet_Click(object sender, RoutedEventArgs e)
         {
-
+            ParameterSetUI parameterSetUI = new ParameterSetUI();
+            parameterSetUI.ShowDialog();
         }
 
         private void btnDrawWall_Click(object sender, RoutedEventArgs e)

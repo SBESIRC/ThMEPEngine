@@ -24,7 +24,7 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <cus:ImageButton Grid.Row="0" Content="参数设置" x:Name="btnParamSet" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnSltFloor_Click"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="0" Content="参数设置" x:Name="btnParamSet" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>
         <Line Grid.Row="1" X1="5" Y1="0" X2="170" Y2="0" StrokeDashArray="5" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center"/>
         <cus:ImageButton Grid.Row="2" Content="绘制户外污水管" x:Name="btnDrainagePipe" Width="140" Height="22" Margin="7,10,7,7" ImageTextLocation="TextOnly"  Click="btnDrainagePipe_Click"></cus:ImageButton>
         <cus:ImageButton Grid.Row="3" Content="绘制户外雨水管" x:Name="btnRainPipe" Width="140" Height="22" Margin="7" ImageTextLocation="TextOnly"  Click="btnRainPipe_Click"></cus:ImageButton>
@@ -40,6 +40,6 @@
             <cus:InputTextBox Width ="160" TextBoxInputType="InputInteger"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding StepLengthBC , Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
             <Label  Content="m"/>
         </StackPanel>
-        <cus:ImageButton Grid.Row="13" Content="生成套管标注" x:Name="btnPipeTag" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnSltFloor_Click"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="13" Content="生成套管标注" x:Name="btnPipeTag" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>
     </Grid>
 </cus:ThCustomWindow>

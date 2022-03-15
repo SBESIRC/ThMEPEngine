@@ -306,26 +306,31 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             Dictionary<string, int> mopPoolNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.mopPool, ref mopPoolNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
 
             //单盆洗手台
             Dictionary<string, int> singleBasinWashingNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.singleBasinWashingTable, ref singleBasinWashingNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.singleBasinWashingTable, singleBasinWashingNames));
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.singleBasinWashingTable, singleBasinWashingNames));
 
             //获取坐便器
             Dictionary<string, int> toiletNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
 
             //获取厨房台盆（洗涤盆）
             Dictionary<string, int> kitchenSinkNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.kitchenBasin, ref kitchenSinkNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
 
             //获取地漏
             Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
             GetVisitorDictionary(EnumEquipmentType.floorDrain, ref floorDrainNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames));
+            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames));
         }
 
         private void GetVisitorDictionary(EnumEquipmentType type, ref Dictionary<string, int> visirorDict)
