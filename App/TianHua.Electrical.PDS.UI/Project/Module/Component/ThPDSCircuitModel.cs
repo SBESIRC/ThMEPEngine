@@ -90,65 +90,23 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertyChanged(nameof(Description));
             }
         }
-        string lastDemandFactorValue = "1.00";
         [DisplayName("需要系数")]
-        [Range(typeof(double), "0.01", "1.00")]
-        public string DemandFactor
+        public double DemandFactor
         {
-            get
-            {
-                var v = edge.Target.Load.DemandFactor;
-                if (v > 0 && v <= 1)
-                {
-                    var s = $"{v:F2}";
-                    if (s == "0.00") s = "0.01";
-                    lastDemandFactorValue = s;
-                    return s;
-                }
-                edge.Target.Load.DemandFactor = double.Parse(lastDemandFactorValue);
-                return lastDemandFactorValue;
-            }
+            get => edge.Target.Load.DemandFactor;
             set
             {
-                if (double.TryParse(value, out var v))
-                {
-                    if (v > 0 && v <= 1)
-                    {
-                        edge.Target.Load.DemandFactor = v;
-                        lastDemandFactorValue = $"{v:F2}";
-                    }
-                }
+                edge.Target.Load.DemandFactor = value;
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
-        string lastPowerFactorValue = "1.00";
         [DisplayName("功率因数")]
-        [Range(typeof(double), "0.01", "1.00")]
-        public string PowerFactor
+        public double PowerFactor
         {
-            get
-            {
-                var v = edge.Target.Load.PowerFactor;
-                if (v > 0 && v <= 1)
-                {
-                    var s = $"{v:F2}";
-                    if (s == "0.00") s = "0.01";
-                    lastPowerFactorValue = s;
-                    return s;
-                }
-                edge.Target.Load.PowerFactor = double.Parse(lastPowerFactorValue);
-                return lastPowerFactorValue;
-            }
+            get => edge.Target.Load.PowerFactor;
             set
             {
-                if (double.TryParse(value, out var v))
-                {
-                    if (v > 0 && v <= 1)
-                    {
-                        edge.Target.Load.PowerFactor = v;
-                        lastPowerFactorValue = $"{v:F2}";
-                    }
-                }
+                edge.Target.Load.PowerFactor = value;
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }

@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             this.breaker = breaker;
         }
-        [DisplayName(null)]
+        [DisplayName("内容")]
         public string Content => breaker.Content;
         [DisplayName("元器件类型")]
         public string Type => "断路器";

@@ -18,7 +18,7 @@
         <StatusBar DockPanel.Dock="Bottom"  FontSize="14">
             <TextBlock>进度</TextBlock>
             <Separator Width="1"  HorizontalAlignment="Center"/>
-            <ProgressBar Width="200" Height="10" Value="50"></ProgressBar>
+            <ProgressBar Width="100" Height="10" Value="50"></ProgressBar>
             <Separator Width="1"  HorizontalAlignment="Center"/>
             <TextBlock>正在计算回路电流:1321/2164</TextBlock>
             <Separator Width="1"  HorizontalAlignment="Center"/>
@@ -38,13 +38,14 @@
             <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
         </StatusBar>
         <Grid Width="950" Height="700">
-            <Border BorderBrush="Black" BorderThickness="1" Margin="2.73972602739726,4.14201183431953,202.739726027397,142.485207100592">
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,143">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000"></Canvas>
                 </ScrollViewer>
             </Border>
-            <TreeView x:Name="tv" ItemsSource="{Binding DataList}" Style="{x:Null}" Margin="758.904109589041,7.45562130177515,13.6986301369863,446.508875739645">
-                <TreeView.ItemContainerStyle>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,0,10,442">
+                <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
+                    <!--<TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
@@ -55,14 +56,15 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                        <TextBlock Text="{Binding Name}"/>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="759.58904109589,262.603550295858,12.3287671232877,143.313609467456">
+                </TreeView.ItemContainerStyle>-->
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,263,10,143">
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>

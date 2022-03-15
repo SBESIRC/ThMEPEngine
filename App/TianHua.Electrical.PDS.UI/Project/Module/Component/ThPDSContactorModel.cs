@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             this.contactor = contactor;
         }
-        [DisplayName(null)]
+        [DisplayName("内容")]
         public string Content => contactor.Content;
 
         [DisplayName("元器件类型")]

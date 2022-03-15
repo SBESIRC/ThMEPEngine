@@ -36,65 +36,23 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => vertice.Load.Phase;
             set => vertice.Load.Phase = value;
         }
-        string lastDemandFactorValue = "1.00";
         [DisplayName("需要系数")]
-        [Range(typeof(double), "0.01", "1.00")]
-        public string DemandFactor
+        public double DemandFactor
         {
-            get
-            {
-                var v = vertice.Load.DemandFactor;
-                if (v > 0 && v <= 1)
-                {
-                    var s = $"{v:F2}";
-                    if (s == "0.00") s = "0.01";
-                    lastDemandFactorValue = s;
-                    return s;
-                }
-                vertice.Load.DemandFactor = double.Parse(lastDemandFactorValue);
-                return lastDemandFactorValue;
-            }
+            get => vertice.Load.DemandFactor;
             set
             {
-                if (double.TryParse(value, out var v))
-                {
-                    if (v > 0 && v <= 1)
-                    {
-                        vertice.Load.DemandFactor = v;
-                        lastDemandFactorValue = $"{v:F2}";
-                    }
-                }
+                vertice.Load.DemandFactor = value;
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
-        string lastPowerFactorValue = "1.00";
         [DisplayName("功率因数")]
-        [Range(typeof(double), "0.01", "1.00")]
-        public string PowerFactor
+        public double PowerFactor
         {
-            get
-            {
-                var v = vertice.Load.PowerFactor;
-                if (v > 0 && v <= 1)
-                {
-                    var s = $"{v:F2}";
-                    if (s == "0.00") s = "0.01";
-                    lastPowerFactorValue = s;
-                    return s;
-                }
-                vertice.Load.PowerFactor = double.Parse(lastPowerFactorValue);
-                return lastPowerFactorValue;
-            }
+            get => vertice.Load.PowerFactor;
             set
             {
-                if (double.TryParse(value, out var v))
-                {
-                    if (v > 0 && v <= 1)
-                    {
-                        vertice.Load.PowerFactor = v;
-                        lastPowerFactorValue = $"{v:F2}";
-                    }
-                }
+                vertice.Load.PowerFactor = value;
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }
