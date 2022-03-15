@@ -48,15 +48,17 @@ namespace TianHua.Electrical.PDS.Service
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
-            var noneLoad = false;
+            var noneLoad = true;
             foreach (var e in entities)
             {
                 if (e is Line line)
                 {
-                    noneLoad = true;
+                    // 
                 }
                 else
                 {
+                    // 只要有一个有效负载，则认为整个节点为有效负载
+                    noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
                     if (LoadBlocks[e].EffectiveName.IndexOf("电动机及负载标注") == 0)
                     {

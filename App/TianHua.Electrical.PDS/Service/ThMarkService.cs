@@ -156,6 +156,11 @@ namespace TianHua.Electrical.PDS.Service
             PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
         }
 
+        /// <summary>
+        /// 获取负载或回路标注
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
         public List<string> GetMarks(Polyline frame)
         {
             var dbTexts = new List<DBText>();
@@ -186,55 +191,50 @@ namespace TianHua.Electrical.PDS.Service
             var result = new List<string>();
             var textLeads = new List<Line>();
             SearchMarkLine(frame, textLeads);
-            if (textLeads.Count > 0)
+            var tolerence = 3.0 * Math.PI / 180.0;
+            textLeads.ForEach(o =>
             {
-                var tolerence = 3.0 * Math.PI / 180.0;
-                textLeads.ForEach(o =>
+                var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
+                var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
+                if (TextCollection.Count > 0)
                 {
-                    var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
-                    var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
-                    if (TextCollection.Count > 0)
+                    TextCollection.OfType<DBText>().ForEach(t =>
                     {
-                        TextCollection.OfType<DBText>().ForEach(t =>
+                        // 只取与引线方向相同的文字
+                        var rad = t.Rotation * Math.PI / 180.0;
+                        var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
+                        var lineAngle = o.Angle % Math.PI;
+                        if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
                         {
-                            // 只取与引线方向相同的文字
-                            var rad = t.Rotation * Math.PI / 180.0;
-                            var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
-                            var lineAngle = o.Angle % Math.PI;
-                            if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
-                            {
-                                dbTexts.Add(t);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
-                        if (pointCollection.Count > 0)
-                        {
-                            result.AddRange(MarkDic[pointCollection[0] as DBPoint]);
+                            dbTexts.Add(t);
                         }
-                    }
-                });
-            }
-            else
-            {
-                var pointCollection = PointIndex.SelectWindowPolygon(frame);
-                if (pointCollection.Count > 0)
-                {
-                    result = MarkDic[pointCollection[0] as DBPoint];
+                    });
                 }
                 else
                 {
-                    frame = frame.Buffer(200.0).OfType<Polyline>().OrderByDescending(o => o.Length).First();
-                    var TextCollection = TextIndex.SelectCrossingPolygon(frame);
-                    if (TextCollection.Count > 0)
+                    var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
+                    if (pointCollection.Count > 0)
                     {
-                        TextCollection.OfType<DBText>().ForEach(o =>
-                        {
-                            result.Add(o.TextString);
-                        });
+                        result.AddRange(MarkDic[pointCollection[0] as DBPoint]);
                     }
+                }
+            });
+
+            var points = PointIndex.SelectWindowPolygon(frame);
+            if (points.Count > 0)
+            {
+                result.AddRange(MarkDic[points[0] as DBPoint]);
+            }
+            else
+            {
+                frame = frame.Buffer(200.0).OfType<Polyline>().OrderByDescending(o => o.Length).First();
+                var TextCollection = TextIndex.SelectCrossingPolygon(frame);
+                if (TextCollection.Count > 0)
+                {
+                    TextCollection.OfType<DBText>().ForEach(o =>
+                    {
+                        result.Add(o.TextString);
+                    });
                 }
             }
 

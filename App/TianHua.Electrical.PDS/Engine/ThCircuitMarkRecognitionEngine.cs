@@ -33,7 +33,12 @@ namespace TianHua.Electrical.PDS.Engine
 
     public class ThCircuitMarkRecognitionEngine : ThAnnotationElementRecognitionEngine
     {
-        public List<Entity> Results { get; protected set; } = new List<Entity>();
+        public ThCircuitMarkRecognitionEngine()
+        {
+            Results = new DBObjectCollection();
+        }
+
+        public DBObjectCollection Results { get; protected set; }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -51,7 +56,7 @@ namespace TianHua.Electrical.PDS.Engine
             extractionEngine.ExtractFromMS(database);
             extractionEngine.Results.Select(o => o.Data as Entity).ForEach(o =>
             {
-                if(o is Polyline polyline)
+                if (o is Polyline polyline)
                 {
                     var lines = new DBObjectCollection();
                     polyline.Explode(lines);

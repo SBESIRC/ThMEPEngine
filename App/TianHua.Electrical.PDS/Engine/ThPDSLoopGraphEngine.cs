@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -125,23 +126,55 @@ namespace TianHua.Electrical.PDS.Engine
                             }
                         });
                     });
-                    var thisMark = new List<string>();
-                    markList.ForEach(mark =>
-                    {
-                        mark.ForEach(str =>
-                        {
-                            if (str.Contains(distBoxKey))
-                            {
-                                thisMark = mark;
-                            }
-                        });
-                    });
-                    var newNode = ThPDSGraphService.CreateNode(distBox, thisMark, DistBoxKey);
-                    CacheDistBoxes.Add(distBox, newNode);
-                    PDSGraph.Graph.AddVertex(newNode);
 
-                    var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string>(), DistBoxKey);
-                    PDSGraph.Graph.AddEdge(newEdge);
+                    var distBoxKeyList = new List<string>();
+                    if (distBoxKey.Contains("/"))
+                    {
+                        var regex = new Regex(@".+[/]");
+                        var match = regex.Match(distBoxKey);
+                        if (match.Success)
+                        {
+                            distBoxKeyList.Add(match.Value.Replace("/", ""));
+                            var secRegex = new Regex(@".{1}[/]");
+                            var secMatch = secRegex.Match(distBoxKey);
+                            if (secMatch.Success)
+                            {
+                                distBoxKeyList.Add(distBoxKey.Replace(secMatch.Value, ""));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        distBoxKeyList.Add(distBoxKey);
+                    }
+                    distBoxKeyList.ForEach(key =>
+                    {
+                        var thisMark = new List<string>();
+                        markList.ForEach(mark =>
+                        {
+                            mark.ForEach(str =>
+                            {
+                                if (str.Contains(key))
+                                {
+                                    thisMark = mark;
+                                }
+                            });
+                        });
+                        if (thisMark.Count == 0)
+                        {
+                            return;
+                        }
+                        var newNode = ThPDSGraphService.CreateNode(distBox, thisMark, DistBoxKey);
+                        if (!CacheDistBoxes.ContainsKey(distBox))
+                        {
+                            CacheDistBoxes.Add(distBox, newNode);
+                        }
+
+                        PDSGraph.Graph.AddVertex(newNode);
+
+                        var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string>(), DistBoxKey);
+                        PDSGraph.Graph.AddEdge(newEdge);
+                    });
                 });
             });
         }
@@ -243,8 +276,8 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 var polyline = ThPDSBufferService.Buffer(curve, Database);
                 // 首先遍历从桥架搭出去的线
-                var results = FindNextLine(curve, polyline).OfType<Line>();
-                foreach (Line findCurve in results)
+                var results = FindNextLine(curve, polyline).OfType<Curve>();
+                foreach (var findCurve in results)
                 {
                     var IsStart = findCurve.StartPoint.DistanceTo(curve.GetClosestPointTo(findCurve.StartPoint, false))
                         < ThPDSCommon.AllowableTolerance;

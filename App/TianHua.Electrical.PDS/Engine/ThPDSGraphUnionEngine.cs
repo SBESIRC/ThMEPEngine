@@ -36,11 +36,16 @@ namespace TianHua.Electrical.PDS.Engine
                 });
             });
 
-            for (var i = 0; i < cabletrayEdgeList.Count - 1; i++)
+            for (var i = 0; i < cabletrayEdgeList.Count; i++)
             {
                 var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitNumber;
 
-                for (var j = i + 1; j < cabletrayEdgeList.Count; j++)
+                if(string.IsNullOrEmpty(circuitID))
+                {
+                    continue;
+                }
+
+                for (var j = 0; j < cabletrayEdgeList.Count; j++)
                 {
                     var otherDistBoxID = "";
                     if (cabletrayEdgeList[j].Target.Loads.Count > 0)
@@ -57,6 +62,7 @@ namespace TianHua.Electrical.PDS.Engine
                             edge.Circuit.ViaConduit = true;
                         }
                         addEdgeList.Add(edge);
+                        break;
                     }
                 }
             }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 
 using ThMEPEngineCore.Engine;
 
@@ -28,7 +29,12 @@ namespace TianHua.Electrical.PDS.Engine
 
     public class ThTCHWireDim2RecognitionEngine : ThAnnotationElementRecognitionEngine
     {
-        public List<Entity> Results { get; protected set; } = new List<Entity> ();
+        public ThTCHWireDim2RecognitionEngine()
+        {
+            Results = new DBObjectCollection();
+        }
+
+        public DBObjectCollection Results { get; protected set; } 
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -44,7 +50,7 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var engine = new ThTCHWireDim2ExtractionEngine();
             engine.ExtractFromMS(database);
-            Results = engine.Results.Select(o => o.Data as Entity).ToList();
+            Results = engine.Results.Select(o => o.Data as Entity).ToCollection();
         }
     }
 }
