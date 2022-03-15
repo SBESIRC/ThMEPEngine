@@ -14,6 +14,10 @@ using ThMEPArchitecture.ParkingStallArrangement.General;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Threading.Tasks;
+using ThCADCore.NTS;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -69,7 +73,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             base.AfterExecute();
         }
 
-        public void Run(AcadDatabase acadDatabase)
+        public void _Run(AcadDatabase acadDatabase)
         {
             var isDirectlyArrange = true;
             bool usePline = true;
@@ -121,6 +125,142 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();
             Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
+        }
+
+        public void Run(AcadDatabase acadDatabase)
+        {
+            Active.Editor.WriteMessage($"线求交点\n");
+            NTSLineTest2();
+        }
+        private void ParallelTest()
+        {
+            var l1 = new List<double>();
+            var l2 = new List<double>();
+            for (int i = 0; i < 100000; i++)
+            {
+                l1.Add(General.Utils.RandDouble());
+                l2.Add(General.Utils.RandDouble());
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var d1 in l1)
+            {
+                foreach(var d2 in l2)
+                {
+                    d1.CompareTo( d2);
+                }
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(l1, d1 => l2.ForEach(d2 => d1.CompareTo(d2)));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+
+        }
+        private void NTSLineTest()
+        {
+            var lineLis1 = new List<LineString>();
+            for (int i = 0; i < 6; i++)
+            {
+                lineLis1.Add(RandomLine().ToNTSLineString());
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var l1 in lineLis1)
+            {
+                GetMoreBuffer(l1);
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis1, l => GetMoreBuffer(l));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        private void NTSLineTest2()
+        {
+            var lineLis1 = new List<(LineString, LineString)>();
+            for (int i = 0; i < 6; i++)
+            {
+                lineLis1.Add((RandomLine().ToNTSLineString(), RandomLine().ToNTSLineString()));
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var l in lineLis1)
+            {
+                InsectMore(l.Item1,l.Item2);
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis1, l => InsectMore(l.Item1, l.Item2));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        private void LineTest()
+        {
+            var lineLis1 = new List<Line>();
+            var lineLis2 = new List<Line>();
+            for (int i = 0;i < 1000; i++)
+            {
+                lineLis1.Add(RandomLine());
+                lineLis2.Add(RandomLine());
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach(var l1 in lineLis1)
+            {
+                foreach(var l2 in lineLis2)
+                {
+                    l1.Intersect(l2, Intersect.OnBothOperands);
+                }
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis1, l1 => lineLis2.ForEach(l2 => l1.Intersect(l2, Intersect.OnBothOperands)));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        private void LineTest2()
+        {
+            var lineLis = new List<Line>();
+            var lis = new List<int>();
+            for (int i = 0; i < 1000; i++)
+            {
+                lineLis.Add(RandomLine());
+                lis.Add(i);
+            }
+            var t0 = _stopwatch.Elapsed.TotalSeconds;
+            foreach (var l1 in lineLis)
+            {
+                GetMoreCenter(l1);
+            }
+            var t1 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"单线程seconds: {t1 - t0} \n");
+            Parallel.ForEach(lineLis, l1 => GetMoreCenter(l1));
+            var t2 = _stopwatch.Elapsed.TotalSeconds;
+            Active.Editor.WriteMessage($"多线程seconds: {t2 - t1} \n");
+        }
+        private Line RandomLine(double Lim = 100)
+        {
+            var spt = new Point3d(General.Utils.RandDouble() * Lim, General.Utils.RandDouble() * Lim, 0);
+            var ept = new Point3d(General.Utils.RandDouble() * Lim, General.Utils.RandDouble() * Lim, 0);
+            return new Line(spt, ept);
+        }
+        private void GetMoreCenter( Line l,int n = 10000)
+        {
+            for(int i = 0; i < n; ++i)
+            {
+                l.GetCenter();
+            }
+        }
+        private void GetMoreBuffer(LineString lstr, int n = 100000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr.Buffer(100);
+            }
+        }
+        private void InsectMore(LineString lstr1, LineString lstr2, int n = 100000)
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                lstr1.Intersects(lstr2);
+            }
         }
     }
 }
