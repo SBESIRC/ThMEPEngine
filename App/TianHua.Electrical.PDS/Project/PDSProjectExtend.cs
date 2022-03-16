@@ -110,7 +110,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 var DemandFactor = node.Load.DemandFactor;
                 if (node.Details.IsOnlyLoad)
-                    DemandFactor = 1;
+                    DemandFactor = 1.0;
                 var PowerFactor = node.Load.PowerFactor;
                 var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
                 node.Load.CalculateCurrent = Math.Round(node.Details.LowPower * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);

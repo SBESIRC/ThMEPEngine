@@ -53,7 +53,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (e is Line line)
                 {
-                    // 
+                    //
                 }
                 else
                 {
@@ -71,6 +71,11 @@ namespace TianHua.Electrical.PDS.Service
                         loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
+            }
+
+            if(loads.Count == 0)
+            {
+                loads.Add(new ThPDSLoad());
             }
 
             node.Loads = loads;
@@ -95,6 +100,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaCableTray = true;
             }
+            // 可能存在问题
             if (target.NodeType == PDSNodeType.Load)
             {
                 edge.Circuit.ViaConduit = true;
@@ -123,6 +129,11 @@ namespace TianHua.Electrical.PDS.Service
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
                 edge.Circuit.ID.CircuitNumber = source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID;
+            }
+
+            if(target.NodeType == PDSNodeType.None)
+            {
+                ThPDSLayerService.Assign(edge.Circuit, target.Loads[0]);
             }
             return edge;
         }

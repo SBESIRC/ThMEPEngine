@@ -331,13 +331,8 @@ namespace TianHua.Electrical.PDS.Engine
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
                 if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
-                    var needAssign = false;
-                    if (newEdge.Target.Loads.Count == 0)
-                    {
-                        newEdge.Target.Loads.Add(new ThPDSLoad());
-                        needAssign = true;
-                    }
-                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, newEdge.Target.Loads[0], circuit.Layer, needAssign);
+                    ThPDSLayerService.SelectCircuitType(newEdge.Circuit, newEdge.Target.Loads[0], circuit.Layer, 
+                        newEdge.Target.Loads[0].DefaultCircuitType == ThPDSCircuitType.None);
                 }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
