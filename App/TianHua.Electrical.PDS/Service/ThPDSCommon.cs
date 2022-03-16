@@ -10,6 +10,7 @@
         public static readonly string ELECTRICITY = "电量";
         public static readonly string POWER_CATEGORY = "电源类别";
 
-        public const double AllowableTolerance = 25.0;//允许公差
+        public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
+        public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
     }
 }

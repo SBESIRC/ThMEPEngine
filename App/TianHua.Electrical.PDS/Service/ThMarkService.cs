@@ -223,7 +223,10 @@ namespace TianHua.Electrical.PDS.Service
             var points = PointIndex.SelectWindowPolygon(frame);
             if (points.Count > 0)
             {
-                result.AddRange(MarkDic[points[0] as DBPoint]);
+                points.OfType<DBPoint>().ForEach(p =>
+                {
+                    result.AddRange(MarkDic[p]);
+                });
             }
             else
             {

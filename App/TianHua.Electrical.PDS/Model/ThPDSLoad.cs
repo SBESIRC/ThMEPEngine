@@ -276,6 +276,7 @@
             Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
             PowerFactor = 0.85;
+            Location = new ThPDSLocation();
         }
 
         /// <summary>

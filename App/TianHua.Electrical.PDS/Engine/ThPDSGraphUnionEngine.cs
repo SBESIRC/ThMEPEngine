@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using QuikGraph;
 
@@ -40,7 +42,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitNumber;
 
-                if(string.IsNullOrEmpty(circuitID))
+                if (string.IsNullOrEmpty(circuitID))
                 {
                     continue;
                 }
@@ -70,13 +72,37 @@ namespace TianHua.Electrical.PDS.Engine
             var unionGraph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             cabletrayEdgeList.ForEach(edge =>
             {
-                unionGraph.AddVertex(edge.Target);
+                if (!IsContains(unionGraph, edge.Target, out var originalNode))
+                {
+                    unionGraph.AddVertex(edge.Target);
+                }
             });
             addEdgeList.ForEach(edge =>
             {
-                unionGraph.AddVertex(edge.Source);
-                unionGraph.AddVertex(edge.Target);
-                unionGraph.AddEdge(edge);
+                var sourceCheck = IsContains(unionGraph, edge.Source, out var originalSourceNode);
+                var targetCheck = IsContains(unionGraph, edge.Target, out var originalTargetNode);
+                if (!sourceCheck)
+                {
+                    unionGraph.AddVertex(edge.Source);
+                }
+                if (!targetCheck)
+                {
+                    unionGraph.AddVertex(edge.Target);
+                }
+
+                if (!sourceCheck && !targetCheck)
+                {
+                    unionGraph.AddEdge(edge);
+                }
+                else
+                {
+                    var newEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(originalSourceNode, originalTargetNode)
+                    {
+                        Circuit = edge.Circuit,
+                    };
+                    unionGraph.AddEdge(newEdge);
+                }
+
             });
 
             // 设置图的遍历起点
@@ -89,6 +115,44 @@ namespace TianHua.Electrical.PDS.Engine
             }
 
             return unionGraph;
+        }
+
+        /// <summary>
+        /// 判断图中是否已包含该节点，若包含则返回true
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <param name="originalNode"></param>
+        /// <returns></returns>
+        private bool IsContains(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
+            ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
+        {
+            if (node.NodeType != PDSNodeType.None)
+            {
+                if (!string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
+                {
+                    foreach (var vertex in graph.Vertices)
+                    {
+                        // id、楼层、位置判断
+                        if (vertex.Loads[0].ID.LoadID == node.Loads[0].ID.LoadID
+                            && vertex.Loads[0].Location.FloorNumber == node.Loads[0].Location.FloorNumber
+                            && ToPoint3d(vertex.Loads[0].Location.StoreyBasePoint - vertex.Loads[0].Location.BasePoint)
+                                .DistanceTo(ToPoint3d(node.Loads[0].Location.StoreyBasePoint - node.Loads[0].Location.BasePoint))
+                                < ThPDSCommon.STOREY_TOLERANCE)
+                        {
+                            originalNode = vertex;
+                            return true;
+                        }
+                    }
+                }
+            }
+            originalNode = node;
+            return false;
+        }
+
+        private Point3d ToPoint3d(Vector3d vector)
+        {
+            return new Point3d(vector.X, vector.Y, 0);
         }
     }
 }

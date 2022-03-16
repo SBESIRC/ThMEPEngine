@@ -75,8 +75,9 @@ namespace TianHua.Electrical.PDS.Command
                     });
 
                     // 创建移动到原点的类
-                    var transformerPt = new Point3d();
-                    //var transformerPt = storeysGeometry[0].StartPoint;
+                    // 测试使用
+                    // var transformerPt = new Point3d();
+                    var transformerPt = storeysGeometry[0].StartPoint;
                     var transformer = new ThMEPOriginTransformer(transformerPt);
 
                     EntitiesTransform(transformer, storeysGeometry.ToCollection());
@@ -115,8 +116,11 @@ namespace TianHua.Electrical.PDS.Command
                     ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                     ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
 
-                    storeysGeometry.ForEach(x =>
+                    for(var i = 0;i< storeysEngine.Elements.Count;i++)
                     {
+                        var x = storeysGeometry[i];
+                        var storey = storeysEngine.Elements[i] as ThEStoreys;
+
                         // 回路
                         var cableIndex = new ThCADCoreNTSSpatialIndex(cableEngine.Results);
                         var cables = cableIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
@@ -161,10 +165,13 @@ namespace TianHua.Electrical.PDS.Command
                         graphEngine.MultiDistBoxAnalysis(distBoxFrames);
                         graphEngine.CreatGraph();
                         graphEngine.CopyAttributes();
+                        var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),
+                            storey.Data.Position.Y - (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
+                        graphEngine.AssignStorey(storey.StoreyNumber, storeyBasePoint);
 
                         var graph = graphEngine.GetGraph();
                         graphList.Add(graph);
-                    });
+                    }
 
                     // 移回原位
                     EntitiesReset(transformer, loadExtractService.MarkBlocks.Keys.ToCollection());
