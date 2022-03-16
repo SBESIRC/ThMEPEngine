@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d" 
+             Background="White"
              d:DesignHeight="1000" d:DesignWidth="1000">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -68,16 +69,14 @@
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>
-            <CheckBox Style="{x:Null}" Margin="731,572,125,107">消防负荷</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,591,128,92">消防电源监控</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,610,129,70">浪涌保护器</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="833,571,32,106">双重电源</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="833,591,22,91">电器火灾监控</CheckBox>
-            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,612,30,67"></ComboBox>
-            <Button Click="btnBalance" Style="{x:Null}" Margin="725.342465753425,648.639053254438,120.547945205479,31.4792899408284">平衡相序</Button>
-            <Button Click="btnSelectFast" Style="{x:Null}" Margin="841.095890410959,649.467455621302,5.47945205479452,30.6508875739645">快速选型</Button>
-            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725.342465753425,675.147928994083,119.178082191781,4.97041420118343">批量生成</Button>
-            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="840,675,4,5">单独生成</Button>
+            <CheckBox Style="{x:Null}" Margin="733,595,127,85">浪涌保护器</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="731,572,121,105">消防电源监控</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="836,572,19,110">电气火灾监控</CheckBox>
+            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,595,30,84"></ComboBox>
+            <Button Click="btnBalance" Style="{x:Null}" Margin="725,619,121,61">平衡相序</Button>
+            <Button Click="btnSelectFast" Style="{x:Null}" Margin="837,621,10,59">快速选型</Button>
+            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,644,119,36">批量生成</Button>
+            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="836,646,8,34">单独生成</Button>
         </Grid>
     </DockPanel>
 </UserControl>

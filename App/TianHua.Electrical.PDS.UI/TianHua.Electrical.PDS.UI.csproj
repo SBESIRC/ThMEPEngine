@@ -134,6 +134,7 @@
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphHighDpiRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphTreeBuilder.cs" />

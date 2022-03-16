@@ -77,7 +77,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => "";
         }
         [DisplayName("安装方式")]
-        public string NstalledMethod
+        public string InstalledMethod
         {
             get => "";
         }

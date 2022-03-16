@@ -13,6 +13,7 @@
                     SizeToContent="Manual"
                     MinHeight="500"
                     Icon="{x:Null}"
+                    FontFamily="Consolas"
                     Width="1000"
                     Height="800"
                     Background="White"
