@@ -78,7 +78,9 @@
     <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />
+    <Compile Include="ViewModels\ThPDSCircuitGraphHighDpiRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphRenderContext.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphTreeBuilder.cs" />
