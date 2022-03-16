@@ -67,7 +67,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     else resHoles.Add(mPolygon.Loops()[i]);
                 }
             }
-            polyFrame = polyFrame.Buffer(1000)[0] as Polyline;
+            //polyFrame = polyFrame.Buffer(1000)[0] as Polyline;
             return new KeyValuePair<Polyline, List<Polyline>>(polyFrame, resHoles);
         }
 
