@@ -78,7 +78,9 @@
     <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />

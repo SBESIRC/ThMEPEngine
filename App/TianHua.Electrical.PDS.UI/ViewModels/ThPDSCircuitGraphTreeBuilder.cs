@@ -50,10 +50,20 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         if (si > 1000) return;
                         var v = vertices[node.Id];
                         if (v.Type != Model.PDSNodeType.DistributionBox) return;
+                        var name = v.Load?.ID?.LoadID;
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            name = v.Load?.ID?.Description;
+                        }
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            name = v.Load?.LoadUID;
+                        }
+                        name ??= "";
                         var m = new ThPDSCircuitGraphTreeModel()
                         {
                             Id = idDict[v],
-                            Name = v.Load?.ID?.LoadID ?? " ",
+                            Name = name,
                             DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                         };
                         if (parent is null)
