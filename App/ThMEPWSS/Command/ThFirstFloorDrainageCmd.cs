@@ -13,17 +13,22 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
 namespace ThMEPWSS.Command
 {
     public class ThFirstFloorDrainageCmd : IAcadCommand, IDisposable
     {
         Dictionary<string, List<string>> config;
-        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic)
+        ParamSettingViewModel paramSetting = null;
+
+        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting)
         {
             config = dic;
+            paramSetting = _paramSetting;
         }
 
         public void Execute()
@@ -36,7 +41,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
                 var pt = frameDic.First().Key.StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0));
                 foreach (var dic in frameDic)
                 {
                     var frame = dic.Key.Clone() as Polyline;
@@ -54,7 +59,7 @@ namespace ThMEPWSS.Command
                     var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = frame.GetAxis(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
                     using (acad.Database.GetDocument().LockDocument())
@@ -73,6 +78,21 @@ namespace ThMEPWSS.Command
                     }
                 }
             }
+        }
+
+        private void ClassifyRoomVerticalPipe(List<ThIfcRoom> thRooms, List<VerticalPipeModel> verticalPipes)
+        {
+            var rooms = thRooms.Select(x => x.Boundary).ToList();
+            foreach (Polyline room in rooms)
+            {
+                var pipes = verticalPipes.Where(x => room.Contains(x.Position)).ToList();
+
+            }
+        }
+
+        private void ClassifyPipes(List<VerticalPipeModel> verticalPipes)
+        {
+
         }
 
         /// <summary>
@@ -118,7 +138,7 @@ namespace ThMEPWSS.Command
                 if (interOutFrames.Count > 0)
                 {
                     var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => {
-                        var tempPoly = y.ExtendByLengthLine(150);
+                        var tempPoly = y.ExtendByLengthLine(100);
                         tempPoly = tempPoly.ExtendByLengthLine(-100, false);
                         return tempPoly;
                     });

@@ -4,10 +4,11 @@
     {
         public ThPDSID()
         {
+            BlockName = "";
             LoadID = "";
             Description = "";
-            CircuitNumber = "";
-            BlockName = "";
+            CircuitID = "";
+            CircuitNumber = ""; 
         }
 
         /// <summary>

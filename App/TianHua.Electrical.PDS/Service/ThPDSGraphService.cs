@@ -48,15 +48,17 @@ namespace TianHua.Electrical.PDS.Service
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
-            var noneLoad = false;
+            var noneLoad = true;
             foreach (var e in entities)
             {
                 if (e is Line line)
                 {
-                    noneLoad = true;
+                    //
                 }
                 else
                 {
+                    // 只要有一个有效负载，则认为整个节点为有效负载
+                    noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
                     if (LoadBlocks[e].EffectiveName.IndexOf("电动机及负载标注") == 0)
                     {
@@ -69,6 +71,11 @@ namespace TianHua.Electrical.PDS.Service
                         loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
+            }
+
+            if(loads.Count == 0)
+            {
+                loads.Add(new ThPDSLoad());
             }
 
             node.Loads = loads;
@@ -93,6 +100,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaCableTray = true;
             }
+            // 可能存在问题
             if (target.NodeType == PDSNodeType.Load)
             {
                 edge.Circuit.ViaConduit = true;
@@ -121,6 +129,11 @@ namespace TianHua.Electrical.PDS.Service
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
                 edge.Circuit.ID.CircuitNumber = source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID;
+            }
+
+            if(target.NodeType == PDSNodeType.None)
+            {
+                ThPDSLayerService.Assign(edge.Circuit, target.Loads[0]);
             }
             return edge;
         }

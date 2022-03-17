@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
-        private static void Assign(ThPDSCircuit circuit, ThPDSLoad load)
+        public static void Assign(ThPDSCircuit circuit, ThPDSLoad load)
         {
             if (circuit.Type != ThPDSCircuitType.None)
             {

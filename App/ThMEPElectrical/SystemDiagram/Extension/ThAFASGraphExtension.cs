@@ -15,8 +15,8 @@ namespace ThMEPElectrical.SystemDiagram.Extension
         {
             ThAFASVertex Source = graph.Vertices.Where(o => o.VertexElement == startEntity).First();
             var Target = new ThAFASVertex() { VertexElement = secondEntity, IsStartVertexOfGraph = false };
-            graph.AddEdge(new ThAFASEdge<ThAFASVertex>(Source, Target) { Edge = edge });
             graph.AddVertex(Target);
+            graph.AddEdge(new ThAFASEdge<ThAFASVertex>(Source, Target) { Edge = edge });
         }
     }
 }

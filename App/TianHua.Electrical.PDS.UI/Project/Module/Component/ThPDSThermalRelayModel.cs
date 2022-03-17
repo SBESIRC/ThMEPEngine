@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             this.thermalRelay = thermalRelay;
         }
-        [DisplayName(null)]
+        [DisplayName("内容")]
         public string Content => thermalRelay.Content;
         [DisplayName("元器件类型")]
         public string Type => "热继电器";

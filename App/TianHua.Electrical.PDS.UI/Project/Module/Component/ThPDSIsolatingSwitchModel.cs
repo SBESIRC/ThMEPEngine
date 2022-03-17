@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
         [DisplayName("元器件类型")]
         public string Type => "隔离开关";
-        [DisplayName(null)]
+        [DisplayName("内容")]
         public string Content => isolatingSwitch.Content;
         [DisplayName("隔离开关类型")]
         public string IsolatingSwitchType

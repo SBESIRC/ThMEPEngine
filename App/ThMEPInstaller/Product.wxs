@@ -7,6 +7,10 @@
         <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="$(var.Description)" Manufacturer="$(var.Manufacturer)" Platform="x64" />
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
+        <!--Application logo-->
+        <Icon Id="Logo.ico" SourceFile="Logo.ico" />
+        <!--Application logo for Control Panel-->
+        <Property Id="ARPPRODUCTICON" Value="Logo.ico" />
         <Feature Id="ProductFeature" Title="ThMEPInstaller" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="ProductComponentsSupport" />

@@ -27,5 +27,15 @@
         /// 元器件类型
         /// </summary>
         public ComponentType ComponentType { get; set; }
+
+
+        /// <summary>
+        /// 获取级联元器件电流规格
+        /// </summary>
+        /// <returns></returns>
+        public virtual double GetCascadeRatedCurrent()
+        {
+            return 0;
+        }
     }
 }

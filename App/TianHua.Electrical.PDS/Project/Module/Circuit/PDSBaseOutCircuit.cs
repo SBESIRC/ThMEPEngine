@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
@@ -12,6 +7,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// </summary>
     public abstract class PDSBaseOutCircuit
     {
+        /// <summary>
+        /// 出线回路类型
+        /// </summary>
         public CircuitFormOutType CircuitFormType { get; set; }
     }
 

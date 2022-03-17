@@ -17,8 +17,11 @@ using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
-using TianHua.Electrical.PDS.Project;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model.Electrical;
+using NFox.Cad;
+using ThCADCore.NTS;
+using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Command
 {
@@ -35,6 +38,15 @@ namespace TianHua.Electrical.PDS.Command
                 NodeType = PDSNodeType.CableCarrier,
             };
 
+            // 读取配置表信息
+            var fileService = new ThConfigurationFileService();
+            var tableInfo = fileService.Acquire(LoadConfigUrl);
+            var distBoxKey = new List<string>();
+            var nameFilter = new List<string>();
+            var propertyFilter = new List<string>();
+            var tableAnalysis = new ThPDSTableAnalysisService();
+            tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
+
             //加载所有已打开的文件
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
@@ -45,125 +57,126 @@ namespace TianHua.Electrical.PDS.Command
                 //    continue;
                 //}
 
-                using (DocumentLock docLock = doc.LockDocument())
+                using (var docLock = doc.LockDocument())
                 using (var acad = AcadDatabase.Use(doc.Database))
                 {
-                    // 读取配置表信息
-                    var fileService = new ThConfigurationFileService();
-                    var tableInfo = fileService.Acquire(LoadConfigUrl);
-                    var distBoxKey = new List<string>();
-                    var nameFilter = new List<string>();
-                    var propertyFilter = new List<string>();
-                    var tableAnalysis = new ThPDSTableAnalysisService();
-                    tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
-
                     var storeysEngine = new ThEStoreysRecognitionEngine();
                     storeysEngine.Recognize(acad.Database, new Point3dCollection());
                     if (storeysEngine.Elements.Count == 0)
                     {
-                        //continue;
+                        continue;
                     }
+
+                    var storeysGeometry = new List<Polyline>();
+                    storeysEngine.Elements.ForEach(o =>
+                    {
+                        var storey = acad.Element<BlockReference>((o as ThEStoreys).ObjectId, true);
+                        storeysGeometry.Add(storey.ToOBB(storey.BlockTransform));
+                    });
+
+                    // 创建移动到原点的类
+                    // 测试使用
+                    // var transformerPt = new Point3d();
+                    var transformerPt = storeysGeometry[0].StartPoint;
+                    var transformer = new ThMEPOriginTransformer(transformerPt);
+
+                    EntitiesTransform(transformer, storeysGeometry.ToCollection());
 
                     // 提取回路
                     var cableEngine = new ThCableSegmentRecognitionEngine();
                     cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
-
-                    // 创建移动到原点的类
-                    var transformerPt = new Point3d();
-                    if (cableEngine.Results.Count > 0)
-                    {
-                        transformerPt = cableEngine.Results[0].StartPoint;
-                    }
-                    var transformer = new ThMEPOriginTransformer(transformerPt);
-
-                    cableEngine.Results.ForEach(o =>
-                    {
-                        transformer.Transform(o);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(o);
-                    });
+                    EntitiesTransform(transformer, cableEngine.Results);
 
                     // 提取桥架
                     var cableTrayEngine = new ThCabletraySegmentRecognitionEngine();
                     cableTrayEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                    cableTrayEngine.Results.ForEach(o =>
-                    {
-                        transformer.Transform(o);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(o);
-                    });
+                    EntitiesTransform(transformer, cableTrayEngine.Results);
 
                     // 提取标注
                     var markExtractor = new ThCircuitMarkRecognitionEngine();
                     markExtractor.RecognizeMS(acad.Database, new Point3dCollection());
-                    markExtractor.Results.ForEach(o =>
-                    {
-                        transformer.Transform(o);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(o);
-                    });
+                    EntitiesTransform(transformer, markExtractor.Results);
+
+                    // 天正标注
                     var tchWireDimExtractor = new ThTCHWireDim2RecognitionEngine();
                     tchWireDimExtractor.RecognizeMS(acad.Database, new Point3dCollection());
-                    tchWireDimExtractor.Results.ForEach(o =>
-                    {
-                        transformer.Transform(o);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(o);
-                    });
+                    EntitiesTransform(transformer, tchWireDimExtractor.Results);
 
                     // 根据块名提取负载及标注块
                     var loadExtractService = new ThPDSBlockExtractService();
                     loadExtractService.Extract(acad.Database, tableInfo, nameFilter, propertyFilter, distBoxKey);
-                    loadExtractService.MarkBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Transform(block);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(block);
-                    });
-                    loadExtractService.DistBoxBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Transform(block);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(block);
-                    });
-                    loadExtractService.LoadBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Transform(block);
-                        ThMEPEntityExtension.ProjectOntoXYPlane(block);
-                    });
+                    BlockTransform(acad, transformer, loadExtractService.MarkBlocks);
+                    BlockTransform(acad, transformer, loadExtractService.DistBoxBlocks);
+                    BlockTransform(acad, transformer, loadExtractService.LoadBlocks);
 
                     // 提取配电箱框线
-                    var distBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database);
-
-                    //做一个标注的Service
-                    var markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks, tchWireDimExtractor.Results);
+                    var allDistBoxFrame = ThPDSDistBoxFrameExtraction.GetDistBoxFrame(acad.Database).ToCollection();
+                    EntitiesTransform(transformer, allDistBoxFrame);
 
                     ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                     ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
-                    var graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks.Keys.ToList(),
-                        loadExtractService.LoadBlocks.Keys.ToList(), cableTrayEngine.Results, cableEngine.Results, markService,
-                        distBoxKey, cableTrayNode);
 
-                    graphEngine.MultiDistBoxAnalysis(distBoxFrame);
-                    graphEngine.CreatGraph();
-                    graphEngine.CopyAttributes();
+                    for(var i = 0;i< storeysEngine.Elements.Count;i++)
+                    {
+                        var x = storeysGeometry[i];
+                        var storey = storeysEngine.Elements[i] as ThEStoreys;
 
-                    var graph = graphEngine.GetGraph();
-                    graphList.Add(graph);
+                        // 回路
+                        var cableIndex = new ThCADCoreNTSSpatialIndex(cableEngine.Results);
+                        var cables = cableIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
 
-                    // 移动回原位
-                    loadExtractService.MarkBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Reset(block);
-                    });
-                    loadExtractService.DistBoxBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Reset(block);
-                    });
-                    loadExtractService.LoadBlocks.ForEach(o =>
-                    {
-                        var block = acad.Element<BlockReference>(o.Value.ObjId, true);
-                        transformer.Reset(block);
-                    });
+                        // 桥架
+                        var cableTrayIndex = new ThCADCoreNTSSpatialIndex(cableTrayEngine.Results);
+                        var cableTrays = cableTrayIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
+
+                        // 标注
+                        var markIndex = new ThCADCoreNTSSpatialIndex(markExtractor.Results);
+                        var marks = markIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+
+                        // 天正标注
+                        var tchWireDimIndex = new ThCADCoreNTSSpatialIndex(tchWireDimExtractor.Results);
+                        var tchWireDims = tchWireDimIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+
+                        // 标注块
+                        var markBlockIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.MarkBlocks.Keys.ToCollection());
+                        var markBlocks = markBlockIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+                        var markBlockData = loadExtractService.MarkBlocks
+                            .Where(o => markBlocks.Contains(o.Key))
+                            .ToDictionary(o => o.Key, o => o.Value);
+
+                        // 配电箱
+                        var distBoxIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.DistBoxBlocks.Keys.ToCollection());
+                        var distBoxes = distBoxIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+
+                        // 负载
+                        var distBoxFrame = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
+                        var loads = distBoxFrame.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+
+                        // 配电箱框线
+                        var distBoxFrameIndex = new ThCADCoreNTSSpatialIndex(allDistBoxFrame);
+                        var distBoxFrames = distBoxFrameIndex.SelectCrossingPolygon(x).OfType<Polyline>().ToList();
+
+                        //做一个标注的Service
+                        var markService = new ThMarkService(marks, markBlockData, tchWireDims);
+                        
+                        var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
+                            distBoxKey, cableTrayNode);
+
+                        graphEngine.MultiDistBoxAnalysis(distBoxFrames);
+                        graphEngine.CreatGraph();
+                        graphEngine.CopyAttributes();
+                        var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),
+                            storey.Data.Position.Y - (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
+                        graphEngine.AssignStorey(storey.StoreyNumber, storeyBasePoint);
+
+                        var graph = graphEngine.GetGraph();
+                        graphList.Add(graph);
+                    }
+
+                    // 移回原位
+                    EntitiesReset(transformer, loadExtractService.MarkBlocks.Keys.ToCollection());
+                    EntitiesReset(transformer, loadExtractService.DistBoxBlocks.Keys.ToCollection());
+                    EntitiesReset(transformer, loadExtractService.LoadBlocks.Keys.ToCollection());
                 }
             }
 
@@ -175,6 +188,34 @@ namespace TianHua.Electrical.PDS.Command
         public void Dispose()
         {
             throw new NotImplementedException();
+        }
+
+        private void EntitiesTransform(ThMEPOriginTransformer transformer, DBObjectCollection collection)
+        {
+            collection.OfType<Entity>().ForEach(o =>
+            {
+                transformer.Transform(o);
+                ThMEPEntityExtension.ProjectOntoXYPlane(o);
+            });
+        }
+
+        private void BlockTransform(AcadDatabase acad, ThMEPOriginTransformer transformer,
+            Dictionary<Entity, ThPDSBlockReferenceData> blockData)
+        {
+            blockData.ForEach(o =>
+            {
+                var block = acad.Element<BlockReference>(o.Value.ObjId, true);
+                transformer.Transform(block);
+                ThMEPEntityExtension.ProjectOntoXYPlane(block);
+            });
+        }
+
+        private void EntitiesReset(ThMEPOriginTransformer transformer, DBObjectCollection collection)
+        {
+            collection.OfType<Entity>().ForEach(o =>
+            {
+                transformer.Reset(o);
+            });
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection objs)
         {
-            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLinealGeometry());
+            var lineStrings = objs.Cast<Curve>().Where(x=>!(x is Spline)).Select(o => o.ToNTSLinealGeometry());
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 

@@ -62,9 +62,9 @@ namespace TianHua.Electrical.PDS.Model
             Attributes = blockRef.GetAttributesInBlockReference();
             Cat_1 =  ThPDSLoadTypeCat_1.LumpedLoad;
             Cat_2 = ThPDSLoadTypeCat_2.None;
-            Phase = ThPDSPhase.一相;
+            Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
-            PowerFactor = 1.0;
+            PowerFactor = 0.85;
         }
 
         public ThPDSBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
@@ -79,9 +79,9 @@ namespace TianHua.Electrical.PDS.Model
             Attributes = blockRef.GetAttributesInBlockReference();
             Cat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
             Cat_2 = ThPDSLoadTypeCat_2.None;
-            Phase = ThPDSPhase.一相;
+            Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
-            PowerFactor = 1.0;
+            PowerFactor = 0.85;
             OwnerSpace2WCS = transfrom;
         }
     }

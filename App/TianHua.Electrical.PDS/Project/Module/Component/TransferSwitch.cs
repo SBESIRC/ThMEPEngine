@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -21,6 +22,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public AutomaticTransferSwitch(double calculateCurrent, string polesNum)
         {
             this.ComponentType = ComponentType.ATSE;
+            var ATSEComponent = ATSEConfiguration.ATSEComponentInfos.FirstOrDefault(o =>
+                double.Parse(o.Amps.Split(';').Last())>calculateCurrent
+                && o.Poles.Contains(polesNum));
+            if (ATSEComponent.IsNull())
+            {
+                throw new NotSupportedException();
+            }
+            TransferSwitchType = ATSEComponent.Model;
+            PolesNum = polesNum;
+            RatedCurrent = ATSEComponent.Amps.Split(';').Select(o => double.Parse(o)).First(o => o > calculateCurrent).ToString();
         }
 
         public string Content { get { return $"{TransferSwitchType} {RatedCurrent}A {PolesNum}"; } }
@@ -49,6 +60,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public ManualTransferSwitch(double calculateCurrent, string polesNum)
         {
             this.ComponentType = ComponentType.MTSE;
+            var MTSEComponent = MTSEConfiguration.MTSEComponentInfos.FirstOrDefault(o =>
+                double.Parse(o.Amps.Split(';').Last())>calculateCurrent
+                && o.Poles.Contains(polesNum));
+            if (MTSEComponent.IsNull())
+            {
+                throw new NotSupportedException();
+            }
+            TransferSwitchType = MTSEComponent.Model;
+            PolesNum = polesNum;
+            RatedCurrent = MTSEComponent.Amps.Split(';').Select(o => double.Parse(o)).First(o => o > calculateCurrent).ToString();
         }
 
         public string Content { get { return $"{TransferSwitchType} {RatedCurrent}A {PolesNum}"; } }

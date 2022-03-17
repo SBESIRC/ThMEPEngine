@@ -267,12 +267,16 @@
     {
         public ThPDSLoad()
         {
-            ID = new ThPDSID();
-            AttributesCopy = "";
-            LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
             LoadUID = System.Guid.NewGuid().ToString();
+            ID = new ThPDSID();
+            LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
             DefaultCircuitType = ThPDSCircuitType.None;
             InstalledCapacity = new ThInstalledCapacity();
+            AttributesCopy = "";
+            Phase = ThPDSPhase.三相;
+            DemandFactor = 1.0;
+            PowerFactor = 0.85;
+            Location = new ThPDSLocation();
         }
 
         /// <summary>

@@ -145,6 +145,7 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(dimensionLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(portMarkLayer));
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portMarkName), true);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(holeName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(airValveName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(fireValveName), true);

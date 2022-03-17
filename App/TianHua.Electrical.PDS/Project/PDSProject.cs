@@ -62,20 +62,6 @@ namespace TianHua.Electrical.PDS.Project
             }
         }
 
-        //public testViewerModule ConvertToTest()
-        //{
-        //    test = new testViewerModule();
-        //    ConverterFactory<testViewerModule, testViewerModule> factory = new ConverterFactory<testViewerModule, testViewerModule>();
-        //    return factory.ConvertMethod(test);
-        //}
-
-        //public InformationMatchViewerModule ConvertToInformationMatch()
-        //{
-        //    InformationMatch = new InformationMatchViewerModule();
-        //    ConverterFactory<InformationMatchViewerModule, InformationMatchViewerModule> factory = new ConverterFactory<InformationMatchViewerModule, InformationMatchViewerModule>();
-        //    return factory.ConvertMethod(InformationMatch);
-        //}
-
         /// <summary>
         /// 推送Data数据
         /// </summary>

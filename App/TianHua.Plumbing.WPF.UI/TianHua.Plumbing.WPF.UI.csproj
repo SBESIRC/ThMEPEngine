@@ -83,6 +83,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Converter\BeamRecognizeSourceBooleanConverter.cs" />
+    <Compile Include="Converter\DrainSettingConverter.cs" />
+    <Compile Include="Converter\SewageWasteWaterConvert.cs" />
+    <Compile Include="Converter\SingleRowSettingConverter.cs" />
     <Compile Include="Converter\SprinklerRangeBooleanConverter.cs" />
     <Compile Include="Converter\CheckSprinklerTypeBooleanConverter.cs" />
     <Compile Include="Converter\RadioUiValueConverter.cs" />

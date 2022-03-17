@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
@@ -15,16 +16,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     public class ReprocessingPipe
     {
         double frameSpace = 300;
-        double moveStep = 100;
         double frameDis = 150;
         List<RouteModel> routes;
         List<Polyline> outFrame;
-        List<Polyline> holes;
-        public ReprocessingPipe(List<RouteModel> routeModels, List<Polyline> _outFrame, List<Polyline> _holes)
+        public ReprocessingPipe(List<RouteModel> routeModels, List<Polyline> _outFrame)
         {
             routes = routeModels;
             outFrame = _outFrame;
-            holes = _holes;
         }
 
         /// <summary>
@@ -32,112 +30,119 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public List<RouteModel> Reprocessing()
         {
-            foreach (var Frame in outFrame)
-            {
-                var interRoutes = GetIntersectRoute(Frame, routes);
-                HandleSpace(Frame, interRoutes);
-            }
-            return routes;
-        }
-
-        /// <summary>
-        /// 后处理间距
-        /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="routes"></param>
-        private void HandleSpace(Polyline frame, List<RouteModel> routes)
-        {
             if (routes.Count <= 0)
             {
-                return;
+                return routes;
             }
-            var dir = GetOrderDir(frame, routes.First().route);
-            var matrix = CalOrderMatrix(dir);
-            var orderRoutes = OrderRoutes(matrix, routes);
-            var frameLength = GetFrameLength(matrix, frame);
-            MoveRouteBySpace(orderRoutes, frame, dir, holes, frameLength);
+            var polys = routes.Select(x => x.route).ToList();
+            var frame = FindOutFrame(polys);
+            var line = FindRouteIntersectLine(polys.First(), frame);
+            var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
+
+            var routeDic = routes.ToDictionary(x => x, y => FindRouteIntersectLine(y.route, frame));
+            return AdjustRoute(routeDic, dir);
         }
 
         /// <summary>
-        /// 调整出户框线路由间距为300
+        /// 调整路由线保证间距
         /// </summary>
-        /// <param name="routes"></param>
-        /// <param name="frame"></param>
+        /// <param name="routeDic"></param>
         /// <param name="dir"></param>
-        /// <param name="holes"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        private bool MoveRouteBySpace(List<RouteModel> routes, Polyline frame, Vector3d dir, List<Polyline> holes, double length)
+        private List<RouteModel> AdjustRoute(Dictionary<RouteModel, Line> routeDic, Vector3d dir)
         {
-            length = length - frameDis;
-            var spaceDis = 0.0;
-            var allPts = frame.Vertices().Cast<Point3d>().ToList();
-            for (int i = 0; i < routes.Count; i++)
+            var firRoute = routeDic.OrderBy(x => x.Key.route.NumberOfVertices).First();
+            var leftDics = new Dictionary<RouteModel, Line>();
+            var rightDics = new Dictionary<RouteModel, Line>();
+            foreach (var dic in routeDic)
             {
-                if (i == 0)
+                if (dic.Key != firRoute.Key)
                 {
-                    spaceDis = spaceDis + frameDis;
-                }
-                else
-                {
-                    spaceDis = spaceDis + frameSpace;
-                }
-                var route = routes[i];
-                var routePoly = route.route;
-                var ptDis = allPts.Select(x => routePoly.DistanceTo(x, false)).OrderBy(x => x).First();
-                do
-                {
-                    var moveDis = spaceDis - ptDis; 
-                    if (MoveRouteLineSegment(frame, dir, moveDis, holes, ref route))
+                    var checkDir = (dic.Value.StartPoint - firRoute.Value.StartPoint).GetNormal();
+                    if (checkDir.DotProduct(dir) >= 0)
                     {
-                        break;
+                        leftDics.Add(dic.Key, dic.Value);
                     }
                     else
                     {
-                        spaceDis = spaceDis + moveStep;
+                        rightDics.Add(dic.Key, dic.Value);
                     }
-                } while (spaceDis < length);
+                }
             }
 
-            return spaceDis < length;
+            var resRoutes = MoveRouteBySpace(firRoute, leftDics, dir);
+            resRoutes.Add(firRoute.Key);
+            resRoutes.AddRange(MoveRouteBySpace(firRoute, rightDics, dir));
+
+            return resRoutes;
         }
 
         /// <summary>
-        /// 移动出乎框线处的路由线
+        /// 根据间距移动出户路由
         /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="routeModel"></param>
+        /// <param name="firRoute"></param>
+        /// <param name="routeDic"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        private List<RouteModel> MoveRouteBySpace(KeyValuePair<RouteModel, Line> firRoute, Dictionary<RouteModel, Line> routeDic, Vector3d dir)
+        {
+            List<RouteModel> resRoute = new List<RouteModel>();
+            if (routeDic.Count <= 0)
+            {
+                return resRoute;
+            }
+
+            var checkDir = (routeDic.First().Value.StartPoint - firRoute.Value.StartPoint).GetNormal();
+            if (checkDir.DotProduct(dir) < 0)
+            {
+                dir = -dir;
+            }
+
+            double space = frameSpace;
+            routeDic = routeDic.OrderBy(x => x.Value.Distance(firRoute.Value)).ToDictionary(x => x.Key, y => y.Value);
+            while (routeDic.Count > 0)
+            {
+                var dic = routeDic.First();
+                var dis = dic.Value.Distance(firRoute.Value);
+                var routeModel = dic.Key;
+                if (dis != space)
+                {
+                    var moveDis = (space - dis);
+                    routeModel.route = MoveRouteLineSegment(dir, moveDis, dic);
+                }
+                resRoute.Add(routeModel);
+                space += frameSpace;
+                routeDic.Remove(dic.Key);
+            }
+
+            return resRoute;
+        }
+
+        /// <summary>
+        /// 移动路由线
+        /// </summary>
         /// <param name="dir"></param>
         /// <param name="moveDis"></param>
-        /// <param name="holes"></param>
+        /// <param name="route"></param>
         /// <returns></returns>
-        private bool MoveRouteLineSegment(Polyline frame, Vector3d dir, double moveDis, List<Polyline> holes, ref RouteModel routeModel)
+        private Polyline MoveRouteLineSegment(Vector3d dir, double moveDis, KeyValuePair<RouteModel, Line> route)
         {
-            var allLines = routeModel.route.GetAllLineByPolyline();
+            var allLines = route.Key.route.GetAllLineByPolyline();
             var resLineDic = new Dictionary<Line, bool>();
             foreach (var line in allLines)
             {
-                if (frame.IsIntersects(line))
+                if (route.Value.StartPoint.IsEqualTo(line.StartPoint, new Tolerance(0.01, 0.01)) ||
+                    route.Value.EndPoint.IsEqualTo(line.EndPoint, new Tolerance(0.01, 0.01)))
                 {
-                    var lineDir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
-                    if (lineDir.DotProduct(dir) < 0)
-                    {
-                        lineDir = -lineDir;
-                    }
-                    var moveLine = new Line(line.StartPoint + lineDir * moveDis, line.EndPoint + lineDir * moveDis);
-                    if (CheckService.CheckIntersectWithHoles(moveLine, holes))
-                    {
-                        return false;
-                    }
+                    var moveLine = new Line(line.StartPoint + dir * moveDis, line.EndPoint + dir * moveDis);
                     resLineDic.Add(moveLine, true);
+                    route = new KeyValuePair<RouteModel, Line>(route.Key, moveLine);
                 }
                 else
                 {
                     resLineDic.Add(line, false);
                 }
             }
-            routeModel.route = CreateMovePolyline(resLineDic);
-            return true;
+            return CreateMovePolyline(resLineDic);
         }
 
         /// <summary>
@@ -181,80 +186,31 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         }
 
         /// <summary>
-        /// 求框线长度
+        /// 找到相交段的线
         /// </summary>
-        /// <param name="matrix"></param>
+        /// <param name="routePoly"></param>
         /// <param name="frame"></param>
         /// <returns></returns>
-        private double GetFrameLength(Matrix3d matrix, Polyline frame)
+        private Line FindRouteIntersectLine(Polyline routePoly, Polyline frame)
         {
-            var allPts = frame.Vertices().Cast<Point3d>().ToList();
-            allPts = allPts.Select(x => x.TransformBy(matrix.Inverse())).OrderBy(x => x.X).ToList();
-            return Math.Abs(allPts.First().X - allPts.Last().X);
+            var allLines = routePoly.GetAllLineByPolyline();
+            return allLines.FirstOrDefault(x => x.IsIntersects(frame));
         }
 
         /// <summary>
-        /// 排序路由
+        /// 寻找出户的框线
         /// </summary>
-        /// <param name="matrix"></param>
-        /// <param name="routes"></param>
         /// <returns></returns>
-        private List<RouteModel> OrderRoutes(Matrix3d matrix, List<RouteModel> routes)
+        private Polyline FindOutFrame(List<Polyline> routePolys)
         {
-            return routes.OrderBy(x =>
+            var frames = outFrame.Where(x => routePolys.Any(y=>y.IsIntersects(x))).ToList();
+            var ep = routePolys.First().EndPoint;
+            if (routePolys.First().StartPoint.DistanceTo(ep) < 1)
             {
-                var transPt = x.startPosition.TransformBy(matrix.Inverse());
-                return transPt.X;
-            }).ToList();
-        }
-
-        /// <summary>
-        /// 获取排序矩阵
-        /// </summary>
-        /// <param name="xDir"></param>
-        /// <returns></returns>
-        private Matrix3d CalOrderMatrix(Vector3d xDir)
-        {
-            var zDir = Vector3d.ZAxis;
-            var yDir = zDir.CrossProduct(xDir);
-            Matrix3d matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
-                    0.0, 0.0, 0.0, 1.0});
-            return matrix;
-        }
-
-        /// <summary>
-        /// 计算获取和调整方向
-        /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="route"></param>
-        /// <returns></returns>
-        private Vector3d GetOrderDir(Polyline frame, Polyline route)
-        {
-            var allLines = StructGeoService.GetAllLineByPolyline(route);
-            var line = allLines.Where(x => x.IsIntersects(frame)).First();
-            var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
-            var allPts = frame.Vertices().Cast<Point3d>().ToList();
-            var pt = allPts.OrderBy(x => line.DistanceTo(x, false)).First();
-            var closePt = line.GetClosestPointTo(pt, false);
-            if (dir.DotProduct((closePt - pt).GetNormal()) < 0)
-            {
-                dir = -dir;
+                ep = routePolys.First().StartPoint;
             }
-            return dir;
-        }
-
-        /// <summary>
-        /// 获取相交的路由
-        /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="routes"></param>
-        /// <returns></returns>
-        private List<RouteModel> GetIntersectRoute(Polyline frame, List<RouteModel> routes)
-        {
-            return routes.Where(x => frame.IsIntersects(x.route)).ToList();
+            var needFrame = frames.OrderBy(x => x.DistanceTo(ep, false)).First();
+            return needFrame;
         }
     }
 }

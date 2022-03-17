@@ -2,18 +2,24 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
              mc:Ignorable="d" 
-             d:DesignHeight="1000" d:DesignWidth="1000"
-             >
+             Background="White"
+             d:DesignHeight="1000" d:DesignWidth="1000">
     <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom"  FontSize="14">
             <TextBlock>进度</TextBlock>
             <Separator Width="1"  HorizontalAlignment="Center"/>
-            <ProgressBar Width="200" Height="10" Value="50"></ProgressBar>
+            <ProgressBar Width="100" Height="10" Value="50"></ProgressBar>
             <Separator Width="1"  HorizontalAlignment="Center"/>
             <TextBlock>正在计算回路电流:1321/2164</TextBlock>
             <Separator Width="1"  HorizontalAlignment="Center"/>
@@ -33,13 +39,14 @@
             <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
         </StatusBar>
         <Grid Width="950" Height="700">
-            <Border BorderBrush="Black" BorderThickness="1" Margin="2.73972602739726,4.14201183431953,202.739726027397,142.485207100592">
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,143">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000"></Canvas>
                 </ScrollViewer>
             </Border>
-            <TreeView x:Name="tv" ItemsSource="{Binding DataList}" Style="{x:Null}" Margin="758.904109589041,7.45562130177515,13.6986301369863,446.508875739645">
-                <TreeView.ItemContainerStyle>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,0,10,442">
+                <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
+                    <!--<TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
@@ -50,27 +57,26 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                        <TextBlock Text="{Binding Name}"/>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="759.58904109589,262.603550295858,12.3287671232877,143.313609467456">
-                <ContentControl x:Name="propertyGrid" Style="{x:Null}"></ContentControl>
+                </TreeView.ItemContainerStyle>-->
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,263,10,143">
+                <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>
-            <CheckBox Style="{x:Null}" Margin="731,572,125,107">消防负荷</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,591,128,92">消防电源监控</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,610,129,70">浪涌保护器</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="833,571,32,106">双重电源</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="833,591,22,91">电器火灾监控</CheckBox>
-            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,612,30,67"></ComboBox>
-            <Button Click="btnBalance" Style="{x:Null}" Margin="725.342465753425,648.639053254438,120.547945205479,31.4792899408284">平衡相序</Button>
-            <Button Click="btnSelectFast" Style="{x:Null}" Margin="841.095890410959,649.467455621302,5.47945205479452,30.6508875739645">快速选型</Button>
-            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725.342465753425,675.147928994083,119.178082191781,4.97041420118343">批量生成</Button>
-            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="840,675,4,5">单独生成</Button>
+            <CheckBox Style="{x:Null}" Margin="733,595,127,85">浪涌保护器</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="731,572,121,105">消防电源监控</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="836,572,19,110">电气火灾监控</CheckBox>
+            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,595,30,84"></ComboBox>
+            <Button Click="btnBalance" Style="{x:Null}" Margin="725,619,121,61">平衡相序</Button>
+            <Button Click="btnSelectFast" Style="{x:Null}" Margin="837,621,10,59">快速选型</Button>
+            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,644,119,36">批量生成</Button>
+            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="836,646,8,34">单独生成</Button>
         </Grid>
     </DockPanel>
 </UserControl>

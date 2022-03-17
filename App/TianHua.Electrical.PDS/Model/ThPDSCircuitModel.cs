@@ -6,7 +6,7 @@
         {
             CircuitType = ThPDSCircuitType.None;
             DemandFactor = 1.0;
-            PowerFactor = 1.0;
+            PowerFactor = 0.85;
         }
 
         /// <summary>

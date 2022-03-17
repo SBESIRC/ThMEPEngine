@@ -144,5 +144,28 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 
             return allPts;
         }
+
+        /// <summary>
+        /// 以一个点为中心点创建polyline
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="length"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline CreatePolylineByPt(this Point3d point, double length, Vector3d dir)
+        {
+            var otherDir = Vector3d.ZAxis.CrossProduct(dir);
+            var pt1 = point + dir * length + otherDir * length;
+            var pt2 = point - dir * length + otherDir * length;
+            var pt3 = point - dir * length - otherDir * length;
+            var pt4 = point + dir * length - otherDir * length;
+            Polyline polyline = new Polyline() { Closed = true };
+            polyline.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(1, pt2.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(2, pt3.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(3, pt4.ToPoint2D(), 0, 0, 0);
+            return polyline;
+        }
     }
 }
+

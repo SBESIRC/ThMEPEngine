@@ -55,8 +55,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             //计算逃生路径(用A*算法)
             //----构建寻路地图框线
             var allHoles = holes.SelectMany(x => x.Key).ToList();
-            var mapFrame = CreateMapFrame(closetLane, startPt, allHoles, 2500);
-            mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
+            var mapFrame = CreateMapFrame(closetLane, startPt, allHoles, 500);
+            var movePoly = AdjustMapFrame(polyline, closetLane);
+            mapFrame = mapFrame.Intersection(new DBObjectCollection() { movePoly }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
@@ -68,7 +69,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var resHoles = SelelctCrossing(weightHole.Key, mapFrame);
                 aStarRoute.SetObstacle(resHoles, weightHole.Value);
             }
-            
+
             //----计算路径
             var path = aStarRoute.Plan(startPt);
             if (path != null)
@@ -111,27 +112,63 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         private Polyline AdjustMapFrame(Polyline frame, Line closetLine)
         {
             var lineDir = Vector3d.ZAxis.CrossProduct(closetLine.EndPoint - closetLine.StartPoint).GetNormal();
-
             var grids = gridInfo.Where(x => x.Key.IsParallelTo(lineDir, new Tolerance(0.001, 0.001)))
                 .SelectMany(x => x.Value)
                 .OrderBy(x => x.Distance(closetLine)).ToList();
             if (grids.Count > 0)
             {
-                var checkDir = (grids.First().StartPoint - closetLine.StartPoint).GetNormal();
-                if (lineDir.DotProduct(checkDir) < 0)
-                {
-                    lineDir = -lineDir;
-                }
-                var moveDis = grids.First().Distance(closetLine) % moveSpace;
+                var dir = (closetLine.EndPoint - closetLine.StartPoint).GetNormal();
+                var firGrid = grids.First();
+                var minPt = GetBoungdingBoxMinPt(dir, frame);
+                var closetPt = firGrid.GetClosestPointTo(minPt, true);
+                var moveDis = closetPt.DistanceTo(minPt) % moveSpace;
                 if (moveDis != 0)
                 {
                     moveDis = moveSpace - moveDis;
                 }
-                var sPt = frame.StartPoint;
-                var toPt = sPt + lineDir * moveDis;
+                var sPt = minPt;
+                var moveDir = (minPt - closetPt).GetNormal();
+                var toPt = sPt + moveDir * moveDis;
                 frame.Move(sPt, toPt);
             }
             return frame;
+        }
+
+        /// <summary>
+        /// 获取boundingbox
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private Point3d GetBoungdingBoxMinPt(Vector3d xDir, Polyline polyline)
+        {
+            Vector3d zDir = Vector3d.ZAxis;
+            Vector3d yDir = zDir.CrossProduct(xDir);
+            var matrix = new Matrix3d(new double[] {
+                xDir.X, xDir.Y, xDir.Z, 0,
+                yDir.X, yDir.Y, yDir.Z, 0,
+                zDir.X, zDir.Y, zDir.Z, 0,
+                0.0, 0.0, 0.0, 1.0
+            });
+            var clonePoly = polyline.Clone() as Polyline;
+            clonePoly.TransformBy(matrix);
+            List<Point3d> allPts = new List<Point3d>();
+            for (int i = 0; i < clonePoly.NumberOfVertices; i++)
+            {
+                allPts.Add(clonePoly.GetPoint3dAt(i));
+            }
+
+            allPts = allPts.OrderBy(x => x.X).ToList();
+            double minX = allPts.First().X;
+            double maxX = allPts.Last().X;
+            allPts = allPts.OrderBy(x => x.Y).ToList();
+            double minY = allPts.First().Y;
+            double maxY = allPts.Last().Y;
+
+            List<Point3d> boundingbox = new List<Point3d>();
+            boundingbox.Add(new Point3d(minX, minY, 0));
+            boundingbox.Add(new Point3d(maxX, maxY, 0));
+
+            return boundingbox[0].TransformBy(matrix.Inverse());
         }
 
         /// <summary>

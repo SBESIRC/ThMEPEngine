@@ -16,7 +16,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         public PDSBaseOutCircuit CircuitForm { get; set; }
         public PDSProjectErrorType ErrorType { get; set; }
 
-        
+        /// <summary>
+        /// 级联电流额定值
+        /// </summary>
+        public double CascadeCurrent { get; set; }
 
         /// <summary>
         /// 回路锁
@@ -26,6 +29,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public CircuitDetails()
         {
             CircuitLock = false;
+            CascadeCurrent = 0;
         }
     }
 

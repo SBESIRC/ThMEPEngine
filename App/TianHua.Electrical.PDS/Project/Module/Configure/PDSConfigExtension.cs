@@ -21,6 +21,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadContactorConfig();
             LoadIsolatorConfig();
             LoadThermalRelayConfig();
+            LoadATSEConfig();
+            LoadMTSEConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -111,64 +113,73 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             for (int i = 1; i < TableMCB.Rows.Count; i++)
             {
                 var row = TableMCB.Rows[i];
-                BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ModelName = row["型号"].ToString(),
-                    Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                    FrameSize = row["壳架规格"].ToString(),
-                    MaxKV = row["额定电压"].ToString(),
-                    Poles = row["级数"].ToString(),
-                    Amps = row["额定电流"].ToString(),
-                    TripDevice = row["脱扣器"].ToString(),
-                    ResidualCurrent = row["剩余电流动作"].ToString(),
-                    Characteristics = row["瞬时脱扣器型式"].ToString(),
-                    Width = row["宽度"].ToString(),
-                    Depth = row["深度"].ToString(),
-                    Height = row["高度"].ToString(),
-                    DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                });
+                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    {
+                        ModelName = row["型号"].ToString(),
+                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                        FrameSize = row["壳架规格"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = row["额定电流"].ToString(),
+                        TripDevice = row["脱扣器"].ToString(),
+                        ResidualCurrent = row["剩余电流动作"].ToString(),
+                        Characteristics = row["瞬时脱扣器型式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                    });
+                }
             }
             var TableMCCB = dataSet.Tables["MCCB"];
             for (int i = 1; i < TableMCCB.Rows.Count; i++)
             {
                 var row = TableMCCB.Rows[i];
-                BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ModelName = row["型号"].ToString(),
-                    Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                    FrameSize = row["壳架规格"].ToString(),
-                    MaxKV = row["额定电压"].ToString(),
-                    Poles = row["级数"].ToString(),
-                    Amps = row["额定电流"].ToString(),
-                    TripDevice = row["脱扣器"].ToString(),
-                    ResidualCurrent = row["剩余电流动作"].ToString(),
-                    Characteristics = row["瞬时脱扣器型式"].ToString(),
-                    Width = row["宽度"].ToString(),
-                    Depth = row["深度"].ToString(),
-                    Height = row["高度"].ToString(),
-                    DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                });
+                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    {
+                        ModelName = row["型号"].ToString(),
+                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                        FrameSize = row["壳架规格"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = row["额定电流"].ToString(),
+                        TripDevice = row["脱扣器"].ToString(),
+                        ResidualCurrent = row["剩余电流动作"].ToString(),
+                        Characteristics = row["瞬时脱扣器型式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                    });
+                }
             }
             var TableACB = dataSet.Tables["ACB"];
             for (int i = 1; i < TableACB.Rows.Count; i++)
             {
                 var row = TableACB.Rows[i];
-                BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ModelName = row["型号"].ToString(),
-                    Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                    FrameSize = row["壳架规格"].ToString(),
-                    MaxKV = row["额定电压"].ToString(),
-                    Poles = row["级数"].ToString(),
-                    Amps = row["额定电流"].ToString(),
-                    TripDevice = row["脱扣器"].ToString(),
-                    ResidualCurrent = row["剩余电流动作"].ToString(),
-                    Characteristics = row["瞬时脱扣器型式"].ToString(),
-                    Width = row["宽度"].ToString(),
-                    Depth = row["深度"].ToString(),
-                    Height = row["高度"].ToString(),
-                    DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                });
+                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    {
+                        ModelName = row["型号"].ToString(),
+                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                        FrameSize = row["壳架规格"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = row["额定电流"].ToString(),
+                        TripDevice = row["脱扣器"].ToString(),
+                        ResidualCurrent = row["剩余电流动作"].ToString(),
+                        Characteristics = row["瞬时脱扣器型式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                    });
+                }
             }
         }
 
@@ -243,6 +254,88 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         MaxAmps = double.Parse(row["整定电流上限"].ToString()),
                         MinAmps = double.Parse(row["整定电流下限"].ToString()),
                         ThermalDeviceCode = row["热元件代号"].ToString(),
+                        InstallMethod = row["安装方式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载ATSE配置
+        /// </summary>
+        private static void LoadATSEConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ATSEUrl, true);
+            var Table = dataSet.Tables["ATSE"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    ATSEConfiguration.ATSEComponentInfos.Add(new ATSEComponentInfo()
+                    {
+                        ModelName = row["型号"].ToString(),
+                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                        FrameSize = row["壳架等级"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = row["额定电流"].ToString(),
+                        ATSECharacteristics = row["ATSE功能特点"].ToString(),
+                        UtilizationCategory = row["使用类别"].ToString(),
+                        ATSEMainContact = row["主触头O位置"].ToString(),
+                        Icu = row["额定极限分断能力"].ToString(),
+                        IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
+                        Icm = row["额定短路接通能力"].ToString(),
+                        Icw = row["额定短时耐受能力"].ToString(),
+                        Tkr = row["短时耐受时间"].ToString(),
+                        TrippingTime = row["瞬时脱扣时间"].ToString(),
+                        TrippingTimeDelay = row["延时脱扣时间"].ToString(),
+                        WiringCapacity = row["接线能力"].ToString(),
+                        InstallMethod = row["安装方式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载MTSE配置
+        /// </summary>
+        private static void LoadMTSEConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.MTSEUrl, true);
+            var Table = dataSet.Tables["MTSE"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    MTSEConfiguration.MTSEComponentInfos.Add(new MTSEComponentInfo()
+                    {
+                        ModelName = row["型号"].ToString(),
+                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                        FrameSize = row["壳架等级"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = row["额定电流"].ToString(),
+                        MTSECharacteristics = row["MTSE功能特点"].ToString(),
+                        UtilizationCategory = row["使用类别"].ToString(),
+                        MTSEMainContact = row["主触头O位置"].ToString(),
+                        Icu = row["额定极限分断能力"].ToString(),
+                        IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
+                        Icm = row["额定短路接通能力"].ToString(),
+                        Icw = row["额定短时耐受能力"].ToString(),
+                        Tkr = row["短时耐受时间"].ToString(),
+                        TrippingTime = row["瞬时脱扣时间"].ToString(),
+                        TrippingTimeDelay = row["延时脱扣时间"].ToString(),
+                        WiringCapacity = row["接线能力"].ToString(),
                         InstallMethod = row["安装方式"].ToString(),
                         Width = row["宽度"].ToString(),
                         Depth = row["深度"].ToString(),

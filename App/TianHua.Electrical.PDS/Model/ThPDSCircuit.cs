@@ -33,6 +33,7 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSCircuit()
         {
             CircuitUID = System.Guid.NewGuid().ToString();
+            ID = new ThPDSID();
         }
 
         /// <summary>

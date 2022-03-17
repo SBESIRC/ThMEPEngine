@@ -16,10 +16,10 @@ namespace TianHua.Electrical.PDS.Engine
     {
         public ThCabletraySegmentRecognitionEngine()
         {
-            Results = new List<Curve>();
+            Results = new DBObjectCollection();
         }
 
-        public List<Curve> Results { get; protected set; }
+        public DBObjectCollection Results { get; protected set; }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {

@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Service
 {
     public static class ThPDSBufferService
     {
-        public static Polyline Buffer(Entity entity, Database database, double distance = ThPDSCommon.AllowableTolerance)
+        public static Polyline Buffer(Entity entity, Database database, double distance = ThPDSCommon.ALLOWABLE_TOLERANCE)
         {
             if (entity is Curve curve)
             {
@@ -54,7 +54,7 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
-        public static Polyline Buffer(Entity entity, double distance = ThPDSCommon.AllowableTolerance)
+        public static Polyline Buffer(Entity entity, double distance = ThPDSCommon.ALLOWABLE_TOLERANCE)
         {
             if (entity is Curve curve)
             {
