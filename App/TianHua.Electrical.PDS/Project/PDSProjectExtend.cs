@@ -6,6 +6,7 @@ using System.Linq;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Configure;
@@ -36,7 +37,6 @@ namespace TianHua.Electrical.PDS.Project
             {
                 PDSProjectGraph.CalculateProjectInfo(rootNode);
             }
-
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.Project
             edges.ForEach(e =>
             {
                 PDSProjectGraph.CalculateProjectInfo(e.Target);
-                e.Details = e.CreatCircuitDetails();
+                e.ComponentSelection();
             });
             if (node.Details.LowPower <= 0)
             {
@@ -60,7 +60,7 @@ namespace TianHua.Electrical.PDS.Project
             }
             node.CalculateCurrent();
             PDSProjectGraph.CalculateCircuitFormInType(node);
-            PDSProjectGraph.LeafComponentSelection(node);
+            node.ComponentSelection(edges);
             node.Details.IsStatistical = true;
             return;
         }
@@ -118,13 +118,15 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
-        /// 叶子节点元器件选型
+        /// Node元器件选型
         /// </summary>
-        public static void LeafComponentSelection(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode node)
+        public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
         {
             if (node.Type == PDSNodeType.DistributionBox)
             {
                 var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
                 var PolesNum = "4P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
                 if (node.Load.Phase == ThPDSPhase.一相)
                 {
@@ -173,7 +175,104 @@ namespace TianHua.Electrical.PDS.Project
                     //暂未定义，后续补充
                     throw new NotSupportedException();
                 }
+
+                //统计节点级联电流
+                node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
             }
+        }
+
+        /// <summary>
+        /// 回路元器件选型
+        /// </summary>
+        /// <param name="pDSCircuit"></param>
+        /// <returns></returns>
+        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        {
+            edge.Details = new CircuitDetails();
+            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            var CascadeCurrent = edge.Target.Details.CascadeCurrent;
+            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
+            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            if (edge.Target.Load.Phase == ThPDSPhase.一相)
+            {
+                if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
+                {
+                    PolesNum = "1P";
+                }
+                else
+                {
+                    PolesNum = "2P";
+                }
+            }
+            var Characteristics = "";//瞬时脱扣器类型
+            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
+            if (edge.Target.Type == PDSNodeType.None)
+            {
+                edge.Details.CircuitForm = new RegularCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
+            {
+                //2022/03/14 为了本周尽快实现联动，目前发动机暂只支持 分立元件 与 分立元件-星三角启动
+                //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
+                if (ProjectGlobalConfiguration.MotorUIChoise == "分立元件")
+                {
+                    if (edge.Target.Details.LowPower <ProjectGlobalConfiguration.MotorPower)
+                    {
+                        edge.Details.CircuitForm = new Motor_DiscreteComponentsCircuit()
+                        {
+                            breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                            contactor = new Contactor(CalculateCurrent, PolesNum),
+                            thermalRelay = new ThermalRelay(CalculateCurrent),
+                        };
+                    }
+                    else
+                    {
+                        edge.Details.CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit()
+                        {
+                            breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                            contactor1 = new Contactor(CalculateCurrent, PolesNum),
+                            thermalRelay = new ThermalRelay(CalculateCurrent),
+                            contactor2 = new Contactor(CalculateCurrent, PolesNum),
+                            contactor3 = new Contactor(CalculateCurrent, PolesNum),
+                        };
+                    }
+                }
+            }
+            else if (edge.Target.Load.ID.BlockName == "E-BDB006-1" && edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+            {
+                edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
+                {
+                    breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    meter = new MeterTransformer(CalculateCurrent),
+                    breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket || (new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName) && edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.LumpedLoad))
+            {
+                //漏电
+                edge.Details.CircuitForm = new LeakageCircuit()
+                {
+                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
+            {
+                //消防应急照明回路
+                edge.Details.CircuitForm = new FireEmergencyLighting();
+            }
+            else
+            {
+                edge.Details.CircuitForm = new RegularCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+
+            //统计回路级联电流
+            edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
         }
 
         /// <summary>
@@ -201,97 +300,6 @@ namespace TianHua.Electrical.PDS.Project
         public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> NewGraph)
         {
             //暂时不考虑
-        }
-
-        /// <summary>
-        /// 创建回路细节信息
-        /// </summary>
-        /// <param name="pDSCircuit"></param>
-        /// <returns></returns>
-        public static CircuitDetails CreatCircuitDetails(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
-        {
-            var circuitDetails = new CircuitDetails();
-            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
-            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-            if (edge.Target.Load.Phase == ThPDSPhase.一相)
-            {
-                if(edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
-                {
-                    PolesNum = "1P";
-                }
-                else
-                {
-                    PolesNum = "2P";
-                }
-            }
-            var Characteristics = "";//瞬时脱扣器类型
-            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
-            if (edge.Target.Type == PDSNodeType.None)
-            {
-                circuitDetails.CircuitForm = new RegularCircuit()
-                {
-                    breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                };
-                //edge.circuitDetails.CircuitFormType = CircuitFormOutType.常规;
-            }
-            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
-            {
-                //2022/03/14 为了本周尽快实现联动，目前发动机暂只支持 分立元件 与 分立元件-星三角启动
-                //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
-                if (ProjectGlobalConfiguration.MotorUIChoise == "分立元件")
-                {
-                    if (edge.Target.Details.LowPower <ProjectGlobalConfiguration.MotorPower)
-                    {
-                        circuitDetails.CircuitForm = new Motor_DiscreteComponentsCircuit()
-                        {
-                            breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                            contactor = new Contactor(CalculateCurrent, PolesNum),
-                            thermalRelay = new ThermalRelay(CalculateCurrent),
-                        };
-                    }
-                    else
-                    {
-                        circuitDetails.CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit()
-                        {
-                            breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                            contactor1 = new Contactor(CalculateCurrent, PolesNum),
-                            thermalRelay = new ThermalRelay(CalculateCurrent),
-                            contactor2 = new Contactor(CalculateCurrent, PolesNum),
-                            contactor3 = new Contactor(CalculateCurrent, PolesNum),
-                        };
-                    }
-                }
-            }
-            else if (edge.Target.Load.ID.BlockName == "E-BDB006-1" && edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
-            {
-                circuitDetails.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
-                {
-                    breaker1 = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    meter = new MeterTransformer(CalculateCurrent),
-                    breaker2 = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                };
-            }
-            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket || (new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName) && edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.LumpedLoad))
-            {
-                //漏电
-                circuitDetails.CircuitForm = new LeakageCircuit()
-                {
-                    breaker= new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                };
-            }
-            else if(edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
-            {
-                //消防应急照明回路
-                circuitDetails.CircuitForm = new FireEmergencyLighting();
-            }
-            else
-            {
-                circuitDetails.CircuitForm = new RegularCircuit()
-                {
-                    breaker = new Breaker(CalculateCurrent, TripDevice, PolesNum, Characteristics),
-                };
-            }
-            return circuitDetails;
         }
     }
 }

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
+    [CascadeComponent]
     public class CPS : PDSBaseComponent
     {
         public CPS()
@@ -44,5 +46,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 级别代号
         /// </summary>
         public string CodeLevel { get; set; }
+
+        public override double GetCascadeRatedCurrent()
+        {
+            if (double.TryParse(RatedCurrent, out double result))
+            {
+                return result;
+            }
+            return 0;
+        }
     }
 }

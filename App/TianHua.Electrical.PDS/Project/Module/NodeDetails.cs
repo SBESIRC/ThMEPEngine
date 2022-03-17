@@ -28,6 +28,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public double LowPower { get; set; }
         public double HighPower { get; set; }
 
+        /// <summary>
+        /// 级联电流额定值
+        /// </summary>
+        public double CascadeCurrent { get; set; }
+
         public bool IsOnlyLoad { get; set; }
 
         /// <summary>
@@ -38,6 +43,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();
+            CascadeCurrent = 0;
         }
     }
 }
