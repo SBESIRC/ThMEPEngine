@@ -1,4 +1,6 @@
-﻿namespace ThMEPStructure.Reinforcement.Model
+﻿using Autodesk.AutoCAD.DatabaseServices;
+
+namespace ThMEPStructure.Reinforcement.Model
 {
     public class ThRectangleEdgeComponent: ThEdgeComponent
     {
@@ -16,13 +18,9 @@
         /// </summary>
         public string Link3 { get; set; }
 
-        /// <summary>
-        /// 迭代步数
-        /// </summary>
-        public int X { get; set; }
-        /// <summary>
-        /// 迭代增大后的纵筋规格
-        /// </summary>
-        public string EnhancedReinforce { get; set; }
+        public override DBObjectCollection Draw()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
