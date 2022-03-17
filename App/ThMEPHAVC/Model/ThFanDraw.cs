@@ -125,7 +125,7 @@ namespace ThMEPHVAC.Model
                     Width = valvewidth,
                     ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
                     ValveBlockLayer = service.electrycityValveLayer,
-                    ValveVisibility = ThDuctUtils.ElectricValveModelName(),
+                    ValveVisibility = service.electrycityValveVisibility,
                     WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                     LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
                     VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,

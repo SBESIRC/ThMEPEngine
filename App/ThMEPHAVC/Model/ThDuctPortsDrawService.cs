@@ -144,6 +144,10 @@ namespace ThMEPHVAC.Model
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ductSizeLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(dimensionLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(portMarkLayer));
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(silencerLayer));
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(electrycityValveLayer));
+        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(holeLayer));
+        
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portMarkName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(holeName), true);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(portName), true);
