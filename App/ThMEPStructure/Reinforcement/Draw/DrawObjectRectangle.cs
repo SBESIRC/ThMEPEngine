@@ -167,7 +167,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 //如果是拉筋
                 else if (gangJin.GangjinType == 2)
                 {
-                    CalLinkPosition();
+                    //CalLinkPosition();
                 }
             }
         }

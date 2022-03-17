@@ -1,4 +1,5 @@
-﻿namespace ThMEPStructure.Reinforcement.Model
+﻿using Autodesk.AutoCAD.DatabaseServices;
+namespace ThMEPStructure.Reinforcement.Model
 {
     public abstract class ThEdgeComponent
     {
@@ -47,5 +48,10 @@
         /// 箍筋线宽
         /// </summary>
         public double StirrupLineWeight { get; set; }
+        /// <summary>
+        /// 绘制
+        /// </summary>
+        
+
     }
 }

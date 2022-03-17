@@ -25,7 +25,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             foreach(var component in components)
             {
-                component.draw
+                //component.Draw();
 
             }
 

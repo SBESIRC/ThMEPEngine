@@ -89,9 +89,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <param name="drawingScale"></param>
         public abstract void DrawOutline(string drawingScale);
 
-        public Point3d TableStartPt;
-        public Polyline Outline;
-        public List<GangJinBase> GangJinBases;
+       
         
 
         //初始化钢筋列表
