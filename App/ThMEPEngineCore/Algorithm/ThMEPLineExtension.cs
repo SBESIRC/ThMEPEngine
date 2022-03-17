@@ -115,6 +115,20 @@ namespace ThMEPEngineCore.Algorithm
                     polyline.Explode(entitySet);
                     objs.AddRange(ExplodeCurves(entitySet));
                 }
+                else if (curve is Polyline2d polyline2d)
+                { 
+                    var pline = polyline2d.ToPolyline();
+                    if (pline != null)
+                    {
+                        var entitySet = new DBObjectCollection();
+                        pline.Explode(entitySet);
+                        objs.AddRange(ExplodeCurves(entitySet));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
                 else if (curve is Arc arc)
                 {
                     if (arc.Length > lengthThreshold)
