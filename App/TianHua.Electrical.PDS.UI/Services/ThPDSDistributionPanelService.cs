@@ -1570,19 +1570,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 setSel(default);
                 {
-                    var width = 20.0;
-                    var thickness = 5.0;
-                    if (left.Contains("进线"))
                     {
-                        if (busEnd.Y == busStart.Y)
-                        {
-                            busEnd = busStart.OffsetY(100);
-                        }
-                        var path = DrawLine(canvas, null, Brushes.Black, busStart, busEnd);
-                        path.StrokeThickness = thickness;
-                    }
-                    {
-                        busStart = busEnd;
                         {
                             var name = "SPD附件";
                             var item = PDSItemInfo.Create(name, new Point(busStart.X, dy));
@@ -1691,44 +1679,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 foreach (var info in item.brInfos)
                                 {
                                     DrawGeos(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red);
-                                    var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
-                                    if (_info != null)
-                                    {
-                                        var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
-                                        var tr = new TranslateTransform(r.X, -r.Y - r.Height);
-                                        var cvs = new Canvas
-                                        {
-                                            Width = r.Width,
-                                            Height = r.Height,
-                                            Background = Brushes.Transparent,
-                                            RenderTransform = tr
-                                        };
-                                        hoverDict[cvs] = cvs;
-                                        cvs.MouseUp += (s, e) =>
-                                        {
-                                            if (e.ChangedButton != MouseButton.Left) return;
-                                            setSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
-                                            if (info.BlockName == "PDS")
-                                            {
-                                                UpdatePropertyGrid(null);
-                                            }
-                                            e.Handled = true;
-                                        };
-                                        cvs.Cursor = Cursors.Hand;
-                                        canvas.Children.Add(cvs);
-                                    }
                                 }
                             }
                         }
-                        if (left.Contains("进线"))
+                    }
+                    var shouldDrawBusLine = left.Contains("进线");
+                    var width = 20.0;
+                    var thickness = 5.0;
+                    if (shouldDrawBusLine)
+                    {
+                        if (busEnd.Y == busStart.Y)
                         {
-                            if (busEnd.Y == busStart.Y)
-                            {
-                                busEnd = busStart.OffsetY(100);
-                            }
-                            var path = DrawLine(canvas, null, Brushes.Black, busStart, busEnd);
-                            path.StrokeThickness = thickness;
+                            busEnd = busStart.OffsetY(100);
                         }
+                        var path = DrawLine(canvas, null, Brushes.Black, busStart, busEnd);
+                        path.StrokeThickness = thickness;
                     }
                     var cvs = new Canvas
                     {
