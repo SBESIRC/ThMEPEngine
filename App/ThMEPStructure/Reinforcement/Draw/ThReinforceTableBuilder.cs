@@ -18,11 +18,18 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.frame = frame;
             this.elevation = elevation;
             this.drawingScale = drawingScale;
-            this.tblRowHeight = tblRowHeight;   
+            this.tblRowHeight = tblRowHeight;
         }
 
         public DBObjectCollection Build(List<ThEdgeComponent> components)
         {
+            foreach(var component in components)
+            {
+                component.draw
+
+            }
+
+
             throw new NotImplementedException();
         }
     }

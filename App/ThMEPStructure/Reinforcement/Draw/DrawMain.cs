@@ -20,7 +20,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             var documentlock = doc.LockDocument();
             Autodesk.AutoCAD.EditorInput.Editor ed = doc.Editor;
             ed.WriteMessage("Draw begin");
-
+            //需要对一行上的所有暗柱计算表格第一行截面行的长和宽
 
             DrawObjectLType drawObjectLType = new DrawObjectLType();
             drawObjectLType.Init();

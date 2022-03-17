@@ -14,6 +14,9 @@ namespace ThMEPStructure.Reinforcement.Draw
     class DrawObjectRectangle:DrawObjectBase
     {
         private ThRectangleEdgeComponent thRectangleEdgeComponent;
+        private List<Point3d> points;
+        //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
+        private List<int> pointsFlag;
         /// <summary>
         /// 一型钢筋确定点的位置,先去掉四角的点
         /// </summary>
@@ -26,7 +29,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             double offset = scale * (thRectangleEdgeComponent.C + 5) + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
             //根据点的对数所有点的位置确定位置
             //polyline从左上角逆时针旋转，四个点先获取
-            List<Point3d> points=new List<Point3d>();
+            points=new List<Point3d>();
             for(int i=0;i<polyline.NumberOfVertices;i++)
             {
                 Point3d point = polyline.GetPoint3dAt(i);
@@ -56,6 +59,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     break;
                 }
                 points.Add(tmpPoint);
+                pointsFlag.Add(1);
             }
             //计算竖直方向最远两个纵筋的距离
             double disY = points[0].Y - points[1].Y;
@@ -99,6 +103,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[3].X, points[3].Y - deltaY, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(2);
+                pointsFlag.Add(2);
             }
             for (int i = 0; i < pointsPair - result; i++)
             {
@@ -106,6 +112,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[1].X + deltaX, points[1].Y, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(3);
+                pointsFlag.Add(3);
             }
 
 
@@ -116,9 +124,21 @@ namespace ThMEPStructure.Reinforcement.Draw
         }
 
 
-        void CalLinkPosition()
+        void CalLinkPosition(ThRectangleEdgeComponent thRectangleEdgeComponent)
         {
+            //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
+            for(int i=0;i<points.Count;i+=2)
+            {
+                if(pointsFlag[i]==2||pointsFlag[i]==3)
+                {
+                    if(thRectangleEdgeComponent.Link2.IsNullOrEmpty())
+                    {
+                        //不需要解析有几个，只有T字型Link3可能有选择的情况，直接绘制，利用第i，i+1个点
+                        
+                    }
 
+                }
+            }
         }
 
         void CalStirrupPosition()

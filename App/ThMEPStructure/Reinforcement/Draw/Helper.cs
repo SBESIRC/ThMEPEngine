@@ -9,12 +9,18 @@ namespace ThMEPStructure.Reinforcement.Draw
     class Helper
     {
         /// <summary>
-        /// 将纵筋规格解析出每个不同大小的规格的钢筋各有多少个
+        /// 将纵筋规格解析出每个不同大小的规格的钢筋各有多少个，一共有多少个
         /// </summary>
         /// <param name="str"></param>
         public void AnalyseZongJinStr(string str)
         {
 
+        }
+
+        public static int SumLinkNum(string str)
+        {
+            int result = 0;
+            return result;
         }
 
         /// <summary>

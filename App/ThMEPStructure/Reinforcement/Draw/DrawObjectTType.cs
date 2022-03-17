@@ -12,6 +12,8 @@ namespace ThMEPStructure.Reinforcement.Draw
     class DrawObjectTType : DrawObjectBase
     {
         ThTTypeEdgeComponent thTTypeEdgeComponent;
+        private List<Point3d> points;
+        private List<int> pointsFlag;
         public override void DrawOutline(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
@@ -30,7 +32,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         void CalReinforcePosition(int pointNum, ThTTypeEdgeComponent thTTypeEdgeComponent, Polyline polyline, double scale)
         {
             //存储结果
-            List<Point3d> points = new List<Point3d>();
+            points = new List<Point3d>();
             //纵筋相对轮廓的偏移值
             double offset = scale * (thTTypeEdgeComponent.C + 5) + thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight;
             //根据八个轮廓上的点的位置计算纵筋位置
@@ -158,5 +160,31 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
 
         }
+
+        void CalLinkPosition(ThTTypeEdgeComponent thTTypeEdgeComponent)
+        {
+            //需要解析link3有几个,需要优先选择间隔大的
+            int num = Helper.SumLinkNum(thTTypeEdgeComponent.Link3);
+            //遍历所有点，找出2，3，4类型的钢筋，钢筋,同时查表
+            for (int i = 0; i < points.Count; i+=2)
+            {
+                if ( pointsFlag[i] == 3)
+                {
+                    if (thTTypeEdgeComponent.Link2.IsNullOrEmpty())
+                    {
+                        //所以先加到List里，排序后在选择前num*2个
+
+                    }
+
+                }
+                //只有一种情况直接绘制
+                else if(pointsFlag[i]==2||pointsFlag[i]==4)
+                {
+
+                }
+            }
+        }
+
+
     }
 }
