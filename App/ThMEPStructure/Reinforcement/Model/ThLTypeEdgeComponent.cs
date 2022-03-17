@@ -22,9 +22,6 @@
         /// 对应标注图中的数字4
         /// </summary>
         public string Link4 { get; set; }
-    }
-    public class ThLTypeCalEdgeComponent: ThLTypeEdgeComponent
-    {
         /// <summary>
         /// 迭代步数
         /// </summary>

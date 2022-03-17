@@ -23,5 +23,14 @@
         /// 对应标注图中的数字4
         /// </summary>
         public string Link4 { get; set; }
+
+        /// <summary>
+        /// 迭代步数
+        /// </summary>
+        public int X { get; set; }
+        /// <summary>
+        /// 迭代增大后的纵筋规格
+        /// </summary>
+        public string EnhancedReinforce { get; set; }
     }
 }
