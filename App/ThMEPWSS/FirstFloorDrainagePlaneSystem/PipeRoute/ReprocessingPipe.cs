@@ -30,6 +30,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public List<RouteModel> Reprocessing()
         {
+            if (routes.Count <= 0)
+            {
+                return routes;
+            }
             var polys = routes.Select(x => x.route).ToList();
             var frame = FindOutFrame(polys);
             var line = FindRouteIntersectLine(polys.First(), frame);
@@ -201,7 +205,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         {
             var frames = outFrame.Where(x => routePolys.Any(y=>y.IsIntersects(x))).ToList();
             var ep = routePolys.First().EndPoint;
-            var needFrame = frames.OrderByDescending(x => x.DistanceTo(ep, false)).First();
+            if (routePolys.First().StartPoint.DistanceTo(ep) < 1)
+            {
+                ep = routePolys.First().StartPoint;
+            }
+            var needFrame = frames.OrderBy(x => x.DistanceTo(ep, false)).First();
             return needFrame;
         }
     }

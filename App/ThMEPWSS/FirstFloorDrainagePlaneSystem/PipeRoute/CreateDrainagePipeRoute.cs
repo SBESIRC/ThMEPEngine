@@ -67,6 +67,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, gridInfo);
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
+                weightHoles.Add(CreateOtherPipeHoles(connectPipes, pipe, closetLine.Key), double.MaxValue);
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
@@ -91,7 +92,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="polylines"></param>
         /// <returns></returns>
-        public List<Polyline> CreateConnectLineHoles(List<Polyline> polylines)
+        private List<Polyline> CreateConnectLineHoles(List<Polyline> polylines)
         {
             var resLines = new List<Polyline>();
             foreach (var polyline in polylines)
@@ -99,6 +100,26 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 resLines.AddRange(polyline.BufferPL(lineDis).Cast<Polyline>().ToList());
             }
             return resLines;
+        }
+
+        /// <summary>
+        /// 将其他点创建成洞口（不允许通过其他点）
+        /// </summary>
+        /// <param name="pipes"></param>
+        /// <param name="thisPipe"></param>
+        /// <param name="closeLine"></param>
+        /// <returns></returns>
+        private List<Polyline> CreateOtherPipeHoles(List<VerticalPipeModel> pipes, VerticalPipeModel thisPipe, Line closeLine)
+        {
+            var dir = (closeLine.EndPoint - closeLine.StartPoint).GetNormal();
+            var otherPipes = pipes.Except(new List<VerticalPipeModel>() { thisPipe }).ToList();
+            var pipeHoles = new List<Polyline>();
+            foreach (var pipe in otherPipes)
+            {
+                pipeHoles.Add(pipe.Position.CreatePolylineByPt(step / 2 + 1, dir));
+            }
+            
+            return pipeHoles;
         }
 
         /// <summary>
@@ -136,8 +157,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     }
 
                     var resPipes = new List<VerticalPipeModel>();
-                    resPipes.AddRange(OrderDistance(matrix, leftPipes, closePoly));
-                    resPipes.AddRange(OrderDistance(matrix, rightPipes, closePoly));
+                    resPipes.AddRange(OrderDistance(matrix, leftPipes, closePoly, true));
+                    resPipes.AddRange(OrderDistance(matrix, rightPipes, closePoly, false));
                     return resPipes;
                 }
             }
@@ -152,22 +173,27 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="pipes"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<VerticalPipeModel> OrderDistance(Matrix3d matrix, Dictionary<VerticalPipeModel, Point3d> pipes, Polyline polyline)
+        private List<VerticalPipeModel> OrderDistance(Matrix3d matrix, Dictionary<VerticalPipeModel, Point3d> pipes, Polyline polyline, bool isLeft)
         {
-            var orderPipe = new List<VerticalPipeModel>();
             if (pipes.Count <= 0)
             {
-                return orderPipe;
+                return new List<VerticalPipeModel>();
             }
             var pipePt = pipes.First().Value;
             var checkDir = (pipePt - polyline.GetClosestPointTo(pipePt, false)).GetNormal();
             if (checkDir.DotProduct(matrix.CoordinateSystem3d.Yaxis) < 0)
             {
-                return pipes.OrderByDescending(x => x.Value.Y).Select(x => x.Key).ToList();
+                if (isLeft)
+                    return pipes.OrderByDescending(x => Math.Floor(x.Value.Y)).ThenBy(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
+                else
+                    return pipes.OrderByDescending(x => Math.Floor(x.Value.Y)).ThenByDescending(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
             }
             else
             {
-                return pipes.OrderBy(x => x.Value.Y).Select(x => x.Key).ToList();
+                if (isLeft)
+                    return pipes.OrderBy(x => Math.Floor(x.Value.Y)).ThenBy(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
+                else
+                    return pipes.OrderBy(x => Math.Floor(x.Value.Y)).ThenByDescending(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
             }
         }
 

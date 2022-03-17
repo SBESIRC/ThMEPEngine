@@ -150,6 +150,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
         private List<GloblePoint> GetPath(GlobleNode lastNode)
         {
             List<GloblePoint> route = new List<GloblePoint>();
+            if (lastNode.CostH > 0.1)
+            {
+                return route;
+            }
             lastNode.Location.IsInflectionPoint = true;
             route.Insert(0, lastNode.Location);
             GlobleNode tempNode = lastNode;
