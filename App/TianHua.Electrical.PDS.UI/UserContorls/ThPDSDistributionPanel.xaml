@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" 
              Background="White"
              d:DesignHeight="1000" d:DesignWidth="1000">
@@ -13,6 +14,8 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+            <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
@@ -69,10 +72,10 @@
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>
-            <CheckBox Style="{x:Null}" Margin="733,595,127,85">浪涌保护器</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,572,121,105">消防电源监控</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="836,572,19,110">电气火灾监控</CheckBox>
-            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,595,30,84"></ComboBox>
+            <CheckBox Style="{x:Null}" Margin="733,595,127,85" IsChecked="{Binding Path=Current.SurgeProtectionDevice}">浪涌保护器</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="731,572,121,105" IsChecked="{Binding Path=Current.FirePowerMonitoring}">消防电源监控</CheckBox>
+            <CheckBox Style="{x:Null}" Margin="836,572,19,110" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}">电气火灾监控</CheckBox>
+            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,595,30,84" IsEnabled="{Binding Path=Current.SurgeProtectionDevice}" ItemsSource="{Binding Path=Current.SurgeProtectionTypes}" SelectedItem="{Binding Path=Current.SurgeProtection,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
             <Button Click="btnBalance" Style="{x:Null}" Margin="725,619,121,61">平衡相序</Button>
             <Button Click="btnSelectFast" Style="{x:Null}" Margin="837,621,10,59">快速选型</Button>
             <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,644,119,36">批量生成</Button>
