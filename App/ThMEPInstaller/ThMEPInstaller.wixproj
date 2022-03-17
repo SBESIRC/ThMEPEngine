@@ -42,6 +42,7 @@
     <Compile Include="WSS.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Logo.ico" />
     <Content Include="License_zh-CN.rtf" />
     <Content Include="Variable.wxi" />
   </ItemGroup>
