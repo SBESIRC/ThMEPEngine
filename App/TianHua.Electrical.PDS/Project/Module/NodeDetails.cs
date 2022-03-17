@@ -40,10 +40,19 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public PhaseSequence PhaseSequence { get; set; }
 
+        /// <summary>
+        /// 是否启用浪涌保护器
+        /// </summary>
+        public bool SurgeProtectionEnable { get; set; }
+
+        public SurgeProtectionDeviceType SurgeProtection { get; set; }
+
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
+            SurgeProtectionEnable = false;
+            SurgeProtection = SurgeProtectionDeviceType.SPD2;
         }
     }
 }
