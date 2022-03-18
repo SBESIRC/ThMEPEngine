@@ -27,8 +27,6 @@ namespace TianHua.Electrical.PDS.Command
 {
     public class ThPDSCommand : ThMEPBaseCommand, IDisposable
     {
-        readonly static string LoadConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "平面关注对象.xlsx");
-
         public override void SubExecute()
         {
             // 记录所有图纸中的图
@@ -40,7 +38,7 @@ namespace TianHua.Electrical.PDS.Command
 
             // 读取配置表信息
             var fileService = new ThConfigurationFileService();
-            var tableInfo = fileService.Acquire(LoadConfigUrl);
+            var tableInfo = fileService.Acquire(ThCADCommon.PDSComponentsPath());
             var distBoxKey = new List<string>();
             var nameFilter = new List<string>();
             var propertyFilter = new List<string>();

@@ -23,7 +23,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         private void Init()
         {
             if (PDSBlockInfos != null) return;
-            var file = ThCADExtension.ThCADCommon.PDSComponentPath();
+            var file = ThCADExtension.ThCADCommon.PDSComponentDwgPath();
             using var lck = DocLock;
             using var adb = Linq2Acad.AcadDatabase.Open(file, Linq2Acad.DwgOpenMode.ReadOnly);
             static bool canExplode(Entity entity)
