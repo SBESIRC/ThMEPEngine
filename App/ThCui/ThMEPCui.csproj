@@ -47,7 +47,6 @@
     <Compile Include="ThCuiCmdHandler.cs" />
     <Compile Include="ThCuiCommon.cs" />
     <Compile Include="ThCuiProfileYamlParser.cs" />
-    <Compile Include="ThMenuBar.cs" />
     <Compile Include="ThPartialCui.cs" />
     <Compile Include="ThRibbonBar.cs" />
     <Compile Include="ThRibbonUtils.cs" />

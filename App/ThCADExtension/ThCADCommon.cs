@@ -18,7 +18,7 @@ namespace ThCADExtension
 
         // Ribbon
         public static readonly string RibbonTabName = "ThMEPRibbonBar";
-        public static readonly string RibbonTabTitle = "天华机电工具集";
+        public static readonly string RibbonTabTitle = "天华AI工具集";
         public static readonly string OnlineHelpUrl = @"http://info.thape.com.cn/AI/thmep/help.html";
 
         // RegAppName

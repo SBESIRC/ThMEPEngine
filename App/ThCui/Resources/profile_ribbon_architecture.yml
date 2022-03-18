@@ -1,6 +1,6 @@
 ---
 name: "ThMEPRibbonBar"
-title: "天华机电工具集"
+title: "天华AI工具集"
 panels:
   - UID: "pnlHelp"
     name: "Help"

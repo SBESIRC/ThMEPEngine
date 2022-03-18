@@ -12,8 +12,6 @@ namespace TianHua.AutoCAD.ThCui
             try
             {
                 CustomizationSection cs = Active.Document.AddCui(cuiFile, menuGroupName);
-                ThMenuBar.CreateThMenu(cs);
-                //ThToolBar.CreateToolbars(cs);
                 ThRibbonBar.CreateThRibbonBar(cs);
                 if (cs.IsModified)
                 {
