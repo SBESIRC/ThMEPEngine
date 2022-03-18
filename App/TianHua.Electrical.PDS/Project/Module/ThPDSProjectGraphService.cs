@@ -104,6 +104,29 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 插入浪涌保护器
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <param name="type"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void InsertSurgeProtectionDevice(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, SurgeProtectionDeviceType type)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 移除浪涌保护器
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public static void RemoveSurgeProtectionDevice(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// 更新图
         /// </summary>
         /// <param name="graph"></param>

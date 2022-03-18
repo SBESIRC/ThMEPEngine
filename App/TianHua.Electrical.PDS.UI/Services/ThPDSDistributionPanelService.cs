@@ -15,7 +15,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
+using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.PDS.UI.Converter;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -395,6 +397,82 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
+        public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
+        {
+            ThPDSDistributionPanelConfigState _Current;
+            public ThPDSDistributionPanelConfigState Current
+            {
+                get => _Current;
+                set
+                {
+                    if (value != _Current)
+                    {
+                        _Current = value;
+                        OnPropertyChanged(nameof(Current));
+                    }
+                }
+            }
+        }
+        readonly ThPDSDistributionPanelConfig Config = new();
+        public class ThPDSDistributionPanelConfigState : NotifyPropertyChangedBase
+        {
+            PDS.Project.Module.ThPDSProjectGraphNode vertice;
+            public ThPDSDistributionPanelConfigState(PDS.Project.Module.ThPDSProjectGraphNode vertice)
+            {
+                this.vertice = vertice;
+            }
+            public bool SurgeProtectionDevice
+            {
+                get => vertice.Details.SurgeProtectionEnable;
+                set
+                {
+                    if (value != SurgeProtectionDevice)
+                    {
+                        vertice.Details.SurgeProtectionEnable = value;
+                        OnPropertyChanged(nameof(SurgeProtectionDevice));
+                    }
+                }
+            }
+            bool _FirePowerMonitoring;
+            public bool FirePowerMonitoring
+            {
+                get => _FirePowerMonitoring;
+                set
+                {
+                    if (value != _FirePowerMonitoring)
+                    {
+                        _FirePowerMonitoring = value;
+                        OnPropertyChanged(nameof(FirePowerMonitoring));
+                    }
+                }
+            }
+            bool _ElectricalFireMonitoring;
+            public bool ElectricalFireMonitoring
+            {
+                get => _ElectricalFireMonitoring;
+                set
+                {
+                    if (value != _ElectricalFireMonitoring)
+                    {
+                        _ElectricalFireMonitoring = value;
+                        OnPropertyChanged(nameof(ElectricalFireMonitoring));
+                    }
+                }
+            }
+            public Array SurgeProtectionTypes => Enum.GetValues(typeof(PDS.Project.Module.SurgeProtectionDeviceType));
+            public PDS.Project.Module.SurgeProtectionDeviceType SurgeProtection
+            {
+                get => vertice.Details.SurgeProtection;
+                set
+                {
+                    if (value != SurgeProtection)
+                    {
+                        vertice.Details.SurgeProtection = value;
+                        OnPropertyChanged(nameof(SurgeProtection));
+                    }
+                }
+            }
+        }
         public UserContorls.ThPDSDistributionPanel Panel;
         public TreeView TreeView;
         public Canvas Canvas;
@@ -410,11 +488,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var circuitLst = graph.Edges.Select(x => x.Circuit).ToList();
             var details = graph.Edges.Select(x => x.Details).ToList();
             Context = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
+            Panel.DataContext = Config;
             var canvas = Canvas;
             canvas.Background = Brushes.Transparent;
             canvas.Width = 2000;
             canvas.Height = 2000;
-            var fontUri = new Uri(@"C:\WINDOWS\Fonts\SimHei.TTF");
+            var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var cvt = new GlyphsUnicodeStringConverter();
             Action clear = null;
             {
@@ -450,6 +529,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 clear?.Invoke();
                 dccbs = null;
                 if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
+                Config.Current = new(graph.Vertices.ToList()[sel.Id]);
                 var hoverDict = new Dictionary<object, object>();
                 var rightTemplates = new List<KeyValuePair<Glyphs, int>>();
                 var leftTemplates = new List<Glyphs>();
@@ -1311,13 +1391,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var before = new HashSet<FrameworkElement>(canvas.Children.Count);
                     foreach (var ui in canvas.Children)
                     {
-                        if (ui is Path || ui is TextBlock) before.Add((FrameworkElement)ui);
+                        if (ui is Path or Glyphs or TextBlock) before.Add((FrameworkElement)ui);
                     }
                     DrawGeos(canvas, trans, item);
                     var after = new HashSet<FrameworkElement>(canvas.Children.Count - before.Count);
                     foreach (var ui in canvas.Children)
                     {
-                        if (ui is Path || ui is TextBlock)
+                        if (ui is Path or Glyphs or TextBlock)
                         {
                             var fe = (FrameworkElement)ui;
                             if (!before.Contains(fe))
@@ -1490,9 +1570,123 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 setSel(default);
                 {
+                    {
+                        {
+                            var name = "SPD附件";
+                            var item = PDSItemInfo.Create(name, new Point(busStart.X, dy));
+                            var before = new HashSet<FrameworkElement>(canvas.Children.Count);
+                            foreach (var ui in canvas.Children)
+                            {
+                                if (ui is Path or Glyphs or TextBlock) before.Add((FrameworkElement)ui);
+                            }
+                            DrawGeos(canvas, trans, item);
+                            var after = new HashSet<FrameworkElement>(canvas.Children.Count - before.Count);
+                            foreach (var ui in canvas.Children)
+                            {
+                                if (ui is Path or Glyphs or TextBlock)
+                                {
+                                    var fe = (FrameworkElement)ui;
+                                    if (!before.Contains(fe))
+                                    {
+                                        after.Add(fe);
+                                    }
+                                }
+                            }
+                            foreach (var fe in after)
+                            {
+                                fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.SurgeProtectionDevice)), Converter = new VisibilityCollapsedConverter(), });
+                                if (fe is Glyphs g)
+                                {
+                                    g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = Config.Current, Converter = cvt, Path = new PropertyPath(nameof(Config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+                                }
+                            }
+                            var _info = PDSItemInfo.GetBlockDefInfo(name);
+                            if (_info != null)
+                            {
+                                dy -= _info.Bounds.Height;
+                                busEnd = busEnd.OffsetXY(0, _info.Bounds.Height);
+                                insertGaps.Add(new GLineSegment(busEnd, busEnd.OffsetXY(500, 0)));
+                            }
+                            void DrawGeos(Canvas canvas, Transform trans, PDSItemInfo item, Brush strockBrush = null)
+                            {
+                                strockBrush ??= Brushes.Black;
+                                foreach (var info in item.lineInfos)
+                                {
+                                    var st = info.Line.StartPoint;
+                                    var ed = info.Line.EndPoint;
+                                    DrawLine(canvas, trans, strockBrush, st, ed);
+                                }
+                                {
+                                    var path = new Path();
+                                    var geo = new PathGeometry();
+                                    path.Stroke = strockBrush;
+                                    path.Data = geo;
+                                    path.RenderTransform = trans;
+                                    foreach (var info in item.arcInfos)
+                                    {
+                                        var figure = new PathFigure();
+                                        figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
+                                        var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
+                                          new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
+                                        figure.Segments.Add(arcSeg);
+                                        geo.Figures.Add(figure);
+                                    }
+                                    canvas.Children.Add(path);
+                                }
+                                foreach (var info in item.circleInfos)
+                                {
+                                    var path = new Path();
+                                    var geo = new EllipseGeometry(info.Circle.Center, info.Circle.Radius, info.Circle.Radius);
+                                    path.Stroke = strockBrush;
+                                    path.Data = geo;
+                                    path.RenderTransform = trans;
+                                    canvas.Children.Add(path);
+                                }
+                                foreach (var info in item.textInfos)
+                                {
+                                    var glyph = new Glyphs() { UnicodeString = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                                    leftTemplates.Add(glyph);
+                                    if (info.Height > 0)
+                                    {
+                                        glyph.FontRenderingEmSize = info.Height;
+                                    }
+                                    Canvas.SetLeft(glyph, info.BasePoint.X);
+                                    Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
+                                    canvas.Children.Add(glyph);
+                                }
+                                foreach (var hatch in item.hatchInfos)
+                                {
+                                    if (hatch.Points.Count < 3) continue;
+                                    var geo = new PathGeometry();
+                                    var path = new Path
+                                    {
+                                        Fill = strockBrush,
+                                        Stroke = strockBrush,
+                                        Data = geo,
+                                        RenderTransform = trans
+                                    };
+                                    var figure = new PathFigure
+                                    {
+                                        StartPoint = hatch.Points[0]
+                                    };
+                                    for (int i = 1; i < hatch.Points.Count; i++)
+                                    {
+                                        figure.Segments.Add(new LineSegment(hatch.Points[i], false));
+                                    }
+                                    geo.Figures.Add(figure);
+                                    canvas.Children.Add(path);
+                                }
+                                foreach (var info in item.brInfos)
+                                {
+                                    DrawGeos(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red);
+                                }
+                            }
+                        }
+                    }
+                    var shouldDrawBusLine = left.Contains("进线");
                     var width = 20.0;
                     var thickness = 5.0;
-                    if (left.Contains("进线"))
+                    if (shouldDrawBusLine)
                     {
                         if (busEnd.Y == busStart.Y)
                         {
@@ -1738,6 +1932,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 new BlockDefInfo("SPD", new GRect(0, -10, 78, 5)),
                 new BlockDefInfo("常规", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("漏电", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
+                new BlockDefInfo("SPD附件", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("接触器控制", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("热继电器保护", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("配电计量（上海CT）", new GRect(0, -24, 628, 21).Expand(0, EXPY)),
@@ -2344,6 +2539,33 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-29, -14), px.OffsetXY(-29, -26)), "E-UNIV-Oppo"));
                         r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-26, -20), 3), "E-UNIV-Oppo"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(-39.5, 0)), "E-UNIV-Oppo"));
+                        break;
+                    case "SPD附件":
+                        r.brInfos.Add(new BlockInfo("SPD", "E-UNIV-Oppo", px.OffsetXY(0, -40)));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(3, -30), "SPD1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "SPD":
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72.9919784453705, -0.000226596953552871), px.OffsetXY(42.6156667589894, 6.43058558580378E-06)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72.9919094777506, -4.50748979746368), px.OffsetXY(72.9919500743326, 4.50703660355987)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(75.4959511584293, -3.0487805263466), px.OffsetXY(75.4959786164418, 3.04830477905341)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(77.9999928391098, -1.59007125563107), px.OffsetXY(78.0000071585582, 1.58957295455036)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9838433146178, -3.60601460357543), px.OffsetXY(67.9838757918806, 3.60560651724347)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9515624231608, -3.60603524490614), px.OffsetXY(67.9838433141213, -3.60612545965478)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18, 0), px.OffsetXY(0, 0)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9839244612049, 3.60560651684523), px.OffsetXY(47.9516435702444, 3.60569673159375)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9838433146178, -3.60601460357543), px.OffsetXY(67.9838757918806, 3.60560651724347)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9516110929817, -3.60592438922151), px.OffsetXY(47.9516435702444, 3.60569673159375)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.983843314687, -3.60599873829165), px.OffsetXY(67.9838757919497, 3.60562238252726)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.951562423239, -3.60601937962235), px.OffsetXY(67.9838433141977, -3.6061095943744)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9839244608775, 3.60553388676021), px.OffsetXY(47.951643569917, 3.60562410150885)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.983843314687, -3.60599873829165), px.OffsetXY(67.9838757919497, 3.60562238252726)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9516110930526, -3.60590852394114), px.OffsetXY(47.9516435703154, 3.60571259687754)), "E-POWR-DEVC"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(24.578755982202, -1.45046977819334), px.OffsetXY(21.6777718340727, 1.45051436993208)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(21.6777718340727, -1.45046977819334), px.OffsetXY(24.578755982202, 1.45051436993208)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(38.5130556325494, 2.22958693711917E-05), px.OffsetXY(28.1256620542608, -5.99714218273562)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(42.615666759064, 2.22958693711917E-05), px.OffsetXY(29.1513148358881, -7.77362491144856)), "0"));
+                        r.hatchInfos.Add(new HatchInfo(new Point[] { px.OffsetXY(27.1000092726281, -4.22065945402983), px.OffsetXY(30.1769676175099, -9.55010764015429), px.OffsetXY(24.0230509277371, -9.55010764015429), }, "E-POWR-DEVC"));
+                        r.hatchInfos.Add(new HatchInfo(new Point[] { px.OffsetXY(54.620, -1.959), px.OffsetXY(63.704, 0), px.OffsetXY(54.620, 1.959), }, "E-POWR-DEVC"));
                         break;
                     default:
                         return null;

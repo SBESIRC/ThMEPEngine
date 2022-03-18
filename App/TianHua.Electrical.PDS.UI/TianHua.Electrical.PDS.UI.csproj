@@ -85,6 +85,7 @@
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\RadioUiValueConverter.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
     <Compile Include="Services\ThPDSDistributionPanelService.cs" />

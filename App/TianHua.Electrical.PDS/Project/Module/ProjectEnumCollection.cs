@@ -82,4 +82,15 @@ namespace TianHua.Electrical.PDS.Project.Module
         Info = 4,//信息，用户无需关注
         Normal = 5,//正常，用户无需关注
     }
+
+    /// <summary>
+    /// 浪涌保护器
+    /// </summary>
+    public enum SurgeProtectionDeviceType
+    {
+        SPD1,
+        SPD2,
+        SPD3,
+        SPD4,
+    }
 }

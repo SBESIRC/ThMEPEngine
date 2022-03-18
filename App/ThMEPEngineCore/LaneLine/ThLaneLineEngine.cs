@@ -6,9 +6,7 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using System.Collections.Generic;
-using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
@@ -58,6 +56,20 @@ namespace ThMEPEngineCore.LaneLine
                     polyline.Explode(entitySet);
                     objs.AddRange(ExplodeCurves(entitySet));
                 }
+                else if (o is Polyline2d polyline2d)
+                {
+                    var pline = polyline2d.ToPolyline();
+                    if (pline != null)
+                    {
+                        var entitySet = new DBObjectCollection();
+                        pline.Explode(entitySet);
+                        objs.AddRange(ExplodeCurves(entitySet));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -69,7 +81,7 @@ namespace ThMEPEngineCore.LaneLine
         protected static List<Line> NodingLines(DBObjectCollection curves)
         {
             var results = new List<Line>();
-            if(curves.Count==0)
+            if (curves.Count == 0)
             {
                 return new List<Line>();
             }
@@ -90,7 +102,7 @@ namespace ThMEPEngineCore.LaneLine
         }
 
         protected static List<DBObjectCollection> GroupParallelLines(DBObjectCollection curves)
-        { 
+        {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
             var lines = spatialIndex.SelectAll().OfType<Line>();
             lines.ForEach(o =>
@@ -122,7 +134,7 @@ namespace ThMEPEngineCore.LaneLine
             {
                 if (group.Key == null)
                 {
-                    group.ForEach(o => results.Add(new DBObjectCollection(){ o }));
+                    group.ForEach(o => results.Add(new DBObjectCollection() { o }));
                 }
                 else
                 {
