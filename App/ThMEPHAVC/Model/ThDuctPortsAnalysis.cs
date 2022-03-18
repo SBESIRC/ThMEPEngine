@@ -999,6 +999,7 @@ namespace ThMEPHVAC.Model
             distributePortNum = 0;
             double avgAirVolume = portParam.param.airVolume / portParam.param.portNum;
             avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
+            var disPortNum = portParam.param.portNum;
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -1012,8 +1013,9 @@ namespace ThMEPHVAC.Model
                         endline.Add(l.GetHashCode(), p);
                         continue;
                     }
-                    int portNum = (int)(portParam.param.portNum * l.Length / totalLen);
+                    int portNum = (int)Math.Round(disPortNum * l.Length / totalLen, 0);
                     portNum = (portNum == 0) ? 1 : portNum;
+                    disPortNum = (portNum == 0) ? disPortNum - 1 : disPortNum;
                     distributePortNum += portNum;
                     var param = new EndlineSegInfo() { portNum = portNum};
                     param.seg = new SegInfo() { l = l };
@@ -1028,8 +1030,12 @@ namespace ThMEPHVAC.Model
         private void DistributeRemainPort(int distributePortNum)
         {
             int remainPortNum = portParam.param.portNum - distributePortNum;
+            bool flag = remainPortNum > 0;
+            remainPortNum = Math.Abs(remainPortNum);
             double avgAirVolume = portParam.param.airVolume / portParam.param.portNum;
             avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
+            var maxSeg = new EndlineSegInfo ();
+            double maxLineLen = Double.MinValue;
             while (remainPortNum > 0)
             {
                 foreach (var endline in endLinesInfos)
@@ -1037,13 +1043,25 @@ namespace ThMEPHVAC.Model
                     foreach (var seg in endline.endlines.Values)
                     {
                         if (IsExcludeLine(seg.seg.l))
-                            continue;
-                        // 将剩余的风口平均分到每一段的末端管
-                        seg.portNum++;
-                        seg.portsInfo.Add(new PortInfo() { portAirVolume = avgAirVolume });
-                        remainPortNum--;
-                        break;
+                          continue;
+                        if (seg.seg.l.Length > maxLineLen)
+                        {
+                            maxSeg = seg;
+                            maxLineLen = seg.seg.l.Length;
+                        }
                     }
+                    // 将剩余的风口平均分到每一段最长管段
+                    if (flag)
+                    {
+                        maxSeg.portNum++;
+                        maxSeg.portsInfo.Add(new PortInfo() { portAirVolume = avgAirVolume });
+                    }
+                    else
+                    {
+                        maxSeg.portNum--;
+                        maxSeg.portsInfo.RemoveAt(0);
+                    }
+                    remainPortNum--;
                     if (remainPortNum == 0)
                         break;
                 }

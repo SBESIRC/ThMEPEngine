@@ -398,7 +398,10 @@ namespace TianHua.Hvac.UI
             if (radioVerticalPipe.Checked)
                 portRange = "侧回风口";
             if (portRange.Contains("侧") || radioVerticalPipe.Checked)
-                portNum /= 2;
+            {
+              var num = Math.Round(portNum * 0.5, 0);
+              portNum = (int)num;
+            }
             airSpeed = Double.Parse(textAirSpeed.Text);
         }
         private void GetDuctSize(out string roomDuctSize, out string notRoomDuctSize)
