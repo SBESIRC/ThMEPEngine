@@ -42,44 +42,41 @@
             <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
         </StatusBar>
         <Grid Width="950" Height="700">
-            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,143">
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,117">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000"></Canvas>
                 </ScrollViewer>
             </Border>
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,0,10,442">
                 <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
-                    <!--<TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                        <Setter Property="FontWeight" Value="Normal" />
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TreeView.ItemContainerStyle>-->
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
                             <TextBlock Text="{Binding Name}"/>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
+                            <MenuItem Header="电气火灾监控"  IsCheckable="True" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}"/>
+                            <MenuItem Header="浪涌保护器">
+                                <MenuItem Header="无" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=None}"/>
+                                <MenuItem Header="SPD1" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD1}"/>
+                                <MenuItem Header="SPD2" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD2}"/>
+                                <MenuItem Header="SPD3" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD3}"/>
+                                <MenuItem Header="SPD4" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD4}"/>
+                            </MenuItem>
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
                 </TreeView>
             </Border>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,263,10,143">
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,263,10,117">
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
-            <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="0.684931506849315,571.597633136095,232.876712328767,4.97041420118343"></TextBox>
-            <CheckBox Style="{x:Null}" Margin="733,595,127,85" IsChecked="{Binding Path=Current.SurgeProtectionDevice}">浪涌保护器</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="731,572,121,105" IsChecked="{Binding Path=Current.FirePowerMonitoring}">消防电源监控</CheckBox>
-            <CheckBox Style="{x:Null}" Margin="836,572,19,110" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}">电气火灾监控</CheckBox>
-            <ComboBox x:Name="cbx" Style="{x:Null}" Margin="833,595,30,84" IsEnabled="{Binding Path=Current.SurgeProtectionDevice}" ItemsSource="{Binding Path=Current.SurgeProtectionTypes}" SelectedItem="{Binding Path=Current.SurgeProtection,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-            <Button Click="btnBalance" Style="{x:Null}" Margin="725,619,121,61">平衡相序</Button>
-            <Button Click="btnSelectFast" Style="{x:Null}" Margin="837,621,10,59">快速选型</Button>
-            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,644,119,36">批量生成</Button>
-            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="836,646,8,34">单独生成</Button>
+            <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="6,588,225,65"></TextBox>
+            <Button Click="btnBalance" Style="{x:Null}" Margin="725,588,121,92">平衡相序</Button>
+            <Button Click="btnSelectFast" Style="{x:Null}" Margin="834,588,13,92">快速选型</Button>
+            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,611,119,69">批量生成</Button>
+            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="834,612,10,68">单独生成</Button>
         </Grid>
     </DockPanel>
 </UserControl>
