@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
             SurgeProtectionEnable = false;
-            SurgeProtection = SurgeProtectionDeviceType.SPD2;
+            SurgeProtection = SurgeProtectionDeviceType.None;
         }
     }
 }
