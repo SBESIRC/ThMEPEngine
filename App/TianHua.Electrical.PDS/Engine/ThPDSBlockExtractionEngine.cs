@@ -44,6 +44,7 @@ namespace TianHua.Electrical.PDS.Engine
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);
+            extractor.Extract(database);
             Results = visitor.Results;
         }
     }

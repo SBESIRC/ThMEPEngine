@@ -88,6 +88,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum SurgeProtectionDeviceType
     {
+        None,
         SPD1,
         SPD2,
         SPD3,

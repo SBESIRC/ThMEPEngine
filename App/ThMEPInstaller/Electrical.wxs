@@ -1,130 +1,178 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?include Variable.wxi ?>
-  <Fragment>
-    <?if $(var.Configuration) = Debug ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" Guid="{ABE87E98-D9F8-420A-B9E6-279E883B12DC}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" Guid="{14DD672A-CDDB-4278-B818-1B8509930241}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Debug" Guid="{A3F5D048-B3DF-4809-9302-E2D5D15FFC40}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" Guid="{2DB388F6-D171-43A7-9A15-512CE2152FCB}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" Guid="{33F3ECAF-87C3-4497-8639-EA2DB3084BB9}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Debug" Guid="{F31E1444-4EC0-427D-A499-2CCF1622120C}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" Guid="{A3714D18-C3C7-4CB6-A912-F4C415398FC7}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" Guid="{38C31ED1-B853-4395-8B90-BED701D24707}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" Guid="{E8A46F90-FFDC-4C9B-BBE7-744D253FAF88}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" Guid="{4536E45A-3F11-4849-97BF-F53A13ACD9F3}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Debug" Guid="{191C1B85-269B-4762-BCC9-580BCB059358}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" Guid="{F26ADE7A-A210-4C02-92A9-352AF9A20B2A}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <?elseif $(var.Configuration) = Release ?>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" Guid="{6CB2ED62-B3D7-4674-8929-28B7D2E3EBFC}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" Guid="{29802FC6-51D0-4BC1-B0E4-23295BF8314F}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Release" Guid="{9CAE8B56-CA07-43BF-B1C7-4C07AF3D80EB}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" Guid="{FD2DEA62-94BB-4331-B6B3-4E98B1EC2CEC}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" Guid="{76CACBAF-0C3F-474D-BAD4-DE392FA2B753}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" Guid="{3911609E-341F-4217-8549-D78B93AB01F6}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Release" Guid="{6B7545CA-5463-48E9-BD08-4BCE1985C3B4}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" Guid="{4878B871-400F-4981-8D7C-CDABE55CF1F0}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" Guid="{41E6F720-4924-44E0-8A13-BA224FA45456}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPElectrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" Guid="{34FE8AFF-5A36-47E0-8883-64683AF11672}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPLighting.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Release" Guid="{4C3AE882-AAEC-430B-8D2D-54279FCAF001}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" Guid="{7BEFCA30-6675-4B55-9B7D-B079BAEDA16E}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.UI.dll" />
-      </Component>
-    </DirectoryRef>
-    <?endif?>
-  </Fragment>
-  <Fragment>
-    <ComponentGroup Id="ProductComponentsElectricalWin64">
-      <?if $(var.Configuration) = Debug ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" />
-      <?elseif $(var.Configuration) = Release ?>
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" />
-      <?endif?>
-    </ComponentGroup>
-  </Fragment>
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" Guid="{ABE87E98-D9F8-420A-B9E6-279E883B12DC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" Guid="{14DD672A-CDDB-4278-B818-1B8509930241}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Debug" Guid="{A3F5D048-B3DF-4809-9302-E2D5D15FFC40}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" Guid="{2DB388F6-D171-43A7-9A15-512CE2152FCB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Debug" Guid="{031A91CD-47DE-43B1-967F-DE52BADFBAEE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Debug" Guid="{0DDA758C-D300-4B54-A12A-4A4B6ADE4063}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" Guid="{33F3ECAF-87C3-4497-8639-EA2DB3084BB9}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Debug" Guid="{F31E1444-4EC0-427D-A499-2CCF1622120C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" Guid="{A3714D18-C3C7-4CB6-A912-F4C415398FC7}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" Guid="{38C31ED1-B853-4395-8B90-BED701D24707}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Debug" Guid="{99C71C87-332F-4CD9-A941-1272AA4EF000}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Debug" Guid="{2C331C33-698A-4E57-BD84-181B35159E6F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" Guid="{E8A46F90-FFDC-4C9B-BBE7-744D253FAF88}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" Guid="{4536E45A-3F11-4849-97BF-F53A13ACD9F3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Debug" Guid="{191C1B85-269B-4762-BCC9-580BCB059358}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" Guid="{F26ADE7A-A210-4C02-92A9-352AF9A20B2A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Debug" Guid="{5FD364D8-3FFC-47CF-B032-1457DC93F339}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Debug" Guid="{B892076E-946A-49C4-932F-ACF15B179691}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" Guid="{6CB2ED62-B3D7-4674-8929-28B7D2E3EBFC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" Guid="{29802FC6-51D0-4BC1-B0E4-23295BF8314F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Release" Guid="{9CAE8B56-CA07-43BF-B1C7-4C07AF3D80EB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" Guid="{FD2DEA62-94BB-4331-B6B3-4E98B1EC2CEC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Release" Guid="{3C2F04F9-DF1E-43C6-A78A-47ADDCB49319}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Release" Guid="{1D0D1553-6F6F-49AC-BEB0-3216DC83347C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" Guid="{76CACBAF-0C3F-474D-BAD4-DE392FA2B753}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" Guid="{3911609E-341F-4217-8549-D78B93AB01F6}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Release" Guid="{6B7545CA-5463-48E9-BD08-4BCE1985C3B4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" Guid="{4878B871-400F-4981-8D7C-CDABE55CF1F0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Release" Guid="{0B9B37FC-054B-4201-A72B-02125882BBB5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Release" Guid="{4AFA5EEC-900D-441C-81B1-1E752FDB65E5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" Guid="{41E6F720-4924-44E0-8A13-BA224FA45456}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPElectrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" Guid="{34FE8AFF-5A36-47E0-8883-64683AF11672}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPLighting.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Release" Guid="{4C3AE882-AAEC-430B-8D2D-54279FCAF001}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" Guid="{7BEFCA30-6675-4B55-9B7D-B079BAEDA16E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Release" Guid="{D45DEE36-E805-48CF-9DD3-CA7F3C726999}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.PDS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Release" Guid="{D27A5D95-F68C-4683-910F-C727CADD50F3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Electrical.PDS.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsElectricalWin64">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Electrical_PDS_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Electrical_PDS_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Electrical_PDS_UI_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
 </Wix>

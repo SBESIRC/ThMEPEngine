@@ -34,6 +34,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         public double CascadeCurrent { get; set; }
 
         public bool IsOnlyLoad { get; set; }
+        public bool FirePowerMonitoring { get; set; }
+        public bool ElectricalFireMonitoring { get; set; }
 
         /// <summary>
         /// 相序
@@ -52,7 +54,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
             SurgeProtectionEnable = false;
-            SurgeProtection = SurgeProtectionDeviceType.SPD2;
+            SurgeProtection = SurgeProtectionDeviceType.None;
         }
     }
 }

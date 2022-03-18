@@ -37,6 +37,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             cb();
         }
     }
+    public class EqualsThenNotVisibeConverter : IValueConverter
+    {
+        object target;
+        public EqualsThenNotVisibeConverter(object target)
+        {
+            this.target = target;
+        }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Equals(value, target) ? Visibility.Collapsed : Visibility.Visible;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
     public class GlyphsUnicodeStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -421,40 +437,26 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             {
                 this.vertice = vertice;
             }
-            public bool SurgeProtectionDevice
-            {
-                get => vertice.Details.SurgeProtectionEnable;
-                set
-                {
-                    if (value != SurgeProtectionDevice)
-                    {
-                        vertice.Details.SurgeProtectionEnable = value;
-                        OnPropertyChanged(nameof(SurgeProtectionDevice));
-                    }
-                }
-            }
-            bool _FirePowerMonitoring;
             public bool FirePowerMonitoring
             {
-                get => _FirePowerMonitoring;
+                get => vertice.Details.FirePowerMonitoring;
                 set
                 {
-                    if (value != _FirePowerMonitoring)
+                    if (value != FirePowerMonitoring)
                     {
-                        _FirePowerMonitoring = value;
+                        vertice.Details.FirePowerMonitoring = value;
                         OnPropertyChanged(nameof(FirePowerMonitoring));
                     }
                 }
             }
-            bool _ElectricalFireMonitoring;
             public bool ElectricalFireMonitoring
             {
-                get => _ElectricalFireMonitoring;
+                get => vertice.Details.ElectricalFireMonitoring;
                 set
                 {
-                    if (value != _ElectricalFireMonitoring)
+                    if (value != ElectricalFireMonitoring)
                     {
-                        _ElectricalFireMonitoring = value;
+                        vertice.Details.ElectricalFireMonitoring = value;
                         OnPropertyChanged(nameof(ElectricalFireMonitoring));
                     }
                 }
@@ -488,7 +490,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var circuitLst = graph.Edges.Select(x => x.Circuit).ToList();
             var details = graph.Edges.Select(x => x.Details).ToList();
             Context = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
-            Panel.DataContext = Config;
+            TreeView.ContextMenu.DataContext = Config;
+            TreeView.ContextMenu.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = TreeView, Path = new PropertyPath(nameof(TreeView.SelectedItem)), Converter = new EqualsThenNotVisibeConverter(null), }); ;
             var canvas = Canvas;
             canvas.Background = Brushes.Transparent;
             canvas.Width = 2000;
@@ -1594,7 +1597,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             foreach (var fe in after)
                             {
-                                fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.SurgeProtectionDevice)), Converter = new VisibilityCollapsedConverter(), });
+                                fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.SurgeProtection)), Converter = new EqualsThenNotVisibeConverter(PDS.Project.Module.SurgeProtectionDeviceType.None), });
                                 if (fe is Glyphs g)
                                 {
                                     g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = Config.Current, Converter = cvt, Path = new PropertyPath(nameof(Config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });

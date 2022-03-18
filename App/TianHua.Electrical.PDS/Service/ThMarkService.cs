@@ -120,7 +120,7 @@ namespace TianHua.Electrical.PDS.Service
                         MarkDic.Add(ToDbPoint(pt), marks);
                     });
                 }
-                else if (o.Value.EffectiveName.Contains("负载标注"))
+                else if (o.Value.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS))
                 {
                     var value = GetTexts(o.Value);
                     if (o.Value.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))

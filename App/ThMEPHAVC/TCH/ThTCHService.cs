@@ -33,11 +33,11 @@ namespace ThMEPHVAC.TCH
         }
         public static string CovertPoint(Point3d p)
         {
-            return CovertVector(p.GetAsVector());
+            return $@"{{""X"":{Math.Round(p.X, 6)},""Y"":{Math.Round(p.Y, 6)},""Z"":{Math.Round(p.Z, 6)}}}";
         }
         private static string CovertVector(Vector3d v)
         {
-            return $@"{{""X"":{Math.Round(v.X, 6)},""Y"":{Math.Round(v.Y, 6)},""Z"":{Math.Round(v.Z, 6)}}}";
+            return $@"{{""X"":{Math.Round(v.X, 4)},""Y"":{Math.Round(v.Y, 4)},""Z"":{Math.Round(v.Z, 4)}}}";
         }
     }
 }

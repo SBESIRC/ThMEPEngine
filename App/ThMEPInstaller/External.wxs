@@ -89,6 +89,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" Guid="{73CAE301-A9A4-46B2-8E18-066056FE33CF}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\SQLite-net.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" Guid="{6CA75497-88FD-42D3-AAA6-C875076144E1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\HandyControl.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -182,6 +185,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SQLite_Net_Debug" Guid="{3A267813-6C47-40ED-9DD3-5CAB7528B01C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\SQLite-net.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" Guid="{05131D9E-3EDD-48C5-9D37-6D63DF4B74BC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\HandyControl.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -274,6 +280,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SQLite_Net_Debug" Guid="{AA24D19E-6E8F-4EEA-AC61-7BD4566FFF10}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_SQLite_Net_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\SQLite-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" Guid="{BDC473D7-AD29-4ADA-96B2-160DA4EF6061}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\HandyControl.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -369,6 +378,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_SQLite_Net_Release" Guid="{3D65F5C7-BC7B-449C-B13B-277D26C111A8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\SQLite-net.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" Guid="{5EE220AE-5667-4492-9FD7-50538C43FBB0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\HandyControl.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Release="bin\Release-NET40" ?>
@@ -462,6 +474,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_SQLite_Net_Release" Guid="{44DB12DA-F5AB-4C3E-BEB2-E79EE464F613}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\SQLite-net.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Release" Guid="{9233DE08-3862-4DB2-84F5-ECE66D0FA50B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\HandyControl.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -554,6 +569,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_SQLite_Net_Release" Guid="{B92B3165-FA6D-4F1A-91DD-DDB52AC4D42B}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_SQLite_Net_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\SQLite-net.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Release" Guid="{1206228A-1535-475F-B94F-42DA2ACA531E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\HandyControl.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -655,6 +673,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -744,6 +765,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native_Sqlite_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native_Sqlite_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native_Sqlite_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

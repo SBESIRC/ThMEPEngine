@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{E1399386-39D8-437B-A95C-D1A8F9E19621}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{D1414B78-0428-4E97-94F1-AC90DBC824E4}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -766,6 +766,36 @@
             </Commands>
         </ComponentEntry>
     </Components>
+
+    <!--Assembly App, Electrical.PDS.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.PDS.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for PDS" AppName="ElectricalPDSUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDLXT" Global="THDLXT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Electrical.PDS.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.PDS.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for PDS" AppName="ElectricalPDSUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDLXT" Global="THDLXT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Electrical.PDS.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.PDS.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for PDS" AppName="ElectricalPDSUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDLXT" Global="THDLXT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+
+
     <!--Assembly App, ThFanSelection, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />

@@ -42,6 +42,11 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Intersection(curves.UnionGeometries()).ToDbCollection();
         }
 
+        public static DBObjectCollection IntersectionMP(this AcPolygon polygon, DBObjectCollection curves, bool keepHoles = false)
+        {
+            return polygon.ToNTSPolygon().Intersection(curves.UnionGeometries()).ToDbCollection(keepHoles);
+        }
+
         public static bool Contains(this AcPolygon polygon, Point3d pt)
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());

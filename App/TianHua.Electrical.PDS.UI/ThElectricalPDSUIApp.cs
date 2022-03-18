@@ -1,7 +1,7 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using System.Windows;
-using TianHua.Electrical.PDS.Command;
+﻿using System.Windows;
+using Autodesk.AutoCAD.Runtime;
 using TianHua.Electrical.PDS.UI.UI;
+using TianHua.Electrical.PDS.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI
@@ -19,11 +19,17 @@ namespace TianHua.Electrical.PDS.UI
                 MessageBox.Show(ex.Message);
             }
         }
+
         public void Terminate()
         {
+
         }
-        [CommandMethod("TIANHUACAD", "THPDSUITest", CommandFlags.Modal)]
-        public void THPDSUITest()
+
+        /// <summary>
+        /// 电力系统
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
+        public void THDLXT()
         {
             var win = ElecSandboxUI.TryGetSingleWindow();
             if (win == null) return;
@@ -34,8 +40,12 @@ namespace TianHua.Electrical.PDS.UI
             win.Graph = g;
             AcadApp.ShowModelessWindow(win);
         }
-        [CommandMethod("TIANHUACAD", "THPDSTest", CommandFlags.Modal)]
-        public void THPDSTest()
+
+        /// <summary>
+        /// 电力系统（内部使用）
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPDS", CommandFlags.Modal)]
+        public void THPDS()
         {
             var cmd = new ThPDSCommand();
             cmd.Execute();

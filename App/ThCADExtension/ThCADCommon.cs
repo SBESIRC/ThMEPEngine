@@ -18,7 +18,7 @@ namespace ThCADExtension
 
         // Ribbon
         public static readonly string RibbonTabName = "ThMEPRibbonBar";
-        public static readonly string RibbonTabTitle = "天华机电工具集";
+        public static readonly string RibbonTabTitle = "天华AI工具集";
         public static readonly string OnlineHelpUrl = @"http://info.thape.com.cn/AI/thmep/help.html";
 
         // RegAppName
@@ -123,26 +123,47 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
 
-        // 电路系统图元素
-        public static string PDSComponentPath()
+        /// <summary>
+        /// 电力配电系统图元素
+        /// </summary>
+        /// <returns></returns>
+        public static string PDSComponentDwgPath()
         {
             return Path.Combine(SupportPath(), "电力配电系统图元素.dwg");
+        }
+
+        /// <summary>
+        /// 电力配电系统图生成
+        /// </summary>
+        /// <returns></returns>
+        public static string PDSDiagramDwgPath()
+        {
+            return Path.Combine(SupportPath(), "电力配电系统图生成.dwg");
+        }
+
+        /// <summary>
+        /// 平面关注对象
+        /// </summary>
+        /// <returns></returns>
+        public static string PDSComponentsPath()
+        {
+            return Path.Combine(SupportPath(), "平面关注对象.xlsx");
         }
 
         // 房间名称分类处理
         public static string RoomConfigPath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), "房间名称分类处理.xlsx");
+            return Path.Combine(SupportPath(), "房间名称分类处理.xlsx");
         }
         //风机参数表
         public static string FanParameterTablePath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), "风机参数表.xlsx");
+            return Path.Combine(SupportPath(), "风机参数表.xlsx");
         }
         public static string FanMaterialTablePath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), "导出材料表.xlsx");
-        }
+            return Path.Combine(SupportPath(), "导出材料表.xlsx");
+        }        
         /// <summary>
         /// 室内机信息表
         /// </summary>
