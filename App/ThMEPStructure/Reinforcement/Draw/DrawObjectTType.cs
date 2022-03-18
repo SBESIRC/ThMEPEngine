@@ -14,16 +14,136 @@ namespace ThMEPStructure.Reinforcement.Draw
         ThTTypeEdgeComponent thTTypeEdgeComponent;
         private List<Point3d> points;
         private List<int> pointsFlag;
-        public override void DrawOutline(string drawingScale)
+        public override void DrawOutline()
         {
-            int scale = 100 / int.Parse(drawingScale.Substring(2));
             var pts = new Point3dCollection
             {
                 TableStartPt + new Vector3d(200, -1500, 0)* scale,
                 TableStartPt + new Vector3d(200, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
-                //TableStartPt + new Vector3d(200, -1500 - thTTypeEdgeComponent.Bw, 0),
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -1500, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500 + thTTypeEdgeComponent.Hc1, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500 + thTTypeEdgeComponent.Hc1, 0) * scale,
+                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500, 0) * scale
+            };
+            Outline = pts.CreatePolyline();
+        }
+        public override void DrawWall()
+        {
+            if (thTTypeEdgeComponent.Type == "A")
+            {
+                Point3d pt1 = Outline.GetPoint3dAt(7), pt2 = Outline.GetPoint3dAt(8);
+                double bf = thTTypeEdgeComponent.Bf * scale;
+                Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(0, bf * 5 / 8.0, 0), out Line line1, out Line line2);
+
+                LinkedWallLines.Add(line1);
+                LinkedWallLines.Add(line2);
+                LinkedWallLines.Add(polyline);
+
+                if (thTTypeEdgeComponent.LinkWallPos == "1") return;
+                if (thTTypeEdgeComponent.LinkWallPos != "2L")
+                {
+                    pt1 = Outline.GetPoint3dAt(0);
+                    pt2 = Outline.GetPoint3dAt(1);
+                    double bw = thTTypeEdgeComponent.Bw * scale;
+                    polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out line1, out line2);
+
+                    LinkedWallLines.Add(line1);
+                    LinkedWallLines.Add(line2);
+                    LinkedWallLines.Add(polyline);
+                }
+                if (thTTypeEdgeComponent.LinkWallPos != "2S")
+                {
+                    pt1 = Outline.GetPoint3dAt(4);
+                    pt2 = Outline.GetPoint3dAt(5);
+                    double bw = thTTypeEdgeComponent.Bw * scale;
+                    polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out line1, out line2);
+
+                    LinkedWallLines.Add(line1);
+                    LinkedWallLines.Add(line2);
+                    LinkedWallLines.Add(polyline);
+                }
+            }
+            else
+            {
+                if (thTTypeEdgeComponent.LinkWallPos != "1L")
+                {
+                    Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
+                    double bw = thTTypeEdgeComponent.Bw * scale;
+                    Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
+
+                    LinkedWallLines.Add(line1);
+                    LinkedWallLines.Add(line2);
+                    LinkedWallLines.Add(polyline);
+                }
+                if (thTTypeEdgeComponent.LinkWallPos != "1S")
+                {
+                    Point3d pt1 = Outline.GetPoint3dAt(4), pt2 = Outline.GetPoint3dAt(5);
+                    double bw = thTTypeEdgeComponent.Bw * scale;
+                    Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
+
+                    LinkedWallLines.Add(line1);
+                    LinkedWallLines.Add(line2);
+                    LinkedWallLines.Add(polyline);
+                }
             }
         }
+        public override void DrawDim()
+        {
+            RotatedDimension rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(1),
+                XLine2Point = Outline.GetPoint3dAt(2),
+                DimLinePoint = Outline.GetPoint3dAt(1) + new Vector3d(0, -600, 0),
+                DimensionText = thTTypeEdgeComponent.Hc2s.ToString(),
+                Rotation = 0.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(2),
+                XLine2Point = Outline.GetPoint3dAt(3),
+                DimLinePoint = Outline.GetPoint3dAt(2) + new Vector3d(0, -600, 0),
+                DimensionText = thTTypeEdgeComponent.Bf.ToString(),
+                Rotation = 0.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(3),
+                XLine2Point = Outline.GetPoint3dAt(4),
+                DimLinePoint = Outline.GetPoint3dAt(3) + new Vector3d(0, -600, 0),
+                DimensionText = thTTypeEdgeComponent.Hc2l.ToString(),
+                Rotation = 0.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(4),
+                XLine2Point = Outline.GetPoint3dAt(5),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(1000, 0, 0),
+                DimensionText = thTTypeEdgeComponent.Bw.ToString(),
+                Rotation = Math.PI / 2.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(5),
+                XLine2Point = Outline.GetPoint3dAt(5) + (Outline.GetPoint3dAt(7) - Outline.GetPoint3dAt(6)),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(1000, 0, 0),
+                DimensionText = thTTypeEdgeComponent.Hc1.ToString(),
+                Rotation = Math.PI / 2.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+        }
+
         /// <summary>
         /// T型钢筋确定位置，轮廓上10个点
         /// </summary>

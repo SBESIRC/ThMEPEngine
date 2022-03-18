@@ -58,6 +58,6 @@ namespace ThMEPStructure.Reinforcement.Model
         public int X { get; set; }
 
 
-        public abstract DBObjectCollection Draw();
+        public abstract DBObjectCollection Draw(string elevation,double tblRowHeight,double scale);
     }
 }

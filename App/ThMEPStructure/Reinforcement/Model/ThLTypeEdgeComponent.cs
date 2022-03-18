@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-
+using ThMEPStructure.Reinforcement.Draw;
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Model
 {
     public class ThLTypeEdgeComponent:ThEdgeComponent
@@ -25,8 +26,11 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public string Link4 { get; set; }
 
-        public override DBObjectCollection Draw()
+        public override DBObjectCollection Draw(string elevation, double tblRowHeight, double scale)
         {
+            DrawObjectLType drawObjectLType = new DrawObjectLType();
+            drawObjectLType.CalAndDrawGangJin(this, elevation, tblRowHeight, scale, new Point3d(0, 0, 0));
+            
             throw new System.NotImplementedException();
         }
     }

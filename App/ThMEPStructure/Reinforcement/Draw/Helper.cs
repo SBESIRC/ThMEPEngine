@@ -12,14 +12,21 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 将纵筋规格解析出每个不同大小的规格的钢筋各有多少个，一共有多少个
         /// </summary>
         /// <param name="str"></param>
-        public void AnalyseZongJinStr(string str)
+        public static int AnalyseZongJinStr(string str)
         {
-
+            int result = 0;
+            return result;
         }
 
         public static int SumLinkNum(string str)
         {
             int result = 0;
+            return result;
+        }
+
+        public static double CalScale(string str)
+        {
+            double result = 100.0 / (double)int.Parse(str.Substring(2));
             return result;
         }
 

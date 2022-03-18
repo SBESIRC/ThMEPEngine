@@ -24,6 +24,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     ConcreteStrengthGrade = "C60",
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
+                    Number = "GBZ1",
                 };
             }
         }
@@ -49,6 +50,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     StirrupLineWeight = 30,
                     X = 1,
                     EnhancedReinforce = "2C18+4C16+2C12",
+                    Number = "GBZ2",
                 };
             }
         }
@@ -75,6 +77,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     ConcreteStrengthGrade = "C60",
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
+                    Number = "GBZ3",
                 };
             }
         }
@@ -102,6 +105,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
                     EnhancedReinforce = "2C20+8C24+6C16",
+                    Number = "GBZ4",
                 };
             }
         }
@@ -129,6 +133,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     ConcreteStrengthGrade = "C60",
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
+                    Number = "GBZ5",
                 };
             }
         }
@@ -157,6 +162,7 @@ namespace ThMEPStructure.Reinforcement.Command
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
                     EnhancedReinforce = "2C20+8C18+6C16",
+                    Number = "GBZ6",
                 };
             }
         }

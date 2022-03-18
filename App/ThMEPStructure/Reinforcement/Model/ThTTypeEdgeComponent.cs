@@ -26,7 +26,7 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public string Link4 { get; set; }
 
-        public override DBObjectCollection Draw()
+        public override DBObjectCollection Draw(string elevation, double tblRowHeight, double scale)
         {
             throw new System.NotImplementedException();
         }

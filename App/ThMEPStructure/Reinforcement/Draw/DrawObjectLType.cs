@@ -13,9 +13,9 @@ namespace ThMEPStructure.Reinforcement.Draw
     {
         
         ThLTypeEdgeComponent thLTypeEdgeComponent;
-        public override void DrawOutline(string drawingScale)
+        public override void DrawOutline()
         {
-            int scale = 100 / int.Parse(drawingScale.Substring(2));
+            
             var pts = new Point3dCollection
             {
                 TableStartPt + new Vector3d(450, -1000, 0) * scale,
@@ -31,9 +31,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             Outline = pts.CreatePolyline();
         }
 
-        public override void DrawWall(string drawingScale)
+        public override void DrawWall()
         {
-            int scale = 100 / int.Parse(drawingScale.Substring(2));
+            
             if (thLTypeEdgeComponent.Type == "A")
             {
                 Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(7);
@@ -55,9 +55,9 @@ namespace ThMEPStructure.Reinforcement.Draw
                 LinkedWallLines.Add(polyline);
             }
         }
-        public override void DrawDim(string drawingScale)
+        public override void DrawDim()
         {
-            int scale = 100 / int.Parse(drawingScale.Substring(2));
+            
             RotatedDimension rotatedDimension = new RotatedDimension
             {
                 XLine1Point = Outline.GetPoint3dAt(0),
@@ -104,7 +104,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        void CalReinforcePosition(int pointNum,ThLTypeEdgeComponent thLTypeEdgeComponent,Polyline polyline,double scale)
+        void CalReinforcePosition(int pointNum,Polyline polyline)
         {
             //存储结果
             List<Point3d> points = new List<Point3d>();
@@ -229,25 +229,45 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public void CalGangjinPosition()
         {
-            foreach(var gangJin in GangJinBases)
-            {
-                //如果是纵筋
-                if(gangJin.GangjinType==0)
-                {
-                    //更新gangjin的值
-                    //CalReinforcePosition();
-                }
-                //如果是箍筋
-                else if(gangJin.GangjinType==1)
-                {
-                    CalStirrupPosition();
-                }
-                //如果是拉筋
-                else if(gangJin.GangjinType==2)
-                {
-                    CalLinkPosition();
-                }
-            }
+            
+            //计算轮廓得到ployline
+            DrawOutline();
+            
+            double firstRowHeight = 0;
+            double firstRowWidth = 0;
+            //计算表格轮廓
+            calTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
+            //绘制表格
+
+            DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
+
+            //统计纵筋的数量
+            int pointNum = Helper.AnalyseZongJinStr(thLTypeEdgeComponent.Reinforce);
+            //计算纵筋位置
+            CalReinforcePosition(pointNum, Outline);
+            //计算箍筋位置
+            
+            //计算拉筋位置
+            CalLinkPosition();
+
+        }
+
+        public void DrawGangJin()
+        {
+            objectCollection = new DBObjectCollection();
+            //绘制
+
+        }
+
+        public void CalAndDrawGangJin(ThLTypeEdgeComponent thLTypeEdgeComponent,string elevation, double tblRowHeight, double scale,Point3d position)
+        {
+            this.thLTypeEdgeComponent = thLTypeEdgeComponent;
+            this.elevation = elevation;
+            this.tblRowHeight = tblRowHeight;
+            this.scale = scale;
+            this.TableStartPt = position;
+            CalGangjinPosition();
+            DrawGangJin();
         }
     }
 }

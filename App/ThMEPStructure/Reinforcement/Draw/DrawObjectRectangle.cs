@@ -172,9 +172,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
         }
 
-        public override void DrawOutline(string drawingScale)
+        public override void DrawOutline()
         {
-            int scale = 100 / int.Parse(drawingScale.Substring(2));
             var pts = new Point3dCollection
             {
                 TableStartPt + new Vector3d(450, -1500, 0) * scale,
@@ -183,6 +182,57 @@ namespace ThMEPStructure.Reinforcement.Draw
                 TableStartPt + new Vector3d(450 + thRectangleEdgeComponent.Hc, -1500, 0) * scale
             };
             Outline = pts.CreatePolyline();
+        }
+
+        public override void DrawWall()
+        {
+            double bw = thRectangleEdgeComponent.Bw * scale;
+            Point3d pt1 = Outline.GetPoint3dAt(2), pt2 = Outline.GetPoint3dAt(3);
+            Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
+
+            LinkedWallLines.Add(line1);
+            LinkedWallLines.Add(line2);
+            LinkedWallLines.Add(polyline);
+
+            if (thRectangleEdgeComponent.LinkWallPos == "2")
+            {
+                pt1 = Outline.GetPoint3dAt(0);
+                pt2 = Outline.GetPoint3dAt(1);
+                polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out line1, out line2);
+
+                LinkedWallLines.Add(line1);
+                LinkedWallLines.Add(line2);
+                LinkedWallLines.Add(polyline);
+            }
+        }
+
+        public override void DrawDim()
+        {
+            RotatedDimension rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(1),
+                XLine2Point = Outline.GetPoint3dAt(2),
+                DimLinePoint = Outline.GetPoint3dAt(1) + new Vector3d(0, -600, 0),
+                DimensionText = thRectangleEdgeComponent.Hc.ToString(),
+                Rotation = 0.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
+
+            Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
+            if (thRectangleEdgeComponent.LinkWallPos == "2")
+            {
+                pt1 += new Vector3d(-thRectangleEdgeComponent.Bw * 5 / 8.0, 0, 0) * scale;
+                pt2 += new Vector3d(-thRectangleEdgeComponent.Bw * 5 / 8.0, 0, 0) * scale;
+            }
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = pt1,
+                XLine2Point = pt2,
+                DimLinePoint = pt1 + new Vector3d(-600, 0, 0),
+                DimensionText = thRectangleEdgeComponent.Bw.ToString(),
+                Rotation = Math.PI / 2.0
+            };
+            rotatedDimensions.Add(rotatedDimension);
         }
     }
 }

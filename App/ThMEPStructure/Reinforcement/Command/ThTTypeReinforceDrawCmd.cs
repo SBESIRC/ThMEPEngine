@@ -25,7 +25,7 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active()) 
             {
                 var tEdgeComponent = ThReinforceTestData.TTypeEdgeComponent;
-                var objs = tEdgeComponent.Draw();
+                var objs = tEdgeComponent.Draw("1.0-2.0", 800, 4);
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
@@ -49,7 +49,7 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active())
             {
                 var tEdgeComponent = ThReinforceTestData.TTypeCalEdgeComponent;
-                var objs = tEdgeComponent.Draw();
+                var objs = tEdgeComponent.Draw("1.0-2.0", 800, 4);
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
