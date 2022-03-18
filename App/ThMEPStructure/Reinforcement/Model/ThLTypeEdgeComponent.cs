@@ -30,7 +30,7 @@ namespace ThMEPStructure.Reinforcement.Model
         {
             DrawObjectLType drawObjectLType = new DrawObjectLType();
             drawObjectLType.CalAndDrawGangJin(this, elevation, tblRowHeight, scale, new Point3d(0, 0, 0));
-            
+            return drawObjectLType.objectCollection;
             throw new System.NotImplementedException();
         }
     }

@@ -27,7 +27,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             double scale = Helper.CalScale(this.drawingScale);
             foreach(var component in components)
             {
-                component.Draw("1.0-2.0", 800, 4);
+                component.Draw("1.0-2.0", 800, scale);
 
             }
 

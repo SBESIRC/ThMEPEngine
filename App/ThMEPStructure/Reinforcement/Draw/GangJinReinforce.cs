@@ -10,8 +10,8 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     class GangJinReinforce:GangJinBase
     {
-        Point3d point;
-        double r;
+        public Point3d point;
+        public double r;
         protected void CalPositionL()
         {
 
@@ -31,7 +31,24 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         }
 
-        public override void  Draw()
+        /// <summary>
+        /// 生成点筋
+        /// </summary>
+        /// <param name="position">点筋位置</param>
+        /// <param name="r">点筋半径</param>
+        /// <returns>点筋</returns>
+        public Polyline DrawReinforce()
+        {
+            Polyline res = new Polyline();
+            Point2d pt = new Point2d(point.X, point.Y);
+
+            res.AddVertexAt(0, pt + new Vector2d(r / 2, 0), 1, r, r);
+            res.AddVertexAt(1, pt + new Vector2d(-r / 2, 0), 1, r, r);
+            res.Closed = true;
+            return res;
+        }
+
+        public override void Draw()
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;

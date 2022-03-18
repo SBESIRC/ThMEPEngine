@@ -80,7 +80,6 @@
     <Compile Include="Reinforcement\Data\YJK\ThExtractLeaderMarkService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallService.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThExtractWallColumnService.cs" />
-    <Compile Include="Reinforcement\Draw\Class1.cs" />
     <Compile Include="Reinforcement\Draw\DrawMain.cs" />
     <Compile Include="Reinforcement\Draw\DrawObjectBase.cs" />
     <Compile Include="Reinforcement\Draw\DrawObjectLType.cs" />

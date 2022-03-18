@@ -20,6 +20,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public List<Curve> LinkedWallLines;
         public List<RotatedDimension> rotatedDimensions;
         public List<GangJinBase> GangJinBases;
+        public List<Point3d> points = new List<Point3d>();    //纵筋位置
         public DBObjectCollection objectCollection;
 
         //根据轮廓的点来计算表格第一行的长宽
@@ -160,7 +161,9 @@ namespace ThMEPStructure.Reinforcement.Draw
                 pt1 + direction.GetNormal() * length * 5 / 8.0 + (pt2 - pt1) * 5 / 8.0,
                 pt1 + direction.GetNormal() * length * 5 / 8.0 + (pt2 - pt1) * 11 / 8.0
             };
-            return pts.CreatePolyline();
+            Polyline tmp = pts.CreatePolyline();
+            tmp.Closed = false;
+            return tmp;
         }
     }
 }
