@@ -23,7 +23,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             //需要对一行上的所有暗柱计算表格第一行截面行的长和宽
 
             DrawObjectLType drawObjectLType = new DrawObjectLType();
-            drawObjectLType.Init();
+            //drawObjectLType.Init();
             drawObjectLType.CalGangjinPosition();
             drawObjectLType.DrawGangJin();
         }
