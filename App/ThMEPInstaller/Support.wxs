@@ -102,6 +102,15 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_TG20_DB" Guid="{3512ECA8-E62B-47D5-A4C6-9ECCDF863E9E}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_TG20_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20.db" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{64057DEB-0C08-42A3-8B7C-67C180703822}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图生成.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Component_Template" Guid="{D0E8E3D8-5195-4057-B0F5-E1CD92802413}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Component_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图元素.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Components" Guid="{A910B414-4CCE-42D5-8EFB-288D53089E31}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Components" Source="$(var.AutoloaderContentsPath)\Support\平面关注对象.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -197,6 +206,9 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Wire_Layer_Configuration" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_ElectricalConfig_Config" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Component_Template" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Components" />
         </ComponentGroup>
     </Fragment>
 </Wix>
