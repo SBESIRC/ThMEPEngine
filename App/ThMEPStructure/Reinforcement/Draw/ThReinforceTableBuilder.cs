@@ -23,12 +23,13 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public DBObjectCollection Build(List<ThEdgeComponent> components)
         {
+            //提取放大尺寸
+            double scale = Helper.CalScale(this.drawingScale);
             foreach(var component in components)
             {
-                component.Draw();
+                component.Draw("1.0-2.0", 800, 4);
 
             }
-
 
             throw new NotImplementedException();
         }
