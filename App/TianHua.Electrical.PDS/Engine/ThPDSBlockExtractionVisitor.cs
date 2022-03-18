@@ -4,11 +4,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
-using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -52,11 +52,28 @@ namespace TianHua.Electrical.PDS.Engine
             var results = new List<ThRawIfcDistributionElementData>();
             if (IsDistributionElement(br) && CheckLayerValid(br))
             {
-                results.Add(new ThRawIfcDistributionElementData()
+                if (matrix == Matrix3d.Identity)
                 {
-                    Data = br,  
-                    Geometry = br.GetTransformedCopy(matrix).GeometricExtents.ToRectangle(),
-                });
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Data = br,
+                        Geometry = br.GeometricExtents.ToRectangle(),
+                    });
+                }
+                else
+                {
+                    using (var acad = AcadDatabase.Use(br.Database))
+                    {
+                        var brCopy = br.GetTransformedCopy(matrix);
+                        acad.ModelSpace.Add(brCopy);
+                        results.Add(new ThRawIfcDistributionElementData()
+                        {
+                            Data = brCopy,
+                            Geometry = brCopy.GeometricExtents.ToRectangle(),
+                        });
+                        brCopy.Erase();
+                    }
+                }
             }
             return results;
         }
@@ -114,6 +131,10 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
+            if (blockTableRecord.IsFromExternalReference || blockTableRecord.IsFromOverlayReference)
+            {
+                return false;
+            }
             // 不支持图纸空间
             if (blockTableRecord.IsLayout)
             {

@@ -23,7 +23,7 @@ namespace TianHua.Electrical.PDS.Service
             var thPDSDistBox = new ThPDSLoad
             {
                 ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
-                InstalledCapacity = AnalysisPower(marks, out _),
+                InstalledCapacity = AnalysisPower(marks, out _, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -59,19 +59,20 @@ namespace TianHua.Electrical.PDS.Service
             var thPDSLoad = new ThPDSLoad
             {
                 ID = CreateLoadID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
-                InstalledCapacity = AnalysisPower(marks, out var needCopy),
+                InstalledCapacity = AnalysisPower(marks, out var needCopy, out var frequencyConversion),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                FireLoad = marks.Contains("消防电源"),
+                FireLoad = marks.Contains(ThPDSCommon.FIRE_POWER_SUPPLY),
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
                     BasePoint = distBoxData.Position,
-                }
+                },
+                FrequencyConversion = frequencyConversion,
             };
 
             if (needCopy)
@@ -135,9 +136,9 @@ namespace TianHua.Electrical.PDS.Service
                         ? distBoxData.Attributes[ThPDSCommon.DESCRIPTION] : "",
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, out var needCopy),
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, out _, out _),
                 FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
-                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals("消防电源") : false,
+                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.FIRE_POWER_SUPPLY) : false,
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 DefaultCircuitType = distBoxData.DefaultCircuitType,
@@ -148,7 +149,9 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
                     BasePoint = distBoxData.Position,
-                }
+                },
+                FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
+                    && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
             };
         }
 
@@ -378,17 +381,20 @@ namespace TianHua.Electrical.PDS.Service
             return result;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy)
+        private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy, out bool frequencyConversion)
         {
             var results = new ThInstalledCapacity();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;
+            frequencyConversion = false;
             for (var i = 0; i < infos.Count; i++)
             {
                 var m = r.Match(infos[i]);
                 while (m.Success)
                 {
+                    infos[i] = infos[i].Replace(m.Value, "");
+                    frequencyConversion = infos[i].Contains(ThPDSCommon.FREQUENCY_CONVERSION);
                     var result = m.Value.Replace("k", "");
                     result = result.Replace("K", "");
                     result = result.Replace("w", "");

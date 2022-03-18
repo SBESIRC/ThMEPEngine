@@ -134,11 +134,8 @@ namespace TianHua.Electrical.PDS.Engine
                     foreach (var vertex in graph.Vertices)
                     {
                         // id、楼层、位置判断
-                        if (vertex.Loads[0].ID.LoadID == node.Loads[0].ID.LoadID
-                            && vertex.Loads[0].Location.FloorNumber == node.Loads[0].Location.FloorNumber
-                            && ToPoint3d(vertex.Loads[0].Location.StoreyBasePoint - vertex.Loads[0].Location.BasePoint)
-                                .DistanceTo(ToPoint3d(node.Loads[0].Location.StoreyBasePoint - node.Loads[0].Location.BasePoint))
-                                < ThPDSCommon.STOREY_TOLERANCE)
+                        if (LoadIDCheck(vertex, node) && StoreyCheck(vertex, node) && PositionCheck(vertex, node)
+                            && DescriptionCheck(vertex, node) && PowerCheck(vertex, node) && TypeCheck(vertex, node))
                         {
                             originalNode = vertex;
                             return true;
@@ -153,6 +150,107 @@ namespace TianHua.Electrical.PDS.Engine
         private Point3d ToPoint3d(Vector3d vector)
         {
             return new Point3d(vector.X, vector.Y, 0);
+        }
+
+        /// <summary>
+        /// 负载编号校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool LoadIDCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return vertex.Loads[0].ID.LoadID == node.Loads[0].ID.LoadID;
+        }
+
+        /// <summary>
+        /// 楼层校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool StoreyCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return vertex.Loads[0].Location.FloorNumber == node.Loads[0].Location.FloorNumber;
+        }
+
+        /// <summary>
+        /// 相对位置校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool PositionCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return ToPoint3d(vertex.Loads[0].Location.StoreyBasePoint - vertex.Loads[0].Location.BasePoint)
+                .DistanceTo(ToPoint3d(node.Loads[0].Location.StoreyBasePoint - node.Loads[0].Location.BasePoint))
+                < ThPDSCommon.STOREY_TOLERANCE;
+        }
+
+        /// <summary>
+        /// 描述校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool DescriptionCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return vertex.Loads[0].ID.Description == node.Loads[0].ID.Description;
+        }
+
+        /// <summary>
+        /// 功率校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool PowerCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            var check = true;
+            var vertexUsualPower = vertex.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
+            var vertexFirePower = vertex.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
+            var nodeUsualPower = node.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
+            var nodeFirePower = node.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
+            if (vertexUsualPower.Count == nodeUsualPower.Count && vertexFirePower.Count == nodeFirePower.Count)
+            {
+                if (!LoopCheck(vertexUsualPower, nodeUsualPower) || !LoopCheck(vertexFirePower, nodeFirePower))
+                {
+                    check = false;
+                }
+            }
+            else
+            {
+                check = false;
+            }
+
+            return check;
+        }
+
+        /// <summary>
+        /// 负载类型校核
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private bool TypeCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
+        {
+            return vertex.Loads[0].LoadTypeCat_1 == node.Loads[0].LoadTypeCat_1
+                && vertex.Loads[0].LoadTypeCat_2 == node.Loads[0].LoadTypeCat_2
+                && vertex.Loads[0].LoadTypeCat_3 == node.Loads[0].LoadTypeCat_3;
+        }
+
+        private bool LoopCheck(List<double> first, List<double> second)
+        {
+            var check = true;
+            for (var i = 0; i < first.Count; i++)
+            {
+                if (first[i] != second[i])
+                {
+                    check = false;
+                    break;
+                }
+            }
+            return check;
         }
     }
 }

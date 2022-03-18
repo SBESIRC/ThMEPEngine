@@ -48,9 +48,9 @@ namespace TianHua.Electrical.PDS.Service
                 .ForEach(block =>
                 {
                     var blockData = new ThPDSBlockReferenceData(block.ObjectId);
-                    if (blockData.EffectiveName.IndexOf("负载标注") == 0
-                        || blockData.EffectiveName.Contains("水泵标注")
-                        || blockData.EffectiveName.Contains("E-电力平面-负荷明细"))
+                    if (blockData.EffectiveName.IndexOf(ThPDSCommon.LOAD_LABELS) == 0
+                        || blockData.EffectiveName.Contains(ThPDSCommon.PUMP_LABELS)
+                        || blockData.EffectiveName.Contains(ThPDSCommon.LOAD_DETAILS))
                     {
                         MarkBlocks.Add(block, blockData);
                         return;

@@ -60,7 +60,7 @@ namespace TianHua.Electrical.PDS.Service
                     // 只要有一个有效负载，则认为整个节点为有效负载
                     noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
-                    if (LoadBlocks[e].EffectiveName.IndexOf("电动机及负载标注") == 0)
+                    if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
                         loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
                     }

@@ -3,25 +3,25 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.ApplicationServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using QuikGraph;
 
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
-using TianHua.Electrical.PDS.Engine;
-using TianHua.Electrical.PDS.Model;
-using TianHua.Electrical.PDS.Service;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Electrical;
-using NFox.Cad;
-using ThCADCore.NTS;
+using TianHua.Electrical.PDS.Engine;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project;
+using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Command
 {
@@ -114,7 +114,7 @@ namespace TianHua.Electrical.PDS.Command
                     ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                     ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
 
-                    for(var i = 0;i< storeysEngine.Elements.Count;i++)
+                    for (var i = 0; i < storeysEngine.Elements.Count; i++)
                     {
                         var x = storeysGeometry[i];
                         var storey = storeysEngine.Elements[i] as ThEStoreys;
@@ -156,7 +156,7 @@ namespace TianHua.Electrical.PDS.Command
 
                         //做一个标注的Service
                         var markService = new ThMarkService(marks, markBlockData, tchWireDims);
-                        
+
                         var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
                             distBoxKey, cableTrayNode);
 
