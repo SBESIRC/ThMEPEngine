@@ -49,12 +49,14 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public double StirrupLineWeight { get; set; }
         /// <summary>
-        /// 绘制
+        /// 迭代增大后的纵筋规格
         /// </summary>
+        public string EnhancedReinforce { get; set; }
         /// <summary>
         /// 迭代步数
         /// </summary>
         public int X { get; set; }
+
         /// <summary>
         /// 迭代增大后的纵筋规格
         /// </summary>
