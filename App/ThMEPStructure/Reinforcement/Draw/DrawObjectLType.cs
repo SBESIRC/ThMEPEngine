@@ -9,10 +9,14 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.DatabaseServices;
 namespace ThMEPStructure.Reinforcement.Draw
 {
-    class DrawObjectLType:DrawObjectBase
+    class DrawObjectLType : DrawObjectBase
     {
-        
+
         ThLTypeEdgeComponent thLTypeEdgeComponent;
+        /// <summary>
+        /// 标记两个方向是否接墙
+        /// </summary>
+        private bool top = false, right = false;
         public override void DrawOutline(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
@@ -35,6 +39,13 @@ namespace ThMEPStructure.Reinforcement.Draw
             int scale = 100 / int.Parse(drawingScale.Substring(2));
             if (thLTypeEdgeComponent.Type == "A")
             {
+                top = true;
+                if (thLTypeEdgeComponent.LinkWallPos == "2") right = true;
+            }
+            else if (thLTypeEdgeComponent.Type == "B") right = true;
+
+            if (top)
+            {
                 Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(7);
                 double bf = thLTypeEdgeComponent.Bf * scale;
                 Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(0, bf * 5 / 8.0, 0), out Line line1, out Line line2);
@@ -43,7 +54,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 LinkedWallLines.Add(line2);
                 LinkedWallLines.Add(polyline);
             }
-            if (thLTypeEdgeComponent.LinkWallPos == "2" || thLTypeEdgeComponent.Type == "B")
+            if (right)
             {
                 Point3d pt1 = Outline.GetPoint3dAt(4), pt2 = Outline.GetPoint3dAt(5);
                 double bw = thLTypeEdgeComponent.Bw * scale;
@@ -57,31 +68,13 @@ namespace ThMEPStructure.Reinforcement.Draw
         public override void DrawDim(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
+            double bw = thLTypeEdgeComponent.Bw * 5 / 8.0 * scale;
+
             RotatedDimension rotatedDimension = new RotatedDimension
-            {
-                XLine1Point = Outline.GetPoint3dAt(0),
-                XLine2Point = Outline.GetPoint3dAt(1),
-                DimLinePoint = Outline.GetPoint3dAt(0) + new Vector3d(-600, 0, 0),
-                DimensionText = thLTypeEdgeComponent.Hc1.ToString(),
-                Rotation = Math.PI / 2.0
-            };
-            rotatedDimensions.Add(rotatedDimension);
-
-            rotatedDimension = new RotatedDimension
-            {
-                XLine1Point = Outline.GetPoint3dAt(1),
-                XLine2Point = Outline.GetPoint3dAt(2),
-                DimLinePoint = Outline.GetPoint3dAt(1) + new Vector3d(-600, 0, 0),
-                DimensionText = thLTypeEdgeComponent.Bw.ToString(),
-                Rotation = Math.PI / 2.0
-            };
-            rotatedDimensions.Add(rotatedDimension);
-
-            rotatedDimension = new RotatedDimension
             {
                 XLine1Point = Outline.GetPoint3dAt(2),
                 XLine2Point = Outline.GetPoint3dAt(3),
-                DimLinePoint = Outline.GetPoint3dAt(2) + new Vector3d(0, -600, 0),
+                DimLinePoint = Outline.GetPoint3dAt(2) + new Vector3d(0, -800, 0),
                 DimensionText = thLTypeEdgeComponent.Bf.ToString(),
                 Rotation = 0.0
             };
@@ -91,10 +84,42 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 XLine1Point = Outline.GetPoint3dAt(3),
                 XLine2Point = Outline.GetPoint3dAt(4),
-                DimLinePoint = Outline.GetPoint3dAt(3) + new Vector3d(0, -600, 0),
+                DimLinePoint = Outline.GetPoint3dAt(3) + new Vector3d(0, -800, 0),
                 DimensionText = thLTypeEdgeComponent.Hc2.ToString(),
                 Rotation = 0.0
             };
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(4),
+                XLine2Point = Outline.GetPoint3dAt(5),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(800, 0, 0),
+                DimensionText = thLTypeEdgeComponent.Hc2.ToString(),
+                Rotation = 0.0
+            };
+            if (right)
+            {
+                rotatedDimension.XLine1Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.XLine2Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.DimLinePoint += new Vector3d(bw, 0, 0);
+            }
+            rotatedDimensions.Add(rotatedDimension);
+
+            rotatedDimension = new RotatedDimension
+            {
+                XLine1Point = Outline.GetPoint3dAt(5),
+                XLine2Point = Outline.GetPoint3dAt(5) + (Outline.GetPoint3dAt(7) - Outline.GetPoint3dAt(6)),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(800, 0, 0),
+                DimensionText = thLTypeEdgeComponent.Hc2.ToString(),
+                Rotation = 0.0
+            };
+            if (right)
+            {
+                rotatedDimension.XLine1Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.XLine2Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.DimLinePoint += new Vector3d(bw, 0, 0);
+            }
             rotatedDimensions.Add(rotatedDimension);
         }
 
@@ -103,7 +128,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        void CalReinforcePosition(int pointNum,ThLTypeEdgeComponent thLTypeEdgeComponent,Polyline polyline,double scale)
+        void CalReinforcePosition(int pointNum, ThLTypeEdgeComponent thLTypeEdgeComponent, Polyline polyline, double scale)
         {
             //存储结果
             List<Point3d> points = new List<Point3d>();
@@ -115,23 +140,23 @@ namespace ThMEPStructure.Reinforcement.Draw
                 Point3d point = polyline.GetPoint3dAt(i);
                 Point3d tmpPoint;
                 //左上角，向右下偏移
-                if (i == 0||i==1)
+                if (i == 0 || i == 1)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y - offset, 0);
                 }
-                
+
                 //左下角，向右上偏移
                 else if (i == 2)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y + offset, 0);
                 }
                 //右下角，左上偏移
-                else if (i == 3||i==4)
+                else if (i == 3 || i == 4)
                 {
                     tmpPoint = new Point3d(point.X - offset, point.Y + offset, 0);
                 }
                 //右上角，左下偏移
-                else if (i >= 5&&i<=7)
+                else if (i >= 5 && i <= 7)
                 {
                     tmpPoint = new Point3d(point.X - offset, point.Y - offset, 0);
                 }
@@ -141,25 +166,25 @@ namespace ThMEPStructure.Reinforcement.Draw
                 }
                 points.Add(tmpPoint);
             }
-            
+
             //底层需要添加额外的纵筋，1，2两点中点，4，5中点
-            if (thLTypeEdgeComponent.Bw>=300)
+            if (thLTypeEdgeComponent.Bw >= 300)
             {
                 Point3d tmpPoint = new Point3d((points[1].X + points[2].X) / 2.0, (points[1].Y + points[2].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[4].X + points[5].X) / 2.0, (points[4].Y + points[5].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
             }
-            
+
             //左侧需要添加额外的钢筋,0,7中点，2，3中点
-            if(thLTypeEdgeComponent.Bf>=300)
+            if (thLTypeEdgeComponent.Bf >= 300)
             {
                 Point3d tmpPoint = new Point3d((points[0].X + points[7].X) / 2.0, (points[0].Y + points[7].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[2].X + points[3].X) / 2.0, (points[2].Y + points[3].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
             }
-           
+
             int needLayoutPointsNum = pointNum - points.Count;
             //需要排布的点的对数
             int pointsPair = needLayoutPointsNum / 2;

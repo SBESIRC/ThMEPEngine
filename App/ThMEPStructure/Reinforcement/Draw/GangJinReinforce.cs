@@ -31,6 +31,23 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         }
 
+        /// <summary>
+        /// 生成点筋
+        /// </summary>
+        /// <param name="position">点筋位置</param>
+        /// <param name="r">点筋半径</param>
+        /// <returns>点筋</returns>
+        protected Polyline DrawReinforce(Point3d position, double r)
+        {
+            Polyline res = new Polyline();
+            Point2d pt = new Point2d(position.X, position.Y);
+
+            res.AddVertexAt(0, pt + new Vector2d(r / 2, 0), 1, r, r);
+            res.AddVertexAt(1, pt + new Vector2d(-r / 2, 0), 1, r, r);
+            res.Closed = true;
+            return res;
+        }
+
         public override void  Draw()
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;

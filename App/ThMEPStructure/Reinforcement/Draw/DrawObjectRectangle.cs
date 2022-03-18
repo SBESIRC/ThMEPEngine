@@ -191,6 +191,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public override void DrawDim(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
+            double bw = thRectangleEdgeComponent.Bw * scale;
             RotatedDimension rotatedDimension = new RotatedDimension
             {
                 XLine1Point = Outline.GetPoint3dAt(1),
@@ -204,8 +205,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
             if (thRectangleEdgeComponent.LinkWallPos == "2")
             {
-                pt1 += new Vector3d(-thRectangleEdgeComponent.Bw * 5 / 8.0, 0, 0) * scale;
-                pt2 += new Vector3d(-thRectangleEdgeComponent.Bw * 5 / 8.0, 0, 0) * scale;
+                pt1 += new Vector3d(-bw * 5 / 8.0, 0, 0);
+                pt2 += new Vector3d(-bw * 5 / 8.0, 0, 0);
             }
             rotatedDimension = new RotatedDimension
             {

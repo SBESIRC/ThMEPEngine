@@ -12,6 +12,11 @@ namespace ThMEPStructure.Reinforcement.Draw
     class DrawObjectTType : DrawObjectBase
     {
         ThTTypeEdgeComponent thTTypeEdgeComponent;
+        /// <summary>
+        /// 标记三个方向是否接墙
+        /// </summary>
+        private bool top = false, left = false, right = false;
+
         public override void DrawOutline(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
@@ -33,62 +38,48 @@ namespace ThMEPStructure.Reinforcement.Draw
         public override void DrawWall(string drawingScale)
         {
             int scale = 100 / int.Parse(drawingScale.Substring(2));
+            //根据信息判断三个方向上分别是否需要接墙
             if (thTTypeEdgeComponent.Type == "A")
+            {
+                top = true;
+                if (thTTypeEdgeComponent.LinkWallPos != "1")
+                {
+                    if (thTTypeEdgeComponent.LinkWallPos != "2L") left = true;
+                    if (thTTypeEdgeComponent.LinkWallPos != "2S") right = true;
+                }
+            }
+            else if (thTTypeEdgeComponent.Type == "B")
+            {
+                if (thTTypeEdgeComponent.LinkWallPos != "1L") left = true;
+                if (thTTypeEdgeComponent.LinkWallPos != "1S") right = true;
+            }
+            //分别画出三个方向的墙线
+            if (left)
+            {
+                Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
+                double bw = thTTypeEdgeComponent.Bw * scale;
+                Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
+                LinkedWallLines.Add(line1);
+                LinkedWallLines.Add(line2);
+                LinkedWallLines.Add(polyline);
+            }
+            if (right)
+            {
+                Point3d pt1 = Outline.GetPoint3dAt(4), pt2 = Outline.GetPoint3dAt(5);
+                double bw = thTTypeEdgeComponent.Bw * scale;
+                Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
+                LinkedWallLines.Add(line1);
+                LinkedWallLines.Add(line2);
+                LinkedWallLines.Add(polyline);
+            }
+            if (top)
             {
                 Point3d pt1 = Outline.GetPoint3dAt(7), pt2 = Outline.GetPoint3dAt(8);
                 double bf = thTTypeEdgeComponent.Bf * scale;
                 Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(0, bf * 5 / 8.0, 0), out Line line1, out Line line2);
-
                 LinkedWallLines.Add(line1);
                 LinkedWallLines.Add(line2);
                 LinkedWallLines.Add(polyline);
-
-                if (thTTypeEdgeComponent.LinkWallPos == "1") return;
-                if (thTTypeEdgeComponent.LinkWallPos != "2L")
-                {
-                    pt1 = Outline.GetPoint3dAt(0);
-                    pt2 = Outline.GetPoint3dAt(1);
-                    double bw = thTTypeEdgeComponent.Bw * scale;
-                    polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out line1, out line2);
-
-                    LinkedWallLines.Add(line1);
-                    LinkedWallLines.Add(line2);
-                    LinkedWallLines.Add(polyline);
-                }
-                if (thTTypeEdgeComponent.LinkWallPos != "2S")
-                {
-                    pt1 = Outline.GetPoint3dAt(4);
-                    pt2 = Outline.GetPoint3dAt(5);
-                    double bw = thTTypeEdgeComponent.Bw * scale;
-                    polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out line1, out line2);
-
-                    LinkedWallLines.Add(line1);
-                    LinkedWallLines.Add(line2);
-                    LinkedWallLines.Add(polyline);
-                }
-            }
-            else
-            {
-                if (thTTypeEdgeComponent.LinkWallPos != "1L")
-                {
-                    Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
-                    double bw = thTTypeEdgeComponent.Bw * scale;
-                    Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
-
-                    LinkedWallLines.Add(line1);
-                    LinkedWallLines.Add(line2);
-                    LinkedWallLines.Add(polyline);
-                }
-                if (thTTypeEdgeComponent.LinkWallPos != "1S")
-                {
-                    Point3d pt1 = Outline.GetPoint3dAt(4), pt2 = Outline.GetPoint3dAt(5);
-                    double bw = thTTypeEdgeComponent.Bw * scale;
-                    Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
-
-                    LinkedWallLines.Add(line1);
-                    LinkedWallLines.Add(line2);
-                    LinkedWallLines.Add(polyline);
-                }
             }
         }
         public override void DrawDim(string drawingScale)
@@ -124,24 +115,37 @@ namespace ThMEPStructure.Reinforcement.Draw
             };
             rotatedDimensions.Add(rotatedDimension);
 
+            double bw = thTTypeEdgeComponent.Bw * 5 / 8.0 * scale;
             rotatedDimension = new RotatedDimension
             {
                 XLine1Point = Outline.GetPoint3dAt(4),
                 XLine2Point = Outline.GetPoint3dAt(5),
-                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(1000, 0, 0),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(600, 0, 0),
                 DimensionText = thTTypeEdgeComponent.Bw.ToString(),
                 Rotation = Math.PI / 2.0
             };
+            if (right)
+            {
+                rotatedDimension.XLine1Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.XLine2Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.DimLinePoint += new Vector3d(bw, 0, 0);
+            }
             rotatedDimensions.Add(rotatedDimension);
 
             rotatedDimension = new RotatedDimension
             {
                 XLine1Point = Outline.GetPoint3dAt(5),
                 XLine2Point = Outline.GetPoint3dAt(5) + (Outline.GetPoint3dAt(7) - Outline.GetPoint3dAt(6)),
-                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(1000, 0, 0),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(600, 0, 0),
                 DimensionText = thTTypeEdgeComponent.Hc1.ToString(),
                 Rotation = Math.PI / 2.0
             };
+            if (right)
+            {
+                rotatedDimension.XLine1Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.XLine2Point += new Vector3d(bw, 0, 0);
+                rotatedDimension.DimLinePoint += new Vector3d(bw, 0, 0);
+            }
             rotatedDimensions.Add(rotatedDimension);
         }
 
@@ -162,13 +166,13 @@ namespace ThMEPStructure.Reinforcement.Draw
                 Point3d point = polyline.GetPoint3dAt(i);
                 Point3d tmpPoint;
                 //左上角，向右下偏移
-                if (i == 0 || i == 1||i==2)
+                if (i == 0 || i == 1 || i == 2)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y - offset, 0);
                 }
 
                 //左下角，向右上偏移
-                else if (i == 3 ||i==4)
+                else if (i == 3 || i == 4)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y + offset, 0);
                 }
@@ -227,20 +231,20 @@ namespace ThMEPStructure.Reinforcement.Draw
             for (int i = 0; i <= pointsPair; i++)
             {
                 numbers.Clear();
-                for(int w=0;w<=pointsPair-i;w++)
+                for (int w = 0; w <= pointsPair - i; w++)
                 {
                     //竖直方向有i对点，水平方向左侧有w对点，水平方向右侧有pointsPair-i-w对点
                     for (int j = 0; j <= i; j++)
                     {
                         numbers.Add(disY / (double)(i + 1));
                     }
-                    for(int l=0;l<=w;l++)
+                    for (int l = 0; l <= w; l++)
                     {
                         numbers.Add(disX1 / (double)(w + 1));
                     }
-                    for (int k = 0; k <= pointsPair - i-w; k++)
+                    for (int k = 0; k <= pointsPair - i - w; k++)
                     {
-                        numbers.Add(disX2 / (pointsPair - i-w + 1));
+                        numbers.Add(disX2 / (pointsPair - i - w + 1));
                     }
                     double tmp = Helper.calVariance(numbers);
                     if (tmp < minVar)
