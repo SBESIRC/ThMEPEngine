@@ -57,10 +57,6 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public int X { get; set; }
 
-        /// <summary>
-        /// 迭代增大后的纵筋规格
-        /// </summary>
-        public string EnhancedReinforce { get; set; }
 
         public abstract DBObjectCollection Draw();
     }
