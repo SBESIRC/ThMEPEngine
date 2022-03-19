@@ -236,11 +236,37 @@ namespace TianHua.AutoCAD.ThCui
         private void UpdateRibbonUserInterface()
         {
             // 根据当前的登录信息配置Panels
-            //ThRibbonUtils.ConfigPanelsWithCurrentUser();
-
-            // 根据当前的Profile配置Panels
-            ThRibbonUtils.ConfigPanelsWithProfile("W");
-            //ThRibbonUtils.ConfigPanelsWithCurrentProfile();
+            if (ThAcsSystemService.Instance.IsLogged)
+            {
+                // 根据登录用户的专业自动配置Panels
+                var major = ThAcsSystemService.Instance.MajorCode;
+                switch(major)
+                {
+                    case "A":
+                        ThRibbonUtils.ConfigPanelsWithProfile("A");
+                        break;
+                    case "S":
+                        ThRibbonUtils.ConfigPanelsWithProfile("S");
+                        break;
+                    case "H":
+                        ThRibbonUtils.ConfigPanelsWithProfile("H");
+                        break;
+                    case "E":
+                        ThRibbonUtils.ConfigPanelsWithProfile("E");
+                        break;
+                    case "W":
+                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                        break;
+                    default:
+                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                        break;
+                }
+            }
+            else
+            {
+                // 未登录，使用默认专业配置Panels
+                ThRibbonUtils.ConfigPanelsWithProfile("W");
+            }
         }
 
         //private void UpdateToolbarUserInterface()
