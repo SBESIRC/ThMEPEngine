@@ -14,9 +14,8 @@ namespace ThMEPStructure.Reinforcement.Draw
     class DrawObjectRectangle:DrawObjectBase
     {
         private ThRectangleEdgeComponent thRectangleEdgeComponent;
-        private List<Point3d> points;
-        //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
-        private List<int> pointsFlag;
+        
+        
         /// <summary>
         /// 一型钢筋确定点的位置,先去掉四角的点
         /// </summary>
@@ -85,7 +84,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     numbers.Add(disX / (double)(pointsPair - i + 1));
                 }
-                double tmp = Helper.calVariance(numbers);
+                double tmp = Helper.CalVariance(numbers);
                 if (tmp < minVar)
                 {
                     result = i;

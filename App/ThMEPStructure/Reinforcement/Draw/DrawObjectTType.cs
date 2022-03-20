@@ -246,7 +246,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     {
                         numbers.Add(disX2 / (pointsPair - i - w + 1));
                     }
-                    double tmp = Helper.calVariance(numbers);
+                    double tmp = Helper.CalVariance(numbers);
                     if (tmp < minVar)
                     {
                         resultY = i;

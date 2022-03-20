@@ -205,7 +205,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     numbers.Add(disX / (double)(pointsPair - i + 1));
                 }
-                double tmp = Helper.calVariance(numbers);
+                double tmp = Helper.CalVariance(numbers);
                 if (tmp < minVar)
                 {
                     result = i;
@@ -253,13 +253,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             //计算轮廓得到polyline
             DrawOutline();
 
-            double firstRowHeight = 0;
-            double firstRowWidth = 0;
             //计算表格轮廓
             calTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
-            //绘制表格
 
-            DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
 
             //统计纵筋的数量
             int pointNum = Helper.AnalyseZongJinStr(thLTypeEdgeComponent.Reinforce);
@@ -276,6 +272,14 @@ namespace ThMEPStructure.Reinforcement.Draw
         public void DrawGangJin()
         {
             objectCollection = new DBObjectCollection();
+
+            //绘制表格
+            DBObjectCollection tableCollection = new DBObjectCollection();
+            tableCollection = DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
+            foreach(DBObject element in tableCollection)
+            {
+                objectCollection.Add(element);
+            }
             //绘制纵筋
             foreach (var point in points)
             {
@@ -328,7 +332,17 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.elevation = elevation;
             this.tblRowHeight = tblRowHeight;
             this.scale = scale;
+            this.number = thLTypeEdgeComponent.Number;
             TableStartPt = position;
+            if(thLTypeEdgeComponent.IsCalculation)
+            {
+                this.Reinforce = thLTypeEdgeComponent.EnhancedReinforce;
+            }
+            else
+            {
+                this.Reinforce = thLTypeEdgeComponent.Reinforce;
+            }
+            this.Stirrup = thLTypeEdgeComponent.Stirrup;
             CalGangjinPosition();
             DrawGangJin();
         }

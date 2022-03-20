@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class Helper
@@ -34,7 +34,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 计算方差，平方的均值减去均值的平方
         /// </summary>
         /// <param name="numbers"></param>
-        public static double calVariance(List<double> numbers)
+        public static double CalVariance(List<double> numbers)
         {
             double squareSum = 0;
             double sum = 0;
@@ -46,6 +46,29 @@ namespace ThMEPStructure.Reinforcement.Draw
 
             return (squareSum / numbers.Count) - (sum / numbers.Count) * (sum / numbers.Count);
         }
+
+        /// <summary>
+        /// 计算文字居中放置位置
+        /// </summary>
+        /// <param name="startX"></param>
+        /// <param name="startY"></param>
+        /// <param name="finalX"></param>
+        /// <param name="finalY"></param>
+        /// <param name="strHeight"></param>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Point3d CalCenterPosition(double startX,double startY,double finalX,double finalY,double strHeight,string str)
+        {
+            double x, y;
+            //纵向
+            y = (startY - finalY)/2.0 + finalY - strHeight/2.0;
+            //横向
+            double strWidth = str.Length * strHeight / 2.0;
+            x = (startX - finalX) / 2.0 + finalX - strWidth / 2.0;
+            Point3d point = new Point3d(x, y, 0);
+            return point;
+        }
+
 
     }
 }
