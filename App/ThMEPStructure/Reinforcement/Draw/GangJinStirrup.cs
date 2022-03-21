@@ -76,6 +76,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <param name="height">内部纵向点筋距离</param>
         /// <param name="startPt">左上角点筋位置</param>
         /// <param name="r">点筋到箍筋距离</param>
+        /// <param name="lineWeight">线宽</param>
         /// <returns>箍筋</returns>
         protected Polyline DrawStirrup(double width, double height, Point3d startPt, double r, double lineWeight)
         {
