@@ -249,7 +249,8 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public void CalGangjinPosition()
         {
-
+            Extents2d extents = new Extents2d();
+            
             //计算轮廓得到polyline
             DrawOutline();
 
@@ -258,7 +259,9 @@ namespace ThMEPStructure.Reinforcement.Draw
 
 
             //统计纵筋的数量
-            int pointNum = Helper.AnalyseZongJinStr(thLTypeEdgeComponent.Reinforce);
+            StrToReinforce strToReinforce = new StrToReinforce();
+            strToReinforce = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
+            int pointNum = strToReinforce.num;
             //计算纵筋位置
             CalReinforcePosition(pointNum, Outline);
             
