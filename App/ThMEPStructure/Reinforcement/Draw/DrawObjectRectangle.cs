@@ -128,14 +128,19 @@ namespace ThMEPStructure.Reinforcement.Draw
             //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
             for(int i=0;i<points.Count;i+=2)
             {
-                if(pointsFlag[i]==2||pointsFlag[i]==3)
+                if(pointsFlag[i]==2)
                 {
-                    if(thRectangleEdgeComponent.Link2.IsNullOrEmpty())
+                    if(!thRectangleEdgeComponent.Link2.IsNullOrEmpty())
                     {
-                        //不需要解析有几个，只有T字型Link3可能有选择的情况，直接绘制，利用第i，i+1个点
                         
                     }
+                }
+                else if(pointsFlag[i] == 3)
+                {
+                    if (!thRectangleEdgeComponent.Link3.IsNullOrEmpty())
+                    {
 
+                    }
                 }
             }
         }

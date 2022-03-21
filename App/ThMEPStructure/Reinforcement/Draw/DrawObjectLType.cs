@@ -161,6 +161,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     break;
                 }
                 points.Add(tmpPoint);
+                pointsFlag.Add(0);
             }
 
             //底层需要添加额外的纵筋，1，2两点中点，4，5中点
@@ -170,6 +171,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[4].X + points[5].X) / 2.0, (points[4].Y + points[5].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
+                pointsFlag.Add(4);
+                pointsFlag.Add(4);
             }
 
             //左侧需要添加额外的钢筋,0,7中点，2，3中点
@@ -179,6 +182,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[2].X + points[3].X) / 2.0, (points[2].Y + points[3].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
+                pointsFlag.Add(4);
+                pointsFlag.Add(4);
             }
 
             int needLayoutPointsNum = pointNum - points.Count;
@@ -222,6 +227,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[7].X, points[7].Y - deltaY, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(2);
+                pointsFlag.Add(2);
             }
             for (int i = 0; i < pointsPair - result; i++)
             {
@@ -229,6 +236,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[6].X + deltaX, points[6].Y, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(3);
+                pointsFlag.Add(3);
             }
         }
         void CalReinforceCPosition(int pointNum, int pointCNum)
@@ -239,7 +248,31 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         void CalLinkPosition()
         {
+            //遍历所有点，找出2，3,4类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
+            for (int i = 0; i < points.Count; i += 2)
+            {
+                if (pointsFlag[i] == 2)
+                {
+                    if (!thLTypeEdgeComponent.Link2.IsNullOrEmpty())
+                    {
+                        
+                    }
+                }
+                else if (pointsFlag[i] == 3)
+                {
+                    if (!thLTypeEdgeComponent.Link3.IsNullOrEmpty())
+                    {
 
+                    }
+                }
+                else if (pointsFlag[i] == 4)
+                {
+                    if (!thLTypeEdgeComponent.Link4.IsNullOrEmpty())
+                    {
+
+                    }
+                }
+            }
         }
 
         void CalStirrupPosition()
@@ -267,6 +300,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             
             //计算箍筋位置
             
+
             //计算拉筋位置
             CalLinkPosition();
 
