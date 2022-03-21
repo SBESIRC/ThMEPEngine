@@ -71,9 +71,6 @@
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
-    <Compile Include="Project\Module\Circuit\ThPDSBlockInfo.cs" />
-    <Compile Include="Project\Module\Circuit\ThPDSCircuit.cs" />
-    <Compile Include="Project\Module\Circuit\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
