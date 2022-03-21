@@ -116,8 +116,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm
                             var nodeCostG = nextNode.CostG;
                             //如果新的路径代价更小，则更新该位置上的节点的原始路径
                             nextNode.ResetParentNode(currenNode, costG, direction);
-                            //routePlanData.OpenedList.Remove(nextNode);
-                            //routePlanData.OpenedList.Add(nextNode);
                         }
                     }
                     else
