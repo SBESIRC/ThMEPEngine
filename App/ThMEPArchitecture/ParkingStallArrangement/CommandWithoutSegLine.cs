@@ -61,23 +61,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Logger?.Information($"############################################");
-                    Logger?.Information($"自动分割线迭代");
-                    Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                    if (!rstDataExtract)
+                    if (_CommandMode == CommandMode.WithUI)
                     {
-                        return;
+                        Logger?.Information($"############################################");
+                        Logger?.Information($"自动分割线迭代");
+                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                        var stopWatch = new Stopwatch();
+                        stopWatch.Start();
+                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                        if (!rstDataExtract)
+                        {
+                            return;
+                        }
+                        for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                        {
+                            RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                        }
+                        stopWatch.Stop();
+                        var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                        Logger?.Information(strTotalMins);
+
                     }
-                    for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                    else//生成二分全部方案
                     {
-                        RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                        var autogen = new AutoSegGenerator(outerBrder, Logger);
+                        autogen.Run(false);
                     }
-                    stopWatch.Stop();
-                    var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
-                    Logger?.Information(strTotalMins);
                 }
             }
             catch (Exception ex)

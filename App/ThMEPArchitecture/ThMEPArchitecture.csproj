@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateAllSeglinesCmd.cs" />
+    <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\CommandPreprocess.cs" />

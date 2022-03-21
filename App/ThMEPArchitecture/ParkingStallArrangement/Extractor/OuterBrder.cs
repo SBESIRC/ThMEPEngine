@@ -178,6 +178,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 }
             }
         }
+        #region 分割线检查
         public bool SegLineVaild(Serilog.Core.Logger logger)
         {
             // 标记圆半径5000
@@ -198,7 +199,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             if (!NoneCrossBlock()) return false;
             return true;
         }
-        #region 分割线检查
+
         // 判断正交
         private bool IsOrthogonal()
         {
