@@ -1719,6 +1719,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     };
                     {
                         var menu = new ContextMenu();
+                        var vertice = graph.Vertices.ToList()[sel.Id];
                         cvs.ContextMenu = menu;
                         {
                             var mi = new MenuItem();
@@ -1731,7 +1732,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "常规";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.常规);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.常规);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1741,7 +1742,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "漏电";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.漏电);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.漏电);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1751,7 +1752,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "电动机（分立）";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.电动机_分立元件);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_分立元件);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1761,7 +1762,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "电动机（CPS）";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.电动机_CPS);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_CPS);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1771,7 +1772,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "电动机（三角/Y）";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.双速电动机_CPSdetailYY);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_CPSdetailYY);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1781,7 +1782,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "电动机（双速）";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件detailYY);
+                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件detailYY);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1798,7 +1799,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "1路进线";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormInType.一路进线);
+                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.一路进线);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1808,7 +1809,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "2路进线ATSE";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormInType.二路进线ATSE);
+                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.二路进线ATSE);
                                         UpdateCanvas();
                                     });
                                 }
@@ -1818,7 +1819,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     m.Header = "3路进线TSE";
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, PDS.Project.Module.CircuitFormInType.三路进线);
+                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.三路进线);
+                                        UpdateCanvas();
+                                    });
+                                }
+                                {
+                                    var m = new MenuItem();
+                                    mi.Items.Add(m);
+                                    m.Header = "集中电源";
+                                    m.Command = new PDSCommand(() =>
+                                    {
+                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.集中电源);
                                         UpdateCanvas();
                                     });
                                 }
