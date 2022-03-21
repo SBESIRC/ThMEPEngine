@@ -25,10 +25,11 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             //提取放大尺寸
             double scale = Helper.CalScale(this.drawingScale);
+            List<ThEdgeComponent> tmpComponents = new List<ThEdgeComponent>();
+            //需要将组件分行，迭代计算一个队列里最大的长和宽，如果宽超过给的尺寸就停止添加到队列里，将最大的长和宽作为表格的截面尺寸
             foreach(var component in components)
             {
-                component.Draw("1.0-2.0", 800, scale);
-
+                component.Draw(this.elevation, this.tblRowHeight, scale);
             }
 
             throw new NotImplementedException();
