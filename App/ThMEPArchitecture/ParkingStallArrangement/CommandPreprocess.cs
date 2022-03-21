@@ -114,8 +114,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             objs = objs.ToNTSMultiPolygon().Union().ToDbCollection();// union操作,获取合并后的多段线
 
             var walls = new List<Entity>();
-            foreach (Entity obj in objs) walls.Add(obj);
-
+            foreach (Entity obj in objs) 
+            { 
+                if (obj  is Polyline pline)
+                {
+                    if(pline.Area > tol) walls.Add(pline);
+                }
+            } 
             var LayerName = "AI-障碍物";
             if (!acadDatabase.Layers.Contains(LayerName))
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, LayerName, 1);
