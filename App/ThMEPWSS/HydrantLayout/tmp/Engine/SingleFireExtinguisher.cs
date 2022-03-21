@@ -19,15 +19,18 @@ using ThMEPWSS.HydrantLayout.tmp.Service;
 using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Data;
 
+
 namespace ThMEPWSS.HydrantLayout.tmp.Engine
 {
-    class SingleFireHydrant
+    class SingleFireExtinguisher
     {
-        //全局变量（debug用的，这样就不用重新启动项目）
-        public int Mode = Info.Mode;
+        //全局变量
+        public int Mode = Info.Mode; 
         //外部输入
         ThHydrantModel model;
         Point3d CenterPoint;
+        double LongSide = 0;
+        double ShortSide = 0;
         int Type;
         //是否找到合适的摆放位置
         bool Done = false;
@@ -41,11 +44,14 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
         MPolygon LeanWall;
 
 
-        public SingleFireHydrant(ThHydrantModel model, int type)
+        public SingleFireExtinguisher(ThHydrantModel model, int type)
         {
+            //读取属性
             this.model = model;
             CenterPoint = model.Center;
             Type = type;
+            CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
+
 
             //搜索实体周边环境
             SearchRangeFrame searchRangeFrame0 = new SearchRangeFrame(CenterPoint);
@@ -73,21 +79,21 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             List<Vector3d> dirList;
 
             //寻找第一优先级定位点并测试摆放
-            searchPoint0.FindTurningPoint(out basePointList, out dirList);
+            searchPoint0.FindTurningPoint2(out basePointList, out dirList, ShortSide);
             FirstPriorityTest(basePointList, dirList);
 
             //寻找第二优先级定位点并测试摆放
-            if(Done == false) 
+            if (Done == false)
             {
-                searchPoint0.FindColumnPoint(out basePointList, out dirList);
+                searchPoint0.FindColumnPoint2(out basePointList, out dirList);
                 SecondPriorityTest(basePointList, dirList);
             }
 
             //寻找第三优先级定位点并测试摆放
             if (Done == false)
             {
-                searchPoint0.FindOtherPoint(out basePointList, out dirList);
-                ThirdPriorityTest(basePointList, dirList);
+                //searchPoint0.FindOtherPoint(out basePointList, out dirList);
+                //ThirdPriorityTest(basePointList, dirList);
             }
 
         }
@@ -101,50 +107,42 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             //开始循环
             for (int i = 0; i < basePointList.Count; i++)
             {
-                var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], Type, Info.Mode);
-                Polyline vpPl = fireHydrant0.GetRiserObb();
-                List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
+                FireExtinguisher fireExtinguisher0 = new FireExtinguisher(basePointList[i], dirList[i], ShortSide, LongSide, Type, Info.Mode);
+                List<Polyline> fireObbList = fireExtinguisher0.GetFireObbList();
                 if (i == 0)
                 {
                     fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
                 }
-                //int besttIndex = -1;
-                //int bestdoorIndex = -1;
-                //int maxFit = -1;
+
                 int start = -1;
                 int end = -1;
 
                 switch (Mode)
                 {
-                    case 2: { start = 0; end = 8; break; }
-                    case 1: { start = 0; end = 8; break; }
-                    case 0: { start = 0; end = 8; break; }
+                    case 2: { start = 0; end = 4; break; }
+                    case 1: { start = 0; end = 4; break; }
+                    case 0: { start = 0; end = 4; break; }
                 }
 
                 for (int j = start; j <= end; j++)
                 {
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
-                        List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);
+                        Polyline doorArea = fireExtinguisher0.GetDoorAreaObb(j);
                         //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
-                        for (int k = 0; k < doorAreaList.Count; k++)
+                        if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
                         {
-                            if (FeasibilityCheck.IsDoorFeasible(doorAreaList[k], LeanWall.Shell())) //如果门没有被阻挡,找到一个可以摆放的模型
-                            {
-                                double distance = basePointList[i].DistanceTo(CenterPoint);
+                            double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
 
-                                double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, LeanWall.Shell());
-                                double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
-                                int againstWallLength = (int)(againstWallLength0 + againstWallLength1)/100;
-                                
-                                Point3d fireCenter = new Point3d();
-                                Vector3d fireDir = new Vector3d();
-                                fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
-                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k],ProcessedData.ParkingIndex);
-                                FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
-                                fireCompareModels0.Add(fireCompareModeltmp);
-                                break;
-                            }
+                            double againstWallLength = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
+                
+                            Point3d fireCenter = new Point3d();
+                            Vector3d fireDir = new Vector3d();
+                            fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
+                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, ProcessedData.ParkingIndex);
+                            FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
+                            fireCompareModels0.Add(fireCompareModeltmp);
+                            break;
                         }
                     }
                 }
@@ -161,7 +159,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, Info.ShortSide, Info.LongSide, fireCompareModelbest.fireDir);
                 //Polyline drawFire = CreateBoundaryService.CreateBoundary(new Point3d(411898,722948,0), Info.ShortSide, Info.LongSide,new Vector3d(0,1,0));
                 DrawUtils.ShowGeometry(drawFire, "l1fire", 2, lineWeightNum: 30);
-                fireCompareModelbest.Draw();
+                fireCompareModelbest.Draw2();
             }
         }
 
@@ -174,46 +172,43 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             //开始循环
             for (int i = 0; i < basePointList.Count; i++)
             {
-                var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], Type, Info.Mode);
-                Polyline vpPl = fireHydrant0.GetRiserObb();
-                List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
-                //if (i == 0)
-                //{
-                //    fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
-                //}
+                FireExtinguisher fireExtinguisher0 = new FireExtinguisher(basePointList[i], dirList[i], ShortSide, LongSide, Type, Info.Mode);
+                List<Polyline> fireObbList = fireExtinguisher0.GetFireObbList();
+                if (i == 0)
+                {
+                    fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
+                }
+
                 int start = -1;
                 int end = -1;
 
                 switch (Mode)
                 {
-                    case 2: { start = 0; end = 8; break; }
-                    case 1: { start = 7; end = 7; break; }
-                    case 0: { start = 7; end = 7; break; }
+                    case 2: { start = 0; end = 4; break; }
+                    case 1: { start = 2; end = 3; break; }
+                    case 0: { start = 2; end = 3; break; }
                 }
+
 
                 for (int j = start; j <= end; j++)
                 {
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
-                        List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);
+                        Polyline doorArea = fireExtinguisher0.GetDoorAreaObb(j);
                         //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
-                        for (int k = 0; k < doorAreaList.Count; k++)
+                        if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
                         {
-                            double distance = fireHydrant0.TFireCenterPointList[j].DistanceTo(CenterPoint);
-                            double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, searchPoint0.LeanWallList[i]);
-                            double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], searchPoint0.LeanWallList[i]);
-                            int againstWallLength = (int)(againstWallLength0 + againstWallLength1) / 100;
-                            //double againstWallLength = 200;
+                            double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
 
-                            if (FeasibilityCheck.IsDoorFeasible(doorAreaList[k], LeanWall.Shell())) //如果门没有被阻挡,找到一个可以摆放的模型
-                            {    
-                                Point3d fireCenter = new Point3d();
-                                Vector3d fireDir = new Vector3d();
-                                fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
-                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], ProcessedData.ParkingIndex);
-                                FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
-                                fireCompareModels0.Add(fireCompareModeltmp);
-                            }
+                            double againstWallLength = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
+
+                            Point3d fireCenter = new Point3d();
+                            Vector3d fireDir = new Vector3d();
+                            fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
+                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, ProcessedData.ParkingIndex);
+                            FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
+                            fireCompareModels0.Add(fireCompareModeltmp);
+                            break;
                         }
                     }
                 }
@@ -222,7 +217,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
 
             //寻找最优
             //fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance);
-            fireCompareModels0 = fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ThenBy(x => x.doorGood).ToList();
+            fireCompareModels0 = fireCompareModels0.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
             if (fireCompareModels0.Count > 0)
             {
                 Done = true;
@@ -230,7 +225,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, Info.ShortSide, Info.LongSide, fireCompareModelbest.fireDir);
                 //Polyline drawFire = CreateBoundaryService.CreateBoundary(new Point3d(411898,722948,0), Info.ShortSide, Info.LongSide,new Vector3d(0,1,0));
                 DrawUtils.ShowGeometry(drawFire, "l1fire", 2, lineWeightNum: 30);
-                fireCompareModelbest.Draw();
+                fireCompareModelbest.Draw2();
             }
         }
 
@@ -253,7 +248,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 int start = -1;
                 int end = -1;
 
-                switch (Mode)
+                switch (Info.Mode)
                 {
                     case 2: { start = 6; end = 8; break; }
                     case 1: { start = 6; end = 8; break; }
@@ -300,8 +295,11 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, Info.ShortSide, Info.LongSide, fireCompareModelbest.fireDir);
                 //Polyline drawFire = CreateBoundaryService.CreateBoundary(new Point3d(411898,722948,0), Info.ShortSide, Info.LongSide,new Vector3d(0,1,0));
                 DrawUtils.ShowGeometry(drawFire, "l1fire", 2, lineWeightNum: 30);
-                fireCompareModelbest.Draw();
+                fireCompareModelbest.Draw2();
             }
         }
     }
+
+
+
 }

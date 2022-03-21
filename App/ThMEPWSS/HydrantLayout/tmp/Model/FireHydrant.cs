@@ -56,8 +56,8 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         public Polyline DoorAreaObb = new Polyline();
 
         //模板相关属性
-        List<Point3d>  TFireCenterPointList = new List<Point3d>();
-        List<Vector3d> TFireDirList  =  new List<Vector3d>();
+        public List<Point3d>  TFireCenterPointList = new List<Point3d>();
+        public List<Vector3d> TFireDirList  =  new List<Vector3d>();
         List<Polyline> TFireObb = new List<Polyline>();
         Vector3d clockwise90;
         Vector3d clockwise270;
@@ -119,7 +119,10 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         }
 
         //计算立柱外包框线
-        public void GetRiserObbList() { }
+        public Polyline GetRiserObb() 
+        {
+           return CreateBoundaryService.CreateBoundary(BasePoint + 0.5 * vp * vBasePoint, vp, vp, vBasePoint);
+        }
 
         //获取消火栓外包框线列表
         public List<Polyline> GetFireObbList()
@@ -167,25 +170,25 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
                 case 0:
                     {
                         Point3d doorBasePoint = fireCenterPoint + dir * 0.5 * (ss + dss) + fclockwise270 * doorOffset;
-                        plOut = CreateBoundaryService.CreateBoundary(doorBasePoint, dss, dls, dir);
+                        plOut = CreateBoundaryService.CreateDoor(doorBasePoint, dss, dls, dir, 0);
                         break;
                     }
                 case 1:
                     {
                         Point3d doorBasePoint = fireCenterPoint + dir * 0.5 * (ss + dss) + fclockwise90 * doorOffset;
-                        plOut = CreateBoundaryService.CreateBoundary(doorBasePoint, dss, dls, dir);
+                        plOut = CreateBoundaryService.CreateDoor(doorBasePoint, dss, dls, dir, 1);
                         break;
                     }
                 case 2:
                     {
                         Point3d doorBasePoint = fireCenterPoint - dir * 0.5 * (ss + dss) + fclockwise90 * doorOffset;
-                        plOut = CreateBoundaryService.CreateBoundary(doorBasePoint, dss, dls, dir);
+                        plOut = CreateBoundaryService.CreateDoor(doorBasePoint, dss, dls, dir, 0);
                         break;
                     }
                 case 3:
                     {
                         Point3d doorBasePoint = fireCenterPoint - dir * 0.5 * (ss + dss) + fclockwise270 * doorOffset;
-                        plOut = CreateBoundaryService.CreateBoundary(doorBasePoint, dss, dls, dir);
+                        plOut = CreateBoundaryService.CreateDoor(doorBasePoint, dss, dls, dir, 1);
                         break;
                     }
             }

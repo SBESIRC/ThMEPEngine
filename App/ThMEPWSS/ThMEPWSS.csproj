@@ -75,9 +75,12 @@
     <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
     <Compile Include="HydrantLayout\tmp\Engine\InputDataProcess.cs" />
     <Compile Include="HydrantLayout\tmp\Engine\Run.cs" />
+    <Compile Include="HydrantLayout\tmp\Engine\SingleFireExtinguisher.cs" />
     <Compile Include="HydrantLayout\tmp\Engine\SingleFireHydrant.cs" />
     <Compile Include="HydrantLayout\tmp\Model\DataPackage.cs" />
+    <Compile Include="HydrantLayout\tmp\Model\FireExtinguisher.cs" />
     <Compile Include="HydrantLayout\tmp\Model\FireHydrant.cs" />
+    <Compile Include="HydrantLayout\tmp\Model\SecondaryModel.cs" />
     <Compile Include="HydrantLayout\tmp\Service\CreateBoundaryService.cs" />
     <Compile Include="HydrantLayout\tmp\Service\FeasibilityCheck.cs" />
     <Compile Include="HydrantLayout\tmp\Service\IndexCompute.cs" />

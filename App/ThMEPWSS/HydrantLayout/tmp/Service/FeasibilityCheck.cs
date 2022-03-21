@@ -43,6 +43,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl);
             objs1.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1forbidden", 8));
             objs2.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1paking", 9));
+            //objs2.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1testblock", 8));
             if (objs1.Count == 0 && objs2.Count == 0 && shell.Contains(pl))
             {
                 flag = true;
@@ -76,6 +77,19 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             var objs1 = ProcessedData.ForbiddenIndex.SelectCrossingPolygon(pl);
             var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl);
             if (objs1.Count == 0 && objs2.Count == 0)
+            {
+                flag = true;
+            }
+            return flag;
+        }
+
+        public static bool IsBoundaryOK(Polyline area, ThCADCoreNTSSpatialIndex forbidden) 
+        {
+            bool flag = false;
+            var bufferArea = area.Buffer(-10);
+            var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+            var obj = forbidden.SelectCrossingPolygon(pl);
+            if (obj.Count == 0) 
             {
                 flag = true;
             }

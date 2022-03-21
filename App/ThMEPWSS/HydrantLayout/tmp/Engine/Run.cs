@@ -51,6 +51,11 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 SingleFireHydrant singleFireHydrant0 = new SingleFireHydrant(processedData0.FireHydrant[i], 0);
             }
 
+            for (int i = 0; i < processedData0.FireExtinguisher.Count; i++)
+            {
+                SingleFireExtinguisher singleFireExtinguisher0 = new SingleFireExtinguisher(processedData0.FireExtinguisher[i], 1);
+            }
+
         }
     }
 }

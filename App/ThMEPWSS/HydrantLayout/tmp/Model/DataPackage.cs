@@ -59,13 +59,14 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         public static ThCADCoreNTSSpatialIndex ForbiddenIndex;
         public static ThCADCoreNTSSpatialIndex LeanWallIndex;
         public static ThCADCoreNTSSpatialIndex ParkingIndex;
-        public static ThCADCoreNTSSpatialIndex LineWallIndex;
+        //public static ThCADCoreNTSSpatialIndex LineWallIndex;
         
         //立柱起点
-        public List<Point3d> FireHydrant;
-        public List<Point3d> FireExtinguisher;
+        public List<ThHydrantModel> FireHydrant;
+        public List<ThHydrantModel> FireExtinguisher;
+        //public List<Point3d> FireHydrant;
+        //public List<Point3d> FireExtinguisher;
 
-        
         public ProcessedData()
         {
 
@@ -98,17 +99,21 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         //搜索范围
         public static double SearchRange = 3000;
         public static double Radius = 3500;
+        public static double SearchRadius = 2700;
 
-        //实体形状数据 
+        //消火栓实体形状数据
         public static double LongSide = 800;
         public static double ShortSide = 200;
         public static double DoorLongSide = 1200;
         public static double DoorShortSide = 800;
         public static double DoorOffset = 200;
         public static double VPSide = 200;
+
+        //灭火器实体形状数据
+        public static double ExDoorSide = 500;  
         
         //其他
-        public static double ColumnAreaBound = 6000;
+        public static double ColumnAreaBound = 400000;
     }
 
 
