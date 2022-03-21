@@ -72,6 +72,7 @@
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />

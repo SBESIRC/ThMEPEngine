@@ -164,8 +164,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="type"></param>
-        [Obsolete]
-        public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
+        public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
         {
             //throw new NotImplementedException();
         }

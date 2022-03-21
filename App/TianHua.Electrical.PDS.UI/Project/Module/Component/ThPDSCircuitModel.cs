@@ -115,6 +115,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get => edge.Target.Load.CalculateCurrent;
         }
-
+        public bool CircuitLock
+        {
+            get => edge.Details.CircuitLock;
+            set
+            {
+                edge.Details.CircuitLock = value;
+                OnPropertyChanged(nameof(CircuitLock));
+            }
+        }
     }
 }
