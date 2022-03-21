@@ -7,15 +7,15 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     public class ThReinforceTableBuilder
     {
-        private string frame = "";
+        private Extents2d extents = new Extents2d();
         private string elevation = "";
         private double tblRowHeight;
         private string drawingScale = "";
 
-        public ThReinforceTableBuilder(string frame,string elevation, 
+        public ThReinforceTableBuilder(Extents2d extents,string elevation, 
             string drawingScale,double tblRowHeight)
         {
-            this.frame = frame;
+            this.extents = extents;
             this.elevation = elevation;
             this.drawingScale = drawingScale;
             this.tblRowHeight = tblRowHeight;
