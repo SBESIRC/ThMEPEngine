@@ -14,6 +14,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
+            Type = PDSNodeType.None;
             IsStartVertexOfGraph = false;
             Details = new NodeDetails();
         }

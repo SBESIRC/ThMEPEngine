@@ -5,6 +5,7 @@
     /// </summary>
     public enum ComponentType
     {
+        导体,
         隔离开关,
         接触器,
         热继电器,

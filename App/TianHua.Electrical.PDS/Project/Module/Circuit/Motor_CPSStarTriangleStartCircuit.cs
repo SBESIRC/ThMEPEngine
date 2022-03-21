@@ -26,5 +26,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：接触器2
         /// </summary>
         public Contactor contactor2 { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor1 { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor2 { get; set; }
     }
 }

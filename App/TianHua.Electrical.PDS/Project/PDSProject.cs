@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -25,6 +26,8 @@ namespace TianHua.Electrical.PDS.Project
         public static PDSProject Instance { get { return instance; } }
 
         public ThPDSProjectGraph graphData;
+
+        public UIProjectGlobalConfiguration projectGlobalConfiguration;
 
         //public BreakerComponentConfiguration breakerConfig;
 
@@ -47,6 +50,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 //Creat New Project
                 this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>().CreatPDSProjectGraph();
+                this.projectGlobalConfiguration = new UIProjectGlobalConfiguration();
                 if (!instance.DataChanged.IsNull())
                 {
                     instance.DataChanged();//推送消息告知VM刷新

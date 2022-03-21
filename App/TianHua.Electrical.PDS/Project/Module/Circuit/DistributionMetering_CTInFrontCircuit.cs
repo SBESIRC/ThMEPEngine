@@ -23,5 +23,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：预留
         /// </summary>
         public PDSBaseComponent reservedComponent { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor { get; set; }
     }
 }

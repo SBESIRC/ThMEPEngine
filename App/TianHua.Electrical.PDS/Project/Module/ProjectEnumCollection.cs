@@ -94,4 +94,58 @@ namespace TianHua.Electrical.PDS.Project.Module
         SPD3,
         SPD4,
     }
+
+    /// <summary>
+    /// 桥架敷设
+    /// </summary>
+    public enum BridgeLaying
+    {
+        [Description("None")]
+        None,
+        [Description("金属槽盒")]
+        MR,
+        [Description("塑料槽盒")]
+        PR,
+        [Description("电缆托盘")]
+        CT,
+        [Description("电缆梯架")]
+        CL,
+        [Description("电缆支架")]
+        CR,
+    }
+    
+    /// <summary>
+    /// 穿管敷设
+    /// </summary>
+    public enum Pipelaying
+    {
+        [Description("None")]
+        None,
+        [Description("穿管明敷")]
+        E,
+        [Description("穿管暗敷")]
+        C,
+        [Description("沿或跨梁（屋架）明敷")]
+        AB,
+        [Description("沿或跨柱明敷")]
+        AC,
+        [Description("沿吊顶或顶板面明敷")]
+        CE,
+        [Description("吊顶内明敷")]
+        SCE,
+        [Description("沿墙面明敷")]
+        WS,
+        [Description("沿屋面明敷")]
+        RS,
+        [Description("顶板内暗敷")]
+        CC,
+        [Description("梁内暗敷")]
+        BC,
+        [Description("柱内暗敷")]
+        CLC,
+        [Description("墙内暗敷")]
+        WC,
+        [Description("地板或地面下暗敷")]
+        FC,
+    }
 }

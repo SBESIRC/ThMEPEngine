@@ -82,6 +82,7 @@
     <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
     <Compile Include="Project\Module\Circuit\ThermalRelayProtectionCircuit.cs" />
     <Compile Include="Project\Module\Component\Breaker.cs" />
+    <Compile Include="Project\Module\Component\Conductor.cs" />
     <Compile Include="Project\Module\Component\CPS.cs" />
     <Compile Include="Project\Module\Component\Extension\CascadeComponentAttribute.cs" />
     <Compile Include="Project\Module\Component\Extension\CascadeComponentExtension.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
     <Compile Include="Project\Module\Component\TransferSwitch.cs" />
+    <Compile Include="Project\Module\Configure\ConductorConfigration.cs" />
     <Compile Include="Project\Module\Configure\MTSEConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ATSEConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ContactorConfiguration.cs" />
@@ -105,6 +107,7 @@
     <Compile Include="Project\Module\NodeDetails.cs" />
     <Compile Include="Project\Module\PDSBaseElement.cs" />
     <Compile Include="Project\Module\PDSProjectModule.cs" />
+    <Compile Include="Project\Module\ProjectConfigure\UIProjectGlobalConfiguration.cs" />
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
     <Compile Include="Project\Module\SmallBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
