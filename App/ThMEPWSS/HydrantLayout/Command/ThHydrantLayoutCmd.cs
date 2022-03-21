@@ -33,6 +33,7 @@ namespace ThMEPWSS.HydrantLayout.Command
         private int _radius = 3000;
         private int _layoutMode = 2;
         private int _layoutObject = 2;
+        private bool _avoidParking = true; 
         private Dictionary<string, List<string>> _BlockNameDict;
         public ThHydrantLayoutCmd()
         {
@@ -50,6 +51,7 @@ namespace ThMEPWSS.HydrantLayout.Command
             _radius = HydrantLayoutSetting.Instance.SearchRadius;
             _layoutObject = HydrantLayoutSetting.Instance.LayoutObject;
             _layoutMode = HydrantLayoutSetting.Instance.LayoutMode;
+            _avoidParking = HydrantLayoutSetting.Instance.AvoidParking;
 
             _BlockNameDict = new Dictionary<string, List<string>>(){
                                 { "集水井", new List<string>() { "A-Well-1" }},
@@ -79,7 +81,7 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 //转换器
                 //var transformer = ThHydrantUtil.GetTransformer(selectPts);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0,0,0));
+                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
 
                 //提取数据
@@ -116,7 +118,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //转回到原位置
                 dataQuery.Reset(transformer);
                 dataQuery.Print();
-                 //dataQuery.Clean();
+                //dataQuery.Clean();
 
 
             }
