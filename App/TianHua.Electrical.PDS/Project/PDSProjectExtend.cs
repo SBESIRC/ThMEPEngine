@@ -277,7 +277,6 @@ namespace TianHua.Electrical.PDS.Project
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                     Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
-                ((edge.Details.CircuitForm as RegularCircuit).breaker as Breaker).SetRatedCurrent("32");
             }
 
             //统计回路级联电流
