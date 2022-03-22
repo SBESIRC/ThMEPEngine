@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
@@ -91,6 +87,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
         [DisplayName("需要系数")]
+        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
             get => edge.Target.Load.DemandFactor;
@@ -101,6 +98,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
         [DisplayName("功率因数")]
+        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
             get => edge.Target.Load.PowerFactor;
