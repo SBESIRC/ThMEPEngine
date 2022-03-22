@@ -179,7 +179,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 layoutPara.Set(histories[k].Genome);
                 if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
-                var Cars = new List<Polyline>();
+                var Walls = new List<Polyline>();
+                var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
                 var Lanes = new List<Line>();
                 var Boundary = layoutPara.OuterBoundary;
@@ -188,6 +189,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
                     try
                     {
@@ -198,9 +200,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
                 var partitionpro_final = new ParkingPartitionPro();
-                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
                 partitionpro_final.Display();
             }

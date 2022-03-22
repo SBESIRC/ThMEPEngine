@@ -71,6 +71,25 @@ namespace ThMEPArchitecture.PartitionLayout
         }
     }
 
+    public class InfoCar
+    {
+        public InfoCar(Polyline car, Point3d point, Vector3d vector)
+        {
+            Polyline=car;
+            Point=point;
+            Vector = vector;
+        }
+        public int CarLayoutMode = 0;
+        public Vector3d Vector;
+        public Point3d Point;
+        public Polyline Polyline;
+    }
+    public enum CarLayoutMode : int
+    {
+        VERT = 0,
+        PARALLEL = 1,
+    }
+
     public class CarBoxPlus
     {
         public CarBoxPlus() { }

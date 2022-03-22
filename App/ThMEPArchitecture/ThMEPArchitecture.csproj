@@ -68,6 +68,7 @@
     <Compile Include="ParkingStallArrangement\Method\PtTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\GaParameter.cs" />
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
+    <Compile Include="PartitionLayout\LayoutOutput.cs" />
     <Compile Include="PartitionLayout\LayoutPostProcessing.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProMain.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProSucceed.cs" />

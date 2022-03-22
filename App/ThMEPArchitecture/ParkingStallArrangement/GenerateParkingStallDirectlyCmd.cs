@@ -92,7 +92,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
-                var Cars = new List<Polyline>();
+                var Walls = new List<Polyline>();
+                var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
                 var Lanes = new List<Line>();
                 var Boundary = layoutPara.OuterBoundary;
@@ -101,6 +102,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
                     try
                     {
@@ -111,10 +113,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars,ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                try
+                {
+                    LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
                 count = Cars.Count;
                 var partitionpro_final = new ParkingPartitionPro();
-                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
                 partitionpro_final.Display();
             }

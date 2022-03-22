@@ -74,6 +74,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public ThCADCoreNTSSpatialIndex CarSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public List<Lane> IniLanes = new List<Lane>();
         public List<Polyline> CarSpots = new List<Polyline>();
+        public List<InfoCar> Cars = new List<InfoCar>();
         public List<Polyline> Pillars = new List<Polyline>();
         private List<Polyline> CarBoxes = new List<Polyline>();
         private List<Polyline> IniLaneBoxes = new List<Polyline>();
@@ -97,6 +98,9 @@ namespace ThMEPArchitecture.PartitionLayout
         public static double DisParallelCarLength = 6000;
         public static double DisParallelCarWidth = 2400;
         public static double DisLaneWidth = 5500;
+        public static double CollisionD = 300;
+        public static double CollisionCT = 1400;
+        public static double CollisionCM = 1500;
         public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
         public static double DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
         public static int CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);
@@ -204,7 +208,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void Dispose()
         {
-            Walls?.ForEach(e => e.Dispose());
+            //Walls?.ForEach(e => e.Dispose());
             Boundary?.Dispose();
             BoundingBox?.Dispose();
             IniLanes?.ForEach(e => e.Line?.Dispose());
@@ -225,10 +229,10 @@ namespace ThMEPArchitecture.PartitionLayout
             return count;
         }
 
-        public int Process(List<Polyline> cars, List<Polyline> pillars, List<Line> lanes, string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
+        public int Process(List<InfoCar> cars, List<Polyline> pillars, List<Line> lanes, string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
             GenerateParkingSpaces();
-            cars.AddRange(CarSpots);
+            cars.AddRange(Cars);
             pillars.AddRange(Pillars);
             lanes.AddRange(IniLanes.Select(e => CreateLine(e.Line)));
             Dispose();
@@ -314,27 +318,15 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void Display(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
-            using (AcadDatabase adb = AcadDatabase.Active())
-            {
-                if (!adb.Layers.Contains(carLayerName))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, carLayerName, 0);
-                if (!adb.Layers.Contains(columnLayerName))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, columnLayerName, 0);
-            }
-            CarSpots.Select(e =>
-            {
-                e.Layer = carLayerName;
-                e.ColorIndex = carindex;
-                return e;
-            }).AddToCurrentSpace();
-            Pillars.Select(e =>
-            {
-                e.Layer = columnLayerName;
-                if (columncolor < 0)
-                    e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
-                else e.ColorIndex = columncolor;
-                return e;
-            }).AddToCurrentSpace();
+            LayoutOutput.CarLayerName = carLayerName;
+            LayoutOutput.ColumnLayerName = columnLayerName;
+            LayoutOutput.InitializeLayer();
+            var vertcar = LayoutOutput.VCar;
+            var pcar = LayoutOutput.PCar;
+            LayoutOutput layout = new LayoutOutput(Cars, Pillars);
+            layout.DisplayColumns();
+            layout.DisplayCars();
+
         }
 
         public void GenerateParkingSpaces()
@@ -343,9 +335,7 @@ namespace ThMEPArchitecture.PartitionLayout
             GenerateLanes();
             GeneratePerpModules();
             GenerateCarsInModules();
-            //里面的函数目前不适合并行化操作
             GenerateCarsOnRestLanes();
-            //里面函数大部分可以并行化操作
             PostProcess();
         }
 
@@ -927,7 +917,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
-            var lanes = GeneratePerpModuleLanes(mindistance, DisModulus);
+            var lanes = GeneratePerpModuleLanes(mindistance, DisModulus, true, null, true);
             GeneratePerpModuleBoxes(lanes);
         }
 
@@ -956,7 +946,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 //    else continue;
                 //}
                 line.TransformBy(Matrix3d.Displacement(lanes[i].Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback);
+                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback,true);
             }
         }
 
@@ -996,7 +986,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private void GenerateCarsOnRestLanes()
         {
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
+            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;
@@ -1004,7 +994,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var line = CreateLine(vl);
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
-                    , true, false, false, false, true, true,false);
+                    , true, false, false, false, true, true, false, false, true, false, false, false, true);
             }
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
             foreach (var k in vertlanes)
