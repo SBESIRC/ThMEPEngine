@@ -778,7 +778,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var item = PDSItemInfo.Create(name, new Point(busStart.X, dy));
                     var vertice = graph.Vertices.ToList()[sel.Id];
                     var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                    var circuitVM = new Project.Module.Component.ThPDSCircuitModel(vertice, edge);
+                    var circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge);
                     render += () =>
                     {
                         {

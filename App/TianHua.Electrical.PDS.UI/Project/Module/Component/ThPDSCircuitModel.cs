@@ -8,117 +8,110 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSCircuitModel : NotifyPropertyChangedBase
     {
-        ThPDSProjectGraphNode vertice;
-        ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge;
+        private ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
 
-        public ThPDSCircuitModel(ThPDSProjectGraphNode vertice, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public ThPDSCircuitModel(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
-            this.vertice = vertice;
-            this.edge = edge;
+            _edge = edge;
         }
+
         [DisplayName("回路编号")]
         public string CircuitId
         {
-            get => edge.Circuit.ID.CircuitID;
-            //set
-            //{
-            //    edge.Circuit.ID.CircuitID = value;
-            //    OnPropertyChanged(nameof(CircuitId));
-            //}
+            get => _edge.Circuit.ID.CircuitID;
         }
+
         [DisplayName("回路形式")]
         public Model.ThPDSCircuitType CircuitType
         {
-            get => edge.Circuit.Type;
+            get => _edge.Circuit.Type;
             set
             {
-                edge.Circuit.Type = value;
+                _edge.Circuit.Type = value;
                 OnPropertyChanged(nameof(CircuitType));
             }
         }
+
         [DisplayName("功率")]
         public double Power
         {
-            get => edge.Target.Details.LowPower;
+            get => _edge.Target.Details.LowPower;
             set
             {
-                edge.Target.Details.LowPower = value;
+                _edge.Target.Details.LowPower = value;
                 OnPropertyChanged(nameof(Power));
             }
         }
+
         [DisplayName("相序")]
         public Model.ThPDSPhase Phase
         {
-            get => edge.Target.Load.Phase;
+            get => _edge.Target.Load.Phase;
             set
             {
-                edge.Target.Load.Phase = value;
+                _edge.Target.Load.Phase = value;
                 OnPropertyChanged(nameof(Phase));
             }
         }
+
         [DisplayName("负载类型")]
         public Model.PDSNodeType LoadType
         {
-            get => edge.Target.Type;
-            set
-            {
-                edge.Target.Type = value;
-                OnPropertyChanged(nameof(LoadType));
-            }
+            get => _edge.Target.Type;
         }
+
         [DisplayName("负载编号")]
         public string LoadId
         {
-            get => edge.Circuit.ID.LoadID;
-            //set
-            //{
-            //    edge.Circuit.ID.LoadID = value;
-            //    OnPropertyChanged(nameof(LoadId));
-            //}
+            get => _edge.Circuit.ID.LoadID;
         }
+
         [DisplayName("功能描述")]
         public string Description
         {
-            get => edge.Target.Load.ID.Description;
+            get => _edge.Target.Load.ID.Description;
             set
             {
-                edge.Target.Load.ID.Description = value;
+                _edge.Target.Load.ID.Description = value;
                 OnPropertyChanged(nameof(Description));
             }
         }
+
         [DisplayName("需要系数")]
         [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
-            get => edge.Target.Load.DemandFactor;
+            get => _edge.Target.Load.DemandFactor;
             set
             {
-                edge.Target.Load.DemandFactor = value;
+                _edge.Target.Load.DemandFactor = value;
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
+
         [DisplayName("功率因数")]
         [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
-            get => edge.Target.Load.PowerFactor;
+            get => _edge.Target.Load.PowerFactor;
             set
             {
-                edge.Target.Load.PowerFactor = value;
+                _edge.Target.Load.PowerFactor = value;
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }
+
         [DisplayName("计算电流")]
         public double CalculateCurrent
         {
-            get => edge.Target.Load.CalculateCurrent;
+            get => _edge.Target.Load.CalculateCurrent;
         }
         public bool CircuitLock
         {
-            get => edge.Details.CircuitLock;
+            get => _edge.Details.CircuitLock;
             set
             {
-                edge.Details.CircuitLock = value;
+                _edge.Details.CircuitLock = value;
                 OnPropertyChanged(nameof(CircuitLock));
             }
         }
