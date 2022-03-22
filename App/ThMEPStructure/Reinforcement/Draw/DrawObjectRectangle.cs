@@ -21,9 +21,10 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        void CalReinforcePosition(int pointNum,Polyline polyline,ThRectangleEdgeComponent thRectangleEdgeComponent,double scale)
+        protected override void CalReinforcePosition(int pointNum,Polyline polyline)
         {
-            
+            points = new List<Point3d>();
+            pointsFlag = new List<int>();
             //纵筋相对轮廓的偏移值
             double offset = scale * (thRectangleEdgeComponent.C + 5) + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
             //根据点的对数所有点的位置确定位置
@@ -123,7 +124,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         }
 
 
-        void CalLinkPosition(ThRectangleEdgeComponent thRectangleEdgeComponent)
+        protected override void CalLinkPosition()
         {
             //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
             for(int i=0;i<points.Count;i+=2)
@@ -243,6 +244,25 @@ namespace ThMEPStructure.Reinforcement.Draw
                 Rotation = Math.PI / 2.0
             };
             rotatedDimensions.Add(rotatedDimension);
+        }
+
+        public override void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
+        {
+            this.thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
+            this.elevation = elevation;
+            this.tblRowHeight = tblRowHeight;
+            this.scale = scale;
+            this.number = thRectangleEdgeComponent.Number;
+            TableStartPt = position;
+            if (thRectangleEdgeComponent.IsCalculation)
+            {
+                this.Reinforce = thRectangleEdgeComponent.EnhancedReinforce;
+            }
+            else
+            {
+                this.Reinforce = thRectangleEdgeComponent.Reinforce;
+            }
+            this.Stirrup = thRectangleEdgeComponent.Stirrup;
         }
     }
 }

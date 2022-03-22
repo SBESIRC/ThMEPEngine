@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-
+using ThMEPStructure.Reinforcement.Draw;
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Model
 {
     public class ThRectangleEdgeComponent: ThEdgeComponent
@@ -20,6 +21,9 @@ namespace ThMEPStructure.Reinforcement.Model
 
         public override DBObjectCollection Draw(string elevation, double tblRowHeight, double scale)
         {
+            DrawObjectRectangle drawObjectRectangle = new DrawObjectRectangle();
+            drawObjectRectangle.CalAndDrawGangJin(this, elevation, tblRowHeight, scale, new Point3d(0, 0, 0));
+            return drawObjectRectangle.objectCollection;
             throw new System.NotImplementedException();
         }
     }

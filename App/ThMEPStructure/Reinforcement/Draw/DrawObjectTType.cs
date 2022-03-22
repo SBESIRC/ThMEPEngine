@@ -155,10 +155,11 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        void CalReinforcePosition(int pointNum, ThTTypeEdgeComponent thTTypeEdgeComponent, Polyline polyline, double scale)
+        protected override void CalReinforcePosition(int pointNum, Polyline polyline)
         {
             //存储结果
             points = new List<Point3d>();
+            pointsFlag = new List<int>();
             //纵筋相对轮廓的偏移值
             double offset = scale * (thTTypeEdgeComponent.C + 5) + thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight;
             //根据八个轮廓上的点的位置计算纵筋位置
@@ -192,6 +193,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     break;
                 }
                 points.Add(tmpPoint);
+                pointsFlag.Add(1);
             }
 
             //底层需要添加额外的纵筋，2，3两点中点，6，7中点
@@ -201,6 +203,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[6].X + points[7].X) / 2.0, (points[6].Y + points[7].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
+                pointsFlag.Add(4);
+                pointsFlag.Add(4);
             }
 
             //竖向需要添加额外的钢筋,0,9中点，4，5中点
@@ -210,6 +214,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint);
                 tmpPoint = new Point3d((points[4].X + points[5].X) / 2.0, (points[4].Y + points[5].Y) / 2.0, 0.0);
                 points.Add(tmpPoint);
+                pointsFlag.Add(4);
+                pointsFlag.Add(4);
             }
 
             int needLayoutPointsNum = pointNum - points.Count;
@@ -269,6 +275,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[9].X, points[9].Y - deltaY, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(2);
+                pointsFlag.Add(2);
             }
             for (int i = 0; i < resultX1; i++)
             {
@@ -276,6 +284,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(3);
+                pointsFlag.Add(3);
             }
             for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
             {
@@ -283,11 +293,13 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
                 points.Add(tmpPoint2);
+                pointsFlag.Add(3);
+                pointsFlag.Add(3);
             }
 
         }
 
-        void CalLinkPosition(ThTTypeEdgeComponent thTTypeEdgeComponent)
+        protected override void CalLinkPosition()
         {
             //需要解析link3有几个,需要优先选择间隔大的
             int num = Helper.SumLinkNum(thTTypeEdgeComponent.Link3);
@@ -309,6 +321,25 @@ namespace ThMEPStructure.Reinforcement.Draw
 
                 }
             }
+        }
+
+        public override void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
+        {
+            this.thTTypeEdgeComponent = component as ThTTypeEdgeComponent;
+            this.elevation = elevation;
+            this.tblRowHeight = tblRowHeight;
+            this.scale = scale;
+            this.number = thTTypeEdgeComponent.Number;
+            TableStartPt = position;
+            if (thTTypeEdgeComponent.IsCalculation)
+            {
+                this.Reinforce = thTTypeEdgeComponent.EnhancedReinforce;
+            }
+            else
+            {
+                this.Reinforce = thTTypeEdgeComponent.Reinforce;
+            }
+            this.Stirrup = thTTypeEdgeComponent.Stirrup;
         }
 
 

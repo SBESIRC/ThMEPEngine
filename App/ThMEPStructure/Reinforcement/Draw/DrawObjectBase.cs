@@ -22,7 +22,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public List<RotatedDimension> rotatedDimensions;
         public List<Polyline> Links = new List<Polyline>();
 
-        public List<Point3d> points = new List<Point3d>();    //纵筋位置
+        public List<Point3d> points;    //纵筋位置
         //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
         protected List<int> pointsFlag = new List<int>();
         public DBObjectCollection objectCollection;
@@ -31,8 +31,13 @@ namespace ThMEPStructure.Reinforcement.Draw
         public string Reinforce;
         public string Stirrup;
 
+        public static void GetTableFirstRowHW()
+        {
+
+        }
+
         //根据轮廓的点来计算表格第一行的长宽
-        public void calTableFirstRowHW(Polyline polyline,out double height,out double width)
+        public void CalTableFirstRowHW(Polyline polyline,out double height,out double width)
         {
             //遍历所有点，找到最小的矩形包围盒，再计算图上大小之后，再对宽度放大三倍，高度放大四倍
             double xMin = 1e10;
@@ -134,6 +139,9 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 绘制连接墙体
         /// </summary>
         public abstract void DrawWall();
+        
+        protected abstract void CalReinforcePosition(int pointNum, Polyline polyline);
+        protected abstract void CalLinkPosition();
 
         public Polyline GenPouDuan(Point3d pt1, Point3d pt2, Point3d linePt, out Line line1, out Line line2)
         {
@@ -162,5 +170,123 @@ namespace ThMEPStructure.Reinforcement.Draw
             tmp.Closed = false;
             return tmp;
         }
+
+        public void CalAndDrawGangJin(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
+        {
+            init(component,elevation,tblRowHeight,scale,position);
+            CalGangjinPosition(component);
+            DrawGangJin(component);
+        }
+
+        public abstract void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position);
+
+        public void CalGangjinPosition(ThEdgeComponent component)
+        {
+            //计算轮廓得到polyline
+            DrawOutline();
+
+            //计算表格轮廓
+            CalTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
+
+            //统计纵筋的数量
+            StrToReinforce strToReinforce = new StrToReinforce();
+            if (component is ThLTypeEdgeComponent)
+            {
+                ThLTypeEdgeComponent thLTypeEdgeComponent = component as ThLTypeEdgeComponent;
+                strToReinforce = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
+            }
+            else if(component is ThRectangleEdgeComponent)
+            {
+                ThRectangleEdgeComponent thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
+                strToReinforce = Helper.StrToRein(thRectangleEdgeComponent.Reinforce);
+            }
+            else if(component is ThTTypeEdgeComponent)
+            {
+                ThTTypeEdgeComponent thTTypeEdgeComponent = component as ThTTypeEdgeComponent;
+                strToReinforce = Helper.StrToRein(thTTypeEdgeComponent.Reinforce);
+            }
+            
+            int pointNum = strToReinforce.num;
+            //计算纵筋位置
+            CalReinforcePosition(pointNum, Outline);
+
+            //计算拉筋位置
+            CalLinkPosition();
+
+        }
+
+        public void DrawGangJin(ThEdgeComponent component)
+        {
+            objectCollection = new DBObjectCollection();
+
+            //绘制表格
+            DBObjectCollection tableCollection = new DBObjectCollection();
+            tableCollection = DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
+            foreach (DBObject element in tableCollection)
+            {
+                objectCollection.Add(element);
+            }
+            //绘制纵筋
+            foreach (var point in points)
+            {
+                GangJinReinforce gangJinReinforce = new GangJinReinforce
+                {
+                    GangjinType = 0,
+                    point = point,
+                    r = component.PointReinforceLineWeight
+                };
+                var rein = gangJinReinforce.DrawReinforce();
+                rein.Layer = "REIN";
+                objectCollection.Add(rein);
+            }
+            //绘制箍筋
+            GangJinStirrup stirrup = new GangJinStirrup
+            {
+                Outline = Outline,
+                scale = scale,
+                GangjinType = 1
+            };
+            if(component is ThLTypeEdgeComponent)
+            {
+                ThLTypeEdgeComponent thLTypeEdgeComponent = component as ThLTypeEdgeComponent;
+                stirrup.CalPositionL(thLTypeEdgeComponent);
+            }
+            else if(component is ThRectangleEdgeComponent)
+            {
+                ThRectangleEdgeComponent thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
+                stirrup.CalPositionR(thRectangleEdgeComponent);
+            }
+            else if(component is ThTTypeEdgeComponent)
+            {
+                ThTTypeEdgeComponent thTTypeEdgeComponent = component as ThTTypeEdgeComponent;
+                stirrup.CalPositionT(thTTypeEdgeComponent);
+            }
+
+            foreach (var polyline in stirrup.stirrups)
+            {
+                polyline.Layer = "LINK";
+                objectCollection.Add(polyline);
+            }
+            //绘制拉筋
+
+            //轮廓、尺寸、墙体
+            Outline.Layer = "COLU_DE_TH";
+            objectCollection.Add(Outline);
+            DrawDim();
+            foreach (var dimension in rotatedDimensions)
+            {
+                dimension.Layer = "COLU_DE_DIM";
+                objectCollection.Add(dimension);
+            }
+            DrawWall();
+            foreach (var wallLine in LinkedWallLines)
+            {
+                wallLine.Layer = "THIN";
+                objectCollection.Add(wallLine);
+            }
+
+        }
+
+
     }
 }

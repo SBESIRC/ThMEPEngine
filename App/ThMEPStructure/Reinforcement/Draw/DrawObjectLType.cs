@@ -129,8 +129,10 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        void CalReinforcePosition(int pointNum, Polyline polyline)
+        protected override void CalReinforcePosition(int pointNum, Polyline polyline)
         {
+            points = new List<Point3d>();
+            pointsFlag = new List<int>();
             //纵筋相对轮廓的偏移值
             double offset = scale * (thLTypeEdgeComponent.C + 5) + thLTypeEdgeComponent.PointReinforceLineWeight + thLTypeEdgeComponent.StirrupLineWeight;
             //根据八个轮廓上的点的位置计算纵筋位置
@@ -164,7 +166,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     break;
                 }
                 points.Add(tmpPoint);
-                pointsFlag.Add(0);
+                pointsFlag.Add(1);
             }
 
             //底层需要添加额外的纵筋，1，2两点中点，4，5中点
@@ -249,7 +251,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         }
 
 
-        void CalLinkPosition()
+        protected override void CalLinkPosition()
         {
             //遍历所有点，找出2，3,4类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
             for (int i = 0; i < points.Count; i += 2)
@@ -297,90 +299,18 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
         }
 
-        public void CalGangjinPosition()
+        
+
+
+        public override void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
         {
-            Extents2d extents = new Extents2d();
-            
-            //计算轮廓得到polyline
-            DrawOutline();
-
-            //计算表格轮廓
-            calTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
-
-
-            //统计纵筋的数量
-            StrToReinforce strToReinforce = new StrToReinforce();
-            strToReinforce = Helper.StrToRein(thLTypeEdgeComponent.Reinforce);
-            int pointNum = strToReinforce.num;
-            //计算纵筋位置
-            CalReinforcePosition(pointNum, Outline);
-
-            //计算箍筋位置
-            CalStirrupPosition();
-
-            //计算拉筋位置
-            CalLinkPosition();
-
-        }
-
-        public void DrawGangJin()
-        {
-            objectCollection = new DBObjectCollection();
-
-            //绘制表格
-            DBObjectCollection tableCollection = new DBObjectCollection();
-            tableCollection = DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
-            foreach(DBObject element in tableCollection)
-            {
-                objectCollection.Add(element);
-            }
-            //绘制纵筋
-            foreach (var point in points)
-            {
-                GangJinReinforce gangJinReinforce = new GangJinReinforce
-                {
-                    GangjinType = 0,
-                    point = point,
-                    r = thLTypeEdgeComponent.PointReinforceLineWeight
-                };
-                var rein = gangJinReinforce.DrawReinforce();
-                rein.Layer = "REIN";
-                objectCollection.Add(rein);
-            }
-            //绘制箍筋、拉筋
-            foreach(var link in Links)
-            {
-                link.Layer = "LINK";
-                objectCollection.Add(link);
-            }
-
-            //轮廓、尺寸、墙体
-            Outline.Layer = "COLU_DE_TH";
-            objectCollection.Add(Outline);
-            DrawDim();
-            foreach(var dimension in rotatedDimensions)
-            {
-                dimension.Layer = "COLU_DE_DIM";
-                objectCollection.Add(dimension);
-            }
-            DrawWall();
-            foreach(var wallLine in LinkedWallLines)
-            {
-                wallLine.Layer = "THIN";
-                objectCollection.Add(wallLine);
-            }
-
-        }
-
-        public void CalAndDrawGangJin(ThLTypeEdgeComponent thLTypeEdgeComponent, string elevation, double tblRowHeight, double scale, Point3d position)
-        {
-            this.thLTypeEdgeComponent = thLTypeEdgeComponent;
+            this.thLTypeEdgeComponent = component as ThLTypeEdgeComponent;
             this.elevation = elevation;
             this.tblRowHeight = tblRowHeight;
             this.scale = scale;
             this.number = thLTypeEdgeComponent.Number;
             TableStartPt = position;
-            if(thLTypeEdgeComponent.IsCalculation)
+            if (thLTypeEdgeComponent.IsCalculation)
             {
                 this.Reinforce = thLTypeEdgeComponent.EnhancedReinforce;
             }
@@ -389,8 +319,6 @@ namespace ThMEPStructure.Reinforcement.Draw
                 this.Reinforce = thLTypeEdgeComponent.Reinforce;
             }
             this.Stirrup = thLTypeEdgeComponent.Stirrup;
-            CalGangjinPosition();
-            DrawGangJin();
         }
     }
 }
