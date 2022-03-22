@@ -75,7 +75,7 @@ namespace TianHua.Hvac.UI.Command
                 if (result.Status == PromptStatus.OK)
                 {
                     var objIds = result.Value.GetObjectIds();
-                    excludeLine = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).ToCollection();
+                    excludeLine = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).Where(o => o != null).ToCollection();
                 }
             }
         }
