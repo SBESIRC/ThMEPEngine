@@ -261,7 +261,7 @@ namespace TianHua.Electrical.PDS.Service
         public ThPDSCircuit CircuitMarkAnalysis(List<string> infos, List<string> distBoxKey)
         {
             var id = CreateCircuitID(infos, distBoxKey);
-            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfigModel.BlockConfig);
+            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfig.BlockConfig);
             var circuit = new ThPDSCircuit
             {
                 ID = id,
@@ -273,7 +273,7 @@ namespace TianHua.Electrical.PDS.Service
         public ThPDSCircuit CircuitMarkAnalysis(List<string> infos)
         {
             var id = CreateCircuitID(infos);
-            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfigModel.BlockConfig);
+            var circuitModel = SelectModel(id.CircuitNumber, ThPDSCircuitConfig.BlockConfig);
             var circuit = new ThPDSCircuit
             {
                 ID = id,
@@ -364,9 +364,9 @@ namespace TianHua.Electrical.PDS.Service
             return circuitID;
         }
 
-        private ThPDSCircuitModel SelectModel(string circuitNumber, List<ThPDSCircuitModel> table)
+        private ThPDSCircuitConfigItem SelectModel(string circuitNumber, List<ThPDSCircuitConfigItem> table)
         {
-            var result = new ThPDSCircuitModel();
+            var result = new ThPDSCircuitConfigItem();
             foreach (var o in table)
             {
                 var check = o.TextKey.Replace("*", ".*");

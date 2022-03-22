@@ -96,7 +96,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             if (circuit.Type != ThPDSCircuitType.None)
             {
-                var config = ThPDSCircuitConfigModel.BlockConfig.Where(o => o.CircuitType == circuit.Type).First();
+                var config = ThPDSCircuitConfig.BlockConfig.Where(o => o.CircuitType == circuit.Type).First();
                 load.Phase = config.Phase;
                 load.DemandFactor = config.DemandFactor;
                 load.PowerFactor = config.PowerFactor;
