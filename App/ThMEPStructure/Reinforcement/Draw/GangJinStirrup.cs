@@ -53,15 +53,15 @@ namespace ThMEPStructure.Reinforcement.Draw
             double offset = (thTTypeEdgeComponent.C + 5) * scale + thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight;
             pt += new Vector3d(offset, -offset, 0);
             double r = thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight / 2;
-            double width = (thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Hc2l + thTTypeEdgeComponent.Bf) * scale - 2 * offset;
-            double height = thTTypeEdgeComponent.Bw * scale - 2 * offset;
+            double width = thTTypeEdgeComponent.Bf * scale - 2 * offset;
+            double height = (thTTypeEdgeComponent.Bw + thTTypeEdgeComponent.Hc1) * scale - 2 * offset;
             Polyline polyline = DrawStirrup(width, height, pt, r, thTTypeEdgeComponent.StirrupLineWeight);
             stirrups.Add(polyline);
 
-            pt = Outline.GetPoint3dAt(8);
+            pt = Outline.GetPoint3dAt(2);
             pt += new Vector3d(offset, -offset, 0);
-            width = thTTypeEdgeComponent.Bf * scale - 2 * offset;
-            height = (thTTypeEdgeComponent.Bw + thTTypeEdgeComponent.Hc1) * scale - 2 * offset;
+            width = (thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent .Hc2l) * scale - 2 * offset;
+            height = thTTypeEdgeComponent.Bw * scale - 2 * offset;
             polyline = DrawStirrup(width, height, pt, r, thTTypeEdgeComponent.StirrupLineWeight);
             stirrups.Add(polyline);
         }

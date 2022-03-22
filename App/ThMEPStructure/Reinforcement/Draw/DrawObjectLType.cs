@@ -284,7 +284,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
         }
 
-        void CalStirrupPosition()
+        protected override void CalStirrupPosition()
         {
             GangJinStirrup stirrup = new GangJinStirrup
             {

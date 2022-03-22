@@ -129,26 +129,40 @@ namespace ThMEPStructure.Reinforcement.Draw
             //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
             for(int i=0;i<points.Count;i+=2)
             {
-                if(pointsFlag[i]==2)
+                if (pointsFlag[i] == 2)
                 {
-                    if(!thRectangleEdgeComponent.Link2.IsNullOrEmpty())
+                    if (thRectangleEdgeComponent.Link2.IsNullOrEmpty())
                     {
-                        
+                        continue;
                     }
                 }
-                else if(pointsFlag[i] == 3)
+                else if (pointsFlag[i] == 3)
                 {
-                    if (!thRectangleEdgeComponent.Link3.IsNullOrEmpty())
+                    if (thRectangleEdgeComponent.Link3.IsNullOrEmpty())
                     {
-
+                        continue;
                     }
                 }
+                else continue;
+                double r = thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight / 2;
+                Polyline link = GangJinLink.DrawLink(points[i], points[i + 1], r, thRectangleEdgeComponent.StirrupLineWeight, scale);
+                Links.Add(link);
             }
         }
 
-        void CalStirrupPosition()
+        protected override void CalStirrupPosition()
         {
-
+            GangJinStirrup stirrup = new GangJinStirrup
+            {
+                Outline = Outline,
+                scale = scale,
+                GangjinType = 1
+            };
+            stirrup.CalPositionR(thRectangleEdgeComponent);
+            foreach (var polyline in stirrup.stirrups)
+            {
+                Links.Add(polyline);
+            }
         }
 
         /// <summary>
@@ -245,7 +259,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             };
             rotatedDimensions.Add(rotatedDimension);
         }
-
+        
         public override void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
         {
             this.thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
@@ -264,5 +278,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             this.Stirrup = thRectangleEdgeComponent.Stirrup;
         }
+
+        
     }
 }

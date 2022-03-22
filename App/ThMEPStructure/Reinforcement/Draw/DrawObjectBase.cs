@@ -142,7 +142,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         
         protected abstract void CalReinforcePosition(int pointNum, Polyline polyline);
         protected abstract void CalLinkPosition();
-
+        protected abstract void CalStirrupPosition();
         public Polyline GenPouDuan(Point3d pt1, Point3d pt2, Point3d linePt, out Line line1, out Line line2)
         {
             double length = pt1.DistanceTo(pt2);
@@ -209,7 +209,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             int pointNum = strToReinforce.num;
             //计算纵筋位置
             CalReinforcePosition(pointNum, Outline);
-
+            //计算箍筋位置
+            CalStirrupPosition();
             //计算拉筋位置
             CalLinkPosition();
 
@@ -239,35 +240,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                 rein.Layer = "REIN";
                 objectCollection.Add(rein);
             }
-            //绘制箍筋
-            GangJinStirrup stirrup = new GangJinStirrup
+            //绘制箍筋、拉筋
+            foreach (var link in Links)
             {
-                Outline = Outline,
-                scale = scale,
-                GangjinType = 1
-            };
-            if(component is ThLTypeEdgeComponent)
-            {
-                ThLTypeEdgeComponent thLTypeEdgeComponent = component as ThLTypeEdgeComponent;
-                stirrup.CalPositionL(thLTypeEdgeComponent);
+                link.Layer = "LINK";
+                objectCollection.Add(link);
             }
-            else if(component is ThRectangleEdgeComponent)
-            {
-                ThRectangleEdgeComponent thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
-                stirrup.CalPositionR(thRectangleEdgeComponent);
-            }
-            else if(component is ThTTypeEdgeComponent)
-            {
-                ThTTypeEdgeComponent thTTypeEdgeComponent = component as ThTTypeEdgeComponent;
-                stirrup.CalPositionT(thTTypeEdgeComponent);
-            }
-
-            foreach (var polyline in stirrup.stirrups)
-            {
-                polyline.Layer = "LINK";
-                objectCollection.Add(polyline);
-            }
-            //绘制拉筋
 
             //轮廓、尺寸、墙体
             Outline.Layer = "COLU_DE_TH";

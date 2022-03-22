@@ -20,19 +20,19 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             double width = (thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Hc2l + thTTypeEdgeComponent.Bf) * scale;
             double height = (thTTypeEdgeComponent.Bw + thTTypeEdgeComponent.Hc1) * scale;
-            Point3d startPt = TableStartPt + new Vector3d(width, -height * 2.5, 0);
+            Point3d startPt = TableStartPt + new Vector3d(width + thTTypeEdgeComponent.Hc2s * scale, -height * 2.5, 0);
             var pts = new Point3dCollection
             {
-                startPt + new Vector3d(0, 0, 0)* scale,
-                startPt + new Vector3d(0, -thTTypeEdgeComponent.Bw, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, -thTTypeEdgeComponent.Bw, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -thTTypeEdgeComponent.Bw, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -thTTypeEdgeComponent.Bw, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, 0, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, 0, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, thTTypeEdgeComponent.Hc1, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, thTTypeEdgeComponent.Hc1, 0) * scale,
-                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, 0, 0) * scale
+                startPt,
+                startPt + new Vector3d(0, -thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(-thTTypeEdgeComponent.Hc2s, -thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(-thTTypeEdgeComponent.Hc2s, -thTTypeEdgeComponent.Hc1 - thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(0, -thTTypeEdgeComponent.Hc1 - thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Bf, -thTTypeEdgeComponent.Hc1 - thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -thTTypeEdgeComponent.Hc1 - thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Bf, -thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Bf, 0, 0) * scale
             };
             Outline = pts.CreatePolyline();
         }
@@ -57,7 +57,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             //分别画出三个方向的墙线
             if (left)
             {
-                Point3d pt1 = Outline.GetPoint3dAt(0), pt2 = Outline.GetPoint3dAt(1);
+                Point3d pt1 = Outline.GetPoint3dAt(2), pt2 = Outline.GetPoint3dAt(3);
                 double bw = thTTypeEdgeComponent.Bw * scale;
                 Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(-bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
                 LinkedWallLines.Add(line1);
@@ -66,7 +66,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             if (right)
             {
-                Point3d pt1 = Outline.GetPoint3dAt(4), pt2 = Outline.GetPoint3dAt(5);
+                Point3d pt1 = Outline.GetPoint3dAt(6), pt2 = Outline.GetPoint3dAt(7);
                 double bw = thTTypeEdgeComponent.Bw * scale;
                 Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(bw * 5 / 8.0, 0, 0), out Line line1, out Line line2);
                 LinkedWallLines.Add(line1);
@@ -75,7 +75,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             if (top)
             {
-                Point3d pt1 = Outline.GetPoint3dAt(7), pt2 = Outline.GetPoint3dAt(8);
+                Point3d pt1 = Outline.GetPoint3dAt(9), pt2 = Outline.GetPoint3dAt(0);
                 double bf = thTTypeEdgeComponent.Bf * scale;
                 Polyline polyline = GenPouDuan(pt1, pt2, pt1 + new Vector3d(0, bf * 5 / 8.0, 0), out Line line1, out Line line2);
                 LinkedWallLines.Add(line1);
@@ -88,9 +88,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             rotatedDimensions = new List<RotatedDimension>();
             RotatedDimension rotatedDimension = new RotatedDimension
             {
-                XLine1Point = Outline.GetPoint3dAt(1),
-                XLine2Point = Outline.GetPoint3dAt(2),
-                DimLinePoint = Outline.GetPoint3dAt(1) + new Vector3d(0, -600, 0),
+                XLine1Point = Outline.GetPoint3dAt(3),
+                XLine2Point = Outline.GetPoint3dAt(4),
+                DimLinePoint = Outline.GetPoint3dAt(3) + new Vector3d(0, -600, 0),
                 DimensionText = thTTypeEdgeComponent.Hc2s.ToString(),
                 Rotation = 0.0
             };
@@ -98,9 +98,9 @@ namespace ThMEPStructure.Reinforcement.Draw
 
             rotatedDimension = new RotatedDimension
             {
-                XLine1Point = Outline.GetPoint3dAt(2),
-                XLine2Point = Outline.GetPoint3dAt(3),
-                DimLinePoint = Outline.GetPoint3dAt(2) + new Vector3d(0, -600, 0),
+                XLine1Point = Outline.GetPoint3dAt(4),
+                XLine2Point = Outline.GetPoint3dAt(5),
+                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(0, -600, 0),
                 DimensionText = thTTypeEdgeComponent.Bf.ToString(),
                 Rotation = 0.0
             };
@@ -108,9 +108,9 @@ namespace ThMEPStructure.Reinforcement.Draw
 
             rotatedDimension = new RotatedDimension
             {
-                XLine1Point = Outline.GetPoint3dAt(3),
-                XLine2Point = Outline.GetPoint3dAt(4),
-                DimLinePoint = Outline.GetPoint3dAt(3) + new Vector3d(0, -600, 0),
+                XLine1Point = Outline.GetPoint3dAt(5),
+                XLine2Point = Outline.GetPoint3dAt(6),
+                DimLinePoint = Outline.GetPoint3dAt(5) + new Vector3d(0, -600, 0),
                 DimensionText = thTTypeEdgeComponent.Hc2l.ToString(),
                 Rotation = 0.0
             };
@@ -119,9 +119,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             double bw = thTTypeEdgeComponent.Bw * 5 / 8.0 * scale;
             rotatedDimension = new RotatedDimension
             {
-                XLine1Point = Outline.GetPoint3dAt(4),
-                XLine2Point = Outline.GetPoint3dAt(5),
-                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(600, 0, 0),
+                XLine1Point = Outline.GetPoint3dAt(6),
+                XLine2Point = Outline.GetPoint3dAt(7),
+                DimLinePoint = Outline.GetPoint3dAt(6) + new Vector3d(600, 0, 0),
                 DimensionText = thTTypeEdgeComponent.Bw.ToString(),
                 Rotation = Math.PI / 2.0
             };
@@ -135,9 +135,9 @@ namespace ThMEPStructure.Reinforcement.Draw
 
             rotatedDimension = new RotatedDimension
             {
-                XLine1Point = Outline.GetPoint3dAt(5),
-                XLine2Point = Outline.GetPoint3dAt(5) + (Outline.GetPoint3dAt(7) - Outline.GetPoint3dAt(6)),
-                DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(600, 0, 0),
+                XLine1Point = Outline.GetPoint3dAt(7),
+                XLine2Point = Outline.GetPoint3dAt(7) + (Outline.GetPoint3dAt(9) - Outline.GetPoint3dAt(8)),
+                DimLinePoint = Outline.GetPoint3dAt(6) + new Vector3d(600, 0, 0),
                 DimensionText = thTTypeEdgeComponent.Hc1.ToString(),
                 Rotation = Math.PI / 2.0
             };
@@ -149,6 +149,21 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             rotatedDimensions.Add(rotatedDimension);
         }
+        protected override void CalStirrupPosition()
+        {
+            GangJinStirrup stirrup = new GangJinStirrup
+            {
+                Outline = Outline,
+                scale = scale,
+                GangjinType = 1
+            };
+            stirrup.CalPositionT(thTTypeEdgeComponent);
+            foreach (var polyline in stirrup.stirrups)
+            {
+                Links.Add(polyline);
+            }
+        }
+         
 
         /// <summary>
         /// T型钢筋确定位置，轮廓上10个点
