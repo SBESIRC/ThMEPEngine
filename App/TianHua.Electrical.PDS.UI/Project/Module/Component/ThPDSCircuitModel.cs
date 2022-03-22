@@ -45,6 +45,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("相序")]
+        [EditorAttribute(typeof(ThPDSCircuitPhaseSequenceEnumPropertyEditor), typeof(PropertyEditorBase))]
         public PhaseSequence PhaseSequence
         {
             get => _edge.Target.Details.PhaseSequence;
