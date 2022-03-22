@@ -3,6 +3,7 @@ using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Circuit;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -44,13 +45,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("相序")]
-        public Model.ThPDSPhase Phase
+        public PhaseSequence PhaseSequence
         {
-            get => _edge.Target.Load.Phase;
+            get => _edge.Target.Details.PhaseSequence;
             set
             {
-                _edge.Target.Load.Phase = value;
-                OnPropertyChanged(nameof(Phase));
+                _edge.Target.Details.PhaseSequence = value;
+                OnPropertyChanged(nameof(PhaseSequence));
             }
         }
 

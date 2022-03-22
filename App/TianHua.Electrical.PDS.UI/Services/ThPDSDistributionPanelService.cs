@@ -960,7 +960,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "相序");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Phase)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                             }
                         }
