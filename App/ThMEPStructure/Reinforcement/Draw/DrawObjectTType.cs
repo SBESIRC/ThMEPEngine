@@ -16,22 +16,23 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 标记三个方向是否接墙
         /// </summary>
         private bool top = false, left = false, right = false;
-        private List<Point3d> points;
-        private List<int> pointsFlag;
         public override void DrawOutline()
         {
+            double width = (thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Hc2l + thTTypeEdgeComponent.Bf) * scale;
+            double height = (thTTypeEdgeComponent.Bw + thTTypeEdgeComponent.Hc1) * scale;
+            Point3d startPt = TableStartPt + new Vector3d(width, -height * 2.5, 0);
             var pts = new Point3dCollection
             {
-                TableStartPt + new Vector3d(200, -1500, 0)* scale,
-                TableStartPt + new Vector3d(200, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -1500 - thTTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -1500, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -1500 + thTTypeEdgeComponent.Hc1, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500 + thTTypeEdgeComponent.Hc1, 0) * scale,
-                TableStartPt + new Vector3d(200 + thTTypeEdgeComponent.Hc2s, -1500, 0) * scale
+                startPt + new Vector3d(0, 0, 0)* scale,
+                startPt + new Vector3d(0, -thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, -thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, -thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, -thTTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf + thTTypeEdgeComponent.Hc2l, 0, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, 0, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Bf, thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, thTTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thTTypeEdgeComponent.Hc2s, 0, 0) * scale
             };
             Outline = pts.CreatePolyline();
         }

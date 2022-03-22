@@ -13,7 +13,7 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectRectangle:DrawObjectBase
     {
-        private ThRectangleEdgeComponent thRectangleEdgeComponent;
+        ThRectangleEdgeComponent thRectangleEdgeComponent;
         
         
         /// <summary>
@@ -153,37 +153,40 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <summary>
         /// 计算得到的都是本地坐标默认，
         /// </summary>
-        public void CalGangjinPosition()
-        {
-            foreach (var gangJin in GangJinBases)
-            {
-                //如果是纵筋
-                if (gangJin.GangjinType == 0)
-                {
-                    //更新gangjin的值
-                    //CalReinforcePosition();
-                }
-                //如果是箍筋
-                else if (gangJin.GangjinType == 1)
-                {
-                    CalStirrupPosition();
-                }
-                //如果是拉筋
-                else if (gangJin.GangjinType == 2)
-                {
-                    //CalLinkPosition();
-                }
-            }
-        }
+        //public void CalGangjinPosition()
+        //{
+        //    foreach (var gangJin in GangJinBases)
+        //    {
+        //        //如果是纵筋
+        //        if (gangJin.GangjinType == 0)
+        //        {
+        //            //更新gangjin的值
+        //            //CalReinforcePosition();
+        //        }
+        //        //如果是箍筋
+        //        else if (gangJin.GangjinType == 1)
+        //        {
+        //            CalStirrupPosition();
+        //        }
+        //        //如果是拉筋
+        //        else if (gangJin.GangjinType == 2)
+        //        {
+        //            //CalLinkPosition();
+        //        }
+        //    }
+        //}
 
         public override void DrawOutline()
         {
+            double width = thRectangleEdgeComponent.Hc * scale;
+            double height = thRectangleEdgeComponent.Bw * scale;
+            Point3d startPt = TableStartPt + new Vector3d(width, -height * 2.5, 0);
             var pts = new Point3dCollection
             {
-                TableStartPt + new Vector3d(450, -1500, 0) * scale,
-                TableStartPt + new Vector3d(450, -1500 - thRectangleEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(450 + thRectangleEdgeComponent.Hc, -1500 - thRectangleEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(450 + thRectangleEdgeComponent.Hc, -1500, 0) * scale
+                startPt + new Vector3d(0, 0, 0) * scale,
+                startPt + new Vector3d(0, -height, 0),
+                startPt + new Vector3d(width, -height, 0),
+                startPt + new Vector3d(width, 0, 0)
             };
             Outline = pts.CreatePolyline();
         }

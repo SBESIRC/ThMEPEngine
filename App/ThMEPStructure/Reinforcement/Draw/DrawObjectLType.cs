@@ -19,16 +19,19 @@ namespace ThMEPStructure.Reinforcement.Draw
         private bool top = false, right = false;
         public override void DrawOutline()
         {
+            double width = (thLTypeEdgeComponent.Bf + thLTypeEdgeComponent.Hc2) * scale;
+            double height = (thLTypeEdgeComponent.Bw + thLTypeEdgeComponent.Hc1) * scale;
+            Point3d startPt = TableStartPt + new Vector3d(width, -height * 2.5, 0);
             var pts = new Point3dCollection
             {
-                TableStartPt + new Vector3d(450, -1000, 0) * scale,
-                TableStartPt + new Vector3d(450, -1000 - thLTypeEdgeComponent.Hc1, 0) * scale,
-                TableStartPt + new Vector3d(450, -1000 - thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(450 + thLTypeEdgeComponent.Bf, -1000 - thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(450 + thLTypeEdgeComponent.Bf + thLTypeEdgeComponent.Hc2, -1000 - thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
-                TableStartPt + new Vector3d(450 + thLTypeEdgeComponent.Bf + thLTypeEdgeComponent.Hc2, -1000 - thLTypeEdgeComponent.Hc1, 0) * scale,
-                TableStartPt + new Vector3d(450 + thLTypeEdgeComponent.Bf, -1000 - thLTypeEdgeComponent.Hc1, 0) * scale,
-                TableStartPt + new Vector3d(450 + thLTypeEdgeComponent.Bf, -1000, 0) * scale
+                startPt,
+                startPt + new Vector3d(0, -thLTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(0, -thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thLTypeEdgeComponent.Bf, -thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thLTypeEdgeComponent.Bf + thLTypeEdgeComponent.Hc2, -thLTypeEdgeComponent.Hc1 - thLTypeEdgeComponent.Bw, 0) * scale,
+                startPt + new Vector3d(thLTypeEdgeComponent.Bf + thLTypeEdgeComponent.Hc2, -thLTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thLTypeEdgeComponent.Bf, -thLTypeEdgeComponent.Hc1, 0) * scale,
+                startPt + new Vector3d(thLTypeEdgeComponent.Bf, 0, 0) * scale
             };
             Outline = pts.CreatePolyline();
         }
@@ -93,7 +96,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 XLine1Point = Outline.GetPoint3dAt(4),
                 XLine2Point = Outline.GetPoint3dAt(5),
                 DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(800, 0, 0),
-                DimensionText = thLTypeEdgeComponent.Hc2.ToString(),
+                DimensionText = thLTypeEdgeComponent.Bw.ToString(),
                 Rotation = Math.PI / 2
             };
             if (right)
@@ -109,7 +112,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 XLine1Point = Outline.GetPoint3dAt(5),
                 XLine2Point = Outline.GetPoint3dAt(5) + (Outline.GetPoint3dAt(7) - Outline.GetPoint3dAt(6)),
                 DimLinePoint = Outline.GetPoint3dAt(4) + new Vector3d(800, 0, 0),
-                DimensionText = thLTypeEdgeComponent.Hc2.ToString(),
+                DimensionText = thLTypeEdgeComponent.Hc1.ToString(),
                 Rotation = Math.PI / 2
             };
             if (right)
@@ -253,31 +256,45 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 if (pointsFlag[i] == 2)
                 {
-                    if (!thLTypeEdgeComponent.Link2.IsNullOrEmpty())
+                    if (thLTypeEdgeComponent.Link2.IsNullOrEmpty())
                     {
-                        
+                        continue;
                     }
                 }
                 else if (pointsFlag[i] == 3)
                 {
-                    if (!thLTypeEdgeComponent.Link3.IsNullOrEmpty())
+                    if (thLTypeEdgeComponent.Link3.IsNullOrEmpty())
                     {
-
+                        continue;
                     }
                 }
                 else if (pointsFlag[i] == 4)
                 {
-                    if (!thLTypeEdgeComponent.Link4.IsNullOrEmpty())
+                    if (thLTypeEdgeComponent.Link4.IsNullOrEmpty())
                     {
-
+                        continue;
                     }
                 }
+                else continue;
+                double r = thLTypeEdgeComponent.PointReinforceLineWeight + thLTypeEdgeComponent.StirrupLineWeight / 2;
+                Polyline link = GangJinLink.DrawLink(points[i], points[i + 1], r, thLTypeEdgeComponent.StirrupLineWeight, scale);
+                Links.Add(link);
             }
         }
 
         void CalStirrupPosition()
         {
-
+            GangJinStirrup stirrup = new GangJinStirrup
+            {
+                Outline = Outline,
+                scale = scale,
+                GangjinType = 1
+            };
+            stirrup.CalPositionL(thLTypeEdgeComponent);
+            foreach (var polyline in stirrup.stirrups)
+            {
+                Links.Add(polyline);
+            }
         }
 
         public void CalGangjinPosition()
@@ -297,9 +314,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             int pointNum = strToReinforce.num;
             //计算纵筋位置
             CalReinforcePosition(pointNum, Outline);
-            
+
             //计算箍筋位置
-            
+            CalStirrupPosition();
 
             //计算拉筋位置
             CalLinkPosition();
@@ -330,20 +347,12 @@ namespace ThMEPStructure.Reinforcement.Draw
                 rein.Layer = "REIN";
                 objectCollection.Add(rein);
             }
-            //绘制箍筋
-            GangJinStirrup stirrup = new GangJinStirrup
+            //绘制箍筋、拉筋
+            foreach(var link in Links)
             {
-                Outline = Outline,
-                scale = scale,
-                GangjinType = 1
-            };
-            stirrup.CalPositionL(thLTypeEdgeComponent);
-            foreach(var polyline in stirrup.stirrups)
-            {
-                polyline.Layer = "LINK";
-                objectCollection.Add(polyline);
+                link.Layer = "LINK";
+                objectCollection.Add(link);
             }
-            //绘制拉筋
 
             //轮廓、尺寸、墙体
             Outline.Layer = "COLU_DE_TH";

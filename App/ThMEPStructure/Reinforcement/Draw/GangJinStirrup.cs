@@ -12,9 +12,6 @@ namespace ThMEPStructure.Reinforcement.Draw
 {
     class GangJinStirrup:GangJinBase
     {
-        List<Point3d> point3s;
-        double r;
-        
         public List<Polyline> stirrups = new List<Polyline>();
         public Polyline Outline;
         public double scale;
@@ -82,9 +79,9 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             Polyline res = new Polyline();
             Point2d pt = new Point2d(startPt.X, startPt.Y);
-            pt += new Vector2d(1, 1).GetNormal() * r + new Vector2d(1, -1).GetNormal() * 2 * r;
+            pt += new Vector2d(1, 1).GetNormal() * r + new Vector2d(1, -1).GetNormal() * 150 * scale / 4;
             res.AddVertexAt(0, new Point2d(pt.X, pt.Y), 0, lineWeight, lineWeight);
-            pt += new Vector2d(-1, 1).GetNormal() * 2 * r;
+            pt += new Vector2d(-1, 1).GetNormal() * 150 * scale / 4;
             res.AddVertexAt(1, new Point2d(pt.X, pt.Y), Math.Tan(3 * Math.PI / 16), lineWeight, lineWeight);
             pt += new Vector2d(-1, -1).GetNormal() * r + new Vector2d(-1, 0) * r;
             res.AddVertexAt(2, new Point2d(pt.X, pt.Y), 0, lineWeight, lineWeight);
@@ -104,7 +101,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             res.AddVertexAt(9, new Point2d(pt.X, pt.Y), Math.Tan(3 * Math.PI / 16), width, width);
             pt += new Vector2d(0, -1) * r + new Vector2d(-1, -1).GetNormal() * r;
             res.AddVertexAt(10, new Point2d(pt.X, pt.Y), 0, lineWeight, lineWeight);
-            pt += new Vector2d(1, -1).GetNormal() * 2 * r;
+            pt += new Vector2d(1, -1).GetNormal() * 150 * scale / 4;
             res.AddVertexAt(11, new Point2d(pt.X, pt.Y), 0, lineWeight, lineWeight);
             res.ConstantWidth = lineWeight;
             return res;

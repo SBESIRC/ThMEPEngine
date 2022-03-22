@@ -20,11 +20,11 @@ namespace ThMEPStructure.Reinforcement.Draw
         public Polyline Outline;
         public List<Curve> LinkedWallLines;
         public List<RotatedDimension> rotatedDimensions;
-        public List<GangJinBase> GangJinBases;
+        public List<Polyline> Links = new List<Polyline>();
 
         public List<Point3d> points = new List<Point3d>();    //纵筋位置
         //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
-        protected List<int> pointsFlag;
+        protected List<int> pointsFlag = new List<int>();
         public DBObjectCollection objectCollection;
         public double firstRowHeight = 0;
         public double firstRowWidth = 0;
@@ -122,7 +122,6 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <summary>
         /// 绘制轮廓
         /// </summary>
-        /// <param name="drawingScale"></param>
         public abstract void DrawOutline();
 
        
@@ -130,44 +129,11 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <summary>
         /// 绘制轮廓尺寸
         /// </summary>
-        /// <param name="drawingScale"></param>
         public abstract void DrawDim();
         /// <summary>
         /// 绘制连接墙体
         /// </summary>
-        /// <param name="drawingScale"></param>
         public abstract void DrawWall();
-
-        
-
-
-        //初始化钢筋列表
-        public void Init(ThLTypeEdgeComponent thLTypeEdgeComponent)
-        {
-            GangJinBases = new List<GangJinBase>();
-            GangJinStirrup gangJinStirrup = new GangJinStirrup();
-            GangJinBases.Add(gangJinStirrup);
-            GangJinReinforce gangJinReinforce = new GangJinReinforce();
-            GangJinBases.Add(gangJinReinforce);
-        }
-
-        public void Init(ThRectangleEdgeComponent thRectangleEdgeComponent)
-        {
-            GangJinBases = new List<GangJinBase>();
-            GangJinStirrup gangJinStirrup = new GangJinStirrup();
-            GangJinBases.Add(gangJinStirrup);
-            GangJinReinforce gangJinReinforce = new GangJinReinforce();
-            GangJinBases.Add(gangJinReinforce);
-        }
-
-        public void Init(ThTTypeEdgeComponent thTTypeEdgeComponent)
-        {
-            GangJinBases = new List<GangJinBase>();
-            GangJinStirrup gangJinStirrup = new GangJinStirrup();
-            GangJinBases.Add(gangJinStirrup);
-            GangJinReinforce gangJinReinforce = new GangJinReinforce();
-            GangJinBases.Add(gangJinReinforce);
-        }
 
         public Polyline GenPouDuan(Point3d pt1, Point3d pt2, Point3d linePt, out Line line1, out Line line2)
         {
