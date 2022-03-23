@@ -26,10 +26,10 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <param name="obspacialindex"></param>
         /// <param name="boundary"></param>
         /// <param name="vm"></param>
-        public static void DealWithCarsOntheEndofLanes(ref List<InfoCar> cars,ref List<Polyline> pillars, List<Line> lanes
-            , List<Polyline> Walls,ThCADCoreNTSSpatialIndex obspacialindex,Polyline boundary, ParkingStallArrangementViewModel vm)
+        public static void DealWithCarsOntheEndofLanes(ref List<InfoCar> cars, ref List<Polyline> pillars, List<Line> lanes
+            , List<Polyline> Walls, ThCADCoreNTSSpatialIndex obspacialindex, Polyline boundary, ParkingStallArrangementViewModel vm)
         {
-            var carspacialindex=new ThCADCoreNTSSpatialIndex(cars.Select(e => e.Polyline).ToCollection());
+            var carspacialindex = new ThCADCoreNTSSpatialIndex(cars.Select(e => e.Polyline).ToCollection());
             for (int i = 0; i < lanes.Count; i++)
             {
                 var lane = lanes[i];
@@ -41,7 +41,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     var carLine = new Line();
                     if (CanAddCarSpots(lane, CreateVector(lane).GetNormal(), pointest, vec, carspacialindex, ref carLine))
                     {
-                        generate_cars(Walls,lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, vm);
+                        generate_cars(Walls, lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, vm);
                     }
                 }
                 if (boundary.GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 10)
@@ -52,7 +52,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     var carLine = new Line();
                     if (CanAddCarSpots(lane, -CreateVector(lane).GetNormal(), pointest, vec, carspacialindex, ref carLine))
                     {
-                        generate_cars(Walls,lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars,vm, false);
+                        generate_cars(Walls, lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, vm, false);
                     }
                 }
             }
@@ -115,7 +115,7 @@ namespace ThMEPArchitecture.PartitionLayout
         }
 
         private static void generate_cars(List<Polyline> Walls, List<Line> lanes, Line lane, Line carLine, Vector3d vec, Polyline boundary, ThCADCoreNTSSpatialIndex obspacialindex
-            , ThCADCoreNTSSpatialIndex carspacialindex, ref List<InfoCar> cars,ref List<Polyline> pillars, ParkingStallArrangementViewModel vm, bool isstartpoint=true)
+            , ThCADCoreNTSSpatialIndex carspacialindex, ref List<InfoCar> cars, ref List<Polyline> pillars, ParkingStallArrangementViewModel vm, bool isstartpoint = true)
         {
             var partitionpro = new ParkingPartitionPro();
             partitionpro.Walls = Walls;
@@ -151,7 +151,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
             if (ClosestPointInVertLines(ls.EndPoint, ls, lanes.ToArray()) < 10) ls.ReverseCurve();
             if (ClosestPointInVertLines(ls.StartPoint, ls, lanes.ToArray()) < 10)
-                ls.StartPoint = ls.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(ls).GetNormal() * vm.RoadWidth/2));
+                ls.StartPoint = ls.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(ls).GetNormal() * vm.RoadWidth / 2));
             if (ClosestPointInVertLines(ls.EndPoint, ls, lanes.ToArray()) < 10)
                 ls.EndPoint = ls.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(ls).GetNormal() * vm.RoadWidth / 2));
             var vecmove = CreateVector(ps, pe);
@@ -161,7 +161,12 @@ namespace ThMEPArchitecture.PartitionLayout
             partitionpro.ObstaclesSpatialIndex = obspacialindex;
             partitionpro.Obstacles = obspacialindex.SelectAll().Cast<Polyline>().ToList();
             partitionpro.IniLanes.Add(new Lane(ls, vecmove));
-            var lsbuffer = ls.Buffer(ParkingPartitionPro.DisLaneWidth / 2 - 10);
+            Polyline lsbuffer = new Polyline();
+            try
+            {
+                lsbuffer = ls.Buffer(ParkingPartitionPro.DisLaneWidth / 2 - 10);
+            }
+            catch { return; }
             if (carspacialindex.SelectCrossingPolygon(lsbuffer).Count > 0) return;
             cars = cars.Where(e => !pl.Contains(e.Polyline.GetRecCentroid())).ToList();
             pillars = pillars.Where(e => !pl.Contains(e.GetRecCentroid())).ToList();

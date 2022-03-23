@@ -323,6 +323,13 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput.InitializeLayer();
             var vertcar = LayoutOutput.VCar;
             var pcar = LayoutOutput.PCar;
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                if (!adb.Blocks.Contains(LayoutOutput.VCARBLKNAME))
+                {
+                    ;
+                }
+            }
             LayoutOutput layout = new LayoutOutput(Cars, Pillars);
             layout.DisplayColumns();
             layout.DisplayCars();
