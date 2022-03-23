@@ -14,8 +14,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 新建回路
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="circuit"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="node"></param>
+        /// <param name="type"></param>
         public static void AddCircuit(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
             var target = new ThPDSProjectGraphNode();
@@ -55,8 +55,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 切换进线形式
         /// </summary>
         /// <param name="graph"></param>
+        /// <param name="node"></param>
         /// <param name="type"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="NotSupportedException"></exception>
         public static void UpdateFormInType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormInType type)
         {
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
@@ -160,20 +161,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 删除回路
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        [Obsolete]
-        public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
-        {
-            //throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 删除回路
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="edge"></param>
         public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
