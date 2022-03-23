@@ -732,8 +732,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var minDists = new List<double>();
             foreach (var build in buildLines)
             {
-                var pline = build as Polyline;
-                minDists.Add(line.Distance(pline));
+                 if(build is Curve curve)
+                {
+                    minDists.Add(line.Distance(curve));
+                }
             }
             return minDists.Min();
         }

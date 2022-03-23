@@ -70,6 +70,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var height = Math.Abs(ptsOrderedByY.First().Y - ptsOrderedByY.Last().Y);
             return Math.Max(width, height);
         }
+        //获取一个block中全部polyline
+        public static List<Polyline> GetPolyLines(this BlockReference block)
+        {
+            var objs = new DBObjectCollection();
+            block.Explode(objs);
+            var res = new List<Polyline>();
+            foreach(var ent in objs)
+            {
+                if (ent is Polyline pline) res.Add(pline);
+            }
+            return res;
+        }
+
     }
 }
 

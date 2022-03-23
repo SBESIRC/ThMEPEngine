@@ -73,7 +73,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
-                Logger?.Information(ex.Message);
+                //Logger?.Information(ex.Message);
+                Logger?.Information(ex.StackTrace);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
@@ -137,15 +138,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             bool recordprevious = false;
-            try
-            {
-                //rst = geneAlgorithm.Run(histories, recordprevious);
-                rst = geneAlgorithm.Run2(histories, recordprevious);
-            }
-            catch(Exception ex)
-            {
-                Active.Editor.WriteMessage(ex.Message);
-            }
+
+            //rst = geneAlgorithm.Run(histories, recordprevious);
+            rst = geneAlgorithm.Run2(histories, recordprevious);
+
+
             Chromosome solution = rst.First();
 
             if (BreakFlag)
@@ -197,6 +194,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
+                        //Logger?.Information(ex.StackTrace);
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }

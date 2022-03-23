@@ -12,7 +12,7 @@ using AcHelper;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPEngineCore;
 using Linq2Acad;
-
+using ThMEPArchitecture.ViewModel;
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
     public static class WindmillSplit
@@ -95,7 +95,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return segLines;
         }
-
+        public static List<Line> GetExtendSegline(List< Line> seglineList, Dictionary<int, List<int>> seglineIndexDic)
+        {
+            var segLines = new List<Line>();
+            seglineList.ForEach(line => segLines.Add(line.Clone() as Line));
+            for (int i = 0; i < seglineList.Count; i++)
+            {
+                foreach (var j in seglineIndexDic[i])
+                {
+                    if (segLines[i].HasIntersection(segLines[j]))//邻接表中连接的线不需要扩展
+                    {
+                        continue;
+                    }
+                    //两条线没有交上，进行延展
+                    var linei = segLines[i];
+                    var linej = segLines[j];
+                    ExtendLines(ref linei, ref linej);
+                    segLines[i] = linei;
+                    segLines[j] = linej;
+                }
+            }
+            return segLines;
+        }
         public static void ExtendLines(ref Line linei, ref Line linej)
         {
             var intersectPt = linei.Intersect(linej, (Intersect)3).First();//两根线都延展求交点
@@ -143,6 +164,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var buildLinesSpatialIndex = outerBrder.BuildingSpatialIndex;
             var attachedRampSpatialIndex = outerBrder.AttachedRampSpatialIndex;
             var buildingWithoutRampSpatialIndex = outerBrder.BuildingWithoutRampSpatialIndex;
+            var BoundarySpatialIndex = outerBrder.BoundarySpatialIndex;
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
@@ -168,6 +190,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
                 else
                 {
+                    l = HelperEX.GetVaildSegLine(i, cutlines, area);
                     l.GetMaxMinVal(area, ptsIndex, buildLinesSpatialIndex, buildingWithoutRampSpatialIndex, width, out double maxVal2, out double minVal2);
                     if (maxVal2 < minVal2)
                     {
@@ -233,7 +256,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex ptsIndex, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, ThCADCoreNTSSpatialIndex buildingWithoutRampSpatialIndex, double width, out double maxVal, out double minVal)
         {
-            double halfCarLaneWidth = 2750;
+            double halfCarLaneWidth = (ParameterStock.RoadWidth / 2);
             //var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
             //var dbPts = new List<DBPoint>();
             //areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
@@ -302,6 +325,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var areas = new List<Polyline>() { area };
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
+            segLines = SeglineTools.SeglinePrecut(segLines, area);//预切割
+            if (!segLines.Allconnected()) return new List<Polyline>();//判断车道是否相连
 #if DEBUG
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {

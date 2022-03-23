@@ -110,6 +110,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
+                        //Logger?.Information(ex.StackTrace);
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using NetTopologySuite.Geometries;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -200,10 +201,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return true;
         }
 
-        public static bool IsVertical(this Line line)
+        // 获取线组成的面域，默认忽略洞
+        public static List<Polyline> ToAreas(this DBObjectCollection curves,bool includeHoles = false)
         {
-            if (Math.Abs(line.StartPoint.X - line.EndPoint.X) < 1e-4) return true;
-            else return false;
+            var geos = curves.Polygonize();
+            var objs = new List<Polyline>();
+            if (includeHoles)
+            {
+                foreach (Polygon polygon in geos)
+                {
+                    objs.AddRange(polygon.ToDbPolylines());
+                }
+            }
+            else
+            {
+                foreach (Polygon polygon in geos)
+                {
+                    objs.Add(polygon.Shell.ToDbPolyline());
+                }
+            }
+            geos.Clear();
+            geos = null;
+            return objs;
         }
+
     }
 }

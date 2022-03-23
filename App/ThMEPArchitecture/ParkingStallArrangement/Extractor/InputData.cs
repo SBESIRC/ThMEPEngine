@@ -63,14 +63,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 return false;
             }
             var extractRst = outerBrder.Extract(block);//提取多段线
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var pline = outerBrder.WallLine;
+                currentDb.CurrentSpace.Add(pline);
+            }
+#endif
             if (!extractRst)
             {
                 return false;
             }
             if (!(Logger == null) && outerBrder.SegLines.Count != 0)
             {
+                bool Isvaild = outerBrder.SegLineVaild(Logger);
+                outerBrder.SegLines.ShowInitSegLine();
+                //outerBrder.RemoveInnerSegLine();
                 //check seg lines
-                if(!outerBrder.SegLineVaild(Logger)) return false;
+                if (!Isvaild) return false;
             }
 
             return true;

@@ -127,7 +127,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (!IsValidatedSolutions(layoutPara)) return -1;
             int result = GetParkingNums(layoutPara, parameterViewModel);
             //Thread.Sleep(3);
-            //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
+            //int result = General.Utils.RandInt(1000) + 20;
             ParkingStallCount = result;
             //System.Diagnostics.Debug.WriteLine(Count);
 
@@ -270,10 +270,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 var partitionpro = new ParkingPartitionPro();
-                ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                if (!partitionpro.Validate()) continue;
                 try
                 {
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
                     var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
                     if (CachedPartitionCnt.ContainsKey(partitionBoundary))
                     {
@@ -453,7 +453,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return genome;
         }
 
-        private bool RandomCreateChromosome(out Chromosome solution, int N = 100)
+        private bool RandomCreateChromosome(out Chromosome solution, int N = 20)
         {
             // Try N times
             solution = new Chromosome();

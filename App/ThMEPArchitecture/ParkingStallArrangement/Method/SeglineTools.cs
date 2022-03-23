@@ -32,10 +32,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                             //1.找到在边界上距离pt最近的点
 
                             //line1在边界上距离pt最近的点
-                            var dis1 = GetNearestOnWall(line1, WallLine, pt, out Point3d wpt1);
+                            var flag1 = GetNearestOnWall(line1, WallLine, pt, out Point3d wpt1);
 
                             //line2在边界上距离pt最近的点
-                            var dis2 = GetNearestOnWall(line2, WallLine, pt, out Point3d wpt2);
+                            var flag2 = GetNearestOnWall(line2, WallLine, pt, out Point3d wpt2);
 
                             ////选伸出边界较长的一根切割
                             //if(dis1 > dis2)
@@ -49,11 +49,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                             //    SegLines[j] = line2;
                             //}
 
-                            //两根都切一下
-                            CutLine(ref line1, wpt1, pt, prop);
-                            SegLines[i] = line1;
-                            CutLine(ref line2, wpt2, pt, prop);
-                            SegLines[j] = line2;
+                            //在边界内的切一下
+                            if (flag1)
+                            {
+                                CutLine(ref line1, wpt1, pt, prop);
+                                SegLines[i] = line1;
+                            }
+                            if (flag2)
+                            {
+                                CutLine(ref line2, wpt2, pt, prop);
+                                SegLines[j] = line2;
+                            }
                         }
                     }
                 }
@@ -61,14 +67,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return SegLines;
         }
 
-        private static double GetNearestOnWall(Line line, Polyline WallLine, Point3d IntPt, out Point3d wpt)
+        private static bool GetNearestOnWall(Line line, Polyline WallLine, Point3d IntPt, out Point3d wpt)
         {
             var templ = line.Intersect(WallLine, Intersect.OnBothOperands);
-            if (templ.Count == 0) throw new ArgumentException("线不与边界相交");
+            if (templ.Count == 0)
+            {
+                wpt = new Point3d();
+                return false;
+                //throw new ArgumentException("线不与边界相交");
+            } 
+
             if (templ.Count == 1)
             {
                 wpt = templ.First();
-                return IntPt.DistanceTo(wpt);
+                //return IntPt.DistanceTo(wpt);
             }
 
             else
@@ -84,7 +96,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     {
                         wpt = templ.Last();
                     }
-                    return IntPt.DistanceTo(wpt);
+                    //return IntPt.DistanceTo(wpt);
                 }
                 else
                 {
@@ -97,9 +109,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     {
                         wpt = templ.Last();
                     }
-                    return IntPt.DistanceTo(wpt);
+                    //return IntPt.DistanceTo(wpt);
                 }
             }
+            return true;
         }
 
 
@@ -147,5 +160,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
+        public static List<Line> RemoveOuterLine(List<Line> SegLines, Polyline WallLine)
+        {
+            List<Line> SegLines2 = new List<Line>();
+            foreach(Line l in SegLines)
+            {
+                if(WallLine.Contains(l) || WallLine.Intersects(l)) SegLines2.Add(l);
+                else l.Dispose();
+            }
+            return SegLines2;
+        }
     }
 }
