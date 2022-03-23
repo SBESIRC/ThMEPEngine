@@ -5,7 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.Reinforcement.Draw;
-
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Command
 {
     internal class ThRectTypeReinforceDrawCmd : ThMEPBaseCommand, IDisposable
@@ -24,7 +24,9 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active()) 
             {
                 var recEdgeComponent = ThReinforceTestData.RectangleEdgeComponent;
-                var objs = recEdgeComponent.Draw("1.0-2.0", 800, 4);
+                double H, W;
+                recEdgeComponent.InitAndCalTableSize("1.0-2.0", 800, 4,out H,out W);
+                var objs = recEdgeComponent.Draw(H, W, new Point3d());
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
@@ -49,7 +51,9 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active())
             {
                 var recEdgeComponent = ThReinforceTestData.RectangleCalEdgeComponent;
-                var objs = recEdgeComponent.Draw("1.0-2.0", 800, 4);
+                double H, W;
+                recEdgeComponent.InitAndCalTableSize("1.0-2.0", 800, 4, out H, out W);
+                var objs = recEdgeComponent.Draw(H, W, new Point3d());
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);

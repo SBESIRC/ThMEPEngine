@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Model
 {
     public abstract class ThEdgeComponent
@@ -57,7 +58,7 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public int X { get; set; }
 
-
-        public abstract DBObjectCollection Draw(string elevation,double tblRowHeight,double scale);
+        public abstract void InitAndCalTableSize(string elevation, double tblRowHeight, double scale,out double firstRowH,out double firstRowW);
+        public abstract DBObjectCollection Draw(double firstRowH, double firstRowW, Point3d point);
     }
 }

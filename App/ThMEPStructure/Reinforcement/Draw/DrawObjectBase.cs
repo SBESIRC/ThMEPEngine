@@ -26,18 +26,17 @@ namespace ThMEPStructure.Reinforcement.Draw
         //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
         protected List<int> pointsFlag = new List<int>();
         public DBObjectCollection objectCollection;
-        public double firstRowHeight = 0;
-        public double firstRowWidth = 0;
+        public double FirstRowHeight = 0;
+        public double FirstRowWidth = 0;
         public string Reinforce;
         public string Stirrup;
 
-        public static void GetTableFirstRowHW()
-        {
+        
 
-        }
+
 
         //根据轮廓的点来计算表格第一行的长宽
-        public void CalTableFirstRowHW(Polyline polyline,out double height,out double width)
+        protected void CalTableFirstRowHW(Polyline polyline,out double height,out double width)
         {
             //遍历所有点，找到最小的矩形包围盒，再计算图上大小之后，再对宽度放大三倍，高度放大四倍
             double xMin = 1e10;
@@ -62,7 +61,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 绘制表格,输入起始点位置，行宽，第一个行装截面的表格的长款
         /// 输出：绘制13个点的多段线表格,填装文字
         /// </summary>
-        public DBObjectCollection DrawTable(double rowHeight,double firstRowHeight,double firstRowWidth)
+        protected DBObjectCollection DrawTable(double rowHeight,double firstRowHeight,double firstRowWidth)
         {
             DBObjectCollection objectCollection = new DBObjectCollection();
             Polyline polyline = new Polyline();
@@ -171,22 +170,24 @@ namespace ThMEPStructure.Reinforcement.Draw
             return tmp;
         }
 
-        public void CalAndDrawGangJin(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
+        public void CalAndDrawGangJin(double H,double W, ThEdgeComponent component,Point3d point)
         {
-            init(component,elevation,tblRowHeight,scale,position);
+            this.TableStartPt = point;
+            //init(component,elevation,tblRowHeight,scale,position);
+            SetFirstRowWH(H, W);
             CalGangjinPosition(component);
             DrawGangJin(component);
         }
 
         public abstract void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position);
 
-        public void CalGangjinPosition(ThEdgeComponent component)
+        protected void CalGangjinPosition(ThEdgeComponent component)
         {
-            //计算轮廓得到polyline
-            DrawOutline();
 
-            //计算表格轮廓
-            CalTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
+            //重新计算轮廓得到polyline
+            DrawOutline();
+            ////计算表格轮廓
+            //CalTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
 
             //统计纵筋的数量
             StrToReinforce strToReinforce = new StrToReinforce();
@@ -216,13 +217,30 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         }
 
-        public void DrawGangJin(ThEdgeComponent component)
+
+        /// <summary>
+        /// 获得表格第一行（截面）长和宽
+        /// </summary>
+        public void GetTableFirstRowHW(out double firstRowHeight, out double firstRowWidth)
+        {
+            //计算轮廓得到polyline
+            DrawOutline();
+            CalTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
+        }
+
+        public void SetFirstRowWH(double firstRowHeight, double firstRowWidth)
+        {
+            this.FirstRowHeight = firstRowHeight;
+            this.FirstRowWidth = firstRowWidth;
+        }
+
+        protected void DrawGangJin(ThEdgeComponent component)
         {
             objectCollection = new DBObjectCollection();
 
             //绘制表格
             DBObjectCollection tableCollection = new DBObjectCollection();
-            tableCollection = DrawTable(tblRowHeight, firstRowHeight, firstRowWidth);
+            tableCollection = DrawTable(tblRowHeight, FirstRowHeight, FirstRowWidth);
             foreach (DBObject element in tableCollection)
             {
                 objectCollection.Add(element);

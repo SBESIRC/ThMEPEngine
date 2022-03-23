@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.Reinforcement.Draw;
 using ThMEPStructure.Reinforcement.Model;
-
+using Autodesk.AutoCAD.Geometry;
 namespace ThMEPStructure.Reinforcement.Command
 {
     internal class ThLTypeReinforceDrawCmd : ThMEPBaseCommand, IDisposable
@@ -25,7 +25,9 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active()) 
             {
                 var lEdgeComponent = ThReinforceTestData.LTypeEdgeComponent;
-                var objs = lEdgeComponent.Draw("1.0-2.0", 800, 4);
+                double H, W;
+                lEdgeComponent.InitAndCalTableSize("1.0-2.0", 800, 4, out H, out W);
+                var objs = lEdgeComponent.Draw(H, W, new Point3d());
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
@@ -50,7 +52,9 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active())
             {
                 var lEdgeComponent = ThReinforceTestData.LTypeCalEdgeComponent;
-                var objs = lEdgeComponent.Draw("1.0-2.0", 800, 4);
+                double H, W;
+                lEdgeComponent.InitAndCalTableSize("1.0-2.0", 800, 4, out H, out W);
+                var objs = lEdgeComponent.Draw(H, W, new Point3d());
                 objs.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);

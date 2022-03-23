@@ -25,7 +25,7 @@ namespace ThMEPStructure.Reinforcement.Command
             using (var acadDb = AcadDatabase.Active())
             {
                 // A0(1189,841) A1(841,594) A2(594,420) A3(420,297) A4(210,297)
-                var extents = new Extents2d(0,0,841,594);
+                var extents = new Extents2d(0,0,84100,59400);
                 var tableBuilder = new ThReinforceTableBuilder(
                     extents, "0.000~3.000","1:25",800);
                 var datas = new List<ThEdgeComponent>();

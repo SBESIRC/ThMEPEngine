@@ -26,12 +26,21 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
         public string Link4 { get; set; }
 
-        public override DBObjectCollection Draw(string elevation, double tblRowHeight, double scale)
+        private DrawObjectLType drawObjectLType;
+        public override DBObjectCollection Draw(double firstRowH, double firstRowW, Point3d point)
         {
-            DrawObjectLType drawObjectLType = new DrawObjectLType();
-            drawObjectLType.CalAndDrawGangJin(this, elevation, tblRowHeight, scale, new Point3d(0, 0, 0));
+
+            drawObjectLType.CalAndDrawGangJin(firstRowH, firstRowW, this, point);
             return drawObjectLType.objectCollection;
             throw new System.NotImplementedException();
         }
+
+        public override void InitAndCalTableSize(string elevation, double tblRowHeight, double scale, out double firstRowH, out double firstRowW)
+        {
+            drawObjectLType = new DrawObjectLType();
+            drawObjectLType.init(this, elevation, tblRowHeight, scale, new Point3d(0, 0, 0));
+            drawObjectLType.GetTableFirstRowHW(out firstRowH,out firstRowW);
+        }
+
     }
 }
