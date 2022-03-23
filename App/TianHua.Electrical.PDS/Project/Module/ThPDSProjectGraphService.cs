@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 newEdge.Details.CircuitForm = new RegularCircuit()
                 {
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, newEdge.Target.Load.Phase, newEdge.Target.Load.DefaultCircuitType, newEdge.Target.Load.LoadTypeCat_1, newEdge.Target.Load.FireLoad, newEdge.Circuit.ViaConduit, newEdge.Circuit.ViaCableTray, newEdge.Target.Load.Location.FloorNumber),
+                    Conductor = new Conductor(CalculateCurrent, newEdge.Target.Load.Phase, newEdge.Target.Load.CircuitType, newEdge.Target.Load.LoadTypeCat_1, newEdge.Target.Load.FireLoad, newEdge.Circuit.ViaConduit, newEdge.Circuit.ViaCableTray, newEdge.Target.Load.Location.FloorNumber),
                 };
             }
 

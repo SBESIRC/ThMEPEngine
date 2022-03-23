@@ -73,7 +73,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
-            if(loads.Count == 0)
+            if (loads.Count == 0)
             {
                 loads.Add(new ThPDSLoad());
             }
@@ -105,33 +105,47 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaConduit = true;
             }
-            if (edge.Circuit.Type == ThPDSCircuitType.None)
+
+            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.FirstOrDefault());
+            if (circuitModel.CircuitType != ThPDSCircuitType.None)
             {
                 if (target.Loads.Count > 0)
                 {
-                    edge.Circuit.Type = target.Loads[0].DefaultCircuitType;
+                    target.Loads[0].CircuitType = circuitModel.CircuitType;
                 }
             }
             var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
-            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID))
+            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault()))
             {
-                edge.Circuit.ID.CircuitID = circuitIDs[0];
+                edge.Circuit.ID.CircuitID.Add(circuitIDs[0]);
+            }
+            else
+            {
+                edge.Circuit.ID.CircuitID.Add("");
             }
             var circuitNumbers = target.Loads.Select(o => o.ID.CircuitNumber).Distinct().OfType<string>().ToList();
-            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber))
+            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault()))
             {
-                edge.Circuit.ID.CircuitNumber = circuitNumbers[0];
+                edge.Circuit.ID.CircuitNumber.Add(circuitNumbers[0]);
+            }
+            else
+            {
+                edge.Circuit.ID.CircuitNumber.Add("");
             }
 
             if (source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID)
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault())
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault())
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.CircuitNumber = source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID;
+                edge.Circuit.ID.CircuitNumber.Add(source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID.First());
+            }
+            else
+            {
+                edge.Circuit.ID.CircuitNumber.Add("");
             }
 
-            if(target.NodeType == PDSNodeType.None)
+            if (target.NodeType == PDSNodeType.None)
             {
                 ThPDSLayerService.Assign(edge.Circuit, target.Loads[0]);
             }

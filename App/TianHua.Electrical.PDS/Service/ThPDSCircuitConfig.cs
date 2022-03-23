@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -119,5 +119,22 @@ namespace TianHua.Electrical.PDS.Service
                 FireLoad = false, //实际不存在，为存储方便设为false
             },
         };
+
+        public static ThPDSCircuitConfigItem SelectModel(string circuitNumber)
+        {
+            var result = new ThPDSCircuitConfigItem();
+            foreach (var o in BlockConfig)
+            {
+                var check = o.TextKey.Replace("*", ".*");
+                var r = new Regex(@check);
+                var m = r.Match(circuitNumber);
+                if (m.Success)
+                {
+                    result = o;
+                    break;
+                }
+            }
+            return result;
+        }
     }
 }

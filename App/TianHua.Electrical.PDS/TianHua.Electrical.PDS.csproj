@@ -26,6 +26,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
+    <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
+    <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
+    <Compile Include="Diagram\ThPDSDiagramAssignment.cs" />
+    <Compile Include="Diagram\ThPDSExplodeService.cs" />
     <Compile Include="Engine\ThCableSegmentExtractionEngine.cs" />
     <Compile Include="Engine\ThCableSegmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThCableSegmentRecognitionEngine.cs" />

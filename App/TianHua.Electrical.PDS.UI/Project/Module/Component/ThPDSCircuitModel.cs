@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using HandyControl.Controls;
+using System.Linq;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
 using TianHua.Electrical.PDS.Project.Module;
@@ -19,16 +20,21 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("回路编号")]
         public string CircuitId
         {
-            get => _edge.Circuit.ID.CircuitID;
+            get => _edge.Circuit.ID.CircuitID.FirstOrDefault();
+            //set
+            //{
+            //    edge.Circuit.ID.CircuitID = value;
+            //    OnPropertyChanged(nameof(CircuitId));
+            //}
         }
 
         [DisplayName("回路形式")]
         public Model.ThPDSCircuitType CircuitType
         {
-            get => _edge.Circuit.Type;
+            get => _edge.Target.Load.CircuitType;
             set
             {
-                _edge.Circuit.Type = value;
+                _edge.Target.Load.CircuitType = value;
                 OnPropertyChanged(nameof(CircuitType));
             }
         }

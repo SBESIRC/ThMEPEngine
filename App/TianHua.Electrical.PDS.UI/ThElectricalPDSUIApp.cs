@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Runtime;
 using TianHua.Electrical.PDS.UI.UI;
 using TianHua.Electrical.PDS.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Linq;
 
 namespace TianHua.Electrical.PDS.UI
 {
@@ -49,6 +50,14 @@ namespace TianHua.Electrical.PDS.UI
         {
             var cmd = new ThPDSCommand();
             cmd.Execute();
+            var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            if (graph == null) return;
+            var vertices = graph.Vertices.ToList();
+            for (var i = 0; i < vertices.Count && i < 10; i++)
+            {
+                var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices[i]);
+                drawCmd.Execute();
+            }
         }
     }
 }

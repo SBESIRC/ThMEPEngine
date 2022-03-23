@@ -212,7 +212,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent,edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray,edge.Target.Load.Location.FloorNumber),
+                    Conductor = new Conductor(CalculateCurrent,edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray,edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
@@ -228,7 +228,7 @@ namespace TianHua.Electrical.PDS.Project
                             breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                             contactor = new Contactor(CalculateCurrent, PolesNum),
                             thermalRelay = new ThermalRelay(CalculateCurrent),
-                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                         };
                     }
                     else
@@ -240,8 +240,8 @@ namespace TianHua.Electrical.PDS.Project
                             thermalRelay = new ThermalRelay(CalculateCurrent),
                             contactor2 = new Contactor(CalculateCurrent, PolesNum),
                             contactor3 = new Contactor(CalculateCurrent, PolesNum),
-                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                         };
                     }
                 }
@@ -253,7 +253,7 @@ namespace TianHua.Electrical.PDS.Project
                     breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                     meter = new MeterTransformer(CalculateCurrent),
                     breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket || (new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName) && edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.LumpedLoad))
@@ -262,7 +262,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
                     breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
@@ -275,7 +275,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.DefaultCircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
 

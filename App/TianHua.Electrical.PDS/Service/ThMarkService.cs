@@ -247,13 +247,9 @@ namespace TianHua.Electrical.PDS.Service
         private void SearchMarkLine(Polyline frame, List<Line> textLeads)
         {
             var lineCollection = LineIndex.SelectFence(frame);
-            if (lineCollection.Count == 0)
-            {
-                return;
-            }
             lineCollection.OfType<Line>().ForEach(o =>
             {
-                if (!textLeads.Contains(o))
+                if (!textLeads.Contains(o) && (frame.Contains(o.StartPoint) || frame.Contains(o.EndPoint)))
                 {
                     textLeads.Add(o);
                     var newFrame = ThPDSBufferService.Buffer(o);
