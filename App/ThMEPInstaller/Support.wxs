@@ -102,9 +102,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_TG20_DB" Guid="{3512ECA8-E62B-47D5-A4C6-9ECCDF863E9E}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_TG20_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20.db" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{64057DEB-0C08-42A3-8B7C-67C180703822}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图生成.dwg" KeyPath="yes" />
-            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{FFDB073F-A6E3-474B-B758-0512C5AE9E0B}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图模板.dwg" KeyPath="yes" />
+            </Component>         
             <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Component_Template" Guid="{D0E8E3D8-5195-4057-B0F5-E1CD92802413}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PDS_Component_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图元素.dwg" KeyPath="yes" />
             </Component>
