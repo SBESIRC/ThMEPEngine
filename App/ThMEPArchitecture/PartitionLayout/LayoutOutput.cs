@@ -200,7 +200,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             get
             {
-                if (_VCar == null)
+                if (true)
                 {
                     var blkname = VCARBLKNAME;
                     using (AcadDatabase adb = AcadDatabase.Active())
@@ -208,7 +208,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         if (!adb.Layers.Contains(VCarLayerName))
                             ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
                         BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
-                        if (!bt.Has(blkname))
+                        try
                         {
                             BlockTableRecord record = new BlockTableRecord();
                             record.Name = blkname;
@@ -219,6 +219,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
                             bt.DowngradeOpen();
                         }
+                        catch { }
                         BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
                         BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
                         br.ScaleFactors = new Scale3d(1);
@@ -238,7 +239,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             get
             {
-                if (_PCar == null)
+                if (true)
                 {
                     var blkname = PCARBLKNAME;
                     using (AcadDatabase adb = AcadDatabase.Active())
@@ -246,7 +247,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         if (!adb.Layers.Contains(PCarLayerName))
                             ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, PCarLayerName, 0);
                         BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
-                        if (!bt.Has(blkname))
+                        try
                         {
                             BlockTableRecord record = new BlockTableRecord();
                             record.Name = blkname;
@@ -257,6 +258,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
                             bt.DowngradeOpen();
                         }
+                        catch { }
                         BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
                         BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
                         br.ScaleFactors = new Scale3d(1);

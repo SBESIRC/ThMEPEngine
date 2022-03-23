@@ -161,7 +161,12 @@ namespace ThMEPArchitecture.PartitionLayout
             partitionpro.ObstaclesSpatialIndex = obspacialindex;
             partitionpro.Obstacles = obspacialindex.SelectAll().Cast<Polyline>().ToList();
             partitionpro.IniLanes.Add(new Lane(ls, vecmove));
-            var lsbuffer = ls.Buffer(ParkingPartitionPro.DisLaneWidth / 2 - 10);
+            var lsbuffer = new Polyline();
+            try
+            {
+                lsbuffer = ls.Buffer(ParkingPartitionPro.DisLaneWidth / 2 - 10);
+            }
+            catch { return; }
             if (carspacialindex.SelectCrossingPolygon(lsbuffer).Count > 0) return;
             cars = cars.Where(e => !pl.Contains(e.Polyline.GetRecCentroid())).ToList();
             pillars = pillars.Where(e => !pl.Contains(e.GetRecCentroid())).ToList();

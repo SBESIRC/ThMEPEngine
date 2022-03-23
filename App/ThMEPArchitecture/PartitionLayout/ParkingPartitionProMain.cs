@@ -326,7 +326,6 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput layout = new LayoutOutput(Cars, Pillars);
             layout.DisplayColumns();
             layout.DisplayCars();
-
         }
 
         public void GenerateParkingSpaces()
