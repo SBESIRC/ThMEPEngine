@@ -293,48 +293,92 @@ namespace ThMEPStructure.Reinforcement.Draw
                 pointsFlag.Add(2);
                 pointsFlag.Add(2);
             }
-            for (int i = 0; i < resultX1; i++)
+            //间距大的先安排拉筋
+            if(deltaX1>deltaX2)
             {
-                Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1, points[2].Y, 0);
-                points.Add(tmpPoint1);
-                Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
-                points.Add(tmpPoint2);
-                pointsFlag.Add(3);
-                pointsFlag.Add(3);
+                for (int i = 0; i < resultX1; i++)
+                {
+                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1, points[2].Y, 0);
+                    points.Add(tmpPoint1);
+                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
+                    points.Add(tmpPoint2);
+                    pointsFlag.Add(3);
+                    pointsFlag.Add(3);
+                }
+                for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
+                {
+                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2, points[5].Y, 0);
+                    points.Add(tmpPoint1);
+                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
+                    points.Add(tmpPoint2);
+                    pointsFlag.Add(3);
+                    pointsFlag.Add(3);
+                }
             }
-            for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
+            else
             {
-                Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2, points[5].Y, 0);
-                points.Add(tmpPoint1);
-                Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
-                points.Add(tmpPoint2);
-                pointsFlag.Add(3);
-                pointsFlag.Add(3);
+                for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
+                {
+                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2, points[5].Y, 0);
+                    points.Add(tmpPoint1);
+                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
+                    points.Add(tmpPoint2);
+                    pointsFlag.Add(3);
+                    pointsFlag.Add(3);
+                }
+                for (int i = 0; i < resultX1; i++)
+                {
+                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1, points[2].Y, 0);
+                    points.Add(tmpPoint1);
+                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
+                    points.Add(tmpPoint2);
+                    pointsFlag.Add(3);
+                    pointsFlag.Add(3);
+                }
             }
-
+            
         }
 
         protected override void CalLinkPosition()
         {
+            List<Point3d> tmpPoints = new List<Point3d>();
             //需要解析link3有几个,需要优先选择间隔大的
-            int num = Helper.SumLinkNum(thTTypeEdgeComponent.Link3);
+            LinkDetail linkDetail = Helper.StrToLinkDetail(thTTypeEdgeComponent.Link3);
+            int cnt = 0;
             //遍历所有点，找出2，3，4类型的钢筋，钢筋,同时查表
             for (int i = 0; i < points.Count; i+=2)
             {
-                if ( pointsFlag[i] == 3)
+                if (pointsFlag[i] == 3)
+                {
+                    if (cnt >= linkDetail.num)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        cnt++;
+                    }
+                }
+                //只有一种情况直接绘制
+                else if (pointsFlag[i] == 2)
                 {
                     if (thTTypeEdgeComponent.Link2.IsNullOrEmpty())
                     {
-                        //所以先加到List里，排序后在选择前num*2个
-
+                        continue;
                     }
-
                 }
-                //只有一种情况直接绘制
-                else if(pointsFlag[i]==2||pointsFlag[i]==4)
+                else if (pointsFlag[i] == 4)
                 {
-
+                    if (thTTypeEdgeComponent.Link4.IsNullOrEmpty())
+                    {
+                        continue;
+                    }
                 }
+                else continue;
+                double r = thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight / 2;
+                Polyline link = GangJinLink.DrawLink(points[i], points[i + 1], r, thTTypeEdgeComponent.StirrupLineWeight, scale);
+                Links.Add(link);
+
             }
         }
 

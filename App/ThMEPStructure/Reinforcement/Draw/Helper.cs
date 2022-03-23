@@ -89,8 +89,13 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public static LinkDetail StrToLinkDetail(string link)
         {
+            
             //解析表格当中的link字符串,并将得到的信息返回到LinkDetail类里
             LinkDetail res = new LinkDetail();
+            if (link.IsNullOrEmpty())
+            {
+                res.num = 0;
+            }
             string num1 = "", num2 = "", num3 = "";
             if (link.Contains("C"))
             {
@@ -108,12 +113,6 @@ namespace ThMEPStructure.Reinforcement.Draw
             return res;
         }
 
-
-        public static int SumLinkNum(string str)
-        {
-            int result = 0;
-            return result;
-        }
 
         public static double CalScale(string str)
         {

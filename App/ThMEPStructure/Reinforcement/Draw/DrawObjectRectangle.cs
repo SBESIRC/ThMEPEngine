@@ -165,31 +165,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
         }
 
-        /// <summary>
-        /// 计算得到的都是本地坐标默认，
-        /// </summary>
-        //public void CalGangjinPosition()
-        //{
-        //    foreach (var gangJin in GangJinBases)
-        //    {
-        //        //如果是纵筋
-        //        if (gangJin.GangjinType == 0)
-        //        {
-        //            //更新gangjin的值
-        //            //CalReinforcePosition();
-        //        }
-        //        //如果是箍筋
-        //        else if (gangJin.GangjinType == 1)
-        //        {
-        //            CalStirrupPosition();
-        //        }
-        //        //如果是拉筋
-        //        else if (gangJin.GangjinType == 2)
-        //        {
-        //            //CalLinkPosition();
-        //        }
-        //    }
-        //}
+       
 
         public override void DrawOutline()
         {
