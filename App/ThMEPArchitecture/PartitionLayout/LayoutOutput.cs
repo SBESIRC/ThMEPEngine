@@ -21,6 +21,8 @@ namespace ThMEPArchitecture.PartitionLayout
         }
         public static string CarLayerName;
         public static string ColumnLayerName;
+        public static string PCarLayerName = "平行式";
+        public static string VCarLayerName = "C-标准车位-背靠背";
         public static string PCARBLKNAME = "AI-平行式2460";
         public static string VCARBLKNAME = "AI-垂直式5124";
         public List<InfoCar> Cars;
@@ -68,6 +70,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = color1;
+            pl.Layer = PCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -82,6 +85,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(x * (length / 2 - widthDb - widthDc - thickness)));
             pl.ColorIndex = color1;
+            pl.Layer = PCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -141,6 +145,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.ColorIndex = color1;
+            pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -172,6 +177,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - 1150)));
             pl.ColorIndex = color1;
+            pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
             pt = ori;
@@ -199,6 +205,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     var blkname = VCARBLKNAME;
                     using (AcadDatabase adb = AcadDatabase.Active())
                     {
+                        if (!adb.Layers.Contains(VCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
                         BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
                         if (!bt.Has(blkname))
                         {
@@ -235,6 +243,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     var blkname = PCARBLKNAME;
                     using (AcadDatabase adb = AcadDatabase.Active())
                     {
+                        if (!adb.Layers.Contains(PCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, PCarLayerName, 0);
                         BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
                         if (!bt.Has(blkname))
                         {
