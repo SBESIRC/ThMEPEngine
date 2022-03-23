@@ -2,26 +2,14 @@
 using System.Linq;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
-using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
     public static class ThPDSProjectGraphService
     {
-        /// <summary>
-        /// 新建回路
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="circuit"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        [Obsolete]
-        public static void AddCircuit(ThPDSProjectGraph graph, CircuitFormOutType type)
-        {
-            //throw new NotImplementedException();
-        }
-
         /// <summary>
         /// 新建回路
         /// </summary>
@@ -61,18 +49,6 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
 
             graph.Graph.AddEdge(newEdge);
-        }
-
-        /// <summary>
-        /// 切换进线形式
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="type"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        [Obsolete]
-        public static void UpdateFormInType(ThPDSProjectGraph graph, CircuitFormInType type)
-        {
-            //throw new NotImplementedException();
         }
 
         /// <summary>
