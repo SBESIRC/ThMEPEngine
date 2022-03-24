@@ -34,7 +34,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public Model.ThPDSPhase Phase
         {
             get => vertice.Load.Phase;
-            set => vertice.Load.Phase = value;
         }
         [DisplayName("需要系数")]
         public double DemandFactor
