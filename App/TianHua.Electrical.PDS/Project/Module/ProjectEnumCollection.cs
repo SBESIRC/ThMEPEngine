@@ -160,4 +160,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         RCCB,   // Residual Current Circuit Breaker
         ACB,    // air circuit breaker
     }
+
+    /// <summary>
+    /// 接触器型号
+    /// </summary>
+    public enum ContactorModel
+    {
+        CJ20,
+    }
 }
