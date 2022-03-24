@@ -6,6 +6,9 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 接触器
+    /// </summary>
     public class ThPDSContactorModel : NotifyPropertyChangedBase
     {
         private readonly Contactor _contactor;
@@ -31,7 +34,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => (ContactorModel)Enum.Parse(typeof(ContactorModel), _contactor.ContactorType);
             set
             {
-                _contactor.ContactorType = Model.ToString();
+                _contactor.ContactorType = value.ToString();
                 OnPropertyChanged(nameof(Model));
             }
         }
