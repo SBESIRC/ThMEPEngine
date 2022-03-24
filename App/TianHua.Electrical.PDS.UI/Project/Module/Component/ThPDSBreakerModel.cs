@@ -16,6 +16,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(false)]
         [DisplayName("内容")]
         public string Content => _breaker.Content;
 
