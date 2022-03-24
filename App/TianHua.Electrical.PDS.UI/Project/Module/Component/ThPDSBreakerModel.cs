@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
@@ -13,23 +15,21 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             _breaker = breaker;
         }
 
+        [ReadOnly(true)]
         [DisplayName("内容")]
-        [ReadOnlyAttribute(true)]
         public string Content => _breaker.Content;
 
-
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        [ReadOnlyAttribute(true)]
         public ComponentType Type => _breaker.ComponentType;
 
-
         [DisplayName("型号")]
-        public string BreakerType
+        public BreakerModel Model
         {
-            get => _breaker.BreakerType;
+            get => (BreakerModel)Enum.Parse(typeof(BreakerModel), _breaker.BreakerType);
             set
             {
-                _breaker.SetModel(value);
+                _breaker.SetModel(value.ToString());
                 OnPropertyChanged();
             }
         }
@@ -91,9 +91,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         private void OnPropertyChanged()
         {
+            OnPropertyChanged(nameof(Model));
             OnPropertyChanged(nameof(Content));
             OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(BreakerType));
             OnPropertyChanged(nameof(RatedCurrent));
             OnPropertyChanged(nameof(TripUnitType));
             OnPropertyChanged(nameof(FrameSpecifications));

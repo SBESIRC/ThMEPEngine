@@ -148,4 +148,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         [Description("地板或地面下暗敷")]
         FC,
     }
+
+    /// <summary>
+    /// 断路器型号
+    /// </summary>
+    public enum BreakerModel
+    {
+        MCB,    // Miniature Circuit Breaker
+        RCBO,   // Residual Current Operated Circuit Breaker
+        MCCB,   // Molded Case Circuit Breaker
+        RCCB,   // Residual Current Circuit Breaker
+        ACB,    // air circuit breaker
+    }
 }
