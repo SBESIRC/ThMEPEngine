@@ -57,8 +57,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         }
                         if (string.IsNullOrWhiteSpace(name))
                         {
-                            //name = v.Load?.LoadUID;
-                            name = "未编号配电箱";
+                            name = "未知配电箱";
                         }
                         name ??= "";
                         var m = new ThPDSCircuitGraphTreeModel()
