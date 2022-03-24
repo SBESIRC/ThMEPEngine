@@ -37,6 +37,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private HashSet<int> VertSegLineValues = new HashSet<int>();// 所有合理垂直分割线的值
         private HashSet<int> HorzSegLineValues = new HashSet<int>();// 所有合理水平分割线的值
         public HashSet<BisectionPlan> AllSegPlans = new HashSet<BisectionPlan>();
+        private bool ShowSegLineOnly = true;
         public AutoSegGenerator(OuterBrder outerBrder, Serilog.Core.Logger logger)
         {
             WallLine = outerBrder.WallLine.Clone() as Polyline;
@@ -63,8 +64,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Buildings.Add(pline);
             }
         }
-        public void Run(bool lastPlanOnly = true)
+        public void Run(bool lastPlanOnly = true,bool showSegLineOnly = true)
         {
+            ShowSegLineOnly = showSegLineOnly;
             LastPlanOnly = lastPlanOnly;
             Logger?.Information("\n二分分割线穷举");
             var initAreaKey = new Tuple<int?, int?, int?, int?>(null, null, null, null);
@@ -81,25 +83,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 areas = nextLevelAreas;
             }
-            GetAllSegLinePlan();
-            //var maxCount = AllSegPlans.Max(p => p.Count);
-            //var LastLayer = AllSegPlans.Where(p => p.Count == maxCount);
-            Logger?.Information("\n 总方案数" );
-            Logger?.Information("\n" + AllSegPlans.Count().ToString());
-            Active.Editor.WriteMessage("\n 总方案数");
-            Active.Editor.WriteMessage("\n" + AllSegPlans.Count().ToString());
-            var LastLayer = GetLastLayerPlan();
-            Logger?.Information("\n 最后一层方案数");
-            Logger?.Information("\n" + LastLayer.Count().ToString());
-            Active.Editor.WriteMessage("\n 最后一层方案数");
-            Active.Editor.WriteMessage("\n" + LastLayer.Count().ToString());
-            int i = 0;
-            foreach (var plan in LastLayer)
+            if(!ShowSegLineOnly)
             {
-                plan.Draw(i, BisectSegLineDic);
-                i += 1;
+                GetAllSegLinePlan();
+                //var maxCount = AllSegPlans.Max(p => p.Count);
+                //var LastLayer = AllSegPlans.Where(p => p.Count == maxCount);
+                Logger?.Information("\n 总方案数");
+                Logger?.Information("\n" + AllSegPlans.Count().ToString());
+                Active.Editor.WriteMessage("\n 总方案数");
+                Active.Editor.WriteMessage("\n" + AllSegPlans.Count().ToString());
+                var LastLayer = GetLastLayerPlan();
+                Logger?.Information("\n 最后一层方案数");
+                Logger?.Information("\n" + LastLayer.Count().ToString());
+                Active.Editor.WriteMessage("\n 最后一层方案数");
+                Active.Editor.WriteMessage("\n" + LastLayer.Count().ToString());
+                int i = 0;
+                foreach (var plan in LastLayer)
+                {
+                    plan.Draw(i, BisectSegLineDic);
+                    i += 1;
+                }
+                ReclaimMemory();
             }
-            ReclaimMemory();
         }
         //获取所有切到不能再切的方案
         private List<BisectionPlan> GetLastLayerPlan()
@@ -246,7 +251,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 else//新的分割线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
-                                    //BisecSegLine.DrawSegLine();//画出来
+                                    if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
                                 }
                                 //为节点添加分支
                                 bisectArea.AddBranch(BisecSegLine, out List<BisectionSegLine> curSpliters1, out List<BisectionSegLine> curSpliters2);
@@ -342,6 +347,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 else// 新的分割线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
+                                    if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
                                 }
                                 //为节点添加分支
                                 bisectArea.AddBranch(BisecSegLine, out List<BisectionSegLine> curSpliters1, out List<BisectionSegLine> curSpliters2);
