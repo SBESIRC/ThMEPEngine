@@ -364,7 +364,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 
             SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
-            Areas.AddRange(areas);
+            Areas = areas.Where(area => area.Area > (ParameterStock.RoadWidth * ParameterStock.RoadWidth)).ToList();
+            //Areas.AddRange(areas);
 
             for (int i = 0; i < Areas.Count; i++)
             {
