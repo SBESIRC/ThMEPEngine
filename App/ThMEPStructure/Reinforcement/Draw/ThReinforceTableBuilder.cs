@@ -33,45 +33,42 @@ namespace ThMEPStructure.Reinforcement.Draw
             double scale = Helper.CalScale(this.drawingScale);
             List<ThEdgeComponent> tmpComponents = new List<ThEdgeComponent>();
             //需要将组件分行，迭代计算一个队列里最大的长和宽，如果宽超过给的尺寸就停止添加到队列里，将最大的长和宽作为表格的截面尺寸
-            double firstRowH = 0, firstRowW = 0;
+            double firstRowH = 0;
             double tmpH, tmpW;
+            List<double> widths = new List<double>();
+            double widthSum = 0;
             int cnt = 0;
             foreach(var component in components)
             {
                 component.InitAndCalTableSize(this.elevation, this.tblRowHeight, scale,out tmpH, out tmpW);
-                if(firstRowH<tmpH)
-                {
-                    firstRowH = tmpH;
-                }
-                if(firstRowW<tmpW)
-                {
-                    firstRowW = tmpW;
-                }
-                cnt++;
+                widthSum += tmpW;
                 //如果超出范围就绘制
-                if(cnt*firstRowW>width)
+                if(widthSum>width)
                 {
+                    //绘制之前存的每一个
                     foreach(var componentRow in tmpComponents)
                     {
-                        tmpColllection=componentRow.Draw(firstRowH, firstRowW, new Point3d(startX, startY, 0));
+                        tmpColllection=componentRow.Draw(firstRowH, widths[cnt], new Point3d(startX, startY, 0));
                         foreach(DBObject dBObject in tmpColllection)
                         {
                             objectCollection.Add(dBObject);
                         }
-                        startX += firstRowW;
+                        startX += widths[cnt];
+                        cnt++;
                     }
-                    cnt = 0;
+                    widthSum = 0;
                     tmpComponents.Clear();
                     startY -= firstRowH + 4 * this.tblRowHeight;
                     startX = extents.MinPoint.X;
+                    firstRowH = tmpH;
+                    
                 }
-                //否则就加入队列中
-                else
+                widths.Add(tmpW);
+                tmpComponents.Add(component);
+                if(firstRowH<tmpH)
                 {
-                    tmpComponents.Add(component);
-
+                    firstRowH = tmpH;
                 }
-                
             }
 
             return objectCollection;

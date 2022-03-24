@@ -52,8 +52,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 if (point.Y > yMax) yMax = point.Y;
                 if (point.Y < yMin) yMin = point.Y;
             }
-            height = (yMax - yMin)  * 4;
-            width = (xMax - xMin)  * 3;
+            height = (yMax - yMin) * 3 + 1000;
+            width = Math.Max((xMax - xMin) * 1.2 + 1000, 5000);
         }
 
 
@@ -174,7 +174,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             this.TableStartPt = point;
             //init(component,elevation,tblRowHeight,scale,position);
-            SetFirstRowWH(H, W);
+            SetFirstRowH(H);
             CalGangjinPosition(component);
             DrawGangJin(component);
         }
@@ -226,12 +226,14 @@ namespace ThMEPStructure.Reinforcement.Draw
             //计算轮廓得到polyline
             DrawOutline();
             CalTableFirstRowHW(Outline, out firstRowHeight, out firstRowWidth);
+            //this.FirstRowHeight = firstRowHeight;
+            this.FirstRowWidth = firstRowWidth;
         }
 
-        public void SetFirstRowWH(double firstRowHeight, double firstRowWidth)
+        public void SetFirstRowH(double firstRowHeight)
         {
             this.FirstRowHeight = firstRowHeight;
-            this.FirstRowWidth = firstRowWidth;
+            //this.FirstRowWidth = firstRowWidth;
         }
 
         protected void DrawGangJin(ThEdgeComponent component)
