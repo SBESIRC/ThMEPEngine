@@ -309,7 +309,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int PopulationSize;
         int FirstPopulationSize;
         double SelectionRate;
-        int FirstPopulationSizeMultiplyFactor = 2;
+        int FirstPopulationSizeMultiplyFactor = 1;
         int SelectionSize;
         int MaxCount = 10;//出现相同车位数的最大次数
         double MutationRate;
@@ -358,7 +358,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
             }
 
-            FirstPopulationSizeMultiplyFactor = 2;
+            FirstPopulationSizeMultiplyFactor = 1;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
@@ -505,16 +505,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     // 如果为合理解则添加
                     if (initgenome.IsVaild(LayoutPara, ParameterViewModel)) solutions.Add(initgenome.Clone());
                 }
-            } 
+            }
+            var RndFlag = RandomCreateChromosome(out Chromosome Rsolution,200);//尝试200次看看有没有合理解
+            if(RndFlag) solutions.Add(Rsolution);//找到了合理解
             while (solutions.Count < FirstPopulationSize)
             {
                 // 随机生成 其余的解
-                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
-                if (FoundVaild)
+                var FoundVaild = false;
+                if (RndFlag)//之前找到合理解
                 {
-                    solutions.Add(solution);
+                    FoundVaild = RandomCreateChromosome(out Chromosome solution);//尝试找一下
+                    if(FoundVaild) solutions.Add(solution);
                 }
-                else
+                if(!FoundVaild)//没有合理解
                 {
                     // 没找到则在之前解随机挑选一个
                     var idx = RandInt(solutions.Count);
@@ -748,10 +751,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (UpperBound - LowerBound < tol) return LowerBound;
             else
             {
-                var parkingLength = ParameterViewModel.VerticalSpotLength;
+                var dist = ParameterStock.VerticalSpotLength + ParameterStock.D2;
                 var SolutionLis = new List<double>() { LowerBound, UpperBound};
-                var s1 = LowerBound + parkingLength;
-                var s2 = UpperBound - parkingLength;
+                var s1 = LowerBound + dist;
+                var s2 = UpperBound - dist;
                 if (s1 < UpperBound) SolutionLis.Add(s1);
                 if (s2 > LowerBound) SolutionLis.Add(s2);
                 return SolutionLis[RandInt(SolutionLis.Count)];// 随机选一个

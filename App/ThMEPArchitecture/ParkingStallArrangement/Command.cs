@@ -73,7 +73,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
-                //Logger?.Information(ex.Message);
+                Logger?.Information(ex.Message);
+                Logger?.Information("##################################");
                 Logger?.Information(ex.StackTrace);
                 Active.Editor.WriteMessage(ex.Message);
             }

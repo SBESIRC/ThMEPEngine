@@ -366,8 +366,8 @@ namespace ThMEPArchitecture.ViewModel
                 }
                 else if(value == CommandRunSpeedEnum.Slow)//slow
                 {
-                    IterationCount = 30;
-                    PopulationCount = 150;
+                    IterationCount = 60;
+                    PopulationCount = 80;
                     MaxTimespan = 60;
                 }
                 else
@@ -478,7 +478,15 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
-
+        // 车位碰撞参数 D2
+        private static int _D2 = 200;
+        public static int D2
+        {
+            get
+            {
+                return _D2;
+            }
+        }
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
