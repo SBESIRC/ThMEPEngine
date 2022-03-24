@@ -13,13 +13,13 @@ namespace TianHua.Electrical.PDS.UI.Editors
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox
         {
-            IsEnabled = IsEnabled(propertyItem),
-            ItemsSource = ItemsSource(propertyItem),
+            IsEnabled = GetIsEnabled(propertyItem),
+            ItemsSource = GetItemsSource(propertyItem),
         };
 
         public override DependencyProperty GetDependencyProperty() => Selector.SelectedValueProperty;
 
-        private bool IsEnabled(PropertyItem propertyItem)
+        private bool GetIsEnabled(PropertyItem propertyItem)
         {
             var model = propertyItem.Value as ThPDSCircuitModel;
             if (model != null)
@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
             }
         }
 
-        private IEnumerable ItemsSource(PropertyItem propertyItem)
+        private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
             var model = propertyItem.Value as ThPDSCircuitModel;
             if (model != null)

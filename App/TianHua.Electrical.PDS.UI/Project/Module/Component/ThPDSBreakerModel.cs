@@ -79,13 +79,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("附件")]
-        public string Appendix { 
-            get => _breaker.Appendix; 
-            set 
+        public string Appendix
+        {
+            get => _breaker.Appendix;
+            set
             {
                 _breaker.Appendix = value;
                 OnPropertyChanged(nameof(Appendix));
-            }  
+            }
         }
 
         private void OnPropertyChanged()

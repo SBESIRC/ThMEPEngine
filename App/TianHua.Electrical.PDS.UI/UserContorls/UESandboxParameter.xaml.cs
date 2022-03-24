@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -11,6 +12,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public UESandboxParameter()
         {
             InitializeComponent();
+            DataContext = new ThPDSUESandboxParameterModel();
         }
         private void btnImportSetting(object sender, RoutedEventArgs e)
         {
