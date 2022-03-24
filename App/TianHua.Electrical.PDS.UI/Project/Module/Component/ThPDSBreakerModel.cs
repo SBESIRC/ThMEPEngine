@@ -30,7 +30,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetModel(value);
-                OnPropertyChanged(nameof(BreakerType));
+                OnPropertyChanged();
             }
         }
 
@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetFrameSpecifications(value);
-                OnPropertyChanged(nameof(FrameSpecifications));
+                OnPropertyChanged();
             }
         }
 
@@ -52,7 +52,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetPolesNum(value);
-                OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged();
             }
         }
 
@@ -63,7 +63,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetRatedCurrent(value);
-                OnPropertyChanged(nameof(RatedCurrent));
+                OnPropertyChanged();
             }
         }
 
@@ -74,7 +74,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetTripDevice(value);
-                OnPropertyChanged(nameof(TripUnitType));
+                OnPropertyChanged();
             }
         }
 
@@ -86,6 +86,16 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 _breaker.Appendix = value;
                 OnPropertyChanged(nameof(Appendix));
             }  
+        }
+
+        private void OnPropertyChanged()
+        {
+            OnPropertyChanged(nameof(Content));
+            OnPropertyChanged(nameof(PolesNum));
+            OnPropertyChanged(nameof(BreakerType));
+            OnPropertyChanged(nameof(RatedCurrent));
+            OnPropertyChanged(nameof(TripUnitType));
+            OnPropertyChanged(nameof(FrameSpecifications));
         }
     }
 }

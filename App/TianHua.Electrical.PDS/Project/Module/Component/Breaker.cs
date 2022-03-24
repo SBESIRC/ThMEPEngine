@@ -90,7 +90,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 修改脱扣器类型给
+        /// 修改脱扣器类型
         /// </summary>
         /// <param name="tripDevice"></param>
         public void SetTripDevice(string tripDevice)
@@ -204,7 +204,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public string Content { get { return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}"; } }
 
         /// <summary>
-        /// 模型
+        /// 型号
         /// </summary>
         public string BreakerType { get; set; }
 
