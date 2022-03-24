@@ -42,8 +42,8 @@
     <Compile Include="WSS.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Logo.ico" />
-    <Content Include="License_zh-CN.rtf" />
+    <Content Include="Resources\License_zh-CN.rtf" />
+    <Content Include="Resources\Logo.ico" />
     <Content Include="Variable.wxi" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="UtilExtension_zh-CN.wxl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
