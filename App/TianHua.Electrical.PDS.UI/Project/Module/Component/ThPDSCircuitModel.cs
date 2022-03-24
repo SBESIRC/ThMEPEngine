@@ -18,14 +18,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("回路编号")]
-        public string CircuitId
+        public string CircuitNumber
         {
-            get => _edge.Circuit.ID.CircuitID.FirstOrDefault();
-            //set
-            //{
-            //    edge.Circuit.ID.CircuitID = value;
-            //    OnPropertyChanged(nameof(CircuitId));
-            //}
+            get => _edge.Circuit.ID.CircuitNumber[0];
+            set
+            {
+                _edge.Circuit.ID.CircuitNumber[0] = value;
+                OnPropertyChanged(nameof(CircuitNumber));
+            }
         }
 
         [DisplayName("回路形式")]
