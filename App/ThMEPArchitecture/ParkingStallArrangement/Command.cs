@@ -77,6 +77,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Logger?.Information("##################################");
                 Logger?.Information(ex.StackTrace);
                 Active.Editor.WriteMessage(ex.Message);
+                GAData.Save();//储存出错的chromesome
             }
         }
 

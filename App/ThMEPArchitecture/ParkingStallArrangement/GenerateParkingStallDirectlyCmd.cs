@@ -82,7 +82,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 
-            var rst = geneAlgorithm.Run();
+            List<Gene> rst;
+            if (_CommandMode == CommandMode.WithUI) rst = geneAlgorithm.Run();
+            //块内的东西，以及位置都不能变化。
+            else rst = GAData.LoadChromosome().Genome;//无ui，读取
 
             layoutPara.DirectlyArrangementSetParameter(rst);
             int count = 0;
