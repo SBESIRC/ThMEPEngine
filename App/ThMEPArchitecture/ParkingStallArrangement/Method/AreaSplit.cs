@@ -44,7 +44,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rst;
         }
 
-        public static Polyline SplitByRamp(this Polyline polygon,  DBObjectCollection rstRamps, double tor = 5.0)
+        public static Polyline _SplitByRamp(this Polyline polygon,  DBObjectCollection rstRamps, double tor = 5.0)
         {
             var defaultTesselateLength = 100;
             var lines = polygon.ToLines(defaultTesselateLength);
@@ -68,7 +68,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             rst = rst.OrderByDescending(a => a.Area).ToList();
             return rst.First();
         }
-
+        public static Polyline Combine(this Polyline Boundary, DBObjectCollection Ramps)
+        {
+            var curves = new DBObjectCollection();
+            curves.Add(Boundary);
+            foreach (BlockReference ramp in Ramps)
+            {
+                ramp.GetPolyLines().ForEach(pline => curves.Add(pline));
+            }
+            var rst = curves.ToAreas();
+            return rst.FindByMax(a => a.Area);
+        }
         public static List<Polyline> SplitArea(this List<Line> splitterLines, List<Polyline> polyLines, double tor = 5.0)
         {
             var rst = new List<Polyline>();
@@ -96,7 +106,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var geos = multiLineStrings.Polygonize();
             foreach (Polygon plg in geos)
             {
-                rst.Add(plg.ToDbEntity() as Polyline);
+                //rst.Add(plg.ToDbEntity() as Polyline);
+                rst.Add(plg.Shell.ToDbPolyline());//只保留外框
             }
 
             return rst;

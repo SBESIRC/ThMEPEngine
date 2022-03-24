@@ -58,9 +58,13 @@ namespace ThMEPWSS
                         };
             var layoutMode = ThHydrantUtil.SettingSelection("\n摆放方式", hintMode, "2");
 
+          
+            var avoidParking = ThHydrantUtil.SettingBoolean ("\n车位是否阻挡开门",1);
+
             HydrantLayoutSetting.Instance.LayoutObject = Convert.ToInt32(layoutObject);
             HydrantLayoutSetting.Instance.SearchRadius = radius;
             HydrantLayoutSetting.Instance.LayoutMode = Convert.ToInt32(layoutMode);
+            HydrantLayoutSetting.Instance.AvoidParking = avoidParking;
 
             using (var cmd = new ThHydrantLayoutCmd())
             {

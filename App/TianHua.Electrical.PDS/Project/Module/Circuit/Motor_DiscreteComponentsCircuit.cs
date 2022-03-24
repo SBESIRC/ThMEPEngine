@@ -26,5 +26,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：热继电器
         /// </summary>
         public ThermalRelay thermalRelay { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor { get; set; }
     }
 }

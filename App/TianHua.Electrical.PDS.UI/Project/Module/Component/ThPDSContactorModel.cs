@@ -1,50 +1,63 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 接触器
+    /// </summary>
     public class ThPDSContactorModel : NotifyPropertyChangedBase
     {
-        readonly Contactor contactor;
+        private readonly Contactor _contactor;
 
         public ThPDSContactorModel(Contactor contactor)
         {
-            this.contactor = contactor;
+            _contactor = contactor;
         }
-        [DisplayName("内容")]
-        public string Content => contactor.Content;
 
+        [ReadOnly(true)]
+        [DisplayName("内容")]
+        public string Content => _contactor.Content;
+
+
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public string Type => "接触器";
-        [DisplayName("接触器类型")]
-        public string ContactorType
+        public ComponentType Type => _contactor.ComponentType;
+
+
+        [DisplayName("型号")]
+        public ContactorModel Model
         {
-            get => contactor.ContactorType;
+            get => (ContactorModel)Enum.Parse(typeof(ContactorModel), _contactor.ContactorType);
             set
             {
-                contactor.ContactorType = value;
-                OnPropertyChanged(nameof(Content));
+                _contactor.ContactorType = value.ToString();
+                OnPropertyChanged(nameof(Model));
             }
         }
+
         [DisplayName("极数")]
         public string PolesNum
         {
-            get => contactor.PolesNum;
+            get => _contactor.PolesNum;
             set
             {
-                contactor.PolesNum = value;
-                OnPropertyChanged(nameof(Content));
+                _contactor.PolesNum = value;
+                OnPropertyChanged(nameof(PolesNum));
             }
         }
+
         [DisplayName("额定电流")]
         public string RatedCurrent
         {
-            get => contactor.RatedCurrent;
+            get => _contactor.RatedCurrent;
             set
             {
-                contactor.RatedCurrent = value;
-                OnPropertyChanged(nameof(Content));
+                _contactor.RatedCurrent = value;
+                OnPropertyChanged(nameof(RatedCurrent));
             }
         }
     }

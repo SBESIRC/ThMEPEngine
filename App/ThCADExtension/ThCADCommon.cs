@@ -138,7 +138,7 @@ namespace ThCADExtension
         /// <returns></returns>
         public static string PDSDiagramDwgPath()
         {
-            return Path.Combine(SupportPath(), "电力配电系统图生成.dwg");
+            return Path.Combine(SupportPath(), "电力配电系统图模板.dwg");
         }
 
         /// <summary>

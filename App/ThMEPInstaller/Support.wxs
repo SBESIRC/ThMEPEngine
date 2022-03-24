@@ -102,9 +102,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_TG20_DB" Guid="{3512ECA8-E62B-47D5-A4C6-9ECCDF863E9E}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_TG20_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20.db" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{64057DEB-0C08-42A3-8B7C-67C180703822}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图生成.dwg" KeyPath="yes" />
-            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{FFDB073F-A6E3-474B-B758-0512C5AE9E0B}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图模板.dwg" KeyPath="yes" />
+            </Component>         
             <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Component_Template" Guid="{D0E8E3D8-5195-4057-B0F5-E1CD92802413}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PDS_Component_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图元素.dwg" KeyPath="yes" />
             </Component>
@@ -158,6 +158,42 @@
                 <File Id="FILE_Autoloader_PackageContents_Support_BeamStructure_BuildBeamConfig" Source="$(var.AutoloaderContentsPath)\Support\BeamStructure\BuildBeamConfig.json" KeyPath="yes" />
             </Component>
         </DirectoryRef>
+    
+        <DirectoryRef Id="DIR_Autoloader_Contents_Support_PowerDistributionSystem">
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_ATSE_ImportLibrary_19DX101" Guid="{4FDFFFF3-7F34-4E56-AEE4-81ED9066187C}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_ATSE_ImportLibrary_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_ATSE_ImportLibrary_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_CircuitBreaker_ImportLibrary_19DX101" Guid="{AD5ADD38-7AA0-47CE-BA79-78FA2A9A9C6C}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_CircuitBreaker_ImportLibrary_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_CircuitBreaker_ImportLibrary_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Contactor_19DX101" Guid="{09D839A4-1352-46EB-AEC2-52D2EF47494A}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_Contactor_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_Contactor_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Isolator_19DX101" Guid="{8BCF88DC-A56B-45B8-97A9-A18C04126436}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_Isolator_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_Isolator_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeOneCoordination_19DX101" Guid="{C0D53CA9-D2FD-4FC1-9616-BDBD5AAC0C61}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeOneCoordination_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_Motor_TypeOneCoordination_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeTwoCoordination_19DX101" Guid="{DF630ECB-AA74-4AE5-80FF-F016B73326CF}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeTwoCoordination_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_Motor_TypeTwoCoordination_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_MTSE_ImportLibrary_19DX101" Guid="{05363F49-BD20-4BF3-857E-1C94473BDEB5}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_MTSE_ImportLibrary_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_MTSE_ImportLibrary_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_ThermalRelay_19DX101" Guid="{536D35E7-851F-465C-8AAA-772009962316}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_ThermalRelay_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_ThermalRelay_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_Busway_Selector_Default" Guid="{97AFD970-23CC-4DAC-998D-FC66A247525D}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_Busway_Selector_Default" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_Busway_Selector_Default.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_LV_Conductor_Selector_Default" Guid="{25F52153-CC07-4BFE-B38D-3BC6FF79227A}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_LV_Conductor_Selector_Default" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_Conductor_Selector_Default.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_LV_Current_Transformer_19DX101" Guid="{C6B6238F-7B92-4061-976B-3627B052D767}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_LV_Current_Transformer_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_Current_Transformer_19DX101.xlsx" KeyPath="yes" />
+            </Component>
+        </DirectoryRef>
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
@@ -209,6 +245,17 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Component_Template" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_Components" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_ATSE_ImportLibrary_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_CircuitBreaker_ImportLibrary_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Contactor_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Isolator_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeOneCoordination_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_Motor_TypeTwoCoordination_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_MTSE_ImportLibrary_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_ThermalRelay_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PDS_LV_Busway_Selector_Default" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_Conductor_Selector_Default" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_Current_Transformer_19DX101" />
         </ComponentGroup>
     </Fragment>
 </Wix>

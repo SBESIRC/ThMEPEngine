@@ -49,12 +49,12 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
         public ThCADCoreNTSSpatialIndex LeanWallIndex;
         public DBObjectCollection PakingObjs = new DBObjectCollection();
         public ThCADCoreNTSSpatialIndex PakingIndex;
-
+        public ThCADCoreNTSSpatialIndex DifferIndex;
         //消防栓的大小属性
         public double ShortSide = 200;
         public double LongSide = 800;
         public double DoorShortSide = 800;
-        public double DoorLongSide = 1300;
+        public double DoorLongSide = 1200;
         public double DoorOffset = 200;
 
         //其他属性
@@ -75,13 +75,13 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
         public void FindLeanWall()
         {
             var room = rawData0.Room;
-            var wall = rawData0.Wall;
-            var column = rawData0.Column;
 
             var obj = new DBObjectCollection();
-            wall.ForEach(x => obj.Add(x));
-            column.ForEach(x => obj.Add(x));
-            
+            rawData0.Wall.ForEach(x => obj.Add(x));
+            rawData0.Column.ForEach(x => obj.Add(x));
+            rawData0.Door.ForEach(x => obj.Add(x));
+            rawData0.FireProof.ForEach(x => obj.Add(x));
+            DifferIndex = new ThCADCoreNTSSpatialIndex(obj);
             //var mroom = room.OfType<MPolygon>().ToList();
             //var differ0 = mroom[0].DifferenceMP(obj);
             //differ0.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x,"l0mroom"));
@@ -125,7 +125,9 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             {
                 if (singleroom is Polyline pl)
                 {
-                    var differ = pl.Difference(obj);
+                    var differobj = DifferIndex.SelectCrossingPolygon(pl);              
+                    var plNew = ThMPolygonTool.CreateMPolygon(pl);
+                    var differ = plNew.DifferenceMP(differobj);
                     foreach (var singlediffer in differ)
                     {
                         if (singlediffer is Polyline sd)
@@ -142,7 +144,12 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                 }
                 else if (singleroom is MPolygon mpl)
                 {
-                    var differ = mpl.DifferenceMP(obj);
+                    var differobj = DifferIndex.SelectCrossingPolygon(mpl);
+                    foreach (var hole in  mpl.Holes()) 
+                    {
+                        differobj.Add(hole);
+                    }
+                    var differ = mpl.DifferenceMP(differobj);
                     foreach (var singlediffer in differ)
                     {
                         if (singlediffer is Polyline sd)
@@ -187,22 +194,26 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
                     rawData0.VerticalPipe.Remove(PointToVP[VerticalPipeList[0]]);
                     if (model.Type == 0)
                     {
-                        VerticalPipeUsed0.Add((PointToVP[VerticalPipeList[0]].Outline as DBPoint).Position);
+                        //VerticalPipeUsed0.Add((PointToVP[VerticalPipeList[0]].Outline as DBPoint).Position);
+                        HydrantModel0.Add(model);
                     }
                     if (model.Type == 1)
                     {
-                        VerticalPipeUsed1.Add((PointToVP[VerticalPipeList[0]].Outline as DBPoint).Position);
+                        //VerticalPipeUsed1.Add((PointToVP[VerticalPipeList[0]].Outline as DBPoint).Position);
+                        HydrantModel1.Add(model);
                     }
                 }
                 else if (VerticalPipeList.Count == 0) //没找到立管
                 {
                     if (model.Type == 0)
                     {
-                        VerticalPipeUsed0.Add(model.Center);
+                        //VerticalPipeUsed0.Add(model.Center);
+                        HydrantModel0.Add(model);
                     }
                     if (model.Type == 1)
                     {
-                        VerticalPipeUsed1.Add(model.Center);
+                        //VerticalPipeUsed1.Add(model.Center);
+                        HydrantModel1.Add(model);
                     }
                 }
             }
@@ -234,7 +245,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             //卷帘 buffer
             var fpObjs = new DBObjectCollection();
             rawData0.FireProof.ForEach(x => fpObjs.Add(x));
-            fpObjs.BufferPolygons(250);
+            fpObjs.BufferPolygons(50);
             rawData0.FireProof = fpObjs.OfType<Polyline>().ToList();
 
             //立柱buffer
@@ -253,7 +264,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             rawData0.Door.ForEach(x => ForbiddenObjs.Add(x));
             rawData0.FireProof.ForEach(x => ForbiddenObjs.Add(x));
             rawData0.Wall.ForEach(x => ForbiddenObjs.Add(x));
-            IgnoreVPBlock.ForEach(x => ForbiddenObjs.Add(x));
+            //IgnoreVPBlock.ForEach(x => ForbiddenObjs.Add(x));
             ForbiddenIndex = new ThCADCoreNTSSpatialIndex(ForbiddenObjs);
 
             //可倚靠区
@@ -285,8 +296,10 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             ProcessedData.LeanWallIndex = LeanWallIndex;
             ProcessedData.ParkingIndex = PakingIndex;
 
-            processedData1.FireHydrant = VerticalPipeUsed0;
-            processedData1.FireExtinguisher = VerticalPipeUsed1;
+            processedData1.FireHydrant = HydrantModel0;
+            processedData1.FireExtinguisher = HydrantModel1;
+            //processedData1.FireHydrant = HydrantModel0;
+            //processedData1.FireExtinguisher = HydrantModel1;
 
             return processedData1;
         }

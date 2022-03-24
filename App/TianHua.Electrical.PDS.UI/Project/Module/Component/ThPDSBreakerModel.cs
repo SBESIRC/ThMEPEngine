@@ -1,73 +1,102 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSBreakerModel : NotifyPropertyChangedBase
     {
-        readonly Breaker breaker;
+        private readonly Breaker _breaker;
 
         public ThPDSBreakerModel(Breaker breaker)
         {
-            this.breaker = breaker;
+            _breaker = breaker;
         }
+
+        [ReadOnly(true)]
         [DisplayName("内容")]
-        public string Content => breaker.Content;
+        public string Content => _breaker.Content;
+
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public string Type => "断路器";
-        [DisplayName("模型")]
-        public string BreakerType
+        public ComponentType Type => _breaker.ComponentType;
+
+        [DisplayName("型号")]
+        public BreakerModel Model
         {
-            get => breaker.BreakerType;
+            get => (BreakerModel)Enum.Parse(typeof(BreakerModel), _breaker.BreakerType);
             set
             {
-                breaker.BreakerType = value;
-                OnPropertyChanged(nameof(Content));
+                _breaker.SetModel(value.ToString());
+                OnPropertyChanged();
             }
         }
+
         [DisplayName("壳架规格")]
         public string FrameSpecifications
         {
-            get => breaker.FrameSpecifications;
+            get => _breaker.FrameSpecifications;
             set
             {
-                breaker.FrameSpecifications = value;
-                OnPropertyChanged(nameof(Content));
+                _breaker.SetFrameSpecifications(value);
+                OnPropertyChanged();
             }
         }
 
         [DisplayName("极数")]
         public string PolesNum
         {
-            get => breaker.PolesNum;
+            get => _breaker.PolesNum;
             set
             {
-                breaker.PolesNum = value;
-                OnPropertyChanged(nameof(Content));
+                _breaker.SetPolesNum(value);
+                OnPropertyChanged();
             }
         }
+
         [DisplayName("额定电流")]
         public string RatedCurrent
         {
-            get => breaker.RatedCurrent;
+            get => _breaker.RatedCurrent;
             set
             {
-                breaker.RatedCurrent = value;
-                OnPropertyChanged(nameof(Content));
+                _breaker.SetRatedCurrent(value);
+                OnPropertyChanged();
             }
         }
+
         [DisplayName("脱扣器类型")]
         public string TripUnitType
         {
-            get => breaker.TripUnitType;
+            get => _breaker.TripUnitType;
             set
             {
-                breaker.TripUnitType = value;
-                OnPropertyChanged(nameof(Content));
+                _breaker.SetTripDevice(value);
+                OnPropertyChanged();
             }
         }
+
         [DisplayName("附件")]
-        public string Appendix { get => breaker.Appendix; set => breaker.Appendix = value; }
+        public string Appendix
+        {
+            get => _breaker.Appendix;
+            set
+            {
+                _breaker.Appendix = value;
+                OnPropertyChanged(nameof(Appendix));
+            }
+        }
+
+        private void OnPropertyChanged()
+        {
+            OnPropertyChanged(nameof(Model));
+            OnPropertyChanged(nameof(Content));
+            OnPropertyChanged(nameof(PolesNum));
+            OnPropertyChanged(nameof(RatedCurrent));
+            OnPropertyChanged(nameof(TripUnitType));
+            OnPropertyChanged(nameof(FrameSpecifications));
+        }
     }
 }

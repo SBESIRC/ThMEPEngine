@@ -10,7 +10,16 @@
         public static readonly string ELECTRICITY = "电量";
         public static readonly string POWER_CATEGORY = "电源类别";
         public static readonly string FIRE_POWER_SUPPLY = "消防电源";
+        public static readonly string NON_FIRE_POWER_SUPPLY = "非消防电源";
         public static readonly string FREQUENCY_CONVERSION = "变频";
+
+        public static readonly string DISTRIBUTION_BOX_ID = "配电箱编号";
+        public static readonly string APPLICATION = "Description";
+        public static readonly string FIRE_LOAD = "Fire Load"; 
+        public static readonly string OVERALL_DIMENSIONS = "Overall Dimensions";
+        public static readonly string LOCATION = "Location";
+        public static readonly string INSTALLMETHOD = "Install Method";
+        public static readonly string ENTER_CIRCUIT_ID = "进线回路编号：";
 
         public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
         public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
@@ -19,6 +28,10 @@
         public static readonly string LOAD_LABELS = "负载标注";
         public static readonly string LOAD_DETAILS = "负载明细";
         public static readonly string PUMP_LABELS = "水泵标注";
-        
+
+        public static readonly string SYSTEM_DIAGRAM_TABLE_HEADER = "系统图内框及标题栏";
+        public static readonly string SYSTEM_DIAGRAM_TABLE_TITLE = "系统图标题栏";
+        public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE = "单相计算表";
+        public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE = "三相计算表";
     }
 }

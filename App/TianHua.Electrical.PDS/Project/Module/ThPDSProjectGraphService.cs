@@ -1,4 +1,10 @@
 ﻿using System;
+using System.Linq;
+using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -8,22 +14,125 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 新建回路
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="circuit"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void AddCircuit(ThPDSProjectGraph graph, CircuitFormOutType type)
+        /// <param name="node"></param>
+        /// <param name="type"></param>
+        public static void AddCircuit(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
-            //throw new NotImplementedException();
+            var target = new ThPDSProjectGraphNode();
+            graph.Graph.AddVertex(target);
+            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit()};
+            newEdge.Details = new CircuitDetails();
+            var CalculateCurrent = newEdge.Target.Load.CalculateCurrent;//计算电流
+            var CascadeCurrent = newEdge.Target.Details.CascadeCurrent;
+            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
+            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            if (newEdge.Target.Load.Phase == ThPDSPhase.一相)
+            {
+                if (newEdge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
+                {
+                    PolesNum = "1P";
+                }
+                else
+                {
+                    PolesNum = "2P";
+                }
+            }
+            var Characteristics = "";//瞬时脱扣器类型
+            var TripDevice = newEdge.Target.Load.LoadTypeCat_1.GetTripDevice(newEdge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
+            if (newEdge.Target.Type == PDSNodeType.None)
+            {
+                newEdge.Details.CircuitForm = new RegularCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    Conductor = new Conductor(CalculateCurrent, newEdge.Target.Load.Phase, newEdge.Target.Load.CircuitType, newEdge.Target.Load.LoadTypeCat_1, newEdge.Target.Load.FireLoad, newEdge.Circuit.ViaConduit, newEdge.Circuit.ViaCableTray, newEdge.Target.Load.Location.FloorNumber),
+                };
+            }
+
+            graph.Graph.AddEdge(newEdge);
         }
 
         /// <summary>
         /// 切换进线形式
         /// </summary>
         /// <param name="graph"></param>
+        /// <param name="node"></param>
         /// <param name="type"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void UpdateFormInType(ThPDSProjectGraph graph, CircuitFormInType type)
+        /// <exception cref="NotSupportedException"></exception>
+        public static void UpdateFormInType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormInType type)
         {
-            //throw new NotImplementedException();
+            if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
+            {
+                var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
+                var edges = graph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
+                var PolesNum = "4P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+                if (node.Load.Phase == ThPDSPhase.一相)
+                {
+                    //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
+                    //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
+                    if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
+                    {
+                        PolesNum = "1P";
+                    }
+                    else
+                    {
+                        PolesNum = "2P";
+                    }
+                }
+                else if (node.Load.Phase == ThPDSPhase.三相)
+                {
+                    if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
+                    {
+                        PolesNum = "3P";
+                    }
+                }
+                switch (type)
+                {
+                    case CircuitFormInType.一路进线:
+                        {
+                            node.Details.CircuitFormType = new OneWayInCircuit()
+                            {
+                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, PolesNum)
+                            };
+                            break;
+                        }
+                    case CircuitFormInType.二路进线ATSE:
+                        {
+                            node.Details.CircuitFormType = new TwoWayInCircuit()
+                            {
+                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, PolesNum)
+                            };
+                            break;
+                        }
+                    case CircuitFormInType.三路进线:
+                        {
+                            node.Details.CircuitFormType = new ThreeWayInCircuit()
+                            {
+                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                transferSwitch2 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
+                            };
+                            break;
+                        }
+                    case CircuitFormInType.集中电源:
+                        {
+                            node.Details.CircuitFormType = new CentralizedPowerCircuit()
+                            {
+                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                            };
+                            break;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
+            }
         }
 
         /// <summary>
@@ -32,7 +141,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="type"></param>
-        public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
+        public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
         {
             //throw new NotImplementedException();
         }
@@ -43,20 +152,21 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="doLock"></param>
-        public static void Lock(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, bool doLock)
+        public static void Lock(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, bool doLock)
         {
-            //throw new NotImplementedException();
+            edge.Details.CircuitLock = doLock;
         }
 
         /// <summary>
         /// 删除回路
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        /// <param name="edge"></param>
+        public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
-            //throw new NotImplementedException();
+            //删除回路只删除这个连接关系，前后节点都还保留
+            //所以删除后，后面的负载会失去原有的回路,需要人再去分配
+            graph.Graph.RemoveEdge(edge);
         }
 
         /// <summary>
@@ -104,29 +214,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 插入浪涌保护器
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <param name="type"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void InsertSurgeProtectionDevice(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, SurgeProtectionDeviceType type)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 移除浪涌保护器
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void RemoveSurgeProtectionDevice(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// 更新图
         /// </summary>
         /// <param name="graph"></param>
@@ -134,7 +221,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            //throw new NotImplementedException();
+            graph.UpdateWithNode(node , false);
+        }
+
+        public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        {
+            graph.UpdateWithEdge(edge, false);
         }
     }
 }

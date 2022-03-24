@@ -26,5 +26,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：断路器
         /// </summary>
         public BreakerBaseComponent breaker2 { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor { get; set; }
     }
 }

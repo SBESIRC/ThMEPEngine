@@ -1,85 +1,81 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSDistributionBoxModel : NotifyPropertyChangedBase
     {
-        ThPDSProjectGraphNode vertice;
-
-        public ThPDSDistributionBoxModel(ThPDSProjectGraphNode vertice)
+        private readonly ThPDSProjectGraphNode _node;
+        public ThPDSDistributionBoxModel(ThPDSProjectGraphNode graphNode)
         {
-            this.vertice = vertice;
+            _node = graphNode;
         }
+
+        [ReadOnly(true)]
         [DisplayName("配电箱编号")]
         public string ID
         {
-            get => vertice.Load.ID.LoadID;
-            //set => vertice.Load.ID.LoadID = value;
+            get => _node.Load.ID.LoadID;
         }
+
         [DisplayName("功率")]
         public double InstallCapacity
         {
-            get => vertice.Details.LowPower;
-            set => vertice.Details.LowPower = value;
+            get => _node.Details.LowPower;
+            set
+            {
+                _node.Details.LowPower = value;
+                OnPropertyChanged(nameof(InstallCapacity));
+            }
         }
+
+        [ReadOnly(true)]
         [DisplayName("相数")]
-        public Model.ThPDSPhase Phase
+        public ThPDSPhase Phase
         {
-            get => vertice.Load.Phase;
-            set => vertice.Load.Phase = value;
+            get => _node.Load.Phase;
         }
+
         [DisplayName("需要系数")]
         public double DemandFactor
         {
-            get => vertice.Load.DemandFactor;
+            get => _node.Load.DemandFactor;
             set
             {
-                vertice.Load.DemandFactor = value;
+                _node.Load.DemandFactor = value;
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
+
         [DisplayName("功率因数")]
         public double PowerFactor
         {
-            get => vertice.Load.PowerFactor;
+            get => _node.Load.PowerFactor;
             set
             {
-                vertice.Load.PowerFactor = value;
+                _node.Load.PowerFactor = value;
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }
+
+        [ReadOnly(true)]
         [DisplayName("计算电流")]
         public double CalculateCurrent
         {
-            get => vertice.Load.CalculateCurrent;
+            get => _node.Load.CalculateCurrent;
         }
+
         [DisplayName("用途描述")]
         public string Description
         {
-            get => vertice.Load.ID.Description;
+            get => _node.Load.ID.Description;
             set
             {
-                vertice.Load.ID.Description = value;
+                _node.Load.ID.Description = value;
                 OnPropertyChanged(nameof(Description));
             }
-        }
-        [DisplayName("箱体尺寸")]
-        public string OverallDimensions
-        {
-            get => "";
-        }
-        [DisplayName("安装方式")]
-        public string InstalledMethod
-        {
-            get => "";
         }
     }
 }

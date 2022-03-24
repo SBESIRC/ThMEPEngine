@@ -27,6 +27,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateAllSeglinesCmd.cs" />
+    <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
+    <Compile Include="ParkingStallArrangement\Algorithm\GAData.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\CommandPreprocess.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="ParkingStallArrangement\Method\PtTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\GaParameter.cs" />
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
+    <Compile Include="PartitionLayout\LayoutOutput.cs" />
     <Compile Include="PartitionLayout\LayoutPostProcessing.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProMain.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProSucceed.cs" />

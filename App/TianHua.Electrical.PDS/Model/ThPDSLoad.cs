@@ -270,7 +270,7 @@
             LoadUID = System.Guid.NewGuid().ToString();
             ID = new ThPDSID();
             LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
-            DefaultCircuitType = ThPDSCircuitType.None;
+            CircuitType = ThPDSCircuitType.None;
             InstalledCapacity = new ThInstalledCapacity();
             AttributesCopy = "";
             Phase = ThPDSPhase.三相;
@@ -315,9 +315,9 @@
         public ThPDSLoadTypeCat_3 LoadTypeCat_3 { get; set; }
 
         /// <summary>
-        /// 默认回路类型
+        /// 回路类型
         /// </summary>
-        public ThPDSCircuitType DefaultCircuitType { get; set; }
+        public ThPDSCircuitType CircuitType { get; set; }
 
         /// <summary>
         /// 是否是消防设备

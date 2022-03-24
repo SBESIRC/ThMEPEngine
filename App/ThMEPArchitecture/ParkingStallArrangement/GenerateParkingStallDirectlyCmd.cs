@@ -82,7 +82,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 
-            var rst = geneAlgorithm.Run();
+            List<Gene> rst;
+            if (_CommandMode == CommandMode.WithUI) rst = geneAlgorithm.Run();
+            //块内的东西，以及位置都不能变化。
+            else rst = GAData.LoadChromosome().Genome;//无ui，读取
 
             layoutPara.DirectlyArrangementSetParameter(rst);
             int count = 0;
@@ -92,7 +95,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
-                var Cars = new List<Polyline>();
+                var Walls = new List<Polyline>();
+                var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
                 var Lanes = new List<Line>();
                 var Boundary = layoutPara.OuterBoundary;
@@ -101,6 +105,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
                     try
                     {
@@ -108,13 +113,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
+                        //Logger?.Information(ex.StackTrace);
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars,ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                try
+                {
+                    LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
                 count = Cars.Count;
                 var partitionpro_final = new ParkingPartitionPro();
-                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
                 partitionpro_final.Display();
             }

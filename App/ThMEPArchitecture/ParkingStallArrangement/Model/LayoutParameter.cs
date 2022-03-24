@@ -38,6 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Dictionary<int, List<int>> AreaSegLineDic { get; set; }//key表示区域索引，value表示线索引
         public ThCADCoreNTSSpatialIndex BuildingBlockSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
+        public ThCADCoreNTSSpatialIndex BoundarySpatialIndex { get; set; }//所有边界，包含边界，障碍物，坡道的索引
         public Dictionary<int, List<int>> SeglineNeighborIndexDic { get; set; }//分割线临近线
         public List<Ramps> RampList { get; set; }//坡道
         public int SegAreasCnt { get; set; }//初始分割线数目
@@ -111,6 +112,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             BuildingBoxes = new Dictionary<int, List<Polyline>>();
             Id2AllSegLineDic = new Dictionary<int, List<Line>>();
             BuildingBlockSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingObjs);
+            BoundarySpatialIndex = outerBrder.BoundarySpatialIndex;
             SegLineIndexDic = new Dictionary<int, Line>();
             AreaSegLineDic = new Dictionary<int, List<int>>();
             SeglineNeighborIndexDic = seglineNeighborIndexDic;
@@ -197,37 +199,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     tmpSegLines.Add(line);
                     tmpSegLineIndexDic.Add(i, line);
                 }
-                if (IsInCorrectSegLine(tmpBoundary, tmpSegLines))
-                {
-                    return false;
-                }
+                //if (IsInCorrectSegLine(tmpBoundary, tmpSegLines))
+                //{
+                //    return false;
+                //}
+                var segLines = WindmillSplit.GetExtendSegline(tmpSegLineIndexDic, SeglineNeighborIndexDic);//进行线的延展
+                //segLines = SeglineTools.RemoveOuterLine(segLines, tmpBoundary);//移除区域外的线
+                segLines = SeglineTools.SeglinePrecut(segLines, tmpBoundary);//预切割
+                if (!segLines.Allconnected()) return false;//判断车道是否相连
+                var vaildSeg = segLines.GetVaildSegLines(tmpBoundary);//获取有效分割线
+                if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return false;  //判断车道宽
                 //If in manual mode
-                areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+                //areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
 
-                if (!IsReasonableAns(areas, tmpBoundary, tmpSegLines))
-                {
-                    return false;
-                }
 
-                foreach (var area in areas)
-                {
-                    //var areaSPIdx = new ThCADCoreNTSSpatialIndex(new List<Polyline> { area });
-                    // 求area和building的交集
-                    var buildLines = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
-                    var pts = area.Intersect(OuterBoundary, Intersect.OnBothOperands);
+                //if (!IsReasonableAns(areas, tmpBoundary, tmpSegLines))
+                //{
+                //    return false;
+                //}
 
-                    if (buildLines.Count == 0)// 区域内没有建筑
-                    {
-                        if (area.Area < 0.25 * (parameterViewModel.RoadWidth * parameterViewModel.RoadWidth))//区域面积小于车道宽的平方
-                        {
-                            return false;
-                        }
-                        if (pts.Count == 0)//空腔
-                        {
-                            return false;
-                        }
-                    }
-                }
+                //foreach (var area in areas)
+                //{
+                //    // 求area和building的交集
+                //    var buildLines = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
+                //    var pts = area.Intersect(OuterBoundary, Intersect.OnBothOperands);
+
+                //    if (buildLines.Count == 0)// 区域内没有建筑
+                //    {
+                //        if (area.Area < 0.25 * (parameterViewModel.RoadWidth * parameterViewModel.RoadWidth))//区域面积小于车道宽的平方
+                //        {
+                //            return false;
+                //        }
+                //        if (pts.Count == 0)//空腔
+                //        {
+                //            return false;
+                //        }
+                //    }
+                //}
             }
             catch (Exception ex)
             {
@@ -259,17 +267,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLineIndexDic.Add(i, line);
             }
 
-            if (IsInCorrectSegLine(tmpBoundary, SegLines))
-            {
-                return false;
-            }
+            //if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            //{
+            //    return false;
+            //}
 
-            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+            //var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+            var _areas = new List<Polyline>() { tmpBoundary };
+            var _segLines = WindmillSplit.GetExtendSegline(SegLineIndexDic, SeglineNeighborIndexDic);//进行线的延展
+            //_segLines = SeglineTools.RemoveOuterLine(_segLines, tmpBoundary);//移除区域外的线
+            _segLines = SeglineTools.SeglinePrecut(_segLines, tmpBoundary);//预切割
+            if (!_segLines.Allconnected()) return false;//判断车道是否相连
+            var vaildSeg = _segLines.GetVaildSegLines(tmpBoundary);//获取有效分割线
+            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return false;  //判断车道宽
 
-            if(!IsReasonableAns(areas, tmpBoundary))
-            {
-                return false;
-            }
+            var areas = _segLines.SplitArea(_areas);//基于延展线进行区域分割
+            //if(!IsReasonableAns(areas, tmpBoundary))
+            //{
+            //    return false;
+            //}
 
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
@@ -277,10 +293,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             try
             {
                 SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
-                Areas.AddRange(areas);
+                Areas = areas.Where(area => area.Area > (ParameterStock.RoadWidth * ParameterStock.RoadWidth)).ToList();
             }
-            catch (Exception)
+            catch
             {
+                return false;//分割的区域有问题
             }
             finally
             {
@@ -291,7 +308,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 AreaNumber.Add(i);
                 Id2AllSubAreaDic.Add(i, Areas[i]);
-
+                
                 //todo: optimize
                 var buildingBlocksInSubArea = GetBuildings(Areas[i]);
 
@@ -308,6 +325,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 foreach(var build in buildingBlocksInSubArea)
                 {
                     var rect = build.GetRect();
+
                     var cuttersInBuilding = AllShearwallsSpatialIndex.SelectCrossingPolygon(rect).Cast<Polyline>().ToList();
                     bdBoxes.Add(rect);
                     allCuttersInSubArea.Add(cuttersInBuilding);
@@ -315,13 +333,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 BuildingBoxes.Add(i, bdBoxes);
                 SubAreaId2ShearWallsDic.Add(i, allCuttersInSubArea);
 
-                if(bdBoxes.Count == 0)//没有建筑物
-                {
-                    if(areaWall.Count == 0)//没有墙线
-                    {
-                        return false;
-                    }
-                }
+                //if(bdBoxes.Count == 0)//没有建筑物
+                //{
+                //    if(areaWall.Count == 0)//没有墙线
+                //    {
+                //        return false;
+                //    }
+                //}
             }
             return true;
         }
@@ -346,7 +364,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 
             SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
-            Areas.AddRange(areas);
+            Areas = areas.Where(area => area.Area > (ParameterStock.RoadWidth * ParameterStock.RoadWidth)).ToList();
+            //Areas.AddRange(areas);
 
             for (int i = 0; i < Areas.Count; i++)
             {

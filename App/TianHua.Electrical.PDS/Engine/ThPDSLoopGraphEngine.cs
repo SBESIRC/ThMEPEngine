@@ -103,7 +103,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public void MultiDistBoxAnalysis(List<Polyline> distBoxFrames)
+        public void MultiDistBoxAnalysis(Database database, List<Polyline> distBoxFrames)
         {
             distBoxFrames.ForEach(frame =>
             {
@@ -113,70 +113,119 @@ namespace TianHua.Electrical.PDS.Engine
                 // 搜索框线周围的标注
                 var markList = MarkService.GetMultiMarks(ThPDSBufferService.Buffer(frame));
 
-                distBoxes.OfType<BlockReference>().ForEach(distBox =>
+                var cacheDistBoxes = new List<BlockReference>();
+                var cacheMarkList = new List<List<string>>();
+                for (var i = 0; i < 2; i++)
                 {
-                    var distBoxKey = "";
-                    ThPDSGraphService.DistBoxBlocks[distBox].Attributes.ForEach(attri =>
+                    distBoxes.OfType<BlockReference>().ForEach(distBox =>
                     {
-                        DistBoxKey.ForEach(key =>
-                        {
-                            if (attri.Value.Contains(key))
-                            {
-                                distBoxKey = attri.Value;
-                            }
-                        });
-                    });
-
-                    var distBoxKeyList = new List<string>();
-                    distBoxKey = distBoxKey.Replace("~", "");
-                    if (distBoxKey.Contains("/"))
-                    {
-                        var regex = new Regex(@".+[/]");
-                        var match = regex.Match(distBoxKey);
-                        if (match.Success)
-                        {
-                            distBoxKeyList.Add(match.Value.Replace("/", ""));
-                            var secRegex = new Regex(@".{1}[/]");
-                            var secMatch = secRegex.Match(distBoxKey);
-                            if (secMatch.Success)
-                            {
-                                distBoxKeyList.Add(distBoxKey.Replace(secMatch.Value, ""));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        distBoxKeyList.Add(distBoxKey);
-                    }
-                    distBoxKeyList.ForEach(key =>
-                    {
-                        var thisMark = new List<string>();
-                        markList.ForEach(mark =>
-                        {
-                            mark.ForEach(str =>
-                            {
-                                if (str.Contains(key))
-                                {
-                                    thisMark = mark;
-                                }
-                            });
-                        });
-                        if (thisMark.Count == 0)
+                        if (cacheDistBoxes.Contains(distBox))
                         {
                             return;
                         }
-                        var newNode = ThPDSGraphService.CreateNode(distBox, thisMark, DistBoxKey);
-                        if (!CacheDistBoxes.ContainsKey(distBox))
+
+                        var distBoxKey = "";
+                        ThPDSGraphService.DistBoxBlocks[distBox].Attributes.ForEach(attri =>
                         {
-                            CacheDistBoxes.Add(distBox, newNode);
+                            DistBoxKey.ForEach(key =>
+                            {
+                                if (attri.Value.Contains(key))
+                                {
+                                    distBoxKey = attri.Value;
+                                }
+                            });
+                        });
+
+                        var distBoxKeyList = new List<string>();
+                        distBoxKey = distBoxKey.Replace("~", "/");
+                        if (distBoxKey.Contains("/"))
+                        {
+                            var regex = new Regex(@".+[/]");
+                            var match = regex.Match(distBoxKey);
+                            if (match.Success)
+                            {
+                                distBoxKeyList.Add(match.Value.Replace("/", ""));
+                                var secRegex = new Regex(@".{1}[/]");
+                                var secMatch = secRegex.Match(distBoxKey);
+                                if (secMatch.Success)
+                                {
+                                    distBoxKeyList.Add(distBoxKey.Replace(secMatch.Value, ""));
+                                }
+                            }
                         }
+                        else
+                        {
+                            distBoxKeyList.Add(distBoxKey);
+                        }
+                        var thisMark = new List<string>();
+                        var privateMark = MarkService.GetMarks(ThPDSBufferService.Buffer(distBox, database));
+                        privateMark.ForEach(o =>
+                        {
+                            if (o.Contains("/W") || o.Contains("-W"))
+                            {
+                                thisMark.Add(o);
+                            }
+                        });
+                        distBoxKeyList.ForEach(key =>
+                        {
+                            foreach (var mark in markList)
+                            {
+                                if (cacheMarkList.Contains(mark))
+                                {
+                                    continue;
+                                }
+                                foreach (var str in mark)
+                                {
+                                    var strMatch = false;
+                                    if (str.Contains("/W") || str.Contains("-W"))
+                                    {
+                                        continue;
+                                    }
+                                    if (str.Contains(key))
+                                    {
+                                        // 第一次做严格匹配，第二次模糊匹配
+                                        if (i == 0)
+                                        {
+                                            var regex = new Regex(@key + "[a-zA-Z0-9]{1,}");
+                                            var match = regex.Match(str);
+                                            if (!match.Success)
+                                            {
+                                                strMatch = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            strMatch = true;
+                                        }
+                                    }
+                                    if (strMatch)
+                                    {
+                                        thisMark.AddRange(mark);
+                                        cacheMarkList.Add(mark);
+                                    }
+                                }
+                            }
+                            if (thisMark.Count == 0)
+                            {
+                                return;
+                            }
+                            var newNode = ThPDSGraphService.CreateNode(distBox, thisMark, DistBoxKey);
+                            cacheDistBoxes.Add(distBox);
+                            if (!CacheDistBoxes.ContainsKey(distBox))
+                            {
+                                CacheDistBoxes.Add(distBox, newNode);
+                            }
 
-                        PDSGraph.Graph.AddVertex(newNode);
+                            PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string>(), DistBoxKey);
-                        PDSGraph.Graph.AddEdge(newEdge);
+                            newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
+                            {
+                                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey);
+                                PDSGraph.Graph.AddEdge(newEdge);
+                            });
+                        });
                     });
-                });
+                }
             });
         }
 
@@ -243,18 +292,21 @@ namespace TianHua.Electrical.PDS.Engine
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
 
-                        var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
-                        var newOBB = ThPDSBufferService.Buffer(distBox, Database);
-                        var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
-                        if (filter.Count > 0)
+                        newNode.Loads[0].ID.CircuitNumber.ForEach(circuitNumber =>
                         {
-                            newEdge.Circuit.ViaCableTray = true;
-                        }
-                        else
-                        {
-                            newEdge.Circuit.ViaConduit = true;
-                        }
-                        PDSGraph.Graph.AddEdge(newEdge);
+                            var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { circuitNumber }, DistBoxKey);
+                            var newOBB = ThPDSBufferService.Buffer(distBox, Database);
+                            var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
+                            if (filter.Count > 0)
+                            {
+                                newEdge.Circuit.ViaCableTray = true;
+                            }
+                            else
+                            {
+                                newEdge.Circuit.ViaConduit = true;
+                            }
+                            PDSGraph.Graph.AddEdge(newEdge);
+                        });
 
                         FindGraph(startingEntity, distBox);
                     }
@@ -301,9 +353,12 @@ namespace TianHua.Electrical.PDS.Engine
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
 
-                        // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
-                        var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { newNode.Loads[0].ID.CircuitNumber }, DistBoxKey);
-                        PDSGraph.Graph.AddEdge(newEdge);
+                        newNode.Loads[0].ID.CircuitNumber.ForEach(x =>
+                        {
+                            // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
+                            var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { x }, DistBoxKey);
+                            PDSGraph.Graph.AddEdge(newEdge);
+                        });
 
                         FindGraph(startingEntity, distBox);
                     }
@@ -330,17 +385,17 @@ namespace TianHua.Electrical.PDS.Engine
                 }
 
                 var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos, DistBoxKey);
-                if (newEdge.Circuit.Type == ThPDSCircuitType.None && nextEntity is Line circuit)
+                if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && nextEntity is Line circuit)
                 {
                     ThPDSLayerService.SelectCircuitType(newEdge.Circuit, newEdge.Target.Loads[0], circuit.Layer,
-                        newEdge.Target.Loads[0].DefaultCircuitType == ThPDSCircuitType.None);
+                        true);
                 }
                 PDSGraph.Graph.AddEdge(newEdge);
                 distributionBox.ForEach(box =>
                 {
                     var distBoxNode = CacheDistBoxes[box.Item2];
                     var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3, DistBoxKey);
-                    if (newDistBoxEdge.Circuit.Type == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
+                    if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
                     {
                         var needAssign = false;
                         if (newDistBoxEdge.Target.Loads.Count == 0)
@@ -557,7 +612,7 @@ namespace TianHua.Electrical.PDS.Engine
             return Switch(probeResults, sharedPath, sourceElement, IsStartPoint);
         }
 
-        private Dictionary<Entity, List<Curve>> Switch(List<Entity> probeResults, List<Curve> sharedPath,Curve sourceElement, bool IsStartPoint)
+        private Dictionary<Entity, List<Curve>> Switch(List<Entity> probeResults, List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
         {
             var findPath = new Dictionary<Entity, List<Curve>>();
             switch (probeResults.Count)
@@ -858,16 +913,16 @@ namespace TianHua.Electrical.PDS.Engine
         private Polyline ShrinkLineFrame(Curve curve, bool isStartPoint)
         {
             var shrinkLine = new Line();
-            if(curve is Line line)
+            if (curve is Line line)
             {
                 shrinkLine = line;
             }
-            else if(curve is Polyline polyline)
+            else if (curve is Polyline polyline)
             {
                 shrinkLine = polyline.GetEdges().Last();
             }
 
-            if(shrinkLine.Length < 10 * ThPDSCommon.ALLOWABLE_TOLERANCE + 1.0)
+            if (shrinkLine.Length < 10 * ThPDSCommon.ALLOWABLE_TOLERANCE + 1.0)
             {
                 return new Polyline();
             }

@@ -27,7 +27,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
         }
 
         /// <summary>
-        /// 污废水
+        /// 污废水(合流\分流)
         /// </summary>
         SewageWasteWaterEnum _sewageWasteWater;
         public SewageWasteWaterEnum SewageWasteWater

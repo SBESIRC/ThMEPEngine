@@ -47,11 +47,6 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSID ID { get; set; }
 
         /// <summary>
-        /// 回路类型
-        /// </summary>
-        public ThPDSCircuitType Type { get; set; }
-
-        /// <summary>
         /// 位置信息
         /// </summary>
         public ThPDSLocation Location { get; set; }

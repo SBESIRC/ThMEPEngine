@@ -19,6 +19,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<VerticalPipeModel> verticalPipes;              //排雨水立管
         List<Polyline> wallPolys;                           //墙线
         List<Polyline> outUserPoly;                         //出户框线
+        List<Polyline> rooms;                               //房间框线
         List<Curve> gridLines;                              //轴网线
         ParamSettingViewModel paramSetting = null;          //
         readonly double step = 50;                          //步长
@@ -51,6 +52,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var gridInfo = ClassifyGridInfo();
             var connecLines = new List<Line>(sewageLines);
             connecLines.AddRange(rainLines);
+
+            RoomPolyService roomPolyService = new RoomPolyService();
+            var roomDeep = roomPolyService.GetRoomDeep(rooms, outUserPoly);
+
             var connectPipes = OrderPipeConnect(connecLines);
             foreach (var pipe in connectPipes)
             {

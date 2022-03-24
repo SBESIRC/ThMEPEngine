@@ -65,25 +65,25 @@ namespace TianHua.Electrical.PDS.Service
             switch (layer)
             {
                 case "E-POWR-WIRE":
-                    circuit.Type = ThPDSCircuitType.PowerEquipment;
+                    load.CircuitType = ThPDSCircuitType.PowerEquipment;
                     break;
                 case "E-POWR-WIRE2":
-                    circuit.Type = ThPDSCircuitType.Socket;
+                    load.CircuitType = ThPDSCircuitType.Socket;
                     break;
                 case "E-POWR-WIRE3":
-                    circuit.Type = ThPDSCircuitType.PowerEquipment;
+                    load.CircuitType = ThPDSCircuitType.PowerEquipment;
                     break;
                 case "E-LITE-WIRE":
-                    circuit.Type = ThPDSCircuitType.Lighting;
+                    load.CircuitType = ThPDSCircuitType.Lighting;
                     break;
                 case "E-LITE-WIRE2":
-                    circuit.Type = ThPDSCircuitType.EmergencyLighting;
+                    load.CircuitType = ThPDSCircuitType.EmergencyLighting;
                     break;
                 case "E-LITE-WIRE-LV":
-                    circuit.Type = ThPDSCircuitType.Lighting;
+                    load.CircuitType = ThPDSCircuitType.Lighting;
                     break;
                 default:
-                    circuit.Type = ThPDSCircuitType.None;
+                    load.CircuitType = ThPDSCircuitType.None;
                     break;
             }
             if(needAssign)
@@ -94,9 +94,10 @@ namespace TianHua.Electrical.PDS.Service
 
         public static void Assign(ThPDSCircuit circuit, ThPDSLoad load)
         {
-            if (circuit.Type != ThPDSCircuitType.None)
+            if (load.CircuitType != ThPDSCircuitType.None)
             {
-                var config = ThPDSCircuitConfigModel.BlockConfig.Where(o => o.CircuitType == circuit.Type).First();
+                var config = ThPDSCircuitConfig.BlockConfig
+                    .Where(o => o.CircuitType == load.CircuitType).First();
                 load.Phase = config.Phase;
                 load.DemandFactor = config.DemandFactor;
                 load.PowerFactor = config.PowerFactor;

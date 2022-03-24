@@ -61,23 +61,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Logger?.Information($"############################################");
-                    Logger?.Information($"自动分割线迭代");
-                    Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                    if (!rstDataExtract)
+                    if (_CommandMode == CommandMode.WithUI)
                     {
-                        return;
+                        Logger?.Information($"############################################");
+                        Logger?.Information($"自动分割线迭代");
+                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                        var stopWatch = new Stopwatch();
+                        stopWatch.Start();
+                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                        if (!rstDataExtract)
+                        {
+                            return;
+                        }
+                        for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                        {
+                            RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                        }
+                        stopWatch.Stop();
+                        var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                        Logger?.Information(strTotalMins);
+
                     }
-                    for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                    else//生成二分全部方案
                     {
-                        RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                        var autogen = new AutoSegGenerator(outerBrder, Logger);
+                        autogen.Run(false);
                     }
-                    stopWatch.Stop();
-                    var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
-                    Logger?.Information(strTotalMins);
                 }
             }
             catch (Exception ex)
@@ -216,8 +226,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 layoutPara.Set(histories[k].Genome);
                 if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
-                var Cars = new List<Polyline>();
+                var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
+                var Walls = new List<Polyline>();
                 var Lanes = new List<Line>();
                 var Boundary = layoutPara.OuterBoundary;
                 var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
@@ -225,6 +236,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
                     try
                     {
@@ -235,9 +247,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
                 var partitionpro_final = new ParkingPartitionPro();
-                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
                 partitionpro_final.Display();
             }

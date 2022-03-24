@@ -6,7 +6,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     {
         public DistributionMetering_CTInBehindCircuit()
         {
-            this.CircuitFormType = CircuitFormOutType.配电计量_直接表在后;
+            this.CircuitFormType = CircuitFormOutType.配电计量_CT表在后;
         }
 
         /// <summary>
@@ -23,5 +23,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位3：预留
         /// </summary>
         public PDSBaseComponent reservedComponent { get; set; }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor Conductor { get; set; }
     }
 }

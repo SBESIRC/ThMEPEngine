@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.ApplicationServices;
+using System.IO;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {
@@ -62,15 +64,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             {
                 return false;
             }
+            Logger?.Information("块名：" + block.GetEffectiveName());
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+            string drawingName = Path.GetFileName(doc.Name);
+            Logger?.Information("文件名：" + drawingName);
             var extractRst = outerBrder.Extract(block);//提取多段线
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var pline = outerBrder.WallLine;
+                currentDb.CurrentSpace.Add(pline);
+            }
+#endif
             if (!extractRst)
             {
                 return false;
             }
             if (!(Logger == null) && outerBrder.SegLines.Count != 0)
             {
+                bool Isvaild = outerBrder.SegLineVaild(Logger);
+                outerBrder.SegLines.ShowInitSegLine();
+                //outerBrder.RemoveInnerSegLine();
                 //check seg lines
-                if(!outerBrder.SegLineVaild(Logger)) return false;
+                if (!Isvaild) return false;
             }
 
             return true;

@@ -24,13 +24,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 return false;
             }
-#if DEBUG
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                var pline = outerBrder.WallLine;
-                currentDb.CurrentSpace.Add(pline);
-            }
-#endif
             return true;
         }
 

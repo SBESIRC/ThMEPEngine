@@ -42,14 +42,18 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
             DrawUtils.ShowGeometry(pl, "l1buffer", 3);
             //var trimedWall = singleLean.Trim(pl);
-            var trimedWall = pl.Trim(singleLean);
-            var newpl = trimedWall.OfType<Curve>().ToList();
+            if (singleLean.Contains(pl)) return 0.0;
+            else
+            {
+                var trimedWall = pl.Trim(singleLean);
+                var newpl = trimedWall.OfType<Curve>().ToList();
 
 
-            lengthAgainstWall = newpl.Sum(x => x.GetLength());
-            newpl.ForEach(x => DrawUtils.ShowGeometry(x, "l1against", 2));
+                lengthAgainstWall = newpl.Sum(x => x.GetLength());
+                newpl.ForEach(x => DrawUtils.ShowGeometry(x, "l1against", 2));
 
-            return lengthAgainstWall;
+                return lengthAgainstWall;
+            }
         }
     }
 }

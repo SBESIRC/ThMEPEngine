@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ArrayExtensions;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadThermalRelayConfig();
             LoadATSEConfig();
             LoadMTSEConfig();
+            LoadConductorConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -115,22 +117,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = TableMCB.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
                     {
-                        ModelName = row["型号"].ToString(),
-                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                        FrameSize = row["壳架规格"].ToString(),
-                        MaxKV = row["额定电压"].ToString(),
-                        Poles = row["级数"].ToString(),
-                        Amps = row["额定电流"].ToString(),
-                        TripDevice = row["脱扣器"].ToString(),
-                        ResidualCurrent = row["剩余电流动作"].ToString(),
-                        Characteristics = row["瞬时脱扣器型式"].ToString(),
-                        Width = row["宽度"].ToString(),
-                        Depth = row["深度"].ToString(),
-                        Height = row["高度"].ToString(),
-                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                    });
+                        BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                        {
+                            ModelName = row["型号"].ToString(),
+                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            FrameSize = row["壳架规格"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            TripDevice = row["脱扣器"].ToString(),
+                            ResidualCurrent = row["剩余电流动作"].ToString(),
+                            Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            Width = row["宽度"].ToString(),
+                            Depth = row["深度"].ToString(),
+                            Height = row["高度"].ToString(),
+                            DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                        });
+                    };
                 }
             }
             var TableMCCB = dataSet.Tables["MCCB"];
@@ -139,22 +145,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = TableMCCB.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
                     {
-                        ModelName = row["型号"].ToString(),
-                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                        FrameSize = row["壳架规格"].ToString(),
-                        MaxKV = row["额定电压"].ToString(),
-                        Poles = row["级数"].ToString(),
-                        Amps = row["额定电流"].ToString(),
-                        TripDevice = row["脱扣器"].ToString(),
-                        ResidualCurrent = row["剩余电流动作"].ToString(),
-                        Characteristics = row["瞬时脱扣器型式"].ToString(),
-                        Width = row["宽度"].ToString(),
-                        Depth = row["深度"].ToString(),
-                        Height = row["高度"].ToString(),
-                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                    });
+                        BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                        {
+                            ModelName = row["型号"].ToString(),
+                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            FrameSize = row["壳架规格"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            TripDevice = row["脱扣器"].ToString(),
+                            ResidualCurrent = row["剩余电流动作"].ToString(),
+                            Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            Width = row["宽度"].ToString(),
+                            Depth = row["深度"].ToString(),
+                            Height = row["高度"].ToString(),
+                            DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                        });
+                    }
                 }
             }
             var TableACB = dataSet.Tables["ACB"];
@@ -163,22 +173,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = TableACB.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
                     {
-                        ModelName = row["型号"].ToString(),
-                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                        FrameSize = row["壳架规格"].ToString(),
-                        MaxKV = row["额定电压"].ToString(),
-                        Poles = row["级数"].ToString(),
-                        Amps = row["额定电流"].ToString(),
-                        TripDevice = row["脱扣器"].ToString(),
-                        ResidualCurrent = row["剩余电流动作"].ToString(),
-                        Characteristics = row["瞬时脱扣器型式"].ToString(),
-                        Width = row["宽度"].ToString(),
-                        Depth = row["深度"].ToString(),
-                        Height = row["高度"].ToString(),
-                        DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
-                    });
+                        BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
+                        {
+                            ModelName = row["型号"].ToString(),
+                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            FrameSize = row["壳架规格"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            TripDevice = row["脱扣器"].ToString(),
+                            ResidualCurrent = row["剩余电流动作"].ToString(),
+                            Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            Width = row["宽度"].ToString(),
+                            Depth = row["深度"].ToString(),
+                            Height = row["高度"].ToString(),
+                            DefaultPick = row["默认不选"].ToString().Equals("N") ? false : true
+                        });
+                    }
                 }
             }
         }
@@ -340,6 +354,40 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         Width = row["宽度"].ToString(),
                         Depth = row["深度"].ToString(),
                         Height = row["高度"].ToString(),
+                    });
+                }
+            }
+        }
+
+        private static void LoadConductorConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ConductorUrl, true);
+            var Table = dataSet.Tables["电缆"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    ConductorConfigration.CableConductorInfos.Add(new ConductorComponentInfo()
+                    {
+                        Iset = double.Parse(row["整定电流"].ToString()),
+                        Sphere = double.Parse(row["相线截面"].ToString()),
+                        NumberOfPhaseWire = int.Parse(row["相线数"].ToString()),
+                    });
+                }
+            }
+            var Table1 = dataSet.Tables["电线"];
+            for (int i = 1; i < Table1.Rows.Count; i++)
+            {
+                var row = Table1.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    ConductorConfigration.WireConductorInfos.Add(new ConductorComponentInfo()
+                    {
+                        Iset = double.Parse(row["整定电流"].ToString()),
+                        Sphere = double.Parse(row["相线截面"].ToString()),
+                        NumberOfPhaseWire = int.Parse(row["相线数"].ToString()),
                     });
                 }
             }

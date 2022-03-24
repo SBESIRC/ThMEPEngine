@@ -333,7 +333,7 @@ namespace ThMEPHVAC.Model
         public static double GetReducingLen(double big, double small)
         {
             double reducinglength = 0.5 * Math.Abs(big - small) / Math.Tan(20 * Math.PI / 180);
-            var a = reducinglength < 200 ? 200 : reducinglength > 1000 ? 1000 : reducinglength;
+            var a = reducinglength < 200 ? 200 : reducinglength > 600 ? 600 : reducinglength;
             return ThMEPHVACService.RoundNum(a, 10);
         }
     }

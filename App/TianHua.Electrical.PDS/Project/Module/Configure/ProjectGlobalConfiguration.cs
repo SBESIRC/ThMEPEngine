@@ -23,5 +23,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         //以下内容为暂定，因为全局参数配置UI还没做好
         public static string MotorUIChoise = "分立元件";
         public static double MotorPower = 10;//kw
-    }
+
+        public static List<string> SinglePhasePolesNum = new List<string> { "1P", "1P+N", "2P" };
+        public static List<string> ThreePhasePolesNum = new List<string> { "3P", "3P+N", "4P" };
+}
 }

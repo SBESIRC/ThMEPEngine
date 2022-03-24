@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.CAD;
-
+using Linq2Acad;
 
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -17,6 +17,7 @@ using ThMEPWSS.HydrantLayout.tmp.Service;
 using ThMEPWSS.HydrantLayout.Model;
 using NFox.Cad;
 using ThMEPEngineCore.Diagnostics;
+
 
 namespace ThMEPWSS.HydrantLayout.tmp.Service
 {
@@ -31,6 +32,8 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
         //输出
         MPolygon LeanWall;
+        Polyline Shell = new Polyline();
+        List<Curve> Holes = new List<Curve>();
 
         public SearchRangeFrame(Point3d center)
         {
@@ -50,9 +53,18 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             //进行空间索引
             var selectRooms = ProcessedData.LeanWallIndex.SelectCrossingPolygon(cpolyline);
 
+            var overlapArea = new DBObjectCollection();
             //搜索所在房间
-            var overlapArea = cpolyline.Intersection(selectRooms);
-            foreach (var a in overlapArea) 
+            if (selectRooms.Count > 0)
+            {
+                overlapArea = cpolyline.IntersectionMP(selectRooms);
+            }
+            else 
+            {
+                return;
+            }
+            //overlapArea.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1overlap", 2));
+            foreach (var a in overlapArea)
             {
                 if (a is MPolygon mpl)
                 {
@@ -63,18 +75,31 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
                         break;
                     }
                 }
-                else if (a is Polyline pl) 
+                else if (a is Polyline pl)
                 {
-                    var mpl2 = ThMPolygonTool.CreateMPolygon(pl);
-                    if (mpl2.Shell().Contains(center))
+                    if (pl.Contains(center))
                     {
-                        LeanWall = mpl2;
+                        //var plNew = ThMPolygonTool.CreateMPolygon(pl);
+                        Shell = pl;
                         IfFind = true;
                         break;
                     }
                 }
             }
 
+            if (Shell.Contains(center))
+            {
+                foreach (Polyline a in overlapArea)
+                {
+                    if (a == Shell) continue;
+                    if (Shell.Contains(a))
+                    {
+                        Holes.Add(a);
+                    }
+                }
+                var mpl = ThMPolygonTool.CreateMPolygon(Shell, Holes);
+                LeanWall = mpl;
+            }
 
         }
 
@@ -83,8 +108,5 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             DrawUtils.ShowGeometry(LeanWall, "l1env", 6);
             return LeanWall;
         }
-
-
-
     }
 }

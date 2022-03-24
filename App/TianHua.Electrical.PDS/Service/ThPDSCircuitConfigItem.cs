@@ -1,8 +1,10 @@
-﻿namespace TianHua.Electrical.PDS.Model
+﻿using TianHua.Electrical.PDS.Model;
+
+namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSCircuitModel
+    public class ThPDSCircuitConfigItem
     {
-        public ThPDSCircuitModel()
+        public ThPDSCircuitConfigItem()
         {
             CircuitType = ThPDSCircuitType.None;
             DemandFactor = 1.0;

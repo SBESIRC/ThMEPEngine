@@ -24,8 +24,8 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             var tol = new Tolerance(10, 10);
 
             Point3d pt1 = rec.GetPoint3dAt(0);
-            Point3d pt2 = rec.GetPoint3dAt(0);
-            Point3d pt3 = rec.GetPoint3dAt(0);
+            Point3d pt2 = rec.GetPoint3dAt(1);
+            Point3d pt3 = rec.GetPoint3dAt(2);
 
             Vector3d vec1 = pt2 - pt1;
             Vector3d vec2 = pt3 - pt2;
@@ -45,7 +45,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
         {
             var tol = new Tolerance(10, 10);
             var shortDir = dir.GetNormal();
-            var longDir = new Vector3d(-shortDir.Y, shortDir.X, 0);
+            var longDir = new Vector3d(-shortDir.Y, shortDir.X, 0); //270
 
             //if (shortSide.StartPoint.IsEqualTo(basePt, tol))
             //{
@@ -67,10 +67,10 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             //    openDir = 1;
             //}
 
-            var pt1 = center + 0.5 * shortSide * shortDir + 0.5 * longDir * longSide;
-            var pt2 = pt1 - shortDir * shortSide;
-            var pt3 = pt2 - longDir * longSide;
-            var pt4 = pt3 + shortDir * shortSide;
+            var pt1 = center + 0.5 * shortSide * shortDir + 0.5 * longDir * longSide;  //左上
+            var pt2 = pt1 - shortDir * shortSide; //左下
+            var pt3 = pt2 - longDir * longSide;   //右下
+            var pt4 = pt3 + shortDir * shortSide;  //右上
             var boundary = new Polyline();
             boundary.Closed = true;
 
@@ -81,6 +81,62 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
             return boundary;
         }
+
+
+        public static Polyline CreateDoor(Point3d center, double shortSide, double longSide, Vector3d dir,int openDir)
+        {
+            var tol = new Tolerance(10, 10);
+            var shortDir = dir.GetNormal();
+            var longDir = new Vector3d(-shortDir.Y, shortDir.X, 0); //270
+
+            //if (shortSide.StartPoint.IsEqualTo(basePt, tol))
+            //{
+            //    shortDir = -shortDir;
+            //}
+            //var longDir = (longSide.EndPoint - longSide.StartPoint).GetNormal();
+            //if (longSide.EndPoint.IsEqualTo(basePt, tol))
+            //{
+            //    longDir = -longDir;
+            //}
+
+            //openDir = -1;
+            //if (shortDir.GetAngleTo(longDir, Vector3d.ZAxis) <= Math.PI)
+            //{
+            //    openDir = 0;
+            //}
+            //else
+            //{
+            //    openDir = 1;
+            //}
+
+            var pt1 = center + 0.5 * shortSide * shortDir + 0.5 * longDir * longSide;  //左上
+            var pt2 = pt1 - shortDir * shortSide; //左下
+            var pt3 = pt2 - longDir * longSide;   //右下
+            var pt4 = pt3 + shortDir * shortSide;  //右上
+            var boundary = new Polyline();
+            boundary.Closed = true;
+
+            if (openDir == 0) 
+            {
+                pt2 = pt2 - longDir * Info.DoorOffset * 2; 
+            }
+            if (openDir == 1) 
+            {
+                pt3 = pt3 + longDir * Info.DoorOffset * 2;
+            } 
+
+            boundary.AddVertexAt(0, pt4.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(1, pt1.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(2, pt2.ToPoint2D(), 0, 0, 0);
+            boundary.AddVertexAt(3, pt3.ToPoint2D(), 0, 0, 0);
+
+            return boundary;
+        }
+
+
+
+
+
 
     }
 }

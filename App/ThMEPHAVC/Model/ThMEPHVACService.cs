@@ -11,6 +11,7 @@ using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPEngineCore.CAD;
+using ThCADExtension;
 
 namespace ThMEPHVAC.Model
 {
@@ -489,9 +490,10 @@ namespace ThMEPHVAC.Model
             var mpObjs = new DBObjectCollection();
             foreach (Polyline pl in wallBounds)
             {
+                pl.Closed = true;
                 pl.DPSimplify(1);
                 pl.TransformBy(mat);
-                mpObjs.Add(pl.ToNTSPolygon().ToDbMPolygon());
+                mpObjs.Add(ThMPolygonTool.CreateMPolygon(pl));
             }
             return new ThCADCoreNTSSpatialIndex(mpObjs);
         }

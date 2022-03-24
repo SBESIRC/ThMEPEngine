@@ -6,7 +6,7 @@ namespace ThAnalytics.SDK
     {
         public static THConfig m_Config = new THConfig()
         {
-            Token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaW0tYXV0by1hY2NvdW50QHRoYXAuY29tLmNuIiwic2NwIjoidXNlciIsImV4cCI6MTY0NjQ3NDIyMSwiYXVkIjoiVEhNRVAiLCJpYXQiOjE2MTQ5MzgyMjEsImp0aSI6ImRhNmNlNjAzLWIwMTgtNDRiNS1hMDIyLWUyMzAzZDgwOWFhMCJ9.qyRo50Gsm2AObh1CpvVz_7VxMMCoVx61b7nqWimjlao",
+            Token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaW0tYXV0by1hY2NvdW50QHRoYXAuY29tLmNuIiwic2NwIjoidXNlciIsImV4cCI6MTk2MzQ0OTY2MSwiYXVkIjoiVEhNRVAiLCJpYXQiOjE2NDgwODk2NjEsImp0aSI6ImNmNDNmODZjLTRiZDktNDU0YS05MWY5LWEzYmQxNjFiOWJhMSJ9.T5N97tnfeTnWuSaMSaLRNxD-2lGaFsOOYEXeP-PIQYs",
             AppVersion = "V1.0",
             ServerUrl = @"https://cybros.thape.com.cn",
             SSOUrl = @"https://sso.thape.com.cn/users/sign_in"

@@ -27,6 +27,10 @@ namespace ThMEPIdentity
             {"THSEL", "批量选择"},
             {"THBLD", "生成标准楼栋块"},
             {"THSAMPLEPLAN", "素材库"},
+
+            // 杂项
+            {"THMEPVERSION", "版本查看"},
+            {"THMEPPROFILE", "专业配置"},
         };
 
         private readonly Dictionary<string, string> USERWHITELIST = new Dictionary<string, string>

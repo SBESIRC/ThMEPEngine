@@ -67,7 +67,7 @@ namespace ThMEPEngineCore.Engine
             return bReturn;
         }
 
-        public override  bool IsFlowSegmentBlock(BlockTableRecord blockTableRecord)
+        public override bool IsFlowSegmentBlock(BlockTableRecord blockTableRecord)
         {
             //忽略外参
             if (blockTableRecord.IsFromExternalReference)
@@ -110,7 +110,7 @@ namespace ThMEPEngineCore.Engine
 
                 //有坡度的管子
                 var verticalDiff = Math.Abs(end - start);
-                if (end != 0 && verticalDiff > 0)
+                if (verticalDiff > 0)
                 {
                     if (Math.Abs(length - verticalDiff) <= 0.1)
                     {

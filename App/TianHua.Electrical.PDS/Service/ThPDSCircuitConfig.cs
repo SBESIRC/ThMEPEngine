@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
 {
-    public static class ThPDSCircuitConfigModel
+    public static class ThPDSCircuitConfig
     {
-        public static List<ThPDSCircuitModel> BlockConfig = new List<ThPDSCircuitModel>
+        public static List<ThPDSCircuitConfigItem> BlockConfig = new List<ThPDSCircuitConfigItem>
         {
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.EmergencyLighting,
                 TextKey = "WLE",
@@ -18,7 +18,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.85,
                 FireLoad = true,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.Lighting,
                 TextKey = "WL",
@@ -28,7 +28,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.85,
                 FireLoad = false,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.Socket,
                 TextKey = "WS",
@@ -38,7 +38,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.85,
                 FireLoad = false,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WE*-*",
@@ -48,7 +48,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = true,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "W*-*",
@@ -58,7 +58,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = false,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WM",
@@ -68,7 +68,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = false,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WPE",
@@ -78,7 +78,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = true,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
                 TextKey = "WP",
@@ -88,7 +88,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = false,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WE",
@@ -98,7 +98,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.8,
                 FireLoad = true,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WFEL",
@@ -108,7 +108,7 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor =  0.85,
                 FireLoad = true,
             },
-            new ThPDSCircuitModel
+            new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
                 TextKey = "WC",
@@ -119,5 +119,22 @@ namespace TianHua.Electrical.PDS.Service
                 FireLoad = false, //实际不存在，为存储方便设为false
             },
         };
+
+        public static ThPDSCircuitConfigItem SelectModel(string circuitNumber)
+        {
+            var result = new ThPDSCircuitConfigItem();
+            foreach (var o in BlockConfig)
+            {
+                var check = o.TextKey.Replace("*", ".*");
+                var r = new Regex(@check);
+                var m = r.Match(circuitNumber);
+                if (m.Success)
+                {
+                    result = o;
+                    break;
+                }
+            }
+            return result;
+        }
     }
 }

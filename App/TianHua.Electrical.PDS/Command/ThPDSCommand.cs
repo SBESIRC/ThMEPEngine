@@ -160,7 +160,7 @@ namespace TianHua.Electrical.PDS.Command
                         var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
                             distBoxKey, cableTrayNode);
 
-                        graphEngine.MultiDistBoxAnalysis(distBoxFrames);
+                        graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
                         graphEngine.CreatGraph();
                         graphEngine.CopyAttributes();
                         var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),

@@ -14,7 +14,7 @@ using ThMEPEngineCore.CAD;
 using Linq2Acad;
 using ThMEPEngineCore;
 using ThMEPArchitecture.ViewModel;
-
+using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {
     public class OuterBrder
@@ -29,23 +29,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         public Polyline WallLine = new Polyline();//外框线
         public List<BlockReference> Ramps = new List<BlockReference>();//坡道块
         public List<BlockReference> LonelyRamps = new List<BlockReference>();//未合并的坡道
-        
+        public List<Polyline> LonelyRampsPline = new List<Polyline>();
 
+        private Dictionary<int, List<int>> SeglineIndexDic = new Dictionary<int, List<int>>();// 分割线邻接表
         public ThCADCoreNTSSpatialIndex BuildingSpatialIndex = null;//建筑物SpatialIndex
         public ThCADCoreNTSSpatialIndex LonelyRampSpatialIndex = null;//孤立在地库中间的坡道
         public ThCADCoreNTSSpatialIndex AttachedRampSpatialIndex = null;//依附在地库边界上的坡道
         public ThCADCoreNTSSpatialIndex BuildingWithoutRampSpatialIndex = null;//不包含坡道的建筑物
-        public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex;// 全部障碍物（包含坡道）polyline的spatial index
-        public ThCADCoreNTSSpatialIndex WallSpatialIndex;//墙的spatial index
+        public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex;//全部障碍物（包含坡道，剪力墙）的spatial index
+        public ThCADCoreNTSSpatialIndex BoundarySpatialIndex;// 全部边界（包含坡道，剪力墙以及地库边界）的spatial index
+        //public ThCADCoreNTSSpatialIndex WallSpatialIndex;//墙的spatial index
         public List<Ramps> RampLists = new List<Ramps>();//孤立坡道块
         private Serilog.Core.Logger Logger;
         public bool Extract(BlockReference basement)
         {
             Explode(basement);
+            RemoveSortSegLine();
             BuildingWithoutRampSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingWithoutRampObjs);
             BuildingSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingObjs);
-            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(BuildingObjs.ExplodeBlocks());
-            
+            var allBoundaryObjects = BuildingObjs.ExplodeBlocks();
+            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(allBoundaryObjects);
+
             foreach (var obj in OuterLineObjs)
             {
                 var pline = obj as Polyline;
@@ -57,6 +61,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 WallLine = pline;
                 break;
             }
+            var wallObjs = WallLine.ToLines().ToCollection();
+            foreach(Line line in wallObjs)
+            {
+                allBoundaryObjects.Add(line);
+            }
+            BoundarySpatialIndex = new ThCADCoreNTSSpatialIndex(allBoundaryObjects);
             if (WallLine.GetPoints().Count() == 0)//外框线不存在
             {
                 Active.Editor.WriteMessage("地库边界不存在！");
@@ -71,7 +81,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 
             if (Ramps.Count == 0)
             {
-                WallSpatialIndex = new ThCADCoreNTSSpatialIndex(WallLine.ToLines().ToCollection());
                 return true;
             }
 
@@ -86,26 +95,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     LonelyRamps.Remove(ramp as BlockReference);
                 }
                 LonelyRampSpatialIndex = new ThCADCoreNTSSpatialIndex(LonelyRamps.ToCollection());
-                var splitArea = WallLine.SplitByRamp(rstRamps);
+                LonelyRamps.ForEach(br => LonelyRampsPline.AddRange(br.GetPolyLines()));
+                var splitArea = WallLine.Combine(rstRamps);
                 splitArea = splitArea.DPSimplify(1.0);
-                splitArea = splitArea.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
+                //splitArea = splitArea.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
                 WallLine = splitArea;
             }
-            WallSpatialIndex = new ThCADCoreNTSSpatialIndex(WallLine.ToLines().ToCollection());
-
-            for (int i = SegLines.Count - 1; i >= 0; i--)
-            {
-                var segLine = SegLines[i];
-                var rst = LonelyRampSpatialIndex.SelectFence(segLine);
-                if (rst.Count > 0)
-                {
-                    var blk = rst[0] as BlockReference;
-                    var rect = blk.GetRect();
-                    RampLists.Add(new Ramps(segLine.Intersect(rect, 0).First(), blk));
-
-                    SegLines.RemoveAt(i);
-                }
-            }
+            RemoveInnerSegLine();
             return true;
         }
 
@@ -178,27 +174,65 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 }
             }
         }
+        public void RemoveSortSegLine()
+        {
+            //移除和内坡道连接的线
+            for (int i = SegLines.Count - 1; i >= 0; i--)
+            {
+                var segLine = SegLines[i];
+
+                if (segLine.Length < 100)
+                {
+                    SegLines.RemoveAt(i);
+                }
+            }
+        }
+        public void RemoveInnerSegLine()
+        {
+            //移除和内坡道连接的线
+            for (int i = SegLines.Count - 1; i >= 0; i--)
+            {
+                var segLine = SegLines[i];
+                var rst = LonelyRampSpatialIndex.SelectFence(segLine);
+                if (rst.Count > 0)
+                {
+                    var blk = rst[0] as BlockReference;
+                    var rect = blk.GetRect();
+                    RampLists.Add(new Ramps(segLine.Intersect(rect, 0).First(), blk));
+
+                    SegLines.RemoveAt(i);
+                }
+            }
+        }
+        #region 分割线检查
         public bool SegLineVaild(Serilog.Core.Logger logger)
         {
             // 标记圆半径5000
             Logger = logger;
             // 判断正交（中点标记）
-            if(!IsOrthogonal()) return false;
-            //分割线不可在区域外相交（区域外交点标记）
-            if (!AllIntSecPointInside()) return false;
+            if (!IsOrthogonal()) return false;
+            //VaildSegLines.ShowInitSegLine();
             // 判断每根分割线至少有两个交点(端点标记）
-            if (!HaveAtLeastTwoIntsecPoints()) return false ;
+            if (!HaveAtLeastTwoIntsecPoints()) return false;
+            // 先预切割
+            SegLines = SeglineTools.SeglinePrecut(SegLines, WallLine);
             //获取有效分割线
             VaildSegLines = SegLines.GetVaildSegLines(WallLine);
+            //判断分割线是否穿越建筑物
+            if (!NoneCrossBuilding()) return false;
             // 判断分割线净宽（中点标记）
             if (!LaneWidthSatisfied()) return false;
-            // 判断孤立车道（两个以上标记剩余中点，以下标记自己）
-            if (!Allconnected()) return false;
+            // 后预切割
+            SegLines = SeglineTools.SeglinePrecut(SegLines, WallLine);
+            // 判断每根分割线至少有两个交点(端点标记）
+            if (!HaveAtLeastTwoIntsecPoints()) return false;
+            // 判断车道是否全部相连（两个以上标记剩余中点，以下标记自己）
+            if (!SegLines.Allconnected(Logger)) return false;
             // 分割线穿块检查（被穿块的bounding box，外扩）
             if (!NoneCrossBlock()) return false;
+           
             return true;
         }
-        #region 分割线检查
         // 判断正交
         private bool IsOrthogonal()
         {
@@ -249,26 +283,153 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return true;
         }
-        //分割线不可在区域外相交
-        private bool AllIntSecPointInside()
+        private bool NoneCrossBuilding()
         {
-            var IntSecPoints = SegLines.GetIntSecPts();
-            foreach(var pt in IntSecPoints)
+            foreach (var line in VaildSegLines)
             {
-                if (!WallLine.Contains(pt))
-                {
-                    Logger?.Information("发现区域外交点 ！\n");
-                    Logger?.Information(pt.ToString() + "的交点不符合要求\n");
-                    Active.Editor.WriteMessage("发现区域外交点 ！\n");
-                    pt.MarkPoint();
-                    return false;
-                }  
+                var rst = ObstacleSpatialIndex.SelectFence(line);
+                if (rst.Count != 0) return false;
             }
             return true;
+        }
+        // 判断分割线净宽,如果不够移动一下在判断是否够
+        private bool LaneWidthSatisfied()
+        {
+            var index = 0;
+            var seglineDic = new Dictionary<int, Line>();
+            foreach (var line in SegLines)
+            {
+                seglineDic.Add(index++, line);
+            }
+            SeglineIndexDic = WindmillSplit.GetSegLineIndexDic(seglineDic);
+            double tol = (ParameterStock.RoadWidth / 2)-0.1;// 2749.9
+            for (int i = 0; i < VaildSegLines.Count; i++)
+            {
+                var segline = VaildSegLines[i];
+                if (segline.Length < 10.0) continue;
+                var rect = segline.Buffer(tol);
+                var rst = BoundarySpatialIndex.SelectCrossingPolygon(rect);
+                if (rst.Count > 0)// 初始值净宽不够，移动分割线
+                {
+                    // 移动两次上和下
+                    var initDist = segline.GetMinDist(rst);
+                    if (!ExistWidthSatisfied(i, initDist))
+                    {
+                        var spt = SegLines[i].StartPoint;
+                        var ept = SegLines[i].EndPoint;
+                        Logger?.Information("分割线范围不够车道净宽！\n");
+                        Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
+                        Active.Editor.WriteMessage("分割线范围不够车道净宽！\n");
+                        SegLines[i].GetCenter().MarkPoint();
+                        return false;
+                    }
+                }
+            }
+            index = 0;
+            seglineDic = new Dictionary<int, Line>();
+            foreach (var line in SegLines)
+            {
+                seglineDic.Add(index++, line);
+            }
+            //线延展
+            //SegLines = WindmillSplit.GetExtendSegline(seglineDic, SeglineIndexDic);//进行线的延展
+            VaildSegLines = SegLines.GetVaildSegLines(WallLine);
+            return VaildLaneWidthSatisfied();//判断移动后是否合理
+        }
+        private bool ExistWidthSatisfied(int idx,double initDist)
+        {
+            var segLines_C = new List<Line>();
+            SegLines.ForEach(l => segLines_C.Add(l.Clone() as Line));
+            var segline = SegLines[idx];
+            double moveSize = (ParameterStock.RoadWidth / 2) - initDist;
+            if (segline.IsVertical())//垂直线
+            {
+                segLines_C[idx].StartPoint = new Point3d(segline.StartPoint.X + moveSize, segline.StartPoint.Y, 0);
+                segLines_C[idx].EndPoint = new Point3d(segline.EndPoint.X + moveSize, segline.EndPoint.Y, 0);
+                if (SatisfiedAfterMove(idx,ref segLines_C)) return true;
+                // 不满足，尝试另一个方向
+                segLines_C[idx].StartPoint = new Point3d(segline.StartPoint.X - moveSize, segline.StartPoint.Y, 0);
+                segLines_C[idx].EndPoint = new Point3d(segline.EndPoint.X - moveSize, segline.EndPoint.Y, 0);
+                if (SatisfiedAfterMove(idx, ref segLines_C)) return true;
+            }
+            else
+            {
+                segLines_C[idx].StartPoint = new Point3d(segline.StartPoint.X , segline.StartPoint.Y+ moveSize, 0);
+                segLines_C[idx].EndPoint = new Point3d(segline.EndPoint.X , segline.EndPoint.Y+ moveSize, 0);
+                if (SatisfiedAfterMove(idx, ref segLines_C)) return true;
+                // 不满足，尝试另一个方向
+                segLines_C[idx].StartPoint = new Point3d(segline.StartPoint.X , segline.StartPoint.Y -  moveSize, 0);
+                segLines_C[idx].EndPoint = new Point3d(segline.EndPoint.X , segline.EndPoint.Y -  moveSize, 0);
+                if (SatisfiedAfterMove(idx, ref segLines_C)) return true;
+            }
+            segLines_C.ForEach(l =>l.Dispose());
+            return false;
+
+        }
+        private bool SatisfiedAfterMove(int idx, ref List<Line> segLines_C)
+        {
+            double tol = (ParameterStock.RoadWidth / 2) - 0.1;// 2749.9
+            // 获取分割线有效部分
+            var vaildSeg = HelperEX.GetVaildSegLine(idx, segLines_C, WallLine);
+            bool flag = false;
+            if(vaildSeg.Length > 1.0)
+            {
+                var rect = vaildSeg.Buffer(tol);
+                var rst = BoundarySpatialIndex.SelectCrossingPolygon(rect);
+                flag = rst.Count == 0;
+            }
+            if (flag)
+            {
+                //线延展
+                foreach (var j in SeglineIndexDic[idx])
+                {
+                    if (segLines_C[idx].HasIntersection(segLines_C[j]))//邻接表中连接的线不需要扩展
+                    {
+                        continue;
+                    }
+                    //两条线没有交上，进行延展
+                    var linei = segLines_C[idx];
+                    var linej = segLines_C[j];
+                    WindmillSplit.ExtendLines(ref linei, ref linej);
+                    segLines_C[idx] = linei;
+                    segLines_C[j] = linej;
+                }
+                SegLines.ForEach(l => l.Dispose());
+                SegLines.Clear();
+                SegLines = segLines_C;
+                return true;
+            }
+            else return false;
+        }
+        private bool VaildLaneWidthSatisfied()
+        {
+            double tol = (ParameterStock.RoadWidth / 2) - 0.1;// 2749.9
+            bool flag = true;
+            for (int i = 0; i < VaildSegLines.Count; i++)
+            {
+                var segline = VaildSegLines[i];
+                if (segline.Length < 10.0) continue;
+                var rect = segline.Buffer(tol);
+                var rst = BoundarySpatialIndex.SelectCrossingPolygon(rect);
+                if (rst.Count > 0)
+                {
+                    var spt = SegLines[i].StartPoint;
+                    var ept = SegLines[i].EndPoint;
+                    SegLines[i].ColorIndex = 1;
+                    SegLines[i].AddToCurrentSpace();
+                    Logger?.Information("调整后分割线净宽不够！\n");
+                    Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
+                    Active.Editor.WriteMessage("调整后分割线净宽不够! \n");
+                    SegLines[i].GetCenter().MarkPoint();
+                    flag = false;
+                }
+            }
+            return flag;
         }
         // 判断每根分割线至少有两个交点
         private bool HaveAtLeastTwoIntsecPoints()
         {
+
             //double tol = 1e-4;
             for (int i = 0; i < SegLines.Count; i++)
             {
@@ -278,6 +439,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 
                 // check intersection points
                 pts.AddRange(line.Intersect(WallLine, 0));//求与边界的交点
+                //LonelyRampsPline.ForEach(ramp => pts.AddRange(line.Intersect(ramp, 0)));//求与中间坡道的交点
                 for (int j = 0; j < SegLines.Count; j++)
                 {
                     if (i == j) continue;
@@ -309,77 +471,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 //        return false;
                 //    }
                 //}
-            }
-            return true;
-        }
-        // 判断分割线净宽
-        private bool LaneWidthSatisfied()
-        {
-            double tol = (ParameterStock.RoadWidth / 2)-0.1;// 2749.9
-            for (int i = 0; i < VaildSegLines.Count; i++)
-            {
-                var segline = VaildSegLines[i];
-                var rect = segline.Buffer(tol);
-                var rst1 = ObstacleSpatialIndex.SelectCrossingPolygon(rect);
-                var rst2 = WallSpatialIndex.SelectCrossingPolygon(rect);
-                if (rst1.Count > 0|| rst2.Count > 0)
-                {
-                    var spt = SegLines[i].StartPoint;
-                    var ept = SegLines[i].EndPoint;
-                    Logger?.Information("发现分割线净宽不够 ！\n");
-                    Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
-                    Active.Editor.WriteMessage("发现分割线净宽不够 \n");
-                    SegLines[i].GetCenter().MarkPoint();
-                    return false;
-                }
-            }
-            //var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
-            //segAreasCnt = rstAreas.Count;
-            return true;
-        }
-        // 判断孤立车道
-        private bool Allconnected()
-        {
-            var CheckedLines = new DBObjectCollection();
-            CheckedLines.Add(SegLines[0]);
-            var rest_idx = new List<int>();
-            for (int i = 1; i < SegLines.Count; ++i) rest_idx.Add(i);
-
-            while (rest_idx .Count != 0)
-            {
-                var curCount = rest_idx.Count;// 记录列表个数
-                for (int j = 0; j < curCount; ++j)
-                {
-                    var idx = rest_idx[j];
-                    var line = SegLines[idx];
-                    if (line.ConnectWithAny(CheckedLines))
-                    {
-                        CheckedLines.Add(line);
-                        rest_idx.RemoveAt(j);
-                        break;
-                    }
-                    if (j == curCount - 1)
-                    {
-                        Logger?.Information("分割线未互相连接 ！\n");
-                        Active.Editor.WriteMessage("分割线未互相连接！ \n");
-                        if(CheckedLines.Count < 3)
-                        {
-                            foreach(Line linetomark in CheckedLines)
-                            {
-                                linetomark.GetCenter().MarkPoint();
-                            }
-                        }
-                        else
-                        {
-                            foreach(int idxtomark in rest_idx)
-                            {
-                                SegLines[idxtomark].GetCenter().MarkPoint();
-                            }
-                        }
-                        return false;// 当前线不与任何线相交
-                    }
-                        
-                }
             }
             return true;
         }
@@ -430,12 +521,89 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return IntSecPoints;
         }
-        public static List<Line> GetVaildSegLines(this List<Line> segline,Polyline wallLine)
+        public static Line GetVaildSegLine(int idx, List<Line> seglines, Polyline wallLine)
+        {
+            var pts = GetAllIntSecPoints(idx, seglines, wallLine);
+            return new Line(pts.First(), pts.Last());
+        }
+        // 判断车道是否全部相连
+        public static bool Allconnected(this List<Line> SegLines, Serilog.Core.Logger Logger = null)
+        {
+            var CheckedLines = new DBObjectCollection();
+            CheckedLines.Add(SegLines[0]);
+            var rest_idx = new List<int>();
+            for (int i = 1; i < SegLines.Count; ++i) rest_idx.Add(i);
+
+            while (rest_idx.Count != 0)
+            {
+                var curCount = rest_idx.Count;// 记录列表个数
+                for (int j = 0; j < curCount; ++j)
+                {
+                    var idx = rest_idx[j];
+                    var line = SegLines[idx];
+                    if (line.ConnectWithAny(CheckedLines))
+                    {
+                        CheckedLines.Add(line);
+                        rest_idx.RemoveAt(j);
+                        break;
+                    }
+                    if (j == curCount - 1)
+                    {
+                        if(Logger != null)
+                        {
+                            Logger?.Information("分割线未互相连接 ！\n");
+                            Active.Editor.WriteMessage("分割线未互相连接！ \n");
+                            if (CheckedLines.Count < 3)
+                            {
+                                foreach (Line linetomark in CheckedLines)
+                                {
+                                    linetomark.GetCenter().MarkPoint();
+                                }
+                            }
+                            else
+                            {
+                                foreach (int idxtomark in rest_idx)
+                                {
+                                    SegLines[idxtomark].GetCenter().MarkPoint();
+                                }
+                            }
+                        }
+                        return false;// 当前线不与任何线相交
+                    }
+
+                }
+            }
+            return true;
+        }
+        //判断有效分割线净宽
+        public static bool VaildLaneWidthSatisfied(this List<Line> VaildSegLines, ThCADCoreNTSSpatialIndex BoundarySpatialIndex)
+        {
+            double tol = (ParameterStock.RoadWidth / 2) - 0.1;// 2749.9
+            for (int i = 0; i < VaildSegLines.Count; i++)
+            {
+                var segline = VaildSegLines[i];
+                try
+                {
+                    var rect = segline.Buffer(tol);
+                    var rst = BoundarySpatialIndex.SelectCrossingPolygon(rect);
+                    if (rst.Count > 0)
+                    {
+                        return false;
+                    }
+                }
+                catch
+                {
+                    ;
+                }
+            }
+            return true;
+        }
+        public static List<Line> GetVaildSegLines(this List<Line> seglines,Polyline wallLine)
         {
             var vaildSegLines = new List<Line>();
-            for(int i = 0; i < segline.Count; ++i)
+            for(int i = 0; i < seglines.Count; ++i)
             {
-                var pts = GetAllIntSecPoints(i, segline, wallLine);
+                var pts = GetAllIntSecPoints(i, seglines, wallLine);
                 vaildSegLines.Add(new Line(pts.First(), pts.Last()));
             }
             return vaildSegLines;
@@ -509,7 +677,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return dbObjs;
         }
-
         public static void MarkBlock(this BlockReference block,double scaleValue = 1.1, string LayerName = "AI-提示")
         {
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -532,8 +699,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 1);
                 var circle = CreateCircle(Pt, Radius);
                 circle.Layer = LayerName;
-                circle.ColorIndex = 1;
+                circle.ColorIndex = 2;
                 circle.AddToCurrentSpace();
+            }
+        }
+
+        public static void ShowInitSegLine(this List<Line> seglines, string LayerName = "AI-初始分割线")
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(LayerName))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 4);
+                foreach(var l in seglines)
+                {
+                    l.Layer = LayerName;
+                    l.ColorIndex = 6;
+                    l.AddToCurrentSpace();
+                }
             }
         }
         public static Circle CreateCircle(Point3d Center, double Radius)

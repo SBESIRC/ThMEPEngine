@@ -56,7 +56,8 @@ namespace TianHua.Electrical.PDS.Project
             });
             if (node.Details.LowPower <= 0)
             {
-                node.Details.LowPower = edges.Sum(e => e.Target.Details.LowPower);
+                edges.BalancedPhaseSequence();
+                node.Details.LowPower = edges.Select(e => e.Target).ToList().CalculatePower();
             }
             node.CalculateCurrent();
             PDSProjectGraph.CalculateCircuitFormInType(node);
@@ -211,6 +212,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    Conductor = new Conductor(CalculateCurrent,edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray,edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
@@ -226,6 +228,7 @@ namespace TianHua.Electrical.PDS.Project
                             breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                             contactor = new Contactor(CalculateCurrent, PolesNum),
                             thermalRelay = new ThermalRelay(CalculateCurrent),
+                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                         };
                     }
                     else
@@ -237,6 +240,8 @@ namespace TianHua.Electrical.PDS.Project
                             thermalRelay = new ThermalRelay(CalculateCurrent),
                             contactor2 = new Contactor(CalculateCurrent, PolesNum),
                             contactor3 = new Contactor(CalculateCurrent, PolesNum),
+                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                         };
                     }
                 }
@@ -248,6 +253,7 @@ namespace TianHua.Electrical.PDS.Project
                     breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                     meter = new MeterTransformer(CalculateCurrent),
                     breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket || (new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName) && edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.LumpedLoad))
@@ -256,6 +262,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
                     breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
@@ -268,6 +275,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
                     breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
 
@@ -275,20 +283,172 @@ namespace TianHua.Electrical.PDS.Project
             edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
         }
 
-        /// <summary>
-        /// 平衡相序
-        /// </summary>
-        public static void BalancedPhaseSequence(this ThPDSProjectGraph PDSProjectGraph)
+        public static double CalculatePower(this List<ThPDSProjectGraphNode> nodes)
         {
-
+            double power = 0;
+            double L1Power =0, L2Power =0, L3Power = 0;
+            nodes.ForEach(node =>
+            {
+                switch(node.Details.PhaseSequence)
+                {
+                    case PhaseSequence.L1:
+                    {
+                            L1Power += node.Details.LowPower;
+                            break;
+                    }
+                    case PhaseSequence.L2:
+                        {
+                            L2Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L3:
+                        {
+                            L3Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L123:
+                        {
+                            power += node.Details.LowPower;
+                            break;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
+            });
+            return power + 3 * Math.Max(Math.Max(L1Power, L2Power),L3Power);
         }
 
         /// <summary>
         /// 平衡相序
         /// </summary>
-        public static void BalancedPhaseSequence(this ThPDSProjectGraph PDSProjectGraph, ThPDSProjectGraphNode Node)
+        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
         {
+            var onePhase = new List<ThPDSProjectGraphNode>();
+            foreach (var edge in edges)
+            {
+                if (edge.Target.Load.Phase == ThPDSPhase.三相)
+                {
+                    edge.Target.Details.PhaseSequence = PhaseSequence.L123;
+                }
+                else if (edge.Target.Load.Phase == ThPDSPhase.一相)
+                {
+                    if (edge.Target.Details.LowPower <= 0)
+                    {
+                        edge.Target.Details.PhaseSequence = PhaseSequence.L1;
+                    }
+                    else
+                    {
+                        onePhase.Add(edge.Target);
+                    }
+                }
+            }
+            if (onePhase.Count > 0)
+                onePhase.BalancedPhaseSequence();
+        }
 
+        /// <summary>
+        /// 平衡相序
+        /// </summary>
+        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphNode> nodes)
+        {
+            if(nodes.Count == 1)
+            {
+                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
+            }
+            else if(nodes.Count == 2)
+            {
+                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
+                nodes[1].Details.PhaseSequence = PhaseSequence.L2;
+            }
+            else if (nodes.Count == 3)
+            {
+                nodes[0].Details.PhaseSequence = PhaseSequence.L1;
+                nodes[1].Details.PhaseSequence = PhaseSequence.L2;
+                nodes[2].Details.PhaseSequence = PhaseSequence.L3;
+            }
+            else
+            {
+                var powerSum = nodes.Sum(x => x.Details.LowPower);
+                var averagePower = powerSum/3;
+                var HighPowerNodes = nodes.Where(o => o.Details.LowPower > averagePower).ToList();
+                if(HighPowerNodes.Count == 2)
+                {
+                    HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L2;
+                    HighPowerNodes[1].Details.PhaseSequence = PhaseSequence.L3;
+                    nodes.Except(HighPowerNodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
+                }
+                else if(HighPowerNodes.Count == 1)
+                {
+                    HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L3;
+                    nodes.Remove(HighPowerNodes[0]);
+                    var L1Nodes = nodes.ChoisePhaseSequence(averagePower);
+                    L1Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
+                    nodes.Except(L1Nodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L2);
+                }
+                else
+                {
+                    var L1Nodes = nodes.ChoisePhaseSequence(averagePower);
+                    L1Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
+                    var L23 = nodes.Except(L1Nodes).ToList();
+                    var L2Nodes = L23.ChoisePhaseSequence(averagePower);
+                    L2Nodes.ForEach(o => o.Details.PhaseSequence = PhaseSequence.L2);
+                    L23.Except(L2Nodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L3);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 选择相序
+        /// 此算法暂时采用dp思想求解
+        /// 或者换个说话，同权重的01背包问题
+        /// </summary>
+        /// <param name="nodes"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static List<ThPDSProjectGraphNode> ChoisePhaseSequence(this List<ThPDSProjectGraphNode> nodes,double target)
+        {
+            List<ThPDSProjectGraphNode> result = new List<ThPDSProjectGraphNode>();
+            var target_int = (int)Math.Ceiling(target);
+            int multiple = (int)Math.Ceiling(target / 100);
+            int[] vs = new int[nodes.Count];
+            for(int i = 0; i < vs.Length; i++)
+            {
+                vs[i] = (int)Math.Ceiling(nodes[i].Details.LowPower/multiple);
+            }
+            var capacity = (int)(target_int/multiple);
+            int[,] dp = new int[nodes.Count + 1, capacity + 1];
+            //dp[i,j]表示在可以装 第0至i件物品，并且背包容量为j   可以装的最大值
+            for (int i = 1; i < nodes.Count + 1; i++)
+            {
+                for (int j = 1; j < capacity + 1; j++)
+                {
+                    if (j >= vs[i - 1])
+                    {
+                        dp[i, j] = (int)Math.Max(dp[i - 1, j], vs[i - 1] + dp[i - 1, j - vs[i - 1]]);
+                    }
+                    else
+                    {
+                        dp[i, j] = dp[i - 1, j];
+                    }
+                }
+            }
+            int x = nodes.Count, y = capacity;
+            while(x > 0 && y > 0)
+            {
+                if(dp[x,y] != dp[x - 1 ,y])
+                {
+                    result.Add(nodes[x-1]);
+                    y -= vs[x - 1];
+                    x --;
+                }
+                else
+                {
+                    x--;
+                }
+            }
+            return result;
         }
 
 
@@ -300,6 +460,123 @@ namespace TianHua.Electrical.PDS.Project
         public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> NewGraph)
         {
             //暂时不考虑
+        }
+
+        public static void UpdateWithNode(this ThPDSProjectGraph graph, ThPDSProjectGraphNode node , bool permission = true)
+        {
+            var edges = graph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+            if (permission)
+            {
+                node.Details.LowPower = edges.Select(e => e.Target).ToList().CalculatePower();
+            }
+            node.CalculateCurrent();
+            if (permission)
+            {
+                node.ComponentCheck(edges);
+            }
+            //统计节点级联电流
+            var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+            node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            edges = graph.Graph.Edges.Where(e => e.Target.Equals(node)).ToList();
+            edges.ForEach(e => graph.UpdateWithEdge(e));
+        }
+
+        public static void UpdateWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, bool permission = true)
+        {
+            if (permission)
+            {
+                edge.ComponentCheck();
+            }
+            //统计回路级联电流
+            edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            graph.UpdateWithNode(edge.Source);
+        }
+
+        /// <summary>
+        /// Node元器件选型检查
+        /// </summary>
+        public static void ComponentCheck(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        {
+            if (node.Type == PDSNodeType.DistributionBox)
+            {
+                var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+                if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+                {
+                    if(oneWayInCircuit.isolatingSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        oneWayInCircuit.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, oneWayInCircuit.isolatingSwitch.PolesNum);
+                    }
+                }
+                else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+                {
+                    if (twoWayInCircuit.isolatingSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        twoWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, twoWayInCircuit.isolatingSwitch1.PolesNum);
+                    }
+                    if (twoWayInCircuit.isolatingSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        twoWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, twoWayInCircuit.isolatingSwitch2.PolesNum);
+                    }
+                    if (twoWayInCircuit.transferSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        twoWayInCircuit.transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, (twoWayInCircuit.transferSwitch as AutomaticTransferSwitch).PolesNum);
+                    }
+                }
+                else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+                {
+                    if (threeWayInCircuit.isolatingSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        threeWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch1.PolesNum);
+                    }
+                    if (threeWayInCircuit.isolatingSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        threeWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch2.PolesNum);
+                    }
+                    if (threeWayInCircuit.transferSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        threeWayInCircuit.transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch1 as AutomaticTransferSwitch).PolesNum);
+                    }
+                    if (threeWayInCircuit.isolatingSwitch3.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        threeWayInCircuit.isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch2.PolesNum);
+                    }
+                    if (threeWayInCircuit.transferSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        threeWayInCircuit.transferSwitch2 = new AutomaticTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch2 as ManualTransferSwitch).PolesNum);
+                    }
+                }
+                else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
+                {
+                    if (centralized.isolatingSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
+                    {
+                        centralized.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, centralized.isolatingSwitch.PolesNum);
+                    }
+
+                }
+                else
+                {
+                    //暂未定义，后续补充
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 回路元器件选型检查
+        /// </summary>
+        public static void ComponentCheck(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        {
+            edge.Details = new CircuitDetails();
+            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            var CascadeCurrent = edge.Target.Details.CascadeCurrent;
+            if(edge.Details.CircuitForm is RegularCircuit regularCircuit)
+            {
+                if(regularCircuit.breaker.GetCascadeRatedCurrent() <= CascadeCurrent)
+                {
+                    regularCircuit.breaker = new Breaker(CascadeCurrent, new List<string>() { regularCircuit.breaker.TripUnitType }, regularCircuit.breaker.PolesNum, regularCircuit.breaker.TripUnitType);
+                }
+            }
         }
     }
 }

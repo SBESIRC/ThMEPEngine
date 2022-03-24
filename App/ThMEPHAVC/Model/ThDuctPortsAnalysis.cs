@@ -1035,6 +1035,7 @@ namespace ThMEPHVAC.Model
             double avgAirVolume = portParam.param.airVolume / portParam.param.portNum;
             avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
             var maxSeg = new EndlineSegInfo ();
+            maxSeg.portsInfo = new List<PortInfo>();
             double maxLineLen = Double.MinValue;
             while (remainPortNum > 0)
             {
