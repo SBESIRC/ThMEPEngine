@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -28,24 +31,26 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("电缆根数")]
+        [EditorAttribute(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int NumberOfPhaseWire
         {
             get => _conductor.NumberOfPhaseWire; 
             set
             {
-                _conductor.NumberOfPhaseWire = value;
+                _conductor.SetNumberOfPhaseWire(value);
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(NumberOfPhaseWire));
             }
         }
 
         [DisplayName("相导体截面")]
+        [EditorAttribute(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
         public double ConductorCrossSectionalArea
         {
             get => _conductor.ConductorCrossSectionalArea;
             set
             {
-                _conductor.ConductorCrossSectionalArea = value;
+                _conductor.SetConductorCrossSectionalArea(value);
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(ConductorCrossSectionalArea));
             }
@@ -84,6 +89,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string Content
         {
             get => _conductor.Content;
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<int> AlternativeWireNumbers
+        {
+            get => _conductor.GetNumberOfPhaseWires();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<double> AlternativeConductorCrossSectionalAreas
+        {
+            get => _conductor.GetConductorCrossSectionalAreas();
         }
     }
 }
