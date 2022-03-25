@@ -168,4 +168,12 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         CJ20,
     }
+
+    /// <summary>
+    /// 热继电器型号
+    /// </summary>
+    public enum ThermalRelayModel
+    {
+        JR20,
+    }
 }

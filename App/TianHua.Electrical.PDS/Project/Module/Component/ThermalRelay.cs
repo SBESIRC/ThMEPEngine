@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
@@ -25,13 +22,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             if (thermalRelay.IsNull())
             {
                 thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
-                //throw new NotSupportedException();
             }
             ThermalRelayType = thermalRelay.ModelName;
             PolesNum = thermalRelay.Poles;
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
         }
-        public string Content { get { return $"{ThermalRelayType} {RatedCurrent}A"; } }
+
         /// <summary>
         /// 热继电器类型
         /// </summary>
@@ -43,8 +39,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public string PolesNum { get; set; }
 
         /// <summary>
-        /// 额定电流
+        /// 电流整定范围
         /// </summary>
         public string RatedCurrent { get; set; }
+
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public string Content { get { return $"{ThermalRelayType} {RatedCurrent}A"; } }
     }
 }
