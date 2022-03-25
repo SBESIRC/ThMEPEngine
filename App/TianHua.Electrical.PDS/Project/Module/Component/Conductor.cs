@@ -17,7 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType , ThPDSLoadTypeCat_1 loadType,bool FireLoad,bool ViaConduit,bool ViaCableTray,string FloorNumber)
         {
-            this.ComponentType = ComponentType.导体;
+            this.ComponentType = ComponentType.Conductor;
             ChooseMaterial(loadType, FireLoad, calculateCurrent, phase);
             ChooseCrossSectionalArea(calculateCurrent);
             ChooseLaying(FloorNumber,circuitType, phase, ViaConduit, ViaCableTray, FireLoad);

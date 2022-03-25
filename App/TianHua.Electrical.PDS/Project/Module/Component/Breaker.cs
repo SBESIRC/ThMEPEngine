@@ -38,7 +38,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectGlobalConfiguration.ThreePhasePolesNum;
             }
-            ComponentType = ComponentType.断路器;
+            ComponentType = ComponentType.CB;
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)
@@ -316,7 +316,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectGlobalConfiguration.ThreePhasePolesNum;
             }
-            ComponentType = ComponentType.剩余电流断路器;
+            ComponentType = ComponentType.RCD;
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)

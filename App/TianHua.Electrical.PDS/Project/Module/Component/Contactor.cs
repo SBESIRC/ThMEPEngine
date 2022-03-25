@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="polesNum">级数</param>
         public Contactor(double calculateCurrent, string polesNum)
         {
-            ComponentType = ComponentType.接触器;
+            ComponentType = ComponentType.QAC;
             var contactor = ContactorConfiguration.contactorInfos.FirstOrDefault(o => o.Poles == polesNum && o.Amps > calculateCurrent);
             if(contactor.IsNull())
             {

@@ -15,7 +15,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="calculateCurrent"></param>
         public ThermalRelay(double calculateCurrent)
         {
-            ComponentType = ComponentType.热继电器;
+            ComponentType = ComponentType.KH;
             var thermalRelays = ThermalRelayConfiguration.thermalRelayInfos.
                 Where(o => o.MinAmps <= calculateCurrent && o.MaxAmps >= calculateCurrent);
             var thermalRelay = thermalRelays.OrderBy(o => Math.Abs(2 * calculateCurrent - o.MinAmps - o.MaxAmps)).FirstOrDefault();

@@ -1,22 +1,42 @@
-﻿namespace TianHua.Electrical.PDS.Project.Module.Component
+﻿using System.ComponentModel;
+
+namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
     /// 元器件类型
     /// </summary>
     public enum ComponentType
     {
-        导体,
-        隔离开关,
-        接触器,
-        热继电器,
-        断路器,
-        剩余电流断路器,
-        ATSE,
-        MTSE,
-        MT,
-        CT,
-        CPS,
+        [Description("导体")]
+        Conductor,
+        [Description("隔离开关")]
+        QL,
+        [Description("接触器")]
+        QAC,
+        [Description("热继电器")]
+        KH,
+        [Description("断路器")]
+        CB,
+        [Description("剩余电流动作断路器")]
         RCD,
+        [Description("自动转换开关")]
+        ATSE,
+        [Description("手动转换开关")]
+        MTSE,
+        [Description("电能表")]
+        MT,
+        [Description("电流互感器")]
+        CT,
+        [Description("电动机综合保护开关")]
+        CPS,
+        [Description("熔断器")]
+        FU,
+        [Description("浪涌保护器")]
+        SPD,
+        [Description("软启动器")]
+        SS,
+        [Description("变频器")]
+        FC,
     }
 
     /// <summary>
