@@ -52,6 +52,7 @@
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Project\Module\Circuit\Extension\CircuitGroupAttribute.cs" />
     <Compile Include="Project\Module\Circuit\Extension\UpdateCircuitTypeExtension.cs" />
+    <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSDBText.cs" />

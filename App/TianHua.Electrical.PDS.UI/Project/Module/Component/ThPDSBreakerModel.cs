@@ -1,8 +1,10 @@
-﻿using System;
+﻿using HandyControl.Controls;
+using System.Collections.Generic;
 using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -25,6 +27,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public ComponentType Type => _breaker.ComponentType;
 
         [DisplayName("型号")]
+        [Editor(typeof(ThPDSBreakerModelPropertyEditor), typeof(PropertyEditorBase))]
         public BreakerModel Model
         {
             get => _breaker.BreakerType;
@@ -88,6 +91,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 _breaker.Appendix = value;
                 OnPropertyChanged(nameof(Appendix));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<BreakerModel> AlternativeModel
+        {
+            get => _breaker.GetModels();
         }
 
         private void OnPropertyChanged()
