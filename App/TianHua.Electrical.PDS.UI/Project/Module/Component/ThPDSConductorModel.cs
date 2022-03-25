@@ -35,6 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.NumberOfPhaseWire = value;
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(NumberOfPhaseWire));
             }
         }
@@ -47,6 +48,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.ConductorCrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(ConductorCrossSectionalArea));
             }
         }
@@ -54,10 +56,12 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("PE线导体截面")]
         public double PECrossSectionalArea
         {
-            get => _conductor.PECrossSectionalArea; set
+            get => _conductor.PECrossSectionalArea; 
+            set
             {
                 _conductor.PECrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(PECrossSectionalArea));
             }
         }
@@ -65,10 +69,12 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("敷设方式")]
         public BridgeLaying BridgeLaying
         {
-            get => _conductor.BridgeLaying; set
+            get => _conductor.BridgeLaying; 
+            set
             {
                 _conductor.BridgeLaying = value;
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(BridgeLaying));
             }
         }
@@ -76,12 +82,21 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("穿管直径")]
         public int PipeDiameter
         {
-            get => _conductor.PipeDiameter; set
+            get => _conductor.PipeDiameter; 
+            set
             {
                 _conductor.PipeDiameter = value;
                 OnPropertyChanged(nameof(Content));
+                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(PipeDiameter));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public string ConductorInfo
+        {
+            get => _conductor.ConductorInfo;
         }
 
         [ReadOnly(true)]
