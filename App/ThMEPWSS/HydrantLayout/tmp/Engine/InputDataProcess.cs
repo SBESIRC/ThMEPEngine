@@ -283,13 +283,6 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
 
         public ProcessedData Output()
         {
-            //Info
-            Info.DoorLongSide = DoorLongSide;
-            Info.DoorShortSide = DoorShortSide;
-            Info.ShortSide = ShortSide;
-            Info.LongSide = LongSide;
-            Info.DoorOffset = DoorOffset;
-
             //输出处理后的数据
             ProcessedData processedData1 = new ProcessedData();
             ProcessedData.ForbiddenIndex = ForbiddenIndex;
@@ -298,8 +291,6 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
 
             processedData1.FireHydrant = HydrantModel0;
             processedData1.FireExtinguisher = HydrantModel1;
-            //processedData1.FireHydrant = HydrantModel0;
-            //processedData1.FireExtinguisher = HydrantModel1;
 
             return processedData1;
         }

@@ -231,18 +231,21 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             for (int i = 0; i < Frame.NumberOfVertices; i++)
             {
                 var pt1 = Frame.GetPoint3dAt(i);
-                //如果超出距离就跳出
-                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius) continue;
-
                 //var pt0 = Frame.GetPoint3dAt((i + Frame.NumberOfVertices - 1) % Frame.NumberOfVertices);
                 var pt2 = Frame.GetPoint3dAt((i + 1) % Frame.NumberOfVertices);
                 //Vector3d dir1 = pt1 - pt0;
                 Vector3d dir2 = pt2 - pt1;
+
+                //如果超出距离就跳出
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius && pt2.DistanceTo(CenterPoint) > Info.SearchRadius &&  dir2.Length < Info.OriginRadius * 2/3 ) continue;
+
                 Vector3d baseDir1 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
 
                 Line line0 = new Line(pt1, pt2);
                 Point3d closetPt = line0.GetClosestPointTo(CenterPoint, false);
-                if (IsVPBlocked(closetPt, baseDir1))
+                
+                //不是端点且没被阻挡
+                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1))
                 {
                     basePointList.Add(closetPt);
                     dirList.Add(baseDir1);
@@ -254,13 +257,13 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
                 if (clockwiseFrame == true)
                 {
                     //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
-                    if (dir2.Length > 3 * Info.VPSide)
+                    if (dir2.Length >=  Info.VPSide)
                     {
                         Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
                        
                         //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
-                        if (IsVPBlocked(basePoint1, baseDir1))
+                        if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1))
                         {
                             basePointList.Add(basePoint1);
                             dirList.Add(baseDir1);
@@ -270,7 +273,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
                         Point3d basePoint2 = pt1 + dir2/2;
 
-                        if (basePoint2.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint2, baseDir1))
+                        if (basePoint2.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint2, baseDir1))
                         {
                             basePointList.Add(basePoint2);
                             dirList.Add(baseDir1);
@@ -280,7 +283,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
                         Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
 
-                        if (basePoint3.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint3, baseDir1))
+                        if (basePoint3.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint3, baseDir1))
                         {
                             basePointList.Add(basePoint3);
                             dirList.Add(baseDir1);
@@ -325,7 +328,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
                 if (clockwiseFrame == true)
                 {
                     double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
-                    if (angle < Math.PI * 3 / 2 + 0.15 && angle > Math.PI * 3 / 2 - 0.15 && dir1.Length > Info.VPSide / 2 && dir2.Length > Info.VPSide / 2 && dir1.Length + dir2.Length > 3 * Info.VPSide)
+                    if (angle < Math.PI * 3 / 2 + 0.15 && angle > Math.PI * 3 / 2 - 0.15 && dir1.Length > Info.VPSide / 4 && dir2.Length > Info.VPSide / 4 && dir1.Length + dir2.Length > 3 * Info.VPSide)
                     {
                         Point3d basePoint1 = pt1 - dir1.GetNormal() * 0.5 * shortside;
                         Vector3d baseDir1 = dir2.GetNormal();
@@ -342,6 +345,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
         public void FindColumnPoint2(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
+            LeanWallList.Clear();
             basePointList = new List<Point3d>();
             dirList = new List<Vector3d>();
             foreach (var cl in Columns)
@@ -360,10 +364,84 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
                     {
                         basePointList.Add(mid);
                         dirList.Add(dirOut);
+                        LeanWallList.Add(cl);
                     }
                 }
             }
         }
 
+        public void FindOtherPoint2(out List<Point3d> basePointList, out List<Vector3d> dirList)
+        {
+            basePointList = new List<Point3d>();
+            dirList = new List<Vector3d>();
+            bool clockwiseFrame = Frame.IsCCW();
+
+            for (int i = 0; i < Frame.NumberOfVertices; i++)
+            {
+                var pt1 = Frame.GetPoint3dAt(i);
+                //var pt0 = Frame.GetPoint3dAt((i + Frame.NumberOfVertices - 1) % Frame.NumberOfVertices);
+                var pt2 = Frame.GetPoint3dAt((i + 1) % Frame.NumberOfVertices);
+                //Vector3d dir1 = pt1 - pt0;
+                Vector3d dir2 = pt2 - pt1;
+
+                //如果超出距离就跳出
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius && pt2.DistanceTo(CenterPoint)> Info.SearchRadius && dir2.Length < 2000) continue;
+
+                Vector3d baseDir1 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
+
+                Line line0 = new Line(pt1, pt2);
+                Point3d closetPt = line0.GetClosestPointTo(CenterPoint, false);
+
+                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1))
+                {
+                    basePointList.Add(closetPt);
+                    dirList.Add(baseDir1);
+                    Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + 100 * baseDir1, 200, 200, baseDir1);
+                    DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
+                }
+
+
+                if (clockwiseFrame == true)
+                {
+                    //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
+                    if (dir2.Length > 3 * Info.VPSide)
+                    {
+                        Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
+
+                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                        //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
+                        if (IsVPBlocked(basePoint1, baseDir1))
+                        {
+                            basePointList.Add(basePoint1);
+                            dirList.Add(baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
+                        }
+
+                        Point3d basePoint2 = pt1 + dir2 / 2;
+
+                        if (basePoint2.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint2, baseDir1))
+                        {
+                            basePointList.Add(basePoint2);
+                            dirList.Add(baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                            DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
+                        }
+
+                        Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
+
+                        if (basePoint3.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint3, baseDir1))
+                        {
+                            basePointList.Add(basePoint3);
+                            dirList.Add(baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                            DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
+                        }
+                    }
+                }
+            }
+
+
+        }
     }
 }

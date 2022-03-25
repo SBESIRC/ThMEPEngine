@@ -40,7 +40,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             var bufferObb = wholeObb.Buffer(10);
             var pl = bufferObb.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
 
-            DrawUtils.ShowGeometry(pl, "l1buffer", 3);
+            //DrawUtils.ShowGeometry(pl, "l1buffer", 3);
             //var trimedWall = singleLean.Trim(pl);
             if (singleLean.Contains(pl)) return 0.0;
             else

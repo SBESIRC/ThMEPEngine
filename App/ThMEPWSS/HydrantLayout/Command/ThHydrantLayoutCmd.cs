@@ -109,7 +109,9 @@ namespace ThMEPWSS.HydrantLayout.Command
                 dataQuery.Transform(transformer);
 
                 //Engine start
-                Run run0 = new Run(dataQuery);
+                DataPass dataPass0 = new DataPass(_radius,_layoutObject,_layoutObject,_avoidParking);
+                Run run0 = new Run(dataQuery,dataPass0);
+                List<OutPutModel> outPutModels = run0.outPutModels;
 
                 //
                 //打印

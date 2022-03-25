@@ -23,7 +23,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
     class FireHydrant
     {
         //外部传入的模式属性
-        public int Type = 0; //表示是 消防栓（0） 还是 灭火器（1）
+        //public int Type = 0; //表示是 消防栓（0） 还是 灭火器（1）
         public int Mode = 0; //表示需要调用的模板列表 2(自由) 1（L） 0（I）
 
         //外部传入的位置属性
@@ -34,13 +34,12 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
 
         //以下属性为计算得出
 
-        //当前选择的模板
-        int nowIndex = -1;
-
         //立柱的定位点和定位方向
         public Point3d BasePoint = new Point3d(-100, -100, -100);
         public Vector3d vBasePoint = new Vector3d(0,1,0);
-        
+        double ShortSide = 0;
+        double LongSide = 0;
+
         //实体中心点
         public Point3d cPointFire = new Point3d(-200, -200, -200);
         public Point3d cPointRiser = new Point3d(-200, -200, -200);
@@ -64,24 +63,40 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
 
         //简写
         double vp = Info.VPSide;
-        double ss = Info.ShortSide;
-        double ls = Info.LongSide;
-        double dss = Info.DoorShortSide;
-        double dls = Info.DoorLongSide;
-        double doorOffset = Info.DoorOffset;
+        double ss = 0;
+        double ls = 0;
+        double dss = 0;
+        double dls = 0;
+        double doorOffset = 0;
 
 
         //构造函数
-        public FireHydrant(Point3d basePoint,Vector3d dir, int type, int mode)
+        public FireHydrant(Point3d basePoint, Vector3d dir, double shortside, double longside, int mode)
         {
             BasePoint = basePoint;
             vBasePoint = dir;
-            Type = type;
+            ShortSide = shortside;
+            LongSide = longside;
             Mode = mode;
             clockwise90 = new Vector3d(dir.Y, -dir.X, dir.Z).GetNormal();
             clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
-            
+
+
+            //数据更新
+            SideDataGeneration();
+
+            //构建模型
             GetFireAttribute();
+        }
+
+        //计算所需数据
+        private void SideDataGeneration() 
+        {
+             ss = ShortSide;
+             ls = LongSide;
+             dss = LongSide;
+             dls = LongSide*1.5;
+             doorOffset = LongSide*0.25;
         }
 
         //计算消火栓外包框线
@@ -108,14 +123,17 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
             TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (vp + ss) - vBasePoint * (0.5 * ls - vp));
             TFireDirList.Add(clockwise90);
             //7
-            TFireCenterPointList.Add(BasePoint + clockwise270 * 0.5 * (vp + ls) + vBasePoint * 0.5* vp);
+            TFireCenterPointList.Add(BasePoint + clockwise270 * 0.5 * (vp + ls) + vBasePoint * 0.5* ss);
             TFireDirList.Add(vBasePoint);
             //8
-            TFireCenterPointList.Add(BasePoint + vBasePoint * (vp + 0.5* ls));
-            TFireDirList.Add(clockwise90);
-            //9
-            TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (vp + ls) + vBasePoint * 0.5 * vp);
+            TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (vp + ls) + vBasePoint * 0.5 * ss);
             TFireDirList.Add(vBasePoint);
+            //9
+            TFireCenterPointList.Add(BasePoint + clockwise270 * 0.5 * (ss - vp) + vBasePoint * (vp + 0.5 * ls) );
+            TFireDirList.Add(clockwise90);
+            //10
+            TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (ss - vp) +  vBasePoint * (vp + 0.5 * ls));
+            TFireDirList.Add(clockwise90);
         }
 
         //计算立柱外包框线
@@ -146,9 +164,9 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
             //}
 
             //直接输出全体
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 10; i++)
             {
-                TFireObb.Add(CreateBoundaryService.CreateBoundary(TFireCenterPointList[i], Info.ShortSide, Info.LongSide, TFireDirList[i]));
+                TFireObb.Add(CreateBoundaryService.CreateBoundary(TFireCenterPointList[i], ShortSide, LongSide, TFireDirList[i]));
             }
 
             return TFireObb;
@@ -157,7 +175,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         //获取一种消火栓外包框线
         public void GetFireObb(int tIndex){ }
 
-        //计算开门范围外包框线
+        //计算开门范围外包框线   0：左开   1：右开     
         public Polyline GetDoorAreaObb(int tIndex , int dtIndex)
         {
             Point3d fireCenterPoint = TFireCenterPointList[tIndex];
@@ -204,7 +222,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
             {
                 end = 2;
             }
-            else if (tIndex > 5 && tIndex < 9)
+            else if (tIndex > 5 && tIndex < 10)
             {
                 end = 4;
             }

@@ -28,7 +28,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
 
     class FireCompareModel
     {
-        //属性
+        //基本属性
         public Point3d basePoint;
         public Vector3d dir;
         public Point3d fireCenterPoint;
@@ -40,6 +40,10 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         public double distance = 100000;
         public double againstWallLength = 0;
         public int doorGood = 1;
+
+        //绘图属性
+        public double ShortSide = Info.ShortSide;
+        public double LongSide = Info.LongSide;
 
         public FireCompareModel(Point3d basePoint, Vector3d dir, Point3d fireCenterPoint, Vector3d fireDir, int doorOpenDir, double distance, double againstWallLength, int tIndex, bool doorGood)
         {
@@ -57,20 +61,20 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
             }
         }
 
-        public void Draw()
+        public void Draw(double shortside,double longside)
         {
             double vp = Info.VPSide;
-            double ss = Info.ShortSide;
-            double ls = Info.LongSide;
-            double dss = Info.DoorShortSide;
-            double dls = Info.DoorLongSide;
-            double doorOffset = Info.DoorOffset;
+            double ss = shortside;
+            double ls = longside;
+            double dss = ls;
+            double dls = 1.5*ls;
+            double doorOffset = 0.25*ls;
             var fclockwise90 = new Vector3d(fireDir.Y, -fireDir.X, fireDir.Z).GetNormal();
             var fclockwise270 = new Vector3d(-fireDir.Y, fireDir.X, fireDir.Z).GetNormal();
 
             DBObjectCollection objs = new DBObjectCollection();
             Polyline vpPl = CreateBoundaryService.CreateBoundary(basePoint + 0.5 * vp * dir, vp, vp, dir);
-            Polyline firePl = CreateBoundaryService.CreateBoundary(fireCenterPoint, Info.ShortSide, Info.LongSide, fireDir);
+            Polyline firePl = CreateBoundaryService.CreateBoundary(fireCenterPoint, ss, ls, fireDir);
             Polyline doorPl;
             if (doorOpenDir % 2 == 0)
             {
@@ -88,10 +92,10 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
             objs.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1result", 2));
         }
 
-        public void Draw2() 
+        public void Draw2(double shortside, double longside) 
         {
             DBObjectCollection objs = new DBObjectCollection();
-            Polyline firePl = CreateBoundaryService.CreateBoundary(fireCenterPoint, 200, 800, fireDir);
+            Polyline firePl = CreateBoundaryService.CreateBoundary(fireCenterPoint, shortside, longside, fireDir);
             objs.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1result", 2));
         }
     }
