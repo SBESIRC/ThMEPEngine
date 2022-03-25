@@ -58,7 +58,9 @@ namespace ThMEPStructure.Reinforcement.Draw
                         startX += widths[cnt];
                         cnt++;
                     }
+                    cnt = 0;
                     widthSum = 0;
+                    widths.Clear();
                     tmpComponents.Clear();
                     startY -= firstRowH + 4 * this.tblRowHeight;
                     startX = extents.MinPoint.X;
@@ -71,6 +73,16 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     firstRowH = tmpH;
                 }
+            }
+            foreach (var componentRow in tmpComponents)
+            {
+                tmpColllection = componentRow.Draw(firstRowH, widths[cnt], new Point3d(startX, startY, 0));
+                foreach (DBObject dBObject in tmpColllection)
+                {
+                    objectCollection.Add(dBObject);
+                }
+                startX += widths[cnt];
+                cnt++;
             }
 
             return objectCollection;

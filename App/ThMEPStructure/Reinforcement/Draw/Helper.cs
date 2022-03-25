@@ -101,9 +101,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             if (link.Contains("C"))
             {
                 num1 = link.Substring(0, link.IndexOf("C"));
-                num2 = link.Substring(link.IndexOf("C") + 1, link.IndexOf("@")-link.IndexOf("C"));
+                num2 = link.Substring(link.IndexOf("C") + 1, link.IndexOf("@") - link.IndexOf("C") - 1);
                 num3 = link.Substring(link.IndexOf("@") + 1);
-                if (!num1.Contains("(") && !num2.Contains("(") && num3.Contains("("))
+                if (!num1.Contains("(") && !num2.Contains("(") && !num3.Contains("("))
                 {
                     res.num = int.Parse(num1);
                     res.numNo2 = int.Parse(num2);
