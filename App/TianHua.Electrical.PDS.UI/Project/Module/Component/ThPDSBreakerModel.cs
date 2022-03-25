@@ -39,6 +39,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("壳架规格")]
+        [Editor(typeof(ThPDSBreakerFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string FrameSpecifications
         {
             get => _breaker.FrameSpecifications;
@@ -50,6 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
+        [Editor(typeof(ThPDSBreakerPolesNumPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _breaker.PolesNum;
@@ -61,6 +63,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("额定电流")]
+        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _breaker.RatedCurrent;
@@ -72,6 +75,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("脱扣器类型")]
+        [Editor(typeof(ThPDSBreakerTripDevicePropertyEditor), typeof(PropertyEditorBase))]
         public string TripUnitType
         {
             get => _breaker.TripUnitType;
@@ -95,9 +99,37 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public List<BreakerModel> AlternativeModel
+        public List<BreakerModel> AlternativeModels
         {
             get => _breaker.GetModels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _breaker.GetPolesNums();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeRatedCurrents
+        {
+            get => _breaker.GetRatedCurrents();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeTripDevices
+        {
+            get => _breaker.GetTripDevices();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeFrameSpecifications
+        {
+            get => _breaker.GetFrameSpecifications();
         }
 
         private void OnPropertyChanged()
