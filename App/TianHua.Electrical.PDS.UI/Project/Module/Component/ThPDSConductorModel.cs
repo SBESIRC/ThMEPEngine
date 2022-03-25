@@ -51,40 +51,32 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [ReadOnly(true)]
+        [DisplayName("中性线导体截面")]
+        public double NeutralConductorCrossSectionalArea
+        {
+            get => _conductor.NeutralConductorCrossSectionalArea;
+        }
+
+        [ReadOnly(true)]
         [DisplayName("PE线导体截面")]
         public double PECrossSectionalArea
         {
-            get => _conductor.PECrossSectionalArea; 
-            set
-            {
-                _conductor.PECrossSectionalArea = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(PECrossSectionalArea));
-            }
+            get => _conductor.PECrossSectionalArea;
         }
 
+        [ReadOnly(true)]
         [DisplayName("敷设方式")]
         public BridgeLaying BridgeLaying
         {
-            get => _conductor.BridgeLaying; 
-            set
-            {
-                _conductor.BridgeLaying = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(BridgeLaying));
-            }
+            get => _conductor.BridgeLaying;
         }
 
+        [ReadOnly(true)]
         [DisplayName("穿管直径")]
         public int PipeDiameter
         {
-            get => _conductor.PipeDiameter; 
-            set
-            {
-                _conductor.PipeDiameter = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(PipeDiameter));
-            }
+            get => _conductor.PipeDiameter;
         }
 
         [ReadOnly(true)]

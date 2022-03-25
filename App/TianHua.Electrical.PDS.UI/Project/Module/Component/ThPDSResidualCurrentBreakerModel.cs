@@ -82,6 +82,28 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [DisplayName("RCD类型")]
+        public RCDType RCDType
+        {
+            get => _rccb.RCDType;
+            set
+            {
+                _rccb.SetRCDType(value);
+                OnPropertyChanged();
+            }
+        }
+
+        [DisplayName("剩余电流动作")]
+        public ResidualCurrentSpecification ResidualCurrent
+        {
+            get => _rccb.ResidualCurrent;
+            set
+            {
+                _rccb.ResidualCurrent = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void OnPropertyChanged()
         {
             OnPropertyChanged(nameof(Model));
