@@ -252,10 +252,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     }
 
     /// <summary>
-    /// 剩余电流断路器（RCD）
+    /// 剩余电流断路器（带漏电保护功能的断路器）
     /// </summary>
     [CascadeComponent]
-    public class ResidualCurrentCircuitBreaker : BreakerBaseComponent
+    public class ResidualCurrentBreaker : BreakerBaseComponent
     {
         /// <summary>
         /// 断路器
@@ -264,7 +264,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="tripDevice">脱扣器类型</param>
         /// <param name="polesNum">极数</param>
         /// <param name="characteristics">瞬时脱扣器类型</param>
-        public ResidualCurrentCircuitBreaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
+        public ResidualCurrentBreaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
         {
             if (ProjectGlobalConfiguration.SinglePhasePolesNum.Contains(polesNum))
             {
@@ -274,7 +274,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectGlobalConfiguration.ThreePhasePolesNum;
             }
-            ComponentType = ComponentType.断路器;
+            ComponentType = ComponentType.剩余电流断路器;
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)
