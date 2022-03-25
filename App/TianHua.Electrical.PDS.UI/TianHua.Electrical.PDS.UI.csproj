@@ -34,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Models\Component\ThPDSContactorModel.cs" />
     <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
