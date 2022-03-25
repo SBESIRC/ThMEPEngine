@@ -35,7 +35,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.NumberOfPhaseWire = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(NumberOfPhaseWire));
             }
         }
@@ -48,7 +47,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.ConductorCrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(ConductorCrossSectionalArea));
             }
         }
@@ -61,7 +59,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.PECrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(PECrossSectionalArea));
             }
         }
@@ -74,7 +71,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.BridgeLaying = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(BridgeLaying));
             }
         }
@@ -87,16 +83,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _conductor.PipeDiameter = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
                 OnPropertyChanged(nameof(PipeDiameter));
             }
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public string ConductorInfo
-        {
-            get => _conductor.ConductorInfo;
         }
 
         [ReadOnly(true)]

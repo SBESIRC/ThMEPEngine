@@ -890,7 +890,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
@@ -908,7 +908,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor1 != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor1);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
@@ -926,7 +926,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor2 != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor2);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
