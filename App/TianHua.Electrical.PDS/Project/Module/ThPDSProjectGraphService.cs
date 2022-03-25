@@ -5,6 +5,7 @@ using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -18,36 +19,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="type"></param>
         public static void AddCircuit(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
+            //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
             graph.Graph.AddVertex(target);
+            //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit()};
-            newEdge.Details = new CircuitDetails();
-            var CalculateCurrent = newEdge.Target.Load.CalculateCurrent;//计算电流
-            var CascadeCurrent = newEdge.Target.Details.CascadeCurrent;
-            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
-            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-            if (newEdge.Target.Load.Phase == ThPDSPhase.一相)
-            {
-                if (newEdge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
-                {
-                    PolesNum = "1P";
-                }
-                else
-                {
-                    PolesNum = "2P";
-                }
-            }
-            var Characteristics = "";//瞬时脱扣器类型
-            var TripDevice = newEdge.Target.Load.LoadTypeCat_1.GetTripDevice(newEdge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
-            if (newEdge.Target.Type == PDSNodeType.None)
-            {
-                newEdge.Details.CircuitForm = new RegularCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, newEdge.Target.Load.Phase, newEdge.Target.Load.CircuitType, newEdge.Target.Load.LoadTypeCat_1, newEdge.Target.Load.FireLoad, newEdge.Circuit.ViaConduit, newEdge.Circuit.ViaCableTray, newEdge.Target.Load.Location.FloorNumber),
-                };
-            }
-
+            //Step 3:回路选型
+            newEdge.ComponentSelection(type);
+            //Step 4:添加到Graph
             graph.Graph.AddEdge(newEdge);
         }
 
@@ -143,7 +122,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="type"></param>
         public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
         {
-            //throw new NotImplementedException();
+            if (!edge.Details.CircuitForm.CircuitFormType.Equals(type))
+            {
+                //回路类型相同时没有必要转换
+                edge.UpdateCircuit(edge.Details.CircuitForm, type);
+            }
         }
 
         /// <summary>

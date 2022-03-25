@@ -16,16 +16,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => conductor.ConductorInfo;
         }
         public string Content => conductor.Content;
-        public string LayingTyle
-        {
-            get => conductor.LayingTyle;
-            set
-            {
-                conductor.LayingTyle = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
-        }
 
         public bool IsWire
         {
@@ -41,24 +31,12 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string OuterSheathMaterial
         {
             get => conductor.OuterSheathMaterial;
-            set
-            {
-                conductor.OuterSheathMaterial = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
         }
 
         [DisplayName("导体材质")]
         public string ConductorMaterial
         {
             get => conductor.ConductorMaterial;
-            set
-            {
-                conductor.ConductorMaterial = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
         }
 
         [DisplayName("级数")]
@@ -82,7 +60,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        public string ConductorCrossSectionalArea
+        public double ConductorCrossSectionalArea
         {
             get => conductor.ConductorCrossSectionalArea; set
             {
@@ -92,21 +70,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        public string PECrossSectionalArea
+        public double PECrossSectionalArea
         {
             get => conductor.PECrossSectionalArea; set
             {
                 conductor.PECrossSectionalArea = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
-        }
-
-        public bool AllMotor
-        {
-            get => conductor.AllMotor; set
-            {
-                conductor.AllMotor = value;
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(ConductorInfo));
             }
@@ -135,7 +103,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("穿管直径")]
-        public string PipeDiameter
+        public int PipeDiameter
         {
             get => conductor.PipeDiameter; set
             {

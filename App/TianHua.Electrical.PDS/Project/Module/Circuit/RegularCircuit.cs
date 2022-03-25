@@ -1,10 +1,12 @@
 ﻿using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 常规回路
     /// </summary>
+   [CircuitGroup(CircuitGroup.Group1)]
     public class RegularCircuit : PDSBaseOutCircuit
     {
         public RegularCircuit()

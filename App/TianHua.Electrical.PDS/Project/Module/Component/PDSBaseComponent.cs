@@ -31,7 +31,7 @@
 
 
         /// <summary>
-        /// 获取级联元器件电流规格
+        /// 获取元器件电流规格
         /// </summary>
         /// <returns></returns>
         public virtual double GetCascadeRatedCurrent()

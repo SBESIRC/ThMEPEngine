@@ -150,6 +150,62 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// 穿管管材
+    /// </summary>
+    public enum PipeMaterial
+    {
+        [Description("None")]
+        None,
+        [Description("热镀锌低压流体输送用焊接钢管")]
+        SC,
+        [Description("碳素结构钢电线套管")]
+        MT,
+        [Description("套接紧定式钢管")]
+        JDG,
+        [Description("可挠金属电线保护套管")]
+        CP,
+        [Description("难燃（材料燃烧性能等级B1）以上硬质塑料套管")]
+        PC,
+        [Description("阻燃半硬质塑料套管")]
+        FPC,
+        [Description("塑料波纹套管")]
+        KPC
+    }
+
+    /// <summary>
+    /// 材料特征及结构
+    /// </summary>
+    public enum MaterialStructure
+    {
+        [Description("YJY")]
+        YJY,
+        [Description("BYJ")]
+        BYJ,
+        [Description("KYJY")]
+        KYJY,
+        [Description("RYJ")]
+        RYJ,
+        [Description("NG-A(BTLY)")]
+        NG_A_BTLY,
+    }
+
+    /// <summary>
+    /// 导体类型
+    /// </summary>
+    public enum ConductorType
+    {
+        非消防配电电线,
+        非消防配电电缆,
+        消防配电电线,
+        消防配电干线,
+        消防配电分支线路,
+        消防配电控制电缆,
+        非消防配电控制电缆,
+        消防控制信号软线,
+        非消防控制信号软线,
+    }
+
+    /// <summary>
     /// 断路器型号
     /// </summary>
     public enum BreakerModel

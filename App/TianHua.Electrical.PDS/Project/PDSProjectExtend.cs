@@ -183,7 +183,7 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
-        /// 回路元器件选型
+        /// 回路元器件选型/默认选型
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
@@ -261,14 +261,17 @@ namespace TianHua.Electrical.PDS.Project
                 //漏电
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
-                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
                     Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
             {
                 //消防应急照明回路
-                edge.Details.CircuitForm = new FireEmergencyLighting();
+                edge.Details.CircuitForm = new FireEmergencyLighting()
+                {
+                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                };
             }
             else
             {
@@ -279,6 +282,183 @@ namespace TianHua.Electrical.PDS.Project
                 };
             }
 
+            //统计回路级联电流
+            edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+        }
+
+        /// <summary>
+        /// 回路元器件选型/指定元器件选型
+        /// </summary>
+        /// <returns></returns>
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, Type type, CircuitFormOutType circuitFormOutType)
+        {
+            if (type.IsSubclassOf(typeof(PDSBaseComponent)))
+            {
+                edge.Details = new CircuitDetails();
+                var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+                var CascadeCurrent = edge.Target.Details.CascadeCurrent;
+                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
+                var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+                if (edge.Target.Load.Phase == ThPDSPhase.一相)
+                {
+                    if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
+                    {
+                        PolesNum = "1P";
+                    }
+                    else
+                    {
+                        PolesNum = "2P";
+                    }
+                }
+                var Characteristics = "";//瞬时脱扣器类型
+                var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
+
+                if (type.Equals(typeof(BreakerBaseComponent)))
+                {
+                    if(circuitFormOutType == CircuitFormOutType.漏电)
+                        return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                    else
+                        return new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                }
+                else if(type.Equals(typeof(Breaker)))
+                {
+                    return new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                }
+                else if (type.Equals(typeof(ResidualCurrentBreaker)))
+                {
+                    return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                }
+                else if (type.Equals(typeof(ThermalRelay)))
+                {
+                    return new ThermalRelay(CalculateCurrent);
+                }
+                else if (type.Equals(typeof(Contactor)))
+                {
+                    return new Contactor(CalculateCurrent, PolesNum);
+                }
+                else if (type.Equals(typeof(MeterTransformer)))
+                {
+                    return  new MeterTransformer(CalculateCurrent);
+                }
+                else if (type.Equals(typeof(CurrentTransformer)))
+                {
+                    return new CurrentTransformer(CalculateCurrent);
+                }
+                else
+                {
+                    //暂未支持的元器件类型
+                    throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                //非元器件类型
+                throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// 回路元器件选型/指定回路类型选型
+        /// </summary>
+        /// <param name="pDSCircuit"></param>
+        /// <returns></returns>
+        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge , CircuitFormOutType circuitFormOutType)
+        {
+            edge.Details = new CircuitDetails();
+            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            var CascadeCurrent = edge.Target.Details.CascadeCurrent;
+            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
+            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            if (edge.Target.Load.Phase == ThPDSPhase.一相)
+            {
+                if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
+                {
+                    PolesNum = "1P";
+                }
+                else
+                {
+                    PolesNum = "2P";
+                }
+            }
+            var Characteristics = "";//瞬时脱扣器类型
+            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
+            if (circuitFormOutType == CircuitFormOutType.常规)
+            {
+                edge.Details.CircuitForm = new RegularCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if (circuitFormOutType == CircuitFormOutType.漏电)
+            {
+                edge.Details.CircuitForm = new LeakageCircuit()
+                {
+                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if(circuitFormOutType == CircuitFormOutType.接触器控制)
+            {
+                edge.Details.CircuitForm = new ContactorControlCircuit()
+                {
+                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    contactor = new Contactor(CalculateCurrent, PolesNum),
+                };
+            }
+            else if (circuitFormOutType == CircuitFormOutType.热继电器保护)
+            {
+                edge.Details.CircuitForm = new ThermalRelayProtectionCircuit()
+                {
+                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    thermalRelay = new ThermalRelay(CalculateCurrent),
+                };
+            }
+            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件)
+            {
+                edge.Details.CircuitForm = new Motor_DiscreteComponentsCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    contactor = new Contactor(CalculateCurrent, PolesNum),
+                    thermalRelay = new ThermalRelay(CalculateCurrent),
+                };
+            }
+            //else if (circuitFormOutType == CircuitFormOutType.电动机_CPS)
+            //{
+            //    edge.Details.CircuitForm = new Motor_CPSCircuit()
+            //    {
+            //    };
+            //}
+            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件星三角启动)
+            {
+                edge.Details.CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit()
+                {
+                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    contactor1 = new Contactor(CalculateCurrent, PolesNum),
+                    thermalRelay = new ThermalRelay(CalculateCurrent),
+                    contactor2 = new Contactor(CalculateCurrent, PolesNum),
+                    contactor3 = new Contactor(CalculateCurrent, PolesNum),
+                };
+            }
+            else if (circuitFormOutType == CircuitFormOutType.配电计量_上海CT)
+            {
+                edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
+                {
+                    breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    meter = new MeterTransformer(CalculateCurrent),
+                    breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                };
+            }
+            else if (circuitFormOutType == CircuitFormOutType.消防应急照明回路WFEL)
+            {
+                //消防应急照明回路
+                edge.Details.CircuitForm = new FireEmergencyLighting() 
+                {
+                };
+            }
+            else
+            {
+                //暂未支持该回路类型，请暂时不要选择该回路
+                throw new NotSupportedException();
+            }
             //统计回路级联电流
             edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
         }

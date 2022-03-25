@@ -233,12 +233,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         public string Appendix { get; set; }
 
+        /// <summary>
+        /// 额定电流
+        /// </summary>
         public List<string> AlternativeRatedCurrent { get; }
-
+        /// <summary>
+        /// 级数
+        /// </summary>
         public List<string> AlternativePolesNum { get; }
-
+        /// <summary>
+        /// 脱扣器类型
+        /// </summary>
         public List<string> AlternativeTripDevice { get; }
+        /// <summary>
+        /// 壳架规格
+        /// </summary>
         public List<string> AlternativeFrameSpecifications { get; }
+        /// <summary>
+        /// 模型
+        /// </summary>
         public List<string> AlternativeModel { get; }
 
         public override double GetCascadeRatedCurrent()

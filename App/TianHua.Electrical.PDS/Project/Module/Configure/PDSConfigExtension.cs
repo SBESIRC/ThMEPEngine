@@ -25,6 +25,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadATSEConfig();
             LoadMTSEConfig();
             LoadConductorConfig();
+            LoadCableCondiutConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -75,7 +76,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         if (FireLoad)
                         {
                             characteristics ="C";
-                            return new List<string>() { "TM", "EL" };
+                            return new List<string>() { "MA", "EL" };
                         }
                         else
                         {
@@ -88,7 +89,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         if (FireLoad)
                         {
                             characteristics ="C";
-                            return new List<string>() { "TM", "EL" };
+                            return new List<string>() { "MA", "EL" };
                         }
                         else
                         {
@@ -358,7 +359,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 }
             }
         }
-
+        
+        /// <summary>
+        /// 加载导体配置
+        /// </summary>
         private static void LoadConductorConfig()
         {
             var excelSrevice = new ReadExcelService();
@@ -388,6 +392,51 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         Iset = double.Parse(row["整定电流"].ToString()),
                         Sphere = double.Parse(row["相线截面"].ToString()),
                         NumberOfPhaseWire = int.Parse(row["相线数"].ToString()),
+                    });
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 加载电线电缆配置
+        /// </summary>
+        private static void LoadCableCondiutConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.CableCondiutUrl, true);
+            var Table = dataSet.Tables["YJY(YJV)"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.CableInfos.Add(new CableCondiutInfo()
+                    {
+                        FireCoating = row["耐火外护套"].ToString().Equals("Y"),
+                        WireSphere = double.Parse(row["相线截面"].ToString()),
+                        Phase = row["相数"].ToString() + "P",
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                    });
+                }
+            }
+            var Table1 = dataSet.Tables["BYJ(BV)"];
+            for (int i = 1; i < Table1.Rows.Count; i++)
+            {
+                var row = Table1.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.CondiutInfos.Add(new CableCondiutInfo()
+                    {
+                        FireCoating = row["耐火外护套"].ToString().Equals("Y"),
+                        WireSphere = double.Parse(row["相线截面"].ToString()),
+                        Phase = row["相数"].ToString() + "P",
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
                     });
                 }
             }
