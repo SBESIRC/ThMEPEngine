@@ -21,7 +21,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// <summary>
         /// 型号
         /// </summary>
-        public string Model { get; set; }
+        public BreakerModel Model { get; set; }
 
         /// <summary>
         /// 型号（全称）
@@ -62,6 +62,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// 瞬时脱扣器型式
         /// </summary>
         public string Characteristics { get; set; }
+
+        /// <summary>
+        /// 剩余电流脱扣器类型
+        /// </summary>
+        public string RCDCharacteristics { get; set; }
 
         /// <summary>
         /// 宽度

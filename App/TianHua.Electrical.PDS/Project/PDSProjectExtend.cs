@@ -261,7 +261,7 @@ namespace TianHua.Electrical.PDS.Project
                 //漏电
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
-                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics,edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor),
                     Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
             }
@@ -316,7 +316,7 @@ namespace TianHua.Electrical.PDS.Project
                 if (type.Equals(typeof(BreakerBaseComponent)))
                 {
                     if(circuitFormOutType == CircuitFormOutType.漏电)
-                        return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                        return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor);
                     else
                         return new Breaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
                 }
@@ -326,7 +326,7 @@ namespace TianHua.Electrical.PDS.Project
                 }
                 else if (type.Equals(typeof(ResidualCurrentBreaker)))
                 {
-                    return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics);
+                    return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor);
                 }
                 else if (type.Equals(typeof(ThermalRelay)))
                 {
@@ -393,7 +393,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
-                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics),
+                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, PolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor),
                 };
             }
             else if(circuitFormOutType == CircuitFormOutType.接触器控制)

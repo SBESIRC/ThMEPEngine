@@ -30,10 +30,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("型号")]
         public BreakerModel Model
         {
-            get => (BreakerModel)Enum.Parse(typeof(BreakerModel), _rccb.BreakerType);
+            get => _rccb.BreakerType;
             set
             {
-                _rccb.SetModel(value.ToString());
+                _rccb.SetModel(value);
                 OnPropertyChanged();
             }
         }
@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _rccb.FrameSpecifications;
             set
             {
-                _rccb.SetFrameSpecifications(value);
+                _rccb.SetFrameSpecification(value);
                 OnPropertyChanged();
             }
         }

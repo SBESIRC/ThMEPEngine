@@ -124,7 +124,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model =(BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -132,6 +132,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -152,7 +153,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model = (BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -160,6 +161,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -180,7 +182,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model = (BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -188,6 +190,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = String.Empty,
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),

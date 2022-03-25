@@ -119,7 +119,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum Pipelaying
     {
-        [Description("None")]
+        [Description("无穿管")]
         None,
         [Description("穿管明敷")]
         E,
@@ -215,6 +215,34 @@ namespace TianHua.Electrical.PDS.Project.Module
         MCCB,   // Molded Case Circuit Breaker
         RCCB,   // Residual Current Circuit Breaker
         ACB,    // air circuit breaker
+    }
+
+    /// <summary>
+    /// RCD类型
+    /// </summary>
+    public enum RCDType
+    {
+        A,
+        AC,
+        B,
+        F,
+    }
+
+    /// <summary>
+    /// 剩余电流规格
+    /// </summary>
+    public enum ResidualCurrentSpecification
+    {
+        [Description("10mA")]
+        Specification10,
+        [Description("30mA")]
+        Specification30,
+        [Description("100mA")]
+        Specification100,
+        [Description("300mA")]
+        Specification300,
+        [Description("500mA")]
+        Specification500,
     }
 
     /// <summary>

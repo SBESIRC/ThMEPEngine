@@ -59,7 +59,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         this.conductorUse = config.NonFireDistributionWire;
                         IsWire  = true;
                     }
-                    
+
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.Socket)
@@ -152,7 +152,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         this.conductorUse=config.NonFireDistributionBranchCircuiCables;
                 }
             }
-            if(conductorUse.ConductorMaterial.Contains('N'))
+            if (conductorUse.ConductorMaterial.Contains('N'))
             {
                 Refractory = true;
             }
@@ -165,37 +165,65 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <exception cref="NotImplementedException"></exception>
         private void ChooseCrossSectionalArea(double calculateCurrent)
         {
-            var configs = IsWire ? ConductorConfigration.WireConductorInfos : ConductorConfigration.CableConductorInfos;
-            var config = configs.FirstOrDefault(o => o.Iset > calculateCurrent);
-            if (config.IsNull())
+            var Allconfigs = IsWire ? ConductorConfigration.WireConductorInfos : ConductorConfigration.CableConductorInfos;
+            var configs = Allconfigs.Where(o => o.Iset > calculateCurrent).ToList();
+            if (configs.Count <= 0)
             {
                 throw new NotSupportedException();
             }
             else
             {
-                var Sphere = config.Sphere;
+                var config = configs.First();
                 this.NumberOfPhaseWire = config.NumberOfPhaseWire;
+                var Sphere = config.Sphere;
                 this.ConductorCrossSectionalArea = Sphere;
-                if (Sphere <= 16)
+                //电缆根数 只有1和2
+                if (NumberOfPhaseWire == 1)
                 {
-                    this.PECrossSectionalArea = Sphere;
-                }
-                else if (Sphere <= 35)
-                {
-                    this.PECrossSectionalArea = 16;
-                }
-                else if (Sphere <= 400)
-                {
-                    this.PECrossSectionalArea = Sphere/2;
-                }
-                else if (Sphere <= 800)
-                {
-                    this.PECrossSectionalArea = 200;
+                    AlternativeNumberOfPhaseWire = new List<int>() { 1, 2 };
                 }
                 else
                 {
-                    this.PECrossSectionalArea = Sphere/4;
+                    AlternativeNumberOfPhaseWire = new List<int>() { 2 };
                 }
+                AlternativeConductorCrossSectionalAreas = configs.Select(o => o.Sphere).ToList();
+                CalculateCrossSectionalArea(Sphere);
+            }
+        }
+
+        /// <summary>
+        /// 计算PE线导体横截面积
+        /// </summary>
+        /// <param name="conductorCrossSectionalArea"></param>
+        private void CalculateCrossSectionalArea(double conductorCrossSectionalArea)
+        {
+            if (conductorCrossSectionalArea <= 16)
+            {
+                this.PECrossSectionalArea = conductorCrossSectionalArea;
+            }
+            else if (conductorCrossSectionalArea <= 35)
+            {
+                this.PECrossSectionalArea = 16;
+            }
+            else if (conductorCrossSectionalArea <= 400)
+            {
+                this.PECrossSectionalArea = conductorCrossSectionalArea/2;
+            }
+            else if (conductorCrossSectionalArea <= 800)
+            {
+                this.PECrossSectionalArea = 200;
+            }
+            else
+            {
+                this.PECrossSectionalArea = conductorCrossSectionalArea/4;
+            }
+            if (AllMotor)
+            {
+                NeutralConductorCrossSectionalArea = PECrossSectionalArea;
+            }
+            else
+            {
+                NeutralConductorCrossSectionalArea = ConductorCrossSectionalArea;
             }
         }
 
@@ -296,7 +324,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     //管径不超过20的SC管、管径不超过25的JDG或PC管用于照明回路、插座回路、应急照明回路、消防应急照明回路、控制回路时，默认穿管暗敷，其他情况均为穿管明敷。
                     if ((this.PipeMaterial == PipeMaterial.SC && this.PipeDiameter <= 20)
                         || (this.PipeMaterial == PipeMaterial.JDG && this.PipeDiameter <= 25)
-                        || (this.PipeMaterial == PipeMaterial.PC && this.PipeDiameter <= 25) 
+                        || (this.PipeMaterial == PipeMaterial.PC && this.PipeDiameter <= 25)
                         && (circuitType != ThPDSCircuitType.PowerEquipment))
                     {
                         Pipelaying = Pipelaying.C;
@@ -309,21 +337,124 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
         }
 
+        //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
+        //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
+        //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
+        public string Content { get { return $"{conductorUse.Content}-{ConductorInfo}-{LayingTyle}"; } }
+
+        /// <summary>
+        /// 燃烧特性代号
+        /// </summary>
+        public string ConductorMaterial { get { return conductorUse.ConductorMaterial; } }
+
+        /// <summary>
+        /// 材料特征及结构
+        /// </summary>
+        public string OuterSheathMaterial { get { return conductorUse.OuterSheathMaterial.GetDescription(); } }
+
+        /// <summary>
+        /// 电缆根数
+        /// </summary>
+        public int NumberOfPhaseWire { get; set; }
+
+        /// <summary>
+        /// 相导体截面
+        /// </summary>
+        public double ConductorCrossSectionalArea { get; set; }
+
+        /// <summary>
+        /// 中性线导体截面
+        /// </summary>
+        public double NeutralConductorCrossSectionalArea { get; set; }
+
+        /// <summary>
+        /// PE线导体截面
+        /// </summary>
+        public double PECrossSectionalArea { get; set; }
+
+        /// <summary>
+        /// 穿管敷设方式
+        /// </summary>
+        public Pipelaying Pipelaying { get; set; }
+
+        /// <summary>
+        /// 穿管直径
+        /// </summary>
+        public int PipeDiameter { get; set; }
+
+        /// <summary>
+        /// 获取全部电缆根数
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetNumberOfPhaseWires()
+        {
+            return AlternativeNumberOfPhaseWire;
+        }
+
+        public void SetNumberOfPhaseWire(int numberOfPhaseWire)
+        {
+            this.NumberOfPhaseWire = numberOfPhaseWire;
+        }
+
+        /// <summary>
+        /// 获取全部相导体截面
+        /// </summary>
+        /// <returns></returns>
+        public List<double> GetConductorCrossSectionalAreas()
+        {
+            return AlternativeConductorCrossSectionalAreas;
+        }
+
+        public void SetConductorCrossSectionalArea(double conductorCrossSectionalArea)
+        {
+            this.ConductorCrossSectionalArea = conductorCrossSectionalArea;
+            CalculateCrossSectionalArea(conductorCrossSectionalArea);
+        }
+
+        #region Private Property
+
+        /// <summary>
+        /// 桥架敷设方式/穿管直径-穿管敷设方式
+        /// </summary>
+        private string LayingTyle
+        {
+            get
+            {
+                var ViaConduitStr = conductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial + PipeDiameter + "-" + Pipelaying;
+                if (ViaCableTray && ViaConduit)
+                {
+                    return $"{this.BridgeLaying}/ {ViaConduitStr }";
+                }
+                else if (ViaCableTray)
+                {
+                    return this.BridgeLaying.ToString();
+                }
+                else if (ViaConduit)
+                {
+                    return ViaConduitStr;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
         /// <summary>
         /// 导体根数x每根导体截面积
         /// </summary>
-        public string ConductorInfo 
-        { 
+        private string ConductorInfo
+        {
             get
             {
-                if(Phase == ThPDSPhase.一相)
+                if (Phase == ThPDSPhase.一相)
                 {
                     return $"1×{ConductorCrossSectionalArea}+E{PECrossSectionalArea}";
                 }
                 else
                 {
                     string val = string.Empty;
-                    if(AllMotor)
+                    if (AllMotor)
                     {
                         val = $"3×{ConductorCrossSectionalArea}+2×E{PECrossSectionalArea}";
                     }
@@ -341,67 +472,21 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 桥架敷设方式/穿管直径-穿管敷设方式
+        /// 备选电缆根数
         /// </summary>
-        public string LayingTyle
-        {
-            get
-            {
-                var ViaConduitStr = conductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial + PipeDiameter + "-" + Pipelaying;
-                if (ViaCableTray && ViaConduit)
-                {
-                    return $"{this.BridgeLaying}/ {ViaConduitStr }";
-                }
-                else if(ViaCableTray)
-                {
-                    return this.BridgeLaying.ToString();
-                }
-                else if(ViaConduit)
-                {
-                    return ViaConduitStr;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-        }
-
-        //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
-        //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
-        //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
-        public string Content { get { return $"{conductorUse.Content}-{ConductorInfo}-{LayingTyle}"; } }
-
-        public bool IsWire { get; set; }
+        private List<int> AlternativeNumberOfPhaseWire { get; set; }
 
         /// <summary>
-        /// 导体材质
+        /// 备选相导体截面
         /// </summary>
-        public ConductorUse conductorUse { get; set; }
+        private List<double> AlternativeConductorCrossSectionalAreas { get; set; }
 
-        /// <summary>
-        /// 材料特征及结构
-        /// </summary>
-        public string OuterSheathMaterial { get { return conductorUse.OuterSheathMaterial.GetDescription(); } }
-        
-        /// <summary>
-        /// 导体选择类别
-        /// </summary>
-        public string ConductorMaterial { get { return conductorUse.ConductorType.ToString(); } }
-
-        /// <summary>
-        /// 级数
-        /// </summary>
-        public ThPDSPhase Phase { get; set; }
-
-        public int NumberOfPhaseWire { get; set; }
-        public double ConductorCrossSectionalArea { get; set; }
-        public double PECrossSectionalArea { get; set; }
         private bool AllMotor { get; set; }
+
         /// <summary>
         /// 导体耐火材质
         /// </summary>
-        private bool Refractory { get; set;}
+        private bool Refractory { get; set; }
 
         /// <summary>
         /// 是否穿桥架
@@ -409,28 +494,31 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private bool ViaCableTray { get; set; }
 
         /// <summary>
+        /// 穿管管材
+        /// </summary>
+        private PipeMaterial PipeMaterial { get; set; }
+
+        /// <summary>
         /// 穿管
         /// </summary>
         private bool ViaConduit { get; set; }
+
+        /// <summary>
+        /// 级数
+        /// </summary>
+        private ThPDSPhase Phase { get; set; }
+
+        /// <summary>
+        /// 导体材质
+        /// </summary>
+        private ConductorUse conductorUse { get; set; }
 
         /// <summary>
         /// 桥架敷设方式
         /// </summary>
         public BridgeLaying BridgeLaying { get; set; }
 
-        /// <summary>
-        /// 穿管敷设方式
-        /// </summary>
-        public Pipelaying Pipelaying { get; set; }
-
-        /// <summary>
-        /// 穿管直径
-        /// </summary>
-        public int PipeDiameter { get; set; }
-
-        /// <summary>
-        /// 穿管管材
-        /// </summary>
-        public PipeMaterial PipeMaterial { get; set; }
+        private bool IsWire { get; set; }
+        #endregion
     }
 }
