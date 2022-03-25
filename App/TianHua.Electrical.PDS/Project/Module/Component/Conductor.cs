@@ -435,7 +435,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    return "";
                 }
             }
         }
