@@ -23,6 +23,8 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public DBObjectCollection Build(List<ThEdgeComponent> components)
         {
+            
+
             DBObjectCollection objectCollection=new DBObjectCollection();
             DBObjectCollection tmpColllection = new DBObjectCollection();
             //整个区域的宽

@@ -103,8 +103,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[3].X, points[3].Y - deltaY, 0);
                 points.Add(tmpPoint2);
-                pointsFlag.Add(2);
-                pointsFlag.Add(2);
+                pointsFlag.Add(3);
+                pointsFlag.Add(3);
             }
             for (int i = 0; i < pointsPair - result; i++)
             {
@@ -112,8 +112,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[1].X + deltaX, points[1].Y, 0);
                 points.Add(tmpPoint2);
-                pointsFlag.Add(3);
-                pointsFlag.Add(3);
+                pointsFlag.Add(2);
+                pointsFlag.Add(2);
             }
 
 

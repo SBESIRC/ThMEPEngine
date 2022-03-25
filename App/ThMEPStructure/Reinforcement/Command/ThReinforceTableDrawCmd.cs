@@ -29,26 +29,27 @@ namespace ThMEPStructure.Reinforcement.Command
                 var tableBuilder = new ThReinforceTableBuilder(
                     extents, "0.000~3.000","1:25",800);
                 var datas = new List<ThEdgeComponent>();
-                datas.Add(ThReinforceTestData.RectangleEdgeComponent);
-                datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
+                datas = ThReinforceTestData.StandardTestDatas;
+                //datas.Add(ThReinforceTestData.RectangleEdgeComponent);
+                //datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
 
-                datas.Add(ThReinforceTestData.RectangleEdgeComponent);
-                datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.RectangleEdgeComponent);
+                //datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
 
-                datas.Add(ThReinforceTestData.RectangleEdgeComponent);
-                datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeEdgeComponent);
-                datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.RectangleEdgeComponent);
+                //datas.Add(ThReinforceTestData.RectangleCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.LTypeCalEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeEdgeComponent);
+                //datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
 
                 var results = tableBuilder.Build(datas);
                 results.OfType<Entity>().ForEach(e =>

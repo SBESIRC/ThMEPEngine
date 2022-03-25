@@ -167,14 +167,14 @@ namespace ThMEPStructure.Reinforcement.Command
                 };
             }
         }
-        public List<ThEdgeComponent> StandardTestDatas
+        public static List<ThEdgeComponent> StandardTestDatas
         {
             get
             {
                 return CreateStdTestDatas();
             }
         }
-        private List<ThEdgeComponent> CreateStdTestDatas()
+        private static List<ThEdgeComponent> CreateStdTestDatas()
         {
             var results = new List<ThEdgeComponent>();
             // 一字型 标准型
