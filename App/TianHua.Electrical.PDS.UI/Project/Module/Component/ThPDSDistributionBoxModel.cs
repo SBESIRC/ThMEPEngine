@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -39,6 +41,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("需要系数")]
+        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
             get => _node.Load.DemandFactor;
@@ -50,6 +53,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率因数")]
+        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
             get => _node.Load.PowerFactor;

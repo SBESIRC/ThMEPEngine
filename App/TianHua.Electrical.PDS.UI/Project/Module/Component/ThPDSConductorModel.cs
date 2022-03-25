@@ -1,116 +1,94 @@
 ﻿using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSConductorModel : NotifyPropertyChangedBase
     {
-        readonly Conductor conductor;
+        private readonly Conductor _conductor;
         public ThPDSConductorModel(Conductor conductor)
         {
-            this.conductor = conductor;
-        }
-        public string ConductorInfo
-        {
-            get => conductor.ConductorInfo;
-        }
-        public string Content => conductor.Content;
-
-        public bool IsWire
-        {
-            get => conductor.IsWire; set
-            {
-                conductor.IsWire = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
+            _conductor = conductor;
         }
 
-        [DisplayName("外护套材质")]
-        public string OuterSheathMaterial
-        {
-            get => conductor.OuterSheathMaterial;
-        }
-
-        [DisplayName("导体材质")]
+        [ReadOnly(true)]
+        [DisplayName("燃料特性代号")]
         public string ConductorMaterial
         {
-            get => conductor.ConductorMaterial;
+            get => _conductor.ConductorMaterial;
         }
 
-        [DisplayName("级数")]
-        public Model.ThPDSPhase Phase
+        [ReadOnly(true)]
+        [DisplayName("材料特征及结构")]
+        public string OuterSheathMaterial
         {
-            get => conductor.Phase; set
-            {
-                conductor.Phase = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
+            get => _conductor.OuterSheathMaterial;
         }
 
+        [DisplayName("电缆根数")]
         public int NumberOfPhaseWire
         {
-            get => conductor.NumberOfPhaseWire; set
+            get => _conductor.NumberOfPhaseWire; 
+            set
             {
-                conductor.NumberOfPhaseWire = value;
+                _conductor.NumberOfPhaseWire = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
+                OnPropertyChanged(nameof(NumberOfPhaseWire));
             }
         }
 
+        [DisplayName("相导体截面")]
         public double ConductorCrossSectionalArea
         {
-            get => conductor.ConductorCrossSectionalArea; set
+            get => _conductor.ConductorCrossSectionalArea;
+            set
             {
-                conductor.ConductorCrossSectionalArea = value;
+                _conductor.ConductorCrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
+                OnPropertyChanged(nameof(ConductorCrossSectionalArea));
             }
         }
 
+        [DisplayName("PE线导体截面")]
         public double PECrossSectionalArea
         {
-            get => conductor.PECrossSectionalArea; set
+            get => _conductor.PECrossSectionalArea; set
             {
-                conductor.PECrossSectionalArea = value;
+                _conductor.PECrossSectionalArea = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
+                OnPropertyChanged(nameof(PECrossSectionalArea));
             }
         }
 
-        [DisplayName("桥架敷设方式")]
-        public PDS.Project.Module.BridgeLaying BridgeLaying
+        [DisplayName("敷设方式")]
+        public BridgeLaying BridgeLaying
         {
-            get => conductor.BridgeLaying; set
+            get => _conductor.BridgeLaying; set
             {
-                conductor.BridgeLaying = value;
+                _conductor.BridgeLaying = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
-            }
-        }
-
-        [DisplayName("穿管敷设方式")]
-        public PDS.Project.Module.Pipelaying Pipelaying
-        {
-            get => conductor.Pipelaying; set
-            {
-                conductor.Pipelaying = value;
-                OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
+                OnPropertyChanged(nameof(BridgeLaying));
             }
         }
 
         [DisplayName("穿管直径")]
         public int PipeDiameter
         {
-            get => conductor.PipeDiameter; set
+            get => _conductor.PipeDiameter; set
             {
-                conductor.PipeDiameter = value;
+                _conductor.PipeDiameter = value;
                 OnPropertyChanged(nameof(Content));
-                OnPropertyChanged(nameof(ConductorInfo));
+                OnPropertyChanged(nameof(PipeDiameter));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public string Content
+        {
+            get => _conductor.Content;
         }
     }
 }
