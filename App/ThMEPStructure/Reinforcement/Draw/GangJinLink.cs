@@ -55,6 +55,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             res.AddVertexAt(4, new Point2d(pt.X, pt.Y), 0, width, width);
             pt -= direction * 30 * scale;
             res.AddVertexAt(5, new Point2d(pt.X, pt.Y), 0, width, width);
+            res.ConstantWidth = width;
             return res;
         }
         public override void Draw()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class StrToReinforce
@@ -158,7 +159,25 @@ namespace ThMEPStructure.Reinforcement.Draw
             Point3d point = new Point3d(x, y, 0);
             return point;
         }
-
+        /// <summary>
+        /// 多段线缩小二分之一
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="move">位移矢量</param>
+        /// <param name="basicPt">缩放基准点</param>
+        /// <returns></returns>
+        public static Polyline ShrinkToHalf(Polyline polyline, Vector2d move, Point2d basicPt)
+        {
+            Polyline res = new Polyline();
+            double width = polyline.ConstantWidth;
+            width /= 2;
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                Point2d pt = basicPt + (polyline.GetPoint2dAt(i) - basicPt) / 2;
+                res.AddVertexAt(i, pt + move, polyline.GetBulgeAt(i), width, width);
+            }
+            return res;
+        }
 
     }
 }

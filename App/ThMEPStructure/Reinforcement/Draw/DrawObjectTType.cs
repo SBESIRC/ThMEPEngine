@@ -20,7 +20,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             double width = (thTTypeEdgeComponent.Hc2s + thTTypeEdgeComponent.Hc2l + thTTypeEdgeComponent.Bf) * scale;
             double height = (thTTypeEdgeComponent.Bw + thTTypeEdgeComponent.Hc1) * scale;
-            Point3d startPt = TableStartPt + new Vector3d(width + thTTypeEdgeComponent.Hc2s * scale, -height * 2.5, 0);
+            Point3d startPt = TableStartPt + new Vector3d((FirstRowWidth - width) / 2 + thTTypeEdgeComponent.Hc2s * scale, -FirstRowHeight + height + 1500, 0);
             var pts = new Point3dCollection
             {
                 startPt,
@@ -161,6 +161,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             foreach (var polyline in stirrup.stirrups)
             {
                 Links.Add(polyline);
+                LinksFlag.Add(1);
             }
         }
          
@@ -378,7 +379,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 double r = thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight / 2;
                 Polyline link = GangJinLink.DrawLink(points[i], points[i + 1], r, thTTypeEdgeComponent.StirrupLineWeight, scale);
                 Links.Add(link);
-
+                LinksFlag.Add(pointsFlag[i]);
             }
         }
 
@@ -401,6 +402,47 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.Stirrup = thTTypeEdgeComponent.Stirrup;
         }
 
-
+        public override void CalExplo()
+        {
+            Vector2d vec = new Vector2d(0, (Outline.GetPoint2dAt(0) - Outline.GetPoint2dAt(3)).Y + 1200);
+            Point2d centrePt = Outline.GetPoint2dAt(4) + (Outline.GetPoint2dAt(8) - Outline.GetPoint2dAt(4)) / 2;
+            bool flag = false;
+            for (int i = 0; i < Links.Count; i++)
+            {
+                Polyline tmp = new Polyline();
+                if (LinksFlag[i] == 1)
+                {
+                    if (flag)
+                    {
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
+                    }
+                    else
+                    {
+                        flag = true;
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
+                    }
+                }
+                else if (LinksFlag[i] == 2)
+                {
+                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                }
+                else if (LinksFlag[i] == 3)
+                {
+                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                }
+                else if (LinksFlag[i] == 4)
+                {
+                    if (Math.Abs((Links[i].GetPoint2dAt(1) - Links[i].GetPoint2dAt(0)).X) < 1)
+                    {
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 300), centrePt);
+                    }
+                    else
+                    {
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(300, 0), centrePt);
+                    }
+                }
+                    SmallLinks.Add(tmp);
+            }
+        }
     }
 }

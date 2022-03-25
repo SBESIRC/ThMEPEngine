@@ -21,7 +21,8 @@ namespace ThMEPStructure.Reinforcement.Draw
         public List<Curve> LinkedWallLines;
         public List<RotatedDimension> rotatedDimensions;
         public List<Polyline> Links = new List<Polyline>();
-
+        public List<int> LinksFlag = new List<int>();        //标记不同LINK的类型
+        public List<Polyline> SmallLinks = new List<Polyline>();
         public List<Point3d> points;    //纵筋位置
         //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
         protected List<int> pointsFlag = new List<int>();
@@ -52,8 +53,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                 if (point.Y > yMax) yMax = point.Y;
                 if (point.Y < yMin) yMin = point.Y;
             }
-            height = (yMax - yMin) * 3 + 1000;
-            width = Math.Max((xMax - xMin) * 1.2 + 1000, 5000);
+            height = (yMax - yMin) * 2 + 5000;
+            width = Math.Max((xMax - xMin) * 1.5 + 2500, 5000);
         }
 
 
@@ -138,7 +139,10 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// 绘制连接墙体
         /// </summary>
         public abstract void DrawWall();
-        
+        /// <summary>
+        /// 绘制爆炸图
+        /// </summary>
+        public abstract void CalExplo();
         protected abstract void CalReinforcePosition(int pointNum, Polyline polyline);
         protected abstract void CalLinkPosition();
         protected abstract void CalStirrupPosition();
@@ -214,7 +218,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             CalStirrupPosition();
             //计算拉筋位置
             CalLinkPosition();
-
+            //爆炸图
+            CalExplo();
         }
 
 
@@ -265,6 +270,12 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 link.Layer = "LINK";
                 objectCollection.Add(link);
+            }
+            //绘制爆炸图
+            foreach(var polyline in SmallLinks)
+            {
+                polyline.Layer = "LINK";
+                objectCollection.Add(polyline);
             }
 
             //轮廓、尺寸、墙体

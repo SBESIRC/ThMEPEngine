@@ -11,17 +11,17 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.Reinforcement.Draw
 {
-    class DrawObjectRectangle:DrawObjectBase
+    class DrawObjectRectangle : DrawObjectBase
     {
         ThRectangleEdgeComponent thRectangleEdgeComponent;
-        
-        
+
+
         /// <summary>
         /// 一型钢筋确定点的位置,先去掉四角的点
         /// </summary>
         /// <param name="pointNum"></param>
         /// <param name="points"></param>
-        protected override void CalReinforcePosition(int pointNum,Polyline polyline)
+        protected override void CalReinforcePosition(int pointNum, Polyline polyline)
         {
             points = new List<Point3d>();
             pointsFlag = new List<int>();
@@ -29,28 +29,28 @@ namespace ThMEPStructure.Reinforcement.Draw
             double offset = scale * (thRectangleEdgeComponent.C + 5) + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
             //根据点的对数所有点的位置确定位置
             //polyline从左上角逆时针旋转，四个点先获取
-            points=new List<Point3d>();
-            for(int i=0;i<polyline.NumberOfVertices;i++)
+            points = new List<Point3d>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
                 Point3d point = polyline.GetPoint3dAt(i);
                 Point3d tmpPoint;
                 //左上角，向右下偏移
-                if (i==0)
+                if (i == 0)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y - offset, 0);
                 }
                 //左下角，向右上偏移
-                else if(i==1)
+                else if (i == 1)
                 {
                     tmpPoint = new Point3d(point.X + offset, point.Y + offset, 0);
                 }
                 //右下角，左上偏移
-                else if(i==2)
+                else if (i == 2)
                 {
                     tmpPoint = new Point3d(point.X - offset, point.Y + offset, 0);
                 }
                 //右上角，左下偏移
-                else if(i==3)
+                else if (i == 3)
                 {
                     tmpPoint = new Point3d(point.X - offset, point.Y - offset, 0);
                 }
@@ -97,7 +97,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             double deltaY = disY / (double)(result + 1);
             double deltaX = disX / (double)(pointsPair - result + 1);
             //把一对对点的位置计算出来，计算竖直方向BW上的位置,0，3号点每次向下偏移deltaY,水平方向0，1号点每次向右偏移deltaX
-            for (int i=0;i<result;i++)
+            for (int i = 0; i < result; i++)
             {
                 Point3d tmpPoint1 = new Point3d(points[0].X, points[0].Y - deltaY, 0);
                 points.Add(tmpPoint1);
@@ -108,7 +108,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             for (int i = 0; i < pointsPair - result; i++)
             {
-                Point3d tmpPoint1 = new Point3d(points[0].X+deltaX, points[0].Y , 0);
+                Point3d tmpPoint1 = new Point3d(points[0].X + deltaX, points[0].Y, 0);
                 points.Add(tmpPoint1);
                 Point3d tmpPoint2 = new Point3d(points[1].X + deltaX, points[1].Y, 0);
                 points.Add(tmpPoint2);
@@ -127,7 +127,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         protected override void CalLinkPosition()
         {
             //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
-            for(int i=0;i<points.Count;i+=2)
+            for (int i = 0; i < points.Count; i += 2)
             {
                 if (pointsFlag[i] == 2)
                 {
@@ -147,6 +147,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 double r = thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight / 2;
                 Polyline link = GangJinLink.DrawLink(points[i], points[i + 1], r, thRectangleEdgeComponent.StirrupLineWeight, scale);
                 Links.Add(link);
+                LinksFlag.Add(pointsFlag[i]);
             }
         }
 
@@ -162,16 +163,17 @@ namespace ThMEPStructure.Reinforcement.Draw
             foreach (var polyline in stirrup.stirrups)
             {
                 Links.Add(polyline);
+                LinksFlag.Add(1);
             }
         }
 
-       
+
 
         public override void DrawOutline()
         {
             double width = thRectangleEdgeComponent.Hc * scale;
             double height = thRectangleEdgeComponent.Bw * scale;
-            Point3d startPt = TableStartPt + new Vector3d(width, -height * 2.5, 0);
+            Point3d startPt = TableStartPt + new Vector3d((FirstRowWidth - width) / 2, -FirstRowHeight + height + 1500, 0);
             var pts = new Point3dCollection
             {
                 startPt + new Vector3d(0, 0, 0) * scale,
@@ -235,7 +237,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             };
             rotatedDimensions.Add(rotatedDimension);
         }
-        
+
         public override void init(ThEdgeComponent component, string elevation, double tblRowHeight, double scale, Point3d position)
         {
             this.thRectangleEdgeComponent = component as ThRectangleEdgeComponent;
@@ -255,6 +257,28 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.Stirrup = thRectangleEdgeComponent.Stirrup;
         }
 
-        
+        public override void CalExplo()
+        {
+            Point2d p1 = Outline.GetPoint2dAt(1), p2 = Outline.GetPoint2dAt(3);
+            Vector2d vec = new Vector2d(0, p2.Y - p1.Y + 1200);
+            Point2d centrePt = p1 + (p2 - p1) / 2;
+            for (int i = 0; i < Links.Count; i++)
+            {
+                Polyline tmp = new Polyline();
+                if(LinksFlag[i] == 1)
+                {
+                    tmp = Helper.ShrinkToHalf(Links[i], vec, centrePt);
+                }
+                else if(LinksFlag[i] == 2)
+                {
+                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
+                }
+                else if(LinksFlag[i] == 3)
+                {
+                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
+                }
+                SmallLinks.Add(tmp);
+            }
+        }
     }
 }
