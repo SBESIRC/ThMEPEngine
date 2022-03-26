@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using ThCADExtension;
+using System.ComponentModel;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -27,7 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public ComponentType Type => _breaker.ComponentType;
+        public string Type => _breaker.ComponentType.GetDescription();
 
         [DisplayName("型号")]
         [Editor(typeof(ThPDSBreakerModelPropertyEditor), typeof(PropertyEditorBase))]
