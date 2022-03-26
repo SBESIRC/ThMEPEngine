@@ -1965,45 +1965,24 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             menu.Items.Add(mi);
                             mi.Header = "切换回路形式";
                             {
+                                var types = new CircuitFormInType[]
+                                {
+                                    CircuitFormInType.一路进线,
+                                    CircuitFormInType.二路进线ATSE,
+                                    CircuitFormInType.三路进线,
+                                    CircuitFormInType.集中电源,
+
+                                };
+                                foreach(var type in types)
                                 {
                                     var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "1路进线";
+                                    m.Header = type.ToString();
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.一路进线);
+                                        ThPDSProjectGraphService.UpdateFormInType(graph, vertice, type);
                                         UpdateCanvas();
                                     });
-                                }
-                                {
-                                    var m = new MenuItem();
                                     mi.Items.Add(m);
-                                    m.Header = "2路进线ATSE";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.二路进线ATSE);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "3路进线TSE";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.三路进线);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "集中电源";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.集中电源);
-                                        UpdateCanvas();
-                                    });
                                 }
                             }
                         }

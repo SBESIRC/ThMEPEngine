@@ -1,11 +1,10 @@
 ﻿using System;
+using QuikGraph;
 using System.Linq;
 using TianHua.Electrical.PDS.Model;
-using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
-using TianHua.Electrical.PDS.Project.Module.Configure;
-using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -23,7 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             var target = new ThPDSProjectGraphNode();
             graph.Graph.AddVertex(target);
             //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit()};
+            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
@@ -37,12 +36,13 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="node"></param>
         /// <param name="type"></param>
         /// <exception cref="NotSupportedException"></exception>
-        public static void UpdateFormInType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormInType type)
+        public static void UpdateFormInType(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            ThPDSProjectGraphNode node, CircuitFormInType type)
         {
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
             {
                 var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
-                var edges = graph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+                var edges = graph.Edges.Where(e => e.Source.Equals(node)).ToList();
                 var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
                 var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
                 var PolesNum = "4P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -115,10 +115,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 切换回路样式
+        /// 切换回路形式
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
+        /// <param name="edge"></param>
         /// <param name="type"></param>
         public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
         {
@@ -204,7 +203,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            graph.UpdateWithNode(node , false);
+            graph.UpdateWithNode(node, false);
         }
 
         public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
