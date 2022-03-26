@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSBreakerModel;
+            var model = propertyItem.Value as ThPDSBreakerBaseModel;
             if (model != null)
             {
                 return model.AlternativeModels;

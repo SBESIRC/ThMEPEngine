@@ -1167,10 +1167,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                             {
-                                                var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.ResidualCurrentBreaker;
                                                 if (breaker != null)
                                                 {
-                                                    var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
+                                                    var vm = new Project.Module.Component.ThPDSResidualCurrentBreakerModel(breaker);
                                                     cb += () => UpdatePropertyGrid(vm);
                                                     render += () =>
                                                     {

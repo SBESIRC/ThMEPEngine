@@ -1,117 +1,73 @@
-﻿using System;
+﻿using HandyControl.Controls;
+using System.Collections.Generic;
 using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     /// <summary>
     /// 剩余电流断路器（带漏电保护功能的断路器）
     /// </summary>
-    public class ThPDSResidualCurrentBreakerModel : NotifyPropertyChangedBase
+    public class ThPDSResidualCurrentBreakerModel : ThPDSBreakerBaseModel
     {
-        private readonly ResidualCurrentBreaker _rccb;
-
-        public ThPDSResidualCurrentBreakerModel(ResidualCurrentBreaker breaker)
+        public ThPDSResidualCurrentBreakerModel(BreakerBaseComponent component) : base(component)
         {
-            _rccb = breaker;
+
         }
 
-        [ReadOnly(true)]
-        [Browsable(false)]
-        [DisplayName("内容")]
-        public string Content => _rccb.Content;
-
-        [ReadOnly(true)]
-        [DisplayName("元器件类型")]
-        public ComponentType Type => _rccb.ComponentType;
-
-        [DisplayName("型号")]
-        public BreakerModel Model
+        private ResidualCurrentBreaker RCBreaker
         {
-            get => _rccb.BreakerType;
-            set
+            get
             {
-                _rccb.SetModel(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("壳架规格")]
-        public string FrameSpecifications
-        {
-            get => _rccb.FrameSpecifications;
-            set
-            {
-                _rccb.SetFrameSpecification(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("极数")]
-        public string PolesNum
-        {
-            get => _rccb.PolesNum;
-            set
-            {
-                _rccb.SetPolesNum(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("额定电流")]
-        public string RatedCurrent
-        {
-            get => _rccb.RatedCurrent;
-            set
-            {
-                _rccb.SetRatedCurrent(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("脱扣器类型")]
-        public string TripUnitType
-        {
-            get => _rccb.TripUnitType;
-            set
-            {
-                _rccb.SetTripDevice(value);
-                OnPropertyChanged();
+                return _breaker as ResidualCurrentBreaker;
             }
         }
 
         [DisplayName("RCD类型")]
+        [Editor(typeof(ThPDSBreakerRCDTypePropertyEditor), typeof(PropertyEditorBase))]
         public RCDType RCDType
         {
-            get => _rccb.RCDType;
+            get => RCBreaker.RCDType;
             set
             {
-                _rccb.SetRCDType(value);
+                RCBreaker.SetRCDType(value);
                 OnPropertyChanged();
             }
         }
 
         [DisplayName("剩余电流动作")]
+        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public ResidualCurrentSpecification ResidualCurrent
         {
-            get => _rccb.ResidualCurrent;
+            get => RCBreaker.ResidualCurrent;
             set
             {
-                _rccb.ResidualCurrent = value;
+                RCBreaker.ResidualCurrent = value;
                 OnPropertyChanged();
             }
         }
 
-        private void OnPropertyChanged()
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<RCDType> AlternativeRCDTypes
         {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(Content));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(RatedCurrent));
-            OnPropertyChanged(nameof(TripUnitType));
-            OnPropertyChanged(nameof(FrameSpecifications));
+            get => RCBreaker.GetRCDTypes();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<ResidualCurrentSpecification> AlternativeResidualCurrents
+        {
+            get => RCBreaker.GetResidualCurrents();
+        }
+
+        protected override void OnPropertyChanged()
+        {
+            base.OnPropertyChanged();
+            OnPropertyChanged(nameof(RCDType));
+            OnPropertyChanged(nameof(ResidualCurrent));
         }
     }
 }

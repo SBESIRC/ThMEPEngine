@@ -72,7 +72,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改级数
         /// </summary>
         /// <param name="polesNum"></param>
-        public void SetPolesNum(string polesNum)
+        public override void SetPolesNum(string polesNum)
         {
             if (Breakers.Any(o => o.Poles == polesNum 
             && o.Model == BreakerType
@@ -93,7 +93,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-        public List<string> GetPolesNums()
+        public override List<string> GetPolesNums()
         {
             return AlternativePolesNum;
         }
@@ -102,7 +102,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改脱扣器类型
         /// </summary>
         /// <param name="tripDevice"></param>
-        public void SetTripDevice(string tripDevice)
+        public override void SetTripDevice(string tripDevice)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == BreakerType
@@ -123,7 +123,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-        public List<string> GetTripDevices()
+        public override List<string> GetTripDevices()
         {
             return AlternativeTripDevice;
         }
@@ -132,7 +132,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改额定电流
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public void SetRatedCurrent(string ratedCurrentStr)
+        public override void SetRatedCurrent(string ratedCurrentStr)
         {
             var ratedCurrent = double.Parse(ratedCurrentStr);
             if (Breakers.Any(o => o.Poles ==  PolesNum
@@ -154,7 +154,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-        public List<string> GetRatedCurrents()
+        public override List<string> GetRatedCurrents()
         {
             return AlternativeRatedCurrent;
         }
@@ -163,7 +163,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改壳架规格
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public void SetFrameSpecification(string frameSpecifications)
+        public override void SetFrameSpecification(string frameSpecifications)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == BreakerType
@@ -184,7 +184,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-        public List<string> GetFrameSpecifications()
+        public override List<string> GetFrameSpecifications()
         {
             return AlternativeFrameSpecifications;
         }
@@ -193,7 +193,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改型号
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public void SetModel(BreakerModel model)
+        public override void SetModel(BreakerModel model)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == model
@@ -214,7 +214,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-        public List<BreakerModel> GetModels()
+        public override List<BreakerModel> GetModels()
         {
             return AlternativeModel;
         }

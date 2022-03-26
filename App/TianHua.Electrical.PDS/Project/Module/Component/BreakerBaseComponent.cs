@@ -66,5 +66,42 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 标签
         /// </summary>
         public abstract string Content { get; }
+
+        /// <summary>
+        /// 设置级数
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public abstract void SetPolesNum(string polesNum);
+        public abstract List<string> GetPolesNums();
+
+
+        /// <summary>
+        /// 设置脱扣器
+        /// </summary>
+        /// <param name="tripDevice"></param>
+        public abstract void SetTripDevice(string tripDevice);
+        public abstract List<string> GetTripDevices();
+
+
+        /// <summary>
+        /// 设置额定电流
+        /// </summary>
+        /// <param name="ratedCurrentStr"></param>
+        public abstract void SetRatedCurrent(string ratedCurrentStr);
+        public abstract List<string> GetRatedCurrents();
+
+        /// <summary>
+        /// 设置壳架规格
+        /// </summary>
+        /// <param name="frameSpecifications"></param>
+        public abstract void SetFrameSpecification(string frameSpecifications);
+        public abstract List<string> GetFrameSpecifications();
+
+        /// <summary>
+        /// 设置型号
+        /// </summary>
+        /// <param name="model"></param>
+        public abstract void SetModel(BreakerModel model);
+        public abstract List<BreakerModel> GetModels();
     }
 }

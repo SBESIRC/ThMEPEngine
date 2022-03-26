@@ -1,145 +1,15 @@
-﻿using HandyControl.Controls;
-using System.Collections.Generic;
-using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
-using TianHua.Electrical.PDS.Project.Module.Component;
-using TianHua.Electrical.PDS.UI.Editors;
+﻿using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
-    public class ThPDSBreakerModel : NotifyPropertyChangedBase
+    /// <summary>
+    /// 断路器
+    /// </summary>
+    public class ThPDSBreakerModel : ThPDSBreakerBaseModel
     {
-        private readonly Breaker _breaker;
-
-        public ThPDSBreakerModel(Breaker breaker)
+        public ThPDSBreakerModel(BreakerBaseComponent component) : base(component)
         {
-            _breaker = breaker;
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        [DisplayName("内容")]
-        public string Content => _breaker.Content;
-
-        [ReadOnly(true)]
-        [DisplayName("元器件类型")]
-        public ComponentType Type => _breaker.ComponentType;
-
-        [DisplayName("型号")]
-        [Editor(typeof(ThPDSBreakerModelPropertyEditor), typeof(PropertyEditorBase))]
-        public BreakerModel Model
-        {
-            get => _breaker.BreakerType;
-            set
-            {
-                _breaker.SetModel(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("壳架规格")]
-        [Editor(typeof(ThPDSBreakerFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
-        public string FrameSpecifications
-        {
-            get => _breaker.FrameSpecifications;
-            set
-            {
-                _breaker.SetFrameSpecification(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("极数")]
-        [Editor(typeof(ThPDSBreakerPolesNumPropertyEditor), typeof(PropertyEditorBase))]
-        public string PolesNum
-        {
-            get => _breaker.PolesNum;
-            set
-            {
-                _breaker.SetPolesNum(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("额定电流")]
-        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
-        public string RatedCurrent
-        {
-            get => _breaker.RatedCurrent;
-            set
-            {
-                _breaker.SetRatedCurrent(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("脱扣器类型")]
-        [Editor(typeof(ThPDSBreakerTripDevicePropertyEditor), typeof(PropertyEditorBase))]
-        public string TripUnitType
-        {
-            get => _breaker.TripUnitType;
-            set
-            {
-                _breaker.SetTripDevice(value);
-                OnPropertyChanged();
-            }
-        }
-
-        [DisplayName("附件")]
-        public string Appendix
-        {
-            get => _breaker.Appendix;
-            set
-            {
-                _breaker.Appendix = value;
-                OnPropertyChanged(nameof(Appendix));
-            }
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public List<BreakerModel> AlternativeModels
-        {
-            get => _breaker.GetModels();
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public List<string> AlternativePolesNums
-        {
-            get => _breaker.GetPolesNums();
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public List<string> AlternativeRatedCurrents
-        {
-            get => _breaker.GetRatedCurrents();
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public List<string> AlternativeTripDevices
-        {
-            get => _breaker.GetTripDevices();
-        }
-
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public List<string> AlternativeFrameSpecifications
-        {
-            get => _breaker.GetFrameSpecifications();
-        }
-
-        private void OnPropertyChanged()
-        {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(Content));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(RatedCurrent));
-            OnPropertyChanged(nameof(TripUnitType));
-            OnPropertyChanged(nameof(FrameSpecifications));
+            //
         }
     }
 }

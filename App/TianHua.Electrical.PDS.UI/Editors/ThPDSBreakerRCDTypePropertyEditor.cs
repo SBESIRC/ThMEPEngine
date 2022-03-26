@@ -1,32 +1,30 @@
-﻿using System.Windows;
-using System.Collections.Generic;
+﻿using System;
+using System.Windows;
+using System.Collections;
+using HandyControl.Controls;
 using System.Windows.Controls.Primitives;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
-using HandyControl.Controls;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {
-    public class ThPDSBreakerPolesNumPropertyEditor : PropertyEditorBase
+    public class ThPDSBreakerRCDTypePropertyEditor : PropertyEditorBase
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox
         {
             IsEnabled = !propertyItem.IsReadOnly,
-            ItemsSource = GetItemsSource(propertyItem)
+            ItemsSource = GetItemsSource(propertyItem),
         };
 
         public override DependencyProperty GetDependencyProperty() => Selector.SelectedValueProperty;
 
-        private List<string> GetItemsSource(PropertyItem propertyItem)
+        private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSBreakerBaseModel;
+            var model = propertyItem.Value as ThPDSResidualCurrentBreakerModel;
             if (model != null)
             {
-                return model.AlternativePolesNums;
+                return model.AlternativeRCDTypes;
             }
-            else
-            {
-                return new List<string> { model.PolesNum };
-            }
+            return Enum.GetValues(propertyItem.PropertyType);
         }
     }
 }
