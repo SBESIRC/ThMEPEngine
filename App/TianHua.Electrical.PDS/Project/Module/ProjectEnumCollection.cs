@@ -260,4 +260,46 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         JR20,
     }
+
+    /// <summary>
+    /// 箱体尺寸
+    /// </summary>
+    public enum BoxSize
+    {
+        [Description("非标")] 
+        Non_Standard = 0,
+        [Description("PZ30")]
+        PZ30 = 1,
+        [Description("400Wx250Hx150D")]
+        LowHeight1 = 2,
+        [Description("500Wx250Hx150D")]
+        LowHeight2 = 3,
+        [Description("500Wx600Hx300D")]
+        LowHeight3 = 4,
+        [Description("600Wx400Hx250D")]
+        LowHeight4 = 5,
+        [Description("600Wx800Hx400D")]
+        LowHeight5 = 6,
+        [Description("600Wx1200Hx400D")]
+        HighHeight1 = 7,
+        [Description("600Wx1600Hx400D")]
+        HighHeight2 = 8,
+        [Description("800Wx1600Hx400D")]
+        HighHeight3 = 9,
+        [Description("800Wx1800Hx400D")]
+        HighHeight4 = 10,
+    }
+
+    /// <summary>
+    /// 安装方式
+    /// </summary>
+    public enum BoxInstallationType
+    {
+        [Description("挂墙明装")]
+        挂墙明装,
+        [Description("落地安装，基础高300")]
+        落地安装,
+        [Description("嵌墙明装")]
+        嵌墙明装,
+    }
 }

@@ -42,19 +42,32 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public PhaseSequence PhaseSequence { get; set; }
 
-        /// <summary>
-        /// 是否启用浪涌保护器
-        /// </summary>
-        public bool SurgeProtectionEnable { get; set; }
-
         public SurgeProtectionDeviceType SurgeProtection { get; set; }
+
+        /// <summary>
+        /// 箱体尺寸
+        /// </summary>
+        public BoxSize BoxSize { get; set; }
+
+        /// <summary>
+        /// 配电箱安装方式
+        /// </summary>
+        public BoxInstallationType BoxInstallationType { get; set; }
 
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
-            SurgeProtectionEnable = false;
             SurgeProtection = SurgeProtectionDeviceType.None;
+            BoxSize = BoxSize.Non_Standard;
+            if(Convert.ToUInt32(BoxSize) > 6)
+            {
+                BoxInstallationType = BoxInstallationType.落地安装;
+            }
+            else
+            {
+                BoxInstallationType = BoxInstallationType.挂墙明装;
+            }
         }
     }
 }
