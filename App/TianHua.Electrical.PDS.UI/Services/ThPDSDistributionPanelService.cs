@@ -7,13 +7,13 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Converters;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
@@ -32,63 +32,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
         public void Execute(object parameter)
         {
             cb();
-        }
-    }
-    public class NotConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return !((bool)value);
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class NormalValueConverter : IValueConverter
-    {
-        readonly Func<object, object> f;
-        public NormalValueConverter(Func<object, object> f)
-        {
-            if (f is null) throw new ArgumentNullException();
-            this.f = f;
-        }
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return f(value);
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class EqualsThenNotVisibeConverter : IValueConverter
-    {
-        object target;
-        public EqualsThenNotVisibeConverter(object target)
-        {
-            this.target = target;
-        }
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Equals(value, target) ? Visibility.Collapsed : Visibility.Visible;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class GlyphsUnicodeStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var s = value?.ToString();
-            if (string.IsNullOrEmpty(s)) return "空";
-            return s;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
         }
     }
     public class COR
@@ -1899,7 +1842,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     CircuitFormOutType.双速电动机_分立元件detailYY,
                                     CircuitFormOutType.双速电动机_分立元件YY,
                                 };
-                                foreach(var type in types)
+                                foreach (var type in types)
                                 {
                                     var m = new MenuItem();
                                     m.Header = type.GetEnumDescription();
@@ -1925,7 +1868,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     CircuitFormInType.集中电源,
 
                                 };
-                                foreach(var type in types)
+                                foreach (var type in types)
                                 {
                                     var m = new MenuItem();
                                     m.Header = type.ToString();
