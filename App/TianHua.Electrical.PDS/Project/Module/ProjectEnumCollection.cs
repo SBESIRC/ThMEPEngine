@@ -267,27 +267,27 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum BoxSize
     {
         [Description("非标")] 
-        Non_Standard = 0,
+        Non_Standard = 1,
         [Description("PZ30")]
-        PZ30 = 1,
+        PZ30 = 2,
         [Description("400Wx250Hx150D")]
-        LowHeight1 = 2,
+        LowHeight1 = 3,
         [Description("500Wx250Hx150D")]
-        LowHeight2 = 3,
+        LowHeight2 = 4,
         [Description("500Wx600Hx300D")]
-        LowHeight3 = 4,
+        LowHeight3 = 5,
         [Description("600Wx400Hx250D")]
-        LowHeight4 = 5,
+        LowHeight4 = 6,
         [Description("600Wx800Hx400D")]
-        LowHeight5 = 6,
+        LowHeight5 = 7,
         [Description("600Wx1200Hx400D")]
-        HighHeight1 = 7,
+        HighHeight1 = 8,
         [Description("600Wx1600Hx400D")]
-        HighHeight2 = 8,
+        HighHeight2 = 9,
         [Description("800Wx1600Hx400D")]
-        HighHeight3 = 9,
+        HighHeight3 = 10,
         [Description("800Wx1800Hx400D")]
-        HighHeight4 = 10,
+        HighHeight4 = 11,
     }
 
     /// <summary>
@@ -296,10 +296,10 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum BoxInstallationType
     {
         [Description("挂墙明装")]
-        挂墙明装,
+        挂墙明装 = 1,
         [Description("落地安装，基础高300")]
-        落地安装,
+        落地安装 = 2,
         [Description("嵌墙明装")]
-        嵌墙明装,
+        嵌墙明装 = 3,
     }
 }

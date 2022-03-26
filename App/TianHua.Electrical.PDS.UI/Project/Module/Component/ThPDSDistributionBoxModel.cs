@@ -85,5 +85,29 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertyChanged(nameof(Description));
             }
         }
+
+        [DisplayName("箱体尺寸")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<BoxSize>), typeof(PropertyEditorBase))]
+        public BoxSize BoxSize
+        {
+            get => _node.Details.BoxSize;
+            set
+            {
+                _node.Details.BoxSize = value;
+                OnPropertyChanged(nameof(BoxSize));
+            }
+        }
+
+        [DisplayName("安装方式")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<BoxInstallationType>), typeof(PropertyEditorBase))]
+        public BoxInstallationType BoxInstallationType
+        {
+            get => _node.Details.BoxInstallationType;
+            set
+            {
+                _node.Details.BoxInstallationType = value;
+                OnPropertyChanged(nameof(BoxInstallationType));
+            }
+        }
     }
 }
