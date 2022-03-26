@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Collections;
-using HandyControl.Controls;
 using System.Windows.Controls.Primitives;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
+using HandyControl.Controls;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
-using HandyControl.Controls;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
+using HandyControl.Controls;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {

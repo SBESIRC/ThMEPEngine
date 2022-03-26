@@ -1,9 +1,9 @@
-﻿using HandyControl.Controls;
+﻿using System.ComponentModel;
 using System.Collections.Generic;
-using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
