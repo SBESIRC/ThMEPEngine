@@ -9,8 +9,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new NumericUpDown
         {
-            IsReadOnly = propertyItem.IsReadOnly,
+            DecimalPlaces = 2,
             VerifyFunc = VerifyFunc,
+            IsReadOnly = propertyItem.IsReadOnly,
         };
 
         public override DependencyProperty GetDependencyProperty() => NumericUpDown.ValueProperty;
