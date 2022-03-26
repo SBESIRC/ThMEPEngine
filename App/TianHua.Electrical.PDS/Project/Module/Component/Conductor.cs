@@ -38,12 +38,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
-                        this.conductorUse = config.FireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.FireDistributionBranchCircuiCables;
                         IsWire  = false;
                     }
                     else
                     {
-                        this.conductorUse = config.FireDistributionWire;
+                        this.ConductorUse = config.FireDistributionWire;
                         IsWire  = true;
                     }
                 }
@@ -51,12 +51,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
-                        this.conductorUse = config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
                         IsWire  = false;
                     }
                     else
                     {
-                        this.conductorUse = config.NonFireDistributionWire;
+                        this.ConductorUse = config.NonFireDistributionWire;
                         IsWire  = true;
                     }
 
@@ -68,12 +68,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
-                        this.conductorUse = config.FireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.FireDistributionBranchCircuiCables;
                         IsWire  = false;
                     }
                     else
                     {
-                        this.conductorUse = config.FireDistributionWire;
+                        this.ConductorUse = config.FireDistributionWire;
                         IsWire  = true;
                     }
                 }
@@ -81,12 +81,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
-                        this.conductorUse = config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
                         IsWire  = false;
                     }
                     else
                     {
-                        this.conductorUse = config.NonFireDistributionWire;
+                        this.ConductorUse = config.NonFireDistributionWire;
                         IsWire  = true;
                     }
                 }
@@ -97,19 +97,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase == ThPDSPhase.一相)
                     {
-                        this.conductorUse = config.FireDistributionWire;
+                        this.ConductorUse = config.FireDistributionWire;
                     }
                     else
                     {
-                        this.conductorUse = config.FireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.FireDistributionBranchCircuiCables;
                     }
                 }
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.conductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse=config.NonFireDistributionWire;
                     else
-                        this.conductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.DistributionPanel)
@@ -118,17 +118,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase == ThPDSPhase.一相)
                     {
-                        this.conductorUse = config.FireDistributionWire;
+                        this.ConductorUse = config.FireDistributionWire;
                     }
                     else
-                        this.conductorUse = config.FireDistributionTrunk;
+                        this.ConductorUse = config.FireDistributionTrunk;
                 }
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.conductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse=config.NonFireDistributionWire;
                     else
-                        this.conductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.LumpedLoad)
@@ -137,22 +137,22 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     if (phase == ThPDSPhase.一相)
                     {
-                        this.conductorUse = config.FireDistributionWire;
+                        this.ConductorUse = config.FireDistributionWire;
                     }
                     else
                     {
-                        this.conductorUse = config.FireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.FireDistributionBranchCircuiCables;
                     }
                 }
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.conductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse=config.NonFireDistributionWire;
                     else
-                        this.conductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
                 }
             }
-            if (conductorUse.ConductorMaterial.Contains('N'))
+            if (ConductorUse.ConductorMaterial.Contains('N'))
             {
                 Refractory = true;
             }
@@ -283,7 +283,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             if (viaConduit)
             {
-                if (conductorUse.IsSpecialConductorType)
+                if (ConductorUse.IsSpecialConductorType)
                 {
                     this.PipeDiameter = 0;
                     Pipelaying = Pipelaying.E;
@@ -340,17 +340,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
         //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
         //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
-        public string Content { get { return $"{conductorUse.Content}-{ConductorInfo}-{LayingTyle}"; } }
+        public string Content { get { return $"{ConductorUse.Content}-{ConductorInfo}-{LayingTyle}"; } }
 
         /// <summary>
         /// 燃烧特性代号
         /// </summary>
-        public string ConductorMaterial { get { return conductorUse.ConductorMaterial; } }
+        public string ConductorMaterial { get { return ConductorUse.ConductorMaterial; } }
 
         /// <summary>
         /// 材料特征及结构
         /// </summary>
-        public string OuterSheathMaterial { get { return conductorUse.OuterSheathMaterial.GetDescription(); } }
+        public string OuterSheathMaterial { get { return ConductorUse.OuterSheathMaterial.GetDescription(); } }
 
         /// <summary>
         /// 电缆根数
@@ -420,7 +420,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                var ViaConduitStr = conductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial + PipeDiameter + "-" + Pipelaying;
+                var ViaConduitStr = ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial + PipeDiameter + "-" + Pipelaying;
                 if (ViaCableTray && ViaConduit)
                 {
                     return $"{this.BridgeLaying}/ {ViaConduitStr }";
@@ -511,7 +511,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体材质
         /// </summary>
-        private ConductorUse conductorUse { get; set; }
+        private ConductorUse ConductorUse { get; set; }
 
         /// <summary>
         /// 桥架敷设方式
