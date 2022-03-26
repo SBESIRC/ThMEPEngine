@@ -120,7 +120,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="type"></param>
-        public static void SwitchFormOutType(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
+        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
         {
             if (!edge.Details.CircuitForm.CircuitFormType.Equals(type))
             {
