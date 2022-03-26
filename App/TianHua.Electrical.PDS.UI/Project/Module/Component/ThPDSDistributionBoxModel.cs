@@ -7,6 +7,9 @@ using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 配电箱
+    /// </summary>
     public class ThPDSDistributionBoxModel : NotifyPropertyChangedBase
     {
         private readonly ThPDSProjectGraphNode _node;
@@ -35,13 +38,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("相数")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSPhase>), typeof(PropertyEditorBase))]
         public ThPDSPhase Phase
         {
             get => _node.Load.Phase;
         }
 
         [DisplayName("需要系数")]
-        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
             get => _node.Load.DemandFactor;
@@ -53,7 +57,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率因数")]
-        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
             get => _node.Load.PowerFactor;
