@@ -14,6 +14,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class ResidualCurrentBreaker : BreakerBaseComponent
     {
         /// <summary>
+        /// 标签
+        /// </summary>
+        public override string Content
+        {
+            get
+            {
+                return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}/{RCDType}{ResidualCurrent.GetDescription()}";
+            }
+        }
+
+        /// <summary>
         /// 断路器
         /// </summary>
         /// <param name="calculateCurrent">计算电流</param>
@@ -108,7 +119,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
             }
         }
-
         public List<string> GetPolesNums()
         {
             return AlternativePolesNum;
@@ -196,7 +206,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
             }
         }
-
         public List<string> GetRatedCurrents()
         {
             return AlternativeRatedCurrent;
@@ -283,7 +292,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
             }
         }
-
         public List<BreakerModel> GetModels()
         {
             return AlternativeModel;
@@ -297,7 +305,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             RCDType = type;
         }
-
         public List<RCDType> GetRCDTypes()
         {
             return AlternativeRCDTypes;
@@ -311,7 +318,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             ResidualCurrent = type;
         }
-
         public List<ResidualCurrentSpecification> GetResidualCurrents()
         {
             return AlternativeResidualCurrents;
@@ -321,10 +327,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 瞬时脱扣器类型
         /// </summary>
         private string Characteristics { get; set; }
-
         private List<BreakerComponentInfo> Breakers { get; set; }
-        //RCBO63-C40/1P+N/A30mA
-        public string Content { get { return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}/{RCDType}{ResidualCurrent.GetDescription()}"; } }
 
         /// <summary>
         /// 是否是发动机负载
@@ -332,48 +335,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private bool IsMotor { get; }
 
         /// <summary>
-        /// 模型
-        /// </summary>
-        public BreakerModel BreakerType { get; set; }
-
-        /// <summary>
-        /// 壳架规格
-        /// </summary>
-        public string FrameSpecifications { get; set; }
-
-        /// <summary>
-        /// 极数
-        /// </summary>
-        public string PolesNum { get; set; }
-
-        /// <summary>
-        /// 额定电流
-        /// </summary>
-        public string RatedCurrent { get; set; }
-
-        /// <summary>
-        /// 脱扣器类型
-        /// </summary>
-        public string TripUnitType { get; set; }
-
-        /// <summary>
         /// RCD类型
         /// </summary>
         public RCDType RCDType { get; set; }
+        private List<RCDType> AlternativeRCDTypes { get; set; }
 
         /// <summary>
         /// 剩余电流动作
         /// </summary>
         public ResidualCurrentSpecification ResidualCurrent { get; set; }
-
-        private List<string> AlternativeRatedCurrent { get; }
-
-        private List<string> AlternativePolesNum { get; }
-
-        private List<string> AlternativeTripDevice { get; }
-        private List<string> AlternativeFrameSpecifications { get; }
-        private List<BreakerModel> AlternativeModel { get; }
-        private List<RCDType> AlternativeRCDTypes { get; set; }
         private List<ResidualCurrentSpecification> AlternativeResidualCurrents { get; set; }
 
         public override double GetCascadeRatedCurrent()

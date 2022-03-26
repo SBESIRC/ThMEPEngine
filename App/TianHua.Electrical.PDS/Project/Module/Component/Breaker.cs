@@ -8,19 +8,22 @@ using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
-    /// 断路器（抽象基类）
-    /// </summary>
-    public abstract class BreakerBaseComponent : PDSBaseComponent
-    {
-
-    }
-
-    /// <summary>
     /// 断路器
     /// </summary>
     [CascadeComponent]
     public class Breaker : BreakerBaseComponent
     {
+        /// <summary>
+        /// 标签
+        /// </summary>
+        public override string Content
+        {
+            get
+            {
+                return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}";
+            }
+        }
+
         /// <summary>
         /// 断路器
         /// </summary>
@@ -90,7 +93,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-
         public List<string> GetPolesNums()
         {
             return AlternativePolesNum;
@@ -121,7 +123,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-
         public List<string> GetTripDevices()
         {
             return AlternativeTripDevice;
@@ -153,7 +154,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-
         public List<string> GetRatedCurrents()
         {
             return AlternativeRatedCurrent;
@@ -184,7 +184,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-
         public List<string> GetFrameSpecifications()
         {
             return AlternativeFrameSpecifications;
@@ -215,74 +214,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 TripUnitType =breaker.TripDevice;
             }
         }
-
         public List<BreakerModel> GetModels()
         {
             return AlternativeModel;
         }
 
         /// <summary>
-        /// 瞬时脱扣器类型
+        /// 级联
         /// </summary>
-        private string Characteristics { get; set;}
-
-        private List<BreakerComponentInfo> Breakers { get; set; }
-
-        public string Content { get { return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}"; } }
-
-        /// <summary>
-        /// 型号
-        /// </summary>
-        public BreakerModel BreakerType { get; set; }
-
-        /// <summary>
-        /// 壳架规格
-        /// </summary>
-        public string FrameSpecifications { get; set; }
-
-        /// <summary>
-        /// 极数
-        /// </summary>
-        public string PolesNum { get; set; }
-
-        /// <summary>
-        /// 额定电流
-        /// </summary>
-        public string RatedCurrent { get; set; }
-
-        /// <summary>
-        /// 脱扣器类型
-        /// </summary>
-        public string TripUnitType { get; set; }
-
-        /// <summary>
-        /// 附件
-        /// </summary>
-        public string Appendix { get; set; }
-
-        /// <summary>
-        /// 额定电流
-        /// </summary>
-        private List<string> AlternativeRatedCurrent { get; }
-
-        /// <summary>
-        /// 级数
-        /// </summary>
-        private List<string> AlternativePolesNum { get; }
-
-        /// <summary>
-        /// 脱扣器类型
-        /// </summary>
-        private List<string> AlternativeTripDevice { get; }
-        /// <summary>
-        /// 壳架规格
-        /// </summary>
-        private List<string> AlternativeFrameSpecifications { get; }
-        /// <summary>
-        /// 模型
-        /// </summary>
-        private List<BreakerModel> AlternativeModel { get; }
-
+        /// <returns></returns>
         public override double GetCascadeRatedCurrent()
         {
             if (double.TryParse(RatedCurrent, out double result))
@@ -291,5 +231,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             return 0;
         }
+
+        /// <summary>
+        /// 瞬时脱扣器类型
+        /// </summary>
+        private string Characteristics { get; set; }
+
+        /// <summary>
+        /// 断路器信息
+        /// </summary>
+        private List<BreakerComponentInfo> Breakers { get; set; }
     }
 }
