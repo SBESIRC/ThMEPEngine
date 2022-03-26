@@ -7,22 +7,22 @@ namespace TianHua.Electrical.PDS.Model
     /// </summary>
     public enum ThPDSCircuitType
     {
-        [Description("照明回路")]
-        Lighting,
-        [Description("插座回路")]
-        Socket,
-        [Description("动力回路")]
-        PowerEquipment,
-        [Description("应急照明回路")]
-        EmergencyLighting,
-        [Description("消防动力回路")]
-        EmergencyPowerEquipment,
-        [Description("消防应急照明回路")]
-        FireEmergencyLighting,
-        [Description("控制回路")]
-        Control,
         [Description("未知")]
-        None,
+        None = 0,
+        [Description("照明回路")]
+        Lighting = 1,
+        [Description("插座回路")]
+        Socket = 2,
+        [Description("动力回路")]
+        PowerEquipment = 3,
+        [Description("应急照明回路")]
+        EmergencyLighting = 4,
+        [Description("消防动力回路")]
+        EmergencyPowerEquipment = 5,
+        [Description("消防应急照明回路")]
+        FireEmergencyLighting = 6,
+        [Description("控制回路")]
+        Control = 7,
     }
 
     /// <summary>

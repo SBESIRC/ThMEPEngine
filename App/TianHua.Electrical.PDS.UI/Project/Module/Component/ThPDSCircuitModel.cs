@@ -26,6 +26,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("回路形式")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSCircuitType>), typeof(PropertyEditorBase))]
         public ThPDSCircuitType CircuitType
         {
             get => _edge.Target.Load.CircuitType;
@@ -56,6 +57,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("负载类型")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<PDSNodeType>), typeof(PropertyEditorBase))]
         public PDSNodeType LoadType
         {
             get => _edge.Target.Type;

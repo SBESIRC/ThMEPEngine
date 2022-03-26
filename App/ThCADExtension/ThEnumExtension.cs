@@ -33,6 +33,31 @@ namespace ThCADExtension
             return enumerationValue.ToString();
         }
 
+        // https://stackoverflow.com/questions/15567913/wpf-how-to-bind-an-enum-with-description-to-a-combobox
+        public static string GetEnumDescription(this Enum enumObj)
+        {
+            FieldInfo fieldInfo = enumObj.GetType().GetField(enumObj.ToString());
+            object[] attribArray = fieldInfo.GetCustomAttributes(false);
+            if (attribArray.Length == 0)
+            {
+                return enumObj.ToString();
+            }
+            else
+            {
+                DescriptionAttribute attrib = null;
+                foreach (var att in attribArray)
+                {
+                    if (att is DescriptionAttribute)
+                        attrib = att as DescriptionAttribute;
+                }
+                if (attrib != null)
+                {
+                    return attrib.Description;
+                }
+                return enumObj.ToString();
+            }
+        }
+
         public static T GetEnumName<T>(this string description)
         {
             Type _type = typeof(T);
