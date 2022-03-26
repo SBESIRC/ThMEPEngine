@@ -1,6 +1,7 @@
 ﻿using System;
 using QuikGraph;
 using System.Linq;
+using ThCADExtension;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -1654,6 +1655,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "分配负载";
                                 m.Command = new PDSCommand(() =>
                                 {
+                                    ThPDSProjectGraphService.DistributeLoad(graph, edge);
                                     UpdateCanvas();
                                 });
                             }
@@ -1663,8 +1665,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "删除";
                                 m.Command = new PDSCommand(() =>
                                 {
-                                    var vertice = graph.Vertices.ToList()[sel.Id];
-                                    PDS.Project.Module.ThPDSProjectGraphService.Delete(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, edge);
+                                    ThPDSProjectGraphService.DeleteCircuit(graph, edge);
                                     UpdateCanvas();
                                 });
                             }
@@ -1888,75 +1889,26 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
                             {
+                                var types = new CircuitFormOutType[]
+                                {
+                                    CircuitFormOutType.常规,
+                                    CircuitFormOutType.漏电,
+                                    CircuitFormOutType.电动机_分立元件,
+                                    CircuitFormOutType.电动机_CPS,
+                                    CircuitFormOutType.双速电动机_CPSdetailYY,
+                                    CircuitFormOutType.双速电动机_分立元件detailYY,
+                                    CircuitFormOutType.双速电动机_分立元件YY,
+                                };
+                                foreach(var type in types)
                                 {
                                     var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "常规";
+                                    m.Header = type.GetEnumDescription();
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.常规);
+                                        ThPDSProjectGraphService.AddCircuit(graph, vertice, type);
                                         UpdateCanvas();
                                     });
-                                }
-                                {
-                                    var m = new MenuItem();
                                     mi.Items.Add(m);
-                                    m.Header = "漏电";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.漏电);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（分立）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_分立元件);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（CPS）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_CPS);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（Δ/Y）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_CPSdetailYY);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（双速Δ/YY）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件detailYY);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（双速Y/Y）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件YY);
-                                        UpdateCanvas();
-                                    });
                                 }
                             }
                         }

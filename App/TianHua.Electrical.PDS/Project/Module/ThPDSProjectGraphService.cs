@@ -16,17 +16,18 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="type"></param>
-        public static void AddCircuit(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph, 
+            ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
             //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
-            graph.Graph.AddVertex(target);
+            graph.AddVertex(target);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
-            graph.Graph.AddEdge(newEdge);
+            graph.AddEdge(newEdge);
         }
 
         /// <summary>
@@ -129,14 +130,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 锁定回路（解锁回路）
+        /// 分配负载
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <param name="doLock"></param>
-        public static void Lock(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, bool doLock)
+        /// <param name="edge"></param>
+        public static void DistributeLoad(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
-            edge.Details.CircuitLock = doLock;
+            //
         }
 
         /// <summary>
@@ -144,11 +145,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void Delete(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void DeleteCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph, 
+            ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
             //所以删除后，后面的负载会失去原有的回路,需要人再去分配
-            graph.Graph.RemoveEdge(edge);
+            graph.RemoveEdge(edge);
         }
 
         /// <summary>
