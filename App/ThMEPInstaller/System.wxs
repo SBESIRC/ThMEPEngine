@@ -11,6 +11,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" Guid="{F18B5C4E-38F0-4DAF-8DD4-E1FA18FAF7B3}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Memory.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" Guid="{681893F3-A4AE-4975-86EC-8B8438C77134}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Numerics.Vectors.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" Guid="{3A86EAE5-7857-4C26-A139-3DA5B43E0BE6}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
@@ -23,6 +26,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" Guid="{9966093C-0918-4FB8-9E44-FE109CB429D7}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Memory.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Debug" Guid="{CFD58646-537B-41A5-B73D-E4EF9A3C1A26}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Numerics.Vectors.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" Guid="{40CB951E-636D-4602-ADA2-BD1CEE12EB3A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
@@ -34,6 +40,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" Guid="{75BB3E62-2C14-4FD1-8E24-99E0D07F5188}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Debug" Guid="{5594F99A-3EF9-4386-BB3C-411131BD8E4C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Numerics.Vectors.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" Guid="{20545542-66DB-4829-A18E-CBDA3392213D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
@@ -48,6 +57,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" Guid="{638C6AFF-1BC7-455D-AAB9-8C712AE2493C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Memory.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" Guid="{2F4D3E0E-A6F0-477B-A044-439FA83962C2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Numerics.Vectors.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" Guid="{08418D5F-E4EA-4995-8542-F4EF1254C14E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
@@ -59,6 +71,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" Guid="{F9C80FB7-6821-4AC2-BB24-53DB4A9B096E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Memory.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Release" Guid="{85AC5E08-51F5-456E-97E3-B6EFB1BD382B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Numerics.Vectors.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" Guid="{33826F69-4401-45C6-AD98-8702202C1D2E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
@@ -72,11 +87,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" Guid="{4CAD2FF9-DC92-47D8-ABCE-4E71788EBAB8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Memory.dll" />
             </Component>
-
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Release" Guid="{6F41254B-30F8-4B8D-9501-F7C93C582219}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Numerics.Vectors.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" Guid="{5FFAA0B3-EDD4-4103-8092-389136AD447F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
-
         </DirectoryRef>
         <?endif?>
     </Fragment>
@@ -89,6 +105,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" />
@@ -99,6 +118,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Numerics_Vectors_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Numerics_Vectors_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Numerics_Vectors_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" />
