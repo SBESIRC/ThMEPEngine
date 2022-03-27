@@ -197,6 +197,8 @@ namespace ThMEPHVAC.Model
                 var firstEndline = endline.endlines.Values.LastOrDefault();// 最后一段管段
                 foreach (var seg in endline.endlines.Values)
                 {
+                    if (seg.portNum == 0)
+                        continue;
                     if (seg.portNum == 1)
                     {
                         if (!endEndline.Equals(seg))
@@ -211,10 +213,14 @@ namespace ThMEPHVAC.Model
                     {
                         var shrinkedLine = seg.seg.GetShrinkedLine();
                         var len = firstEndline.Equals(seg) ? 1300 : 0;
-                        var portStep = isAuto ? ThMEPHVACService.RoundNum((shrinkedLine.Length - (x + 400 + 340 + len)) / (seg.portNum - 1), 100) : portParam.portInterval;
+                        var portStep = isAuto ?
+                            endEndline.Equals(seg) ?
+                            ThMEPHVACService.RoundNum((shrinkedLine.Length - (x + 400 + 340 + len)) / (seg.portNum - 1), 100) :
+                            ThMEPHVACService.RoundNum(shrinkedLine.Length / seg.portNum, 100):
+                            portParam.portInterval;
                         var dirVec = ThMEPHVACService.GetEdgeDirection(shrinkedLine);
-                        //var firstOftDis = endEndline.Equals(seg) ? 200 : portStep;末端偏移200，中间端居中
-                        var p = shrinkedLine.EndPoint - firstOftDis * dirVec;
+                        var OftDis = endEndline.Equals(seg) ? firstOftDis : (portStep / 2);//末端偏移200，中间端居中
+                        var p = shrinkedLine.EndPoint - OftDis * dirVec;
                         foreach (var port in seg.portsInfo)
                         {
                             port.position = p;

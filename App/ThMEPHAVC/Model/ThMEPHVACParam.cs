@@ -84,6 +84,7 @@ namespace ThMEPHVAC.Model
     {
         public Point3d srtPoint;
         public double portInterval; // 0->自动间距
+        public string textAirVolume;// 用于双速风量的记录
         public ThMEPHVACParam param;
         public bool verticalPipeEnable;
         public EndCompType endCompType;
@@ -116,6 +117,8 @@ namespace ThMEPHVAC.Model
         public Line lastNotRoomLine;
         public DBObjectCollection centerLines; // 在退出UI界面时搜索
         public DBObjectCollection bypassLines;
+        public DBObjectCollection roomLines;    // 用于非加压送风且进出口路由重叠时
+        public DBObjectCollection notRoomLines; // 用于非加压送风且进出口路由重叠时
         public ElevationAlignStyle roomElevationStyle;
         public ElevationAlignStyle notRoomElevationStyle;
     }
