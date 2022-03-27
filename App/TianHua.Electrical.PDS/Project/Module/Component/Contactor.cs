@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class Contactor : PDSBaseComponent
     {
         /// <summary>
-        /// 
+        /// 接触器
         /// </summary>
         /// <param name="calculateCurrent">计算电流</param>
         /// <param name="polesNum">级数</param>

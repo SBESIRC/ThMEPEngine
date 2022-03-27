@@ -46,25 +46,27 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var edges = graph.Edges.Where(e => e.Source.Equals(node)).ToList();
                 var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
                 var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
-                var PolesNum = "4P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+                var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+                var SpecialPolesNum = "4P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
                 if (node.Load.Phase == ThPDSPhase.一相)
                 {
+                    PolesNum = "1P";
                     //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
                     //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
                     if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
                     {
-                        PolesNum = "1P";
+                        SpecialPolesNum = "1P";
                     }
                     else
                     {
-                        PolesNum = "2P";
+                        SpecialPolesNum = "2P";
                     }
                 }
                 else if (node.Load.Phase == ThPDSPhase.三相)
                 {
                     if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
                     {
-                        PolesNum = "3P";
+                        SpecialPolesNum = "3P";
                     }
                 }
                 switch (type)
@@ -73,7 +75,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new OneWayInCircuit()
                             {
-                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, PolesNum)
+                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum)
                             };
                             break;
                         }
@@ -81,8 +83,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new TwoWayInCircuit()
                             {
-                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, PolesNum),
-                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
+                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
                                 transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, PolesNum)
                             };
                             break;
@@ -91,10 +93,10 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new ThreeWayInCircuit()
                             {
-                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, PolesNum),
-                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
+                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
                                 transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
-                                isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
                                 transferSwitch2 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
                             };
                             break;
@@ -103,7 +105,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new CentralizedPowerCircuit()
                             {
-                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
                             };
                             break;
                         }
