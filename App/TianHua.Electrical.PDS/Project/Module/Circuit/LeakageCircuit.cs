@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 漏电回路
     /// </summary>
+    [CircuitGroup(CircuitGroup.Group1)]
     public class LeakageCircuit : PDSBaseOutCircuit
     {
         public LeakageCircuit()

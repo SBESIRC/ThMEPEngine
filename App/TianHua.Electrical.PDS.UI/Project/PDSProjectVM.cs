@@ -34,6 +34,7 @@ namespace TianHua.Electrical.PDS.UI.Project
 
         #region ViewModel 集合
         public InformationMatchViewModel InformationMatchViewModel { get; set; } //信息匹配视图模型
+        public GlobalParameterViewModel GlobalParameterViewModel { get; set; } //全局参数视图模型
         #endregion
     }
 }

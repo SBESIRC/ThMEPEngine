@@ -77,7 +77,7 @@
       </ItemGroup>
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
-          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+          <HintPath>..\..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>
@@ -87,7 +87,7 @@
       </ItemGroup>
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
-          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+          <HintPath>..\..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>
@@ -97,7 +97,7 @@
       </ItemGroup>
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
-          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+          <HintPath>..\..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>
@@ -109,7 +109,7 @@
       </ItemGroup>
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
-          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+          <HintPath>..\..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

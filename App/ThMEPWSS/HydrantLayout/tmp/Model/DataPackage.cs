@@ -60,7 +60,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         public static ThCADCoreNTSSpatialIndex LeanWallIndex;
         public static ThCADCoreNTSSpatialIndex ParkingIndex;
         //public static ThCADCoreNTSSpatialIndex LineWallIndex;
-        
+
         //立柱起点
         public List<ThHydrantModel> FireHydrant;
         public List<ThHydrantModel> FireExtinguisher;
@@ -73,48 +73,38 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         }
     }
 
-
-    //模型偏移量
-    //class ModeOffset 
-    //{
-    //    public static List<Vector3d> FireCenter = new List<Vector3d>();
-    //}
-
-
-
-    //圆形环境
-    class CircleEnv 
-    {
     
-    
-    }
 
 
-
-    public class Info
+    class Info
     {
         //模式
+        public static int Type = 2;
         public static int Mode = 2;
+        public static bool AllowDoorInPaking = true;
 
         //搜索范围
-        public static double SearchRange = 3000;
+        public static double OriginRadius = 3000;
         public static double Radius = 3500;
         public static double SearchRadius = 2700;
 
+        //距离权重
+        public static double DistanceWeight = 0.5;
+
         //消火栓实体形状数据
-        public static double LongSide = 800;
-        public static double ShortSide = 200;
-        public static double DoorLongSide = 1200;
-        public static double DoorShortSide = 800;
-        public static double DoorOffset = 200;
         public static double VPSide = 200;
 
+        //虚假数据
+        public static double LongSide = 800;
+        public static double ShortSide = 200;
+        //public static double DoorLongSide = 1200;
+        //public static double DoorShortSide = 800;
+        //public static double DoorOffset = 200;
+       
         //灭火器实体形状数据
         public static double ExDoorSide = 500;  
         
         //其他
-        public static double ColumnAreaBound = 400000;
+        public static double ColumnAreaBound = 8000000;
     }
-
-
 }

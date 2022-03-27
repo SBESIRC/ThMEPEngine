@@ -119,7 +119,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum Pipelaying
     {
-        [Description("None")]
+        [Description("无穿管")]
         None,
         [Description("穿管明敷")]
         E,
@@ -150,6 +150,62 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// 穿管管材
+    /// </summary>
+    public enum PipeMaterial
+    {
+        [Description("None")]
+        None,
+        [Description("热镀锌低压流体输送用焊接钢管")]
+        SC,
+        [Description("碳素结构钢电线套管")]
+        MT,
+        [Description("套接紧定式钢管")]
+        JDG,
+        [Description("可挠金属电线保护套管")]
+        CP,
+        [Description("难燃（材料燃烧性能等级B1）以上硬质塑料套管")]
+        PC,
+        [Description("阻燃半硬质塑料套管")]
+        FPC,
+        [Description("塑料波纹套管")]
+        KPC
+    }
+
+    /// <summary>
+    /// 材料特征及结构
+    /// </summary>
+    public enum MaterialStructure
+    {
+        [Description("YJY")]
+        YJY,
+        [Description("BYJ")]
+        BYJ,
+        [Description("KYJY")]
+        KYJY,
+        [Description("RYJ")]
+        RYJ,
+        [Description("NG-A(BTLY)")]
+        NG_A_BTLY,
+    }
+
+    /// <summary>
+    /// 导体类型
+    /// </summary>
+    public enum ConductorType
+    {
+        非消防配电电线,
+        非消防配电电缆,
+        消防配电电线,
+        消防配电干线,
+        消防配电分支线路,
+        消防配电控制电缆,
+        非消防配电控制电缆,
+        消防控制信号软线,
+        非消防控制信号软线,
+    }
+
+    /// <summary>
     /// 断路器型号
     /// </summary>
     public enum BreakerModel
@@ -162,10 +218,88 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// RCD类型
+    /// </summary>
+    public enum RCDType
+    {
+        A,
+        AC,
+        B,
+        F,
+    }
+
+    /// <summary>
+    /// 剩余电流规格
+    /// </summary>
+    public enum ResidualCurrentSpecification
+    {
+        [Description("10mA")]
+        Specification10,
+        [Description("30mA")]
+        Specification30,
+        [Description("100mA")]
+        Specification100,
+        [Description("300mA")]
+        Specification300,
+        [Description("500mA")]
+        Specification500,
+    }
+
+    /// <summary>
     /// 接触器型号
     /// </summary>
     public enum ContactorModel
     {
         CJ20,
+    }
+
+    /// <summary>
+    /// 热继电器型号
+    /// </summary>
+    public enum ThermalRelayModel
+    {
+        JR20,
+    }
+
+    /// <summary>
+    /// 箱体尺寸
+    /// </summary>
+    public enum BoxSize
+    {
+        [Description("非标")] 
+        Non_Standard = 1,
+        [Description("PZ30")]
+        PZ30 = 2,
+        [Description("400Wx250Hx150D")]
+        LowHeight1 = 3,
+        [Description("500Wx250Hx150D")]
+        LowHeight2 = 4,
+        [Description("500Wx600Hx300D")]
+        LowHeight3 = 5,
+        [Description("600Wx400Hx250D")]
+        LowHeight4 = 6,
+        [Description("600Wx800Hx400D")]
+        LowHeight5 = 7,
+        [Description("600Wx1200Hx400D")]
+        HighHeight1 = 8,
+        [Description("600Wx1600Hx400D")]
+        HighHeight2 = 9,
+        [Description("800Wx1600Hx400D")]
+        HighHeight3 = 10,
+        [Description("800Wx1800Hx400D")]
+        HighHeight4 = 11,
+    }
+
+    /// <summary>
+    /// 安装方式
+    /// </summary>
+    public enum BoxInstallationType
+    {
+        [Description("挂墙明装")]
+        挂墙明装 = 1,
+        [Description("落地安装，基础高300")]
+        落地安装 = 2,
+        [Description("嵌墙明装")]
+        嵌墙明装 = 3,
     }
 }

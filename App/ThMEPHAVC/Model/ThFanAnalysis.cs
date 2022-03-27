@@ -191,21 +191,25 @@ namespace ThMEPHVAC.CAD
                                       bool roomEnable,
                                       bool notRoomEnable)
         {
-            if (roomEnable && notRoomEnable)
+            // 加压送风需要添加旁通后重新搜索连接件
+            if (fanParam.scenario == "消防加压送风")
             {
-                GetSpecialShapeInfo(iRoomP, roomLine, roomLines, fanParam.roomDuctSize);
-                GetSpecialShapeInfo(iNotRoomP, notRoomLine, notRoomLines, fanParam.notRoomDuctSize);
+                if (roomEnable && notRoomEnable)
+                {
+                    GetSpecialShapeInfo(iRoomP, roomLine, roomLines, fanParam.roomDuctSize);
+                    GetSpecialShapeInfo(iNotRoomP, notRoomLine, notRoomLines, fanParam.notRoomDuctSize);
+                }
+                else if (roomEnable && !notRoomEnable)
+                {
+                    GetSpecialShapeInfo(iRoomP, roomLine, roomLines, fanParam.roomDuctSize);
+                }
+                else if (!roomEnable && notRoomEnable)
+                {
+                    GetSpecialShapeInfo(iNotRoomP, notRoomLine, notRoomLines, fanParam.notRoomDuctSize);
+                }
+                else
+                    throw new NotImplementedException("未选择要生成室外侧或服务侧！！！");
             }
-            else if (roomEnable && !notRoomEnable)
-            {
-                GetSpecialShapeInfo(iRoomP, roomLine, roomLines, fanParam.roomDuctSize);
-            }
-            else if (!roomEnable && notRoomEnable)
-            {
-                GetSpecialShapeInfo(iNotRoomP, notRoomLine, notRoomLines, fanParam.notRoomDuctSize);
-            }
-            else
-                throw new NotImplementedException("未选择要生成室外侧或服务侧！！！");
         }
 
         private void PreSearchConnLines(Point3d iRoomP, 
@@ -215,23 +219,54 @@ namespace ThMEPHVAC.CAD
                                         bool roomEnable,
                                         bool notRoomEnable)
         {
+            var flag = fanParam.scenario == "消防加压送风";
+            // 加压送风需要添加旁通后重新搜索路由
             if (roomEnable && notRoomEnable)
             {
-                GetDuctInfo(iRoomP, roomLine, roomLines);
-                GetDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
+                if (flag)
+                {
+                    SearchDuctInfo(iRoomP, roomLine, roomLines);
+                    SearchDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
+                }
+                else
+                {
+                    GetDuctInfo(fanParam.roomLines, roomLines, roomLine, iRoomP);
+                    GetDuctInfo(fanParam.notRoomLines, notRoomLines, notRoomLine, iNotRoomP);
+                }
             }
             else if (roomEnable && !notRoomEnable)
             {
-                GetDuctInfo(iRoomP, roomLine, roomLines);
+                if (flag)
+                    SearchDuctInfo(iRoomP, roomLine, roomLines);
+                else
+                    GetDuctInfo(fanParam.roomLines, roomLines, roomLine, iRoomP);
             }
             else if (!roomEnable && notRoomEnable)
             {
-                GetDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
+                if (flag)
+                    SearchDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
+                else
+                    GetDuctInfo(fanParam.notRoomLines, notRoomLines, notRoomLine, iNotRoomP);
             }
             else
                 throw new NotImplementedException("未选择要生成室外侧或服务侧！！！");
         }
-
+        private void GetDuctInfo(DBObjectCollection lines, HashSet<Line> curSet, Line replaceLine, Point3d detectorP)
+        {
+            // 需要将起始线换成replaceLine
+            var detector = ThMEPHVACService.CreateDetector(detectorP, 5);
+            var index = new ThCADCoreNTSSpatialIndex(lines);
+            var res = index.SelectCrossingPolygon(detector);
+            if (res.Count == 0)
+                throw new NotImplementedException("检查风机进出口线段太短不足放置连接件");
+            if (res.Count > 1)
+                throw new NotImplementedException("有多条同色路由线连接在风机进出口");
+            var orgStartLine = res[0] as Line;
+            foreach (Line l in lines)
+                if (!l.Equals(orgStartLine))
+                    curSet.Add(l);
+            curSet.Add(replaceLine);
+        }
         private void SeperateFanInsideAndOutSide(DBObjectCollection wallLines, Point3d iRoomP, Point3d roomP)
         {
             if (wallLines.Count == 0)
@@ -248,9 +283,12 @@ namespace ThMEPHVAC.CAD
         }
         private void MergeBypassCenterLine(ref DBObjectCollection centerLine, DBObjectCollection bypass)
         {
-            foreach (Line l in bypass)
-                centerLine.Add(l.Clone() as Line);
-            centerLine = ThMEPHVACLineProc.PreProc(centerLine);
+            if (bypass.Count > 0)
+            {
+                foreach (Line l in bypass)
+                    centerLine.Add(l.Clone() as Line);
+                centerLine = ThMEPHVACLineProc.PreProc(centerLine);
+            }
         }
         private void MergeBrokenBypass()
         {
@@ -396,13 +434,22 @@ namespace ThMEPHVAC.CAD
         }
         private void ShrinkDuct()
         {
-            var lines = CreateMainEndlineIndex(out Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic);
+            CreateMainEndlineIndex(out Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic);
             var endLinesInfos = new List<EndlineInfo>();
             var reducingInfos = new List<ReducingInfo>();
             shrinkService = new ThShrinkDuct(endLinesInfos, reducingInfos, centerLines);
-            shrinkService.SetLinesShrink(lines, dic);
+            var tlines = new DBObjectCollection();
+            foreach (var l in roomLines)
+                tlines.Add(l);
+            shrinkService.SetLinesShrink(tlines, dic);
             foreach (var e in shrinkService.connectors)
-                specialShapesInfo.Add(new EntityWithType() { entity = e, isRoom = (e.portWidths.Values.FirstOrDefault() == fanParam.roomDuctSize) });
+                specialShapesInfo.Add(new EntityWithType() { entity = e, isRoom = true });
+            tlines.Clear();
+            foreach (var l in notRoomLines)
+                tlines.Add(l);
+            shrinkService.SetLinesShrink(tlines, dic);
+            foreach (var e in shrinkService.connectors)
+                specialShapesInfo.Add(new EntityWithType() { entity = e, isRoom = false });
         }
         private DBObjectCollection CreateMainEndlineIndex(out Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
@@ -421,6 +468,8 @@ namespace ThMEPHVAC.CAD
         }
         private void GetSpecialShapeInfo(Point3d startPoint, Line startLine, HashSet<Line> lineSet, string ductSize)
         {
+            if (lineSet.Count == 0)
+                return;
             var lines = new DBObjectCollection();
             foreach (var l in lineSet)
                 lines.Add(l);
@@ -610,7 +659,7 @@ namespace ThMEPHVAC.CAD
             if (line.Length > 0)
                 outCenterLine.Add(new Line(fanBreakP, otherP));
         }
-        private void GetDuctInfo(Point3d startPoint, Line startLine, HashSet<Line> lines)
+        private void SearchDuctInfo(Point3d startPoint, Line startLine, HashSet<Line> lines)
         {
             if (startLine.Length < 1)
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");

@@ -33,7 +33,23 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\EqualsThenNotVisibeConverter.cs" />
+    <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />
+    <Compile Include="Converters\NormalValueConverter.cs" />
+    <Compile Include="Converters\NotConverter.cs" />
+    <Compile Include="Editors\ThPDSBreakerFrameSpecificationPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerModelPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerPolesNumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerRatedCurrentPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerResidualCurrentPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorWireNumbersPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSEnumDescriptionConverter.cs" />
+    <Compile Include="Editors\ThPDSEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Models\Component\ThPDSContactorModel.cs" />
     <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
@@ -73,12 +89,14 @@
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
+    <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSResidualCurrentBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
@@ -133,6 +151,7 @@
     <Compile Include="UserContorls\UESandboxParameter.xaml.cs">
       <DependentUpon>UESandboxParameter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\GlobalParameterViewModel.cs" />
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />

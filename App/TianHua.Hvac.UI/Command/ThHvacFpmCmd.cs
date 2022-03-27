@@ -181,6 +181,7 @@ namespace TianHua.Hvac.UI.Command
             singleInstance.endCompType = portParam.endCompType;
             singleInstance.portInterval = portParam.portInterval;
             singleInstance.verticalPipeEnable = portParam.verticalPipeEnable;
+            singleInstance.textAirVolume = portParam.textAirVolume;
             singleInstance.param.airSpeed = portParam.param.airSpeed;
             singleInstance.param.airVolume = portParam.param.airVolume;
             singleInstance.param.elevation = portParam.param.elevation;
@@ -193,7 +194,7 @@ namespace TianHua.Hvac.UI.Command
             singleInstance.param.portSize = portParam.param.portSize;
             singleInstance.param.scale = portParam.param.scale;
             singleInstance.param.scenario = portParam.param.scenario;
-            singleInstance.param.portBottomEle = portParam.param.portBottomEle;
+            
             if (portParam.param.portRange.Contains("侧"))
                 singleInstance.param.portNum *= 2;
         }

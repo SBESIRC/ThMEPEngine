@@ -326,7 +326,13 @@
     <PackageReference Include="SQLitePCLRaw.bundle_green">
       <Version>2.0.4</Version>
     </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.core">
+      <Version>2.0.4</Version>
+    </PackageReference>
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl">
       <Version>2.0.4</Version>
     </PackageReference>
   </ItemGroup>

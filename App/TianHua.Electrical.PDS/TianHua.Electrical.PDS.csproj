@@ -50,6 +50,10 @@
     <Compile Include="Model\ThPDSBlockInfo.cs" />
     <Compile Include="Model\ThPDSBlockReferenceData.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
+    <Compile Include="Project\Module\Circuit\Extension\CircuitGroupAttribute.cs" />
+    <Compile Include="Project\Module\Circuit\Extension\UpdateCircuitTypeExtension.cs" />
+    <Compile Include="Project\Module\Component\BreakerBaseComponent.cs" />
+    <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSDBText.cs" />
@@ -98,6 +102,7 @@
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
     <Compile Include="Project\Module\Component\TransferSwitch.cs" />
+    <Compile Include="Project\Module\Configure\CableCondiutConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ConductorConfigration.cs" />
     <Compile Include="Project\Module\Configure\MTSEConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ATSEConfiguration.cs" />
@@ -105,13 +110,13 @@
     <Compile Include="Project\Module\Configure\BreakerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\IsolatorConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSConfigExtension.cs" />
-    <Compile Include="Project\Module\Configure\ProjectGlobalConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\ProjectSystemConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ThermalRelayConfiguration.cs" />
     <Compile Include="Project\Module\InformationMatchViewerModule.cs" />
     <Compile Include="Project\Module\NodeDetails.cs" />
     <Compile Include="Project\Module\PDSBaseElement.cs" />
     <Compile Include="Project\Module\PDSProjectModule.cs" />
-    <Compile Include="Project\Module\ProjectConfigure\UIProjectGlobalConfiguration.cs" />
+    <Compile Include="Project\Module\ProjectConfigure\ProjectGlobalConfiguration.cs" />
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
     <Compile Include="Project\Module\SmallBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />

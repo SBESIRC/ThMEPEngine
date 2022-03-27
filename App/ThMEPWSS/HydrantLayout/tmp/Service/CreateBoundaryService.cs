@@ -88,7 +88,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
             var tol = new Tolerance(10, 10);
             var shortDir = dir.GetNormal();
             var longDir = new Vector3d(-shortDir.Y, shortDir.X, 0); //270
-
+            var DoorOffset = longSide * 0.25;
             //if (shortSide.StartPoint.IsEqualTo(basePt, tol))
             //{
             //    shortDir = -shortDir;
@@ -118,11 +118,11 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
             if (openDir == 0) 
             {
-                pt2 = pt2 - longDir * Info.DoorOffset * 2; 
+                pt2 = pt2 - longDir * DoorOffset * 2; 
             }
             if (openDir == 1) 
             {
-                pt3 = pt3 + longDir * Info.DoorOffset * 2;
+                pt3 = pt3 + longDir * DoorOffset * 2;
             } 
 
             boundary.AddVertexAt(0, pt4.ToPoint2D(), 0, 0, 0);
@@ -132,11 +132,5 @@ namespace ThMEPWSS.HydrantLayout.tmp.Service
 
             return boundary;
         }
-
-
-
-
-
-
     }
 }

@@ -74,7 +74,7 @@ namespace TianHua.Hvac.UI
             else if (portParam.endCompType == EndCompType.DownFlip45)
                 radioButton4.Checked = true;
 
-            textAirVolume.Text = portParam.param.airVolume.ToString();
+            textAirVolume.Text = portParam.textAirVolume;
             textAirSpeed.Text = portParam.param.airSpeed.ToString();
             textPortNum.Text = portParam.param.portNum.ToString();
             if (portParam.genStyle == GenerationStyle.Auto)
@@ -163,6 +163,8 @@ namespace TianHua.Hvac.UI
             var Outter = ductParam.DuctSizeInfor.RecommendOuterDuctSize;
             listBoxRoomDuctSize.Items.Clear();
             listBoxNotRoomDuctSize.Items.Clear();
+            if (ductParam.DuctSizeInfor.DefaultDuctsSizeString == null)
+                return;
             foreach (var s in ductParam.DuctSizeInfor.DefaultDuctsSizeString)
             {
                 listBoxRoomDuctSize.Items.Add(s);
@@ -361,9 +363,10 @@ namespace TianHua.Hvac.UI
                 comboPortRange.SelectedItem = scenario.Contains("排") ? "下回风口" : "下送风口";
             }
         }
-        private void GetAirVolume(out double airVolume, out double airHighVolume)
+        private void GetAirVolume(out double airVolume, out double airHighVolume, out string strAirVolume)
         {
             var volume = textAirVolume.Text;
+            strAirVolume = volume;
             if (selectFansDic.Count > 0)
             {
                 var fan = selectFansDic.Values.FirstOrDefault();
@@ -458,7 +461,7 @@ namespace TianHua.Hvac.UI
             GetPortInfo(out int portNum, out string scale, out string scenario, out string portSize,
                         out string portName, out string portRange, out double airSpeed);
             GetDuctSize(out string roomDuctSize, out string notRoomDuctSize);
-            GetAirVolume(out double airVolume, out double airHighVolume);
+            GetAirVolume(out double airVolume, out double airHighVolume, out string strAirVolume);
             double portInterval = radioPortInterval.Checked ? 0 : (Double.Parse(textPortInterval.Text) * 1000);
             GetElevation(out string roomElevation, out string notRoomElevation,
                          out ElevationAlignStyle roomElevationStyle, out ElevationAlignStyle notRoomElevationStyle);
@@ -680,29 +683,46 @@ namespace TianHua.Hvac.UI
                 connNotRoomLines = notRoomDetector.connectLines;
             }
         }
+        private void GetFanCenterlinesAndTrans(Point3d otherP, out DBObjectCollection roomLines, out DBObjectCollection notRoomLines)
+        {
+            // 风机进出口路由可能在平面上共线(仅处理进出口必须有线的情况)
+            var diffColorRoutine = GetDiffColorRoutine(RoomStartPoint);
+            var tor = new Tolerance(firstRange, firstRange);
+            roomLines = new DBObjectCollection();
+            notRoomLines = new DBObjectCollection();
+            var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
+            var notRoomP = otherP.TransformBy(mat);
+            foreach (var lines in diffColorRoutine)
+            {
+                foreach (Line l in lines)
+                {
+                    if (roomLines.Count == 0 && LineContainsPoint(l, Point3d.Origin, tor))
+                    {
+                        roomLines = lines;
+                    }
+                    if (notRoomLines.Count == 0 && LineContainsPoint(l, notRoomP, tor))
+                    {
+                        notRoomLines = lines;
+                    }
+                }
+            }
+            if (roomLines.Count == 0)
+                throw new NotImplementedException("风机服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+            if (notRoomLines.Count == 0)
+                throw new NotImplementedException("风机非服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+        }
+        
         private void GetCenterlinesAndTrans(Point3d p)
         {
-            centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
-            ExcludeBypass(ref centerlines);
-            var linesDic = SepLineByColor();
-            var procLines = new List<DBObjectCollection>();
-            var mat = Matrix3d.Displacement(-p.GetAsVector());
-            foreach (var pair in linesDic)
-            {
-                foreach (Curve l in pair.Value)
-                    l.TransformBy(mat);
-                var lines = ThMEPHVACLineProc.PreProc(pair.Value);
-                procLines.Add(lines);
-            }
-            linesDic.Clear();
-            centerlines.Clear();
+            // 用于将指定起点的路由与其他系统分开
+            var diffColorRoutine = GetDiffColorRoutine(p);
             var tor = new Tolerance(firstRange, firstRange);
-            foreach (var lines in procLines)
+            foreach (var lines in diffColorRoutine)
             {
                 foreach (Line l in lines)
                 {
                     // 此处一定有包含原点的线，所以就不做容差
-                    if (Point3d.Origin.IsEqualTo(l.StartPoint, tor) || Point3d.Origin.IsEqualTo(l.EndPoint, tor))
+                    if (LineContainsPoint(l, Point3d.Origin, tor))
                     {
                         centerlines = lines;
                         return;
@@ -711,6 +731,28 @@ namespace TianHua.Hvac.UI
             }
             if (centerlines.Count == 0)
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+        }
+        private bool LineContainsPoint(Line l, Point3d p, Tolerance tor)
+        {
+            return p.IsEqualTo(l.StartPoint, tor) || p.IsEqualTo(l.EndPoint, tor);
+        }
+        private List<DBObjectCollection> GetDiffColorRoutine(Point3d p)
+        {
+          centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
+          ExcludeBypass(ref centerlines);
+          var linesDic = SepLineByColor();
+          var diffColorRoutine = new List<DBObjectCollection>();
+          var mat = Matrix3d.Displacement(-p.GetAsVector());
+          foreach (var pair in linesDic)
+          {
+            foreach (Curve l in pair.Value)
+              l.TransformBy(mat);
+            var lines = ThMEPHVACLineProc.PreProc(pair.Value);
+            diffColorRoutine.Add(lines);
+          }
+          linesDic.Clear();
+          centerlines.Clear();
+          return diffColorRoutine;
         }
         private Dictionary<int, DBObjectCollection> SepLineByColor()
         {
@@ -724,14 +766,15 @@ namespace TianHua.Hvac.UI
             }
             return dic;
         }
-        private void CheckCenterLine(Point3d roomP, Point3d notRoomP)
+        private void CheckCenterLine(Point3d roomP, Point3d notRoomP, DBObjectCollection roomLines, DBObjectCollection notRoomLines)
         {
-            var index = new ThCADCoreNTSSpatialIndex(centerlines);
+            var index = new ThCADCoreNTSSpatialIndex(roomLines);
             var roomPl = ThMEPHVACService.CreateDetector(roomP, firstRange);
             var roomRes = index.SelectCrossingPolygon(roomPl);
             if (roomRes.Count != 1)
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
             var notRoomPl = ThMEPHVACService.CreateDetector(notRoomP, firstRange);
+            index = new ThCADCoreNTSSpatialIndex(notRoomLines);
             var notRoomRes = index.SelectCrossingPolygon(notRoomPl);
             if (notRoomRes.Count != 1)
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
@@ -742,8 +785,8 @@ namespace TianHua.Hvac.UI
         }
         private void GetFanConnectLine()
         {
-            RoomStartPoint = GetBasePoint();
-            GetCenterlinesAndTrans(RoomStartPoint);
+            RoomStartPoint = GetBasePoint(out Point3d otherP);
+            GetFanCenterlinesAndTrans(otherP, out DBObjectCollection roomLines, out DBObjectCollection notRoomLines);
             var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
             var reverseMat = Matrix3d.Displacement(RoomStartPoint.GetAsVector());
             foreach (string key in listBox1.Items)
@@ -754,13 +797,13 @@ namespace TianHua.Hvac.UI
                 var roomNotPoint = fanModel.isExhaust ? fanModel.FanOutletBasePoint : fanModel.FanInletBasePoint;
                 roomPoint = roomPoint.TransformBy(mat);
                 roomNotPoint = roomNotPoint.TransformBy(mat);
-                CheckCenterLine(roomPoint, roomNotPoint);
+                CheckCenterLine(roomPoint, roomNotPoint, roomLines, notRoomLines);
                 var roomDetector = new ThFanCenterLineDetector(false);
                 // 服务侧搜索全部的线
-                roomDetector.SearchCenterLine(centerlines, ref roomPoint, SearchBreakType.breakWithEndline);
+                roomDetector.SearchCenterLine(roomLines, ref roomPoint, SearchBreakType.breakWithEndline);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索截至到三通和四通的线
-                notRoomDetector.SearchCenterLine(centerlines, ref roomNotPoint, SearchBreakType.breakWithTeeAndCross);
+                notRoomDetector.SearchCenterLine(notRoomLines, ref roomNotPoint, SearchBreakType.breakWithTeeAndCross);
                 if (fanModel.isExhaust)
                 {
                     fanModel.FanInletBasePoint = roomPoint.TransformBy(reverseMat);
@@ -781,6 +824,8 @@ namespace TianHua.Hvac.UI
                         l.TransformBy(reverseMat);
                 }
                 fan.lastNotRoomLine = notRoomDetector.lastLine;
+                fan.roomLines = roomDetector.connectLines;
+                fan.notRoomLines = notRoomDetector.connectLines;
                 CollectFanConnectLine(fan, roomDetector, notRoomDetector);
                 foreach (Line l in fan.centerLines)
                     l.TransformBy(reverseMat);
@@ -829,11 +874,12 @@ namespace TianHua.Hvac.UI
                 }
             }
         }
-        private Point3d GetBasePoint()
+        private Point3d GetBasePoint(out Point3d otherP)
         {
             foreach (string key in listBox1.Items)
             {
                 var fanModel = selectFansDic[key];
+                otherP = !fanModel.isExhaust ? fanModel.FanInletBasePoint : fanModel.FanOutletBasePoint;
                 return fanModel.isExhaust ? fanModel.FanInletBasePoint : fanModel.FanOutletBasePoint;
             }
             throw new NotImplementedException("No fan was selected!");
@@ -996,7 +1042,7 @@ namespace TianHua.Hvac.UI
                 splitContainer5.Panel1.Enabled = true;
                 textAirVolume.Enabled = true;
                 DetectCrossFan();
-                GetAirVolume(out double airVolume, out _);
+                GetAirVolume(out double airVolume, out _, out _);
                 FillDuctSize(airVolume);
             }
         }
@@ -1067,7 +1113,7 @@ namespace TianHua.Hvac.UI
             GetPortInfo(out int portNum, out string scale, out string scenario, out string portSize,
                         out string portName, out string portRange, out double airSpeed);
             GetDuctSize(out string roomDuctSize, out string notRoomDuctSize);
-            GetAirVolume(out double airVolume, out double airHighVolume);
+            GetAirVolume(out double airVolume, out double airHighVolume, out string strAirVolume);
             double portInterval = radioPortInterval.Checked ? 0 : (Double.Parse(textPortInterval.Text) * 1000);
             GetElevation(out string roomElevation, out string notRoomElevation, out ElevationAlignStyle _, out ElevationAlignStyle _);
             var flag = checkBoxRoom.Checked;
@@ -1098,7 +1144,8 @@ namespace TianHua.Hvac.UI
                 genStyle = genStyle,
                 srtPoint = srtPoint,
                 endCompType = endCompType,
-                portInterval = portInterval
+                portInterval = portInterval,
+                textAirVolume = strAirVolume
             };
         }
         private EndCompType GetEndCompType()
@@ -1225,7 +1272,7 @@ namespace TianHua.Hvac.UI
             if (strVolume.Contains("/"))
             {
                 var strs = strVolume.Split('/');
-                if (strs.Count() == 2 && ThHvacUIService.IsIntegerStr(strs[1]))
+                if (strs.Count() == 2 && !String.IsNullOrEmpty(strs[1]) && ThHvacUIService.IsIntegerStr(strs[1]))
                     return Double.Parse(strs[1]);
                 else
                     return 20000;

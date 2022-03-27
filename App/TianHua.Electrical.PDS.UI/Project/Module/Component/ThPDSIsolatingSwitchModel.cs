@@ -1,49 +1,66 @@
-﻿using System.ComponentModel;
+﻿using ThCADExtension;
+using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 隔离开关
+    /// </summary>
     public class ThPDSIsolatingSwitchModel : NotifyPropertyChangedBase
     {
-        readonly IsolatingSwitch isolatingSwitch;
+        private readonly IsolatingSwitch _isolatingSwitch;
         public ThPDSIsolatingSwitchModel(IsolatingSwitch isolatingSwitch)
         {
-            this.isolatingSwitch = isolatingSwitch;
+            _isolatingSwitch = isolatingSwitch;
         }
+
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public string Type => "隔离开关";
-        [DisplayName("内容")]
-        public string Content => isolatingSwitch.Content;
-        [DisplayName("隔离开关类型")]
+        public string Type
+        {
+            get => _isolatingSwitch.ComponentType.GetDescription();
+        }
+
+        [DisplayName("型号")]
         public string IsolatingSwitchType
         {
-            get => isolatingSwitch.IsolatingSwitchType;
+            get => _isolatingSwitch.IsolatingSwitchType;
             set
             {
-                isolatingSwitch.IsolatingSwitchType = value;
-                OnPropertyChanged(nameof(Content));
+                _isolatingSwitch.IsolatingSwitchType = value;
+                OnPropertyChanged(nameof(IsolatingSwitchType));
             }
         }
+
         [DisplayName("极数")]
         public string PolesNum
         {
-            get => isolatingSwitch.PolesNum;
+            get => _isolatingSwitch.PolesNum;
             set
             {
-                isolatingSwitch.PolesNum = value;
-                OnPropertyChanged(nameof(Content));
+                _isolatingSwitch.PolesNum = value;
+                OnPropertyChanged(nameof(PolesNum));
             }
         }
+
         [DisplayName("额定电流")]
         public string RatedCurrent
         {
-            get => isolatingSwitch.RatedCurrent;
+            get => _isolatingSwitch.RatedCurrent;
             set
             {
-                isolatingSwitch.RatedCurrent = value;
-                OnPropertyChanged(nameof(Content));
+                _isolatingSwitch.RatedCurrent = value;
+                OnPropertyChanged(nameof(RatedCurrent));
             }
+        }
+
+        [Browsable(false)]
+        [DisplayName("内容")]
+        public string Content
+        {
+            get => _isolatingSwitch.Content;
         }
     }
 }

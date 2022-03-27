@@ -1,10 +1,15 @@
 ﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 配电箱
+    /// </summary>
     public class ThPDSDistributionBoxModel : NotifyPropertyChangedBase
     {
         private readonly ThPDSProjectGraphNode _node;
@@ -33,12 +38,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("相数")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSPhase>), typeof(PropertyEditorBase))]
         public ThPDSPhase Phase
         {
             get => _node.Load.Phase;
         }
 
         [DisplayName("需要系数")]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
             get => _node.Load.DemandFactor;
@@ -50,6 +57,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率因数")]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
             get => _node.Load.PowerFactor;
@@ -75,6 +83,30 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _node.Load.ID.Description = value;
                 OnPropertyChanged(nameof(Description));
+            }
+        }
+
+        [DisplayName("箱体尺寸")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<BoxSize>), typeof(PropertyEditorBase))]
+        public BoxSize BoxSize
+        {
+            get => _node.Details.BoxSize;
+            set
+            {
+                _node.Details.BoxSize = value;
+                OnPropertyChanged(nameof(BoxSize));
+            }
+        }
+
+        [DisplayName("安装方式")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<BoxInstallationType>), typeof(PropertyEditorBase))]
+        public BoxInstallationType BoxInstallationType
+        {
+            get => _node.Details.BoxInstallationType;
+            set
+            {
+                _node.Details.BoxInstallationType = value;
+                OnPropertyChanged(nameof(BoxInstallationType));
             }
         }
     }

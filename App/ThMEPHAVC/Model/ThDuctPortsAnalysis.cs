@@ -973,7 +973,8 @@ namespace ThMEPHVAC.Model
             double totalLen = 0;
             foreach (DBObjectCollection lines in endLines)
                 foreach (Line l in lines)
-                    totalLen += l.Length;
+                    if (!IsExcludeLine(l))
+                        totalLen += l.Length;
             return totalLen;
         }
         private void AddInfoToEndline()

@@ -1,42 +1,35 @@
 ﻿using System.ComponentModel;
-using HandyControl.Controls;
-using System.Linq;
-using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.UI.Editors;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSCircuitModel : NotifyPropertyChangedBase
     {
-        private ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
+        private readonly ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
 
         public ThPDSCircuitModel(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             _edge = edge;
         }
 
+        [ReadOnly(true)]
         [DisplayName("回路编号")]
         public string CircuitNumber
         {
             get => _edge.Circuit.ID.CircuitNumber[0];
-            set
-            {
-                _edge.Circuit.ID.CircuitNumber[0] = value;
-                OnPropertyChanged(nameof(CircuitNumber));
-            }
         }
 
+        [ReadOnly(true)]
         [DisplayName("回路形式")]
-        public Model.ThPDSCircuitType CircuitType
+        [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSCircuitType>), typeof(PropertyEditorBase))]
+        public ThPDSCircuitType CircuitType
         {
             get => _edge.Target.Load.CircuitType;
-            set
-            {
-                _edge.Target.Load.CircuitType = value;
-                OnPropertyChanged(nameof(CircuitType));
-            }
         }
 
         [DisplayName("功率")]
@@ -62,16 +55,24 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [ReadOnly(true)]
         [DisplayName("负载类型")]
-        public Model.PDSNodeType LoadType
+        [Editor(typeof(ThPDSEnumPropertyEditor<PDSNodeType>), typeof(PropertyEditorBase))]
+        public PDSNodeType LoadType
         {
             get => _edge.Target.Type;
         }
 
         [DisplayName("负载编号")]
+        [EditorAttribute(typeof(ThPDSLoadIdPlainTextPropertyEditor), typeof(PropertyEditorBase))]
         public string LoadId
         {
             get => _edge.Circuit.ID.LoadID;
+            set
+            {
+                _edge.Circuit.ID.LoadID = value;
+                OnPropertyChanged(nameof(LoadId));
+            }
         }
 
         [DisplayName("功能描述")]
@@ -109,11 +110,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [ReadOnly(true)]
         [DisplayName("计算电流")]
         public double CalculateCurrent
         {
             get => _edge.Target.Load.CalculateCurrent;
         }
+
+        [Browsable(false)]
         public bool CircuitLock
         {
             get => _edge.Details.CircuitLock;

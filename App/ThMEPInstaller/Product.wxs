@@ -8,7 +8,7 @@
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
         <!--Application logo-->
-        <Icon Id="Logo.ico" SourceFile="Logo.ico" />
+        <Icon Id="Logo.ico" SourceFile="$(var.Logo)" />
         <!--Application logo for Control Panel-->
         <Property Id="ARPPRODUCTICON" Value="Logo.ico" />
         <Feature Id="ProductFeature" Title="ThMEPInstaller" Level="1">
@@ -33,7 +33,7 @@
             <ComponentGroupRef Id="ProductComponentsArchitectureWin64" />
         </Feature>
         <UIRef Id="WixUI_Minimal"/>
-        <WixVariable Id="WixUILicenseRtf" Value="License_zh-CN.rtf" />
+        <WixVariable Id="WixUILicenseRtf" Value="$(var.Eula)" />
     </Product>
     <Fragment>
         <Directory Id="TARGETDIR" Name="SourceDir">

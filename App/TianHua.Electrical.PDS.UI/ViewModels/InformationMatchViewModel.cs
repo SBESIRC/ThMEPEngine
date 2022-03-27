@@ -16,7 +16,6 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class InformationMatchViewModel : NotifyPropertyChangedBase
     {
-        //该ViewModel为测试的，后期删除
         public InformationMatchViewModel(ThPDSProjectVMGraphInfo GraphInfo)
         {
             this.graphInfo = GraphInfo;

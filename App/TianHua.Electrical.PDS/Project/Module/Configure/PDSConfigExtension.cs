@@ -25,6 +25,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadATSEConfig();
             LoadMTSEConfig();
             LoadConductorConfig();
+            LoadCableCondiutConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -75,7 +76,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         if (FireLoad)
                         {
                             characteristics ="C";
-                            return new List<string>() { "TM", "EL" };
+                            return new List<string>() { "MA", "EL" };
                         }
                         else
                         {
@@ -88,7 +89,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         if (FireLoad)
                         {
                             characteristics ="C";
-                            return new List<string>() { "TM", "EL" };
+                            return new List<string>() { "MA", "EL" };
                         }
                         else
                         {
@@ -110,7 +111,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadBreakerConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.CircuitBreakerUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CircuitBreakerUrl, true);
             var TableMCB = dataSet.Tables["MCB"];
             for (int i = 1; i < TableMCB.Rows.Count; i++)
             {
@@ -123,7 +124,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model =(BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -131,6 +132,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -151,7 +153,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model = (BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -159,6 +161,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -179,7 +182,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
                             ModelName = row["型号"].ToString(),
-                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            Model = (BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -187,6 +190,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             TripDevice = row["脱扣器"].ToString(),
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
+                            RCDCharacteristics = String.Empty,
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -203,7 +207,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadContactorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ContactorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ContactorUrl, true);
             var TableCJ = dataSet.Tables["CJ20"];
             for (int i = 1; i < TableCJ.Rows.Count; i++)
             {
@@ -228,7 +232,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadIsolatorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.IsolatorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.IsolatorUrl, true);
             var Table = dataSet.Tables["QL"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -253,7 +257,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadThermalRelayConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ThermalRelayUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ThermalRelayUrl, true);
             var Table = dataSet.Tables["JR20"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -283,7 +287,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadATSEConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ATSEUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ATSEUrl, true);
             var Table = dataSet.Tables["ATSE"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -324,7 +328,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadMTSEConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.MTSEUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.MTSEUrl, true);
             var Table = dataSet.Tables["MTSE"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -358,11 +362,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 }
             }
         }
-
+        
+        /// <summary>
+        /// 加载导体配置
+        /// </summary>
         private static void LoadConductorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ConductorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ConductorUrl, true);
             var Table = dataSet.Tables["电缆"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -388,6 +395,51 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         Iset = double.Parse(row["整定电流"].ToString()),
                         Sphere = double.Parse(row["相线截面"].ToString()),
                         NumberOfPhaseWire = int.Parse(row["相线数"].ToString()),
+                    });
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 加载电线电缆配置
+        /// </summary>
+        private static void LoadCableCondiutConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CableCondiutUrl, true);
+            var Table = dataSet.Tables["YJY(YJV)"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.CableInfos.Add(new CableCondiutInfo()
+                    {
+                        FireCoating = row["耐火外护套"].ToString().Equals("Y"),
+                        WireSphere = double.Parse(row["相线截面"].ToString()),
+                        Phase = row["相数"].ToString() + "P",
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1:int.Parse(value),
+                    });
+                }
+            }
+            var Table1 = dataSet.Tables["BYJ(BV)"];
+            for (int i = 1; i < Table1.Rows.Count; i++)
+            {
+                var row = Table1.Rows[i];
+                string value;
+                if (!row[1].ToString().IsNullOrWhiteSpace())
+                {
+                    CableCondiutConfiguration.CondiutInfos.Add(new CableCondiutInfo()
+                    {
+                        FireCoating = row["耐火外护套"].ToString().Equals("Y"),
+                        WireSphere = double.Parse(row["相线截面"].ToString()),
+                        Phase = row["相数"].ToString() + "P",
+                        DIN_SC = (value = row["SC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
+                        DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
                     });
                 }
             }

@@ -1,41 +1,65 @@
-﻿using System.ComponentModel;
+﻿using System;
+using ThCADExtension;
+using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 热继电器
+    /// </summary>
     public class ThPDSThermalRelayModel : NotifyPropertyChangedBase
     {
-        readonly ThermalRelay thermalRelay;
+        private readonly ThermalRelay _thermalRelay;
 
         public ThPDSThermalRelayModel(ThermalRelay thermalRelay)
         {
-            this.thermalRelay = thermalRelay;
+            _thermalRelay = thermalRelay;
         }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
         [DisplayName("内容")]
-        public string Content => thermalRelay.Content;
+        public string Content => _thermalRelay.Content;
+
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public string Type => "热继电器";
-        [DisplayName("热继电器类型")]
-        public string ThermalRelayType
+        public string Type => _thermalRelay.ComponentType.GetDescription();
+
+        [DisplayName("型号")]
+        public ThermalRelayModel Model
         {
-            get => thermalRelay.ThermalRelayType;
+            get => (ThermalRelayModel)Enum.Parse(typeof(ThermalRelayModel), _thermalRelay.ThermalRelayType);
             set
             {
-                thermalRelay.ThermalRelayType = value;
-                OnPropertyChanged(nameof(Content));
+                _thermalRelay.ThermalRelayType = value.ToString();
+                OnPropertyChanged(nameof(Model));
             }
         }
+
+        [ReadOnly(true)]
         [DisplayName("极数")]
-        public string PolesNum { get => thermalRelay.PolesNum; set => thermalRelay.PolesNum = value; }
-        [DisplayName("额定电流")]
-        public string RatedCurrent
+        public string PolesNum
         {
-            get => thermalRelay.RatedCurrent;
+            get => _thermalRelay.PolesNum;
             set
             {
-                thermalRelay.RatedCurrent = value;
-                OnPropertyChanged(nameof(Content));
+                _thermalRelay.PolesNum = value;
+                OnPropertyChanged(nameof(PolesNum));
+            }
+        }
+
+        [ReadOnly(true)]
+        [DisplayName("电流整定范围")]
+        public string RatedCurrent
+        {
+            get => _thermalRelay.RatedCurrent;
+            set
+            {
+                _thermalRelay.RatedCurrent = value;
+                OnPropertyChanged(nameof(RatedCurrent));
             }
         }
     }

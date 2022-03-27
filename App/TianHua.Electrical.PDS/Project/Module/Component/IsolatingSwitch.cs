@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="polesNum">极数</param>
         public IsolatingSwitch(double calculateCurrent, string polesNum)
         {
-            ComponentType = ComponentType.隔离开关;
+            ComponentType = ComponentType.QL;
             var isolator = IsolatorConfiguration.isolatorInfos.FirstOrDefault(o => o.Poles == polesNum && o.Amps > calculateCurrent);
             if (isolator.IsNull())
             {

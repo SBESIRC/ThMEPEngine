@@ -75,7 +75,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Engine
             var bufferArea= fireArea.Buffer(-10);
             var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
             var objs1 = ProcessedData.ForbiddenIndex.SelectCrossingPolygon(pl);
-            var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl);
+            var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl); //?
             if (objs1.Count == 0 && objs2.Count == 0)
             {
                 flag = true;

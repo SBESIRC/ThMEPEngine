@@ -1,0 +1,101 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Component;
+
+namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
+{
+    public static class UpdateCircuitTypeExtension
+    {
+        public static void UpdateCircuit(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,PDSBaseOutCircuit circuit, CircuitFormOutType circuitFormOutType)
+        {
+            var NewType = circuitFormOutType.GetCircuitType();
+            if(NewType.EqualsGroup(circuit.GetType()))
+            {
+                //仅同组的回路才可以来回切换
+                {
+                    var newCircuit = (PDSBaseOutCircuit)System.Activator.CreateInstance(NewType);
+                    var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Cast<PDSBaseComponent>().ToList();
+                    //获取当前Type下所有的属性上标记的特性
+                    var props = NewType.GetProperties();
+                    for (int i = 0; i < props.Length; i++)
+                    {
+                        PropertyInfo prop = props[i];
+                        //定义PDSBaseComponent本身就是预留的元器件，不做赋值处理
+                        if (prop.PropertyType == typeof(PDSBaseComponent) )
+                        {
+                            object oValue = prop.GetValue(newCircuit);
+                            oValue = null;
+                            prop.SetValue(newCircuit, null);
+                        }
+                        else if(prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent)))
+                        {
+                            var MatchingComponent = OriginalComponents.Where(o => o.GetType() == prop.PropertyType).OrderBy(o => o.GetCascadeRatedCurrent()).FirstOrDefault();
+                            if(MatchingComponent.IsNull())
+                            {
+                                prop.SetValue(newCircuit, edge.ComponentSelection(prop.PropertyType, circuitFormOutType));
+                            }
+                            else
+                            {
+                                prop.SetValue(newCircuit, MatchingComponent);
+                            }
+                        }
+                    }
+                    edge.Details.CircuitForm = newCircuit;
+                }
+            }
+        }
+
+        public static Type GetCircuitType(this CircuitFormOutType circuitFormOutType)
+        {
+            switch (circuitFormOutType)
+            {
+                case CircuitFormOutType.常规:
+                    {
+                        return typeof(RegularCircuit);
+                    }
+                case CircuitFormOutType.漏电:
+                    {
+                        return typeof(LeakageCircuit);
+                    }
+                case CircuitFormOutType.接触器控制:
+                    {
+                        return typeof(ContactorControlCircuit);
+                    }
+                case CircuitFormOutType.热继电器保护:
+                    {
+                        return typeof(ThermalRelayProtectionCircuit);
+                    }
+                default:
+                    {
+                        //初步测试，暂时只测试以上四种回路
+                        throw new NotSupportedException();
+                    }
+            }
+        }
+
+        public static bool EqualsGroup(this Type type1,Type type2)
+        {
+            return type1.GetCircuitGroup().Equals(type2.GetCircuitGroup());
+        }
+
+        public static CircuitGroup GetCircuitGroup(this Type type)
+        {
+            if (type.IsDefined(typeof(CircuitGroupAttribute), false))
+            {
+                //先判断再获取--为了提高性能
+                foreach (Attribute attribute in type.GetCustomAttributes(true))
+                {
+                    if (attribute is CircuitGroupAttribute circuitGroupAttribute)
+                    {
+                        return circuitGroupAttribute.groupType;
+                    }
+                }
+            }
+            throw new NotSupportedException();
+        }
+    }
+}

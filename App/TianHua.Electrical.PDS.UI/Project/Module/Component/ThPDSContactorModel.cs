@@ -1,4 +1,5 @@
 ﻿using System;
+using ThCADExtension;
 using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
@@ -19,13 +20,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(false)]
         [DisplayName("内容")]
         public string Content => _contactor.Content;
 
 
         [ReadOnly(true)]
         [DisplayName("元器件类型")]
-        public ComponentType Type => _contactor.ComponentType;
+        public string Type => _contactor.ComponentType.GetDescription();
 
 
         [DisplayName("型号")]

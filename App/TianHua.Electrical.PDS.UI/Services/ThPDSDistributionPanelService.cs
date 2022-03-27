@@ -1,23 +1,20 @@
-﻿using QuikGraph;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+﻿using System;
+using QuikGraph;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADExtension;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Collections.Generic;
+using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
-using TianHua.PDS.UI.Converter;
+using TianHua.Electrical.PDS.UI.Converters;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -35,63 +32,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
         public void Execute(object parameter)
         {
             cb();
-        }
-    }
-    public class NotConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return !((bool)value);
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class NormalValueConverter : IValueConverter
-    {
-        readonly Func<object, object> f;
-        public NormalValueConverter(Func<object, object> f)
-        {
-            if (f is null) throw new ArgumentNullException();
-            this.f = f;
-        }
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return f(value);
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class EqualsThenNotVisibeConverter : IValueConverter
-    {
-        object target;
-        public EqualsThenNotVisibeConverter(object target)
-        {
-            this.target = target;
-        }
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Equals(value, target) ? Visibility.Collapsed : Visibility.Visible;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-    public class GlyphsUnicodeStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var s = value?.ToString();
-            if (string.IsNullOrEmpty(s)) return "空";
-            return s;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
         }
     }
     public class COR
@@ -890,7 +830,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
@@ -908,7 +848,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor1 != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor1);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
@@ -926,7 +866,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     if (conductor2 != null)
                                     {
                                         var vm = new Project.Module.Component.ThPDSConductorModel(conductor2);
-                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(conductor.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
@@ -1167,10 +1107,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                             {
-                                                var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.ResidualCurrentBreaker;
                                                 if (breaker != null)
                                                 {
-                                                    var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
+                                                    var vm = new Project.Module.Component.ThPDSResidualCurrentBreakerModel(breaker);
                                                     cb += () => UpdatePropertyGrid(vm);
                                                     render += () =>
                                                     {
@@ -1622,75 +1562,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 menu.Items.Add(mi);
                                 mi.Header = "切换回路形式";
                                 {
+                                    var types = new CircuitFormOutType[]
+                                    {
+                                        CircuitFormOutType.常规,
+                                        CircuitFormOutType.漏电,
+                                        CircuitFormOutType.接触器控制,
+                                        CircuitFormOutType.热继电器保护,
+                                    };
+                                    foreach (var type in types)
                                     {
                                         var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "常规";
+                                        m.Header = type.ToString();
                                         m.Command = new PDSCommand(() =>
                                         {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.常规);
+                                            ThPDSProjectGraphService.SwitchFormOutType(edge, type);
                                             UpdateCanvas();
                                         });
-                                    }
-                                    {
-                                        var m = new MenuItem();
                                         mi.Items.Add(m);
-                                        m.Header = "漏电";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.漏电);
-                                            UpdateCanvas();
-                                        });
-                                    }
-                                    {
-                                        var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "电动机（分立）";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.电动机_分立元件);
-                                            UpdateCanvas();
-                                        });
-                                    }
-                                    {
-                                        var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "电动机（CPS）";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.电动机_CPS);
-                                            UpdateCanvas();
-                                        });
-                                    }
-                                    {
-                                        var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "电动机（Δ/Y）";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.双速电动机_CPSdetailYY);
-                                            UpdateCanvas();
-                                        });
-                                    }
-                                    {
-                                        var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "电动机（双速Δ/YY）";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件detailYY);
-                                            UpdateCanvas();
-                                        });
-                                    }
-                                    {
-                                        var m = new MenuItem();
-                                        mi.Items.Add(m);
-                                        m.Header = "电动机（双速Y/Y）";
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            PDS.Project.Module.ThPDSProjectGraphService.SwitchFormOutType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, edge, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件YY);
-                                            UpdateCanvas();
-                                        });
                                     }
                                 }
                             }
@@ -1710,6 +1598,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "分配负载";
                                 m.Command = new PDSCommand(() =>
                                 {
+                                    ThPDSProjectGraphService.DistributeLoad(graph, edge);
                                     UpdateCanvas();
                                 });
                             }
@@ -1719,8 +1608,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "删除";
                                 m.Command = new PDSCommand(() =>
                                 {
-                                    var vertice = graph.Vertices.ToList()[sel.Id];
-                                    PDS.Project.Module.ThPDSProjectGraphService.Delete(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, edge);
+                                    ThPDSProjectGraphService.DeleteCircuit(graph, edge);
                                     UpdateCanvas();
                                 });
                             }
@@ -1944,75 +1832,26 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
                             {
+                                var types = new CircuitFormOutType[]
+                                {
+                                    CircuitFormOutType.常规,
+                                    CircuitFormOutType.漏电,
+                                    CircuitFormOutType.电动机_分立元件,
+                                    CircuitFormOutType.电动机_CPS,
+                                    CircuitFormOutType.双速电动机_CPSdetailYY,
+                                    CircuitFormOutType.双速电动机_分立元件detailYY,
+                                    CircuitFormOutType.双速电动机_分立元件YY,
+                                };
+                                foreach (var type in types)
                                 {
                                     var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "常规";
+                                    m.Header = type.GetEnumDescription();
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.常规);
+                                        ThPDSProjectGraphService.AddCircuit(graph, vertice, type);
                                         UpdateCanvas();
                                     });
-                                }
-                                {
-                                    var m = new MenuItem();
                                     mi.Items.Add(m);
-                                    m.Header = "漏电";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.漏电);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（分立）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_分立元件);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（CPS）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.电动机_CPS);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（Δ/Y）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_CPSdetailYY);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（双速Δ/YY）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件detailYY);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "电动机（双速Y/Y）";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.AddCircuit(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormOutType.双速电动机_分立元件YY);
-                                        UpdateCanvas();
-                                    });
                                 }
                             }
                         }
@@ -2021,45 +1860,24 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             menu.Items.Add(mi);
                             mi.Header = "切换回路形式";
                             {
+                                var types = new CircuitFormInType[]
+                                {
+                                    CircuitFormInType.一路进线,
+                                    CircuitFormInType.二路进线ATSE,
+                                    CircuitFormInType.三路进线,
+                                    CircuitFormInType.集中电源,
+
+                                };
+                                foreach (var type in types)
                                 {
                                     var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "1路进线";
+                                    m.Header = type.ToString();
                                     m.Command = new PDSCommand(() =>
                                     {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.一路进线);
+                                        ThPDSProjectGraphService.UpdateFormInType(graph, vertice, type);
                                         UpdateCanvas();
                                     });
-                                }
-                                {
-                                    var m = new MenuItem();
                                     mi.Items.Add(m);
-                                    m.Header = "2路进线ATSE";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.二路进线ATSE);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "3路进线TSE";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.三路进线);
-                                        UpdateCanvas();
-                                    });
-                                }
-                                {
-                                    var m = new MenuItem();
-                                    mi.Items.Add(m);
-                                    m.Header = "集中电源";
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        PDS.Project.Module.ThPDSProjectGraphService.UpdateFormInType(new PDS.Project.Module.ThPDSProjectGraph() { Graph = graph }, vertice, PDS.Project.Module.CircuitFormInType.集中电源);
-                                        UpdateCanvas();
-                                    });
                                 }
                             }
                         }

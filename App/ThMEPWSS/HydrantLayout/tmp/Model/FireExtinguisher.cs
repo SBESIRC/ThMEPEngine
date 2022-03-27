@@ -22,7 +22,7 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
     class FireExtinguisher
     {
         //外部传入的模式属性
-        public int Type = 0; //表示是 消防栓（0） 还是 灭火器（1）
+        //public int Type = 0; //表示是 消防栓（0） 还是 灭火器（1）
         public int Mode = 0; //表示需要调用的模板列表 2(自由) 1（L） 0（I）
 
         //外部传入的位置属性
@@ -59,13 +59,12 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
 
 
         //构造函数
-        public FireExtinguisher(Point3d basePoint, Vector3d dir, double shortside, double longside,int type, int mode)
+        public FireExtinguisher(Point3d basePoint, Vector3d dir, double shortside, double longside, int mode)
         {
             BasePoint = basePoint;
             vBasePoint = dir;
             ShortSide = shortside;
             LongSide = longside;
-            Type = type;
             Mode = mode;
             clockwise90 = new Vector3d(dir.Y, -dir.X, dir.Z).GetNormal();
             clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
@@ -78,19 +77,19 @@ namespace ThMEPWSS.HydrantLayout.tmp.Model
         {
             Point3d tmppt0;
             tmppt0 = BasePoint + clockwise270 * 0.5 * (LongSide-ShortSide) + vBasePoint * (0.5 * ShortSide);
-            //0
+            //0 横左偏
             TFireCenterPointList.Add(tmppt0);
             TFireDirList.Add(vBasePoint);
-            //1        
+            //1 横右偏
             TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (LongSide - ShortSide) + vBasePoint * (0.5 * ShortSide));
             TFireDirList.Add(vBasePoint);
-            //2
+            //2  竖直左
             TFireCenterPointList.Add(BasePoint + vBasePoint * (0.5 * LongSide));
-            TFireDirList.Add(clockwise270);            
-            //3
+            TFireDirList.Add(clockwise270);
+            //3  竖直右
             TFireCenterPointList.Add(BasePoint + vBasePoint * (0.5 * LongSide));
             TFireDirList.Add(clockwise90);
-            //4
+            //4  横中间
             TFireCenterPointList.Add(BasePoint + vBasePoint * 0.5 * ShortSide);
             TFireDirList.Add(vBasePoint);
         }
