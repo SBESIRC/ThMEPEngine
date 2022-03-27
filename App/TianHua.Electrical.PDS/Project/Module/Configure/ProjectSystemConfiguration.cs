@@ -8,7 +8,7 @@ using ThCADExtension;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure
 {
-    public class ProjectGlobalConfiguration
+    public class ProjectSystemConfiguration
     {
         public static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "PowerDistributionSystem");
         public static string CircuitBreakerUrl = Path.Combine(urlFolder, "LV_AC_CircuitBreaker_ImportLibrary_19DX101.xlsx");
@@ -20,10 +20,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static string BuswayUrl = Path.Combine(urlFolder, "LV_Busway_Selector_Default.xlsx");
         public static string ConductorUrl = Path.Combine(urlFolder, "LV_Conductor_Selector_Default.xlsx");
         public static string CableCondiutUrl = Path.Combine(urlFolder, "LV_AC_Cable_Condiut_MatchTable_19DX101.xlsx");
-
-        //以下内容为暂定，因为全局参数配置UI还没做好
-        public static string MotorUIChoise = "分立元件";
-        public static double MotorPower = 10;//kw
 
         public static List<string> SinglePhasePolesNum = new List<string> { "1P", "1P+N", "2P" };
         public static List<string> ThreePhasePolesNum = new List<string> { "3P", "3P+N", "4P" };

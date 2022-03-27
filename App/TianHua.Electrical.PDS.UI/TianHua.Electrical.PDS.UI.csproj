@@ -151,6 +151,7 @@
     <Compile Include="UserContorls\UESandboxParameter.xaml.cs">
       <DependentUpon>UESandboxParameter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\GlobalParameterViewModel.cs" />
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />

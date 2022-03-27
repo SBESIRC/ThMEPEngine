@@ -110,13 +110,13 @@
     <Compile Include="Project\Module\Configure\BreakerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\IsolatorConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSConfigExtension.cs" />
-    <Compile Include="Project\Module\Configure\ProjectGlobalConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\ProjectSystemConfiguration.cs" />
     <Compile Include="Project\Module\Configure\ThermalRelayConfiguration.cs" />
     <Compile Include="Project\Module\InformationMatchViewerModule.cs" />
     <Compile Include="Project\Module\NodeDetails.cs" />
     <Compile Include="Project\Module\PDSBaseElement.cs" />
     <Compile Include="Project\Module\PDSProjectModule.cs" />
-    <Compile Include="Project\Module\ProjectConfigure\UIProjectGlobalConfiguration.cs" />
+    <Compile Include="Project\Module\ProjectConfigure\ProjectGlobalConfiguration.cs" />
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
     <Compile Include="Project\Module\SmallBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />

@@ -16,6 +16,7 @@ namespace TianHua.Electrical.PDS.UI.Project
             PDSProjectVM.Instance.graphInfo = new ThPDSProjectVMGraphInfo() ;
             PDSProjectVM.Instance.graphInfo.graphData = PDSProject.Instance.graphData.Graph.Clone();
             PDSProjectVM.Instance.InformationMatchViewModel = new ViewModels.InformationMatchViewModel(PDSProjectVM.Instance.graphInfo);
+            PDSProjectVM.Instance.GlobalParameterViewModel = new ViewModels.GlobalParameterViewModel(PDSProject.Instance.projectGlobalConfiguration);
         }
         public static void ConvertToProject()
         {

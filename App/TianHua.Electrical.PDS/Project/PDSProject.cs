@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.Project
 
         public ThPDSProjectGraph graphData;
 
-        public UIProjectGlobalConfiguration projectGlobalConfiguration;
+        public ProjectGlobalConfiguration projectGlobalConfiguration;
 
         //public BreakerComponentConfiguration breakerConfig;
 
@@ -50,7 +50,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 //Creat New Project
                 this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>().CreatPDSProjectGraph();
-                this.projectGlobalConfiguration = new UIProjectGlobalConfiguration();
+                this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 if (!instance.DataChanged.IsNull())
                 {
                     instance.DataChanged();//推送消息告知VM刷新

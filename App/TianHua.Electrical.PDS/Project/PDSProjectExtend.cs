@@ -219,9 +219,9 @@ namespace TianHua.Electrical.PDS.Project
             {
                 //2022/03/14 为了本周尽快实现联动，目前发动机暂只支持 分立元件 与 分立元件-星三角启动
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
-                if (ProjectGlobalConfiguration.MotorUIChoise == "分立元件")
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == "分立元件")
                 {
-                    if (edge.Target.Details.LowPower <ProjectGlobalConfiguration.MotorPower)
+                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                     {
                         edge.Details.CircuitForm = new Motor_DiscreteComponentsCircuit()
                         {

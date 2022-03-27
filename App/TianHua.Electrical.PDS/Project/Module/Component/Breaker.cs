@@ -33,13 +33,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="characteristics">瞬时脱扣器类型</param>
         public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
         {
-            if(ProjectGlobalConfiguration.SinglePhasePolesNum.Contains(polesNum))
+            if(ProjectSystemConfiguration.SinglePhasePolesNum.Contains(polesNum))
             {
-                AlternativePolesNum = ProjectGlobalConfiguration.SinglePhasePolesNum;
+                AlternativePolesNum = ProjectSystemConfiguration.SinglePhasePolesNum;
             }
-            else if (ProjectGlobalConfiguration.ThreePhasePolesNum.Contains(polesNum))
+            else if (ProjectSystemConfiguration.ThreePhasePolesNum.Contains(polesNum))
             {
-                AlternativePolesNum = ProjectGlobalConfiguration.ThreePhasePolesNum;
+                AlternativePolesNum = ProjectSystemConfiguration.ThreePhasePolesNum;
             }
             ComponentType = ComponentType.CB;
             var breakers = BreakerConfiguration.breakerComponentInfos.

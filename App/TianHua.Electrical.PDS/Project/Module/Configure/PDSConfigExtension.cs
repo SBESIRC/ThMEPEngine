@@ -111,7 +111,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadBreakerConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.CircuitBreakerUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CircuitBreakerUrl, true);
             var TableMCB = dataSet.Tables["MCB"];
             for (int i = 1; i < TableMCB.Rows.Count; i++)
             {
@@ -207,7 +207,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadContactorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ContactorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ContactorUrl, true);
             var TableCJ = dataSet.Tables["CJ20"];
             for (int i = 1; i < TableCJ.Rows.Count; i++)
             {
@@ -232,7 +232,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadIsolatorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.IsolatorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.IsolatorUrl, true);
             var Table = dataSet.Tables["QL"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -257,7 +257,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadThermalRelayConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ThermalRelayUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ThermalRelayUrl, true);
             var Table = dataSet.Tables["JR20"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -287,7 +287,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadATSEConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ATSEUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ATSEUrl, true);
             var Table = dataSet.Tables["ATSE"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -328,7 +328,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadMTSEConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.MTSEUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.MTSEUrl, true);
             var Table = dataSet.Tables["MTSE"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -369,7 +369,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadConductorConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.ConductorUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.ConductorUrl, true);
             var Table = dataSet.Tables["电缆"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
@@ -406,7 +406,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         private static void LoadCableCondiutConfig()
         {
             var excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectGlobalConfiguration.CableCondiutUrl, true);
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CableCondiutUrl, true);
             var Table = dataSet.Tables["YJY(YJV)"];
             for (int i = 1; i < Table.Rows.Count; i++)
             {
