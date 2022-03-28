@@ -73,7 +73,6 @@ namespace TianHua.Electrical.PDS.Project
         {
             if (node.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.DistributionPanel && node.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
             {
-                //node.nodeDetails.CircuitFormType = CircuitFormInType.集中电源;
                 node.Details.CircuitFormType = new CentralizedPowerCircuit();
             }
             else

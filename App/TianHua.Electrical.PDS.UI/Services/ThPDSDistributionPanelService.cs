@@ -1882,7 +1882,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 CircuitFormInType.一路进线,
                                 CircuitFormInType.二路进线ATSE,
                                 CircuitFormInType.三路进线,
-                                CircuitFormInType.集中电源,
                             };
                             foreach (var inType in inTypes)
                             {
