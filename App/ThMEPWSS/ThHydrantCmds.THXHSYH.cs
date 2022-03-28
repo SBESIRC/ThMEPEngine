@@ -20,6 +20,7 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Diagnostics;
 
+using ThMEPWSS.Common;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Data;
 using ThMEPWSS.HydrantLayout.Command;
@@ -47,8 +48,8 @@ namespace ThMEPWSS
                         {"1",("1","灭火器")},
                         {"2",("2","消火栓 & 灭火器")},
                         };
-            var layoutObject = ThHydrantUtil.SettingSelection("\n优化对象", hintObject, "2");
-            var radius = ThHydrantUtil.SettingInt("\n半径", 3000);
+            var layoutObject = ThMEPWSSUtils.SettingSelection("\n优化对象", hintObject, "2");
+            var radius = ThMEPWSSUtils.SettingInt("\n半径", 3000);
 
 
             var hintMode = new Dictionary<string, (string, string)>()
@@ -56,10 +57,10 @@ namespace ThMEPWSS
                         {"1",("1","L字")},
                         {"2",("2","自由布置")},
                         };
-            var layoutMode = ThHydrantUtil.SettingSelection("\n摆放方式", hintMode, "2");
+            var layoutMode = ThMEPWSSUtils.SettingSelection("\n摆放方式", hintMode, "2");
 
-          
-            var avoidParking = ThHydrantUtil.SettingBoolean ("\n车位是否阻挡开门",1);
+
+            var avoidParking = ThMEPWSSUtils.SettingBoolean("\n车位是否阻挡开门", 1);
 
             HydrantLayoutSetting.Instance.LayoutObject = Convert.ToInt32(layoutObject);
             HydrantLayoutSetting.Instance.SearchRadius = radius;
@@ -119,7 +120,7 @@ namespace ThMEPWSS
 
                 //dataQuery.Reset(transformer);
                 //dataQuery.Print();
-                //dataQuery.Clean();
+                // dataQuery.Clean();
 
                 TestRoomWallColumn(dataQuery);
             }
@@ -150,7 +151,7 @@ namespace ThMEPWSS
             var selectRoom = spindex.SelectCrossingPolygon(cp);
 
             //找出来的空间索引的房间和圆做相交得到我们画的那个”绿色“部分
-            var greedPart = cp.IntersectionMP(selectRoom,true);
+            var greedPart = cp.IntersectionMP(selectRoom, true);
             greedPart.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0green"));
             selectRoom.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0selectRoom"));
         }

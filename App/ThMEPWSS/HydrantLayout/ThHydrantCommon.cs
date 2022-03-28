@@ -9,6 +9,7 @@ namespace ThMEPWSS.HydrantLayout
     internal class ThHydrantCommon
     {
         public static string Layer_Vertical = "W-FRPT-HYDT-EQPM";
+        public static List<double> Radius_Vertical = new List<double>() { 100 / 2, 150 / 2 };
         public static string BlkName_Vertical = "带定位立管";
         public static string BlkName_Vertical150 = "带定位立管150";
         public const string BlkName_Hydrant = "室内消火栓平面";

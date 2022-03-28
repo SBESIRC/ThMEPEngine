@@ -20,6 +20,7 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Command;
 
+using ThMEPWSS.Common;
 using ThMEPWSS.HydrantLayout.Data;
 using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Service;
@@ -80,8 +81,8 @@ namespace ThMEPWSS.HydrantLayout.Command
                 }
 
                 //转换器
-                //var transformer = ThHydrantUtil.GetTransformer(selectPts);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                var transformer = new ThMEPOriginTransformer(new Point3d(0,0,0));
 
 
                 //提取数据

@@ -14,7 +14,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.HydrantLayout.Data
+namespace ThMEPWSS.Service
 {
     public class ThVerticalPipeExtractService
     {
@@ -30,7 +30,6 @@ namespace ThMEPWSS.HydrantLayout.Data
         public ThVerticalPipeExtractService()
         {
             VerticalPipe = new List<ThIfcVirticalPipe>();
-            LayerFilter = new List<string>() { ThHydrantCommon.Layer_Vertical };
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -74,8 +73,6 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         private List<ThIfcVirticalPipe> ExtractCVPipe(Point3dCollection pts)
         {
-         //   var radiusList = new List<double>() { 100 / 2, 150 / 2 };
-
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var cPipeRecognize = new ThCircleVPipeRecognitionEngine()

@@ -39,9 +39,29 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThTCHValveRecognitionEngine.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThValveRecognitionEngine.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\HandleConfluenceService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\RoomPolyService.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThVerticalPipeExtractService.cs" />
+    <Compile Include="DrainageADPrivate\Engine\ThDrainageADEngine.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageADPDataPass.cs" />
+    <Compile Include="DrainageADPrivate\Service\TransformTopToADService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\ViewModel\ParamSettingViewModel.cs" />
+    <Compile Include="Common\ThMEPWSSUtils.cs" />
+    <Compile Include="Common\ThSelectFrameUtil.cs" />
+    <Compile Include="DrainageADPrivate\Cmd\ThDrainageADPCmd.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThDrainageADDataQueryService.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThDrainageADPrivateDataFactory.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThSanitaryTerminalRecognitionEngine.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThTCHPipeRecognitionEngine.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageADNode.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThSaniterayTerminal.cs" />
+    <Compile Include="DrainageADPrivate\ThDrainageADCommon.cs" />
+    <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THZDXTT.cs" />
     <Compile Include="HydrantLayout\Data\ThHandleConflictService.cs" />
     <Compile Include="HydrantLayout\Data\ThCleanEntityService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantDoorExtractor.cs" />
@@ -65,13 +85,11 @@
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataFactory.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataQueryService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantRecognitionEngine.cs" />
-    <Compile Include="HydrantLayout\Data\ThVerticalPipeExtractService.cs" />
     <Compile Include="HydrantLayout\Engine\Class1.cs" />
     <Compile Include="HydrantLayout\Model\HydrantLayoutSetting.cs" />
     <Compile Include="HydrantLayout\Model\ThHydrantModel.cs" />
     <Compile Include="HydrantLayout\Service\ThHydrantModelService.cs" />
     <Compile Include="HydrantLayout\Service\ThHydrantUtil.cs" />
-    <Compile Include="HydrantLayout\Service\ThSelectFrameUtil.cs" />
     <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
     <Compile Include="HydrantLayout\tmp\Engine\InputDataProcess.cs" />
     <Compile Include="HydrantLayout\tmp\Engine\Run.cs" />
@@ -122,6 +140,7 @@
     <Compile Include="Model\ThFireExtinguisher.cs" />
     <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
+    <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectLayer.cs" />
@@ -765,6 +784,9 @@
     <Compile Include="ThSystemDiagramCmds.THJSZC.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MathNet.Numerics">
+      <Version>4.15.0</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
       <Version>7.1.2</Version>
     </PackageReference>

@@ -10,23 +10,24 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
+using GeometryExtensions;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 
-namespace ThMEPWSS.HydrantLayout.Service
+namespace ThMEPWSS.Common
 {
     internal class ThSelectFrameUtil
     {
-        public static Point3dCollection GetFrame()
+        public static Point3dCollection GetFrame(string hint = "请框选一个范围")
         {
             Point3dCollection pts = new Point3dCollection();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
 
                 var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
-                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+                    PointCollector.Shape.Window, new List<string> { hint });
 
                 if (frame.Area > 1e-4)
                 {
@@ -250,6 +251,74 @@ namespace ThMEPWSS.HydrantLayout.Service
             var objs = new DBObjectCollection();
             blockReference.Explode(objs);
             return objs.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+        }
+
+        public static Point3d SelectPoint(string commandSuggestStr)
+        {
+            var ptLeftRes = Active.Editor.GetPoint(commandSuggestStr);
+            Point3d pt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                pt = ptLeftRes.Value;
+                pt = pt.TransformBy(Active.Editor.UCS2WCS());
+            }
+            return pt;
+        }
+
+        public static Point3dCollection SelectFramePointCollection(string commandSuggestStrLeft, string commandSuggestStrRight)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            var pl = SelectFramePL(commandSuggestStrLeft, commandSuggestStrRight);
+            if (pl.NumberOfVertices > 0)
+            {
+                pts = pl.Vertices();
+            }
+
+            return pts;
+        }
+
+        public static Polyline SelectFramePL(string commandSuggestStrLeft, string commandSuggestStrRight)
+        {
+            var resultPl = new Polyline();
+
+            var ptLeftRes = Active.Editor.GetPoint(commandSuggestStrLeft);
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+
+            var ptRightRes = Active.Editor.GetCorner(commandSuggestStrRight, leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                var rightTopPt = ptRightRes.Value;
+                leftDownPt = leftDownPt.TransformBy(Active.Editor.UCS2WCS());
+                rightTopPt = rightTopPt.TransformBy(Active.Editor.UCS2WCS());
+                resultPl = ToFrame(leftDownPt, rightTopPt);
+            }
+
+            return resultPl;
+
+        }
+
+        private static Polyline ToFrame(Point3d left, Point3d right)
+        {
+            var pl = new Polyline();
+            if (left != Point3d.Origin && right != Point3d.Origin)
+            {
+
+                var ptRT = new Point2d(right.X, left.Y);
+                var ptLB = new Point2d(left.X, right.Y);
+
+                pl.AddVertexAt(pl.NumberOfVertices, left.ToPoint2D(), 0, 0, 0);
+                pl.AddVertexAt(pl.NumberOfVertices, ptRT, 0, 0, 0);
+                pl.AddVertexAt(pl.NumberOfVertices, right.ToPoint2D(), 0, 0, 0);
+                pl.AddVertexAt(pl.NumberOfVertices, ptLB, 0, 0, 0);
+
+                pl.Closed = true;
+
+            }
+            return pl;
         }
     }
 }
