@@ -33,6 +33,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\EnumValuesConverter.cs" />
     <Compile Include="Converters\EqualsThenNotVisibeConverter.cs" />
     <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="ViewModels\ThPDSCircuitGraphTreeBuilder.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
+    <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
   </ItemGroup>
   <ItemGroup>

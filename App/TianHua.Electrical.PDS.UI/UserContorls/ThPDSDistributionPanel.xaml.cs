@@ -77,9 +77,21 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         private void btnGenMulti(object sender, RoutedEventArgs e)
         {
+            var vertices = Graph.Vertices.ToList();
+            for (var i = 0; i < vertices.Count && i < 10; i++)
+            {
+                var drawCmd = new Command.ThPDSSystemDiagramCommand(Graph, vertices[i]);
+                drawCmd.Execute();
+            }
+            AcHelper.Active.Editor.Regen();
         }
         private void btnGenSingle(object sender, RoutedEventArgs e)
         {
+            if (tv.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
+            var vertices = Graph.Vertices.ToList();
+            var drawCmd = new Command.ThPDSSystemDiagramCommand(Graph, vertices[sel.Id]);
+            drawCmd.Execute();
+            AcHelper.Active.Editor.Regen();
         }
     }
 }

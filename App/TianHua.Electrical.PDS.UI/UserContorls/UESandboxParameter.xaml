@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:cvt="clr-namespace:TianHua.Electrical.PDS.UI.Converters"
              d:DesignHeight="800" d:DesignWidth="900"
              mc:Ignorable="d" >
     <UserControl.Resources>
@@ -12,6 +13,7 @@
             <Style TargetType="{x:Type Label}">
                 <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
             </Style>
+            <cvt:EnumValuesConverter x:Key="EnumValuesConverter" ></cvt:EnumValuesConverter>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Background="White" Margin="0" x:Name="gridUESDParameter">
@@ -81,20 +83,38 @@
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Row="0" Height="30" VerticalAlignment="Center">
                                 <Label Content="默认导体材料" Padding="0" VerticalContentAlignment="Center"></Label>
-                                <ComboBox SelectedItem="{Binding DefaultConductorMaterial}" Width="60" Height="22" Margin="5,0,0,0"></ComboBox>
+                                <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding DefaultConductorMaterial}" Width="60" Height="22" Margin="5,0,0,0"></ComboBox>
                             </StackPanel>
                             <WrapPanel Orientation="Horizontal" Grid.Row="1"  VerticalAlignment="Center" Margin="0,0,0,5">
                                 <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" 
                                            LineStackingStrategy="BlockLineHeight" LineHeight="25"
                                            HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    消防配电干线及分支干线采用<ComboBox SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}" Width="70" Height="22" Margin="5,0,5,-6" ></ComboBox>矿物绝缘电力电缆
+                                    消防配电干线及分支干线采用<ComboBox Height="22" ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}" Width="70"></ComboBox>矿物绝缘电力电缆
                                 </TextBlock>
                             </WrapPanel>
-                            <DataGrid Grid.Row="2" RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False">
+                            <DataGrid ItemsSource="{Binding ConductorUsages}" Grid.Row="2" RowHeight="25" RowHeaderWidth="0" CanUserAddRows="False" AutoGenerateColumns="False">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="导体用途" Width="*" CanUserSort="False"  IsReadOnly="True"></DataGridTextColumn>
-                                    <DataGridComboBoxColumn Header="材料特征及结构" Width="*"  CanUserSort="False"></DataGridComboBoxColumn>
-                                    <DataGridTextColumn Header="导体标注样式预览" Width="*" CanUserSort="False"></DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="导体用途" Width="120" CanUserSort="False"  IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox HorizontalAlignment="Center" Height="20" ItemsSource="{Binding ConductorType,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding ConductorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="材料特征及结构" Width="90"  CanUserSort="False">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding ConductorMaterial}"></TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="导体标注样式预览" Width="100" CanUserSort="False">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content}"></TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
@@ -156,7 +176,7 @@
                                 <TextBlock Grid.Row="1" Grid.Column="1" TextWrapping="Wrap"  
                                            Padding="0,0,0,0" LineStackingStrategy="BlockLineHeight" LineHeight="25"
                                            HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    潮湿场所、埋于素土内敷设的保护管默认采用<ComboBox SelectedItem="{Binding GeneralRequirements}" Width="70" Height="22" Margin="5,0,5,-6" ></ComboBox>管。
+                                    潮湿场所、埋于素土内敷设的保护管默认采用<ComboBox Height="22" ItemsSource="{Binding GeneralRequirements,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding GeneralRequirements}" Width="70" ></ComboBox>管。
                                 </TextBlock>
 
                                 <Label Grid.Row="2" Grid.Column="0" Content="消防线路："  FontWeight="Black" 
@@ -165,7 +185,7 @@
                                 <TextBlock TextWrapping="Wrap"  Grid.Row="2" Grid.Column="1" 
                                            Padding="0,0,0,0" LineStackingStrategy="BlockLineHeight" LineHeight="25"
                                            TextAlignment="Left">
-                                正负零以上非潮湿场所敷设的保护管默认采用<ComboBox SelectedItem="{Binding FireFightingLineLess}" Width="70" Height="22" Margin="5,0,5,-6" ></ComboBox>管,DN≤50或采用<ComboBox SelectedItem="{Binding FireFightingLineMore}" Width="70" Height="22"  Margin="5,0,5,-6" ></ComboBox>管(DN>50)。
+                                正负零以上非潮湿场所敷设的保护管默认采用<ComboBox  Height="22"  ItemsSource="{Binding FireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding FireFightingLineLess}" Width="70" ></ComboBox>管,DN≤50或采用<ComboBox  Height="22" ItemsSource="{Binding FireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FireFightingLineMore}" Width="70"></ComboBox>管(DN>50)。
                                 </TextBlock>
 
                                 <Label Content="非消防线路：" FontWeight="Black" Grid.Row="3" Grid.Column="0"
@@ -174,7 +194,7 @@
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1"
                                    Padding="0,0,0,0" LineStackingStrategy="BlockLineHeight" LineHeight="25"
                                    VerticalAlignment="Center">
-                                正负零以上非潮湿场所敷设的保护管默认采用<ComboBox SelectedItem="{Binding NonFireFightingLineLess}" Width="70" Height="22" Margin="5,0,5,-6"></ComboBox>管(DN≤50)或采用<ComboBox SelectedItem="{Binding NonFireFightingLineMore}"  Width="70" Height="22" Margin="5,0,5,-6"></ComboBox>管(DN>50)。
+                                正负零以上非潮湿场所敷设的保护管默认采用<ComboBox  Height="22"  ItemsSource="{Binding NonFireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding NonFireFightingLineLess}" Width="70"></ComboBox>管(DN≤50)或采用<ComboBox  Height="22" ItemsSource="{Binding NonFireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding NonFireFightingLineMore}"  Width="70"></ComboBox>管(DN>50)。
                                 </TextBlock>
                             </Grid>
                         </Border>
@@ -185,20 +205,20 @@
                     <Label Content="常用用电设备配电" FontSize="16" FontWeight="Black" Height="40" VerticalContentAlignment="Center"></Label>
                     <StackPanel Orientation="Horizontal"  Height="30" VerticalAlignment="Center">
                         <Label Content="电动机主回路选用"></Label>
-                        <ComboBox SelectedItem="{Binding SelectionOfMainCircuitOfMotor}" Width="80" Height="22"></ComboBox>
+                        <ComboBox ItemsSource="{Binding SelectionOfMainCircuitOfMotor,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding SelectionOfMainCircuitOfMotor}" Width="80" Height="22"></ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"  Height="30" VerticalAlignment="Center">
                         <Label Content="消防电动机功率小于"></Label>
                         <cus:InputTextBox Text="{Binding FireMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
                         <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                        <ComboBox SelectedItem="{Binding FireMotorPowerMore}" Width="80" Height="22"></ComboBox>
+                        <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FireMotorPowerMore}" Width="80" Height="22"></ComboBox>
                         <Label Content="方式启动"></Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Center">
                         <Label Content="普通电动机功率小于"></Label>
                         <cus:InputTextBox Text="{Binding CommonMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
                         <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                        <ComboBox SelectedItem="{Binding CommonMotorPowerMore}" Width="80" Height="22"></ComboBox>
+                        <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding CommonMotorPowerMore}" Width="80" Height="22"></ComboBox>
                         <Label Content="方式启动"></Label>
                     </StackPanel>
                 </StackPanel>

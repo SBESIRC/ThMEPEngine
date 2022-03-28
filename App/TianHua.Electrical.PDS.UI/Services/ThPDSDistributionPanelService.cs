@@ -14,7 +14,6 @@ using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Converters;
-
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -442,6 +441,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                 }
             }
+            double _busLength;
+            public double BusLength
+            {
+                get => _busLength;
+                set
+                {
+                    if (value != _busLength)
+                    {
+                        _busLength = value;
+                        OnPropertyChanged(nameof(BusLength));
+                    }
+                }
+            }
         }
         public UserContorls.ThPDSDistributionPanel Panel;
         public TreeView TreeView;
@@ -514,7 +526,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var leftTemplates = new List<Glyphs>();
                 Action render = null;
                 var dv = new DrawingVisual();
-                var left = ThCADExtension.ThEnumExtension.GetDescription(graph.Vertices.ToList()[sel.Id].Details.CircuitFormType.CircuitFormType) ?? "1路进线";
+                var circuitInType = graph.Vertices.ToList()[sel.Id].Details.CircuitFormType.CircuitFormType;
+                var left = ThCADExtension.ThEnumExtension.GetDescription(circuitInType) ?? "1路进线";
                 var v = graph.Vertices.ToList()[sel.Id];
                 var rights = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm.CircuitFormType) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
                 FrameworkElement selElement = null;
@@ -1584,14 +1597,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var mi = new MenuItem();
                                 menu.Items.Add(mi);
                                 mi.Header = "切换回路样式";
-                                var outTypes = new CircuitFormOutType[] {
+                                var outTypes = new CircuitFormOutType[]
+                                {
                                     CircuitFormOutType.常规,
                                     CircuitFormOutType.漏电,
                                     CircuitFormOutType.电动机_分立元件,
                                     CircuitFormOutType.电动机_CPS,
                                     CircuitFormOutType.双速电动机_CPSdetailYY,
                                     CircuitFormOutType.双速电动机_分立元件detailYY,
-                                    CircuitFormOutType.双速电动机_分立元件YY,};
+                                    CircuitFormOutType.双速电动机_分立元件YY,
+                                };
                                 foreach (var outType in outTypes)
                                 {
                                     var m = new MenuItem();
@@ -1819,31 +1834,29 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var thickness = 5.0;
                     if (shouldDrawBusLine)
                     {
-                        if (busEnd.Y < busStart.Y + 100)
-                        {
-                            busEnd = busStart.OffsetY(100);
-                        }
+                        var len = busEnd.Y - busStart.Y;
+                        var minLen = circuitInType == CircuitFormInType.三路进线 ? 200.0 : 100.0;
+                        if (len < minLen) len = minLen;
+                        Config.Current.BusLength = len;
                         var path = DrawLine(canvas, null, Brushes.Black, busStart, busEnd);
                         path.StrokeThickness = thickness;
+                        BindingOperations.SetBinding(path, Path.DataProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.BusLength)), Converter = new NormalValueConverter(v => new LineGeometry(busStart, busStart.OffsetXY(0, (double)v))), });
                     }
                     var cvs = new Canvas
                     {
                         Width = width,
-                        Height = Math.Abs(busStart.Y - busEnd.Y),
                         Background = Brushes.Transparent,
                     };
+                    BindingOperations.SetBinding(cvs, FrameworkElement.HeightProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.BusLength)) });
                     Canvas.SetLeft(cvs, busStart.X - (width - thickness / 2) / 2);
                     Canvas.SetTop(cvs, busStart.Y);
                     hoverDict[cvs] = cvs;
-                    dccbs += dc =>
+                    cvs.MouseUp += (s, e) =>
                     {
-                        var rect = new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height);
-                        dc.DrawRectangle(br, pen, rect);
-                        cbDict[rect] = () =>
-                        {
-                            setSel(rect);
-                            UpdatePropertyGrid(boxVM);
-                        };
+                        if (e.ChangedButton != MouseButton.Left) return;
+                        setSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
+                        UpdatePropertyGrid(boxVM);
+                        e.Handled = true;
                     };
                     {
                         var menu = new ContextMenu();
@@ -1853,7 +1866,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
-                            var outTypes = new CircuitFormOutType[] {
+                            var outTypes = new CircuitFormOutType[]
+                            {
                                 CircuitFormOutType.常规,
                                 CircuitFormOutType.漏电,
                                 CircuitFormOutType.电动机_分立元件,
@@ -1882,6 +1896,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 CircuitFormInType.一路进线,
                                 CircuitFormInType.二路进线ATSE,
                                 CircuitFormInType.三路进线,
+                                CircuitFormInType.集中电源,
                             };
                             foreach (var inType in inTypes)
                             {
