@@ -8,6 +8,9 @@ using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 导体（配电回路）
+    /// </summary>
     public class ThPDSConductorModel : NotifyPropertyChangedBase
     {
         private readonly Conductor _conductor;
@@ -31,7 +34,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("电缆根数")]
-        [EditorAttribute(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int NumberOfPhaseWire
         {
             get => _conductor.NumberOfPhaseWire; 
@@ -44,7 +47,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("相导体截面")]
-        [EditorAttribute(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
         public double ConductorCrossSectionalArea
         {
             get => _conductor.ConductorCrossSectionalArea;
@@ -56,25 +59,34 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
-        [DisplayName("中性线导体截面")]
-        public double NeutralConductorCrossSectionalArea
-        {
-            get => _conductor.NeutralConductorCrossSectionalArea;
-        }
+        //[ReadOnly(true)]
+        //[DisplayName("中性线导体截面")]
+        //public double NeutralConductorCrossSectionalArea
+        //{
+        //    get => _conductor.NeutralConductorCrossSectionalArea;
+        //}
 
-        [ReadOnly(true)]
-        [DisplayName("PE线导体截面")]
-        public double PECrossSectionalArea
-        {
-            get => _conductor.PECrossSectionalArea;
-        }
+        //[ReadOnly(true)]
+        //[DisplayName("PE线导体截面")]
+        //public double PECrossSectionalArea
+        //{
+        //    get => _conductor.PECrossSectionalArea;
+        //}
 
         [ReadOnly(true)]
         [DisplayName("敷设方式")]
-        public BridgeLaying BridgeLaying
+        [Editor(typeof(ThPDSEnumPropertyEditor<Pipelaying>), typeof(PropertyEditorBase))]
+        public Pipelaying Pipelaying
         {
-            get => _conductor.BridgeLaying;
+            get => _conductor.Pipelaying;
+        }
+
+        [ReadOnly(true)]
+        [DisplayName("管材")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<PipeMaterial>), typeof(PropertyEditorBase))]
+        public PipeMaterial PipeMaterial
+        {
+            get => _conductor.PipeMaterial;
         }
 
         [ReadOnly(true)]

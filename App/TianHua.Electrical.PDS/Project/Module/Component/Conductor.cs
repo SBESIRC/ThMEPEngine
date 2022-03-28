@@ -496,7 +496,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 穿管管材
         /// </summary>
-        private PipeMaterial PipeMaterial { get; set; }
+        public PipeMaterial PipeMaterial { get; set; }
 
         /// <summary>
         /// 穿管
