@@ -8,6 +8,7 @@ using ThCADExtension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
+using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
 
@@ -290,7 +291,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.thermalRelay.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         srcThermalRelay.Erase();
                         var KHText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH).First();
-                        KHText.TextString = circuit.thermalRelay.Content;
+                        KHText.TextString = GetThermalRelayContent(circuit.thermalRelay);
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -389,6 +390,11 @@ namespace TianHua.Electrical.PDS.Diagram
                         throw new NotSupportedException();
                     }
             }
+        }
+
+        private string GetThermalRelayContent(ThermalRelay thermalRelay)
+        {
+            return $"{thermalRelay.ThermalRelayType.GetEnumDescription()} {thermalRelay.RatedCurrent}A";
         }
 
         private CircuitFormInType FetchDescription(string str)
