@@ -822,9 +822,10 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     var pcenter_i = BuildingBoxes[i].GetRecCentroid();
                     var pcenter_j = BuildingBoxes[j].GetRecCentroid();
-                    var line_ij = new Line(pcenter_i, pcenter_j);
+                    var line_ij = new Line(pcenter_i, pcenter_j);               
                     var lines = SplitLine(line_ij, BuildingBoxes).Where(e => !IsInAnyBoxes(e.GetCenter(), BuildingBoxes));
                     line_ij = ChangeLineToBeOrthogonal(line_ij);
+                    if (line_ij.Length < 1) continue;
                     if (BuildingBoxes.Count > 2)
                     {
                         bool quitcycle = false;
@@ -835,7 +836,7 @@ namespace ThMEPArchitecture.PartitionLayout
                                 var p = line_ij.GetCenter();
                                 var lt = new Line(p.TransformBy(Matrix3d.Displacement(CreateVector(line_ij).GetNormal().GetPerpendicularVector() * MaxLength)),
                                     p.TransformBy(Matrix3d.Displacement(-CreateVector(line_ij).GetNormal().GetPerpendicularVector() * MaxLength)));
-                                var bf = lt.Buffer(line_ij.Length / 2);
+                                Polyline bf = lt.Buffer(line_ij.Length / 2);
                                 if (bf.Intersect(BuildingBoxes[k], Intersect.OnBothOperands).Count > 0 || bf.Contains(BuildingBoxes[k].GetRecCentroid()))
                                 {
                                     quitcycle = true;
