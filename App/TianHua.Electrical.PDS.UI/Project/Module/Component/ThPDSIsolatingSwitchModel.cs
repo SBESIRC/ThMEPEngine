@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.UI.Editors;
+using HandyControl.Controls;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -24,17 +26,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("型号")]
-        public string IsolatingSwitchType
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => _isolatingSwitch.IsolatingSwitchType;
+            get => _isolatingSwitch.Model;
             set
             {
-                _isolatingSwitch.IsolatingSwitchType = value;
-                OnPropertyChanged(nameof(IsolatingSwitchType));
+                _isolatingSwitch.Model = value;
+                OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
         [DisplayName("极数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _isolatingSwitch.PolesNum;
@@ -42,6 +47,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _isolatingSwitch.PolesNum = value;
                 OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
@@ -53,14 +59,18 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _isolatingSwitch.RatedCurrent = value;
                 OnPropertyChanged(nameof(RatedCurrent));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
+        [ReadOnly(true)]
+        [Browsable(false)]
+        [DisplayName("额定电压")]
+        public string MaxKV => _isolatingSwitch.MaxKV;
+
+        [ReadOnly(true)]
         [Browsable(false)]
         [DisplayName("内容")]
-        public string Content
-        {
-            get => _isolatingSwitch.Content;
-        }
+        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
     }
 }

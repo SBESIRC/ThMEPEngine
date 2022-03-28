@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()], firstPosition, 100 * scale);
                         srcIsolatingSwitch.Erase();
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
-                        QLText.TextString = circuit.isolatingSwitch.Content;
+                        QLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch);
                         break;
                     }
                 case CircuitFormInType.二路进线ATSE:
@@ -111,7 +111,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch1.ComponentType.GetDescription()], firstPosition, 100 * scale);
                         firstIsolatingSwitch.Erase();
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = circuit.isolatingSwitch1.Content;
+                        firstQLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch1);
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
@@ -120,7 +120,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch2.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         secondIsolatingSwitch.Erase();
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = circuit.isolatingSwitch2.Content;
+                        secondQLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch2);
 
                         // 转换开关
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
@@ -400,6 +400,11 @@ namespace TianHua.Electrical.PDS.Diagram
         private string GetContactorContent(Contactor contactor)
         {
             return $"{contactor.ContactorType} {contactor.RatedCurrent}/{contactor.PolesNum}";
+        }
+
+        private string GetIsolatingSwitchContent(IsolatingSwitch isolatingSwitch)
+        {
+            return $"{isolatingSwitch.Model} {isolatingSwitch.RatedCurrent}/{isolatingSwitch.PolesNum}";
         }
 
         private CircuitFormInType FetchDescription(string str)

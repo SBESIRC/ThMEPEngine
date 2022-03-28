@@ -24,9 +24,13 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSContactorModel model)
+            if (propertyItem.Value is ThPDSContactorModel)
             {
                 return ContactorConfiguration.contactorInfos.Select(o => o.Model).Distinct();
+            }
+            if (propertyItem.Value is ThPDSIsolatingSwitchModel)
+            {
+                return IsolatorConfiguration.isolatorInfos.Select(o => o.Model).Distinct();
             }
             throw new NotSupportedException();
         }

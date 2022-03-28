@@ -9,19 +9,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// LV_AC_Isolator_19DX101.xlsx
     /// </summary>
-    public class IsolatorConfiguration
+    public class IsolatorConfiguration : PDSBaseComponentConfiguration
     {
         /// <summary>
         /// 隔离开关配置
         /// </summary>
-        public static List<IsolatorComponentInfo> isolatorInfos = new List<IsolatorComponentInfo>();
+        public static List<IsolatorConfigurationItem> isolatorInfos = new List<IsolatorConfigurationItem>();
     }
-    public class IsolatorComponentInfo
+    public class IsolatorConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>
-        /// 型号（全称）
+        /// 型号
         /// </summary>
-        public string ModelName { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 额定电压

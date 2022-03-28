@@ -237,9 +237,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             for (int i = 1; i < Table.Rows.Count; i++)
             {
                 var row = Table.Rows[i];
-                IsolatorConfiguration.isolatorInfos.Add(new IsolatorComponentInfo()
+                IsolatorConfiguration.isolatorInfos.Add(new IsolatorConfigurationItem()
                 {
-                    ModelName = row["型号"].ToString(),
+                    Model = row["型号"].ToString(),
                     MaxKV = row["额定电压"].ToString(),
                     Poles = row["级数"].ToString(),
                     Amps = double.Parse(row["额定电流"].ToString()),

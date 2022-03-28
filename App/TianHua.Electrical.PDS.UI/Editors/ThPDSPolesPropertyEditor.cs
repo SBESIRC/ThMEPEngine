@@ -32,6 +32,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return ContactorConfiguration.contactorInfos.Select(o => o.Poles).Distinct();
             }
+            if (propertyItem.Value is ThPDSIsolatingSwitchModel switchModel)
+            {
+                return IsolatorConfiguration.isolatorInfos.Where(o => o.MaxKV == switchModel.MaxKV).Select(o => o.Poles).Distinct();
+            }
             throw new NotSupportedException();
         }
     }
