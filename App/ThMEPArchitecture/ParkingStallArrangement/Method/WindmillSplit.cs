@@ -183,7 +183,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             for (int i = 0; i < cutlines.Count; i++)
             {
                 var l = cutlines[i];
-                if (attachedRampSpatialIndex?.SelectFence(l.ExtendLineEx(10.0, 3)).Count > 0)
+                if (attachedRampSpatialIndex?.SelectFence(l.ExtendLineEx(10.0, 3)).Count > 0
+                    || outerBrder.LonelyRampSpatialIndex.SelectFence(l.ExtendLineEx(10.0, 3)).Count > 0)
                 {
                     maxVals.Add(0);
                     minVals.Add(0);
