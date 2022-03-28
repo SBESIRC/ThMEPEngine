@@ -38,6 +38,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
+    <Compile Include="Command\ThSanitarywareExtractCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
     <Compile Include="DrainageADPrivate\Data\ThTCHValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThValveRecognitionEngine.cs" />
@@ -148,6 +149,8 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
+    <Compile Include="Temp\ThSanitarywareExtractionVisitor.cs" />
+    <Compile Include="Temp\ThSanitarywareRecognitionEngine.cs" />
     <Compile Include="ThHydrantCmds.THXHSYH.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
