@@ -1,9 +1,9 @@
-﻿using System;
-using ThCADExtension;
+﻿using ThCADExtension;
 using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         [DisplayName("内容")]
-        public string Content => _contactor.Content;
+        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
 
 
         [ReadOnly(true)]
@@ -31,17 +31,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
 
         [DisplayName("型号")]
-        public ContactorModel Model
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => (ContactorModel)Enum.Parse(typeof(ContactorModel), _contactor.ContactorType);
+            get => _contactor.ContactorType;
             set
             {
-                _contactor.ContactorType = value.ToString();
+                _contactor.ContactorType = value;
                 OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
         [DisplayName("极数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _contactor.PolesNum;
@@ -49,6 +52,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _contactor.PolesNum = value;
                 OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
@@ -59,6 +63,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _contactor.RatedCurrent = value;
+                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
         }

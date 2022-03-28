@@ -214,7 +214,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = TableCJ.Rows[i];
                 ContactorConfiguration.contactorInfos.Add(new ContactorComponentInfo()
                 {
-                    ModelName = row["型号"].ToString(),
+                    Model = row["型号"].ToString(),
                     MaxKV = row["额定电压"].ToString(),
                     Poles = row["级数"].ToString(),
                     Amps = double.Parse(row["额定电流"].ToString()),

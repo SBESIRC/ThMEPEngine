@@ -246,14 +246,6 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
-    /// 接触器型号
-    /// </summary>
-    public enum ContactorModel
-    {
-        CJ20,
-    }
-
-    /// <summary>
     /// 热继电器型号
     /// </summary>
     public enum ThermalRelayModel

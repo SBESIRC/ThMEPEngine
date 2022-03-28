@@ -25,12 +25,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 throw new NotSupportedException();
             }
-            ContactorType = contactor.ModelName;
+            ContactorType = contactor.Model;
             PolesNum = contactor.Poles;
             RatedCurrent = contactor.Amps.ToString();
         }
 
-        public string Content { get { return $"{ContactorType} {RatedCurrent}/{PolesNum}"; } }
+        //public string Content { get { return $"{ContactorType} {RatedCurrent}/{PolesNum}"; } }
 
 
         /// <summary>

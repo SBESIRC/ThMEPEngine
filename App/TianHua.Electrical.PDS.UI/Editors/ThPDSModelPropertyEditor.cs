@@ -9,7 +9,7 @@ using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {
-    public class ThPDSPolesPropertyEditor : PropertyEditorBase
+    public class ThPDSModelPropertyEditor : PropertyEditorBase
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox
         {
@@ -21,13 +21,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSThermalRelayModel)
+            if (propertyItem.Value is ThPDSContactorModel model)
             {
-                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Poles).Distinct();
-            }
-            if (propertyItem.Value is ThPDSContactorModel)
-            {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Poles).Distinct();
+                return ContactorConfiguration.contactorInfos.Select(o => o.Model).Distinct();
             }
             throw new NotSupportedException();
         }

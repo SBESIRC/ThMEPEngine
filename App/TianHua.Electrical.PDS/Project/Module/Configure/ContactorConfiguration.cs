@@ -9,19 +9,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// LV_AC_Contactor_19DX101.xlsx
     /// </summary>
-    public class ContactorConfiguration
+    public class ContactorConfiguration : PDSBaseComponentConfiguration
     {
         /// <summary>
         /// 接触器配置
         /// </summary>
         public static List<ContactorComponentInfo> contactorInfos = new List<ContactorComponentInfo>();
     }
-    public class ContactorComponentInfo
+    public class ContactorComponentInfo :PDSBaseComponentConfigurationItem
     {
         /// <summary>
-        /// 型号（全称）
+        /// 型号
         /// </summary>
-        public string ModelName { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 额定电压

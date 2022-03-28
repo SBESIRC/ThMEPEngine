@@ -264,7 +264,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.contactor.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         srcContactor.Erase();
                         var QACText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC).First();
-                        QACText.TextString = circuit.contactor.Content;
+                        QACText.TextString = GetContactorContent(circuit.contactor);
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -395,6 +395,11 @@ namespace TianHua.Electrical.PDS.Diagram
         private string GetThermalRelayContent(ThermalRelay thermalRelay)
         {
             return $"{thermalRelay.ThermalRelayType.GetEnumDescription()} {thermalRelay.RatedCurrent}A";
+        }
+
+        private string GetContactorContent(Contactor contactor)
+        {
+            return $"{contactor.ContactorType} {contactor.RatedCurrent}/{contactor.PolesNum}";
         }
 
         private CircuitFormInType FetchDescription(string str)
