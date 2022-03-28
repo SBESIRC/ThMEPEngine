@@ -1,20 +1,26 @@
-﻿using System;
-using QuikGraph;
+﻿using QuikGraph;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
-using ThCADExtension;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Collections.Generic;
-using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.PDS.UI.Converter;
+using TianHua.Electrical.PDS.Project.Module;
+using ThCADExtension;
 using TianHua.Electrical.PDS.UI.Converters;
-
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -890,7 +896,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功率");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? " " : v.ToString()), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                             }
                         }
@@ -1107,25 +1113,48 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                             {
-                                                var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.ResidualCurrentBreaker;
-                                                if (breaker != null)
+                                                void handleLeakageCircuit()
                                                 {
-                                                    var vm = new Project.Module.Component.ThPDSResidualCurrentBreakerModel(breaker);
-                                                    cb += () => UpdatePropertyGrid(vm);
-                                                    render += () =>
                                                     {
-                                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
-                                                        if (item.Key != null)
+                                                        var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                        if (breaker != null)
                                                         {
-                                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                            item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                            var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
+                                                            cb += () => UpdatePropertyGrid(vm);
+                                                            render += () =>
+                                                            {
+                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
+                                                                if (item.Key != null)
+                                                                {
+                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                }
+                                                            };
+                                                            return;
                                                         }
-                                                    };
-                                                }
-                                                else
-                                                {
+                                                    }
+                                                    {
+                                                        var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.ResidualCurrentBreaker;
+                                                        if (breaker != null)
+                                                        {
+                                                            var vm = new Project.Module.Component.ThPDSResidualCurrentBreakerModel(breaker);
+                                                            cb += () => UpdatePropertyGrid(vm);
+                                                            render += () =>
+                                                            {
+                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
+                                                                if (item.Key != null)
+                                                                {
+                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                }
+                                                            };
+                                                            return;
+                                                        }
+                                                    }
                                                     cb += () => UpdatePropertyGrid(null);
+                                                    return;
                                                 }
+                                                handleLeakageCircuit();
                                             }
                                         }
                                         else if (info.BlockName == "Contactor")
@@ -1560,26 +1589,25 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 var mi = new MenuItem();
                                 menu.Items.Add(mi);
-                                mi.Header = "切换回路形式";
+                                mi.Header = "切换回路样式";
+                                var outTypes = new CircuitFormOutType[] {
+                                    CircuitFormOutType.常规,
+                                    CircuitFormOutType.漏电,
+                                    CircuitFormOutType.电动机_分立元件,
+                                    CircuitFormOutType.电动机_CPS,
+                                    CircuitFormOutType.双速电动机_CPSdetailYY,
+                                    CircuitFormOutType.双速电动机_分立元件detailYY,
+                                    CircuitFormOutType.双速电动机_分立元件YY,};
+                                foreach (var outType in outTypes)
                                 {
-                                    var types = new CircuitFormOutType[]
+                                    var m = new MenuItem();
+                                    mi.Items.Add(m);
+                                    m.Header = outType.GetEnumDescription();
+                                    m.Command = new PDSCommand(() =>
                                     {
-                                        CircuitFormOutType.常规,
-                                        CircuitFormOutType.漏电,
-                                        CircuitFormOutType.接触器控制,
-                                        CircuitFormOutType.热继电器保护,
-                                    };
-                                    foreach (var type in types)
-                                    {
-                                        var m = new MenuItem();
-                                        m.Header = type.ToString();
-                                        m.Command = new PDSCommand(() =>
-                                        {
-                                            ThPDSProjectGraphService.SwitchFormOutType(edge, type);
-                                            UpdateCanvas();
-                                        });
-                                        mi.Items.Add(m);
-                                    }
+                                        ThPDSProjectGraphService.SwitchFormOutType(edge, outType);
+                                        UpdateCanvas();
+                                    });
                                 }
                             }
                             {
@@ -1598,7 +1626,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "分配负载";
                                 m.Command = new PDSCommand(() =>
                                 {
-                                    ThPDSProjectGraphService.DistributeLoad(graph, edge);
                                     UpdateCanvas();
                                 });
                             }
@@ -1608,6 +1635,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "删除";
                                 m.Command = new PDSCommand(() =>
                                 {
+                                    var vertice = graph.Vertices.ToList()[sel.Id];
                                     ThPDSProjectGraphService.DeleteCircuit(graph, edge);
                                     UpdateCanvas();
                                 });
@@ -1831,54 +1859,45 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
+                            var outTypes = new CircuitFormOutType[] {
+CircuitFormOutType.常规,
+CircuitFormOutType.漏电,
+CircuitFormOutType.电动机_分立元件,
+CircuitFormOutType.电动机_CPS,
+CircuitFormOutType.双速电动机_CPSdetailYY,
+CircuitFormOutType.双速电动机_分立元件detailYY,
+CircuitFormOutType.双速电动机_分立元件YY,};
+                            foreach (var outType in outTypes)
                             {
-                                var types = new CircuitFormOutType[]
+                                var m = new MenuItem();
+                                mi.Items.Add(m);
+                                m.Header = outType.GetDescription();
+                                m.Command = new PDSCommand(() =>
                                 {
-                                    CircuitFormOutType.常规,
-                                    CircuitFormOutType.漏电,
-                                    CircuitFormOutType.电动机_分立元件,
-                                    CircuitFormOutType.电动机_CPS,
-                                    CircuitFormOutType.双速电动机_CPSdetailYY,
-                                    CircuitFormOutType.双速电动机_分立元件detailYY,
-                                    CircuitFormOutType.双速电动机_分立元件YY,
-                                };
-                                foreach (var type in types)
-                                {
-                                    var m = new MenuItem();
-                                    m.Header = type.GetEnumDescription();
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        ThPDSProjectGraphService.AddCircuit(graph, vertice, type);
-                                        UpdateCanvas();
-                                    });
-                                    mi.Items.Add(m);
-                                }
+                                    ThPDSProjectGraphService.AddCircuit(graph, vertice, outType);
+                                    UpdateCanvas();
+                                });
                             }
                         }
                         {
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
-                            mi.Header = "切换回路形式";
+                            mi.Header = "切换回路样式";
+                            var inTypes = new CircuitFormInType[] {
+CircuitFormInType.一路进线,
+CircuitFormInType.二路进线ATSE,
+CircuitFormInType.三路进线,
+CircuitFormInType.集中电源,};
+                            foreach (var inType in inTypes)
                             {
-                                var types = new CircuitFormInType[]
+                                var m = new MenuItem();
+                                mi.Items.Add(m);
+                                m.Header = inType.GetDescription();
+                                m.Command = new PDSCommand(() =>
                                 {
-                                    CircuitFormInType.一路进线,
-                                    CircuitFormInType.二路进线ATSE,
-                                    CircuitFormInType.三路进线,
-                                    CircuitFormInType.集中电源,
-
-                                };
-                                foreach (var type in types)
-                                {
-                                    var m = new MenuItem();
-                                    m.Header = type.ToString();
-                                    m.Command = new PDSCommand(() =>
-                                    {
-                                        ThPDSProjectGraphService.UpdateFormInType(graph, vertice, type);
-                                        UpdateCanvas();
-                                    });
-                                    mi.Items.Add(m);
-                                }
+                                    ThPDSProjectGraphService.UpdateFormInType(graph, vertice, inType);
+                                    UpdateCanvas();
+                                });
                             }
                         }
                     }

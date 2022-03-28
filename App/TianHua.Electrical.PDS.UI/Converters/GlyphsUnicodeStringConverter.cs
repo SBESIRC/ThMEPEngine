@@ -9,7 +9,7 @@ namespace TianHua.Electrical.PDS.UI.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var s = value?.ToString();
-            if (string.IsNullOrEmpty(s)) return "空";
+            if (string.IsNullOrEmpty(s)) return " ";
             return s;
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
