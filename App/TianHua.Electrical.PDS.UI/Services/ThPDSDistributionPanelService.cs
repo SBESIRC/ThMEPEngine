@@ -1,26 +1,20 @@
-﻿using QuikGraph;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+﻿using System;
+using QuikGraph;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADExtension;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Collections.Generic;
+using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
-using TianHua.PDS.UI.Converter;
-using TianHua.Electrical.PDS.Project.Module;
-using ThCADExtension;
 using TianHua.Electrical.PDS.UI.Converters;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -1860,13 +1854,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
                             var outTypes = new CircuitFormOutType[] {
-CircuitFormOutType.常规,
-CircuitFormOutType.漏电,
-CircuitFormOutType.电动机_分立元件,
-CircuitFormOutType.电动机_CPS,
-CircuitFormOutType.双速电动机_CPSdetailYY,
-CircuitFormOutType.双速电动机_分立元件detailYY,
-CircuitFormOutType.双速电动机_分立元件YY,};
+                                CircuitFormOutType.常规,
+                                CircuitFormOutType.漏电,
+                                CircuitFormOutType.电动机_分立元件,
+                                CircuitFormOutType.电动机_CPS,
+                                CircuitFormOutType.双速电动机_CPSdetailYY,
+                                CircuitFormOutType.双速电动机_分立元件detailYY,
+                                CircuitFormOutType.双速电动机_分立元件YY,
+                            };
                             foreach (var outType in outTypes)
                             {
                                 var m = new MenuItem();
@@ -1884,10 +1879,11 @@ CircuitFormOutType.双速电动机_分立元件YY,};
                             menu.Items.Add(mi);
                             mi.Header = "切换回路样式";
                             var inTypes = new CircuitFormInType[] {
-CircuitFormInType.一路进线,
-CircuitFormInType.二路进线ATSE,
-CircuitFormInType.三路进线,
-CircuitFormInType.集中电源,};
+                                CircuitFormInType.一路进线,
+                                CircuitFormInType.二路进线ATSE,
+                                CircuitFormInType.三路进线,
+                                CircuitFormInType.集中电源,
+                            };
                             foreach (var inType in inTypes)
                             {
                                 var m = new MenuItem();
