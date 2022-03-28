@@ -212,7 +212,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             for (int i = 1; i < TableCJ.Rows.Count; i++)
             {
                 var row = TableCJ.Rows[i];
-                ContactorConfiguration.contactorInfos.Add(new ContactorComponentInfo()
+                ContactorConfiguration.contactorInfos.Add(new ContactorConfigurationItem()
                 {
                     Model = row["型号"].ToString(),
                     MaxKV = row["额定电压"].ToString(),

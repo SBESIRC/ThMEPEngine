@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure
 {
@@ -14,9 +10,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// <summary>
         /// 接触器配置
         /// </summary>
-        public static List<ContactorComponentInfo> contactorInfos = new List<ContactorComponentInfo>();
+        public static List<ContactorConfigurationItem> contactorInfos = new List<ContactorConfigurationItem>();
     }
-    public class ContactorComponentInfo :PDSBaseComponentConfigurationItem
+    public class ContactorConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>
         /// 型号
