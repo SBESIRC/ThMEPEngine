@@ -133,7 +133,7 @@ namespace ThCADExtension
         }
 
         /// <summary>
-        /// 电力配电系统图生成
+        /// 电力配电系统图模板
         /// </summary>
         /// <returns></returns>
         public static string PDSDiagramDwgPath()
