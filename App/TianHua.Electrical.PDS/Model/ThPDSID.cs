@@ -9,8 +9,8 @@ namespace TianHua.Electrical.PDS.Model
             BlockName = "";
             LoadID = "";
             Description = "";
-            CircuitID = new List<string>();
-            CircuitNumber = new List<string>(); 
+            CircuitID = new List<string> { "" };
+            CircuitNumber = new List<string> { "" };
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 回路编号
         /// </summary>
-        public List<string>  CircuitNumber { get; set; }
+        public List<string> CircuitNumber { get; set; }
 
         /// <summary>
         /// 上级配电箱编号

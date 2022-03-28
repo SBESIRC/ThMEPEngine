@@ -113,7 +113,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         [Description("电缆支架")]
         CR,
     }
-    
+
     /// <summary>
     /// 穿管敷设
     /// </summary>

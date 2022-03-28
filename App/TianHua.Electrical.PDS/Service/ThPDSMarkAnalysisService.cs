@@ -99,7 +99,6 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     else
                     {
-                        thPDSLoad.ID.CircuitID.Add("");
                         thPDSLoad.ID.LoadID = str;
                     }
                 }
@@ -196,10 +195,6 @@ namespace TianHua.Electrical.PDS.Service
                 id.LoadID = idMarks[0];
             }
             circuitMarks.Distinct().ForEach(o => id.CircuitNumber.Add(o));
-            if(id.CircuitNumber.Count == 0)
-            {
-                id.CircuitNumber.Add("");
-            }
 
             return id;
         }
@@ -246,15 +241,7 @@ namespace TianHua.Electrical.PDS.Service
             });
 
             circuitNumbers.Distinct().ForEach(o => id.CircuitNumber.Add(o));
-            if (id.CircuitNumber.Count == 0)
-            {
-                id.CircuitNumber.Add("");
-            }
             circuitIDs.Distinct().ForEach(o => id.CircuitID.Add(o));
-            if (id.CircuitID.Count == 0)
-            {
-                id.CircuitID.Add("");
-            }
             return id;
         }
 
@@ -338,17 +325,9 @@ namespace TianHua.Electrical.PDS.Service
             {
                 circuitID.CircuitNumber.Add(circuitMarks[0]);
             }
-            else
-            {
-                circuitID.CircuitNumber.Add("");
-            }
             if (circuitIDs.Distinct().Count() == 1)
             {
                 circuitID.CircuitID.Add(circuitIDs[0]);
-            }
-            else
-            {
-                circuitID.CircuitID.Add("");
             }
 
             return circuitID;
@@ -370,11 +349,6 @@ namespace TianHua.Electrical.PDS.Service
                         circuitID.CircuitID.Add(m.Value);
                     }
                 });
-            }
-            else
-            {
-                circuitID.CircuitNumber.Add("");
-                circuitID.CircuitID.Add("");
             }
             return circuitID;
         }

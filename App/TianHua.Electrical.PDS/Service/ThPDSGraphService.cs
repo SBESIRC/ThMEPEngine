@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using TianHua.Electrical.PDS.Model;
+using Dreambuild.AutoCAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -106,7 +107,7 @@ namespace TianHua.Electrical.PDS.Service
                 edge.Circuit.ViaConduit = true;
             }
 
-            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.FirstOrDefault());
+            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.Last());
             if (circuitModel.CircuitType != ThPDSCircuitType.None)
             {
                 if (target.Loads.Count > 0)
@@ -114,35 +115,30 @@ namespace TianHua.Electrical.PDS.Service
                     target.Loads[0].CircuitType = circuitModel.CircuitType;
                 }
             }
-            var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
-            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault()))
+            // 仅当回路编号有效个数为1时，添加至回路的回路编号中
+            var circuitIDs = new List<string>();
+            target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
+                .ForEach(id => circuitIDs.Add(id)));
+            circuitIDs = circuitIDs.Distinct().ToList();
+            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
-                edge.Circuit.ID.CircuitID.Add(circuitIDs[0]);
+                edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
             }
-            else
+            var circuitNumbers = new List<string>();
+            target.Loads.ForEach(o => o.ID.CircuitNumber.Where(num => !string.IsNullOrEmpty(num))
+                .ForEach(num => circuitNumbers.Add(num)));
+            circuitNumbers = circuitNumbers.Distinct().ToList();
+            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
             {
-                edge.Circuit.ID.CircuitID.Add("");
-            }
-            var circuitNumbers = target.Loads.Select(o => o.ID.CircuitNumber).Distinct().OfType<string>().ToList();
-            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault()))
-            {
-                edge.Circuit.ID.CircuitNumber.Add(circuitNumbers[0]);
-            }
-            else
-            {
-                edge.Circuit.ID.CircuitNumber.Add("");
+                edge.Circuit.ID.CircuitNumber.Add(circuitNumbers.First());
             }
 
             if (source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault())
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault())
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.CircuitNumber.Add(source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID.First());
-            }
-            else
-            {
-                edge.Circuit.ID.CircuitNumber.Add("");
+                edge.Circuit.ID.CircuitNumber.Add(source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID.Last());
             }
 
             if (target.NodeType == PDSNodeType.None)

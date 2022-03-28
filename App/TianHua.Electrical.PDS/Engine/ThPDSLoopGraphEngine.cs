@@ -220,6 +220,11 @@ namespace TianHua.Electrical.PDS.Engine
 
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
+                                if (string.IsNullOrEmpty(number))
+                                {
+                                    return;
+                                }
+
                                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey);
                                 PDSGraph.Graph.AddEdge(newEdge);
                             });
@@ -294,6 +299,11 @@ namespace TianHua.Electrical.PDS.Engine
 
                         newNode.Loads[0].ID.CircuitNumber.ForEach(circuitNumber =>
                         {
+                            if (string.IsNullOrEmpty(circuitNumber))
+                            {
+                                return;
+                            }
+
                             var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { circuitNumber }, DistBoxKey);
                             var newOBB = ThPDSBufferService.Buffer(distBox, Database);
                             var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
@@ -355,6 +365,11 @@ namespace TianHua.Electrical.PDS.Engine
 
                         newNode.Loads[0].ID.CircuitNumber.ForEach(x =>
                         {
+                            if (string.IsNullOrEmpty(x))
+                            {
+                                return;
+                            }
+
                             // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
                             var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { x }, DistBoxKey);
                             PDSGraph.Graph.AddEdge(newEdge);

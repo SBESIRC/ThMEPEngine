@@ -1,9 +1,10 @@
-﻿using System.Windows;
+﻿using AcHelper;
 using Autodesk.AutoCAD.Runtime;
-using TianHua.Electrical.PDS.UI.UI;
-using TianHua.Electrical.PDS.Command;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using System.Linq;
+using System.Windows;
+using TianHua.Electrical.PDS.Command;
+using TianHua.Electrical.PDS.UI.UI;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI
 {
@@ -58,6 +59,7 @@ namespace TianHua.Electrical.PDS.UI
                 var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices[i]);
                 drawCmd.Execute();
             }
+            Active.Editor.Regen();
         }
     }
 }
