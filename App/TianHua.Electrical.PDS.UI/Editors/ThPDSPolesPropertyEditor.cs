@@ -9,6 +9,9 @@ using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {
+    /// <summary>
+    /// 极数编辑器
+    /// </summary>
     public class ThPDSPolesPropertyEditor : PropertyEditorBase
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox

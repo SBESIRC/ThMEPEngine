@@ -10,9 +10,9 @@ using TianHua.Electrical.PDS.UI.Project.Module.Component;
 namespace TianHua.Electrical.PDS.UI.Editors
 {
     /// <summary>
-    /// 型号编辑器
+    /// 额定电流编辑器
     /// </summary>
-    public class ThPDSModelPropertyEditor : PropertyEditorBase
+    public class ThPDSRatedCurrentPropertyEditor : PropertyEditorBase
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox
         {
@@ -26,7 +26,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
         {
             if (propertyItem.Value is ThPDSContactorModel model)
             {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Model).Distinct();
+                return ContactorConfiguration.contactorInfos.Select(o => o.Amps.ToString()).Distinct();
             }
             throw new NotSupportedException();
         }

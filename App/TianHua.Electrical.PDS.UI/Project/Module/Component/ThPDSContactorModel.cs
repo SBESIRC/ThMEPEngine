@@ -57,6 +57,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("额定电流")]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _contactor.RatedCurrent;

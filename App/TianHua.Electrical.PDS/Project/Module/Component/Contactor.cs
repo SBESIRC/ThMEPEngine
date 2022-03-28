@@ -30,9 +30,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             RatedCurrent = contactor.Amps.ToString();
         }
 
-        //public string Content { get { return $"{ContactorType} {RatedCurrent}/{PolesNum}"; } }
-
-
         /// <summary>
         /// 接触器类型
         /// </summary>
