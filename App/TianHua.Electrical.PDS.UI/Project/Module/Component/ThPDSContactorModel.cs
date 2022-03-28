@@ -34,10 +34,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
         public string Model
         {
-            get => _contactor.ContactorType;
+            get => _contactor.Model;
             set
             {
-                _contactor.ContactorType = value;
+                _contactor.Model = value;
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }

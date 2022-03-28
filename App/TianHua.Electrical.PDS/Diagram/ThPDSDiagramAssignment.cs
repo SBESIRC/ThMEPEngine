@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()], firstPosition, 100 * scale);
                         srcIsolatingSwitch.Erase();
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
-                        QLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch);
+                        QLText.TextString = circuit.isolatingSwitch.Content();
                         break;
                     }
                 case CircuitFormInType.二路进线ATSE:
@@ -111,7 +111,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch1.ComponentType.GetDescription()], firstPosition, 100 * scale);
                         firstIsolatingSwitch.Erase();
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch1);
+                        firstQLText.TextString = circuit.isolatingSwitch1.Content();
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
@@ -120,7 +120,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch2.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         secondIsolatingSwitch.Erase();
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = GetIsolatingSwitchContent(circuit.isolatingSwitch2);
+                        secondQLText.TextString = circuit.isolatingSwitch2.Content();
 
                         // 转换开关
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
@@ -264,7 +264,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.contactor.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         srcContactor.Erase();
                         var QACText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC).First();
-                        QACText.TextString = GetContactorContent(circuit.contactor);
+                        QACText.TextString = circuit.contactor.Content();
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -291,7 +291,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             ThPDSComponentMap.ComponentMap[circuit.thermalRelay.ComponentType.GetDescription()], secondPosition, 100 * scale);
                         srcThermalRelay.Erase();
                         var KHText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH).First();
-                        KHText.TextString = GetThermalRelayContent(circuit.thermalRelay);
+                        KHText.TextString = circuit.thermalRelay.Content();
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -390,21 +390,6 @@ namespace TianHua.Electrical.PDS.Diagram
                         throw new NotSupportedException();
                     }
             }
-        }
-
-        private string GetThermalRelayContent(ThermalRelay thermalRelay)
-        {
-            return $"{thermalRelay.Model} {thermalRelay.RatedCurrent}A";
-        }
-
-        private string GetContactorContent(Contactor contactor)
-        {
-            return $"{contactor.ContactorType} {contactor.RatedCurrent}/{contactor.PolesNum}";
-        }
-
-        private string GetIsolatingSwitchContent(IsolatingSwitch isolatingSwitch)
-        {
-            return $"{isolatingSwitch.Model} {isolatingSwitch.RatedCurrent}/{isolatingSwitch.PolesNum}";
         }
 
         private CircuitFormInType FetchDescription(string str)
