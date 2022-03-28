@@ -264,7 +264,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = Table.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ThermalRelayConfiguration.thermalRelayInfos.Add(new ThermalRelayComponentInfo()
+                    ThermalRelayConfiguration.thermalRelayInfos.Add(new ThermalRelayConfigurationItem()
                     {
                         ModelName = row["型号"].ToString(),
                         MaxKV = row["额定电压"].ToString(),

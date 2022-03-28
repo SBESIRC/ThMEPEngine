@@ -51,10 +51,10 @@
     <Compile Include="Editors\ThPDSEnumDescriptionConverter.cs" />
     <Compile Include="Editors\ThPDSEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSPolesPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Models\Component\ThPDSContactorModel.cs" />
     <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
-    <Compile Include="Models\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Models\ThPDSBranchBus.cs" />

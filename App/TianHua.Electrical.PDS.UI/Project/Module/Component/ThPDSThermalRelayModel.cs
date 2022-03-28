@@ -42,8 +42,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
         [DisplayName("极数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _thermalRelay.PolesNum;

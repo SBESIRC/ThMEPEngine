@@ -56,6 +56,8 @@
     <Compile Include="Project\Module\Component\BreakerBaseComponent.cs" />
     <Compile Include="Project\Module\Component\Extension\ComponentTypeSelector.cs" />
     <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
+    <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSDBText.cs" />
