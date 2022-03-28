@@ -165,11 +165,11 @@ namespace ThMEPArchitecture.PartitionLayout
             points.Add(pt);
             pt = pt.TransformBy(Matrix3d.Displacement(CreateVector(baseline).GetNormal() * CollisionD));
             points.Add(pt);
-            pt = pt.TransformBy(Matrix3d.Displacement(vec * (CollisionD + DisVertCarLength - CollisionCT - CollisionCM)));
+            pt = pt.TransformBy(Matrix3d.Displacement(vec * (CollisionD + DisVertCarLength - CollisionCT - CollisionCM-CollisionTOP)));
             points.Add(pt);
             pt = pt.TransformBy(Matrix3d.Displacement(CreateVector(baseline).GetNormal() * DisVertCarWidth));
             points.Add(pt);
-            pt = pt.TransformBy(Matrix3d.Displacement(-vec * (CollisionD + DisVertCarLength - CollisionCT - CollisionCM)));
+            pt = pt.TransformBy(Matrix3d.Displacement(-vec * (CollisionD + DisVertCarLength - CollisionCT - CollisionCM-CollisionTOP)));
             points.Add(pt);
             pt = pt.TransformBy(Matrix3d.Displacement(CreateVector(baseline).GetNormal() * CollisionD));
             points.Add(pt);
@@ -359,12 +359,12 @@ namespace ThMEPArchitecture.PartitionLayout
             if (isStart)
             {
                 pt = lane.Line.StartPoint;
-                ps = pt.TransformBy(Matrix3d.Displacement(CreateVector(lane.Line).GetNormal() * (DisCarAndHalfLane + CollisionD)));
+                ps = pt.TransformBy(Matrix3d.Displacement(CreateVector(lane.Line).GetNormal() * (DisCarAndHalfLane + CollisionD-CollisionTOP)));
             }
             else
             {
                 pt = lane.Line.EndPoint;
-                ps = pt.TransformBy(Matrix3d.Displacement(-CreateVector(lane.Line).GetNormal() * (DisCarAndHalfLane + CollisionD)));
+                ps = pt.TransformBy(Matrix3d.Displacement(-CreateVector(lane.Line).GetNormal() * (DisCarAndHalfLane + CollisionD-CollisionTOP)));
             }
             var line = CreateLineFromStartPtAndVector(ps, lane.Vec, MaxLength);
             var tmpline = SplitLine(line, Boundary).Where(e => e.Length > 1).First();
@@ -373,7 +373,7 @@ namespace ThMEPArchitecture.PartitionLayout
             else return generate_lane_length;
             var gvec = CreateVector(line).GetPerpendicularVector().GetNormal();
             var ptestvec = ps.TransformBy(Matrix3d.Displacement(gvec));
-            if (ptestvec.DistanceTo(pt) < (DisCarAndHalfLane + CollisionD)) gvec = -gvec;
+            if (ptestvec.DistanceTo(pt) < (DisCarAndHalfLane + CollisionD-CollisionTOP)) gvec = -gvec;
             var distnearbuilding = IsEssentialToCloseToBuilding(line, gvec);
             if (distnearbuilding != -1)
             {

@@ -99,6 +99,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public static double DisParallelCarWidth = 2400;
         public static double DisLaneWidth = 5500;
         public static double CollisionD = 300;
+        public static double CollisionTOP = 100;
         public static double CollisionCT = 1400;
         public static double CollisionCM = 1500;
         public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
