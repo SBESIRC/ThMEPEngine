@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using ThCADExtension;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
@@ -11,7 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class ThermalRelay : PDSBaseComponent
     {
         /// <summary>
-        /// 计算电流
+        /// 构造函数
         /// </summary>
         /// <param name="calculateCurrent"></param>
         public ThermalRelay(double calculateCurrent)
@@ -24,20 +23,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
             }
+            Model = thermalRelay.Model;
             PolesNum = thermalRelay.Poles;
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
-            ThermalRelayType = GetThermalRelayType(thermalRelay.ModelName);
-        }
-
-        private ThermalRelayModel GetThermalRelayType(string model)
-        {
-            return model.GetEnumName<ThermalRelayModel>();
         }
 
         /// <summary>
-        /// 热继电器类型
+        /// 型号
         /// </summary>
-        public ThermalRelayModel ThermalRelayType { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 极数

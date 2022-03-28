@@ -266,7 +266,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 {
                     ThermalRelayConfiguration.thermalRelayInfos.Add(new ThermalRelayConfigurationItem()
                     {
-                        ModelName = row["型号"].ToString(),
+                        Model = row["型号"].ToString(),
                         MaxKV = row["额定电压"].ToString(),
                         Poles = row["级数"].ToString(),
                         MaxAmps = double.Parse(row["整定电流上限"].ToString()),

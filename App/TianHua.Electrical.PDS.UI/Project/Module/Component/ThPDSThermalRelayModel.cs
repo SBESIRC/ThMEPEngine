@@ -1,6 +1,5 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -23,20 +22,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         [DisplayName("内容")]
-        public string Content => $"{Model.GetEnumDescription()} {RatedCurrent}A";
+        public string Content => $"{Model} {RatedCurrent}A";
 
         [ReadOnly(true)]
         [DisplayName("元器件类型")]
         public string Type => _thermalRelay.ComponentType.GetDescription();
 
         [DisplayName("型号")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<ThermalRelayModel>), typeof(PropertyEditorBase))]
-        public ThermalRelayModel Model
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => _thermalRelay.ThermalRelayType;
+            get => _thermalRelay.Model;
             set
             {
-                _thermalRelay.ThermalRelayType = value;
+                _thermalRelay.Model = value;
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }

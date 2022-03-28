@@ -246,29 +246,6 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
-    /// 热继电器型号
-    /// </summary>
-    public enum ThermalRelayModel
-    {
-        [Description("JR20-10")]
-        JR20Hyphen10 =   1,
-        [Description("JR20-16")]
-        JR20Hyphen16 =   2,
-        [Description("JR20-25")]
-        JR20Hyphen25 =   3,
-        [Description("JR20-63")]
-        JR20Hyphen63 =   4,
-        [Description("JR20-160")]
-        JR20Hyphen160 =  5,
-        [Description("JR20-205")]
-        JR20Hyphen205 =  6,
-        [Description("JR20-400")]
-        JR20Hyphen400 =  7,
-        [Description("JR20-630")]
-        JR20Hyphen630 =  8,
-    }
-
-    /// <summary>
     /// 箱体尺寸
     /// </summary>
     public enum BoxSize

@@ -394,7 +394,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
         private string GetThermalRelayContent(ThermalRelay thermalRelay)
         {
-            return $"{thermalRelay.ThermalRelayType.GetEnumDescription()} {thermalRelay.RatedCurrent}A";
+            return $"{thermalRelay.Model} {thermalRelay.RatedCurrent}A";
         }
 
         private string GetContactorContent(Contactor contactor)

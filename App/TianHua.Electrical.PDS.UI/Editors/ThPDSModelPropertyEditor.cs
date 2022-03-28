@@ -32,6 +32,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return IsolatorConfiguration.isolatorInfos.Select(o => o.Model).Distinct();
             }
+            if (propertyItem.Value is ThPDSThermalRelayModel)
+            {
+                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Model).Distinct();
+            }
             throw new NotSupportedException();
         }
     }

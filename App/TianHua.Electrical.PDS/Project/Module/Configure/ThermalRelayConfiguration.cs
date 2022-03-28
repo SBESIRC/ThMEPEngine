@@ -19,9 +19,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     public class ThermalRelayConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>
-        /// 型号（全称）
+        /// 型号
         /// </summary>
-        public string ModelName { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 整定电流上限
