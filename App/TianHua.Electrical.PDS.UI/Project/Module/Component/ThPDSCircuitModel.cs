@@ -1,10 +1,10 @@
-﻿using HandyControl.Controls;
+﻿using System.Linq;
 using System.ComponentModel;
-using System.Linq;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
+﻿using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("回路编号")]
         public string CircuitNumber
         {
-            get => _edge.Circuit.ID.CircuitNumber.Last();
+            get => _edge.Circuit.ID.CircuitNumber.LastOrDefault();
         }
 
         [ReadOnly(true)]
