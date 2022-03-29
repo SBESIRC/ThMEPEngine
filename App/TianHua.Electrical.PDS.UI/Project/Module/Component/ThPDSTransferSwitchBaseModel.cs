@@ -39,7 +39,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
-        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
+        //[Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _transferSwitch.PolesNum;
@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("额定电流")]
-        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        //[Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _transferSwitch.RatedCurrent;
