@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.EarthingGrid.Generator.Utils;
+using ThMEPElectrical.EarthingGrid.Generator.Data;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 {
@@ -21,14 +22,13 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         private Point3dCollection allPts = new Point3dCollection();
         private Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
 
-        public ColumnGrid(Dictionary<Polyline, HashSet<Point3d>> _outlinewithBorderPts, List<Polyline> _allOutlines, Dictionary<Polyline, HashSet<Point3d>> _outlinewithNearPts,
-            HashSet<Polyline> _buildingOutline, HashSet<Point3d> _columnPts)
+        public ColumnGrid(PreProcess preProcessData)
         {
-            outlinewithBorderPts = _outlinewithBorderPts;
-            allOutlines = _allOutlines;
-            outlinewithNearPts = _outlinewithNearPts;
-            buildingOutline = _buildingOutline;
-            columnPts = _columnPts;
+            outlinewithBorderPts = preProcessData.outlinewithBorderPts;
+            allOutlines = preProcessData.outlines;
+            outlinewithNearPts = preProcessData.outlinewithNearPts;
+            buildingOutline = preProcessData.buildingOutline;
+            columnPts = preProcessData.columnPts;
         }
 
         public Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> Genterate()
@@ -86,7 +86,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             StructureDealer.CloseBorder(allOutlines, graph.Keys.ToList(), ref outlineWithBorderLine); ///////////////////这个不一定符合要求，要加入拐点
 
             outlineWithBorderLine.Values.ForEach(tups=> tups.ForEach(o => GraphDealer.AddLineToGraph(o.Item1, o.Item2, ref graph)));
-            
+
             AreaDealer.BuildPolygonsCustom(graph, ref findPolylineFromLines);
 
             ////此处加到StructureDealer里一个函数：从findPolylineFromLines删除掉outlineWithBorderLine

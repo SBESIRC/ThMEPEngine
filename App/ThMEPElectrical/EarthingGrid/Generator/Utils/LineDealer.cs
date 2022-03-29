@@ -108,10 +108,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// <returns></returns>
         public static bool IsIntersect(Point3d aSt, Point3d aEd, Point3d bSt, Point3d bEd)
         {
+            //快速排斥
             if (Math.Max(aSt.X, aEd.X) < Math.Min(bSt.X, bEd.X)) return false;
             if (Math.Max(aSt.Y, aEd.Y) < Math.Min(bSt.Y, bEd.Y)) return false;
             if (Math.Max(bSt.X, bEd.X) < Math.Min(aSt.X, aEd.X)) return false;
             if (Math.Max(bSt.Y, bEd.Y) < Math.Min(aSt.Y, aEd.Y)) return false;
+            //相交测试
             double EPS3 = 1.0e-3f;
             var dir = bEd - bSt;
             var dValue = (aSt - bSt).CrossProduct(dir).Z * (aEd - bSt).CrossProduct(dir).Z;
@@ -214,6 +216,32 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 }
             }
             return ansTuples;
+        }
+
+        public static HashSet<Tuple<Point3d, Point3d>> Graph2Tuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
+            if (dicTuples.IsNull())
+            {
+                return tuples;
+            }
+            foreach (var dicTuple in dicTuples)
+            {
+                foreach (var point in dicTuple.Value)
+                {
+                    if(!tuples.Contains(new Tuple<Point3d, Point3d>(point, dicTuple.Key)))
+                    {
+                        tuples.Add(new Tuple<Point3d, Point3d>(dicTuple.Key, point));
+                    }
+                }
+            }
+            return tuples;
+        }
+
+
+        public static void RemoveIntersectsLines()
+        {
+
         }
     }
 }

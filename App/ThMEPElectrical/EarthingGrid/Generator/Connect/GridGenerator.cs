@@ -1,43 +1,32 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPElectrical.EarthingGrid.Generator.Utils;
+using ThMEPElectrical.EarthingGrid.Data;
+using ThMEPElectrical.EarthingGrid.Generator.Data;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 {
     class GridGenerator
     {
-        public Dictionary<Polyline, List<Polyline>> outlineWithWalls = new Dictionary<Polyline, List<Polyline>>();
-        public List<Polyline> outlines = new List<Polyline>();
-        public HashSet<Polyline> buildingOutline = new HashSet<Polyline>();
-        public HashSet<Point3d> columnPts = new HashSet<Point3d>();
-
-        private Dictionary<Polyline, HashSet<Point3d>> outlinewithBorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
-        private Dictionary<Polyline, HashSet<Point3d>> outlinewithNearPts = new Dictionary<Polyline, HashSet<Point3d>>();
-        //private double[,,] faceSizes = new double[2, 3, 2] { { {10000, 10000}, {12000, 8000}, {20000, 5000} }, { {20000, 20000}, {24000, 16000}, {40000, 10000} } };
-
-        public GridGenerator(Dictionary<Polyline, List<Polyline>> _outlineWithWalls, List<Polyline> _outlines, HashSet<Polyline> _buildingOutline, HashSet<Point3d> _columnPts)
+        public static void Genterate(PreProcess preProcessData, List<Tuple<double, double>> faceSize)
         {
-            outlineWithWalls = _outlineWithWalls;
-            outlines = _outlines;
-            buildingOutline = _buildingOutline;
-            columnPts = _columnPts;
-        }
-
-        public void Genterator()
-        {
-            //0、预处理数据
-            //输入墙、外边框，获得外边框对应的墙点，获得外边框对应的引下线
-            DataProcess.ProcessData(outlineWithWalls, outlines, columnPts, ref outlinewithBorderPts, ref outlinewithNearPts);
-
             //1、生成柱网
-            var columnGrid = new ColumnGrid(outlinewithBorderPts,outlines, outlinewithNearPts, buildingOutline, columnPts);
+            var columnGrid = new ColumnGrid(preProcessData);
             var findPolylineFromLines = columnGrid.Genterate();
 
-            List<Tuple<double, double>> faceSize = new List<Tuple<double, double>>();
+            //findPolylineFromLines 需要对它进行处理 包括 1、由于前文的split函数缺陷，造成线会有交叉情况，去交叉，在这或者在split处处理
+
             //2、生成地网
-            var earthGrid = new EarthGrid(findPolylineFromLines, faceSize);
-            var grid = earthGrid.Genterate();
+            var grid = new EarthGrid(findPolylineFromLines, faceSize);
+            var earthGrid = grid.Genterate();
+
+            //3、连接引下线
+            DownConductor.AddDownConductorToEarthGrid(preProcessData, ref earthGrid);
+
+            ShowInfo.ShowGraph(earthGrid, 4);
         }
     }
 }

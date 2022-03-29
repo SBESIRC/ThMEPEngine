@@ -112,7 +112,7 @@
     <Compile Include="Command\TxtStrucInfoCommand.cs" />
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
-    <Compile Include="Command\ThGroundGridCommand.cs" />
+    <Compile Include="Command\ThEarthingGridCommand.cs" />
     <Compile Include="Command\ThDclCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
@@ -140,17 +140,21 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="EarthingGrid\Data\ThEarthingGridDatasetFactory.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorRecognitionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireRecognitionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThMainBuildingHatchExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\ColumnGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\DataProcess.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\DownConductor.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\EarthGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\GridGenerator.cs" />
     <Compile Include="EarthingGrid\Generator\Data\ClassData.cs" />
+    <Compile Include="EarthingGrid\Generator\Data\PreProcess.cs" />
     <Compile Include="EarthingGrid\Generator\Test\test.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\AreaDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\BorderNearConnect.cs" />
@@ -162,6 +166,7 @@
     <Compile Include="EarthingGrid\Generator\Utils\StructureDealer.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
+    <Compile Include="EarthingGrid\Service\ThShearwallGroupService.cs" />
     <Compile Include="EarthingGrid\ThEarthingGridCommon.cs" />
     <Compile Include="ElectricalLoadCalculation\ElectricalConfigDataModel.cs" />
     <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationConfig.cs" />
@@ -392,7 +397,7 @@
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
     <Compile Include="ThElectricalLoadCalculationCmd.cs" />
-    <Compile Include="ThGroundGridCmds.cs" />
+    <Compile Include="ThEarthingGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThMEPCommon.cs" />

@@ -222,6 +222,19 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 new Tuple<Point3d, Point3d>(centerB, centerD) : new Tuple<Point3d, Point3d>(centerA, centerC);
         }
 
-
+        /// <summary>
+        /// 获取两条线的交点
+        /// </summary>
+        public static Point3d GetIntersectPoint(Point3d p0, Point3d p1, Point3d p2, Point3d p3)
+        {
+            double A1 = p1.Y - p0.Y;
+            double B1 = p0.X - p1.X;
+            double C1 = A1 * p0.X + B1 * p0.Y;
+            double A2 = p3.Y - p2.Y;
+            double B2 = p2.X - p3.X;
+            double C2 = A2 * p2.X + B2 * p2.Y;
+            double denominator = A1 * B2 - A2 * B1;
+            return new Point3d((B2 * C1 - B1 * C2) / denominator, (A1 * C2 - A2 * C1) / denominator, 0);
+        }
     }
 }

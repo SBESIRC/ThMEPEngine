@@ -17,4 +17,5 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
         //接地网建议规格（m）	10x10或12x8或20x5	10x10或12x8或20x5	20x20或24x16或40x10
 
     }
+
 }

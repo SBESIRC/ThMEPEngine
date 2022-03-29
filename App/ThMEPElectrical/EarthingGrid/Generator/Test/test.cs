@@ -53,9 +53,8 @@ namespace ThMEPElectrical.EarthGrid.Generator.Test
                     return;
                 }
                 Dictionary<Polyline, List<Polyline>> outlineWithWalls = new Dictionary<Polyline, List<Polyline>>();
-                HashSet<Polyline> buildingOutline = new HashSet<Polyline>();
-                var grid = new GridGenerator(outlineWithWalls, outlines, buildingOutline, columnPts);
-                grid.Genterator();
+                //var grid = new GridGenerator(outlineWithWalls, outlines, columnPts);
+                //grid.Genterator();
             }
         }
         //获取内容：

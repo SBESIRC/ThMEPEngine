@@ -20,12 +20,12 @@ using NFox.Cad;
 
 namespace ThMEPElectrical
 {
-    public class ThGroundGridCmds
+    public class ThEarthingGridCmds
     {
         [CommandMethod("TIANHUACAD", "THGGD", CommandFlags.Modal)]
         public void THGGD()
         {
-            using (var cmd = new ThGroundGridCommand())
+            using (var cmd = new ThEarthingGridCommand())
             {
                 cmd.Execute();
             }
