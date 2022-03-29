@@ -100,6 +100,7 @@
     <Compile Include="Reinforcement\Model\ThWallColumnReinforceConfig.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThYJKDataSetFactory.cs" />
     <Compile Include="Reinforcement\Service\ThAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThDataGroupService.cs" />
     <Compile Include="Reinforcement\Service\ThEdgeComponentMarkFindService.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
