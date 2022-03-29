@@ -611,11 +611,39 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         render += () =>
                         {
                             {
+                                var circuitNumbers = Service.ThPDSCircuitNumberSeacher.Seach(vertice, graph);
+                                var str = string.Join(",", circuitNumbers);
                                 {
                                     var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号");
                                     if (item != null)
                                     {
-                                        var s = string.Join(",", vertice.Load.ID.CircuitNumber);
+                                        if (string.IsNullOrEmpty(str)) str = " ";
+                                        item.UnicodeString = str;
+                                    }
+                                }
+                                {
+                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号1");
+                                    if (item != null)
+                                    {
+                                        var s = circuitNumbers.Count >= 1 ? circuitNumbers[0] : str;
+                                        if (string.IsNullOrEmpty(s)) s = " ";
+                                        item.UnicodeString = s;
+                                    }
+                                }
+                                {
+                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号2");
+                                    if (item != null)
+                                    {
+                                        var s = circuitNumbers.Count >= 2 ? circuitNumbers[1] : str;
+                                        if (string.IsNullOrEmpty(s)) s = " ";
+                                        item.UnicodeString = s;
+                                    }
+                                }
+                                {
+                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号3");
+                                    if (item != null)
+                                    {
+                                        var s = circuitNumbers.Count >= 3 ? circuitNumbers[2] : str;
                                         if (string.IsNullOrEmpty(s)) s = " ";
                                         item.UnicodeString = s;
                                     }
@@ -1159,6 +1187,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                     }
                                                 };
+                                                var cmenu = new ContextMenu();
+                                                cvs.ContextMenu = cmenu;
+                                                cmenu.Items.Add(new MenuItem()
+                                                {
+                                                    Header = "切换断路器",
+                                                    Command = new PDSCommand(() =>
+                                                    {
+                                                        UpdateCanvas();
+                                                    }),
+                                                });
                                             }
                                             else
                                             {
