@@ -54,7 +54,7 @@ namespace TianHua.Electrical.PDS.UI
             var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
             if (graph == null) return;
             var vertices = graph.Vertices.ToList();
-            for (var i = 0; i < vertices.Count && i < 10; i++)
+            for (var i = 0; i < vertices.Count; i++)
             {
                 var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices[i]);
                 drawCmd.Execute();

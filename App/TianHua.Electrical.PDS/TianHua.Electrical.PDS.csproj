@@ -132,6 +132,7 @@
     <Compile Include="Service\ThMarkService.cs" />
     <Compile Include="Service\ThPDSBufferService.cs" />
     <Compile Include="Service\ThPDSCircuitConfig.cs" />
+    <Compile Include="Service\ThPDSCircuitNumberSeacher.cs" />
     <Compile Include="Service\ThPDSGraphService.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />

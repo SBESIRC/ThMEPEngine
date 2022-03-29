@@ -220,11 +220,6 @@ namespace TianHua.Electrical.PDS.Engine
 
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
-                                if (string.IsNullOrEmpty(number))
-                                {
-                                    return;
-                                }
-
                                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey);
                                 PDSGraph.Graph.AddEdge(newEdge);
                             });

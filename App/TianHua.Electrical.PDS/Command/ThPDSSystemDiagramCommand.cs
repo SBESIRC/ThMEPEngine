@@ -14,6 +14,9 @@ using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Command
@@ -67,7 +70,7 @@ namespace TianHua.Electrical.PDS.Command
                 // 插入进线回路
                 basePoint = new Point3d(bodyStartPoint.X, bodyStartPoint.Y - 460 * scaleFactor, 0);
                 var enterCircuit = insertEngine.Insert(activeDb, configDb, enterType, basePoint, scale);
-                var busbar = assignment.EnterCircuitAssign(activeDb, configDb, enterCircuit, Graph, StartNode,scale);
+                var busbar = assignment.EnterCircuitAssign(activeDb, configDb, enterCircuit, Graph, StartNode, scale);
 
                 // 插入空白行
                 var firstRowPoint = new Point3d(bodyStartPoint.X + 5000 * scaleFactor, bodyStartPoint.Y - 500 * scaleFactor, 0);
@@ -83,10 +86,10 @@ namespace TianHua.Electrical.PDS.Command
                     .ToList();
                 foreach (var edge in edges)
                 {
-                    var outType = edge.Details.CircuitForm.CircuitFormType.GetDescription();
+                    var outType = GetOutType(edge.Details.CircuitForm);
                     basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
                     var outCircuit = insertEngine.Insert(activeDb, configDb, outType, basePoint, scale);
-                    assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge,scale);
+                    assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale);
                 }
                 if (edges.Count < 3)
                 {
@@ -123,6 +126,74 @@ namespace TianHua.Electrical.PDS.Command
                 activeDb.ModelSpace.Add(body);
                 body.Layer = ThPDSLayerService.TableFrameLayer();
             }
+        }
+
+        private static string GetOutType(PDSBaseOutCircuit circuitForm)
+        {
+            switch (circuitForm.CircuitFormType)
+            {
+                case CircuitFormOutType.配电计量_上海CT:
+                    {
+                        var circuit = circuitForm as DistributionMetering_ShanghaiCTCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(MeterTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_上海直接表.GetDescription();
+                        }
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_上海直接表:
+                    {
+                        var circuit = circuitForm as DistributionMetering_ShanghaiMTCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(CurrentTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_上海CT.GetDescription();
+                        }
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在前:
+                    {
+                        var circuit = circuitForm as DistributionMetering_CTInFrontCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(MeterTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_直接表在前.GetDescription();
+                        }
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在前:
+                    {
+                        var circuit = circuitForm as DistributionMetering_MTInFrontCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(CurrentTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_CT表在前.GetDescription();
+                        }
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在后:
+                    {
+                        var circuit = circuitForm as DistributionMetering_CTInBehindCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(MeterTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_直接表在后.GetDescription();
+                        }
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在后:
+                    {
+                        var circuit = circuitForm as DistributionMetering_MTInBehindCircuit;
+                        var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
+                        if (type.Equals(typeof(CurrentTransformer)))
+                        {
+                            return CircuitFormOutType.配电计量_CT表在后.GetDescription();
+                        }
+                        break;
+                    }
+            }
+            return circuitForm.CircuitFormType.GetDescription();
         }
 
         private static bool TrySelectPoint(out Point3d basePt)

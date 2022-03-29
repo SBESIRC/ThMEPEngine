@@ -40,8 +40,10 @@ namespace TianHua.Electrical.PDS.Engine
 
             for (var i = 0; i < cabletrayEdgeList.Count; i++)
             {
-                var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitNumber.Last();
-                if (string.IsNullOrEmpty(circuitID))
+                var srcpanelID = cabletrayEdgeList[i].Circuit.ID.SourcePanelID;
+                var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitID;
+                var circuitNumber = cabletrayEdgeList[i].Circuit.ID.CircuitNumber.Last();
+                if (string.IsNullOrEmpty(circuitNumber))
                 {
                     continue;
                 }
@@ -53,10 +55,10 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         otherDistBoxID = cabletrayEdgeList[j].Target.Loads[0].ID.LoadID;
                     }
-                    if (!string.IsNullOrEmpty(otherDistBoxID) && circuitID.IndexOf(otherDistBoxID) == 0)
+                    if (!string.IsNullOrEmpty(otherDistBoxID) && srcpanelID.Last().Equals(otherDistBoxID))
                     {
                         var edge = ThPDSGraphService.UnionEdge(cabletrayEdgeList[j].Target, cabletrayEdgeList[i].Target,
-                            new List<string> { circuitID });
+                            srcpanelID, circuitID);
                         edge.Circuit.ViaCableTray = true;
                         if (cabletrayEdgeList[i].Circuit.ViaConduit || cabletrayEdgeList[j].Circuit.ViaConduit)
                         {

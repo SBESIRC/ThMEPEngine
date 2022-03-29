@@ -15,15 +15,17 @@
 
         public static readonly string DISTRIBUTION_BOX_ID = "配电箱编号";
         public static readonly string APPLICATION = "Description";
-        public static readonly string FIRE_LOAD = "Fire Load"; 
+        public static readonly string FIRE_LOAD = "Fire Load";
         public static readonly string OVERALL_DIMENSIONS = "Overall Dimensions";
         public static readonly string LOCATION = "Location";
         public static readonly string INSTALLMETHOD = "Install Method";
         public static readonly string ENTER_CIRCUIT_ID = "回路编号";
 
         public static readonly string ENTER_CIRCUIT_QL = "QL";
+        public static readonly string ENTER_CIRCUIT_QL_25_1P = "QL 25/1P";
         public static readonly string ENTER_CIRCUIT_QL_250_4P = "QL 250/4P";
-        public static readonly string ENTER_CIRCUIT_ATSE_320A_4P = "ATSE 320A 4P"; 
+        public static readonly string ENTER_CIRCUIT_ATSE_320A_4P = "ATSE 320A 4P";
+        public static readonly string ENTER_CIRCUIT_MTSE_320A_4P = "MTSE 320A 4P";
 
         public static readonly string OUT_CIRCUIT_CB = "CB";
         public static readonly string OUT_CIRCUIT_CB1 = "CB1";
@@ -31,6 +33,8 @@
         public static readonly string OUT_CIRCUIT_RCD = "RCD";
         public static readonly string OUT_CIRCUIT_QAC = "QAC";
         public static readonly string OUT_CIRCUIT_KH = "KH";
+        public static readonly string OUT_CIRCUIT_CT = "CT";
+        public static readonly string OUT_CIRCUIT_MT = "MT";
         public static readonly string OUT_CIRCUIT_CONDUCTOR = "Conductor";
         public static readonly string OUT_CIRCUIT_CIRCUIT_NUMBER = "回路编号";
         public static readonly string OUT_CIRCUIT_PHSAE = "相序";
@@ -52,11 +56,15 @@
         public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE = "三相计算表";
 
         public static readonly string DEFAULT_ISOLATING_SWITCH = "E-BQL102";
+        public static readonly string DEFAULT_ISOLATING_SWITCH_1 = "E-BQL102-1";
         public static readonly string DEFAULT_TRANSFER_SWITCH = "E-BTS101";
+        public static readonly string DEFAULT_MANUAL_TRANSFER_SWITCH = "E-BTS102";
 
         public static readonly string DEFAULT_CIRCUIT_BREAKER = "E-BCB101";
         public static readonly string DEFAULT_RESIDUAL_CURRENT_DEVICE = "E-BCB102";
+        public static readonly string DEFAULT_CPS = "E-BCB103";
         public static readonly string DEFAULT_CONTACTOR = "E-BKM101";
         public static readonly string DEFAULT_THERMAL_RELAY = "E-BKH102";
+        public static readonly string DEFAULT_CURRENT_TRANSFORMER = "E-BCT102";
     }
 }

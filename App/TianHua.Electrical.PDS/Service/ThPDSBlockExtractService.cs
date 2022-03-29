@@ -103,6 +103,10 @@ namespace TianHua.Electrical.PDS.Service
                                 break;
                             }
                         }
+                        if(LoadBlocks.Any(b => b.Value.Position.DistanceTo(blockData.Position) < 1.0))
+                        {
+                            return;
+                        }
                         LoadBlocks.Add(block, blockData);
                     }
                 });

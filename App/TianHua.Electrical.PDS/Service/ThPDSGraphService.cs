@@ -96,7 +96,8 @@ namespace TianHua.Electrical.PDS.Service
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
-            edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
+            var srcPanelID = source.Loads.Count > 0 ? source.Loads[0].ID.LoadID : "";
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, list, distBoxKey);
             if (source.NodeType == PDSNodeType.CableCarrier)
             {
                 edge.Circuit.ViaCableTray = true;
@@ -116,21 +117,21 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
-            var circuitIDs = new List<string>();
-            target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
-                .ForEach(id => circuitIDs.Add(id)));
-            circuitIDs = circuitIDs.Distinct().ToList();
-            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
+            if (string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
-                edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
-            }
-            var circuitNumbers = new List<string>();
-            target.Loads.ForEach(o => o.ID.CircuitNumber.Where(num => !string.IsNullOrEmpty(num))
-                .ForEach(num => circuitNumbers.Add(num)));
-            circuitNumbers = circuitNumbers.Distinct().ToList();
-            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
-            {
-                edge.Circuit.ID.CircuitNumber.Add(circuitNumbers.First());
+                var circuitIDs = new List<string>();
+                target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
+                    .ForEach(id => circuitIDs.Add(id)));
+                circuitIDs = circuitIDs.Distinct().ToList();
+                var sourcePanelIDs = new List<string>();
+                target.Loads.ForEach(o => o.ID.SourcePanelID.Where(id => !string.IsNullOrEmpty(id))
+                    .ForEach(id => sourcePanelIDs.Add(id)));
+                sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
+                if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
+                {
+                    edge.Circuit.ID.SourcePanelID.Add(sourcePanelIDs.First());
+                    edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
+                }
             }
 
             if (source.Loads.Count > 0
@@ -138,7 +139,7 @@ namespace TianHua.Electrical.PDS.Service
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.CircuitNumber.Add(source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID.Last());
+                edge.Circuit.ID.SourcePanelID.Add(source.Loads[0].ID.LoadID);
             }
 
             if (target.NodeType == PDSNodeType.None)
@@ -149,11 +150,11 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode target, List<string> list)
+            ThPDSCircuitGraphNode target, List<string> srcPanelID, List<string> circuitID)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
-            edge.Circuit = service.CircuitMarkAnalysis(list);
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, circuitID);
             return edge;
         }
     }
