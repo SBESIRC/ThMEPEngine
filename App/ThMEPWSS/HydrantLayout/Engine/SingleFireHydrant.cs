@@ -13,13 +13,13 @@ using ThMEPEngineCore.Diagnostics;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Model.Hvac;
-using ThMEPWSS.HydrantLayout.tmp.Model;
-using ThMEPWSS.HydrantLayout.tmp.Engine;
-using ThMEPWSS.HydrantLayout.tmp.Service;
 using ThMEPWSS.HydrantLayout.Model;
+using ThMEPWSS.HydrantLayout.Engine;
+using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Data;
 
-namespace ThMEPWSS.HydrantLayout.tmp.Engine
+
+namespace ThMEPWSS.HydrantLayout.Engine
 {
     class SingleFireHydrant
     {
