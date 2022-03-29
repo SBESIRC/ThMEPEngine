@@ -326,9 +326,18 @@ namespace ThMEPStructure.Reinforcement.Draw
         public override void CalExplo()
         {
             Point2d p1 = Outline.GetPoint2dAt(2), p2 = Outline.GetPoint2dAt(6);
-            Vector2d vec = new Vector2d(p2.X - p1.X, Outline.GetPoint2dAt(7).Y - p1.Y + 1200);
+            Vector2d vec = new Vector2d(p2.X - p1.X, Outline.GetPoint2dAt(7).Y - p1.Y + 2000);
             Point2d centrePt = p1 + (p2 - p1) / 2;
             bool flag = false;
+            //生成的拉筋：link1,link2,link3,竖向link4,横向link4
+            List<List<Polyline>> plinks = new List<List<Polyline>>
+            {
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>()
+            };
             for (int i = 0; i < Links.Count; i++)
             {
                 Polyline tmp = new Polyline();
@@ -343,27 +352,70 @@ namespace ThMEPStructure.Reinforcement.Draw
                         flag = true;
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
                     }
+                    plinks[0].Add(tmp);
                 }
                 else if (LinksFlag[i] == 2)
                 {
                     tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                    plinks[1].Add(tmp);
                 }
                 else if (LinksFlag[i] == 3)
                 {
                     tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                    plinks[2].Add(tmp);
                 }
                 else if (LinksFlag[i] == 4)
                 {
                     if (Math.Abs((Links[i].GetPoint2dAt(1) - Links[i].GetPoint2dAt(0)).X) < 1)
                     {
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 300), centrePt);
+                        plinks[3].Add(tmp);
                     }
                     else
                     {
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(300, 0), centrePt);
+                        plinks[4].Add(tmp);
                     }
                 }
-                SmallLinks.Add(tmp);
+                tmp.Layer = "LINK";
+                objectCollection.Add(tmp);
+            }
+            if (!thLTypeEdgeComponent.Link2.IsNullOrEmpty() &&
+                thLTypeEdgeComponent.Link2.Substring(1) != thLTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[1].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(50, 0), plinks, 1, i));
+                }
+                DrawLinkLabel(tmpList, true, thLTypeEdgeComponent.Link2, 200, -2000);
+            }
+            if (!thLTypeEdgeComponent.Link3.IsNullOrEmpty() &&
+                thLTypeEdgeComponent.Link3.Substring(1) != thLTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[2].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(0, 50), plinks, 2, i));
+                }
+                DrawLinkLabel(tmpList, false, thLTypeEdgeComponent.Link3, 200, 2000);
+            }
+            if (!thLTypeEdgeComponent.Link4.IsNullOrEmpty() &&
+                thLTypeEdgeComponent.Link4.Substring(1) != thLTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[3].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(0, 50), plinks, 3, i));
+                }
+                DrawLinkLabel(tmpList, false, thLTypeEdgeComponent.Link4, -400, -2000);
+
+                tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[4].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(50, 0), plinks, 4, i));
+                }
+                DrawLinkLabel(tmpList, true, thLTypeEdgeComponent.Link4, -600, 2000);
             }
         }
     }

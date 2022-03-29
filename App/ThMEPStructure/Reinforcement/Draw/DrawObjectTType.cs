@@ -164,7 +164,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 LinksFlag.Add(1);
             }
         }
-         
+
 
         /// <summary>
         /// T型钢筋确定位置，轮廓上10个点
@@ -295,7 +295,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 pointsFlag.Add(2);
             }
             //间距大的先安排拉筋
-            if(deltaX1>deltaX2)
+            if (deltaX1 > deltaX2)
             {
                 for (int i = 0; i < resultX1; i++)
                 {
@@ -337,7 +337,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     pointsFlag.Add(3);
                 }
             }
-            
+
         }
 
         protected override void CalLinkPosition()
@@ -347,7 +347,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             LinkDetail linkDetail = Helper.StrToLinkDetail(thTTypeEdgeComponent.Link3);
             int cnt = 0;
             //遍历所有点，找出2，3，4类型的钢筋，钢筋,同时查表
-            for (int i = 0; i < points.Count; i+=2)
+            for (int i = 0; i < points.Count; i += 2)
             {
                 if (pointsFlag[i] == 3)
                 {
@@ -407,6 +407,16 @@ namespace ThMEPStructure.Reinforcement.Draw
             Vector2d vec = new Vector2d(0, (Outline.GetPoint2dAt(0) - Outline.GetPoint2dAt(3)).Y + 1200);
             Point2d centrePt = Outline.GetPoint2dAt(4) + (Outline.GetPoint2dAt(8) - Outline.GetPoint2dAt(4)) / 2;
             bool flag = false;
+            //生成的拉筋：link1,link2,link3,竖向link4,横向link4
+            List<List<Polyline>> plinks = new List<List<Polyline>>
+            {
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>()
+            };
+            //生成拉筋线
             for (int i = 0; i < Links.Count; i++)
             {
                 Polyline tmp = new Polyline();
@@ -421,27 +431,70 @@ namespace ThMEPStructure.Reinforcement.Draw
                         flag = true;
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
                     }
+                    plinks[0].Add(tmp);
                 }
                 else if (LinksFlag[i] == 2)
                 {
                     tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                    plinks[1].Add(tmp);
                 }
                 else if (LinksFlag[i] == 3)
                 {
                     tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                    plinks[2].Add(tmp);
                 }
                 else if (LinksFlag[i] == 4)
                 {
                     if (Math.Abs((Links[i].GetPoint2dAt(1) - Links[i].GetPoint2dAt(0)).X) < 1)
                     {
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 300), centrePt);
+                        plinks[3].Add(tmp);
                     }
                     else
                     {
                         tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(300, 0), centrePt);
+                        plinks[4].Add(tmp);
                     }
                 }
-                    SmallLinks.Add(tmp);
+                tmp.Layer = "LINK";
+                objectCollection.Add(tmp);
+            }
+            //绘制必要的标注
+            if (!thTTypeEdgeComponent.Link2.IsNullOrEmpty() &&
+                thTTypeEdgeComponent.Link2.Substring(1) != thTTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[1].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(50, 0), plinks, 1, i));
+                }
+                DrawLinkLabel(tmpList, true, thTTypeEdgeComponent.Link2, 200, -2000);
+            }
+            if (!thTTypeEdgeComponent.Link3.IsNullOrEmpty() &&
+                thTTypeEdgeComponent.Link3.Substring(1) != thTTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[2].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(0, 50), plinks, 2, i));
+                }
+                DrawLinkLabel(tmpList, false, thTTypeEdgeComponent.Link3, 200, 2000);
+            }
+            if (!thTTypeEdgeComponent.Link4.IsNullOrEmpty() &&
+                thTTypeEdgeComponent.Link4.Substring(1) != thTTypeEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[3].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(0, 50), plinks, 3, i));
+                }
+                DrawLinkLabel(tmpList, false, thTTypeEdgeComponent.Link4, 400, 2000);
+                tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[4].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(50, 0), plinks, 4, i));
+                }
+                DrawLinkLabel(tmpList, true, thTTypeEdgeComponent.Link4, -600, 2000);
             }
         }
     }

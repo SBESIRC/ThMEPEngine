@@ -262,22 +262,56 @@ namespace ThMEPStructure.Reinforcement.Draw
             Point2d p1 = Outline.GetPoint2dAt(1), p2 = Outline.GetPoint2dAt(3);
             Vector2d vec = new Vector2d(0, p2.Y - p1.Y + 1200);
             Point2d centrePt = p1 + (p2 - p1) / 2;
+            //生成的拉筋：link1,link2,link3
+            List<List<Polyline>> plinks = new List<List<Polyline>>
+            {
+                new List<Polyline>(),
+                new List<Polyline>(),
+                new List<Polyline>(),
+            };
             for (int i = 0; i < Links.Count; i++)
             {
                 Polyline tmp = new Polyline();
-                if(LinksFlag[i] == 1)
+                if (LinksFlag[i] == 1)
                 {
                     tmp = Helper.ShrinkToHalf(Links[i], vec, centrePt);
+                    plinks[0].Add(tmp);
                 }
-                else if(LinksFlag[i] == 2)
+                else
                 {
-                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
+                    if (LinksFlag[i] == 2)
+                    {
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
+                        plinks[1].Add(tmp);
+                    }
+                    else if (LinksFlag[i] == 3)
+                    {
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
+                        plinks[2].Add(tmp);
+                    }
                 }
-                else if(LinksFlag[i] == 3)
+                tmp.Layer = "LINK";
+                objectCollection.Add(tmp);
+            }
+            if (!thRectangleEdgeComponent.Link2.IsNullOrEmpty() &&
+                thRectangleEdgeComponent.Link2.Substring(1) != thRectangleEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for(int i = 0; i < plinks[1].Count; i++)
                 {
-                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
+                    tmpList.Add(AdjustPos(new Vector2d(0, 50), plinks, 1, i));
                 }
-                SmallLinks.Add(tmp);
+                DrawLinkLabel(tmpList, false, thRectangleEdgeComponent.Link2, 200, 2000);
+            }
+            if (!thRectangleEdgeComponent.Link3.IsNullOrEmpty() &&
+                thRectangleEdgeComponent.Link3.Substring(1) != thRectangleEdgeComponent.Stirrup)
+            {
+                List<Point2d> tmpList = new List<Point2d>();
+                for (int i = 0; i < plinks[2].Count; i++)
+                {
+                    tmpList.Add(AdjustPos(new Vector2d(50, 0), plinks, 2, i));
+                }
+                DrawLinkLabel(tmpList, true, thRectangleEdgeComponent.Link3, -200, 2000);
             }
         }
     }

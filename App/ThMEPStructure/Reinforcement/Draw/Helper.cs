@@ -90,7 +90,7 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public static LinkDetail StrToLinkDetail(string link)
         {
-            
+
             //解析表格当中的link字符串,并将得到的信息返回到LinkDetail类里
             LinkDetail res = new LinkDetail();
             if (link.IsNullOrEmpty())
@@ -129,7 +129,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         {
             double squareSum = 0;
             double sum = 0;
-            foreach(var num in numbers)
+            foreach (var num in numbers)
             {
                 squareSum += num * num;
                 sum += num;
@@ -148,11 +148,11 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// <param name="strHeight"></param>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static Point3d CalCenterPosition(double startX,double startY,double finalX,double finalY,double strHeight,string str)
+        public static Point3d CalCenterPosition(double startX, double startY, double finalX, double finalY, double strHeight, string str)
         {
             double x, y;
             //纵向
-            y = (startY - finalY)/2.0 + finalY - strHeight/2.0;
+            y = (startY - finalY) / 2.0 + finalY - strHeight / 2.0;
             //横向
             double strWidth = str.Length * strHeight / 2.0;
             x = (startX - finalX) / 2.0 + finalX - strWidth / 2.0;
@@ -178,6 +178,79 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             return res;
         }
+        /// <summary>
+        /// 小图拉筋用的标记
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static Polyline LinkMark(Point2d point)
+        {
+            Polyline res = new Polyline();
+            res.AddVertexAt(0, point - new Vector2d(40, 40), 0, 19, 19);
+            res.AddVertexAt(1, point + new Vector2d(40, 40), 0, 19, 19);
+            res.Layer = "LABEL";
+            return res;
+        }
+        /// <summary>
+        /// 取两点之间的中点
+        /// </summary>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <returns></returns>
+        public static Point2d MidPointOf(Point2d pt1, Point2d pt2)
+        {
+            return pt1 + (pt2 - pt1) / 2;
+        }
+        /// <summary>
+        /// 对点进行排序，flag = false则按x排，flag = true则按y排
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="flag"></param>
+        public static void Sort(List<Point2d> pts, bool flag)
+        {
+            for (int i = 0; i < pts.Count; i++)
+            {
+                for (int j = 0; j < pts.Count - 1 - i; j++)
+                {
+                    if (flag)
+                    {
+                        if (pts[j].Y > pts[j + 1].Y)
+                        {
+                            var tmp = pts[j];
+                            pts[j] = pts[j + 1];
+                            pts[j + 1] = tmp;
+                        }
+                    }
+                    else
+                    {
+                        if (pts[j].X > pts[j + 1].X)
+                        {
+                            var tmp = pts[j];
+                            pts[j] = pts[j + 1];
+                            pts[j + 1] = tmp;
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 判定点是否在LINK上
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="link"></param>
+        /// <returns></returns>
+        public static bool IsIncluded(Point2d point, Polyline link)
+        {
+            Point3d pt = new Point3d(point.X, point.Y, 0);
 
+            for (int i = 0; i < link.NumberOfVertices; i += 2)
+            {
+                Line line = new Line(link.GetPoint3dAt(i), link.GetPoint3dAt(i + 1));
+                double weight = link.GetStartWidthAt(i);
+                Point3d footPoint = line.StartPoint + line.Delta.GetNormal().DotProduct(pt - line.StartPoint) * line.Delta.GetNormal();
+                if ((footPoint - line.EndPoint).DotProduct(footPoint - line.StartPoint) < 0 && footPoint.DistanceTo(pt) < weight / 2 + 15) return true;
+            }
+            return false;
+        }
     }
 }
