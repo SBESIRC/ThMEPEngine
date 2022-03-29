@@ -103,8 +103,6 @@
     <Compile Include="Project\Module\Component\Extension\CascadeComponentExtension.cs" />
     <Compile Include="Project\Module\Component\Meter.cs" />
     <Compile Include="Project\Module\Component\PDSBaseComponent.cs" />
-    <Compile Include="Project\Module\Component\ComponentConfig.cs" />
-    <Compile Include="Project\Module\Component\ComponentExtend.cs" />
     <Compile Include="Project\Module\Component\Contactor.cs" />
     <Compile Include="Project\Module\Component\IsolatingSwitch.cs" />
     <Compile Include="Project\Module\Component\ThermalRelay.cs" />
