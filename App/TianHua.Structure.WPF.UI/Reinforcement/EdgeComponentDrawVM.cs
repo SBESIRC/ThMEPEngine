@@ -1,11 +1,13 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Linq2Acad;
+using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Reinforcement.Command;
 using ThMEPStructure.Reinforcement.Model;
+using ThMEPStructure.Reinforcement.Service;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
@@ -26,17 +28,6 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             LeaderTypes = new ObservableCollection<string>() { "折现引出" };
             MarkPositions = new ObservableCollection<string>() { "右上", "右下", "左上", "左下" };
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
-            EdgeComponents.Add(new EdgeComponentExtractInfo()
-            { 
-                Number ="aaa",
-                Spec ="400x200",
-                TypeCode = "A",
-                ReinforceRatio =20,
-                StirrupRatio =10,
-                IsStandard =true,
-                IsCalculation =true,
-            });
-
         }
 
         public void Select()
@@ -51,7 +42,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 cmd.Execute();
                 if(cmd.IsSuccess)
                 {
-                    EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
+                    Clear();
                     cmd.ExtractInfos.ForEach(o => EdgeComponents.Add(o));
                 }
             };
@@ -62,7 +53,31 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         }
         public void Merge()
         {
-            //TODO
+            var infos = new List<EdgeComponentExtractInfo>();
+            for(int i =0;i< EdgeComponents.Count;i++)
+            {
+                infos.Add(EdgeComponents[i]);
+            }
+            var grouper = new ThDataGroupService(DrawModel.IsConsiderWall,
+                DrawModel.StirrupRatio, DrawModel.ReinforceRatio);
+            var results = grouper.Group(infos);
+            var groups = results
+                .Where(o => o.Count > 0).Select(o => o.First())
+                .GroupBy(o => o.NumberPrefix)
+                .ToList();
+            // 重新编号
+            Clear();
+            foreach (var group in groups)
+            {
+                int index = 1;
+                var items = group.ToList();
+                for(int i=0;i< items.Count;i++)
+                {
+                    items[i].Number = group.Key + index;
+                    index++;
+                    EdgeComponents.Add(items[i]);
+                }
+            }
         }
         public void Draw()
         {

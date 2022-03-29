@@ -110,14 +110,21 @@ namespace ThMEPStructure.Reinforcement.Model
                 return "非标";
             }
         }
-        public string GetCode()
+        /// <summary>
+        /// 编号前缀用于表达构件类型
+        /// YBZ->边缘性构件，GBZ->构造性构件
+        /// GBZ11->GBZ ,YBZ24->YBZ
+        /// </summary>
+        public string NumberPrefix
         {
-            //GBZ11->GBZ, 
-            if (string.IsNullOrEmpty(Number) || Number.Length<3)
+            get
             {
-                return "";
+                if (string.IsNullOrEmpty(Number) || Number.Length < 3)
+                {
+                    return "";
+                }
+                return Number.Substring(0, 3).ToUpper();
             }
-            return Number.Substring(0, 3).ToUpper();
         }
     }
     internal enum ShapeCode

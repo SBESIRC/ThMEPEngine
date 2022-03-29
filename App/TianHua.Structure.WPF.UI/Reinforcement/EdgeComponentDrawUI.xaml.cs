@@ -42,21 +42,26 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             this.Hide();
             drawVM.Select();
-            table1.ItemsSource = null;
-            table1.ItemsSource = drawVM.EdgeComponents;
+            ReSetTable1ItemsSource();
             this.Show();
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
             drawVM.Clear();
-            table1.ItemsSource = null;
-            table1.ItemsSource = drawVM.EdgeComponents;
+            ReSetTable1ItemsSource();
         }
 
         private void btnMerge_Click(object sender, RoutedEventArgs e)
         {
             drawVM.Merge();
+            ReSetTable1ItemsSource();
+        }
+
+        private void ReSetTable1ItemsSource()
+        {
+            table1.ItemsSource = null;
+            table1.ItemsSource = drawVM.EdgeComponents;
         }
 
         private void btnDraw_Click(object sender, RoutedEventArgs e)
