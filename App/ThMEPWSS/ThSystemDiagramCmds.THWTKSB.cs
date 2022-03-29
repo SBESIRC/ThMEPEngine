@@ -1,9 +1,4 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.Command;
 
 namespace ThMEPWSS
@@ -18,10 +13,11 @@ namespace ThMEPWSS
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "THExtractSanitaryware", CommandFlags.Modal)]
-        public void THExtractSanitaryware()
+
+        [CommandMethod("TIANHUACAD", "THWTKBQ", CommandFlags.Modal)]
+        public void THWTKBQ()
         {
-            using (var cmd = new ThSanitarywareExtractCmd())
+            using (var cmd = new ThBlockTagCmd())
             {
                 cmd.Execute();
             }

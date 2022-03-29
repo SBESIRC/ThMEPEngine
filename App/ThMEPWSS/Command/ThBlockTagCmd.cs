@@ -20,11 +20,11 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Command
 {
-    public class ThSanitarywareExtractCmd : IAcadCommand, IDisposable
+    public class ThBlockTagCmd : IAcadCommand, IDisposable
     {
         private string BoundaryLayerName { get; set; }
         private string MarkLayerName { get; set; }
-        public ThSanitarywareExtractCmd()
+        public ThBlockTagCmd()
         {
             MarkLayerName = "文字图层";
             BoundaryLayerName = "图纸识别";
