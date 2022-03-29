@@ -30,10 +30,12 @@ namespace TianHua.Electrical.PDS.UI.Editors
             }
             if (propertyItem.Value is ThATSEModel atse)
             {
+                //  1. 型号决定了可选的额定电流选项
                 return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
             if (propertyItem.Value is ThMTSEModel mtse)
             {
+                //  1. 型号决定了可选的额定电流选项
                 return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
             throw new NotSupportedException();
