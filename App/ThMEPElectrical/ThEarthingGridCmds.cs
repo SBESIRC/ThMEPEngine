@@ -22,8 +22,11 @@ namespace ThMEPElectrical
 {
     public class ThEarthingGridCmds
     {
-        [CommandMethod("TIANHUACAD", "THGGD", CommandFlags.Modal)]
-        public void THGGD()
+        /// <summary>
+        /// 防雷接地网
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THJDPM", CommandFlags.Modal)]
+        public void THJDPM()
         {
             using (var cmd = new ThEarthingGridCommand())
             {
