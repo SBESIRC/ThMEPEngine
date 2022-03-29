@@ -55,6 +55,7 @@
     <Compile Include="Editors\ThPDSPolesPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
     <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\Component\ThPDSBreakerModel.cs" />

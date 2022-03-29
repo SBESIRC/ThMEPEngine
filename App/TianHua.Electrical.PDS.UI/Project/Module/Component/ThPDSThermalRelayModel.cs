@@ -53,8 +53,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
         [DisplayName("电流整定范围")]
+        [Editor(typeof(ThPDSRatedCurrentRangePropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _thermalRelay.RatedCurrent;
