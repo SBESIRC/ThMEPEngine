@@ -28,13 +28,13 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return ContactorConfiguration.contactorInfos.Select(o => o.Amps.ToString()).Distinct();
             }
-            if (propertyItem.Value is ThATSEModel)
+            if (propertyItem.Value is ThATSEModel atse)
             {
-                return ATSEConfiguration.ATSEComponentInfos.SelectMany(o => o.Amps.Split(';')).Distinct();
+                return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
-            if (propertyItem.Value is ThMTSEModel)
+            if (propertyItem.Value is ThMTSEModel mtse)
             {
-                return MTSEConfiguration.MTSEComponentInfos.SelectMany(o => o.Amps.Split(';')).Distinct();
+                return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
             throw new NotSupportedException();
         }
