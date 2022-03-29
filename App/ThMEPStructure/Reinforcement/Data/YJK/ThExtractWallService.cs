@@ -31,38 +31,60 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             var objs = db.GetEntitiesFromMS(WallLayers);
 
             // 获取提取对象中的线
-            var cloneLines = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
+            var clones = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
+            clones = clones.Union(objs.OfType<Polyline>().Select(o=>o.Clone() as Polyline).ToCollection());
 
             // 移到近原点处
-            var transformer = new ThMEPOriginTransformer(cloneLines);
-            transformer.Transform(cloneLines);
+            var transformer = new ThMEPOriginTransformer(clones);
+            transformer.Transform(clones);
             var newPts = transformer.Transform(pts);
 
             // 按范围过滤
-            var filterLines = cloneLines.SelectCrossPolygon(newPts);
-            var restLines = cloneLines.Difference(filterLines);
-            restLines.DisposeEx();
-
-            // 清理
-            var cleanLines = filterLines.Clean();
-            filterLines.DisposeEx();
-
-            // 延伸
-            var extendLines = cleanLines.Extend(1.0);
-            cleanLines.DisposeEx();
-
-            // 造面
-            var allPolygons = extendLines.PolygonsEx();
-            var results = allPolygons.PostProcess(SmallAreaTolerance);
-            var restPolygons = allPolygons.Difference(results);
-            extendLines.DisposeEx();
-            restPolygons.DisposeEx();
+            var results = clones.SelectCrossPolygon(newPts);
+            var rests = clones.Difference(results);
+            rests.DisposeEx();
 
             // 还原到原始位置
             transformer.Reset(results);
-
-            // 返回结果            
             results.OfType<Entity>().ForEach(e => Elements.Add(e));
         }
+        //public void Extract(Database db, Point3dCollection pts)
+        //{
+        //    // 获取指定图层的对象
+        //    var objs = db.GetEntitiesFromMS(WallLayers);
+
+        //    // 获取提取对象中的线
+        //    var cloneLines = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
+        //    cloneLines = cloneLines.Union(objs.OfType<Polyline>().SelectMany(o => o.GetLines()).ToCollection());
+
+        //    // 移到近原点处
+        //    var transformer = new ThMEPOriginTransformer(cloneLines);
+        //    transformer.Transform(cloneLines);
+        //    var newPts = transformer.Transform(pts);
+
+        //    // 按范围过滤
+        //    var filterLines = cloneLines.SelectCrossPolygon(newPts);
+
+        //    // 清理
+        //    var cleanLines = filterLines.Clean();
+
+        //    // 延伸
+        //    var extendLines = cleanLines.Extend(1.0);
+        //    cleanLines.DisposeEx();
+
+        //    // 造面
+        //    var allPolygons = extendLines.PolygonsEx();
+        //    var results = allPolygons.PostProcess(SmallAreaTolerance);
+        //    var restPolygons = allPolygons.Difference(results);
+        //    extendLines.DisposeEx();
+        //    restPolygons.DisposeEx();
+        //    cloneLines.DisposeEx();
+
+        //    // 还原到原始位置
+        //    transformer.Reset(results);
+
+        //    // 返回结果            
+        //    results.OfType<Entity>().ForEach(e => Elements.Add(e));
+        //}
     }
 }

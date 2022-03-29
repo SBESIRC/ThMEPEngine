@@ -85,6 +85,31 @@ namespace ThMEPStructure.Reinforcement.Model
             }
             return result;
         }
+        public string StandardType
+        {
+            get
+            {
+                return GetStandardType();
+            }            
+        }
+        private string GetStandardType()
+        {
+            if(IsStandard)
+            {
+                if(IsCalculation)
+                {
+                    return "标准C";
+                }
+                else
+                {
+                    return "标准";
+                }
+            }
+            else
+            {
+                return "非标";
+            }
+        }
         public string GetCode()
         {
             //GBZ11->GBZ, 

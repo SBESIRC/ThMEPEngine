@@ -161,7 +161,7 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         private static bool IsAdjacentEdgeIndex(int first, int second, int count)
         {
-            return (first + 1) % count == second || (second + 1) % count == first;
+            return (first + 2) % count == second || (second + 2) % count == first;
         }
 
         public static int FindMiddleEdgeIndex(this int preEdgeIndex,int nextEdgeIndex,int count)

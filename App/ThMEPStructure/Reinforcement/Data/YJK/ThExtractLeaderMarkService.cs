@@ -31,7 +31,7 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             var objs = db.GetEntitiesFromMS(TextLayers);
             objs = objs.OfType<Entity>().Where(e => e is DBText || e is Line).ToCollection();
 
-            // 分类
+            // 按图层对Objs分类
             var markLines = Classify(objs.OfType<Line>().ToCollection());
             var markTexts = Classify(objs.OfType<DBText>().ToCollection());
 

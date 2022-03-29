@@ -32,6 +32,8 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
 
             // 获取提取对象中的线
             var cloneLines = objs.OfType<Line>().Select(o => o.Clone() as Line).ToCollection();
+            cloneLines= cloneLines.Union(
+                objs.OfType<Polyline>().SelectMany(o=>o.GetLines()).ToCollection());
 
             // 移到近原点处
             var transformer = new ThMEPOriginTransformer(cloneLines);
@@ -40,13 +42,8 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
 
             // 按范围过滤
             var filterLines = cloneLines.SelectCrossPolygon(newPts);
-            var restLines = cloneLines.Difference(filterLines);
-            restLines.DisposeEx();
-
             // 清理
-            var cleanLines = filterLines.Clean();
-            filterLines.DisposeEx();
-
+            var cleanLines = filterLines.Clean(); 
             // 延伸
             var extendLines = cleanLines.Extend(1.0);
             cleanLines.DisposeEx();
@@ -57,6 +54,7 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             var restPolygons = allPolygons.Difference(results);
             extendLines.DisposeEx();            
             restPolygons.DisposeEx();
+            cloneLines.DisposeEx();
 
             // 还原到原始位置
             transformer.Reset(results);

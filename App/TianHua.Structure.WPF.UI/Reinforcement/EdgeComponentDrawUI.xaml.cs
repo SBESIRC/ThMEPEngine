@@ -40,12 +40,18 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 
         private void btnSelect_Click(object sender, RoutedEventArgs e)
         {
+            this.Hide();
             drawVM.Select();
+            table1.ItemsSource = null;
+            table1.ItemsSource = drawVM.EdgeComponents;
+            this.Show();
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
             drawVM.Clear();
+            table1.ItemsSource = null;
+            table1.ItemsSource = drawVM.EdgeComponents;
         }
 
         private void btnMerge_Click(object sender, RoutedEventArgs e)

@@ -36,6 +36,7 @@ namespace ThMEPStructure.Reinforcement.Command
         #region ---------- Output ----------
         public List<EdgeComponentExtractInfo> ExtractInfos { get; private set; } =
             new List<EdgeComponentExtractInfo>();
+        public bool IsSuccess { get; set; }
         #endregion
         public ThYjkReinforceExtractCmd()
         {
@@ -60,6 +61,11 @@ namespace ThMEPStructure.Reinforcement.Command
                 {
                     return;
                 }
+                if(pc.CollectedPoints ==null || pc.CollectedPoints.Count==0)
+                {
+                    return;
+                }
+                IsSuccess = true;
                 Point3dCollection winCorners = pc.CollectedPoints;
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());

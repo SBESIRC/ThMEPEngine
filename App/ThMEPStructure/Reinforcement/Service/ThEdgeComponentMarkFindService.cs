@@ -52,7 +52,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 FindLinks(links, farwayPt);
                 if (links.Count == 2 && !ThGeometryTool.IsCollinearEx(links[0].StartPoint, links[0].EndPoint, links[1].StartPoint, links[1].EndPoint))
                 {
-                    var codes = FindCodeTexts(links.Last(), SearchMarkTextWidthTolerance); // 找到引柱末端编号(eg. YBZ、GBZ)
+                    var codes = FindCodeTexts(links.Last(), SearchMarkTextWidthTolerance*2.0); // 找到引柱末端编号(eg. YBZ、GBZ)
                     if (codes.Count > 0)
                     {
                         // 找到多个编号，按照离
@@ -207,8 +207,9 @@ namespace ThMEPStructure.Reinforcement.Service
             var outline = CreateOutline(pt, 1.0);
             var links = Query(outline).OfType<Line>().ToList();
             lines.ForEach(l => links.Remove(l));
-
-            if(links.Count==0)
+            links = links.Where(o => IsLink(lines.Last(), o)).ToList(); // 是相连的
+            links = links.Where(o => !IsCollinearAndOverlap(lines.Last(), o)).ToList(); // 是相连的
+            if (links.Count==0)
             {
                 return; 
             }
@@ -224,6 +225,22 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
+        }
+
+        private bool IsLink(Line pre,Line next,double tolerance =1.0)
+        {
+            return ThReinforcementUtils.FindLinkPt(pre, next, tolerance).HasValue;
+        }
+
+        private bool IsCollinearAndOverlap(Line pre, Line next,double tolerance=1.0)
+        {
+            /*
+             *  --------------
+             *               -------------
+             *  判断两条线是否是共线且有重叠            
+             */
+            return ThGeometryTool.IsCollinearEx(pre.StartPoint, pre.EndPoint,
+                next.StartPoint, next.EndPoint) && pre.OverlapDis(next) >= tolerance;
         }
 
         private DBObjectCollection FilterParallelTexts(DBObjectCollection dbTexts,Line line)
@@ -278,24 +295,24 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return  results;
             }
-            var preStr = reinforceText.Substring(0, firstIndex - 1);
+            var preStr = reinforceText.Substring(0, firstIndex);
             var nextStr = reinforceText.Substring(firstIndex + 1);
 
             var pattern1 = @"\d+\.{0,1}\d+[(]\d+\.{0,1}\d+[%]{1}[)]{1}";
             var pattern2 = @"\d+\.{0,1}\d+[%]{1}";
             var rg1 = new Regex(pattern1);
-            var rg2 = new Regex(pattern1);
-            if(rg1.IsMatch(pattern1) && rg2.IsMatch(pattern2))
+            var rg2 = new Regex(pattern2);
+            if(rg1.IsMatch(preStr) && rg2.IsMatch(nextStr))
             {
                 var pattern3 = @"\d+\.{0,1}\d+";
                 var rg3 = new Regex(pattern3);
-                foreach (var match in rg3.Matches(preStr))
+                foreach (Match match in rg3.Matches(preStr))
                 {
-                    results.Add((double)match);
+                    results.Add(double.Parse(match.Value));
                 }
-                foreach (var match in rg3.Matches(nextStr))
+                foreach (Match match in rg3.Matches(nextStr))
                 {
-                    results.Add((double)match);
+                    results.Add(double.Parse(match.Value));
                 }
             }
             return results;
@@ -329,11 +346,11 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             else if(spCloseDis <= CloseTolerance)
             {
-                return edgeComponent.Contains(line.EndPoint);
+                return edgeComponent.Contains(line.EndPoint) ==false;
             }
             else if(epCloseDis <= CloseTolerance)
             {
-                return edgeComponent.Contains(line.StartPoint);
+                return edgeComponent.Contains(line.StartPoint) == false;
             }
             else
             {

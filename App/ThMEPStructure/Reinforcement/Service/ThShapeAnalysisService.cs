@@ -121,12 +121,12 @@ namespace ThMEPStructure.Reinforcement.Service
         private List<Point3d> GetConcavePoints(Polyline polyline)
         {
             var result = polyline.PointClassify();
-            return result.Where(o => o.Value == 2).Select(o => o.Key).ToList();
+            return result.Where(o => o.Value == 1).Select(o => o.Key).ToList();
         }
         private List<Point3d> GetConvexPoints(Polyline polyline)
         {
             var result = polyline.PointClassify();
-            return result.Where(o => o.Value == 1).Select(o => o.Key).ToList();
+            return result.Where(o => o.Value == 2).Select(o => o.Key).ToList();
         }       
 
         private bool IsRectType(Polyline poly)

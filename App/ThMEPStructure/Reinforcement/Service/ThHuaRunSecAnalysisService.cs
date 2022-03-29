@@ -31,15 +31,29 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         protected bool IsLinkWall(Point3d edgeSp,Point3d edgeEp)
         {
-            var midPt = edgeEp.GetMidPt(edgeEp);
-            var outline = midPt.CreateSquare(EnvelopeSearchLength);
-            var walls = Query(outline);
-            outline.Dispose();
-            return walls.Count > 0;
+            var dir = (edgeEp - edgeSp).GetNormal();
+            var newEdgeSp = edgeSp - dir.MultiplyBy(1.0);
+            var newEdgeEp = edgeEp + dir.MultiplyBy(1.0);
+            var perpendVec = dir.GetPerpendicularVector();
+            var l1Sp = newEdgeSp + perpendVec.MultiplyBy(2.0);
+            var l1Ep = newEdgeEp + perpendVec.MultiplyBy(2.0);
+            var l2Sp = newEdgeSp - perpendVec.MultiplyBy(2.0);
+            var l2Ep = newEdgeEp - perpendVec.MultiplyBy(2.0);
+            var l1Outline = ThDrawTool.ToOutline(l1Sp, l1Ep, 1.0);
+            var l2Outline = ThDrawTool.ToOutline(l2Sp, l2Ep, 1.0);
+            bool isLink = Query(l1Outline).Count > 0 && Query(l2Outline).Count > 0;
+            var aa = WallSpatialIndex.SelectAll().OfType<Polyline>()
+                .Select(p => p.StartPoint).ToList();
+            l1Outline.Dispose();
+            l2Outline.Dispose();
+            return isLink;
         }
     }
     internal class ThHuaRunRectSecAnalysisService : ThHuaRunSecAnalysisService
     {
+        public int Hc { get; private set; }
+        public int Bw { get; private set; }
+        public string Spec => Hc + "x" + Bw;
         public ThHuaRunRectSecAnalysisService(DBObjectCollection walls,string antiSeismicGrade):
             base(walls, antiSeismicGrade)
         {
@@ -53,11 +67,7 @@ namespace ThMEPStructure.Reinforcement.Service
             // 查询
             var specInfos = ThHuaRunDataManager.Instance.QueryRect(
                 this.AntiSeismicGrade, componentExtractInfo.GetCode(), specService.A, specService.B);
-            if(specInfos.Count==0)
-            {
-                return;
-            }
-
+      
             // 查找是否有连接的墙
             int linkCount = 0;
             if (specService.A > specService.B)
@@ -71,19 +81,23 @@ namespace ThMEPStructure.Reinforcement.Service
                     specService.EdgeC, specService.EdgeD };
                 linkCount = GetLinkWallEdgeCount(edges);
             }
-
-            if (linkCount > 0)
+            if(specInfos.Count>0 && linkCount > 0)
             {
                 // 在标准库中存在，且连接墙
-                componentExtractInfo.IsStandard = true; 
+                componentExtractInfo.IsStandard = true;
                 componentExtractInfo.TypeCode = StandardType.A.ToString();
+            }
+            if (linkCount > 0)
+            {
                 componentExtractInfo.LinkWallPos = linkCount.ToString();
-                // 附加规格
-                componentExtractInfo.SpecDict.Add("Hc", specService.A);
-                componentExtractInfo.SpecDict.Add("Bw", specService.B);
-            }        
+            }
+            // 附加规格
+            Hc = specService.A;
+            Bw = specService.B;
+            componentExtractInfo.SpecDict.Add("Hc", Hc);
+            componentExtractInfo.SpecDict.Add("Bw", Bw);
+            componentExtractInfo.Spec = this.Spec;
         }
-
         private int GetLinkWallEdgeCount(List<Tuple<Point3d,Point3d>> edges)
         {
             return edges.Where(e => IsLinkWall(e.Item1, e.Item2)).Count();
@@ -91,6 +105,12 @@ namespace ThMEPStructure.Reinforcement.Service
     }
     internal class ThHuaRunLTypeSecAnalysisService : ThHuaRunSecAnalysisService
     {
+        public int Hc1 { get; private set; }
+        public int Bw { get; private set; }
+        public int Hc2 { get; private set; }
+        public int Bf { get; private set; }
+        public string Spec => Hc1 + "x" + Bw + "," + Hc2 + "x" + Bf;
+
         public ThHuaRunLTypeSecAnalysisService(DBObjectCollection walls,string antiSeismicGrade) :
             base(walls,antiSeismicGrade)
         {
@@ -103,31 +123,31 @@ namespace ThMEPStructure.Reinforcement.Service
             // 查询连接墙
             bool isEdgeALinkWall = IsLinkWall(specService.EdgeA.Item1, specService.EdgeA.Item2);
             bool isEdgeDLinkWall = IsLinkWall(specService.EdgeD.Item1, specService.EdgeD.Item2);
-            if (isEdgeALinkWall == false && isEdgeDLinkWall == false)
-            {
-                return;
-            }
-
+    
             // 查询A端规格是否存在于标准库中
             var specInfos = ThHuaRunDataManager.Instance.QueryLType(
                this.AntiSeismicGrade, code, specService.B, specService.D, specService.C, specService.A);
+            Hc1 = specService.B;
+            Bw = specService.D;
+            Hc2 = specService.C;
+            Bf = specService.A;
             if (specInfos.Count > 0)
             {
-                componentExtractInfo.IsStandard = true; // 规格是标准的               
+                if(isEdgeALinkWall || isEdgeDLinkWall)
+                {
+                    // 在标准库中，且有一端连接墙
+                    componentExtractInfo.IsStandard = true; // 规格是标准的     
+                }                          
                 if (isEdgeALinkWall)
                 {
                     // A 端的规格存在于标准库中，且A端连接墙
                     componentExtractInfo.TypeCode = StandardType.A.ToString();
                 }
-                else
+                else if(isEdgeDLinkWall)
                 {
                     // A 端的规格存在于标准库中，且D端连接墙
                     componentExtractInfo.TypeCode = StandardType.B.ToString();
-                }
-                componentExtractInfo.SpecDict.Add("Hc1", specService.B);
-                componentExtractInfo.SpecDict.Add("Bw", specService.D);
-                componentExtractInfo.SpecDict.Add("Hc2", specService.C);
-                componentExtractInfo.SpecDict.Add("Bf", specService.A);
+                }                         
                 if(isEdgeALinkWall)
                 {
                     if(isEdgeDLinkWall)
@@ -139,7 +159,7 @@ namespace ThMEPStructure.Reinforcement.Service
                         componentExtractInfo.LinkWallPos = "1";
                     }
                 }
-                else
+                else if(isEdgeDLinkWall)
                 {
                     componentExtractInfo.LinkWallPos = "1";
                 }
@@ -151,23 +171,27 @@ namespace ThMEPStructure.Reinforcement.Service
                this.AntiSeismicGrade, code, specService.C, specService.A, specService.B, specService.D);
                 if (specInfos.Count > 0)
                 {
-                    componentExtractInfo.IsStandard = true;
+                    if (isEdgeALinkWall || isEdgeDLinkWall)
+                    {
+                        // 在标准库中，且有一端连接墙
+                        componentExtractInfo.IsStandard = true; // 规格是标准的     
+                    }
                     if (isEdgeDLinkWall)
                     {
                         // D端的规格存在于标准库中，且D端连接墙
                         componentExtractInfo.TypeCode = StandardType.A.ToString();
                     }
-                    else
+                    else if(isEdgeALinkWall)
                     {
                         // D端的规格存在于标准库中，且A端连接墙
                         componentExtractInfo.TypeCode = StandardType.B.ToString();
                     }
-                    componentExtractInfo.SpecDict.Add("Hc1", specService.C);
-                    componentExtractInfo.SpecDict.Add("Bw", specService.A);
-                    componentExtractInfo.SpecDict.Add("Hc2", specService.B);
-                    componentExtractInfo.SpecDict.Add("Bf", specService.D);
+                    Hc1 = specService.C;
+                    Bw = specService.A;
+                    Hc2 = specService.B;
+                    Bf = specService.D;
                     if(isEdgeDLinkWall)
-                    {
+                    {   
                         if(isEdgeALinkWall)
                         {
                             componentExtractInfo.LinkWallPos = "2";
@@ -177,12 +201,17 @@ namespace ThMEPStructure.Reinforcement.Service
                             componentExtractInfo.LinkWallPos = "1";
                         }
                     }
-                    else
+                    else if(isEdgeALinkWall)
                     {
                         componentExtractInfo.LinkWallPos = "1";
                     }
                 }
             }
+            componentExtractInfo.SpecDict.Add("Hc1", Hc1);
+            componentExtractInfo.SpecDict.Add("Bw", Bw);
+            componentExtractInfo.SpecDict.Add("Hc2", Hc2);
+            componentExtractInfo.SpecDict.Add("Bf", Bf);
+            componentExtractInfo.Spec = this.Spec;
         }
     }
     internal class ThHuaRunTTypeSecAnalysisService : ThHuaRunSecAnalysisService
@@ -206,22 +235,25 @@ namespace ThMEPStructure.Reinforcement.Service
             specService.Analysis(tType);
             var specInfos = ThHuaRunDataManager.Instance.QueryTType(
                this.AntiSeismicGrade, code, specService.D, specService.B, specService.A, specService.E);
-            if(specInfos.Count==0)
-            {
-                return;
-            }
             bool isEdgeBLinkWall = IsLinkWall(specService.EdgeB.Item1, specService.EdgeB.Item2);
             bool isEdgeHLinkWall = IsLinkWall(specService.EdgeH.Item1, specService.EdgeH.Item2);
             bool isEdgeELinkWall = IsLinkWall(specService.EdgeE.Item1, specService.EdgeE.Item2);
-            if(!isEdgeBLinkWall && !isEdgeHLinkWall && !isEdgeELinkWall)
-            {
-                return;
-            }
-
+ 
             // T型的规格存在于标准库中，且E端连接墙,类型为A,否则为B
-            componentExtractInfo.IsStandard = true;
-            componentExtractInfo.TypeCode = isEdgeELinkWall ? StandardType.A.ToString() : StandardType.B.ToString();
-
+            if(specInfos.Count>0 && (isEdgeBLinkWall || isEdgeHLinkWall || isEdgeELinkWall))
+            {
+                // 标准库中有，且连接墙
+                componentExtractInfo.IsStandard = true;
+            }
+            if (isEdgeELinkWall)
+            {
+                componentExtractInfo.TypeCode = StandardType.A.ToString();
+            }
+            else if(isEdgeBLinkWall || isEdgeHLinkWall)
+            {
+                componentExtractInfo.TypeCode = StandardType.B.ToString();
+            }
+            
             // 设置墙连接位置
             if (isEdgeELinkWall)
             {
@@ -279,7 +311,7 @@ namespace ThMEPStructure.Reinforcement.Service
                         componentExtractInfo.LinkWallPos = "1L";
                     }
                 }
-                else
+                else if(isEdgeHLinkWall && !isEdgeBLinkWall)
                 {
                     // H 连，B不连
                     if (specService.G <= specService.C)
@@ -297,6 +329,12 @@ namespace ThMEPStructure.Reinforcement.Service
             Hc2s = Math.Min(specService.C, specService.G);
             Hc2l = Math.Max(specService.C, specService.G);
             Bf = specService.E;
+            componentExtractInfo.SpecDict.Add("Hc1", Hc1);
+            componentExtractInfo.SpecDict.Add("Bw", Bw);
+            componentExtractInfo.SpecDict.Add("Hc2s", Hc2s);
+            componentExtractInfo.SpecDict.Add("Hc2l", Hc2l);
+            componentExtractInfo.SpecDict.Add("Bf", Bf);
+            componentExtractInfo.Spec = this.Spec;
         }
     }
     internal enum StandardType

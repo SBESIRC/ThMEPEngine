@@ -4,10 +4,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPStructure.Reinforcement.Data.YJK;
+using ThMEPStructure.Reinforcement.Command;
 using ThMEPStructure.Reinforcement.Model;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
@@ -20,6 +17,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public ObservableCollection<string> SortWays { get; set; }
         public ObservableCollection<string> LeaderTypes { get; set; }
         public ObservableCollection<string> MarkPositions { get; set; }
+        private string LayerLinkCharater = "、";
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
@@ -28,24 +26,35 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             LeaderTypes = new ObservableCollection<string>() { "折现引出" };
             MarkPositions = new ObservableCollection<string>() { "右上", "右下", "左上", "左下" };
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
+            EdgeComponents.Add(new EdgeComponentExtractInfo()
+            { 
+                Number ="aaa",
+                Spec ="400x200",
+                TypeCode = "A",
+                ReinforceRatio =20,
+                StirrupRatio =10,
+                IsStandard =true,
+                IsCalculation =true,
+            });
+
         }
-        //private EdgeComponentExtractInfo Create(string number, string spec, string shape, string type, double reinforceRatio, double stirrupRatio)
-        //{
-        //    return new EdgeComponentExtractInfo()
-        //    {
-        //        Number = number,
-        //        Spec = spec,
-        //        Shape = shape,
-        //        Type = type,
-        //        StirrupRatio = stirrupRatio,
-        //        ReinforceRatio = reinforceRatio,
-        //    };
-        //}
+
         public void Select()
         {
-            // 识别
-            //ToDO
+            using (var cmd = new ThYjkReinforceExtractCmd())
+            {
+                // 传入参数
+                cmd.WallLayers = Split(DrawModel.WallLayer, LayerLinkCharater);
+                cmd.TextLayers = Split(DrawModel.TextLayer, LayerLinkCharater);
+                cmd.WallColumnLayers = Split(DrawModel.WallColumnLayer, LayerLinkCharater);
 
+                cmd.Execute();
+                if(cmd.IsSuccess)
+                {
+                    EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
+                    cmd.ExtractInfos.ForEach(o => EdgeComponents.Add(o));
+                }
+            };
         }
         public void Clear()
         {

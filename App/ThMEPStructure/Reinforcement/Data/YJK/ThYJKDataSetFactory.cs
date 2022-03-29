@@ -7,6 +7,9 @@ using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
+using Dreambuild.AutoCAD;
+using ThCADExtension;
+using NFox.Cad;
 
 namespace ThMEPStructure.Reinforcement.Data.YJK
 {
@@ -72,7 +75,17 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
                 edgeComponentInf.ShapeCode = shapeCode;
                 // 解析的结果存在于edgeComponentInf中
                 GetOutlineSpecAndLinkWallPos(edgeComponentInf, walls);
+                Results.Add(edgeComponentInf);
             };
+
+            // 释放资源
+            walls.DisposeEx();
+            var leaderObjs = new DBObjectCollection();
+            leaderMarks.Item1.ForEach(o => leaderObjs = leaderObjs.Union(o.Value));
+            leaderMarks.Item2.ForEach(o => leaderObjs = leaderObjs.Union(o.Value));
+            leaderObjs.DisposeEx();
+            var restWallColumns = wallColumns.Difference(Results.Select(o=>o.EdgeComponent).ToCollection());
+            restWallColumns.DisposeEx();
         }
 
         private void GetOutlineSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf,DBObjectCollection walls)

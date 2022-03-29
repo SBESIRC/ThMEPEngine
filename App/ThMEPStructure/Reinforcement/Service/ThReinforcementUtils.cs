@@ -50,7 +50,14 @@ namespace ThMEPStructure.Reinforcement.Service
             results = results.FilterSmallArea(areaTolerance);
             results = roomSimplifier.Simplify(results);
             results = results.FilterSmallArea(areaTolerance);
+            results = results.RepeatedRemoved();
             return results;
+        }
+
+        public static DBObjectCollection RepeatedRemoved(this DBObjectCollection objs)
+        {
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            return spatialIndex.SelectAll();
         }
 
         public static DBObjectCollection Extend(this DBObjectCollection lines, double length)
@@ -208,6 +215,10 @@ namespace ThMEPStructure.Reinforcement.Service
                 }
             }
             return results;
+        }
+        public static List<Line> GetLines(this Polyline poly)
+        {
+            return ThDrawTool.ToLines(poly);
         }
         public static Vector3d GetLineDirection(this Tuple<Point3d, Point3d> linePtPair)
         {

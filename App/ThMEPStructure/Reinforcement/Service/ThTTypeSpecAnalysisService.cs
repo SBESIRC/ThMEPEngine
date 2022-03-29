@@ -58,17 +58,17 @@ namespace ThMEPStructure.Reinforcement.Service
             var indexes = new List<int>();            
             for(int i=1;i< lines.Count;i++)
             {
-                var nextIndex = (aIndex + i)/ lines.Count;
+                var nextIndex = (aIndex + i)% lines.Count;
                 indexes.Add(nextIndex);
             }
-            EdgeA = lines[indexes[0]];
-            EdgeB = lines[indexes[1]];
-            EdgeC = lines[indexes[2]];
-            EdgeD = lines[indexes[3]];
-            EdgeE = lines[indexes[4]];
-            EdgeF = lines[indexes[5]];
-            EdgeG = lines[indexes[6]];
-            EdgeH = lines[indexes[7]];
-        }
+            EdgeA = lines[aIndex];
+            EdgeB = lines[indexes[0]];
+            EdgeC = lines[indexes[1]];
+            EdgeD = lines[indexes[2]];
+            EdgeE = lines[indexes[3]];
+            EdgeF = lines[indexes[4]];
+            EdgeG = lines[indexes[5]];
+            EdgeH = lines[indexes[6]];
+         }
     }
 }
