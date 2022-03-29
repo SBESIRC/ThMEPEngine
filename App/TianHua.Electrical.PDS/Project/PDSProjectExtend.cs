@@ -165,9 +165,9 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     threeWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
                     threeWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    threeWayInCircuit.transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum);
                     threeWayInCircuit.isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    threeWayInCircuit.transferSwitch1 = new ManualTransferSwitch(CalculateCurrent, PolesNum);
+                    threeWayInCircuit.transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum);
+                    threeWayInCircuit.transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, PolesNum);
                 }
                 else if(node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
@@ -731,7 +731,7 @@ namespace TianHua.Electrical.PDS.Project
                     }
                     if (threeWayInCircuit.transferSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.transferSwitch2 = new AutomaticTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch2 as ManualTransferSwitch).PolesNum);
+                        threeWayInCircuit.transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch2 as ManualTransferSwitch).PolesNum);
                     }
                 }
                 else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)

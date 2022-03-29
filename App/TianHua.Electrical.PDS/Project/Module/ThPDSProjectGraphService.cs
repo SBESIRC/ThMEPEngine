@@ -95,9 +95,9 @@ namespace TianHua.Electrical.PDS.Project.Module
                             {
                                 isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
                                 isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
                                 isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                transferSwitch2 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
+                                transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
+                                transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, PolesNum),
                             };
                             break;
                         }
