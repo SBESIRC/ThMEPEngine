@@ -36,6 +36,14 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return IsolatorConfiguration.isolatorInfos.Where(o => o.MaxKV == switchModel.MaxKV).Select(o => o.Poles).Distinct();
             }
+            if (propertyItem.Value is ThATSEModel)
+            {
+                return ATSEConfiguration.ATSEComponentInfos.SelectMany(o => o.Poles.Split(';')).Distinct();
+            }
+            if (propertyItem.Value is ThMTSEModel)
+            {
+                return MTSEConfiguration.MTSEComponentInfos.SelectMany(o => o.Poles.Split(';')).Distinct();
+            }
             throw new NotSupportedException();
         }
     }

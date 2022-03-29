@@ -635,35 +635,87 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             cor.Register("Isolator", () => UpdatePropertyGrid(vm));
                                         }
+                                        else
+                                        {
+                                            cor.Register("Isolator", () => UpdatePropertyGrid(null));
+                                        }
                                     }
                                     else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
                                     {
-                                        var isolatingSwitch = twoWayInCircuit.isolatingSwitch1;
-                                        if (isolatingSwitch != null)
                                         {
-                                            var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                            if (item != null)
+                                            var isolatingSwitch = twoWayInCircuit.isolatingSwitch1;
+                                            if (isolatingSwitch != null)
                                             {
-                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
+                                                var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
+                                                if (item != null)
+                                                {
+                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                }
+                                                cor.Register("Isolator", () => UpdatePropertyGrid(vm));
                                             }
-                                            cor.Register("Isolator", () => UpdatePropertyGrid(vm));
+                                            else
+                                            {
+                                                cor.Register("Isolator", () => UpdatePropertyGrid(null));
+                                            }
+                                        }
+                                        {
+                                            var sw = twoWayInCircuit.transferSwitch;
+                                            if (sw != null)
+                                            {
+                                                var vm = new Project.Module.Component.ThATSEModel(sw);
+                                                cor.Register("ATSE", () => UpdatePropertyGrid(vm));
+                                            }
+                                            else
+                                            {
+                                                cor.Register("ATSE", () => UpdatePropertyGrid(null));
+                                            }
                                         }
                                     }
                                     else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
                                     {
-                                        var isolatingSwitch = threeWayInCircuit.isolatingSwitch1;
-                                        if (isolatingSwitch != null)
                                         {
-                                            var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                            if (item != null)
+                                            var isolatingSwitch = threeWayInCircuit.isolatingSwitch1;
+                                            if (isolatingSwitch != null)
                                             {
-                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
+                                                var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
+                                                if (item != null)
+                                                {
+                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                }
+                                                cor.Register("Isolator", () => UpdatePropertyGrid(vm));
                                             }
-                                            cor.Register("Isolator", () => UpdatePropertyGrid(vm));
+                                            else
+                                            {
+                                                cor.Register("Isolator", () => UpdatePropertyGrid(null));
+                                            }
+                                        }
+                                        {
+                                            var sw = threeWayInCircuit.transferSwitch1;
+                                            if (sw != null)
+                                            {
+                                                var vm = new Project.Module.Component.ThATSEModel(sw);
+                                                cor.Register("ATSE", () => UpdatePropertyGrid(vm));
+                                            }
+                                            else
+                                            {
+                                                cor.Register("ATSE", () => UpdatePropertyGrid(null));
+                                            }
+                                        }
+                                        {
+                                            var sw = threeWayInCircuit.transferSwitch2;
+                                            if (sw != null)
+                                            {
+                                                var vm = new Project.Module.Component.ThMTSEModel(sw);
+                                                cor.Register("TSE", () => UpdatePropertyGrid(vm));
+                                            }
+                                            else
+                                            {
+                                                cor.Register("TSE", () => UpdatePropertyGrid(null));
+                                            }
                                         }
                                     }
                                     else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
@@ -1891,7 +1943,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
-                            mi.Header = "切换回路样式";
+                            mi.Header = "切换进线形式";
                             var inTypes = new CircuitFormInType[] {
                                 CircuitFormInType.一路进线,
                                 CircuitFormInType.二路进线ATSE,
