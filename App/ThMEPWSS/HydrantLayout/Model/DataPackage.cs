@@ -9,14 +9,14 @@ using ThMEPEngineCore.CAD;
 using ThCADCore.NTS;
 using ThMEPWSS.HydrantLayout;
 
-using ThMEPWSS.HydrantLayout.tmp.Model;
-using ThMEPWSS.HydrantLayout.tmp.Engine;
-using ThMEPWSS.HydrantLayout.Data;
-using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Model;
+using ThMEPWSS.HydrantLayout.Engine;
+using ThMEPWSS.HydrantLayout.Service;
+using ThMEPWSS.HydrantLayout.Data;
+
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.HydrantLayout.tmp.Model
+namespace ThMEPWSS.HydrantLayout.Model
 {
     //全局输入
     class RawData

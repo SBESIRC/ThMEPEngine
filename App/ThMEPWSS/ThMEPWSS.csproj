@@ -87,24 +87,24 @@
     <Compile Include="HydrantLayout\Data\ThHydrantLayoutDataQueryService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantRecognitionEngine.cs" />
     <Compile Include="HydrantLayout\Engine\Class1.cs" />
+    <Compile Include="HydrantLayout\Model\DataPackage.cs" />
+    <Compile Include="HydrantLayout\Model\FireExtinguisher.cs" />
+    <Compile Include="HydrantLayout\Model\FireHydrant.cs" />
     <Compile Include="HydrantLayout\Model\HydrantLayoutSetting.cs" />
+    <Compile Include="HydrantLayout\Model\SecondaryModel.cs" />
     <Compile Include="HydrantLayout\Model\ThHydrantModel.cs" />
     <Compile Include="HydrantLayout\Service\ThHydrantModelService.cs" />
     <Compile Include="HydrantLayout\Service\ThHydrantUtil.cs" />
     <Compile Include="HydrantLayout\ThHydrantCommon.cs" />
-    <Compile Include="HydrantLayout\tmp\Engine\InputDataProcess.cs" />
-    <Compile Include="HydrantLayout\tmp\Engine\Run.cs" />
-    <Compile Include="HydrantLayout\tmp\Engine\SingleFireExtinguisher.cs" />
-    <Compile Include="HydrantLayout\tmp\Engine\SingleFireHydrant.cs" />
-    <Compile Include="HydrantLayout\tmp\Model\DataPackage.cs" />
-    <Compile Include="HydrantLayout\tmp\Model\FireExtinguisher.cs" />
-    <Compile Include="HydrantLayout\tmp\Model\FireHydrant.cs" />
-    <Compile Include="HydrantLayout\tmp\Model\SecondaryModel.cs" />
-    <Compile Include="HydrantLayout\tmp\Service\CreateBoundaryService.cs" />
-    <Compile Include="HydrantLayout\tmp\Service\FeasibilityCheck.cs" />
-    <Compile Include="HydrantLayout\tmp\Service\IndexCompute.cs" />
-    <Compile Include="HydrantLayout\tmp\Service\SearchPoint.cs" />
-    <Compile Include="HydrantLayout\tmp\Service\SearchRangeFrame.cs" />
+    <Compile Include="HydrantLayout\Engine\InputDataProcess.cs" />
+    <Compile Include="HydrantLayout\Engine\Run.cs" />
+    <Compile Include="HydrantLayout\Engine\SingleFireExtinguisher.cs" />
+    <Compile Include="HydrantLayout\Engine\SingleFireHydrant.cs" />
+    <Compile Include="HydrantLayout\Service\CreateBoundaryService.cs" />
+    <Compile Include="HydrantLayout\Service\FeasibilityCheck.cs" />
+    <Compile Include="HydrantLayout\Service\IndexCompute.cs" />
+    <Compile Include="HydrantLayout\Service\SearchPoint.cs" />
+    <Compile Include="HydrantLayout\Service\SearchRangeFrame.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -778,6 +778,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
+    <Folder Include="HydrantLayout\tmp\Engine\" />
+    <Folder Include="HydrantLayout\tmp\Model\" />
+    <Folder Include="HydrantLayout\tmp\Service\" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
