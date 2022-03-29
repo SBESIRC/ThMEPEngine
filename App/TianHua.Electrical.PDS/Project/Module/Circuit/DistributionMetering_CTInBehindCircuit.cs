@@ -1,7 +1,9 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
+    [CircuitGroup(CircuitGroup.Group1)]
     public class DistributionMetering_MTInBehindCircuit : PDSBaseOutCircuit
     {
         public DistributionMetering_MTInBehindCircuit()

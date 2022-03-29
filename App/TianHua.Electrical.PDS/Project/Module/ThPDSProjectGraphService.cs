@@ -5,6 +5,7 @@ using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -16,7 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="type"></param>
-        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph, 
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
             ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
             //Step 1:新建未知负载
@@ -147,7 +148,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void DeleteCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph, 
+        public static void DeleteCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
             ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
@@ -213,6 +214,22 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             graph.UpdateWithEdge(edge, false);
+        }
+
+        /// <summary>
+        /// 元器件切换
+        /// </summary>
+        /// <returns></returns>
+        public static void ComponentSwitching(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, PDSBaseComponent component, ComponentType componentType)
+        {
+            if(edge.Details.CircuitForm.Contains(component))
+            {
+                var ComponentType = componentType.GetComponentType();
+                if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
+                {
+                    component = edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType);
+                }
+            }
         }
     }
 }

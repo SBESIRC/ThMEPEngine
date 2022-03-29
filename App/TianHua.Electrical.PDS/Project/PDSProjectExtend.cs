@@ -255,7 +255,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
                 {
                     breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new MeterTransformer(CalculateCurrent),
+                    meter = new MeterTransformer(CalculateCurrent, PolesNum),
                     breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
                     Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                 };
@@ -344,11 +344,11 @@ namespace TianHua.Electrical.PDS.Project
                 }
                 else if (type.Equals(typeof(MeterTransformer)))
                 {
-                    return  new MeterTransformer(CalculateCurrent);
+                    return  new MeterTransformer(CalculateCurrent, PolesNum);
                 }
                 else if (type.Equals(typeof(CurrentTransformer)))
                 {
-                    return new CurrentTransformer(CalculateCurrent);
+                    return new CurrentTransformer(CalculateCurrent, PolesNum);
                 }
                 else
                 {
@@ -451,7 +451,7 @@ namespace TianHua.Electrical.PDS.Project
                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
                 {
                     breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new MeterTransformer(CalculateCurrent),
+                    meter = new MeterTransformer(CalculateCurrent, PolesNum),
                     breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
                 };
             }

@@ -2,9 +2,9 @@
 
 namespace TianHua.Electrical.PDS.Project.Module.Component.Extension
 {
-    public class ComponentTypeSelector
+    public static class ComponentTypeSelector
     {
-        public static Type GetComponentType(ComponentType component)
+        public static Type GetComponentType(this ComponentType component)
         {
             switch (component)
             {
