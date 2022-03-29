@@ -5,10 +5,8 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using ThCADExtension;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundSpraySystem.Service;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -29,39 +27,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             PipeDN = DN;
             hasFlow = hasflow;
         }
+
         public void InsertBlock(AcadDatabase acadDatabase)
         {
-            //BlocksImport.ImportElementsFromStdDwg();
-
             InsertLine(acadDatabase, StPt, StPt.OffsetX(300), "W-FRPT-SPRL-PIPE");
             if(!PipeDN.Equals(""))
             {
                 InsertText(acadDatabase, StPt.OffsetXY(50, 150), PipeDN);
             }
-            /*if (TermPt.HasSignalValve)
-            {
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "遥控信号阀",
-                    StPt.OffsetX(300), new Scale3d(1, 1, 1), 0);
-            }
-            else
-            {
-                InsertLine(acadDatabase, StPt.OffsetX(300), StPt.OffsetX(600), "W-FRPT-SPRL-PIPE");
-            }
-           
-            InsertLine(acadDatabase, StPt.OffsetX(600), StPt.OffsetX(650), "W-FRPT-SPRL-PIPE");
-
-            if (TermPt.HasFlow)
-            {
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水流指示器",
-                    StPt.OffsetX(770), new Scale3d(1, 1, 1), 0);
-            }
-            else
-            {
-                InsertLine(acadDatabase, StPt.OffsetX(650), StPt.OffsetX(890), "W-FRPT-SPRL-PIPE");
-            }
-
-            InsertLine(acadDatabase, StPt.OffsetX(890), StPt.OffsetX(1090), "W-FRPT-SPRL-PIPE");*/
-
+            
             if (hasFlow)
             {
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "信号阀＋水流指示器",
@@ -95,27 +69,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                     StPt.OffsetX(2740), new Scale3d(-1.2, 1.2, 1.2), Math.PI);
 
             InsertLine(acadDatabase, StPt.OffsetX(2740), StPt.OffsetX(3690), "W-FRPT-SPRL-PIPE");
-            InsertLine(acadDatabase, StPt.OffsetX(3690), StPt.OffsetXY(3690, -2350), "W-FRPT-SPRL-PIPE");
-            InsertLine(acadDatabase, StPt.OffsetXY(3690, -2200), StPt.OffsetXY(3940, -2200), "W-FRPT-SPRL-PIPE");
+            InsertLine(acadDatabase, StPt.OffsetX(3690), StPt.OffsetXY(3690, -1350), "W-FRPT-SPRL-PIPE");
+            InsertLine(acadDatabase, StPt.OffsetXY(3690, -1200), StPt.OffsetXY(3940, -1200), "W-FRPT-SPRL-PIPE");
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "压力表",
-                    StPt.OffsetXY(3940, -2200), new Scale3d(1.5, 1.5, 1.5), 0);
+                    StPt.OffsetXY(3940, -1200), new Scale3d(1.5, 1.5, 1.5), 0);
 
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
-                    StPt.OffsetXY(3690, -2500), new Scale3d(1, 1, 1), Math.PI/2);
+                    StPt.OffsetXY(3690, -1500), new Scale3d(1, 1, 1), Math.PI/2);
 
-            InsertLine(acadDatabase, StPt.OffsetXY(3690, -2650), StPt.OffsetXY(3690, -2800), "W-FRPT-SPRL-PIPE");
-            InsertLine(acadDatabase, StPt.OffsetXY(3540, -2800), StPt.OffsetXY(3840, -2800), "W-FRPT-SPRL-EQPM");
-            InsertLine(acadDatabase, StPt.OffsetXY(3540, -2800), StPt.OffsetXY(3690, -3050), "W-FRPT-SPRL-EQPM");
-            InsertLine(acadDatabase, StPt.OffsetXY(3840, -2800), StPt.OffsetXY(3690, -3050), "W-FRPT-SPRL-EQPM");
-            InsertLine(acadDatabase, StPt.OffsetXY(3490, -3200), StPt.OffsetXY(3890, -3200), "W-DRAI-EQPM");
+            InsertLine(acadDatabase, StPt.OffsetXY(3690, -1650), StPt.OffsetXY(3690, -1800), "W-FRPT-SPRL-PIPE");
+            InsertLine(acadDatabase, StPt.OffsetXY(3540, -1800), StPt.OffsetXY(3840, -1800), "W-FRPT-SPRL-EQPM");
+            InsertLine(acadDatabase, StPt.OffsetXY(3540, -1800), StPt.OffsetXY(3690, -2050), "W-FRPT-SPRL-EQPM");
+            InsertLine(acadDatabase, StPt.OffsetXY(3840, -1800), StPt.OffsetXY(3690, -2050), "W-FRPT-SPRL-EQPM");
+            InsertLine(acadDatabase, StPt.OffsetXY(3490, -2200), StPt.OffsetXY(3890, -2200), "W-DRAI-EQPM");
 
-            var arc = new Arc(StPt.OffsetXY(3690, -3200), new Vector3d(0, 0, 1), 200, Math.PI, Math.PI * 2);
+            var arc = new Arc(StPt.OffsetXY(3690, -2200), new Vector3d(0, 0, 1), 200, Math.PI, Math.PI * 2);
             arc.LayerId = DbHelper.GetLayerId("W-DRAI-EQPM");
             acadDatabase.CurrentSpace.Add(arc);
 
-            InsertLine(acadDatabase, StPt.OffsetXY(3690, -3400), StPt.OffsetXY(3690, -5800), "W-FRPT-DRAI-PIPE");
-            InsertLine(acadDatabase, StPt.OffsetXY(690, -5800), StPt.OffsetXY(3690, -5800), "W-FRPT-SPRL-DIMS");
-            InsertLine(acadDatabase, StPt.OffsetXY(690, -410), StPt.OffsetXY(690, -5800), "W-FRPT-DRAI-PIPE");
+            InsertLine(acadDatabase, StPt.OffsetXY(3690, -2400), StPt.OffsetXY(3690, -4500), "W-FRPT-DRAI-PIPE");
+            InsertLine(acadDatabase, StPt.OffsetXY(690, -4500), StPt.OffsetXY(3690, -4500), "W-FRPT-SPRL-DIMS");
+            InsertLine(acadDatabase, StPt.OffsetXY(690, -410), StPt.OffsetXY(690, -4500), "W-FRPT-DRAI-PIPE");
             InsertLine(acadDatabase, StPt.OffsetXY(690, -410), StPt.OffsetXY(1140, -410), "W-FRPT-DRAI-PIPE");
 
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-EQPM", "截止阀",
@@ -125,32 +99,34 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
             InsertLine(acadDatabase, StPt.OffsetX(1640), StPt.OffsetXY(1640, -410), "W-FRPT-DRAI-PIPE");
 
-            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXY(3190, -2500),
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXY(3690, -1500),
                 new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "标高", "h+1.50" } });
             SetDynBlockValue(objID, "翻转状态2", 1);
             //var data = new ThBlockReferenceData(objID);
             //data.CustomProperties.SetValue("翻转状态2", 1);
 
-            InsertLine(acadDatabase, StPt.OffsetXY(1346, -114), StPt.OffsetXY(1753, -690), "W-FRPT-SPRL-DIMS");
+            InsertLine(acadDatabase, StPt.OffsetXY(1346,-114), StPt.OffsetXY(1753, -690), "W-FRPT-SPRL-DIMS");
             InsertLine(acadDatabase, StPt.OffsetXY(1753, -690), StPt.OffsetXY(3640, -690), "W-FRPT-SPRL-DIMS");
-            InsertLine(acadDatabase, StPt.OffsetXY(1440, -510), StPt.OffsetXY(1917, -1250), "W-FRPT-SPRL-DIMS");
-            InsertLine(acadDatabase, StPt.OffsetXY(1917, -1250), StPt.OffsetXY(2660, -1250), "W-FRPT-SPRL-DIMS");
-            InsertLine(acadDatabase, StPt.OffsetXY(2977, -2965), StPt.OffsetXY(3340, -2670), "W-FRPT-NOTE");
-            InsertLine(acadDatabase, StPt.OffsetXY(3100, -3630), StPt.OffsetXY(3520, -3107), "W-FRPT-NOTE");
+
+            //InsertLine(acadDatabase, StPt.OffsetXY(1440, -510), StPt.OffsetXY(1917, -1250), "W-FRPT-SPRL-DIMS");
+            //InsertLine(acadDatabase, StPt.OffsetXY(1917, -1250), StPt.OffsetXY(2660, -1250), "W-FRPT-SPRL-DIMS");
+
+            InsertLine(acadDatabase, StPt.OffsetXY(2977, -1965), StPt.OffsetXY(3340, -1670), "W-FRPT-NOTE");
+            InsertLine(acadDatabase, StPt.OffsetXY(3100, -2630), StPt.OffsetXY(3496, -2088), "W-FRPT-NOTE");
 
             InsertText(acadDatabase, StPt.OffsetXY(1780, -640), "减压孔板XXmm");
-            InsertText(acadDatabase, StPt.OffsetXY(1940, -1180), "泄水阀");
-            InsertText(acadDatabase, StPt.OffsetXY(980, -3730), FloorNum);
-            InsertText(acadDatabase, StPt.OffsetXY(1130, -5700), "排至地下一层集水坑");
+            //InsertText(acadDatabase, StPt.OffsetXY(1940, -1180), "泄水阀");
+            InsertText(acadDatabase, StPt.OffsetXY(1350, -3910), FloorNum);
+            InsertText(acadDatabase, StPt.OffsetXY(1000, -4400), "排至地下一层集水坑");
 
-            InsertText(acadDatabase, StPt.OffsetXY(2350, -3380), "截止阀", "W-FRPT-NOTE");
-            InsertText(acadDatabase, StPt.OffsetXY(2340, -4000), "K=80", "W-FRPT-NOTE");
-            InsertText(acadDatabase, StPt.OffsetXY(2310, -4450), "试水接头", "W-FRPT-NOTE");
-            InsertText(acadDatabase, StPt.OffsetXY(740, -840), "DN50");
-            InsertText(acadDatabase, StPt.OffsetXY(1040, -5250), "DN50", "W-FRPT-SPRL-DIMS", Math.PI / 2);
-            InsertText(acadDatabase, StPt.OffsetXY(4060, -5250), "DN80", "W-FRPT-SPRL-DIMS", Math.PI / 2);
-            InsertSolid(acadDatabase, StPt.OffsetXY(3497, -2546), StPt.OffsetXY(3320, -2646), StPt.OffsetXY(3362, -2698));
-            InsertSolid(acadDatabase, StPt.OffsetXY(3615, -2927), StPt.OffsetXY(3523, -3107), StPt.OffsetXY(3469, -3068));
+            InsertText(acadDatabase, StPt.OffsetXY(2350, -2380), "截止阀", "W-FRPT-NOTE");
+            InsertText(acadDatabase, StPt.OffsetXY(2340, -3000), "K=80", "W-FRPT-NOTE");
+            InsertText(acadDatabase, StPt.OffsetXY(2310, -3450), "试水接头", "W-FRPT-NOTE");
+            //InsertText(acadDatabase, StPt.OffsetXY(740, -840), "DN50");
+            InsertText(acadDatabase, StPt.OffsetXY(1040, -3950), "DN50", "W-FRPT-SPRL-DIMS", Math.PI / 2);
+            InsertText(acadDatabase, StPt.OffsetXY(4060, -3950), "DN80", "W-FRPT-SPRL-DIMS", Math.PI / 2);
+            InsertSolid(acadDatabase, StPt.OffsetXY(3497, -1546), StPt.OffsetXY(3320, -1646), StPt.OffsetXY(3362, -1698));
+            InsertSolid(acadDatabase, StPt.OffsetXY(3615, -1927), StPt.OffsetXY(3523, -2107), StPt.OffsetXY(3469, -2068));
         }
         private static void SetDynBlockValue(ObjectId blockId, string propName, object value)
         {

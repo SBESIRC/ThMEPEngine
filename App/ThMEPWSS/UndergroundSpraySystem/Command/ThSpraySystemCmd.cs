@@ -6,6 +6,7 @@ using ThMEPWSS.UndergroundSpraySystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.ViewModel;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Command;
+using ThMEPWSS.UndergroundSpraySystem.Method;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Command
 {
@@ -21,6 +22,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
         public void Dispose()
         {
         }
+
         public override void SubExecute()
         {
             try
@@ -42,34 +44,52 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-
         public void CreateSpraySystem(AcadDatabase curDb)
         {
-            Point3d startPt;
-            if (!SpraySys.GetInsertPt(curDb, out startPt))
-            {
-                return;
-            }
-            var selectArea = _UiConfigs.SelectedArea;//生成候选区域
+            var rstPipeMarkPt = SpraySys.GetPipeMarkPt(curDb, out Point3d startPt);
+            if (!rstPipeMarkPt) return;
+            //Point3d startPt = new Point3d(3656.846, 691217.2053,0);
+            var selectArea = _UiConfigs.SelectedArea;
 
-            var sprayOut = new SprayOut();//输出参数
-            if(sprayOut.InsertPoint.Equals(new Point3d()))
-            {
-                return;
-            }
+            var rstGetInsertPt = SpraySys.GetInsertPoint(out Point3d insertPt);
+            if (!rstGetInsertPt) return;
+            //Point3d insertPt = new Point3d(20739.8895, 458919.9202, 0);
+            var sprayOut = new SprayOut(insertPt);//输出参数
             var sprayIn = new SprayIn(_UiConfigs);//输入参数
-            var spraySystem = new SpraySystem();
+            var spraySystem = new SpraySystem();//系统参数
 
-            var loopFlag = true;
-
-            if (!SpraySys.GetInput(curDb, sprayIn, selectArea, startPt))//提取输入参数
+            var alarmValve = new AlarmValveTCH();
+            var alarmPts = alarmValve.Extract(curDb.Database, selectArea);
+            var sprayType = CheckSprayType.IsAcrossFloor(sprayIn, alarmPts);
+            
+            if(sprayType == 0)
             {
-                return;
+                var rstGetInput = SpraySys.GetInput(curDb, sprayIn, selectArea, startPt);//提取输入参数
+                if (!rstGetInput) return;
+                CmdWithoutAcrossLayers(curDb, sprayIn, spraySystem, sprayOut);
+            }
+            else
+            {
+                var rstGetInput = SpraySysWithAcrossFloor.GetInput2(curDb, sprayIn, selectArea, startPt);//提取输入参数
+                if (!rstGetInput) return;
+                CmdWithAcrossLayers(curDb, sprayIn, spraySystem, sprayOut);
             }
 
-            loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
+            sprayOut.Draw(curDb);
+        }
 
-            if(loopFlag)
+        /// <summary>
+        /// 不存在跨楼层报警阀间
+        /// </summary>
+        /// <param name="curDb"></param>
+        /// <param name="sprayIn"></param>
+        /// <param name="spraySystem"></param>
+        /// <param name="sprayOut"></param>
+        public static void CmdWithoutAcrossLayers(AcadDatabase curDb, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
+        {
+            var loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
+
+            if (loopFlag)
             {
                 SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
             }
@@ -77,7 +97,53 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             {
                 SpraySys.GetOutput2(sprayIn, spraySystem, sprayOut);
             }
-            sprayOut.Draw(curDb);
+        }
+
+        /// <summary>
+        /// 存在跨楼层报警阀间
+        /// </summary>
+        /// <param name="curDb"></param>
+        /// <param name="sprayIn"></param>
+        /// <param name="spraySystem"></param>
+        /// <param name="sprayOut"></param>
+        public static void CmdWithAcrossLayers(AcadDatabase curDb, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
+        {
+            ;
+            var rstMainLoopsInOtherFloor = SpraySysWithAcrossFloor.AcrossFloorTypeCheck(curDb, sprayIn, spraySystem);
+
+            if(rstMainLoopsInOtherFloor)//存在跨楼层主环
+            {
+                ;
+                //环管跨楼层时，1.dfs起点所在层；2.dfs其它层；3.将其它层的连接到起点所在层
+                SpraySysWithMainLoopAcrossFloor.Processing(curDb, sprayIn, spraySystem);
+                SpraySysWithMainLoopAcrossFloor.GetOutput(sprayIn, spraySystem, sprayOut);
+                var acrossMainLoop = spraySystem.MainLoopsInOtherFloor[0];
+                SpraySysWithMainLoopAcrossFloor.ProcessingInOtherFloor(curDb, acrossMainLoop, sprayIn, spraySystem);
+                SpraySysWithMainLoopAcrossFloor.GetOutputInOtherFloor(sprayIn, spraySystem, sprayOut);
+                if(spraySystem.MainLoopsInOtherFloor.Count> 1)
+                {
+                    acrossMainLoop = spraySystem.MainLoopsInOtherFloor[1];
+                    SpraySysWithMainLoopAcrossFloor.ProcessingInOtherFloor(curDb, acrossMainLoop, sprayIn, spraySystem);
+                    SpraySysWithMainLoopAcrossFloor.GetOutputInOtherFloor(sprayIn, spraySystem, sprayOut, 2);
+                }
+            }
+
+            else
+            {
+                //暂时用楼层数作为判断条件
+                if(sprayIn.FloorRectDic.Count > 3)
+                {
+                    SpraySysWithAcrossFloor.Processing2(curDb, sprayIn, spraySystem);
+                    SpraySysWithAcrossFloor.GetOutput2(sprayIn, spraySystem, sprayOut);
+                }
+                else
+                {
+                    SpraySysWithAcrossFloor.Processing(curDb, sprayIn, spraySystem);
+                    SpraySysWithAcrossFloor.GetOutput(sprayIn, spraySystem, sprayOut);
+                }
+                
+            }
+      
         }
     }
 }

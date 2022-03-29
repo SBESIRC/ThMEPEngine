@@ -34,7 +34,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                     dbObjs.Cast<Entity>()
-                        .Where(e => IsTCHNote(e))
+                        .Where(e => e.IsTCHText())
                         .ForEach(e => ExplodeTCHNote(e, DBObjs));
                     dbObjs.Cast<Entity>()
                         .Where(e => e is DBText)
@@ -58,6 +58,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                   (layer.Contains("-DIMS") ||
                    layer.Contains("-NOTE") ||
                    layer.Contains("-FRPT-HYDT-DIMS") ||
+                   layer.Contains("-FRPT-SPRL-DIMS") ||
                    layer.Contains("-SHET-PROF")) || 
                    layer.Contains("TWT_TEXT");
         }
@@ -107,7 +108,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 foreach (var db in dbObjs)
                 {
                     var ent = db as Entity;
-                    if(IsTCHNote(ent))
+                    if(ent.IsTCHText())
                     {
                         ExplodeTCHNote(ent, DBObjs);
                     }

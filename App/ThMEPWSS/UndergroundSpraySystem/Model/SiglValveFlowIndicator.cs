@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
-    class DNLine
+    public class SiglValveFlowIndicator
     {
+        public void Extract()
+        {
+
+        }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -27,7 +22,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         }
         public void Insert(AcadDatabase acadDatabase)
         {
-            _ = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(Layer, BlockName, Pt, Scale, Angle);
+            acadDatabase.ModelSpace.ObjectId.InsertBlockReference(Layer, BlockName, Pt, Scale, Angle);
         }
     }
 }

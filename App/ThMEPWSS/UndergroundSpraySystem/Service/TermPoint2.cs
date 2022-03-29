@@ -10,6 +10,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using DotNetARX;
 using Linq2Acad;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -50,11 +51,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 return;
             }
-            var adjs = sprayIn.LeadLineDic[StartLine];
-            if (adjs.Count > 1)
+            if(!sprayIn.LeadLineDic.ContainsKey(StartLine))
             {
-                ;
+                return;
             }
+            var adjs = sprayIn.LeadLineDic[StartLine];
             double minDist = 100;
             foreach (var l in sprayIn.LeadLines)
             {
@@ -117,7 +118,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex, Tuple<Point3d, Point3d> tuplePoint)
         {
-            ;
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             var pipeNumber = "";
@@ -156,19 +156,23 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             return pipeNumber;
         }
 
-
-        public void SetType()
+        public void SetType(SprayIn sprayIn, bool acrossFloor = false)
         {
             if(PipeNumber.Contains("防火分区"))
             {
                 Type = 1;
                 return;
             }
-            if(PipeNumber.Trim().StartsWith("ZP"))
+            if(sprayIn.ThroughPt.Contains(PtEx))
             {
                 Type = 2;
                 return;
             }
+            //if(PipeNumber.Trim().StartsWith("ZP") && !acrossFloor)
+            //{
+            //    Type = 2;
+            //    return;
+            //}
             if(PipeNumber.Contains("水泵接合器"))
             {
                 Type = 3;

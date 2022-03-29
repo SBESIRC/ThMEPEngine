@@ -13,16 +13,16 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
-namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
+namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
-    public class ThExtractPipeDNLine//提取管径标注引线
+    public class PipeDnLineNew//新的提取引线逻辑，用于跨层
     {
         public List<Entity> Results { get; private set; }
         public DBObjectCollection DBObjs { get; private set; }
         public List<Line> DBObjResults { get; private set; }
         public List<Line> LabelPosition { get; private set; }
 
-        public ThExtractPipeDNLine()
+        public PipeDnLineNew()
         {
             DBObjResults = new List<Line>();
         }
@@ -34,7 +34,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(e => e is not DBText)
+                   .Where(e => e is Line)
                    .Where(o => IsPipeDNLayer(o.Layer))
                    .ToList();
 
@@ -45,10 +45,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     try
                     {
-                        if (db is DBPoint)
-                        {
-                            continue;
-                        }
                         if (db is Line line)//线段直接添加
                         {
                             DBObjResults.Add(line);
@@ -76,7 +72,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         ;
                     }
@@ -86,8 +82,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         private bool IsPipeDNLayer(string layer)
         {
-            return (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS")) ||
-                   layer.ToUpper().Equals("W-FRPT-NOTE");
+            return (layer.ToUpper().Contains("W-FRPT-NOTE"));
         }
 
         public List<Point3d> ExtractSlash()
@@ -95,6 +90,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var SlashPts = new List<Point3d>();
             foreach (var line in DBObjResults)
             {
+                var angle = line.Angle.RadianToDegree();
                 if (PointAngle.IsSplashLine(line))
                 {
                     var pt1 = line.StartPoint;
@@ -154,6 +150,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return segLineDic;
         }
-    
+
     }
 }

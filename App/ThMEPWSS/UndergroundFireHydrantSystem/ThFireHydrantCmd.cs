@@ -17,6 +17,7 @@ using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using System.Linq;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.Command
 {
@@ -135,10 +136,15 @@ namespace ThMEPWSS.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var selectArea = Common.Utils.SelectAreas();//生成候选区域
-                var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
+                PromptNestedEntityOptions nestedEntOpt = new PromptNestedEntityOptions("\nPick nested entity in block:");
+                var dwg = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+                Editor ed = dwg.Editor;
+                PromptNestedEntityResult nestedEntRes = ed.GetNestedEntity(nestedEntOpt);
 
-                var mark = markEngine.Extract(acadDatabase.Database, selectArea);
+                var entId = nestedEntRes.ObjectId;
+                var dbObj = acadDatabase.Element<Entity>(entId);
+                var name = dbObj.GetRXClass().DxfName;
+                var rst = dbObj.IsTCHPipe();
                 ;
             }
         }

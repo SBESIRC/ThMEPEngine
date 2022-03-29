@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
@@ -21,90 +17,62 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             bool flag = true;
             foreach (var pt in mainPathList[0])
             {
-                try
+                visited.Add(pt);
+                if (!sprayIn.PtTypeDic.ContainsKey(pt))
                 {
-                    visited.Add(pt);
-                    if (!sprayIn.PtTypeDic.ContainsKey(pt))
+                    continue;
+                }
+                if (sprayIn.PtTypeDic[pt].Contains("SubLoop"))
+                {
+                    if (flag)
                     {
+                        sePts.Add(pt);
+                        flag = false;
                         continue;
                     }
-                    if (sprayIn.PtTypeDic[pt].Contains("SubLoop"))
+                    else
                     {
-                        if (flag)
-                        {
-                            sePts.Add(pt);
-                            flag = false;
-                            continue;
-                        }
-                        else
-                        {
-                            sePts.Add(pt);
-                            subLoopPts.Add(new List<Point3dEx>(sePts));
-                            sePts.Clear();
-                            flag = true;
-                            continue;
-                        }
+                        sePts.Add(pt);
+                        subLoopPts.Add(new List<Point3dEx>(sePts));
+                        sePts.Clear();
+                        flag = true;
+                        continue;
                     }
                 }
-                catch (Exception ex)
-                {
-                    ;
-                }
-                
             }
 
             foreach (var sePt in subLoopPts)
             {
-                try
-                {
-                    tempPath.Clear();
-                    tempPath.Add(sePt[0]);
-                    visited.Add(sePt[0]);
-                    var subLoop = new List<Point3dEx>();
-                    DepthSearch.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
-                    spraySystem.SubLoops.Add(subLoop);
-                    spraySystem.SubLoopBranchDic.Add(subLoop.First(), 0);
-                    spraySystem.SubLoopBranchDic.Add(subLoop.Last(), 0);
-                    spraySystem.SubLoopBranchPtDic.Add(subLoop.First(), new List<Point3dEx>());
-                    spraySystem.SubLoopBranchPtDic.Add(subLoop.Last(), new List<Point3dEx>());
-                }
-                catch(Exception ex)
-                {
-                    ;
-                }
-                
+                tempPath.Clear();
+                tempPath.Add(sePt[0]);
+                visited.Add(sePt[0]);
+                var subLoop = new List<Point3dEx>();
+                DepthSearch.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
+                spraySystem.SubLoops.Add(subLoop);
+                spraySystem.SubLoopBranchDic.Add(subLoop.First(), 0);
+                spraySystem.SubLoopBranchDic.Add(subLoop.Last(), 0);
+                spraySystem.SubLoopBranchPtDic.Add(subLoop.First(), new List<Point3dEx>());
+                spraySystem.SubLoopBranchPtDic.Add(subLoop.Last(), new List<Point3dEx>());
             }
         }
 
         public static void SetType(SprayIn sprayIn, SpraySystem spraySystem)
         {
-            foreach(var rstPath in spraySystem.SubLoops)
+            foreach (var rstPath in spraySystem.SubLoops)
             {
                 for (int i = 1; i < rstPath.Count - 1; i++)
                 {
-                    try
+                    var pt = rstPath[i];
+                    if (sprayIn.PtDic[pt].Count == 3)
                     {
-                        var pt = rstPath[i];
-                        if(sprayIn.PtDic[pt].Count == 3)
+                        if (sprayIn.PtTypeDic[pt].Contains("MainLoop"))
                         {
-                            if (sprayIn.PtTypeDic[pt].Contains("MainLoop"))
-                            {
-                                sprayIn.PtTypeDic[pt] = "Branch";
-                                spraySystem.SubLoopBranchDic[rstPath[0]] += 1;
-                                spraySystem.SubLoopBranchDic[rstPath.Last()] += 1;
-                                spraySystem.SubLoopBranchPtDic[rstPath.First()].Add(pt);
-                                spraySystem.SubLoopBranchPtDic[rstPath.Last()].Add(pt);
-
-                            }
-                            else
-                            {
-                                ;
-                            }
+                            sprayIn.PtTypeDic[pt] = "Branch";
+                            spraySystem.SubLoopBranchDic[rstPath[0]] += 1;
+                            spraySystem.SubLoopBranchDic[rstPath.Last()] += 1;
+                            spraySystem.SubLoopBranchPtDic[rstPath.First()].Add(pt);
+                            spraySystem.SubLoopBranchPtDic[rstPath.Last()].Add(pt);
                         }
-                        
-                    }
-                    catch
-                    {
                     }
                 }
             }
