@@ -91,6 +91,8 @@
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
+    <Compile Include="Project\Module\Component\ThATSEModel.cs" />
+    <Compile Include="Project\Module\Component\ThMTSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSTransferSwitchBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSUESandboxParameterModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
