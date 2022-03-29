@@ -42,7 +42,7 @@
             <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
         </StatusBar>
         <Grid Width="994" Height="700">
-            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,-131">
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,0">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000"></Canvas>
                 </ScrollViewer>
@@ -69,7 +69,7 @@
                     </TreeView.ContextMenu>
                 </TreeView>
             </Border>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,-131">
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,0">
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
             
