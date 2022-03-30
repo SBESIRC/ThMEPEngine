@@ -11,6 +11,8 @@ namespace TianHua.Electrical.PDS.UI.Models
     public class ThPDSCircuitGraphTreeModel : NotifyPropertyChangedBase
     {
         public int Id { get; set; }
+        public ThPDSCircuitGraphTreeModel Parent { get; set; }
+        public ThPDSCircuitGraphTreeModel Root { get; set; }
         string _Name;
         public string Name
         {
@@ -30,13 +32,43 @@ namespace TianHua.Electrical.PDS.UI.Models
             get => _IsChecked;
             set
             {
-                if (value != _IsChecked)
-                {
-                    _IsChecked = value;
-                    OnPropertyChanged(nameof(IsChecked));
-                }
+                SetIsChecked(value, true, true);
             }
         }
+        void SetIsChecked(bool? value, bool updateChildren, bool updateParent)
+        {
+            if (value == _IsChecked) return;
+            _IsChecked = value;
+            if (updateChildren && _IsChecked.HasValue)
+            {
+                foreach (var o in DataList)
+                {
+                    o.SetIsChecked(_IsChecked, true, false);
+                }
+            }
+            if (updateParent) Parent?.VerifyCheckState();
+            OnPropertyChanged(nameof(IsChecked));
+        }
+
+        void VerifyCheckState()
+        {
+            bool? state = null;
+            for (int i = 0; i < DataList.Count; ++i)
+            {
+                bool? current = DataList[i].IsChecked;
+                if (i == 0)
+                {
+                    state = current;
+                }
+                else if (state != current)
+                {
+                    state = null;
+                    break;
+                }
+            }
+            SetIsChecked(state, false, true);
+        }
+
         bool _IsSelected;
         public bool IsSelected
         {

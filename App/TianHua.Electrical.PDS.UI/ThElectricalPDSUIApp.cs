@@ -33,12 +33,14 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
         public void THDLXT()
         {
-            var win = ElecSandboxUI.TryGetSingleWindow();
-            if (win == null) return;
+            var win = ElecSandboxUI.TryGetCurrentWindow();
+            if (win is not null) return;
             var cmd = new ThPDSCommand();
             cmd.Execute();
             var g = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
             if (g == null) return;
+            win = ElecSandboxUI.TryCreateSingleton();
+            if (win == null) return;
             win.Graph = g;
             AcadApp.ShowModelessWindow(win);
         }

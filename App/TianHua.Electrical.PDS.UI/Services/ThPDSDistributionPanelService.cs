@@ -14,6 +14,7 @@ using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Converters;
+using System.Windows.Controls.Primitives;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class PDSCommand : ICommand
@@ -539,46 +540,53 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var ctrl = new UserContorls.ThPDSBatchGenerate();
                     var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
                     var tree = builder.Build(graph);
+                    {
+                        void dfs(ThPDSCircuitGraphTreeModel node)
+                        {
+                            foreach (var n in node.DataList)
+                            {
+                                n.Parent = node;
+                                n.Root = tree;
+                                dfs(n);
+                            }
+                        }
+                        dfs(tree);
+                    }
                     ctrl.treeView.DataContext = tree;
-                    ctrl.cbxCheckAll.Checked += (s, e) =>
                     {
-                        void dfs(ThPDSCircuitGraphTreeModel node)
-                        {
-                            node.IsChecked = true;
-                            foreach (var n in node.DataList) dfs(n);
-                        }
-                        dfs(tree);
-                    };
-                    ctrl.cbxCheckAll.Unchecked += (s, e) =>
-                    {
-                        void dfs(ThPDSCircuitGraphTreeModel node)
-                        {
-                            node.IsChecked = false;
-                            foreach (var n in node.DataList) dfs(n);
-                        }
-                        dfs(tree);
-                    };
+                        ctrl.cbxCheckAll.SetBinding(ToggleButton.IsCheckedProperty, new Binding() { Source = tree, Path = new PropertyPath(nameof(tree.IsChecked)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                    }
+                    var w = new Window() { Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                     ctrl.btnGen.Command = new PDSCommand(() =>
                     {
-                        var vertices = graph.Vertices.ToList();
-                        var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                        void dfs(ThPDSCircuitGraphTreeModel node)
+                        w.Hide();
+                        UI.ElecSandboxUI.TryGetCurrentWindow().Hide();
+                        try
                         {
-                            if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
-                            foreach (var n in node.DataList) dfs(n);
+                            var vertices = graph.Vertices.ToList();
+                            var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                            void dfs(ThPDSCircuitGraphTreeModel node)
+                            {
+                                if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                                foreach (var n in node.DataList) dfs(n);
+                            }
+                            dfs(tree);
+                            foreach (var vertice in checkeddVertices)
+                            {
+                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
+                                drawCmd.Execute();
+                            }
+                            AcHelper.Active.Editor.Regen();
                         }
-                        dfs(tree);
-                        foreach (var vertice in checkeddVertices)
+                        finally
                         {
-                            var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
-                            drawCmd.Execute();
+                            UI.ElecSandboxUI.TryGetCurrentWindow().Show();
+                            w.Show();
                         }
-                        AcHelper.Active.Editor.Regen();
                     });
                     ctrl.cbxCheckAll.Unchecked += (s, e) => { };
-                    var w = new Window() { Width = 800, Height = 600, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                     w.Content = ctrl;
-                    w.ShowDialog();
+                    w.Show();
                 });
                 {
                     var cmenu = new ContextMenu();
