@@ -1,14 +1,14 @@
 ﻿using System;
 using QuikGraph;
 using System.Linq;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using System.Collections.Generic;
-using TianHua.Electrical.PDS.Project.Module.Configure;
-using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -301,38 +301,38 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="CircuitName"></param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException"></exception>
-        private static CircuitFormOutType Switch(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,string CircuitName)
+        public static CircuitFormOutType Switch(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,string circuitName)
         {
-            if (CircuitName == "常规配电回路")
+            if (circuitName == "常规配电回路")
                 return CircuitFormOutType.常规;
-            else if (CircuitName == "漏电保护回路")
+            else if (circuitName == "漏电保护回路")
                 return CircuitFormOutType.漏电;
-            else if (CircuitName == "带接触器回路")
+            else if (circuitName == "带接触器回路")
                 return CircuitFormOutType.接触器控制;
-            else if (CircuitName == "带热继电器回路")
+            else if (circuitName == "带热继电器回路")
                 return CircuitFormOutType.热继电器保护;
-            else if (CircuitName == "计量(上海)")
+            else if (circuitName == "计量(上海)")
             {
                 if (edge.Target.Details.LowPower < 100)
                     return CircuitFormOutType.配电计量_上海直接表;
                 else
                     return CircuitFormOutType.配电计量_上海CT;
             }
-            else if (CircuitName == "计量(表在前)")
+            else if (circuitName == "计量(表在前)")
             {
                 if (edge.Target.Details.LowPower < 100)
                     return CircuitFormOutType.配电计量_直接表在前;
                 else
                     return CircuitFormOutType.配电计量_CT表在前;
             }
-            else if (CircuitName == "计量(表在后)")
+            else if (circuitName == "计量(表在后)")
             {
                 if (edge.Target.Details.LowPower < 100)
                     return CircuitFormOutType.配电计量_直接表在后;
                 else
                     return CircuitFormOutType.配电计量_CT表在后;
             }
-            else if (CircuitName == "电动机配电回路")
+            else if (circuitName == "电动机配电回路")
             {
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
