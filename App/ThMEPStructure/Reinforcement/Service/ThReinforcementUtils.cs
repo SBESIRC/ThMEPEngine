@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 
@@ -259,6 +260,18 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return null;
             }
+        }
+        public static DBObjectCollection GetObbFrames(this DBObjectCollection polys)
+        {
+            var transformer = new ThMEPOriginTransformer(polys);
+            transformer.Transform(polys);
+            var results =  polys
+                .OfType<Polyline>()
+                .Select(p => p.GetMinimumRectangle())
+                .ToCollection();
+            transformer.Reset(polys);
+            transformer.Reset(results);
+            return results;
         }
     }
 }

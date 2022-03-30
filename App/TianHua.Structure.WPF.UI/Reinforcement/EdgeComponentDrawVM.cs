@@ -2,12 +2,16 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Linq2Acad;
+using NFox.Cad;
 using AcHelper;
+using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Reinforcement.Command;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
+using Dreambuild.AutoCAD;
+using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
+using Autodesk.AutoCAD.Geometry;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
@@ -20,6 +24,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public ObservableCollection<string> LeaderTypes { get; set; }
         public ObservableCollection<string> MarkPositions { get; set; }
         private string LayerLinkCharater = "、";
+        private static List<DBObjectCollection> ComponentBoundaries { get; set; }
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
@@ -28,8 +33,15 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             LeaderTypes = new ObservableCollection<string>() { "折现引出" };
             MarkPositions = new ObservableCollection<string>() { "右上", "右下", "左上", "左下" };
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
+            if(ComponentBoundaries==null)
+            {
+                ComponentBoundaries = new List<DBObjectCollection>();
+            }  
+            else
+            {
+                RemoveComponentFrames();
+            }
         }
-
         public void Select()
         {
             using (var cmd = new ThYjkReinforceExtractCmd())
@@ -44,6 +56,13 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 {
                     Clear();
                     cmd.ExtractInfos.ForEach(o => EdgeComponents.Add(o));
+                    var obbs = cmd.ExtractInfos
+                        .Select(o => o.EdgeComponent)
+                        .ToCollection()
+                        .GetObbFrames();
+                    RemoveComponentFrames();
+                    ComponentBoundaries.Add(obbs);
+                    ShowComponentFrames();
                 }
             };
         }
@@ -81,8 +100,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         }
         public void Draw()
         {
-            //TODO
-
+            //throw new NotImplementedException();
         }
         public void SetWallColumnLayer()
         {
@@ -98,6 +116,20 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             var layer = SelectEntityLayer();
             DrawModel.WallLayer = AddLayer(DrawModel.WallLayer, layer);
+        }
+        public void ShowComponentFrames()
+        {
+            if(ComponentBoundaries!=null && ComponentBoundaries.Count>0)
+            {
+                AddToTransient(ComponentBoundaries.Last());
+            }
+        }
+        public void RemoveComponentFrames()
+        {
+            if(ComponentBoundaries!=null && ComponentBoundaries.Count > 0)
+            {
+                ComponentBoundaries.ForEach(o => ClearTransientGraphics(o));
+            }
         }
         private string AddLayer(string originLayer,string newAdd)
         {
@@ -147,7 +179,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 }
                 return "";
             }
-        }
+        }          
         private void SetFocusToDwgView()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
@@ -156,6 +188,35 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+        private void AddToTransient(DBObjectCollection objs)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                var intCol = new IntegerCollection();
+                objs.OfType<Entity>()
+                    .ForEach(e =>
+                {
+                    e.ColorIndex = 200;
+                    e.LineWeight = LineWeight.LineWeight030;
+                    tm.AddTransient(e, cadGraph.TransientDrawingMode.
+                        Highlight, 1, intCol);
+                });
+            }
+        }
+        private void ClearTransientGraphics(DBObjectCollection objs)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                IntegerCollection intCol = new IntegerCollection();
+                objs.OfType<Entity>()
+                    .ForEach(e =>
+                    {
+                        tm.EraseTransient(e, intCol);
+                    });
+            }
         }
     }
 }

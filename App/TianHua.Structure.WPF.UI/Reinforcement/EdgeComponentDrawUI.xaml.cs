@@ -73,5 +73,10 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             this.Close();
         }
+
+        private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            drawVM.RemoveComponentFrames();
+        }
     }
 }

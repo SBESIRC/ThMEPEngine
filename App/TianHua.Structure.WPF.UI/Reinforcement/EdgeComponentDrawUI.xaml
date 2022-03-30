@@ -9,7 +9,8 @@
                     SizeToContent="WidthAndHeight"
                     mc:Ignorable="d"
                     Title="边缘构件绘制"
-                    Width="700" Height="450" MaxWidth="700" MaxHeight="450">
+                    Width="700" Height="450" MaxWidth="700" MaxHeight="450"
+                    Closing="ThCustomWindow_Closing">
     <Grid Focusable="False" Margin="3,3">
         <Grid.RowDefinitions>
             <RowDefinition Height="0.94*"></RowDefinition>
