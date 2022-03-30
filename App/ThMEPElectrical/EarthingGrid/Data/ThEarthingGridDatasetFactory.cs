@@ -98,7 +98,7 @@ namespace ThMEPElectrical.EarthingGrid.Data
             {
                 var outlines = acadDb.ModelSpace
                     .OfType<Polyline>()
-                    .Where(p => p.Layer.ToUpper() == "AI-建筑轮廓线")
+                    .Where(p => p.Layer.ToUpper() == "AI-AREA-EXT") //AI-建筑轮廓线
                     .Select(o => o.Clone() as Polyline)
                     .ToCollection();
                 var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());

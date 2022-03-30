@@ -6,8 +6,8 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
 using ThMEPElectrical.EarthingGrid.Generator.Utils;
+using ThMEPElectrical.EarthingGrid.Generator.Data;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 {
@@ -26,21 +26,26 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             faceSize = _faceSize;
         }
 
-        public Dictionary<Point3d, HashSet<Point3d>> Genterate()
+        public Dictionary<Point3d, HashSet<Point3d>> Genterate(PreProcess preProcessData)
         {
             //1、生成连接结构
             CreateCenterLineRelation();
 
-            //2.1、进行网格分割
+            //2、进行网格分割
             SplitGrid();
             CreateCenterGrid();
 
-            ////2.2、进行网格合并
+            //3、删除大轮廓外的线, 删除单体内的线
+            RangeConfine rangeConfine = new RangeConfine(preProcessData, lineToCenter, centerToFace, centerGrid);
+            rangeConfine.RemoveExteriorAndInteriorLines(ref lineToCenter, ref centerToFace, ref centerGrid);
+
+            //4、进行网格合并
             var dbPoints = centerGrid.Keys.Select(p => new DBPoint(p)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             MergeGrid(spatialIndex);
             //CreateCenterGrid();
 
+            //5、返回结果
             //ShowInfo.ShowGraph(centerGrid, 2);
             var earthGrid = new Dictionary<Point3d, HashSet<Point3d>>();
             foreach (var face in centerToFace.Values)
@@ -125,6 +130,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 var centerPt = splitedFaces.Dequeue();
                 
                 var polyline = LineDealer.Tuples2Polyline(centerToFace[centerPt].ToList());
+                if(polyline.Area < 10000)
+                {
+                    continue;
+                }
                 var rectangle = OBB(polyline);
                 //if (CheckRectangleA(rectangle) < 0)
                 if (CheckRectangle(rectangle) < 0)
@@ -141,7 +150,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                             intersecetLines.Add(line);
                         }
                     }
-                    if (intersecetLines.Count < 2) //修改bug后不会进入了，但仍防卫一下
+                    if (intersecetLines.Count < 2)
                     {
                         return;
                     }
@@ -416,9 +425,9 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 
                 List<Point3d> horizonPts = new List<Point3d> { lockedPt };
                 //1、向右找 右最下
-                LoopAddFirmPt(startPt, firstDirection, ref horizonPts, ref firmedPts, ref unvisitedPts, spatialIndex, 2);//1
+                LoopAddFirmPt(startPt, firstDirection, ref horizonPts, ref firmedPts, ref unvisitedPts, spatialIndex, 1);//1
                 //2、向左找 左最上
-                LoopAddFirmPt(startPt, -firstDirection, ref horizonPts, ref firmedPts, ref unvisitedPts, spatialIndex, 2);//1
+                LoopAddFirmPt(startPt, -firstDirection, ref horizonPts, ref firmedPts, ref unvisitedPts, spatialIndex, 1);//1
 
                 List<Point3d> verticalPts = new List<Point3d>();
                 foreach(var curHorizonPt in horizonPts)
@@ -446,20 +455,21 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             while (true)
             {
                 Point3d curPt = GetUpRightPt(prePt, baseDirection, mode);
-                //ShowInfo.ShowPointAsO(curPt, color, 500);
                 if (curPt == prePt)
                 {
                     break;
                 }
                 var lockPt = GetLockedPt(curPt, baseDirection, ref unvisitedPts, spatialIndex, ref firmedPts);
+
+                //ShowInfo.ShowPointAsO(lockPt, color, 500);
+                storagePts.Add(lockPt);
+                firmedPts.Add(lockPt);
                 if (lockPt == curPt)
                 {
                     //ShowInfo.ShowPointAsU(lockPt, color, 800);
                     //ShowInfo.ShowGeometry(LineDealer.Tuples2Polyline(centerToFace[lockPt].ToList()).ToNTSGeometry(), color); //这里会有关键字不在的报错
                     break;
                 }
-                storagePts.Add(lockPt);
-                firmedPts.Add(lockPt);
                 prePt = curPt;
             }
         }

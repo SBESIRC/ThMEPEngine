@@ -162,6 +162,7 @@
     <Compile Include="EarthingGrid\Generator\Utils\GraphDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\LineDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\PointsDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\RangeConfine.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\ShowInfo.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\StructureDealer.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />

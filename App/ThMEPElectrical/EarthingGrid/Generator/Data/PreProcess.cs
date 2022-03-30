@@ -8,6 +8,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.EarthingGrid.Data;
 using ThMEPElectrical.EarthingGrid.Service;
 using ThMEPElectrical.EarthingGrid.Generator.Connect;
+using ThMEPElectrical.EarthingGrid.Generator.Utils;
+
+using AcHelper;
+using NFox.Cad;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Data
 {
@@ -26,6 +31,8 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
         public List<Polyline> outlines = new List<Polyline>();
         public HashSet<Polyline> buildingOutline = new HashSet<Polyline>();
         public HashSet<Point3d> columnPts = new HashSet<Point3d>();
+        public HashSet<Polyline> innOutline = new HashSet<Polyline>();
+        public HashSet<Polyline> extOutline = new HashSet<Polyline>();
 
         public Dictionary<Polyline, HashSet<Point3d>> outlinewithBorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
         public Dictionary<Polyline, HashSet<Point3d>> outlinewithNearPts = new Dictionary<Polyline, HashSet<Point3d>>();
@@ -43,24 +50,21 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
 
             var group = new ThShearwallGroupService(dataset.Shearwalls, dataset.MainBuildings);
             buildingWithWalls = group.Group();
-
             buildingOutline = buildingWithWalls.Keys.ToHashSet();
         }
 
         public void Process()
         {
-            //Conductors 引下线，类型为块，可找到基准点
-            //ConductorWires 引下线连接线
-            
-
             //生成outlines
             foreach(var outline in MainBuildings.Cast<Polyline>())
             {
                 outlines.Add(outline);
+                innOutline.Add(outline);
             }
             foreach (var outline in ArchitectOutlines.Cast<Polyline>())
             {
                 outlines.Add(outline);
+                extOutline.Add(outline);
             }
 
             //输入墙、外边框，获得外边框对应的墙点/边界点，获得外边框对应的近点，点集

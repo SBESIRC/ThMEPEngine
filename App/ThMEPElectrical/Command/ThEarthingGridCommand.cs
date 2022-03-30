@@ -19,6 +19,9 @@ using ThMEPElectrical.EarthingGrid.Generator.Connect;
 using ThMEPElectrical.EarthingGrid.Generator.Data;
 using Autodesk.AutoCAD.Geometry;
 
+using ThMEPElectrical.EarthingGrid.Generator.Utils;
+using ThCADCore.NTS;
+
 namespace ThMEPElectrical.Command
 {
     public class ThEarthingGridCommand : IAcadCommand, IDisposable

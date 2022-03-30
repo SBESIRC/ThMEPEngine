@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using AcHelper;
-using NFox.Cad;
-using ThCADCore.NTS;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.EarthingGrid.Generator.Data;
@@ -22,7 +17,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             //2、对每个组连接最近线
             ConnectWithEarthGrid(ptGroups,ref earthGrid);
         }
-
 
         //生成点集组
         public static void GetPointsGroups(ref List<HashSet<Point3d>> ptGroups, Dictionary<Point3d, HashSet<Point3d>> graph)
