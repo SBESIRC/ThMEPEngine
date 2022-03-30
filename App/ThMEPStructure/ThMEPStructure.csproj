@@ -104,6 +104,7 @@
     <Compile Include="Reinforcement\Service\ThEdgeComponentMarkFindService.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunDataManager.cs" />
     <Compile Include="Reinforcement\Service\ThHuaRunSecAnalysisService.cs" />
+    <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
     <Compile Include="Reinforcement\Service\ThTTypeSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThLTypeSpecAnalysisService.cs" />

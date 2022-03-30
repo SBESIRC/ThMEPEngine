@@ -244,6 +244,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
         }
 
+        public static string ReinforceTemplateDwgPath()
+        {
+            return Path.Combine(SupportPath(), "配筋模板.dwg");
+        }
+
         // 运行时根目录
         private static string RootPath()
         {
