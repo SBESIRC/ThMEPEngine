@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
                 else
                 {
-                    return "3×" + MeterSwitchType + "A";
+                    return "3×" + CurrentTransformerSwitchType + "A";
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (CurrentTransformers.Any(o => o.parameter == parameters))
             {
-                MeterSwitchType = parameters;
+                CurrentTransformerSwitchType = parameters;
             }
             else
             {

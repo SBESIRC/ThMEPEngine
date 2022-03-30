@@ -29,6 +29,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadMotorConfig();
             LoadMeterConfig();
             LoadMTConfig();
+            LoadCPSConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -563,6 +564,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             };
         }
 
+        /// <summary>
+        /// 加载电流互感器配置
+        /// </summary>
         private static void LoadMTConfig()
         {
             var excelSrevice = new ReadExcelService();
@@ -578,6 +582,39 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         Amps = double.Parse(row[0].ToString()),
                         parameter = $"{row[0]}/{row[1]}",
                     });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载CPS配置
+        /// </summary>
+        private static void LoadCPSConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CPSUrl, true);
+            var Table = dataSet.Tables["CPS"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
+                    {
+                        CPSConfiguration.CPSComponentInfos.Add(new CPSComponentInfo()
+                        {
+                            Model = row["型号"].ToString(),
+                            FrameSize = row["壳架规格"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            ResidualCurrent = row["剩余电流动作"].ToString(),
+                            CPSCombination = row["组合形式"].ToString(),
+                            CPSCharacteristics = row["类别代号"].ToString(),
+                            InstallMethod = row["安装方式"].ToString()
+                        });
+                    }
                 }
             }
         }

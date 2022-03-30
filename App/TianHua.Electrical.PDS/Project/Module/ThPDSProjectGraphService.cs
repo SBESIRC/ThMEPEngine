@@ -6,31 +6,14 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
+using System.Collections.Generic;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
     public static class ThPDSProjectGraphService
     {
-        /// <summary>
-        /// 新建回路
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <param name="type"></param>
-        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
-            ThPDSProjectGraphNode node, CircuitFormOutType type)
-        {
-            //Step 1:新建未知负载
-            var target = new ThPDSProjectGraphNode();
-            graph.AddVertex(target);
-            //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
-            //Step 3:回路选型
-            newEdge.ComponentSelection(type);
-            //Step 4:添加到Graph
-            graph.AddEdge(newEdge);
-        }
-
         /// <summary>
         /// 切换进线形式
         /// </summary>
@@ -115,20 +98,6 @@ namespace TianHua.Electrical.PDS.Project.Module
                             throw new NotSupportedException();
                         }
                 }
-            }
-        }
-
-        /// <summary>
-        /// 切换回路形式
-        /// </summary>
-        /// <param name="edge"></param>
-        /// <param name="type"></param>
-        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
-        {
-            if (!edge.Details.CircuitForm.CircuitFormType.Equals(type))
-            {
-                //回路类型相同时没有必要转换
-                edge.UpdateCircuit(edge.Details.CircuitForm, type);
             }
         }
 
@@ -229,6 +198,169 @@ namespace TianHua.Electrical.PDS.Project.Module
                 {
                     component = edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取出线回路转换器
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public static CircuitFormOutSwitcher GetCircuitFormOutSwitcher(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        {
+            return new CircuitFormOutSwitcher(edge);
+        }
+
+        /// <summary>
+        /// 切换出线回路形式
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="type"></param>
+        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
+        {
+            if (!edge.Details.CircuitForm.CircuitFormType.Equals(type))
+            {
+                //回路类型相同时没有必要转换
+                edge.UpdateCircuit(edge.Details.CircuitForm, type);
+            }
+        }
+
+        /// <summary>
+        /// 切换出线回路形式
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="type"></param>
+        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, string type)
+        {
+            var CircuitFormOutType = Switch(edge, type);
+            SwitchFormOutType(edge, CircuitFormOutType);
+        }
+
+        /// <summary>
+        /// 新建回路
+        /// </summary>
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            ThPDSProjectGraphNode node, CircuitFormOutType type)
+        {
+            //Step 1:新建未知负载
+            var target = new ThPDSProjectGraphNode();
+            graph.AddVertex(target);
+            //Step 2:新建回路
+            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
+            //Step 3:回路选型
+            newEdge.ComponentSelection(type);
+            //Step 4:添加到Graph
+            graph.AddEdge(newEdge);
+        }
+
+        /// <summary>
+        /// 新建回路
+        /// </summary>
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            ThPDSProjectGraphNode node, string type)
+        {
+            //Step 1:新建未知负载
+            var target = new ThPDSProjectGraphNode();
+            graph.AddVertex(target);
+            //Step 2:新建回路
+            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
+            //Step 3:获取对应的CircuitFormOutType
+            var CircuitFormOutType = Switch(newEdge, type);
+            //Step 4:回路选型
+            newEdge.ComponentSelection(CircuitFormOutType);
+            //Step 5:添加到Graph
+            graph.AddEdge(newEdge);
+        }
+
+        /// <summary>
+        /// 获取可选择回路列表
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static List<string> AvailableTypes(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        {
+            CircuitGroup circuitGroup = edge.Details.CircuitForm.CircuitFormType.GetCircuitType().GetCircuitGroup();
+            switch (circuitGroup)
+            {
+                case CircuitGroup.Group1:
+                    { return ProjectSystemConfiguration.Group1Switcher; }
+                case CircuitGroup.Group2:
+                    { return ProjectSystemConfiguration.Group2Switcher; }
+                case CircuitGroup.Group3:
+                    { return ProjectSystemConfiguration.Group3Switcher; }
+                default:
+                    {
+                        throw new NotSupportedException();
+                    }
+            }
+        }
+
+        /// <summary>
+        /// 获取对应CircuitFormOutType
+        /// </summary>
+        /// <param name="CircuitName"></param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        private static CircuitFormOutType Switch(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,string CircuitName)
+        {
+            if (CircuitName == "常规配电回路")
+                return CircuitFormOutType.常规;
+            else if (CircuitName == "漏电保护回路")
+                return CircuitFormOutType.漏电;
+            else if (CircuitName == "带接触器回路")
+                return CircuitFormOutType.接触器控制;
+            else if (CircuitName == "带热继电器回路")
+                return CircuitFormOutType.热继电器保护;
+            else if (CircuitName == "计量(上海)")
+            {
+                if (edge.Target.Details.LowPower < 100)
+                    return CircuitFormOutType.配电计量_上海直接表;
+                else
+                    return CircuitFormOutType.配电计量_上海CT;
+            }
+            else if (CircuitName == "计量(表在前)")
+            {
+                if (edge.Target.Details.LowPower < 100)
+                    return CircuitFormOutType.配电计量_直接表在前;
+                else
+                    return CircuitFormOutType.配电计量_CT表在前;
+            }
+            else if (CircuitName == "计量(表在后)")
+            {
+                if (edge.Target.Details.LowPower < 100)
+                    return CircuitFormOutType.配电计量_直接表在后;
+                else
+                    return CircuitFormOutType.配电计量_CT表在后;
+            }
+            else if (CircuitName == "电动机配电回路")
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    {
+                        return CircuitFormOutType.电动机_分立元件;
+                    }
+                    else
+                    {
+                        return CircuitFormOutType.电动机_分立元件星三角启动;
+                    }
+                }
+                else
+                {
+                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    {
+                        return CircuitFormOutType.电动机_CPS;
+                    }
+                    else
+                    {
+                        return CircuitFormOutType.电动机_CPS星三角启动;
+                    }
+                }
+            }
+            else
+            {
+                //其他目前暂不支持
+                throw new NotSupportedException();
             }
         }
     }

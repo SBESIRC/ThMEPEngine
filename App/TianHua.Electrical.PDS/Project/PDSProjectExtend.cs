@@ -221,7 +221,6 @@ namespace TianHua.Electrical.PDS.Project
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
             {
-                //2022/03/14 为了本周尽快实现联动，目前发动机暂只支持 分立元件 与 分立元件-星三角启动
                 //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
@@ -244,6 +243,28 @@ namespace TianHua.Electrical.PDS.Project
                             thermalRelay = new ThermalRelay(CalculateCurrent),
                             contactor2 = new Contactor(CalculateCurrent, PolesNum),
                             contactor3 = new Contactor(CalculateCurrent, PolesNum),
+                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                        };
+                    }
+                }
+                else
+                {
+                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    {
+                        edge.Details.CircuitForm = new Motor_CPSCircuit()
+                        {
+                            cps = new CPS(CalculateCurrent),
+                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                        };
+                    }
+                    else
+                    {
+                        edge.Details.CircuitForm = new Motor_CPSStarTriangleStartCircuit()
+                        {
+                            cps = new CPS(CalculateCurrent),
+                            contactor1 = new Contactor(CalculateCurrent, PolesNum),
+                            contactor2 = new Contactor(CalculateCurrent, PolesNum),
                             Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                             Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
                         };
@@ -342,13 +363,28 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return new Contactor(CalculateCurrent, PolesNum);
                 }
+                else if(type.Equals(typeof(Meter)))
+                {
+                    if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在前 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
+                    {
+                        return new MeterTransformer(CalculateCurrent, PolesNum);
+                    }
+                    else
+                    {
+                        return new CurrentTransformer(CalculateCurrent, PolesNum);
+                    }
+                }
                 else if (type.Equals(typeof(MeterTransformer)))
                 {
-                    return  new MeterTransformer(CalculateCurrent, PolesNum);
+                    return new MeterTransformer(CalculateCurrent, PolesNum);
                 }
                 else if (type.Equals(typeof(CurrentTransformer)))
                 {
                     return new CurrentTransformer(CalculateCurrent, PolesNum);
+                }
+                else if (type.Equals(typeof(CPS)))
+                {
+                    return new CPS(CalculateCurrent);
                 }
                 else
                 {
