@@ -529,7 +529,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var circuitInType = graph.Vertices.ToList()[sel.Id].Details.CircuitFormType.CircuitFormType;
                 var left = ThCADExtension.ThEnumExtension.GetDescription(circuitInType) ?? "1路进线";
                 var v = graph.Vertices.ToList()[sel.Id];
-                var rights = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm.CircuitFormType) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
+                var rights = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm?.CircuitFormType??default) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
                 FrameworkElement selElement = null;
                 Rect selArea = default;
                 Point busStart, busEnd;
@@ -1096,7 +1096,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
                                             var vertice = graph.Vertices.ToList()[sel.Id];
                                             var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            PDS.Project.Module.Component.Breaker breaker = null;
+                                            PDS.Project.Module.Component.BreakerBaseComponent breaker = null;
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
                                             {
                                                 breaker = regularCircuit.breaker;
@@ -1107,50 +1107,50 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
                                             {
-                                                breaker = motor_DiscreteComponentsStarTriangleStartCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = motor_DiscreteComponentsStarTriangleStartCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
                                             {
-                                                breaker = twoSpeedMotor_DiscreteComponentsDYYCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = twoSpeedMotor_DiscreteComponentsDYYCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
                                             {
-                                                breaker = twoSpeedMotor_DiscreteComponentsYYCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = twoSpeedMotor_DiscreteComponentsYYCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
                                             {
-                                                breaker = contactorControlCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = contactorControlCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
                                             {
-                                                breaker = distributionMetering_MTInBehindCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_MTInBehindCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
                                             {
-                                                breaker = distributionMetering_CTInFrontCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_CTInFrontCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
                                             {
-                                                breaker = distributionMetering_CTInBehindCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_CTInBehindCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
                                             {
-                                                breaker = distributionMetering_MTInFrontCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_MTInFrontCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
                                             {
-                                                breaker = distributionMetering_ShanghaiCTCircuit.breaker1 as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_ShanghaiCTCircuit.breaker1;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
                                             {
-                                                breaker = distributionMetering_ShanghaiMTCircuit.breaker1 as PDS.Project.Module.Component.Breaker;
+                                                breaker = distributionMetering_ShanghaiMTCircuit.breaker1;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                                             {
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                             {
-                                                breaker = leakageCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = leakageCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
                                             {
@@ -1164,15 +1164,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
                                             {
-                                                breaker = thermalRelayProtectionCircuit.breaker as PDS.Project.Module.Component.Breaker;
+                                                breaker = thermalRelayProtectionCircuit.breaker;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                             {
-                                                breaker = twoSpeedMotor_CPSDYYCircuit.breaker1 as PDS.Project.Module.Component.Breaker;
+                                                breaker = twoSpeedMotor_CPSDYYCircuit.breaker1;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                             {
-                                                breaker = twoSpeedMotor_CPSYYCircuit.breaker1 as PDS.Project.Module.Component.Breaker;
+                                                breaker = twoSpeedMotor_CPSYYCircuit.breaker1;
                                             }
                                             if (breaker != null)
                                             {
@@ -1194,6 +1194,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     Header = "切换断路器",
                                                     Command = new PDSCommand(() =>
                                                     {
+                                                        ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.CB);
                                                         UpdateCanvas();
                                                     }),
                                                 });
@@ -1227,6 +1228,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                     item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                 }
                                                             };
+                                                            var cmenu = new ContextMenu();
+                                                            cvs.ContextMenu = cmenu;
+                                                            cmenu.Items.Add(new MenuItem()
+                                                            {
+                                                                Header = "切换断路器",
+                                                                Command = new PDSCommand(() =>
+                                                                {
+                                                                    ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.CB);
+                                                                    UpdateCanvas();
+                                                                }),
+                                                            });
                                                             return;
                                                         }
                                                     }
@@ -1245,6 +1257,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                     item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                 }
                                                             };
+                                                            var cmenu = new ContextMenu();
+                                                            cvs.ContextMenu = cmenu;
+                                                            cmenu.Items.Add(new MenuItem()
+                                                            {
+                                                                Header = "切换断路器",
+                                                                Command = new PDSCommand(() =>
+                                                                {
+                                                                    ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.CB);
+                                                                    UpdateCanvas();
+                                                                }),
+                                                            });
                                                             return;
                                                         }
                                                     }
