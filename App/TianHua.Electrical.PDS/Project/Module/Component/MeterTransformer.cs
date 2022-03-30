@@ -6,14 +6,16 @@ using TianHua.Electrical.PDS.Project.Module.Configure;
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
-    /// 电能表
+    /// 直接表
     /// </summary>
     public class MeterTransformer : Meter
     {
         /// <summary>
-        /// 电能表
+        /// 构造函数
         /// </summary>
-        /// <param name="calculateCurrent">计算电流</param>
+        /// <param name="calculateCurrent"></param>
+        /// <param name="polesNum"></param>
+        /// <exception cref="NotSupportedException"></exception>
         public MeterTransformer(double calculateCurrent, string polesNum)
         {
             this.ComponentType = ComponentType.MT;
@@ -32,20 +34,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             MeterSwitchType = meter.parameter;
             AlternativeParameters = meters.Select(o => o.parameter).ToList();
         }
-        public string Content
-        {
-            get
-            {
-                if (PolesNum == "1P")
-                {
-                    return MeterSwitchType;
-                }
-                else
-                {
-                    return "3×" + MeterSwitchType;
-                }
-            }
-        }
+
         public override List<string> GetParameters()
         {
             return AlternativeParameters;
@@ -65,7 +54,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 电能表类型
         /// </summary>
-        private string MeterSwitchType { get; set; }
+        public string MeterSwitchType { get; set; }
 
         /// <summary>
         /// 断路器信息

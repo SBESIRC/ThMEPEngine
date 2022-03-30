@@ -1,23 +1,50 @@
 ﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSMeterTransformerModel : ThPDSMeterBaseModel
     {
-        readonly MeterTransformer meterTransformer;
-        public ThPDSMeterTransformerModel(MeterTransformer meterTransformer)
+        private MeterTransformer Meter => _meter as MeterTransformer;
+        public ThPDSMeterTransformerModel(Meter meter) : base(meter)
         {
-            this.meterTransformer = meterTransformer;
+
         }
-        [DisplayName("内容")]
-        public string Content { get => meterTransformer.Content; }
-        //[DisplayName("电能表类型")]
-        //public string MeterSwitchType { get => meterTransformer.MeterSwitchType; set => meterTransformer.MeterSwitchType = value; }
-        //[DisplayName("极数")]
-        //public string PolesNum { get => meterTransformer.PolesNum; set => meterTransformer.PolesNum = value; }
-        //[DisplayName("额定电流")]
-        //public string RatedCurrent { get => meterTransformer.RatedCurrent; set => meterTransformer.RatedCurrent = value; }
+
+        [DisplayName("电能表规格")]
+        [Editor(typeof(ThPDSMTSpecificationPropertyEditor), typeof(PropertyEditorBase))]
+        public string MTSpecification
+        {
+            get => Meter.MeterSwitchType;
+            set
+            {
+                Meter.SetParameters(value);
+                OnPropertyChanged(nameof(MTSpecification));
+            }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public string ContentMT
+        {
+            get
+            {
+                if (PolesNum == "1P")
+                {
+                    return MTSpecification;
+                }
+                else
+                {
+                    return "3×" + MTSpecification;
+                }
+            }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> MTSpecifications => Meter.GetParameters();
     }
 }

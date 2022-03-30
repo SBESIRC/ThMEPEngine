@@ -11,8 +11,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class CurrentTransformer : Meter
     {
         /// <summary>
-        /// 间接表
+        /// 构造函数
         /// </summary>
+        /// <param name="calculateCurrent"></param>
+        /// <param name="polesNum"></param>
+        /// <exception cref="NotSupportedException"></exception>
         public CurrentTransformer(double calculateCurrent, string polesNum)
         {
             this.ComponentType = ComponentType.CT;
@@ -30,34 +33,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var meter = meters.First();
             CurrentTransformerSwitchType = meter.parameter;
             AlternativeParameters = meters.Select(o => o.parameter).ToList();
-        }
-        public string ContentCT
-        {
-            get
-            {
-                if (PolesNum == "1P")
-                {
-                    return CurrentTransformerSwitchType + "A";
-                }
-                else
-                {
-                    return "3×" + CurrentTransformerSwitchType + "A";
-                }
-            }
-        }
-        public string ContentMT
-        {
-            get
-            {
-                if (PolesNum == "1P")
-                {
-                    return MeterSwitchType;
-                }
-                else
-                {
-                    return "3×" + MeterSwitchType;
-                }
-            }
         }
 
         public override List<string> GetParameters()
@@ -77,14 +52,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 间接表类型
+        /// 直接表类型
         /// </summary>
-        private string MeterSwitchType = "1.5(6)";
+        public string MeterSwitchType = "1.5(6)";
 
         /// <summary>
         /// 间接表类型
         /// </summary>
-        private string CurrentTransformerSwitchType { get; set; }
+        public string CurrentTransformerSwitchType { get; set; }
 
         /// <summary>
         /// 断路器信息

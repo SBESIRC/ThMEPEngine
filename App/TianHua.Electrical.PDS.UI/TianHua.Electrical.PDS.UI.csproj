@@ -48,10 +48,12 @@
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorWireNumbersPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCTSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSEnumDescriptionConverter.cs" />
     <Compile Include="Editors\ThPDSEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSModelPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSMTSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSPolesPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
