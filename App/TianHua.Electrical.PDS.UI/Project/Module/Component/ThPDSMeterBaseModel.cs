@@ -21,15 +21,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [DisplayName("元器件类型")]
         public string Type => _meter.ComponentType.GetDescription();
 
+        [ReadOnly(true)]
         [DisplayName("极数")]
         public string PolesNum
         {
             get => _meter.PolesNum;
-            set
-            {
-                _meter.PolesNum = value;
-                OnPropertyChanged(nameof(PolesNum));
-            }
         }
     }
 }
