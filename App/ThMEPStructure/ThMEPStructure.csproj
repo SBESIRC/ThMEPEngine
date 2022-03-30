@@ -198,6 +198,11 @@
     <Content Include="bin\Debug-NET45\ThMEPStructure.pdb" />
     <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EPPlus">
+      <Version>5.8.8</Version>
+    </PackageReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
