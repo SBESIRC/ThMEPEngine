@@ -24,6 +24,19 @@ namespace TianHua.Electrical.PDS.UI.Models
                 }
             }
         }
+        bool? _IsChecked = false;
+        public bool? IsChecked
+        {
+            get => _IsChecked;
+            set
+            {
+                if (value != _IsChecked)
+                {
+                    _IsChecked = value;
+                    OnPropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
         bool _IsSelected;
         public bool IsSelected
         {

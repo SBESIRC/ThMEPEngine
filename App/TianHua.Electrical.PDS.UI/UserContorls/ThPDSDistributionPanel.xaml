@@ -56,6 +56,7 @@
                     </TreeView.ItemTemplate>
                     <TreeView.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="批量生成" Command="{Binding BatchGenerate}"></MenuItem>
                             <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
                             <MenuItem Header="电气火灾监控"  IsCheckable="True" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}"/>
                             <MenuItem Header="浪涌保护器">

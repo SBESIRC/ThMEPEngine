@@ -117,6 +117,9 @@
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSBatchGenerate.xaml.cs">
+      <DependentUpon>ThPDSBatchGenerate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserContorls\ThPDSCircuitGraphCanvas.xaml.cs">
       <DependentUpon>ThPDSCircuitGraphCanvas.xaml</DependentUpon>
     </Compile>
@@ -171,6 +174,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ElecSandboxUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSBatchGenerate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

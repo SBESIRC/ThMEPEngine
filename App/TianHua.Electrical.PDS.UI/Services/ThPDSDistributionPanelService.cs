@@ -382,6 +382,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     {
         public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
         {
+            PDSCommand _BatchGenerate;
+            public PDSCommand BatchGenerate
+            {
+                get => _BatchGenerate;
+                set
+                {
+                    if (value != _BatchGenerate)
+                    {
+                        _BatchGenerate = value;
+                        OnPropertyChanged(nameof(BatchGenerate));
+                    }
+                }
+            }
             ThPDSDistributionPanelConfigState _Current;
             public ThPDSDistributionPanelConfigState Current
             {
@@ -521,6 +534,68 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dccbs = null;
                 if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
                 Config.Current = new(graph.Vertices.ToList()[sel.Id]);
+                Config.BatchGenerate = new PDSCommand(() =>
+                {
+                    var ctrl = new UserContorls.ThPDSBatchGenerate();
+                    var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
+                    var tree = builder.Build(graph);
+                    ctrl.treeView.DataContext = tree;
+                    ctrl.cbxCheckAll.Checked += (s, e) =>
+                    {
+                        void dfs(ThPDSCircuitGraphTreeModel node)
+                        {
+                            node.IsChecked = true;
+                            foreach (var n in node.DataList) dfs(n);
+                        }
+                        dfs(tree);
+                    };
+                    ctrl.cbxCheckAll.Unchecked += (s, e) =>
+                    {
+                        void dfs(ThPDSCircuitGraphTreeModel node)
+                        {
+                            node.IsChecked = false;
+                            foreach (var n in node.DataList) dfs(n);
+                        }
+                        dfs(tree);
+                    };
+                    ctrl.btnGen.Command = new PDSCommand(() =>
+                    {
+                        var vertices = graph.Vertices.ToList();
+                        var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                        void dfs(ThPDSCircuitGraphTreeModel node)
+                        {
+                            if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                            foreach (var n in node.DataList) dfs(n);
+                        }
+                        dfs(tree);
+                        foreach (var vertice in checkeddVertices)
+                        {
+                            var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
+                            drawCmd.Execute();
+                        }
+                        AcHelper.Active.Editor.Regen();
+                    });
+                    ctrl.cbxCheckAll.Unchecked += (s, e) => { };
+                    var w = new Window() { Width = 800, Height = 600, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
+                    w.Content = ctrl;
+                    w.ShowDialog();
+                });
+                {
+                    var cmenu = new ContextMenu();
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "单独生成",
+                        Command = new PDSCommand(() =>
+                        {
+                            if (TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
+                            var vertices = graph.Vertices.ToList();
+                            var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertices[sel.Id]);
+                            drawCmd.Execute();
+                            AcHelper.Active.Editor.Regen();
+                        }),
+                    });
+                    canvas.ContextMenu = cmenu;
+                }
                 var hoverDict = new Dictionary<object, object>();
                 var rightTemplates = new List<KeyValuePair<Glyphs, int>>();
                 var leftTemplates = new List<Glyphs>();

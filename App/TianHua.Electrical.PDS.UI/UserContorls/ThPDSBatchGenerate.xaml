@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="TianHua.Electrical.PDS.UI.UserContorls.ThPDSBatchGenerate"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+            xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+            <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Left">
+                <CheckBox x:Name="cbxCheckAll">全选</CheckBox>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnGen">生成选中的配电箱</Button>
+            </StackPanel>
+            <TreeView x:Name="treeView" ItemsSource="{Binding DataList}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                            <TextBlock Text="{Binding Name}"/>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </DockPanel>
+    </Grid>
+</UserControl>
