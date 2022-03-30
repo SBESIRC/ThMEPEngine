@@ -119,7 +119,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 }
                 try
                 {
-                    LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                    LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
                 }
                 catch(Exception ex)
                 {
@@ -129,6 +129,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var partitionpro_final = new ParkingPartitionPro();
                 partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
+                partitionpro_final.OutputLanes= Lanes;
                 partitionpro_final.Display();
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);

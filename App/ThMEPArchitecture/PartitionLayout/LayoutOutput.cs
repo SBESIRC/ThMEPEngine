@@ -14,10 +14,11 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public class LayoutOutput
     {
-        public LayoutOutput(List<InfoCar> cars, List<Polyline> columns)
+        public LayoutOutput(List<InfoCar> cars, List<Polyline> columns, List<Line> lanes)
         {
             Cars = cars;
             Columns = columns;
+            Lanes = lanes;
         }
         public static string CarLayerName;
         public static string ColumnLayerName;
@@ -27,6 +28,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public static string VCARBLKNAME = "AI-垂直式5124";
         public List<InfoCar> Cars;
         public List<Polyline> Columns;
+        public List<Line> Lanes;
         public int ColumnDisplayColorIndex = -1;
         public static void InitializeLayer()
         {
@@ -308,6 +310,14 @@ namespace ThMEPArchitecture.PartitionLayout
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                 }
+            }
+        }
+        public void DisplayLanes()
+        {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                return;
+                Lanes.AddToCurrentSpace();
             }
         }
     }

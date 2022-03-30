@@ -26,7 +26,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <param name="obspacialindex"></param>
         /// <param name="boundary"></param>
         /// <param name="vm"></param>
-        public static void DealWithCarsOntheEndofLanes(ref List<InfoCar> cars,ref List<Polyline> pillars, List<Line> lanes
+        public static void DealWithCarsOntheEndofLanes(ref List<InfoCar> cars,ref List<Polyline> pillars,ref List<Line> lanes
             , List<Polyline> Walls,ThCADCoreNTSSpatialIndex obspacialindex,Polyline boundary, ParkingStallArrangementViewModel vm)
         {
             var carspacialindex=new ThCADCoreNTSSpatialIndex(cars.Select(e => e.Polyline).ToCollection());

@@ -62,6 +62,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public List<Polyline> Walls;
         public List<Polyline> Obstacles;
+        public List<Line> OutputLanes;
         public List<Line> OriginalLanes=new List<Line>();
         public Polyline Boundary;
         public Polyline OutBoundary;
@@ -324,9 +325,10 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput.InitializeLayer();
             var vertcar = LayoutOutput.VCar;
             var pcar = LayoutOutput.PCar;
-            LayoutOutput layout = new LayoutOutput(Cars, Pillars);
+            LayoutOutput layout = new LayoutOutput(Cars, Pillars, OutputLanes);
             layout.DisplayColumns();
             layout.DisplayCars();
+            layout.DisplayLanes();
         }
 
         public void GenerateParkingSpaces()
