@@ -73,11 +73,6 @@
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,0">
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
-            
-            <!--<Button Click="btnBalance" Style="{x:Null}" Margin="725,588,121,92">平衡相序</Button>
-            <Button Click="btnSelectFast" Style="{x:Null}" Margin="834,588,13,92">快速选型</Button>
-            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,611,119,69">批量生成</Button>
-            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="834,612,10,68">单独生成</Button>-->
         </Grid>
     </DockPanel>
 </UserControl>

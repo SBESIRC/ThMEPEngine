@@ -1,20 +1,18 @@
 ﻿using QuikGraph;
-using System.Windows;
-using System.Windows.Controls;
-using TianHua.Electrical.PDS.UI.ViewModels;
-using TianHua.Electrical.PDS.Project.Module;
-using System.Windows.Data;
-using System.ComponentModel;
-using System;
 using System.Linq;
-using TianHua.Electrical.PDS.UI.Models;
+using System.Windows;
 using System.Windows.Media;
+using System.Windows.Controls;
+using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
     public partial class ThPDSDistributionPanel : UserControl
     {
         public WpfServices.ThPDSDistributionPanelService Service = new();
+        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
         public ThPDSDistributionPanel()
         {
             InitializeComponent();
@@ -35,7 +33,6 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
                 Service.Init();
             }
         }
-        ThPDSComponentGraph graph = new ThPDSComponentGraph();
 
         private void Tv_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -45,7 +42,6 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void ThPDSDistributionPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            graph.Build(Graph);
             var builder = new ThPDSCircuitGraphTreeBuilder();
             this.tv.DataContext = builder.Build(Graph);
             if (new Services.ThPDSCircuitGraphComponentGenerator().IN(null) is null)
@@ -64,24 +60,9 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             rd.Render(canvas, Graph);
         }
 
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
-        private void btnBalance(object sender, RoutedEventArgs e)
-        {
-        }
-        public void UpdatePropertyGrid(object vm)
+        private void UpdatePropertyGrid(object vm)
         {
             propertyGrid.SelectedObject = vm;
-        }
-        private void btnSelectFast(object sender, RoutedEventArgs e)
-        {
-        }
-        private void btnGenMulti(object sender, RoutedEventArgs e)
-        {
-           
-        }
-        private void btnGenSingle(object sender, RoutedEventArgs e)
-        {
-           
         }
     }
 }
