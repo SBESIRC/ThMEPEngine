@@ -30,7 +30,8 @@ namespace ThMEPStructure.Reinforcement.Draw
         public double FirstRowWidth = 0;
         public string Reinforce;
         public string Stirrup;
-
+        public List<Polyline> LabelAndRect=new List<Polyline>();//存放C筋标注的多段线以及引线
+        public List<DBText> CJintText = new List<DBText>();//存放C筋标注的文本信息
 
 
 
@@ -128,7 +129,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         /// </summary>
         public abstract void DrawOutline();
 
-
+        
 
         /// <summary>
         /// 绘制轮廓尺寸
@@ -145,6 +146,8 @@ namespace ThMEPStructure.Reinforcement.Draw
         protected abstract void CalReinforcePosition(int pointNum, Polyline polyline);
         protected abstract void CalLinkPosition();
         protected abstract void CalStirrupPosition();
+
+        public abstract void DrawCJin();
         public Polyline GenPouDuan(Point3d pt1, Point3d pt2, Point3d linePt, out Line line1, out Line line2)
         {
             double length = pt1.DistanceTo(pt2);
@@ -211,8 +214,13 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
 
             int pointNum = strToReinforce.num;
+
+            
+
             //计算纵筋位置
             CalReinforcePosition(pointNum, Outline);
+            DrawCJin();
+
             //计算箍筋位置
             CalStirrupPosition();
             //计算拉筋位置
@@ -287,6 +295,17 @@ namespace ThMEPStructure.Reinforcement.Draw
                 objectCollection.Add(dimension);
             }
             
+            foreach (var label in LabelAndRect)
+            {
+                //label.Layer = "CJLaebl";
+                objectCollection.Add(label);             
+            }
+
+            foreach(var txt in CJintText)
+            {
+                //txt.Layer = "CJText";
+                objectCollection.Add(txt);
+            }
 
         }
         /// <summary>

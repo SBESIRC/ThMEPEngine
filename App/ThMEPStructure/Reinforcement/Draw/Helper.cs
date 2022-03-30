@@ -34,14 +34,15 @@ namespace ThMEPStructure.Reinforcement.Draw
         public static StrToReinforce StrToRein(string Reinforce)
         {
             //解析表格中的Reinforce
-            StrToReinforce Res = new StrToReinforce();
+            StrToReinforce Res = new StrToReinforce(); 
+            Res.Rein_Detail_list = new List<ReinforceDetail>();
 
             string tmp = "";
             while (Reinforce.Contains("+"))
             {
                 tmp = Reinforce.Substring(0, Reinforce.IndexOf("+"));
                 Reinforce = Reinforce.Substring(Reinforce.IndexOf("+") + 1);
-                Res.Rein_Detail_list = new List<ReinforceDetail>();
+               
                 ReinforceDetail tmpDetail1 = new ReinforceDetail();
                 if (tmp.Contains("C"))
                 {
@@ -251,6 +252,61 @@ namespace ThMEPStructure.Reinforcement.Draw
                 if ((footPoint - line.EndPoint).DotProduct(footPoint - line.StartPoint) < 0 && footPoint.DistanceTo(pt) < weight / 2 + 15) return true;
             }
             return false;
+        }
+
+        public static int FindMidPoint(List<Point3d> pts, int idx1, int idx2)
+        {
+            //返回idx1和idx2中间的点的下标
+            //idx1，idx2竖直情况
+            int tmp = -1;
+            double mindist = 1000000;
+            if (Math.Abs(pts[idx1].X - pts[idx2].X) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].Y < Math.Max(pts[idx1].Y, pts[idx2].Y) && pts[i].Y > Math.Min(pts[idx1].Y, pts[idx2].Y)&& Math.Abs(pts[i].X - pts[idx1].X) < 50&& Math.Abs(pts[i].X - pts[idx2].X) < 50)
+                    {
+                        if (Math.Abs(TwoPointDist(pts[i], pts[idx1]) - TwoPointDist(pts[i], pts[idx2])) < mindist)
+                        {
+                            mindist = Math.Abs(TwoPointDist(pts[i], pts[idx1]) - TwoPointDist(pts[i], pts[idx2]));
+                            tmp = i;
+                        }
+                    }
+
+
+                }
+            }
+
+            //idx1,idx2水平的情况
+            if (Math.Abs(pts[idx1].Y - pts[idx2].Y) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].X < Math.Max(pts[idx1].X, pts[idx2].X) && pts[i].X > Math.Min(pts[idx1].X, pts[idx2].X)&& Math.Abs(pts[i].Y - pts[idx1].Y) < 50&& Math.Abs(pts[i].Y - pts[idx2].Y) < 50)
+                    {
+                        if (Math.Abs(TwoPointDist(pts[i], pts[idx1]) - TwoPointDist(pts[i], pts[idx2])) < mindist)
+                        {
+                            mindist = Math.Abs(TwoPointDist(pts[i], pts[idx1]) - TwoPointDist(pts[i], pts[idx2]));
+                            tmp = i;
+                        }
+                    }
+
+
+                }
+            }
+            return tmp;
+        }
+        public static double TwoPointDist(Point3d A, Point3d B)
+        {
+            return Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
         }
     }
 }

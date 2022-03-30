@@ -123,7 +123,10 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         }
 
+        public override void DrawCJin()
+        {
 
+        }
         protected override void CalLinkPosition()
         {
             //遍历所有点，找出2，3类型的钢筋，钢筋,同时查表,因为是一对对的点，所以每次加两个点
