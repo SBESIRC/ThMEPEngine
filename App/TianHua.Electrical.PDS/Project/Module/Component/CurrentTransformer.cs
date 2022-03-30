@@ -77,7 +77,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 电能表类型
+        /// 间接表类型
         /// </summary>
         private string MeterSwitchType = "1.5(6)";
 

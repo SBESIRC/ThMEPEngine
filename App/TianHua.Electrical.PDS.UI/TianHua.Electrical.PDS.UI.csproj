@@ -96,8 +96,10 @@
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSCurrentTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSMeterModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSResidualCurrentBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />

@@ -1605,7 +1605,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 object vm = null;
                                                 if (meter is PDS.Project.Module.Component.MeterTransformer meterTransformer)
                                                 {
-                                                    vm = new Project.Module.Component.ThPDSMMeterTransformerModel(meterTransformer);
+                                                    vm = new Project.Module.Component.ThPDSMeterTransformerModel(meterTransformer);
                                                 }
                                                 else if (meter is PDS.Project.Module.Component.CurrentTransformer currentTransformer)
                                                 {
