@@ -101,9 +101,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     {
                         return typeof(Motor_DiscreteComponentsStarTriangleStartCircuit);
                     }
+                case CircuitFormOutType.电动机_CPS:
+                    {
+                        return typeof(Motor_CPSCircuit);
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        return typeof(Motor_CPSStarTriangleStartCircuit);
+                    }
                 default:
                     {
-                        //初步测试，暂时只测试以上四种回路
+                        //暂时只测试以上回路
                         throw new NotSupportedException();
                     }
             }
