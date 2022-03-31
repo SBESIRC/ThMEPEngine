@@ -10,7 +10,7 @@ using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Engine;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Data;
-
+using ThMEPEngineCore.Model.Hvac;
 
 using ThCADCore.NTS;
 using NFox.Cad;
@@ -26,6 +26,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
         //输出数据
         public List<OutPutModel> outPutModels = new List<OutPutModel>();
+        public List<ThIfcVirticalPipe> VerticalPipeOut = new List<ThIfcVirticalPipe>();
 
         public Run(ThHydrantLayoutDataQueryService dataQuery,DataPass dataPass0) 
         {
@@ -49,6 +50,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             dataQueryService = dataQuery;
             InputDataProcess inputDataProcess0 = new InputDataProcess(rawData);
             ProcessedData processedData0 = inputDataProcess0.Output();
+            VerticalPipeOut = processedData0.VerticalPipeOut;
 
             //进行寻找
             //修正每一个消防栓
@@ -70,7 +72,6 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     outPutModels.Add(singleFireExtinguisher0.OutPutSingleModel());
                 }
             }
-
         }
 
 

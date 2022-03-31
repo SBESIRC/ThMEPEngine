@@ -25,6 +25,7 @@ using ThMEPWSS.HydrantLayout.Data;
 using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Engine;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPWSS.HydrantLayout.Command
 {
@@ -112,7 +113,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 DataPass dataPass0 = new DataPass(_radius,_layoutObject,_layoutObject,_avoidParking);
                 Run run0 = new Run(dataQuery,dataPass0);
                 List<OutPutModel> outPutModels = run0.outPutModels;
-
+                List<ThIfcVirticalPipe> VerticalPipeOut = run0.VerticalPipeOut;
                 //
                 //打印
                 dataQuery.Print(); //for debug

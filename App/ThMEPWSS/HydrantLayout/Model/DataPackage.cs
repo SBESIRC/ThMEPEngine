@@ -61,6 +61,8 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static ThCADCoreNTSSpatialIndex ParkingIndex;
         //public static ThCADCoreNTSSpatialIndex LineWallIndex;
 
+        //输出的立管
+        public List<ThIfcVirticalPipe> VerticalPipeOut;
         //立柱起点
         public List<ThHydrantModel> FireHydrant;
         public List<ThHydrantModel> FireExtinguisher;

@@ -154,7 +154,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         Vector3d baseDir1 = dir2.GetNormal();
                         //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
-                        if (IsVPBlocked(basePoint1,baseDir1))
+                        if (IsVPBlocked(basePoint1,baseDir1,Frame))
                         {
                             basePointList.Add(basePoint1);
                             dirList.Add(baseDir1);
@@ -194,29 +194,38 @@ namespace ThMEPWSS.HydrantLayout.Service
                     Point3d mid = start + 0.5 * dir01;
                     Vector3d dirOut = new Vector3d(-dir01.Y, dir01.X, dir01.Z).GetNormal();
                     Polyline probe = CreateBoundaryService.CreateBoundary(center, 1500, 190, dirOut);
-                    if (FeasibilityCheck.IsBoundaryOK(probe, ProcessedData.ParkingIndex)) 
+                    if (FeasibilityCheck.IsBoundaryOK(probe,Frame, ProcessedData.ParkingIndex)) 
                     {
-                        basePointList.Add(mid);
-                        dirList.Add(dirOut);
-                        LeanWallList.Add(cl);
+                        if (IsVPBlocked(mid, dirOut, Frame))
+                        {
+                            basePointList.Add(mid);
+                            dirList.Add(dirOut);
+                            LeanWallList.Add(cl);
+                        }
                     }
 
                     Point3d left = start + 100 * dir01.GetNormal();
                     Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide/2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
-                    if (FeasibilityCheck.IsBoundaryOK(vpLeft, ProcessedData.ForbiddenIndex)) 
+                    if (FeasibilityCheck.IsBoundaryOK(vpLeft,Frame, ProcessedData.ForbiddenIndex)) 
                     {
-                        basePointList.Add(left);
-                        dirList.Add(dirOut);
-                        LeanWallList.Add(cl);
+                        if (IsVPBlocked(left, dirOut, Frame))
+                        {
+                            basePointList.Add(left);
+                            dirList.Add(dirOut);
+                            LeanWallList.Add(cl);
+                        }
                     }
 
                     Point3d right = end - 100 * dir01.GetNormal();
                     Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
-                    if (FeasibilityCheck.IsBoundaryOK(vpRight, ProcessedData.ForbiddenIndex))
+                    if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
                     {
-                        basePointList.Add(right);
-                        dirList.Add(dirOut);
-                        LeanWallList.Add(cl);
+                        if (IsVPBlocked(right, dirOut, Frame))
+                        {
+                            basePointList.Add(right);
+                            dirList.Add(dirOut);
+                            LeanWallList.Add(cl);
+                        }
                     }
                 }
             }
@@ -246,7 +255,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                 Point3d closetPt = line0.GetClosestPointTo(CenterPoint, false);
                 
                 //不是端点且没被阻挡
-                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1))
+                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1,Frame))
                 {
                     basePointList.Add(closetPt);
                     dirList.Add(baseDir1);
@@ -264,7 +273,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                        
                         //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
-                        if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1))
+                        if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint1);
                             dirList.Add(baseDir1);
@@ -274,7 +283,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint2 = pt1 + dir2/2;
 
-                        if (basePoint2.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint2, baseDir1))
+                        if (basePoint2.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint2, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint2);
                             dirList.Add(baseDir1);
@@ -284,7 +293,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
 
-                        if (basePoint3.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint3, baseDir1))
+                        if (basePoint3.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint3, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint3);
                             dirList.Add(baseDir1);
@@ -299,10 +308,10 @@ namespace ThMEPWSS.HydrantLayout.Service
         }
 
         //判断立柱是否被阻挡
-        public bool IsVPBlocked(Point3d basePoint, Vector3d Dir)
+        public bool IsVPBlocked(Point3d basePoint, Vector3d Dir, Polyline shell)
         {
-            Polyline pl = CreateBoundaryService.CreateBoundary(basePoint + Dir * 0.5 * Info.VPSide, Info.VPSide - 10, Info.VPSide - 10, Dir);
-            return FeasibilityCheck.IsFireBlocked(pl);
+            Polyline pl = CreateBoundaryService.CreateBoundary(basePoint + Dir * 0.5 * Info.VPSide, Info.VPSide, Info.VPSide, Dir);
+            return FeasibilityCheck.IsFireFeasible(pl,shell);
         }
 
 
@@ -361,7 +370,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                     Point3d mid = start + 0.5 * dir01;
                     Vector3d dirOut = new Vector3d(-dir01.Y, dir01.X, dir01.Z).GetNormal();
                     Polyline probe = CreateBoundaryService.CreateBoundary(center, 1000, 190, dirOut);
-                    if (FeasibilityCheck.IsBoundaryOK(probe, ProcessedData.ParkingIndex))
+                    if (FeasibilityCheck.IsBoundaryOK(probe,Frame,ProcessedData.ParkingIndex))
                     {
                         basePointList.Add(mid);
                         dirList.Add(dirOut);
@@ -393,7 +402,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                 Line line0 = new Line(pt1, pt2);
                 Point3d closetPt = line0.GetClosestPointTo(CenterPoint, false);
 
-                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1))
+                if (!closetPt.Equals(pt1) && !closetPt.Equals(pt2) && IsVPBlocked(closetPt, baseDir1,Frame))
                 {
                     basePointList.Add(closetPt);
                     dirList.Add(baseDir1);
@@ -411,7 +420,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
-                        if (IsVPBlocked(basePoint1, baseDir1))
+                        if (IsVPBlocked(basePoint1, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint1);
                             dirList.Add(baseDir1);
@@ -421,7 +430,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint2 = pt1 + dir2 / 2;
 
-                        if (basePoint2.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint2, baseDir1))
+                        if (basePoint2.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint2, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint2);
                             dirList.Add(baseDir1);
@@ -431,7 +440,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
 
-                        if (basePoint3.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint3, baseDir1))
+                        if (basePoint3.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint3, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint3);
                             dirList.Add(baseDir1);

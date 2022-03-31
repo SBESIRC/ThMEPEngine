@@ -30,7 +30,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public List<Point3d> VerticalPipeUsed1 = new List<Point3d>();
         public List<ThIfcVirticalPipe> VerticalPipeIgnore = new List<ThIfcVirticalPipe>();
         public DBObjectCollection VerticalPipePoint = new DBObjectCollection();
+        
         public Dictionary<DBObject, ThIfcVirticalPipe> PointToVP = new Dictionary<DBObject, ThIfcVirticalPipe>();
+        public List<ThIfcVirticalPipe> VerticalPipeOut = new List<ThIfcVirticalPipe>();
         //对消火栓和灭火器进行分类
         public List<ThHydrantModel> HydrantModel0 = new List<ThHydrantModel>();
         public List<ThHydrantModel> HydrantModel1 = new List<ThHydrantModel>();
@@ -191,6 +193,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 if (VerticalPipeList.Count != 0) //找到立管 
                 {
                     rawData0.VerticalPipe.Remove(PointToVP[VerticalPipeList[0]]);
+                    VerticalPipeOut.Add(PointToVP[VerticalPipeList[0]]);
+
                     if (model.Type == 0)
                     {
                         //VerticalPipeUsed0.Add((PointToVP[VerticalPipeList[0]].Outline as DBPoint).Position);
@@ -227,25 +231,26 @@ namespace ThMEPWSS.HydrantLayout.Engine
         {
             var pakingObjs = new DBObjectCollection();
             rawData0.Car.ForEach(x => pakingObjs.Add(x));
-            pakingObjs.BufferPolygons(50);
-            rawData0.Car = pakingObjs.OfType<Polyline>().ToList();
+         var bufferPaking=   pakingObjs.BufferPolygons(50);
+            rawData0.Car = bufferPaking.OfType<Polyline>().ToList();
             rawData0.Car.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1car", 6));
         }
 
         //门/卷帘/不使用立柱 
         public void ForbiddenCreate()
         {
+            var bufferTol = 10;
             //门 buffer
             var doorObjs = new DBObjectCollection();
             rawData0.Door.ForEach(x => doorObjs.Add(x));
-            doorObjs.BufferPolygons(50);
-            rawData0.Door = doorObjs.OfType<Polyline>().ToList();
+            var bufferDoor= doorObjs.BufferPolygons(bufferTol);
+            rawData0.Door = bufferDoor.OfType<Polyline>().ToList();
 
             //卷帘 buffer
             var fpObjs = new DBObjectCollection();
             rawData0.FireProof.ForEach(x => fpObjs.Add(x));
-            fpObjs.BufferPolygons(50);
-            rawData0.FireProof = fpObjs.OfType<Polyline>().ToList();
+            var bufferFp =  fpObjs.BufferPolygons(bufferTol);
+            rawData0.FireProof = bufferFp.OfType<Polyline>().ToList();
 
             //立柱buffer
             foreach (var model in VerticalPipeIgnore)
@@ -263,7 +268,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
             rawData0.Door.ForEach(x => ForbiddenObjs.Add(x));
             rawData0.FireProof.ForEach(x => ForbiddenObjs.Add(x));
             rawData0.Wall.ForEach(x => ForbiddenObjs.Add(x));
+            rawData0.Column.ForEach(x => ForbiddenObjs.Add(x));
             //IgnoreVPBlock.ForEach(x => ForbiddenObjs.Add(x));
+
             ForbiddenIndex = new ThCADCoreNTSSpatialIndex(ForbiddenObjs);
 
             //可倚靠区
@@ -288,6 +295,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             ProcessedData.LeanWallIndex = LeanWallIndex;
             ProcessedData.ParkingIndex = PakingIndex;
 
+            processedData1.VerticalPipeOut = VerticalPipeOut;
             processedData1.FireHydrant = HydrantModel0;
             processedData1.FireExtinguisher = HydrantModel1;
 

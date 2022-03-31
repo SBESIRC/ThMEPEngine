@@ -162,7 +162,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 Point3d fireCenter = new Point3d();
                                 Vector3d fireDir = new Vector3d();
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
-                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k],ProcessedData.ParkingIndex);
+                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
                                 fireCompareModels0.Add(fireCompareModeltmp);
                                 break;
@@ -245,7 +245,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 Point3d fireCenter = new Point3d();
                                 Vector3d fireDir = new Vector3d();
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
-                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], ProcessedData.ParkingIndex);
+                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(),ProcessedData.ParkingIndex);
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
                                 fireCompareModelsMix.Add(fireCompareModeltmp);
                             }
@@ -324,7 +324,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 Point3d fireCenter = new Point3d();
                                 Vector3d fireDir = new Vector3d();
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
-                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], ProcessedData.ParkingIndex);
+                                bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
                                 fireCompareModelsMix.Add(fireCompareModeltmp);
                                 break;
@@ -375,7 +375,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
             if (Done)
             {
-                Point3d centerpoint = BestLayOut.basePoint + BestLayOut.dir * Info.VPSide;
+                Point3d centerpoint = BestLayOut.basePoint + BestLayOut.dir * Info.VPSide/2;
                 vp = new OutPutModel(true, 0, centerpoint, BestLayOut.dir, BestLayOut.doorOpenDir, model);
 
                 hydrant = new OutPutModel(true, 1, BestLayOut.fireCenterPoint, BestLayOut.fireDir, BestLayOut.doorOpenDir, model);

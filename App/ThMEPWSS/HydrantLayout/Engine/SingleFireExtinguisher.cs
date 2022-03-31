@@ -141,10 +141,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
                             Point3d fireCenter = new Point3d();
                             Vector3d fireDir = new Vector3d();
                             fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
-                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, ProcessedData.ParkingIndex);
+                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, LeanWall.Shell() , ProcessedData.ParkingIndex);
                             FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
                             fireCompareModels0.Add(fireCompareModeltmp);
-                            break;
                         }
                     }
                 }
@@ -212,7 +211,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                             Point3d fireCenter = new Point3d();
                             Vector3d fireDir = new Vector3d();
                             fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
-                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, ProcessedData.ParkingIndex);
+                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, LeanWall.Shell(),ProcessedData.ParkingIndex);
                             FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
                             fireCompareModels0.Add(fireCompareModeltmp);                        
                         }
@@ -277,7 +276,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                             Point3d fireCenter = new Point3d();
                             Vector3d fireDir = new Vector3d();
                             fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
-                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, ProcessedData.ParkingIndex);
+                            bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, LeanWall.Shell(), ProcessedData.ParkingIndex);
                             FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
                             fireCompareModels0.Add(fireCompareModeltmp);
                         }
