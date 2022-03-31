@@ -108,6 +108,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return;
             }
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
+
             foreach (Point3dEx p in neighbors)
             {
                 try

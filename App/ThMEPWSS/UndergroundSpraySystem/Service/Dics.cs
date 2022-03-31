@@ -13,11 +13,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             for (int i = 0; i < sprayIn.LeadLines.Count - 1; i++)
             {
                 var l1 = sprayIn.LeadLines[i];
-       
+
                 for (int j = i + 1; j < sprayIn.LeadLines.Count; j++)
                 {
                     var l2 = sprayIn.LeadLines[j];
-  
+
                     if (l1.GetLinesDist(l2) < tolerance)
                     {
                         sprayIn.LeadLineDic.AddItem(l1, l2);

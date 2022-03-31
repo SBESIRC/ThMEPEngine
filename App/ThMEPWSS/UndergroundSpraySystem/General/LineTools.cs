@@ -120,13 +120,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                if (pt1.DistanceToEx(pt2) > 763 && pt1.DistanceToEx(pt2) < 764)
+                    ;
                 if (pt1.DistanceToEx(pt2) > 1001 || pt1.DistanceToEx(pt2) < 1)
                 {
                     continue;
                 }
                 if (sprayIn.PtDic.ContainsKey(pt1) && sprayIn.PtDic.ContainsKey(pt2))
                 {
-                    if (sprayIn.PtDic[pt1].Count >= 3 || sprayIn.PtDic[pt2].Count >= 3)
+                    if (sprayIn.PtDic[pt1].Count >= 2 || sprayIn.PtDic[pt2].Count >= 2)
                     {
                         continue;
                     }
@@ -200,6 +202,39 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             //return lineList;//merge
         }
 
+        public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
+        {
+            var dbPts = new List<DBPoint>();
+            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
+            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+            foreach(var apt in alarmPts)
+            {
+                var rect = apt.GetRect(210);
+                var rst = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+                foreach(var obj in rst)
+                {
+                    var pt = (obj as DBPoint).Position;
+                    var line = new Line(apt, pt);
+                    if(line.Length > 1.0)
+                    {
+                        lineList.Add(line);
+#if DEBUG
+                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        {
+                            var layerNames = "报警阀连接的线段";
+                            if (!acadDatabase.Layers.Contains(layerNames))
+                            {
+                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                            }
+                            line.LayerId = DbHelper.GetLayerId(layerNames);
+                            line.ColorIndex = (int)ColorIndex.Red;
+                            acadDatabase.CurrentSpace.Add(line);
+                        }
+#endif
+                    }
+                }
+            }
+        }
 
 
         public static void AddPtDic(SprayIn sprayIn, List<Point3d> pts, Point3d centerPt)

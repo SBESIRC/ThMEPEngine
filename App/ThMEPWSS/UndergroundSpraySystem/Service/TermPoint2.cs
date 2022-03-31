@@ -56,22 +56,23 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 return;
             }
             var adjs = sprayIn.LeadLineDic[StartLine];
-            double minDist = 100;
-            foreach (var l in sprayIn.LeadLines)
-            {
-                var spt = l.StartPoint;
-                var ept = l.EndPoint;
-                var spt1 = StartLine.StartPoint;
-                var ept1 = StartLine.EndPoint;
-                if(!l.Equals(StartLine))
-                {
-                    if (StartLine.GetLinesDist(l)< minDist)
-                    {
-                        TextLine = l;
-                        minDist = StartLine.GetLinesDist(l);
-                    }
-                }
-            }
+            TextLine = adjs[0] as Line;
+            //double minDist = 100;
+            //foreach (var l in adjs)
+            //{
+            //    var spt = l.StartPoint;
+            //    var ept = l.EndPoint;
+            //    var spt1 = StartLine.StartPoint;
+            //    var ept1 = StartLine.EndPoint;
+            //    if(!l.Equals(StartLine))
+            //    {
+            //        if (StartLine.GetLinesDist(l)< minDist)
+            //        {
+            //            TextLine = l;
+            //            minDist = StartLine.GetLinesDist(l);
+            //        }
+            //    }
+            //}
         }
 
         public void SetPipeNumber(ThCADCoreNTSSpatialIndex spatialIndex)

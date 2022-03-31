@@ -14,9 +14,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class PumpText
     {
         public DBObjectCollection DBObjs { get; set; }
-        public PumpText()
+        public DBObjectCollection TextDbObjs { get; set; }
+        public PumpText(DBObjectCollection textDbObjs)
         {
             DBObjs = new DBObjectCollection();
+            TextDbObjs = new DBObjectCollection();
+            foreach (var obj in textDbObjs)
+            {
+                TextDbObjs.Add((DBObject)obj);
+            }
         }
         public void Extract(Database database, SprayIn sprayIn)
         {
@@ -43,8 +49,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         .Where(e => e is BlockReference)
                         .ForEach(e => ExplodeBlockNote(e, DBObjs));
                 }
+                foreach (var obj in TextDbObjs)
+                {
+                    var entity = obj as Entity;
+                    AddObj(entity);
+                }
             }
         }
+
+        private void AddObj(Entity entity)
+        {
+
+            if (entity is DBText dBText)
+            {
+                AddDbText(dBText);
+            }
+            if (entity.IsTCHText())
+            {
+                AddTchText(entity);
+            }
+        }
+
         public List<DBText> GetTexts()
         {
             var dbTexts = new List<DBText>();

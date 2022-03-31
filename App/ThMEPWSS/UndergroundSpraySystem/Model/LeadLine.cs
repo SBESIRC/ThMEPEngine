@@ -6,29 +6,34 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
+
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
     public class LeadLine
     {
         public DBObjectCollection DBObjs { get; set; }
+        public DBObjectCollection TextDbObjs { get; set; }//存放提取的文字，避免二次操作
         public LeadLine()
         {
             DBObjs = new DBObjectCollection();
+            TextDbObjs = new DBObjectCollection();
         }
         public void Extract(Database database, SprayIn sprayIn)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var pipeNumber = acadDatabase
+                var results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
                    .Where(o => IsTargetLayer(o.Layer.ToUpper()))
                    .ToList();
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(pipeNumber.ToCollection());
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
 
                 foreach(var polygon in sprayIn.FloorRectDic.Values)
                 {
@@ -61,6 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
             }
             leadLines = PipeLineList.CleanLaneLines3(leadLines);
+            Draw.LeadLines(leadLines);
             return leadLines;
         }
         private bool IsTargetLayer(string layer)
@@ -75,19 +81,34 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         }
         private bool IsTCHNote(Entity entity)
         {
-            return entity.GetType().Name.Equals("ImpEntity");
+            var name = entity.GetRXClass().DxfName;
+            var rst1 = name.Contains("TCH_VPIPEDIM");//天正标注
+            var rst2 = name.Contains("TCH_MULTILEADER");//引出标注
+
+            return rst1 || rst2;
         }
 
         private void ExplodeTCHNote(Entity entity)
         {
             var dbObjs = new DBObjectCollection();
             entity.Explode(dbObjs);
-            dbObjs.Cast<Entity>()
-                .Where(e => e is Line)
-                .ForEach(e => DBObjs.Add(e));
-            dbObjs.Cast<Entity>()
-                .Where(e => e is Polyline)
-                .ForEach(e => DBObjs.AddList((e as Polyline).Pline2Lines()));
+            foreach (var obj in dbObjs)
+            {
+                var ent = obj as Entity;
+                if (ent is Line line)
+                {
+                    DBObjs.Add(line);
+                }
+                if (ent is Polyline pline)
+                {
+                    DBObjs.AddList(pline.Pline2Lines());
+                }
+                if (ent is DBText || ent.IsTCHText())
+                {
+                    TextDbObjs.Add(ent);
+                }
+
+            }
         }
 
         private void ExplodeBlockNote(Entity entity)
