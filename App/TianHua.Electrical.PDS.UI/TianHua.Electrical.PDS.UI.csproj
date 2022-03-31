@@ -46,11 +46,14 @@
     <Compile Include="Editors\ThPDSBreakerResidualCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCodeLevelPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorWireNumbersPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCTSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSEnumDescriptionConverter.cs" />
     <Compile Include="Editors\ThPDSEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSFrameSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSModelPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSMTSpecificationPropertyEditor.cs" />

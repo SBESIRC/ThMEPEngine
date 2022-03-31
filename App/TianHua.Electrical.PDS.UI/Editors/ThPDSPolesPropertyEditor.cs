@@ -46,6 +46,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
                 //  1. 型号决定了可选的极数选项
                 return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
             }
+            if (propertyItem.Value is ThPDSCPSModel cps)
+            {
+                return cps.AlternativePolesNums;
+            }
             throw new NotSupportedException();
         }
     }

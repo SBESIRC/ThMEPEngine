@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         MT,
         [Description("间接表")]
         CT,
-        [Description("电动机综合保护开关")]
+        [Description("控制保护开关")]
         CPS,
         [Description("熔断器")]
         FU,

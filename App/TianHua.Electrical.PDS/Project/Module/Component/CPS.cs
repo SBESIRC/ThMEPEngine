@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             this.CPSPicks = cPSPicks;
             var CPS = cPSPicks.First();
-            CPSType = CPS.Model;
+            Model = CPS.Model;
             FrameSpecification = CPS.FrameSize;
             PolesNum = CPS.Poles;
             RatedCurrent = CPS.Amps;
@@ -45,7 +45,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 型号
         /// </summary>
-        public string CPSType { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 壳架规格
@@ -72,7 +72,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         public string CodeLevel { get; set; }
 
-        public List<string> GetAlternativeModels()
+        public List<string> GetModels()
         {
             return AlternativeModels;
         }
@@ -85,12 +85,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.CPSCombination.Contains(Combination)
             && o.CPSCharacteristics.Contains(CodeLevel)))
             {
-                this.CPSType = model;
+                this.Model = model;
             }
             else
             {
                 var cps = CPSPicks.First(o => o.Model == model);
-                CPSType = cps.Model;
+                Model = cps.Model;
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
@@ -109,7 +109,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (CPSPicks.Any(o => o.Poles == PolesNum
              && o.FrameSize == frameSpecification
-             && o.Model == CPSType
+             && o.Model == Model
              && o.Amps == RatedCurrent
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)))
@@ -119,7 +119,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else
             {
                 var cps = CPSPicks.First(o => o.FrameSize == frameSpecification);
-                CPSType = cps.Model;
+                Model = cps.Model;
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
@@ -138,7 +138,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (CPSPicks.Any(o => o.Poles == polesNum
              &&o.FrameSize == FrameSpecification
-             && o.Model == CPSType
+             && o.Model == Model
              && o.Amps == RatedCurrent
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)))
@@ -148,7 +148,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else
             {
                 var cps = CPSPicks.First(o => o.Poles == polesNum);
-                CPSType = cps.Model;
+                Model = cps.Model;
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
@@ -167,7 +167,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (CPSPicks.Any(o => o.Amps == ratedCurrent
              && o.FrameSize == FrameSpecification
-             && o.Model == CPSType
+             && o.Model == Model
              && o.Poles == PolesNum
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)))
@@ -177,7 +177,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else
             {
                 var cps = CPSPicks.First(o => o.Amps == ratedCurrent);
-                CPSType = cps.Model;
+                Model = cps.Model;
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;

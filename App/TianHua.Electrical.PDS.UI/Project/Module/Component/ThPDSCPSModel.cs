@@ -1,27 +1,128 @@
-﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
+﻿using ThCADExtension;
+using System.ComponentModel;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSCPSModel : NotifyPropertyChangedBase
     {
-        readonly CPS cps;
+        private readonly CPS _cps;
         public ThPDSCPSModel(CPS cps)
         {
-            this.cps = cps;
+            this._cps = cps;
         }
+
+        [ReadOnly(true)]
+        [DisplayName("元器件类型")]
+        public string Type => _cps.ComponentType.GetDescription();
+
+
         [DisplayName("型号")]
-        public string CPSType { get => cps.CPSType; set => cps.CPSType = value; }
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
+        {
+            get => _cps.Model;
+            set
+            {
+                _cps.SetModel(value);
+                OnPropertiesChanged();
+            }
+        }
+
         [DisplayName("壳架规格")]
-        public string FrameSpecifications { get => cps.FrameSpecification; set => cps.FrameSpecification = value; }
+        [Editor(typeof(ThPDSFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
+        public string FrameSpecification
+        {
+            get => _cps.FrameSpecification;
+            set
+            {
+                _cps.SetFrameSpecification(value);
+                OnPropertiesChanged();
+            }
+        }
+
         [DisplayName("极数")]
-        public string PolesNum { get => cps.PolesNum; set => cps.PolesNum = value; }
-        [DisplayName("额定电流")]
-        public double RatedCurrent { get => cps.RatedCurrent; set => cps.RatedCurrent = value; }
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
+        public string PolesNum
+        {
+            get => _cps.PolesNum;
+            set
+            {
+                _cps.SetPolesNum(value);
+                OnPropertiesChanged();
+            }
+        }
+
         [DisplayName("组合形式")]
-        public string Combination { get => cps.Combination; set => cps.Combination = value; }
+        [Editor(typeof(ThPDSCombinationPropertyEditor), typeof(PropertyEditorBase))]
+        public string Combination
+        {
+            get => _cps.Combination;
+            set
+            {
+                _cps.SetCombination(value);
+                OnPropertiesChanged();
+            }
+        }
+
         [DisplayName("级别代号")]
-        public string CodeLevel { get => cps.CodeLevel; set => cps.CodeLevel = value; }
+        [Editor(typeof(ThPDSCodeLevelPropertyEditor), typeof(PropertyEditorBase))]
+        public string CodeLevel
+        {
+            get => _cps.CodeLevel;
+            set
+            {
+                _cps.SetCodeLevel(value);
+                OnPropertiesChanged();
+            }
+        }
+
+        private void OnPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(Model));
+            OnPropertyChanged(nameof(PolesNum));
+            OnPropertyChanged(nameof(CodeLevel));
+            OnPropertyChanged(nameof(Combination));
+            OnPropertyChanged(nameof(FrameSpecification));
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _cps.GetModels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeFrameSpecifications
+        {
+            get => _cps.GetFrameSpecifications();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _cps.GetPolesNums();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeCombinations
+        {
+            get => _cps.GetCombinations();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeCodeLevels
+        {
+            get => _cps.GetCodeLevels();
+        }
     }
 }

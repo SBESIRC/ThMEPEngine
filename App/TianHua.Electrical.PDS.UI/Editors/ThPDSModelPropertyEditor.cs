@@ -44,6 +44,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return MTSEConfiguration.MTSEComponentInfos.Select(o => o.Model).Distinct();
             }
+            if (propertyItem.Value is ThPDSCPSModel cps)
+            {
+                return cps.AlternativeModels;
+            }
             throw new NotSupportedException();
         }
     }
