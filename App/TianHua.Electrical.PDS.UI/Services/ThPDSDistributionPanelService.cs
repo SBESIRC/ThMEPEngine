@@ -1748,6 +1748,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 var vm = new Project.Module.Component.ThPDSCPSModel(cps);
                                                 cb += () => UpdatePropertyGrid(vm);
+                                                render += () =>
+                                                {
+                                                    var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CPS");
+                                                    if (item.Key != null)
+                                                    {
+                                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                    }
+                                                };
                                             }
                                             else
                                             {

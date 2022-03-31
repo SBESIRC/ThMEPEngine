@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertiesChanged();
             }
         }
-
+        public string Content { get; set; } = "todo add content";
         private void OnPropertiesChanged()
         {
             OnPropertyChanged(nameof(Model));
