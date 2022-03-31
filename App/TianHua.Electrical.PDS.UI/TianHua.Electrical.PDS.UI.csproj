@@ -38,11 +38,7 @@
     <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
-    <Compile Include="Editors\ThPDSBreakerModelPropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerPolesNumPropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerRatedCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerResidualCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCodeLevelPropertyEditor.cs" />
@@ -60,6 +56,7 @@
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSResidualCurrentPropertyEditor.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\ThPDSBranchBus.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />

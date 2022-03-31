@@ -50,6 +50,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return cps.AlternativePolesNums;
             }
+            if (propertyItem.Value is ThPDSBreakerBaseModel breaker)
+            {
+                return breaker.AlternativePolesNums;
+            }
             throw new NotSupportedException();
         }
     }

@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 型号
         /// </summary>
-        public BreakerModel BreakerType { get; set; }
+        public BreakerModel Model { get; set; }
 
         /// <summary>
         /// 壳架规格

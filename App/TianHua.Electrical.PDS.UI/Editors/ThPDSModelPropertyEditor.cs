@@ -48,6 +48,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return cps.AlternativeModels;
             }
+            if (propertyItem.Value is ThPDSBreakerBaseModel breaker)
+            {
+                return breaker.AlternativeModels;
+            }
             throw new NotSupportedException();
         }
     }

@@ -12,17 +12,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
     /// </summary>
     public class ThPDSResidualCurrentBreakerModel : ThPDSBreakerBaseModel
     {
+        private ResidualCurrentBreaker RCBreaker => _breaker as ResidualCurrentBreaker;
+
         public ThPDSResidualCurrentBreakerModel(BreakerBaseComponent component) : base(component)
         {
 
-        }
-
-        private ResidualCurrentBreaker RCBreaker
-        {
-            get
-            {
-                return _breaker as ResidualCurrentBreaker;
-            }
         }
 
         [DisplayName("RCD类型")]
@@ -38,13 +32,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("剩余电流动作")]
-        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSResidualCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public ResidualCurrentSpecification ResidualCurrent
         {
             get => RCBreaker.ResidualCurrent;
             set
             {
-                RCBreaker.ResidualCurrent = value;
+                RCBreaker.SetResidualCurrent(value);
                 OnPropertyChanged();
             }
         }

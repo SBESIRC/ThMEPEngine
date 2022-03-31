@@ -31,10 +31,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public string Type => _breaker.ComponentType.GetDescription();
 
         [DisplayName("型号")]
-        [Editor(typeof(ThPDSBreakerModelPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
         public BreakerModel Model
         {
-            get => _breaker.BreakerType;
+            get => _breaker.Model;
             set
             {
                 _breaker.SetModel(value);
@@ -55,7 +55,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
-        [Editor(typeof(ThPDSBreakerPolesNumPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _breaker.PolesNum;
@@ -67,7 +67,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("额定电流")]
-        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _breaker.RatedCurrent;
