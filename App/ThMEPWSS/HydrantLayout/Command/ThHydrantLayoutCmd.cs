@@ -77,8 +77,8 @@ namespace ThMEPWSS.HydrantLayout.Command
                 }
 
                 //转换器
-                //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
 
                 //提取数据
@@ -101,9 +101,10 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 dataQuery.ProcessArchitechData();
                 dataQuery.ProcessHydrant();
-
+            
                 //转换到原点
                 dataQuery.Transform(transformer);
+                dataQuery.Print();
 
                 //Engine start
                 DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutObject, _avoidParking);
@@ -114,11 +115,12 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //转回到原位置
                 dataQuery.Reset(transformer);
                 outPutModels.ForEach(x => x.Reset(transformer));
-                VerticalPipeOut.ForEach(x => transformer.Reset(x.Outline));
+                //VerticalPipeOut.ForEach(x => transformer.Reset(x.Outline));
 
                 var validHydrant = outPutModels.Where(x => x.IfFind == true && (x.Type == 1 || x.Type == 2)).ToList();
                 var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
                 var layerList = GetResultLayer(validHydrant);
+                InsertBlkService.PrepareInsert(blkList, layerList);
                 //插入真实块
                 InsertBlkService.InsertBlock(outPutModels, 1);
 
@@ -132,7 +134,7 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //删除块
                 validHydrant.ForEach(x => InsertBlkService.CleanEntity(x.OriginModel.Data));
                 VerticalPipeOut.ForEach(x => InsertBlkService.CleanEntity(x.Data));
-                
+
             }
         }
 

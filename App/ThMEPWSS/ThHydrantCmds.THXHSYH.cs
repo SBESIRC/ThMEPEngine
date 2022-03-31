@@ -118,7 +118,7 @@ namespace ThMEPWSS
                 //dataQuery.Print();
                 // dataQuery.Clean();
 
-                TestRoomWallColumn(dataQuery);
+                //TestRoomWallColumn(dataQuery);
             }
         }
 
