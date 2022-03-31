@@ -1883,6 +1883,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "分配负载";
                                 m.Command = new PDSCommand(() =>
                                 {
+                                    var w = new Window() { Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
+                                    var ctrl = new UserContorls.ThPDSLoadDistribution();
+                                    w.Content = ctrl;
+                                    w.ShowDialog();
                                     UpdateCanvas();
                                 });
                             }
@@ -2144,16 +2148,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "切换进线形式";
-                            var inTypes = new CircuitFormInType[] {
-                                CircuitFormInType.一路进线,
-                                CircuitFormInType.二路进线ATSE,
-                                CircuitFormInType.三路进线,
-                            };
+                            var sw = new CircuitFormInSwitcher(vertice);
+                            var inTypes = sw.AvailableTypes();
                             foreach (var inType in inTypes)
                             {
                                 var m = new MenuItem();
                                 mi.Items.Add(m);
-                                m.Header = inType.GetDescription();
+                                m.Header = inType;
                                 m.Command = new PDSCommand(() =>
                                 {
                                     ThPDSProjectGraphService.UpdateFormInType(graph, vertice, inType);

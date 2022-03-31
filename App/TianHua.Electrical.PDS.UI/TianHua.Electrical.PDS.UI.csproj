@@ -149,6 +149,9 @@
     <Compile Include="UserContorls\ThPDSInfoCompare.xaml.cs">
       <DependentUpon>ThPDSInfoCompare.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSLoadDistribution.xaml.cs">
+      <DependentUpon>ThPDSLoadDistribution.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserContorls\ThPDSLowPressurePanel.xaml.cs">
       <DependentUpon>ThPDSLowPressurePanel.xaml</DependentUpon>
     </Compile>
@@ -216,6 +219,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserContorls\ThPDSInfoCompare.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSLoadDistribution.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
