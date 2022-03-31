@@ -15,12 +15,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
     public class HandleConfluenceService
     {
-        //item1.洁具废水主管 item2.洁具污水主管 item3.其他洁具支管 item4.房间内其他立管 item5. 带权联通房间
-        public List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>> pipeTuples; 
+        //item1.洁具废水主管 item2.洁具污水主管 item3.其他废水支管 item4.其他污水支管 item5.房间内其他立管 item6. 带权联通房间
+        public List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>> pipeTuples;
         public List<VerticalPipeModel> otherOutPoly;
         List<VerticalPipeModel> verticalPipes;
         SewageWasteWaterEnum sewageWasteWaterEnum;
         List<Dictionary<Polyline, int>> deepRooms;
+        readonly double step = 50;                          //步长
         public HandleConfluenceService(SewageWasteWaterEnum _sewageWasteWaterEnum, List<VerticalPipeModel> _verticalPipes, List<Dictionary<Polyline, int>> _deepRooms)
         {
             sewageWasteWaterEnum = _sewageWasteWaterEnum;
@@ -33,40 +34,43 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public void GetMainPolyVerticalPipe()
         {
-            pipeTuples = new List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>>();
+            pipeTuples = new List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>>();
             foreach (var dRoom in deepRooms)
             {
                 var rooms = dRoom.Select(x => x.Key).ToList();
                 var roomPipeDic = verticalPipes.ToDictionary(x => x, y => dRoom.FirstOrDefault(z => z.Key.Contains(y.Position)))
-                    .Where(x => !default(KeyValuePair<Polyline, int>).Equals(x))
+                    .Where(x => !default(KeyValuePair<Polyline, int>).Equals(x.Value))
                     .OrderByDescending(x => x.Value.Value)
                     .ToDictionary(x => x.Key, y => y.Value);
                 var roomEquipementPipes = roomPipeDic.Where(x => x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList(); //洁具点位
-                VerticalPipeModel wasteMainPoly = null;                                 //废水主管
-                VerticalPipeModel sewageMainPoly = null;                                //污水主管
-                List<VerticalPipeModel> otherPolys = new List<VerticalPipeModel>();     //其他污废水支管
-                List<VerticalPipeModel> otherVerPipes = new List<VerticalPipeModel>();  //其他立管
+                VerticalPipeModel wasteMainPoly = null;                                                             //废水主管
+                VerticalPipeModel sewageMainPoly = null;                                                            //污水主管
+                List<VerticalPipeModel> otherWastePolys = new List<VerticalPipeModel>();                            //其他废水支管
+                List<VerticalPipeModel> otherSewagePolys = new List<VerticalPipeModel>();                           //其他废水支管
+                List<VerticalPipeModel> otherVerPipes = new List<VerticalPipeModel>();                              //其他立管
 
                 if (roomEquipementPipes.Count > 0)
                 {
-                    sewageMainPoly = roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.SewagePipe).FirstOrDefault();
-                    var allRoomPipes = roomPipeDic.Select(x => x.Key).ToList();
+                    wasteMainPoly = roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe).FirstOrDefault();
                     if (sewageWasteWaterEnum == SewageWasteWaterEnum.Confluence)
                     {
-                        if (sewageMainPoly != null)
+                        roomEquipementPipes.ForEach(x => x.PipeType = VerticalPipeType.ConfluencePipe);
+                        if (wasteMainPoly == null)
                         {
-                            sewageMainPoly = roomEquipementPipes.First();
+                            wasteMainPoly = roomEquipementPipes.First();
                         }
                     }
                     else if (sewageWasteWaterEnum == SewageWasteWaterEnum.Diversion)
                     {
-                        wasteMainPoly = roomPipeDic.First().Key;
+                        sewageMainPoly = roomEquipementPipes.First();
                     }
 
-                    otherPolys = roomEquipementPipes.Where(x => x != sewageMainPoly && x != wasteMainPoly).ToList();
+                    var otherPolys = roomEquipementPipes.Where(x => x != sewageMainPoly && x != wasteMainPoly).ToList();
+                    otherWastePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe || x.PipeType == VerticalPipeType.ConfluencePipe).ToList();
+                    otherSewagePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.SewagePipe).ToList();
                 }
                 otherVerPipes = roomPipeDic.Where(x => !x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList();
-                var tuple = new Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>(sewageMainPoly, wasteMainPoly, otherPolys, otherVerPipes, dRoom);
+                var tuple = new Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>(wasteMainPoly, sewageMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
                 pipeTuples.Add(tuple);
 
                 verticalPipes = verticalPipes.Except(roomPipeDic.Select(x => x.Key)).ToList();
@@ -75,26 +79,53 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             otherOutPoly = verticalPipes;//.Where(x => x.PipeType == VerticalPipeType.CondensatePipe || x.PipeType == VerticalPipeType.rainPipe).ToList();
         }
 
-        public void ConfluenceConnectPipe(VerticalPipeModel mainPipe, List<VerticalPipeModel> otherPipes, RouteModel mainRoute, Dictionary<Polyline, int> rooms, List<Polyline> outFrames, List<MPolygon> roomHoles)
+        /// <summary>
+        /// 合流分流连接算法
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="otherPipes"></param>
+        /// <param name="wallPolys"></param>
+        /// <param name="mainRoute"></param>
+        /// <param name="rooms"></param>
+        /// <param name="outFrames"></param>
+        /// <returns></returns>
+        public List<RouteModel> ConnectPipe(Polyline frame, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys,
+            RouteModel mainRoute, Dictionary<Polyline, int> rooms, List<Polyline> outFrames)
         {
-            var mainLine = GetMainPipeLine(mainRoute, rooms, outFrames);
-            
+            if (otherPipes.Count <= 0 || mainRoute == null)
+            {
+                return new List<RouteModel>();
+            }
+            var mainLine = GetMainPipeLine(mainRoute, rooms, outFrames, wallPolys);
+            return ConnectOtherPipes(frame, mainLine, otherPipes, wallPolys);
         }
 
-        public void ShuntConnectPipe()
+        /// <summary>
+        /// 连接其他支管
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="mainLine"></param>
+        /// <param name="otherPipes"></param>
+        /// <param name="wallPolys"></param>
+        /// <returns></returns>
+        private List<RouteModel> ConnectOtherPipes(Polyline frame, KeyValuePair<Polyline, Line> mainLineDic, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys)
         {
-
-        }
-
-        private void ConnectOtherPipes(Polyline mainLine , List<VerticalPipeModel> otherPipes)
-        {
+            var mainLine = mainLineDic.Key;
             var orderPipeDic = OrderPipes(mainLine, otherPipes);
             var cPipe = ClassifyPipes(orderPipeDic);
-            var resPipeLines = new List<Polyline>();
+            var resPipeLines = new List<RouteModel>();
+            var otherPolyline = new List<RouteModel>();
             foreach (var pipes in cPipe)
             {
-
+                resPipeLines.Add(ConnectPipes(frame, mainLine, resPipeLines, pipes, wallPolys, out List<RouteModel> otherConnectPipeLines));
+                otherPolyline.AddRange(otherConnectPipeLines);
             }
+            var lastPipe = resPipeLines.Last();
+            resPipeLines.Remove(lastPipe);
+            resPipeLines.Add(ConnectLastPipe(lastPipe, mainLineDic.Value));
+            var allResPolys = new List<RouteModel>(resPipeLines);
+            allResPolys.AddRange(otherPolyline);
+            return allResPolys;
         }
 
         /// <summary>
@@ -104,41 +135,119 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="connectLines"></param>
         /// <param name="otherPipes"></param>
         /// <param name="mainDir"></param>
-        private void ConnectPipes(Polyline mainPoly, List<Polyline> connectLines, List<VerticalPipeModel> otherPipes, Vector3d mainDir)
+        private RouteModel ConnectPipes(Polyline frame, Polyline mainPoly, List<RouteModel> connectLines, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, out List<RouteModel> otherConnectPipeLines)
         {
             otherPipes = otherPipes.OrderByDescending(x => mainPoly.GetClosestPointTo(x.Position, true).DistanceTo(x.Position)).ToList();
             var closePt = mainPoly.GetClosestPointTo(otherPipes.First().Position, true);
             var createDir = (closePt - otherPipes.First().Position).GetNormal();
             Polyline resConnectLine = new Polyline();
             resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherPipes.First().Position.ToPoint2D(), 0, 0, 0);
-            if (otherPipes.Count > 1)
+
+            var firPt = otherPipes.First().Position;
+            var pipeType = otherPipes.First().PipeType;
+            var mainClosetPt = mainPoly.GetClosestPointTo(firPt, false);
+            var connectPoly = mainPoly;
+            var connectPt = firPt;
+            if (connectLines.Count > 0)
             {
-                var firPt = otherPipes.First().Position;
-                var mainClosetPt = mainPoly.GetClosestPointTo(firPt, false);
-                if (connectLines.Count > 0)
+                var connectLinesDic = connectLines.ToDictionary(x => x, y => y.route.GetClosestPointTo(firPt, false))
+                    .OrderBy(x => x.Value.DistanceTo(firPt))
+                    .ToDictionary(x => x.Key.route, y => y.Value);
+                var otherClosetPt = connectLinesDic.First().Value;
+                if (firPt.DistanceTo(mainClosetPt) > firPt.DistanceTo(otherClosetPt))
                 {
-                    var otherClosetPt = connectLines.Select(x => x.GetClosestPointTo(firPt, false)).OrderBy(x => x.DistanceTo(firPt)).First();
-                    if (firPt.DistanceTo(mainClosetPt) > firPt.DistanceTo(otherClosetPt))
-                    {
-                        var tempLine = new Line(firPt, firPt + createDir * 100);
-                        var tempPt = tempLine.GetClosestPointTo(otherPipes.Last().Position, true);
-                        resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, tempPt.ToPoint2D(), 0, 0, 0);
-                        resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherPipes.Last().Position.ToPoint2D(), 0, 0, 0);
-                        var lastPt = otherPipes.Last().Position;
-                        var lastClosetPt = connectLines.Select(x => x.GetClosestPointTo(lastPt, false)).OrderBy(x => x.DistanceTo(lastPt)).First();
-                        resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, lastClosetPt.ToPoint2D(), 0, 0, 0);
-                    }
-                    else
-                    {
-                        resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, mainClosetPt.ToPoint2D(), 0, 0, 0);
-                    }
-                }
-                else
-                {
-                    resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, mainClosetPt.ToPoint2D(), 0, 0, 0);
+                    var tempLine = new Line(firPt, firPt + createDir * 100);
+                    var tempPt = tempLine.GetClosestPointTo(otherPipes.Last().Position, true);
+                    resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, tempPt.ToPoint2D(), 0, 0, 0);
+                    resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherPipes.Last().Position.ToPoint2D(), 0, 0, 0);
+                    connectPoly = connectLinesDic.First().Key;
+                    connectPt = otherPipes.Last().Position;
                 }
             }
-             
+
+            CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, new Dictionary<Vector3d, List<Line>>());
+            Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
+            weightHoles.Add(wallPolys, double.MaxValue);
+            var closetLine = GeometryUtils.GetClosetLane(connectPoly.GetAllLineByPolyline(), connectPt, frame, step);
+            var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, connectPt, weightHoles);
+
+            otherPipes.Remove(otherPipes.First());
+            var resLine = CreateConnectLine(resConnectLine, connectLine, connectPt, closetLine.Key, pipeType);
+            otherConnectPipeLines = CreateOtherPipes(otherPipes, resLine);
+            return resLine;
+        }
+
+        /// <summary>
+        /// 创建连接线
+        /// </summary>
+        /// <param name="resConnectLine"></param>
+        /// <param name="connectLines"></param>
+        /// <param name="connectPt"></param>
+        /// <param name="closetLine"></param>
+        /// <returns></returns>
+        private RouteModel CreateConnectLine(Polyline resConnectLine, List<Polyline> connectLines, Point3d connectPt, Line closetLine, VerticalPipeType type)
+        {
+            if (connectLines.Count > 0)
+            {
+                var firLine = connectLines.First();
+                if (resConnectLine.EndPoint.DistanceTo(firLine.EndPoint) < resConnectLine.EndPoint.DistanceTo(firLine.StartPoint))
+                {
+                    firLine.ReverseCurve();
+                }
+                for (int i = 0; i < firLine.NumberOfVertices; i++)
+                {
+                    resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, firLine.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                }
+                return new RouteModel(resConnectLine, type, connectPt);
+            }
+
+            var closetP = closetLine.GetClosestPointTo(connectPt, true);
+            resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, closetP.ToPoint2D(), 0, 0, 0);
+            if (closetLine.GetClosestPointTo(connectPt, false).DistanceTo(closetP) > 1)
+            {
+                var otherP = closetLine.StartPoint.DistanceTo(closetP) < closetLine.EndPoint.DistanceTo(closetP)
+                     ? closetLine.StartPoint : closetLine.EndPoint;
+                resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherP.ToPoint2D(), 0, 0, 0);
+            }
+            return new RouteModel(resConnectLine, type, connectPt);
+        }
+
+        /// <summary>
+        /// 创建其他连接支管
+        /// </summary>
+        /// <param name="otherPipes"></param>
+        /// <param name="resLine"></param>
+        /// <returns></returns>
+        private List<RouteModel> CreateOtherPipes(List<VerticalPipeModel> otherPipes, RouteModel resLine)
+        {
+            var resPolys = new List<RouteModel>();
+            foreach (var pipe in otherPipes)
+            {
+                var pt = resLine.route.GetClosestPointTo(pipe.Position, false);
+                var connectLine = new Polyline();
+                connectLine.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
+                connectLine.AddVertexAt(1, pipe.Position.ToPoint2D(), 0, 0, 0);
+                resPolys.Add(new RouteModel(connectLine, pipe.PipeType, pipe.Position));
+            }
+            return resPolys;
+        }
+
+        /// <summary>
+        /// 将最后一段管劲连接到主管上
+        /// </summary>
+        private RouteModel ConnectLastPipe(RouteModel routeModel, Line originMainLine)
+        {
+            var connectPt = routeModel.route.EndPoint;
+            if (connectPt.DistanceTo(routeModel.startPosition) < 0.1)
+            {
+                routeModel.route.ReverseCurve();
+                connectPt = routeModel.route.EndPoint;
+            }
+
+            var mainLinePt = originMainLine.StartPoint.DistanceTo(connectPt) < originMainLine.EndPoint.DistanceTo(connectPt) ?
+                originMainLine.StartPoint : originMainLine.EndPoint;
+            routeModel.route.AddVertexAt(routeModel.route.NumberOfVertices, mainLinePt.ToPoint2D(), 0, 0, 0);
+            return routeModel;
         }
 
         /// <summary>
@@ -153,9 +262,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var zDir = Vector3d.ZAxis;
             var yDir = zDir.CrossProduct(xDir);
             Matrix3d matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    xDir.X, yDir.X, zDir.X, mainLine.StartPoint.X,
+                    xDir.Y, yDir.Y, zDir.Y, mainLine.StartPoint.Y,
+                    xDir.Z, yDir.Z, zDir.Z, mainLine.StartPoint.Z,
                     0.0, 0.0, 0.0, 1.0});
             var pipeDic = otherPipes.ToDictionary(x => x, y => y.Position.TransformBy(matrix.Inverse()));
             return pipeDic.OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
@@ -174,10 +283,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var firDic = pipeDic.First();
                 pipeDic.Remove(firDic.Key);
                 var pipes = new List<VerticalPipeModel>() { firDic.Key };
-                foreach (var pDic in pipeDic.Where(x => Math.Abs(x.Value.X - firDic.Value.X) <= 200))
+                foreach (var pDic in pipeDic.Where(x => Math.Abs(x.Value.X - firDic.Value.X) <= 200 && x.Value.Y * firDic.Value.Y > 0))
                 {
                     pipes.Add(pDic.Key);
-                    pipeDic.Remove(pDic.Key);
+                }
+                foreach (var pipe in pipes)
+                {
+                    pipeDic.Remove(pipe);
                 }
                 resPipe.Add(pipes);
             }
@@ -192,17 +304,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="deepRooms"></param>
         /// <param name="outFrames"></param>
         /// <returns></returns>
-        private Line GetMainPipeLine(RouteModel mainRoute, Dictionary<Polyline, int> deepRooms, List<Polyline> outFrames)
+        private KeyValuePair<Polyline, Line> GetMainPipeLine(RouteModel mainRoute, Dictionary<Polyline, int> deepRooms, List<Polyline> outFrames, List<Polyline> wallPolys)
         {
-            var outRooms = deepRooms.Select(x => x.Key).ToList(); 
+            var outRooms = deepRooms.Select(x => x.Key).ToList();
             var frames = outFrames.Where(x =>
             {
-                var bufferFrame = x.Buffer(100)[0] as Polyline;
+                var bufferFrame = x;//.Buffer(100)[0] as Polyline;
                 return outRooms.Where(y => y.Intersects(bufferFrame)).Count() == 1;
             }).ToList();
-            var mainLine = mainRoute.route.GetAllLineByPolyline().FirstOrDefault(x=> frames.Any(y =>y.IsIntersects(x)));
-            var extendMainLine = ExtendMainPipeLine(mainLine, outRooms, frames);
-            return extendMainLine;
+            var mainLine = mainRoute.route.GetAllLineByPolyline().FirstOrDefault(x => frames.Any(y => y.IsIntersects(x)));
+            var extendMainLine = ExtendMainPipeLine(mainLine, outRooms, wallPolys);
+            return new KeyValuePair<Polyline, Line>(extendMainLine, mainLine);
         }
 
         /// <summary>
@@ -212,9 +324,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="rooms"></param>
         /// <param name="outFrames"></param>
         /// <returns></returns>
-        private Line ExtendMainPipeLine(Line line, List<Polyline> rooms, List<Polyline> outFrames)
+        private Polyline ExtendMainPipeLine(Line line, List<Polyline> rooms, List<Polyline> wallPolys)
         {
-            var bufferOutFrame = outFrames.Select(x => x.ExtendByLengthLine(100)).ToList();
             var sPt = line.StartPoint;
             var dir = (line.EndPoint - line.StartPoint).GetNormal();
             if (rooms.Any(x => x.Contains(line.StartPoint)))
@@ -224,19 +335,23 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             Ray ray = new Ray() { BasePoint = sPt, UnitDir = dir };
-            var trimRooms = rooms.SelectMany(x => bufferOutFrame.SelectMany(y => y.Trim(x).OfType<Polyline>().ToList())).ToList();
-            var intersectPts = trimRooms.SelectMany(x =>
+            var intersectPts = wallPolys.SelectMany(x =>
             {
                 var ptCollection = new Point3dCollection();
                 ray.IntersectWith(x, Intersect.OnBothOperands, ptCollection, (IntPtr)0, (IntPtr)0);
                 return ptCollection.Cast<Point3d>();
             }).OrderBy(x => x.DistanceTo(sPt)).ToList();
+            Polyline resPoly = new Polyline();
             if (intersectPts.Count > 0)
             {
-                return new Line(sPt, intersectPts[0]);
+                resPoly.AddVertexAt(0, sPt.ToPoint2D(), 0, 0, 0);
+                resPoly.AddVertexAt(1, intersectPts[0].ToPoint2D(), 0, 0, 0);
+                return resPoly;
             }
 
-            return line; 
+            resPoly.AddVertexAt(0, line.StartPoint.ToPoint2D(), 0, 0, 0);
+            resPoly.AddVertexAt(1, line.EndPoint.ToPoint2D(), 0, 0, 0);
+            return resPoly;
         }
     }
 }

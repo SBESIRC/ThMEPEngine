@@ -12,7 +12,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
     {
         public List<Dictionary<Polyline, int>> GetRoomDeep(List<Polyline> rooms, List<Polyline> outUserFrames)
         {
-            var bufferFrames = outUserFrames.Select(x => x.ExtendByLengthLine(100)).ToList();
+            var bufferFrames = outUserFrames.Select(x => x.ExtendByLengthLine(100)).Where(x => x != null).ToList();
             var interDic = outUserFrames.ToDictionary(x => x, y => rooms.Where(x => x.IsIntersects(y)).ToList())
                 .Where(x => x.Value.Count >= 0).ToDictionary(x => x.Key, y => y.Value);
             var oneDeepRooms = interDic.Where(x => x.Value.Count == 1).ToDictionary(x => x.Key, y => y.Value);
@@ -38,8 +38,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 oneDeepRooms.Remove(firRoomDeep.Key);
                 var firstDeepRooms = new Dictionary<Polyline, List<Polyline>>() { { firRoomDeep.Key, firRoomDeep.Value } };
                 var resDeepRooms = GetRoomDeep(firstDeepRooms, allRoomDic, 1);
-                allRoomDic = allRoomDic.Where(x => x.Value.Any(y => resDeepRooms.Keys.Contains(y))).ToDictionary(x => x.Key, y => y.Value);
-                oneDeepRooms = oneDeepRooms.Where(x => x.Value.Any(y => resDeepRooms.Keys.Contains(y))).ToDictionary(x => x.Key, y => y.Value);
+                allRoomDic = allRoomDic.Where(x => !x.Value.Any(y => resDeepRooms.Keys.Contains(y))).ToDictionary(x => x.Key, y => y.Value);
+                oneDeepRooms = oneDeepRooms.Where(x => !x.Value.Any(y => resDeepRooms.Keys.Contains(y))).ToDictionary(x => x.Key, y => y.Value);
                 resRooms.Add(resDeepRooms);
             }
 
@@ -72,12 +72,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             var nextDeepRooms = allRoomDic.Where(x => roomDeepDic.Any(y => x.Value.Contains(y.Key))).ToDictionary(x => x.Key, y => y.Value);
             if (nextDeepRooms.Count > 0)
             {
-                var getNextDeepRooms = GetRoomDeep(nextDeepRooms, allRoomDic, deep++);
+                var getNextDeepRooms = GetRoomDeep(nextDeepRooms, allRoomDic, ++deep);
                 foreach (var nRoom in getNextDeepRooms)
                 {
                     if (!roomDeepDic.Keys.Contains(nRoom.Key))
                     {
-                        roomDeepDic.Add(nRoom.Key, deep);
+                        roomDeepDic.Add(nRoom.Key, nRoom.Value);
                     }
                 }
             }

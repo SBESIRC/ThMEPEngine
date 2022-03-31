@@ -27,7 +27,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double lineWieght = 3;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
-            List<Curve> grids, List<Polyline> _outUserPoly, ParamSettingViewModel _paramSetting)
+            List<Curve> grids, List<Polyline> _outUserPoly, List<Polyline> _rooms, ParamSettingViewModel _paramSetting)
         {
             frame = polyline;
             mainSewagePipes = sewagePolys;
@@ -36,6 +36,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             wallPolys = walls;
             gridLines = grids;
             outUserPoly = _outUserPoly;
+            rooms = _rooms;
             paramSetting = _paramSetting;
         }
 
@@ -55,20 +56,28 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             {
                 var mainPipes = new List<VerticalPipeModel>() { pipeTuple.Item1 };
                 mainPipes.Add(pipeTuple.Item2);
-                mainPipes.AddRange(pipeTuple.Item4);
-
+                mainPipes.AddRange(pipeTuple.Item5);
+                mainPipes = mainPipes.Where(x => x != null).ToList();
                 var routing = RoutingMainPipe(mainPipes);
                 ReprocessingPipe reprocessingPipe = new ReprocessingPipe(routing, outUserPoly);     //后处理间距
                 routing = reprocessingPipe.Reprocessing();
 
                 if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Confluence)
                 {
-
+                    var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
+                    otherPipes.AddRange(pipeTuple.Item4);
+                    var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
                 }
                 else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
                 {
+                    var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
 
+                    var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
                 }
+                resRoutes.AddRange(routing);
             }
 
            

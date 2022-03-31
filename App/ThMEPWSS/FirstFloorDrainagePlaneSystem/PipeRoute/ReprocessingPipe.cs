@@ -35,7 +35,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 return routes;
             }
             var polys = routes.Select(x => x.route).ToList();
-            var frame = FindOutFrame(polys);
+            var frame = FindOutFrame(routes);
             var line = FindRouteIntersectLine(polys.First(), frame);
             var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
 
@@ -201,13 +201,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 寻找出户的框线
         /// </summary>
         /// <returns></returns>
-        private Polyline FindOutFrame(List<Polyline> routePolys)
+        private Polyline FindOutFrame(List<RouteModel> routePolys)
         {
-            var frames = outFrame.Where(x => routePolys.Any(y=>y.IsIntersects(x))).ToList();
-            var ep = routePolys.First().EndPoint;
-            if (routePolys.First().StartPoint.DistanceTo(ep) < 1)
+            var frames = outFrame.Where(x => routePolys.Any(y=>y.route.IsIntersects(x))).ToList();
+            var ep = routePolys.First().route.EndPoint;
+            if (routePolys.First().startPosition.DistanceTo(ep) < 1)
             {
-                ep = routePolys.First().StartPoint;
+                ep = routePolys.First().route.StartPoint;
             }
             var needFrame = frames.OrderBy(x => x.DistanceTo(ep, false)).First();
             return needFrame;

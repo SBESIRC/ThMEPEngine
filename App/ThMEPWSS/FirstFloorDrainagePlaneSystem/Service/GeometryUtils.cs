@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
@@ -165,6 +166,34 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             polyline.AddVertexAt(2, pt3.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(3, pt4.ToPoint2D(), 0, 0, 0);
             return polyline;
+        }
+
+        /// <summary>
+        /// 获取最近的线信息
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="startPt"></param>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static KeyValuePair<Line, Point3d> GetClosetLane(List<Line> lines, Point3d startPt, Polyline polyline, double step)
+        {
+            var closeInfo = GeometryUtils.GetClosetLine(lines, startPt);
+            Line checkLine = new Line(startPt, closeInfo.Value);
+            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline))
+            {
+                var checkDir = (closeInfo.Value - startPt).GetNormal();
+                var lineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
+                if (checkDir.IsEqualTo(lineDir, new Tolerance(0.001, 0.001)))
+                {
+                    return closeInfo;
+                }
+            }
+
+            BFSPathPlaner pathPlaner = new BFSPathPlaner(step);
+            var closetLine = pathPlaner.FindingClosetLine(startPt, lines, polyline);
+            var closetPt = closetLine.GetClosestPointTo(startPt, false);
+
+            return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
         }
     }
 }
