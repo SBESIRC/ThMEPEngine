@@ -51,7 +51,10 @@
                 <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                            <TextBlock Text="{Binding Name}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                <TextBlock Text="{Binding Name}"/>
+                            </StackPanel>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                     <TreeView.ContextMenu>

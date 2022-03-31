@@ -484,8 +484,72 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var circuitLst = graph.Edges.Select(x => x.Circuit).ToList();
             var details = graph.Edges.Select(x => x.Details).ToList();
             Context = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
-            TreeView.ContextMenu.DataContext = Config;
-            TreeView.ContextMenu.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = TreeView, Path = new PropertyPath(nameof(TreeView.SelectedItem)), Converter = new EqualsThenNotVisibeConverter(null), }); ;
+            var treeCMenu = TreeView.ContextMenu;
+            treeCMenu.DataContext = Config;
+            var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
+            var tree = builder.Build(graph);
+            {
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    foreach (var n in node.DataList)
+                    {
+                        n.Parent = node;
+                        n.Root = tree;
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            }
+            var batchGenCmd = new PDSCommand(() =>
+             {
+                 var ctrl = new UserContorls.ThPDSBatchGenerate();
+                 ctrl.treeView.DataContext = tree;
+                 {
+                     ctrl.cbxCheckAll.SetBinding(ToggleButton.IsCheckedProperty, new Binding() { Source = tree, Path = new PropertyPath(nameof(tree.IsChecked)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                 }
+                 var w = new Window() { Title = "批量生成", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
+                 ctrl.btnGen.Command = new PDSCommand(() =>
+                 {
+                     w.Hide();
+                     UI.ElecSandboxUI.TryGetCurrentWindow().Hide();
+                     try
+                     {
+                         var vertices = graph.Vertices.ToList();
+                         var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                         void dfs(ThPDSCircuitGraphTreeModel node)
+                         {
+                             if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                             foreach (var n in node.DataList) dfs(n);
+                         }
+                         dfs(tree);
+                         foreach (var vertice in checkeddVertices)
+                         {
+                             var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
+                             drawCmd.Execute();
+                         }
+                         AcHelper.Active.Editor.Regen();
+                     }
+                     finally
+                     {
+                         UI.ElecSandboxUI.TryGetCurrentWindow().Show();
+                         w.Show();
+                     }
+                 });
+                 ctrl.cbxCheckAll.Unchecked += (s, e) => { };
+                 w.Content = ctrl;
+                 w.Show();
+             });
+            var treeCmenu = new ContextMenu()
+            {
+                ItemsSource = new MenuItem[] {
+                    new MenuItem()
+                    {
+                        Header="批量生成",
+                        Command=batchGenCmd,
+                    },
+                },
+            };
+            TreeView.ContextMenu = treeCmenu;
             var canvas = Canvas;
             canvas.Background = Brushes.Transparent;
             canvas.Width = 2000;
@@ -493,10 +557,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var cvt = new GlyphsUnicodeStringConverter();
             Action clear = null;
-            {
-                var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
-                this.TreeView.DataContext = builder.Build(graph);
-            }
+            this.TreeView.DataContext = tree;
             Project.Module.Component.ThPDSDistributionBoxModel boxVM = null;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
@@ -506,12 +567,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             {
                 if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
                 {
+                    TreeView.ContextMenu = treeCMenu;
                     var vertice = graph.Vertices.ToList()[sel.Id];
                     boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
                 else
                 {
+                    TreeView.ContextMenu = treeCmenu;
                     UpdatePropertyGrid(null);
                 }
                 UpdateCanvas();
@@ -535,59 +598,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dccbs = null;
                 if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
                 Config.Current = new(graph.Vertices.ToList()[sel.Id]);
-                Config.BatchGenerate = new PDSCommand(() =>
-                {
-                    var ctrl = new UserContorls.ThPDSBatchGenerate();
-                    var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
-                    var tree = builder.Build(graph);
-                    {
-                        void dfs(ThPDSCircuitGraphTreeModel node)
-                        {
-                            foreach (var n in node.DataList)
-                            {
-                                n.Parent = node;
-                                n.Root = tree;
-                                dfs(n);
-                            }
-                        }
-                        dfs(tree);
-                    }
-                    ctrl.treeView.DataContext = tree;
-                    {
-                        ctrl.cbxCheckAll.SetBinding(ToggleButton.IsCheckedProperty, new Binding() { Source = tree, Path = new PropertyPath(nameof(tree.IsChecked)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                    }
-                    var w = new Window() { Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
-                    ctrl.btnGen.Command = new PDSCommand(() =>
-                    {
-                        w.Hide();
-                        UI.ElecSandboxUI.TryGetCurrentWindow().Hide();
-                        try
-                        {
-                            var vertices = graph.Vertices.ToList();
-                            var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                            void dfs(ThPDSCircuitGraphTreeModel node)
-                            {
-                                if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
-                                foreach (var n in node.DataList) dfs(n);
-                            }
-                            dfs(tree);
-                            foreach (var vertice in checkeddVertices)
-                            {
-                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
-                                drawCmd.Execute();
-                            }
-                            AcHelper.Active.Editor.Regen();
-                        }
-                        finally
-                        {
-                            UI.ElecSandboxUI.TryGetCurrentWindow().Show();
-                            w.Show();
-                        }
-                    });
-                    ctrl.cbxCheckAll.Unchecked += (s, e) => { };
-                    w.Content = ctrl;
-                    w.Show();
-                });
+                Config.BatchGenerate = batchGenCmd;
                 {
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
@@ -1371,7 +1382,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 }
                                                 handleLeakageCircuit();
                                             }
-                                            else if(edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
+                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
                                             {
                                                 void handleRegularCircuit()
                                                 {
@@ -1883,8 +1894,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "分配负载";
                                 m.Command = new PDSCommand(() =>
                                 {
-                                    var w = new Window() { Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
+                                    var w = new Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                     var ctrl = new UserContorls.ThPDSLoadDistribution();
+                                    ctrl.btnYes.Command = new PDSCommand(() =>
+                                    {
+                                        w.Close();
+                                    });
                                     w.Content = ctrl;
                                     w.ShowDialog();
                                     UpdateCanvas();
@@ -1896,6 +1911,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 m.Header = "删除";
                                 m.Command = new PDSCommand(() =>
                                 {
+                                    var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                                    if (r == MessageBoxResult.Cancel) return;
                                     var vertice = graph.Vertices.ToList()[sel.Id];
                                     ThPDSProjectGraphService.DeleteCircuit(graph, edge);
                                     UpdateCanvas();
