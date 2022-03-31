@@ -57,6 +57,18 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [DisplayName("额定电流")]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        public double RatedCurrent
+        {
+            get => _cps.RatedCurrent;
+            set
+            {
+                _cps.SetRatedCurrent(value);
+                OnPropertiesChanged();
+            }
+        }
+
         [DisplayName("组合形式")]
         [Editor(typeof(ThPDSCombinationPropertyEditor), typeof(PropertyEditorBase))]
         public string Combination
@@ -109,6 +121,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<string> AlternativePolesNums
         {
             get => _cps.GetPolesNums();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<double> AlternativeRatedCurrents
+        {
+            get => _cps.GetRatedCurrents();
         }
 
         [ReadOnly(true)]
