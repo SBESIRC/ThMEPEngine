@@ -68,6 +68,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     startY -= firstRowH + 4 * this.tblRowHeight;
                     startX = extents.MinPoint.X;
                     firstRowH = tmpH;
+                    widthSum = tmpW;
                     
                 }
                 widths.Add(tmpW);
