@@ -192,12 +192,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <returns></returns>
         public static void ComponentSwitching(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, PDSBaseComponent component, ComponentType componentType)
         {
-            if(edge.Details.CircuitForm.Contains(component))
+            if (component.ComponentType !=componentType && edge.Details.CircuitForm.Contains(component))
             {
                 var ComponentType = componentType.GetComponentType();
                 if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
                 {
-                    component = edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType);
+                    edge.Details.CircuitForm.SetCircuitComponentValue(component, edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType));
                 }
             }
         }

@@ -24,5 +24,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
             }
             return false;
         }
+
+        public static bool SetCircuitComponentValue(this PDSBaseOutCircuit circuit, PDSBaseComponent component, PDSBaseComponent value)
+        {
+            Type type = circuit.GetType();
+            foreach (PropertyInfo prop in type.GetProperties())
+            {
+                if (prop.PropertyType == typeof(PDSBaseComponent) ||prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent)))
+                {
+                    object oValue = prop.GetValue(circuit);
+                    if (oValue.IsNull())
+                        continue;
+                    if (oValue.Equals(component))
+                    {
+                        prop.SetValue(circuit, value);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }
