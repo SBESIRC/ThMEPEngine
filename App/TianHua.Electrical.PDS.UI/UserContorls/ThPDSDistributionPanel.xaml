@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
-             xmlns:th="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
              xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" 
              Background="White"
@@ -75,7 +74,7 @@
                 </TreeView>
             </Border>
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,0">
-                <th:ThPDSPropertyGrid x:Name="propertyGrid" />
+                <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
         </Grid>
     </DockPanel>
