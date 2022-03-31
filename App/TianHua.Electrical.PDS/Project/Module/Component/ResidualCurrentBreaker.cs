@@ -20,7 +20,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}/{RCDType}{ResidualCurrent.GetDescription()}";
+                return $"{BreakerType}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{RCDType}{ResidualCurrent.GetDescription()}";
             }
         }
 
@@ -55,7 +55,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             IsMotor = isMotor;
             var breaker = breakers.First(o => o.DefaultPick && o.Poles == polesNum);
             BreakerType = breaker.Model;
-            FrameSpecifications = breaker.FrameSize;
+            FrameSpecification = breaker.FrameSize;
             PolesNum = breaker.Poles;
             RatedCurrent = breaker.Amps.ToString();
             TripUnitType = breaker.TripDevice;
@@ -89,7 +89,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (Breakers.Any(o => o.Poles == polesNum
             && o.Model == BreakerType
-            && o.FrameSize == FrameSpecifications
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
             && o.Amps == double.Parse(RatedCurrent)))
@@ -100,7 +100,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var breaker = Breakers.First(o => o.Poles == polesNum);
                 BreakerType = breaker.Model;
-                FrameSpecifications = breaker.FrameSize;
+                FrameSpecification = breaker.FrameSize;
                 PolesNum = breaker.Poles;
                 RatedCurrent = breaker.Amps.ToString();
                 TripUnitType = breaker.TripDevice;
@@ -132,7 +132,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (Breakers.Any(o => o.Poles == PolesNum
             && o.Model == BreakerType
-            && o.FrameSize == FrameSpecifications
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == tripDevice
             && o.Amps == double.Parse(RatedCurrent)))
@@ -143,7 +143,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var breaker = Breakers.First(o => o.TripDevice == tripDevice);
                 BreakerType = breaker.Model;
-                FrameSpecifications = breaker.FrameSize;
+                FrameSpecification = breaker.FrameSize;
                 PolesNum = breaker.Poles;
                 RatedCurrent = breaker.Amps.ToString();
                 TripUnitType = breaker.TripDevice;
@@ -176,7 +176,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var ratedCurrent = double.Parse(ratedCurrentStr);
             if (Breakers.Any(o => o.Poles == PolesNum
             && o.Model == BreakerType
-            && o.FrameSize == FrameSpecifications
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
             && o.Amps == ratedCurrent))
@@ -187,7 +187,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var breaker = Breakers.First(o => o.Amps == ratedCurrent);
                 BreakerType = breaker.Model;
-                FrameSpecifications = breaker.FrameSize;
+                FrameSpecification = breaker.FrameSize;
                 PolesNum = breaker.Poles;
                 RatedCurrent = breaker.Amps.ToString();
                 TripUnitType = breaker.TripDevice;
@@ -224,13 +224,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.TripDevice == TripUnitType
             && o.Amps == double.Parse(RatedCurrent)))
             {
-                this.FrameSpecifications = frameSpecifications;
+                this.FrameSpecification = frameSpecifications;
             }
             else
             {
                 var breaker = Breakers.First(o => o.FrameSize == frameSpecifications);
                 BreakerType = breaker.Model;
-                FrameSpecifications = breaker.FrameSize;
+                FrameSpecification = breaker.FrameSize;
                 PolesNum = breaker.Poles;
                 RatedCurrent = breaker.Amps.ToString();
                 TripUnitType = breaker.TripDevice;
@@ -262,7 +262,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (Breakers.Any(o => o.Poles == PolesNum
             && o.Model == model
-            && o.FrameSize == FrameSpecifications
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
             && o.Amps == double.Parse(RatedCurrent)))
@@ -273,7 +273,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var breaker = Breakers.First(o => o.Model == model);
                 BreakerType = breaker.Model;
-                FrameSpecifications = breaker.FrameSize;
+                FrameSpecification = breaker.FrameSize;
                 PolesNum = breaker.Poles;
                 RatedCurrent = breaker.Amps.ToString();
                 TripUnitType = breaker.TripDevice;

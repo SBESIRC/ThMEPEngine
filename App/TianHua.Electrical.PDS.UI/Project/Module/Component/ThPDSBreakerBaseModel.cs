@@ -43,10 +43,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("壳架规格")]
-        [Editor(typeof(ThPDSBreakerFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string FrameSpecifications
         {
-            get => _breaker.FrameSpecifications;
+            get => _breaker.FrameSpecification;
             set
             {
                 _breaker.SetFrameSpecification(value);
