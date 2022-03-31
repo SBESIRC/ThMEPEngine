@@ -52,6 +52,7 @@
     <Compile Include="Model\ThPDSBlockInfo.cs" />
     <Compile Include="Model\ThPDSBlockReferenceData.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
+    <Compile Include="Project\Module\CircuitFormInSwitcher.cs" />
     <Compile Include="Project\Module\CircuitFormOutSwitcher.cs" />
     <Compile Include="Project\Module\Circuit\Extension\CircuitExtention.cs" />
     <Compile Include="Project\Module\Circuit\Extension\CircuitGroupAttribute.cs" />

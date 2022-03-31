@@ -9,6 +9,7 @@ using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
+using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -210,6 +211,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             return new CircuitFormOutSwitcher(edge);
         }
+        
+        /// <summary>
+        /// 获取进线回路转换器
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public static CircuitFormInSwitcher GetCircuitFormInSwitcher(ThPDSProjectGraphNode node)
+        {
+            return new CircuitFormInSwitcher(node);
+        }
 
         /// <summary>
         /// 切换出线回路形式
@@ -273,7 +284,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 获取可选择回路列表
+        /// 获取可选择出线回路列表
         /// </summary>
         /// <returns></returns>
         /// <exception cref="NotSupportedException"></exception>
@@ -292,6 +303,48 @@ namespace TianHua.Electrical.PDS.Project.Module
                     {
                         throw new NotSupportedException();
                     }
+            }
+        }
+
+        /// <summary>
+        /// 获取可选择进线回路列表
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static List<CircuitFormInType> AvailableTypes(ThPDSProjectGraphNode node)
+        {
+            var graph = PDSProject.Instance.graphData.Graph;
+            if(node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.一路进线)
+            {
+                return new List<CircuitFormInType>() { CircuitFormInType.二路进线ATSE, CircuitFormInType.三路进线 };
+            }
+            else if(node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.二路进线ATSE)
+            {
+                var result = new List<CircuitFormInType>() { CircuitFormInType.三路进线 };
+                var inCircuitNumCount = ThPDSCircuitNumberSeacher.Seach(node, graph).Count;
+                if (inCircuitNumCount < 2)
+                {
+                    result.Insert(0, CircuitFormInType.一路进线);
+                }
+                return result;
+            }
+            else if(node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.三路进线)
+            {
+                var result = new List<CircuitFormInType>();
+                var inCircuitNumCount = ThPDSCircuitNumberSeacher.Seach(node, graph).Count;
+                if(inCircuitNumCount < 2)
+                {
+                    result.Add(CircuitFormInType.一路进线);
+                }
+                if(inCircuitNumCount < 3)
+                {
+                    result.Add(CircuitFormInType.二路进线ATSE);
+                }
+                return result;
+            }
+            else
+            {
+                return new List<CircuitFormInType>();
             }
         }
 
