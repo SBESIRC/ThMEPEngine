@@ -157,6 +157,7 @@
     <Compile Include="UserContorls\ThPDSMainBusPanel.xaml.cs">
       <DependentUpon>ThPDSMainBusPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSPropertyGrid.cs" />
     <Compile Include="UserContorls\ThPDSSingleLineImageDrawingPanel.xaml.cs">
       <DependentUpon>ThPDSSingleLineImageDrawingPanel.xaml</DependentUpon>
     </Compile>
