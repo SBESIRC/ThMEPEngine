@@ -36,11 +36,11 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Model).Distinct();
             }
-            if (propertyItem.Value is ThATSEModel)
+            if (propertyItem.Value is ThPDSATSEModel)
             {
                 return ATSEConfiguration.ATSEComponentInfos.Select(o => o.Model).Distinct();
             }
-            if (propertyItem.Value is ThMTSEModel)
+            if (propertyItem.Value is ThPDSMTSEModel)
             {
                 return MTSEConfiguration.MTSEComponentInfos.Select(o => o.Model).Distinct();
             }

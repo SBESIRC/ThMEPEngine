@@ -783,7 +783,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var sw = twoWayInCircuit.transferSwitch;
                                             if (sw != null)
                                             {
-                                                var vm = new Project.Module.Component.ThATSEModel(sw);
+                                                var vm = new Project.Module.Component.ThPDSATSEModel(sw);
                                                 cor.Register("ATSE", () => UpdatePropertyGrid(vm));
                                             }
                                             else
@@ -816,7 +816,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var sw = threeWayInCircuit.transferSwitch1;
                                             if (sw != null)
                                             {
-                                                var vm = new Project.Module.Component.ThATSEModel(sw);
+                                                var vm = new Project.Module.Component.ThPDSATSEModel(sw);
                                                 cor.Register("ATSE", () => UpdatePropertyGrid(vm));
                                             }
                                             else
@@ -828,7 +828,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var sw = threeWayInCircuit.transferSwitch2;
                                             if (sw != null)
                                             {
-                                                var vm = new Project.Module.Component.ThMTSEModel(sw);
+                                                var vm = new Project.Module.Component.ThPDSMTSEModel(sw);
                                                 cor.Register("TSE", () => UpdatePropertyGrid(vm));
                                             }
                                             else

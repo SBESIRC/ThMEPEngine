@@ -3,11 +3,11 @@
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     /// <summary>
-    /// 手动转换开关（Manual Transfer Switch）
+    /// 自动转换开关（Automatic Transfer Switch）
     /// </summary>
-    public class ThMTSEModel : ThPDSTransferSwitchBaseModel
+    public class ThPDSATSEModel : ThPDSTransferSwitchBaseModel
     {
-        public ThMTSEModel(TransferSwitch transferSwitch) : base(transferSwitch)
+        public ThPDSATSEModel(TransferSwitch transferSwitch) : base(transferSwitch)
         {
             //
         }

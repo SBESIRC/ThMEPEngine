@@ -36,12 +36,12 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return IsolatorConfiguration.isolatorInfos.Where(o => o.MaxKV == switchModel.MaxKV).Select(o => o.Poles).Distinct();
             }
-            if (propertyItem.Value is ThATSEModel atse)
+            if (propertyItem.Value is ThPDSATSEModel atse)
             {
                 //  1. 型号决定了可选的极数选项
                 return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
             }
-            if (propertyItem.Value is ThMTSEModel mtse)
+            if (propertyItem.Value is ThPDSMTSEModel mtse)
             {
                 //  1. 型号决定了可选的极数选项
                 return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();

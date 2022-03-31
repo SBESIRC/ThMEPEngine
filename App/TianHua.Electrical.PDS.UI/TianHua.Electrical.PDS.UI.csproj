@@ -94,8 +94,8 @@
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
-    <Compile Include="Project\Module\Component\ThATSEModel.cs" />
-    <Compile Include="Project\Module\Component\ThMTSEModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSATSEModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMTSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
