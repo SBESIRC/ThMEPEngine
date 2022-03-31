@@ -501,44 +501,30 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
             }
             var batchGenCmd = new PDSCommand(() =>
-             {
-                 var ctrl = new UserContorls.ThPDSBatchGenerate();
-                 ctrl.treeView.DataContext = tree;
-                 {
-                     ctrl.cbxCheckAll.SetBinding(ToggleButton.IsCheckedProperty, new Binding() { Source = tree, Path = new PropertyPath(nameof(tree.IsChecked)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                 }
-                 var w = new Window() { Title = "批量生成", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
-                 ctrl.btnGen.Command = new PDSCommand(() =>
-                 {
-                     w.Hide();
-                     UI.ElecSandboxUI.TryGetCurrentWindow().Hide();
-                     try
-                     {
-                         var vertices = graph.Vertices.ToList();
-                         var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                         void dfs(ThPDSCircuitGraphTreeModel node)
-                         {
-                             if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
-                             foreach (var n in node.DataList) dfs(n);
-                         }
-                         dfs(tree);
-                         foreach (var vertice in checkeddVertices)
-                         {
-                             var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
-                             drawCmd.Execute();
-                         }
-                         AcHelper.Active.Editor.Regen();
-                     }
-                     finally
-                     {
-                         UI.ElecSandboxUI.TryGetCurrentWindow().Show();
-                         w.Show();
-                     }
-                 });
-                 ctrl.cbxCheckAll.Unchecked += (s, e) => { };
-                 w.Content = ctrl;
-                 w.Show();
-             });
+            {
+                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
+                try
+                {
+                    var vertices = graph.Vertices.ToList();
+                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                        foreach (var n in node.DataList) dfs(n);
+                    }
+                    dfs(tree);
+                    foreach (var vertice in checkeddVertices)
+                    {
+                        var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
+                        drawCmd.Execute();
+                    }
+                    AcHelper.Active.Editor.Regen();
+                }
+                finally
+                {
+                    UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
+                }
+            });
             var treeCmenu = new ContextMenu()
             {
                 ItemsSource = new MenuItem[] {
@@ -606,7 +592,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         Header = "单独生成",
                         Command = new PDSCommand(() =>
                         {
-                            UI.ElecSandboxUI.TryGetCurrentWindow().Hide();
+                            UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                             try
                             {
                                 if (TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
@@ -617,7 +603,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             finally
                             {
-                                UI.ElecSandboxUI.TryGetCurrentWindow().Show();
+                                UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
                             }
                         }),
                     });
