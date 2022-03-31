@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
 using ThMEPEngineCore.CAD;
-
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectRectangle : DrawObjectBase

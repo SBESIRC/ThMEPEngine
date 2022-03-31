@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Reinforcement.Model;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPStructure.Reinforcement.Service;
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class ThReinforceTableBuilder
@@ -23,7 +25,8 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public DBObjectCollection Build(List<ThEdgeComponent> components)
         {
-            
+            Database database = new Database();
+            database.Import();
 
             DBObjectCollection objectCollection=new DBObjectCollection();
             DBObjectCollection tmpColllection = new DBObjectCollection();
