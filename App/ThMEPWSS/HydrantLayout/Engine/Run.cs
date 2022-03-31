@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.HydrantLayout.Model;
 using ThMEPWSS.HydrantLayout.Engine;
@@ -28,7 +29,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public List<OutPutModel> outPutModels = new List<OutPutModel>();
         public List<ThIfcVirticalPipe> VerticalPipeOut = new List<ThIfcVirticalPipe>();
 
-        public Run(ThHydrantLayoutDataQueryService dataQuery,DataPass dataPass0) 
+        public Run(ThHydrantLayoutDataQueryService dataQuery, DataPass dataPass0)
         {
             //var room = dataQuery.Room;
             //var wall = dataQuery.Wall;
@@ -43,7 +44,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //differ0.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0mroom"));
 
             //全局变量设定
-            ParameterSetting(dataPass0); 
+            ParameterSetting(dataPass0);
 
             //处理输入数据
             this.rawData = new RawData(dataQuery);
@@ -76,7 +77,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
 
 
-        private void ParameterSetting(DataPass dataPass0) 
+        private void ParameterSetting(DataPass dataPass0)
         {
             //全局变量设定
             Info.Type = dataPass0.LayoutObject;
@@ -85,19 +86,19 @@ namespace ThMEPWSS.HydrantLayout.Engine
             Info.AllowDoorInPaking = dataPass0.AvoidParking;
 
             //根据全局参数修改数据
-            Info.Radius = Info.OriginRadius + 500 ;
-            Info.SearchRadius = Info.OriginRadius -300 ;
+            Info.Radius = Info.OriginRadius + 500;
+            Info.SearchRadius = Info.OriginRadius - 300;
         }
     }
 
 
-    class DataPass 
+    class DataPass
     {
         public int LayoutObject = 2;//消火栓（0）灭火器（1）两者都考虑（2）
         public int SearchRadius = 3500;
         public int LayoutMode = 2; //一字（0） L字（1） 两者都考虑（2）
         public bool AvoidParking = false;  //开门是否避让车位 T:避让 F:不用避让
-        public DataPass(int radius ,int layoutObj ,int layoutMode , bool avoidPaking) 
+        public DataPass(int radius, int layoutObj, int layoutMode, bool avoidPaking)
         {
             this.SearchRadius = radius;
             this.LayoutObject = layoutObj;
@@ -121,7 +122,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public ThHydrantModel OriginModel = new ThHydrantModel();
 
 
-        public OutPutModel(bool flag,int type ,Point3d centerpoint,Vector3d dir, int doorOpenDir, ThHydrantModel originmodel) 
+        public OutPutModel(bool flag, int type, Point3d centerpoint, Vector3d dir, int doorOpenDir, ThHydrantModel originmodel)
         {
             this.IfFind = flag;
             this.Type = type;
@@ -132,5 +133,13 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         public OutPutModel() { }
+
+        public void Reset(ThMEPOriginTransformer transformer)
+        {
+            if (CenterPoint !=Point3d.Origin )
+            {
+                transformer.Reset(ref CenterPoint);
+            }
+        }
     }
 }

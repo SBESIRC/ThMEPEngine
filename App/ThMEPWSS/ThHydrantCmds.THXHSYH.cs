@@ -21,25 +21,17 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Diagnostics;
 
 using ThMEPWSS.Common;
+using ThMEPWSS.HydrantLayout.Command;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Data;
-using ThMEPWSS.HydrantLayout.Command;
 using ThMEPWSS.HydrantLayout.Model;
 
 namespace ThMEPWSS
 {
     public partial class ThHydrantCmds
     {
-        [CommandMethod("TIANHUACAD", "THHydrantLayout", CommandFlags.Modal)]
-        public void THHydrantLayout()
-        {
-            using (var cmd = new ThHydrantLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
 
-        [CommandMethod("TIANHUACAD", "THHydrantLayoutNoUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THXHSYH", CommandFlags.Modal)]
         public void THHydrantLayoutNoUI()
         {
 
@@ -66,7 +58,11 @@ namespace ThMEPWSS
             HydrantLayoutSetting.Instance.SearchRadius = radius;
             HydrantLayoutSetting.Instance.LayoutMode = Convert.ToInt32(layoutMode);
             HydrantLayoutSetting.Instance.AvoidParking = avoidParking;
-
+            HydrantLayoutSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>()
+                                {
+                                    { "集水井", new List<string>() { "A-Well-1" }},
+                                    { "非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437" } }
+                                };
             using (var cmd = new ThHydrantLayoutCmd())
             {
                 cmd.Execute();
@@ -93,7 +89,7 @@ namespace ThMEPWSS
 
                 var BlockNameDict = new Dictionary<string, List<string>>() {
                                         {"集水井", new List<string>() { "A-Well-1" }},
-                                        {"非机械车位", new List<string>() { "car0" } } };
+                                        {"非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437" } } };
 
                 var dataFactory = new ThHydrantLayoutDataFactory()
                 {

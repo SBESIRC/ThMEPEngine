@@ -115,29 +115,5 @@ namespace ThMEPWSS.HydrantLayout.Data
             Car.ForEach(x => DrawUtils.ShowGeometry(x, "l0car", 173));
             Well.ForEach(x => DrawUtils.ShowGeometry(x, "l0well", 6));
         }
-
-        public void Clean()
-        {
-            VerticalPipe.ForEach(x => CleanEntity(x.Data));
-            Hydrant.ForEach(x => CleanEntity(x.Outline));
-
-        }
-
-        /// <summary>
-        /// 无法删除块中的entity
-        /// </summary>
-        /// <param name="e"></param>
-        private static void CleanEntity(Entity e)
-        {
-            var dbTrans = new DBTransaction();
-            var objId = e.ObjectId;
-            var obj = dbTrans.GetObject(objId, OpenMode.ForWrite, false);
-            obj.UpgradeOpen();
-            obj.Erase();
-            obj.DowngradeOpen();
-            dbTrans.Commit();
-            // Data.Remove(x);
-        }
-
     }
 }

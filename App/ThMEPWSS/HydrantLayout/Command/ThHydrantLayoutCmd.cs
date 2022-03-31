@@ -34,8 +34,8 @@ namespace ThMEPWSS.HydrantLayout.Command
         private int _radius = 3000;
         private int _layoutMode = 2;
         private int _layoutObject = 2;
-        private bool _avoidParking = true; 
-        private Dictionary<string, List<string>> _BlockNameDict;
+        private bool _avoidParking = true;
+        public Dictionary<string, List<string>> _BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         public ThHydrantLayoutCmd()
         {
             InitialCmdInfo();
@@ -53,11 +53,7 @@ namespace ThMEPWSS.HydrantLayout.Command
             _layoutObject = HydrantLayoutSetting.Instance.LayoutObject;
             _layoutMode = HydrantLayoutSetting.Instance.LayoutMode;
             _avoidParking = HydrantLayoutSetting.Instance.AvoidParking;
-
-            _BlockNameDict = new Dictionary<string, List<string>>(){
-                                { "集水井", new List<string>() { "A-Well-1" }},
-                                { "非机械车位", new List<string>() { "car0" } }
-                            };
+            _BlockNameDict = HydrantLayoutSetting.Instance.BlockNameDict;
         }
 
         public override void SubExecute()
@@ -82,7 +78,7 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 //转换器
                 //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0,0,0));
+                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
 
                 //提取数据
@@ -110,21 +106,43 @@ namespace ThMEPWSS.HydrantLayout.Command
                 dataQuery.Transform(transformer);
 
                 //Engine start
-                DataPass dataPass0 = new DataPass(_radius,_layoutObject,_layoutObject,_avoidParking);
-                Run run0 = new Run(dataQuery,dataPass0);
+                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutObject, _avoidParking);
+                Run run0 = new Run(dataQuery, dataPass0);
                 List<OutPutModel> outPutModels = run0.outPutModels;
                 List<ThIfcVirticalPipe> VerticalPipeOut = run0.VerticalPipeOut;
-                //
-                //打印
-                dataQuery.Print(); //for debug
 
                 //转回到原位置
                 dataQuery.Reset(transformer);
-                dataQuery.Print();
-                //dataQuery.Clean();
+                outPutModels.ForEach(x => x.Reset(transformer));
+                VerticalPipeOut.ForEach(x => transformer.Reset(x.Outline));
 
+                var validHydrant = outPutModels.Where(x => x.IfFind == true && (x.Type == 1 || x.Type == 2)).ToList();
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
+                var layerList = GetResultLayer(validHydrant);
+                //插入真实块
+                InsertBlkService.InsertBlock(outPutModels, 1);
 
+                //插入过远提示
+                var tooFarList = validHydrant.Where(x => (x.CenterPoint.DistanceTo(x.OriginModel.Center) >= ThHydrantCommon.DistTol)).ToList();
+                InsertBlkService.InsertTooFar(tooFarList, ThHydrantCommon.Layer_Warning, 2000, 1);
+                //插入没做出来提示
+                var notFoundList = outPutModels.Where(x => x.IfFind == false && (x.Type == 1 || x.Type == 2)).ToList();
+                InsertBlkService.InsertWarning(notFoundList, ThHydrantCommon.Layer_Warning, 2000, 1);
+
+                //删除块
+                validHydrant.ForEach(x => InsertBlkService.CleanEntity(x.OriginModel.Data));
+                VerticalPipeOut.ForEach(x => InsertBlkService.CleanEntity(x.Data));
+                
             }
+        }
+
+        private List<string> GetResultLayer(List<OutPutModel> validHydrant)
+        {
+            var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
+            var layers = validHydrant.Select(x => (x.OriginModel.Data as BlockReference).Layer);
+            layerList.AddRange(layers);
+
+            return layerList;
         }
     }
 }

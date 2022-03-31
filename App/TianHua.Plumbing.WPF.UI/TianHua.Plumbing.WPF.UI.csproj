@@ -110,6 +110,9 @@
     <Compile Include="UI\FireHydrantSystemUI.xaml.cs">
       <DependentUpon>FireHydrantSystemUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\HydrantLayoutUI.xaml.cs">
+      <DependentUpon>HydrantLayoutUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiUserConfig.xaml.cs">
       <DependentUpon>uiUserConfig.xaml</DependentUpon>
     </Compile>
@@ -264,6 +267,10 @@
     <Page Include="UI\FireHydrantSystemUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\HydrantLayoutUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiUserConfig.xaml">
       <Generator>MSBuild:Compile</Generator>
