@@ -24,6 +24,7 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition></ColumnDefinition>
@@ -37,8 +38,12 @@
                     <ComboBox Name ="cbAntiSeismicGrade" Width="100" Grid.Row="1" Grid.Column="1"
                               ItemsSource="{Binding AntiSeismicGrades,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
                               Text="{Binding Model.AntiSeismicGrade,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                    <Label Content="保护层(mm)：" Grid.Row="2" Grid.Column="0"/>
-                    <TextBox Name="tbProtectThick" Width="100" Grid.Row="2" Grid.Column="1" 
+                    <Label Content="构造部位：" Grid.Row="2" Grid.Column="0"/>
+                    <ComboBox Name ="cbGbzPlace" Width="100" Grid.Row="2" Grid.Column="1"
+                              ItemsSource="{Binding GbzPlaces,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.GbzPlace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="保护层(mm)：" Grid.Row="3" Grid.Column="0"/>
+                    <TextBox Name="tbProtectThick" Width="100" Grid.Row="3" Grid.Column="1" 
                              Text="{Binding Model.C,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              InputMethod.IsInputMethodEnabled="False"
                              TextChanged="tbProtectThick_TextChanged"
@@ -110,7 +115,7 @@
                              PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
                 </Grid>
             </GroupBox>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,40,0,0">
                 <cus:ImageButton Name="btnReset" Margin="10,0" Content="恢复默认" Width="80" Height="24"
                                  Click="btnReset_Click"></cus:ImageButton>
                 <cus:ImageButton Name="btnConfirm" Margin="10,0" Content="确定" Width="80" Height="24" Click="btnConfirm_Click"></cus:ImageButton>

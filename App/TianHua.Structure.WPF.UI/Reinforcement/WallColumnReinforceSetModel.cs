@@ -153,6 +153,22 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 RaisePropertyChanged("StirrupLineWeight");
             } 
         }
+        private string gbzPlace = "";
+        /// <summary>
+        /// 构造筋区域(底部加强筋，其它部位)
+        /// </summary>
+        public string GbzPlace
+        {
+            get
+            {
+                return gbzPlace;
+            }
+            set
+            {
+                gbzPlace = value;
+                RaisePropertyChanged("GbzPlace");
+            }
+        }
         public ThWallColumnReinforceSetModel()
         {
             Init();
@@ -161,6 +177,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             C = ThWallColumnReinforceConfig.Instance.C;
             Frame = ThWallColumnReinforceConfig.Instance.Frame;
+            GbzPlace = ThWallColumnReinforceConfig.Instance.GbzPlace;
             DrawScale = ThWallColumnReinforceConfig.Instance.DrawScale;
             Elevation = ThWallColumnReinforceConfig.Instance.Elevation;
             TableRowHeight = ThWallColumnReinforceConfig.Instance.TableRowHeight;
@@ -178,6 +195,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             ThWallColumnReinforceConfig.Instance.C = C;
             ThWallColumnReinforceConfig.Instance.Frame = Frame;
+            ThWallColumnReinforceConfig.Instance.GbzPlace = GbzPlace;
             ThWallColumnReinforceConfig.Instance.DrawScale = DrawScale;
             ThWallColumnReinforceConfig.Instance.Elevation = Elevation;
             ThWallColumnReinforceConfig.Instance.TableRowHeight = TableRowHeight;

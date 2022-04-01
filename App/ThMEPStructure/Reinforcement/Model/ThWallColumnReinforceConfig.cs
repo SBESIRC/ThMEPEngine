@@ -16,6 +16,10 @@
         /// </summary>
         public string ConcreteStrengthGrade { get; set; }
         /// <summary>
+        /// 构造筋部位(底部加强筋，其它部位)
+        /// </summary>
+        public string GbzPlace { get; set; }
+        /// <summary>
         /// 抗震等级
         /// </summary>
         public string AntiSeismicGrade { get; set; }
@@ -59,6 +63,7 @@
             AntiSeismicGrade = "二级";
             StirrupLineWeight = 30.0;
             PointReinforceLineWeight = 50.0;
+            GbzPlace = "底部加强区";
         }
         public void Reset()
         {

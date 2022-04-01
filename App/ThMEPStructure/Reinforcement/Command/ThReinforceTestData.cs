@@ -49,7 +49,6 @@ namespace ThMEPStructure.Reinforcement.Command
                     ConcreteStrengthGrade = "C60",
                     PointReinforceLineWeight = 50,
                     StirrupLineWeight = 30,
-                    X = 1,
                     EnhancedReinforce = "2C18+4C16+2C12",
                     Number = "GBZ2",
                 };

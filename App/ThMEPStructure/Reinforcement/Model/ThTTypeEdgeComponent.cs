@@ -15,17 +15,17 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 拉筋
         /// 对应标注图中的数字2
         /// </summary>
-        public string Link2 { get; set; }
+        public string Link2 { get; set; } = "";
         /// <summary>
         /// 拉筋
         /// 对应标注图中的数字3
         /// </summary>
-        public string Link3 { get; set; }
+        public string Link3 { get; set; } = "";
         /// <summary>
         /// 拉筋
         /// 对应标注图中的数字4
         /// </summary>
-        public string Link4 { get; set; }
+        public string Link4 { get; set; } = "";
 
         DrawObjectTType drawObjectTType;
         
