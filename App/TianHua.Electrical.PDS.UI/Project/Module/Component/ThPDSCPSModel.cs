@@ -17,9 +17,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(false)]
+        [DisplayName("内容")]
+        public string Content => $"{Model}{Combination}-{FrameSpecification}/{CodeLevel}{RatedCurrent}/{PolesNum}{RatedCurrent}";
+
+        [ReadOnly(true)]
         [DisplayName("元器件类型")]
         public string Type => _cps.ComponentType.GetDescription();
-
 
         [DisplayName("型号")]
         [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
@@ -92,7 +96,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertiesChanged();
             }
         }
-        public string Content { get; set; } = "todo add content";
+
         private void OnPropertiesChanged()
         {
             OnPropertyChanged(nameof(Model));

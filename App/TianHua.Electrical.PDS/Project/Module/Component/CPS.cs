@@ -40,8 +40,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             CodeLevel = AlternativeCodeLevels.First();
         }
 
-        //public string Content { get { return $"{BreakerType}{FrameSpecifications}-{TripUnitType}{RatedCurrent}/{PolesNum}"; } }
-
         /// <summary>
         /// 型号
         /// </summary>

@@ -18,5 +18,10 @@ namespace TianHua.Electrical.PDS.Diagram
         {
             return $"{isolatingSwitch.Model} {isolatingSwitch.RatedCurrent}/{isolatingSwitch.PolesNum}";
         }
+
+        public static string Content(this CPS cps)
+        {
+            return $"{cps.Model}{cps.Combination}-{cps.FrameSpecification}/{cps.CodeLevel}{cps.RatedCurrent}/{cps.PolesNum}{cps.RatedCurrent}";
+        }
     }
 }
