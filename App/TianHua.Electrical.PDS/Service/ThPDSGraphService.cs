@@ -1,10 +1,10 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 using TianHua.Electrical.PDS.Model;
-using Dreambuild.AutoCAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -14,7 +14,7 @@ namespace TianHua.Electrical.PDS.Service
         public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
 
         public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
-            List<string> distBoxKey)
+            List<string> distBoxKey, List<ObjectId> objectIds)
         {
             var node = new ThPDSCircuitGraphNode
             {
@@ -22,10 +22,11 @@ namespace TianHua.Electrical.PDS.Service
             };
             var frame = ThPDSBufferService.Buffer(entity, database);
             var marks = markService.GetMarks(frame);
+            objectIds.AddRange(marks.ObjectIds);
             var service = new ThPDSMarkAnalysisService();
             node.Loads = new List<ThPDSLoad>
             {
-                service.DistBoxMarkAnalysis(marks, distBoxKey, DistBoxBlocks[entity]),
+                service.DistBoxMarkAnalysis(marks.Texts, distBoxKey, DistBoxBlocks[entity]),
             };
             return node;
         }
@@ -45,7 +46,7 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService,
-            List<string> distBoxKey, ref string attributesCopy)
+            List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
@@ -61,6 +62,7 @@ namespace TianHua.Electrical.PDS.Service
                     // 只要有一个有效负载，则认为整个节点为有效负载
                     noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
+                    objectIds.Add(LoadBlocks[e].ObjId);
                     if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
                         loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
@@ -69,7 +71,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
-                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
+                        loads.Add(service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
             }
@@ -92,12 +94,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode target, List<string> list, List<string> distBoxKey)
+            ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             var srcPanelID = source.Loads.Count > 0 ? source.Loads[0].ID.LoadID : "";
-            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, list, distBoxKey);
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
             if (source.NodeType == PDSNodeType.CableCarrier)
             {
                 edge.Circuit.ViaCableTray = true;

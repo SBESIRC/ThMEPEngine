@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using QuikGraph;
@@ -12,9 +12,15 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSGraphUnionEngine
     {
-        public ThPDSGraphUnionEngine()
+        private Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> NodeMap;
+
+        private Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> EdgeMap;
+
+        public ThPDSGraphUnionEngine(Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
+            Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap)
         {
-            //
+            NodeMap = nodeMap;
+            EdgeMap = edgeMap;
         }
 
         public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
@@ -65,6 +71,10 @@ namespace TianHua.Electrical.PDS.Engine
                             edge.Circuit.ViaConduit = true;
                         }
                         addEdgeList.Add(edge);
+                        var objectIds = new List<ObjectId>();
+                        objectIds.AddRange(EdgeMap[cabletrayEdgeList[j]]);
+                        objectIds.AddRange(EdgeMap[cabletrayEdgeList[i]]);
+                        EdgeMap.Add(edge, objectIds);
                         break;
                     }
                 }

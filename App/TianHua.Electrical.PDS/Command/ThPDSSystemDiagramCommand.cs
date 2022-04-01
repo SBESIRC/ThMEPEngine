@@ -86,6 +86,10 @@ namespace TianHua.Electrical.PDS.Command
                     .ToList();
                 foreach (var edge in edges)
                 {
+                    if(edge.Details == null)
+                    {
+                        continue;
+                    }
                     var outType = GetOutType(edge.Details.CircuitForm);
                     basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
                     var outCircuit = insertEngine.Insert(activeDb, configDb, outType, basePoint, scale);

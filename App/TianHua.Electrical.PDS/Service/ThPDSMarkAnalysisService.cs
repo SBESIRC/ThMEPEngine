@@ -3,11 +3,12 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
-using Dreambuild.AutoCAD;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -53,8 +54,8 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="marks"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey, ThPDSBlockReferenceData distBoxData,
-            ref string attributesCopy)
+        public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey,
+            ThPDSBlockReferenceData distBoxData, ref string attributesCopy)
         {
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
@@ -67,7 +68,6 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                FireLoad = marks.Contains(ThPDSCommon.FIRE_POWER_SUPPLY),
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
@@ -76,12 +76,24 @@ namespace TianHua.Electrical.PDS.Service
                 FrequencyConversion = frequencyConversion,
             };
 
+            var fireLoad = false;
+            marks.ForEach(str =>
+            {
+                if (str.Contains(ThPDSCommon.FIRE_POWER_SUPPLY))
+                {
+                    fireLoad = true;
+                }
+            });
+            thPDSLoad.FireLoad = fireLoad;
+
             if (needCopy)
             {
                 attributesCopy = distBoxData.EffectiveName;
             }
 
-            var standbyRelationship = AnalysisStandbyRelationship(marks, searchedString);
+            var markStrings = new List<string>();
+            marks.ForEach(o => markStrings.Add(o));
+            var standbyRelationship = AnalysisStandbyRelationship(markStrings, searchedString);
             if (standbyRelationship.Item1)
             {
                 thPDSLoad.PrimaryAvail = standbyRelationship.Item2;
@@ -89,7 +101,7 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             var r = new Regex(@"[a-zA-Z]");
-            foreach (var str in marks.Except(searchedString))
+            foreach (var str in markStrings.Except(searchedString))
             {
                 if (r.Match(str).Success)
                 {
@@ -135,9 +147,10 @@ namespace TianHua.Electrical.PDS.Service
                         ? distBoxData.Attributes[ThPDSCommon.LOAD_ID] : "",
                     Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
                         ? distBoxData.Attributes[ThPDSCommon.DESCRIPTION] : "",
+                    // 电动机及负载标注 直接存块Id
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }, out _, out _),
+                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
                 FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
                     ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.FIRE_POWER_SUPPLY) : false,
                 LoadTypeCat_1 = distBoxData.Cat_1,
@@ -210,7 +223,8 @@ namespace TianHua.Electrical.PDS.Service
             return id;
         }
 
-        private ThPDSID CreateLoadID(List<string> infos, List<string> distBoxKey, string blockName, List<string> searchedString)
+        private ThPDSID CreateLoadID(List<string> infos, List<string> distBoxKey,
+            string blockName, List<string> searchedString)
         {
             var id = new ThPDSID
             {
@@ -218,19 +232,19 @@ namespace TianHua.Electrical.PDS.Service
             };
             var panelIDs = new List<string>();
             var circuitIDs = new List<string>();
-            infos.ForEach(info =>
+            infos.ForEach(str =>
             {
                 foreach (var key in distBoxKey)
                 {
-                    if (info.Contains(key))
+                    if (str.Contains(key))
                     {
-                        searchedString.Add(info);
+                        searchedString.Add(str);
                         var check = "";
-                        if (info.Contains("-W"))
+                        if (str.Contains("-W"))
                         {
                             check = "-W.+";
                         }
-                        else if (info.Contains("/W"))
+                        else if (str.Contains("/W"))
                         {
                             check = "/W.+";
                         }
@@ -240,10 +254,10 @@ namespace TianHua.Electrical.PDS.Service
                             break;
                         }
                         var r = new Regex(@check);
-                        var m = r.Match(info);
+                        var m = r.Match(str);
                         if (m.Success)
                         {
-                            panelIDs.Add(info.Replace(m.Value, ""));
+                            panelIDs.Add(str.Replace(m.Value, ""));
                             circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
                         }
                         break;
@@ -262,7 +276,8 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="infos"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, List<string> infos, List<string> distBoxKey)
+        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, List<string> infos,
+            List<string> distBoxKey)
         {
             var id = CreateCircuitID(srcPanelID, infos, distBoxKey);
             var circuit = new ThPDSCircuit
@@ -288,28 +303,28 @@ namespace TianHua.Electrical.PDS.Service
             var panelIDs = new List<string>();
             var circuitIDs = new List<string>();
             var doSearch = true;
-            infos.ForEach(info =>
+            infos.ForEach(str =>
             {
                 foreach (var key in distBoxKey)
                 {
-                    if (info.Contains(key))
+                    if (str.Contains(key))
                     {
-                        if (info.Contains("-W") || info.Contains("/W"))
+                        if (str.Contains("-W") || str.Contains("/W"))
                         {
                             var check = "";
-                            if (info.Contains("-W"))
+                            if (str.Contains("-W"))
                             {
                                 check = "-W[a-zA-Z]+[0-9]+";
                             }
-                            else if (info.Contains("/W"))
+                            else if (str.Contains("/W"))
                             {
                                 check = "/W[a-zA-Z]+[0-9]+";
                             }
                             var r = new Regex(@check);
-                            var m = r.Match(info);
+                            var m = r.Match(str);
                             if (m.Success)
                             {
-                                panelIDs.Add(info.Replace(m.Value, ""));
+                                panelIDs.Add(str.Replace(m.Value, ""));
                                 circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
                             }
                             doSearch = false;
@@ -322,9 +337,9 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var check = "W[a-zA-Z]+[0-9]+";
                 var r = new Regex(@check);
-                infos.ForEach(info =>
+                infos.ForEach(str =>
                 {
-                    var m = r.Match(info);
+                    var m = r.Match(str);
                     if (m.Success)
                     {
                         circuitIDs.Add(m.Value);
@@ -332,17 +347,17 @@ namespace TianHua.Electrical.PDS.Service
                 });
             }
 
-            circuitIDs= circuitIDs.Distinct().ToList();
+            circuitIDs = circuitIDs.Distinct().ToList();
             panelIDs = panelIDs.Distinct().ToList();
-            if(circuitIDs.Count == 1)
+            if (circuitIDs.Count == 1)
             {
-                if(circuitIDs.Count == panelIDs.Count 
+                if (circuitIDs.Count == panelIDs.Count
                     && (panelIDs[0].Equals(srcPanelID) || string.IsNullOrEmpty(srcPanelID)))
                 {
                     circuitID.SourcePanelID.Add(panelIDs[0]);
                     circuitID.CircuitID.Add(circuitIDs[0]);
                 }
-                else if(!string.IsNullOrEmpty(srcPanelID))
+                else if (!string.IsNullOrEmpty(srcPanelID))
                 {
                     circuitID.SourcePanelID.Add(srcPanelID);
                     circuitID.CircuitID.Add(circuitIDs[0]);
@@ -360,7 +375,8 @@ namespace TianHua.Electrical.PDS.Service
             return thisCircuitID;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy, out bool frequencyConversion)
+        private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy,
+            out bool frequencyConversion)
         {
             var results = new ThInstalledCapacity();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
@@ -390,7 +406,45 @@ namespace TianHua.Electrical.PDS.Service
                     var numMatch = numRegex.Match(infos[i]);
                     if (numMatch.Success)
                     {
+                        infos[i] = infos[i].Replace(numMatch.Value, "");
                         needCopy = true;
+                    }
+
+                    m = m.NextMatch();
+                }
+            }
+
+            return results;
+        }
+
+        private ThInstalledCapacity AnalysisPower(List<string> infos)
+        {
+            var results = new ThInstalledCapacity();
+            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
+            var r = new Regex(@check);
+            for (var i = 0; i < infos.Count; i++)
+            {
+                var m = r.Match(infos[i]);
+                while (m.Success)
+                {
+                    infos[i] = infos[i].Replace(m.Value, "");
+                    var result = m.Value.Replace("k", "");
+                    result = result.Replace("K", "");
+                    result = result.Replace("w", "");
+                    result = result.Replace("W", "");
+                    if (!m.Value.Contains("k") && !m.Value.Contains("K"))
+                    {
+                        results.UsualPower.Add(double.Parse(result) / 1000.0);
+                    }
+                    else
+                    {
+                        results.UsualPower.Add(double.Parse(result));
+                    }
+                    var numRegex = new Regex(@"[2-9][xX]");
+                    var numMatch = numRegex.Match(infos[i]);
+                    if (numMatch.Success)
+                    {
+                        infos[i] = infos[i].Replace(numMatch.Value, "");
                     }
 
                     m = m.NextMatch();

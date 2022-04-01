@@ -84,6 +84,10 @@ namespace TianHua.Electrical.PDS.Diagram
                         var circuit = node.Details.CircuitFormType as OneWayInCircuit;
 
                         // 隔离开关
+                        if(circuit.isolatingSwitch == null)
+                        {
+                            break;
+                        }
                         var srcIsolatingSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_ISOLATING_SWITCH).First();
                         var componentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()];
                         if (!componentName.Equals(srcIsolatingSwitch.BlockName))

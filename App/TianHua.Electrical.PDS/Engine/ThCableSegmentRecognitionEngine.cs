@@ -8,12 +8,18 @@ using NFox.Cad;
 
 using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Engine
 {
     public class ThCableSegmentRecognitionEngine : ThFlowSegmentRecognitionEngine
     {
-        public DBObjectCollection Results { get; protected set; }
+        public ThCableSegmentRecognitionEngine()
+        {
+            Results = new List<ThPDSEntityInfo>();
+        }
+
+        public List<ThPDSEntityInfo> Results { get; protected set; }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             throw new NotImplementedException();
@@ -28,13 +34,22 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void Recognize(List<ThRawIfcFlowSegmentData> datas, Point3dCollection polygon)
         {
-            var curves = datas.Select(data => data.Data as Curve).ToCollection();
+            var entityInfos = datas.Select(data => data.Data as Curve)
+                .Where(o => o.GetLength() > 1.0)
+                .Select(data => new ThPDSEntityInfo(data, true)).ToList();
+            var curves = entityInfos.Select(e => e.Entity).ToCollection();
             if (polygon.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
                 curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Results = curves.OfType<Curve>().Where(o => o.GetLength() > 1.0).ToCollection();
+            entityInfos.ForEach(e =>
+            {
+                if(curves.Contains(e.Entity))
+                {
+                    Results.Add(e);
+                }
+            });
         }
 
         public override void RecognizeEditor(Point3dCollection polygon)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -27,8 +26,15 @@ namespace TianHua.Electrical.PDS.Command
 {
     public class ThPDSCommand : ThMEPBaseCommand, IDisposable
     {
+        private Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> NodeMap;
+
+        private Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> EdgeMap;
+
         public override void SubExecute()
         {
+            NodeMap = new Dictionary<ThPDSCircuitGraphNode, List<ObjectId>>();
+            EdgeMap = new Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>>();
+
             // 记录所有图纸中的图
             var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>();
             var cableTrayNode = new ThPDSCircuitGraphNode
@@ -83,7 +89,8 @@ namespace TianHua.Electrical.PDS.Command
                     // 提取回路
                     var cableEngine = new ThCableSegmentRecognitionEngine();
                     cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                    EntitiesTransform(transformer, cableEngine.Results);
+                    var cableEntities = cableEngine.Results.Select(r => r.Entity).ToCollection();
+                    EntitiesTransform(transformer, cableEntities);
 
                     // 提取桥架
                     var cableTrayEngine = new ThCabletraySegmentRecognitionEngine();
@@ -93,12 +100,14 @@ namespace TianHua.Electrical.PDS.Command
                     // 提取标注
                     var markExtractor = new ThCircuitMarkRecognitionEngine();
                     markExtractor.RecognizeMS(acad.Database, new Point3dCollection());
-                    EntitiesTransform(transformer, markExtractor.Results);
+                    var markEntities = markExtractor.Results.Select(r => r.Entity).ToCollection();
+                    EntitiesTransform(transformer, markEntities);
 
                     // 天正标注
                     var tchWireDimExtractor = new ThTCHWireDim2RecognitionEngine();
                     tchWireDimExtractor.RecognizeMS(acad.Database, new Point3dCollection());
-                    EntitiesTransform(transformer, tchWireDimExtractor.Results);
+                    var tchWireDimEntities = tchWireDimExtractor.Results.Select(r => r.Entity).ToCollection();
+                    EntitiesTransform(transformer, tchWireDimEntities);
 
                     // 根据块名提取负载及标注块
                     var loadExtractService = new ThPDSBlockExtractService();
@@ -120,7 +129,7 @@ namespace TianHua.Electrical.PDS.Command
                         var storey = storeysEngine.Elements[i] as ThEStoreys;
 
                         // 回路
-                        var cableIndex = new ThCADCoreNTSSpatialIndex(cableEngine.Results);
+                        var cableIndex = new ThCADCoreNTSSpatialIndex(cableEntities);
                         var cables = cableIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
 
                         // 桥架
@@ -128,12 +137,14 @@ namespace TianHua.Electrical.PDS.Command
                         var cableTrays = cableTrayIndex.SelectCrossingPolygon(x).OfType<Curve>().ToList();
 
                         // 标注
-                        var markIndex = new ThCADCoreNTSSpatialIndex(markExtractor.Results);
+                        var markIndex = new ThCADCoreNTSSpatialIndex(markEntities);
                         var marks = markIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+                        var marksInfo = markExtractor.Results.Where(r => marks.Contains(r.Entity)).ToList();
 
                         // 天正标注
-                        var tchWireDimIndex = new ThCADCoreNTSSpatialIndex(tchWireDimExtractor.Results);
+                        var tchWireDimIndex = new ThCADCoreNTSSpatialIndex(tchWireDimEntities);
                         var tchWireDims = tchWireDimIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+                        var tchWireDimsInfo = tchWireDimExtractor.Results.Where(r => tchWireDims.Contains(r.Entity)).ToList();
 
                         // 标注块
                         var markBlockIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.MarkBlocks.Keys.ToCollection());
@@ -155,10 +166,10 @@ namespace TianHua.Electrical.PDS.Command
                         var distBoxFrames = distBoxFrameIndex.SelectCrossingPolygon(x).OfType<Polyline>().ToList();
 
                         //做一个标注的Service
-                        var markService = new ThMarkService(marks, markBlockData, tchWireDims);
+                        var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
                         var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                            distBoxKey, cableTrayNode);
+                            distBoxKey, cableTrayNode, NodeMap, EdgeMap);
 
                         graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
                         graphEngine.CreatGraph();
@@ -178,7 +189,7 @@ namespace TianHua.Electrical.PDS.Command
                 }
             }
 
-            var unionEngine = new ThPDSGraphUnionEngine();
+            var unionEngine = new ThPDSGraphUnionEngine(NodeMap, EdgeMap);
             var unionGraph = unionEngine.GraphUnion(graphList, cableTrayNode);
             PDSProject.Instance.PushGraphData(unionGraph);
         }
