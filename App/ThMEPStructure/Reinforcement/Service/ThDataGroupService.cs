@@ -40,7 +40,7 @@ namespace ThMEPStructure.Reinforcement.Service
             if(ConsiderWall)
             {
                 var groups = infos.GroupBy(o => o.StandardType + o.Spec +
-                            o.ShapeCode + o.NumberPrefix + o.TypeCode+o.LinkWallPos);
+                            o.ShapeCode + o.ComponentType.ToString() + o.TypeCode+o.LinkWallPos);
                 foreach (var group in groups)
                 {
                     results.Add(group.ToList());
@@ -49,7 +49,7 @@ namespace ThMEPStructure.Reinforcement.Service
             else
             {
                 var groups = infos.GroupBy(o => o.StandardType + o.Spec +
-                            o.ShapeCode + o.NumberPrefix + o.TypeCode);
+                            o.ShapeCode + o.ComponentType.ToString() + o.TypeCode);
                 foreach (var group in groups)
                 {
                     results.Add(group.ToList());

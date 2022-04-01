@@ -82,7 +82,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             var results = grouper.Group(infos);
             var groups = results
                 .Where(o => o.Count > 0).Select(o => o.First())
-                .GroupBy(o => o.NumberPrefix)
+                .GroupBy(o => o.ComponentType.ToString())
                 .ToList();
             // 重新编号
             Clear();

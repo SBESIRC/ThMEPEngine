@@ -66,7 +66,7 @@ namespace ThMEPStructure.Reinforcement.Service
 
             // 查询
             var specInfos = ThHuaRunDataManager.Instance.QueryRect(
-                this.AntiSeismicGrade, componentExtractInfo.NumberPrefix, specService.A, specService.B);
+                this.AntiSeismicGrade, componentExtractInfo.ComponentType.ToString(), specService.A, specService.B);
       
             // 查找是否有连接的墙
             int linkCount = 0;
@@ -125,7 +125,7 @@ namespace ThMEPStructure.Reinforcement.Service
     
             // 查询A端规格是否存在于标准库中
             var specInfos = ThHuaRunDataManager.Instance.QueryLType(
-               this.AntiSeismicGrade, componentExtractInfo.NumberPrefix, 
+               this.AntiSeismicGrade, componentExtractInfo.ComponentType.ToString(), 
                specService.B, specService.D, specService.C, specService.A);
             Hc1 = specService.B;
             Bw = specService.D;
@@ -168,7 +168,7 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 // 查询 D 端
                 specInfos = ThHuaRunDataManager.Instance.QueryLType(
-               this.AntiSeismicGrade, componentExtractInfo.NumberPrefix, 
+               this.AntiSeismicGrade, componentExtractInfo.ComponentType.ToString(), 
                specService.C, specService.A, specService.B, specService.D);
                 if (specInfos.Count > 0)
                 {
@@ -234,7 +234,7 @@ namespace ThMEPStructure.Reinforcement.Service
             var specService = new ThTTypeSpecAnalysisService();
             specService.Analysis(tType);
             var specInfos = ThHuaRunDataManager.Instance.QueryTType(
-               this.AntiSeismicGrade, componentExtractInfo.NumberPrefix, 
+               this.AntiSeismicGrade, componentExtractInfo.ComponentType.ToString(), 
                specService.D, specService.B, specService.A, specService.E);
             bool isEdgeBLinkWall = IsLinkWall(specService.EdgeB.Item1, specService.EdgeB.Item2);
             bool isEdgeHLinkWall = IsLinkWall(specService.EdgeH.Item1, specService.EdgeH.Item2);

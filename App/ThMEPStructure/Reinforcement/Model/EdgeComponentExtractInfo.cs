@@ -115,23 +115,41 @@ namespace ThMEPStructure.Reinforcement.Model
         /// YBZ->边缘性构件，GBZ->构造性构件
         /// GBZ11->GBZ ,YBZ24->YBZ
         /// </summary>
-        public string NumberPrefix
+        public ComponentType ComponentType
         {
             get
             {
                 if (string.IsNullOrEmpty(Number) || Number.Length < 3)
                 {
-                    return "";
+                    return ComponentType.Unknown;
                 }
-                return Number.Substring(0, 3).ToUpper();
+                var prefix = Number.Substring(0, 3).ToUpper();
+                if (prefix == "GBZ")
+                {
+                    return ComponentType.GBZ;
+                }
+                else if(prefix == "YBZ")
+                {
+                    return ComponentType.YBZ;
+                }
+                else
+                {
+                    return ComponentType.Unknown;
+                }
             }
         }
     }
-    internal enum ShapeCode
+    public enum ShapeCode
     {
         L,
         T,
         Rect,
         Unknown
+    }
+    public enum ComponentType
+    {
+        Unknown,
+        YBZ,
+        GBZ
     }
 }
