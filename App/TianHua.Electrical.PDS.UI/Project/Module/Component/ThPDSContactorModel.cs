@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         [DisplayName("内容")]
-        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
+        public string Content => $"{RatedCurrent}/{PolesNum}";
 
 
         [ReadOnly(true)]
