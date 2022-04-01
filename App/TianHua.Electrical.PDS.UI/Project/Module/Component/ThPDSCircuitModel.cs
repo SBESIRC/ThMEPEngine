@@ -12,18 +12,21 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
     public class ThPDSCircuitModel : NotifyPropertyChangedBase
     {
         private readonly ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
-
         public ThPDSCircuitModel(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
         {
             _edge = edge;
         }
 
-        [ReadOnly(true)]
-        [DisplayName("回路编号")]
+        [DisplayName("回路ID")]
         [Category("配电回路参数")]
-        public string CircuitNumber
+        public string CircuitID
         {
-            get => _edge.Circuit.ID.CircuitNumber.LastOrDefault();
+            get => _edge.Circuit.ID.CircuitID.LastOrDefault();
+            set
+            {
+                _edge.Circuit.ID.CircuitID[_edge.Circuit.ID.CircuitID.Count - 1] = value;
+                OnPropertyChanged(nameof(CircuitID));
+            }
         }
 
         [ReadOnly(true)]
