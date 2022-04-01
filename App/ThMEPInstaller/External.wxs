@@ -92,6 +92,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" Guid="{6CA75497-88FD-42D3-AAA6-C875076144E1}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\HandyControl.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" Guid="{14468397-BCD4-4809-A9F1-2F3CAA2C2D26}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\MathNet.Numerics.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -188,6 +191,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" Guid="{05131D9E-3EDD-48C5-9D37-6D63DF4B74BC}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\HandyControl.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" Guid="{9CD21CF6-E7A0-42FB-9294-B588B8A0E0E4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MathNet.Numerics.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -283,6 +289,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" Guid="{BDC473D7-AD29-4ADA-96B2-160DA4EF6061}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\HandyControl.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" Guid="{129D4C4A-C4C5-4059-8AB9-CEA6CCDD1D8E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\MathNet.Numerics.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -381,6 +390,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" Guid="{5EE220AE-5667-4492-9FD7-50538C43FBB0}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\HandyControl.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" Guid="{2B8F6B9E-CB3A-4DF9-AE93-80851E31DA55}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\MathNet.Numerics.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Release="bin\Release-NET40" ?>
@@ -477,6 +489,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Release" Guid="{9233DE08-3862-4DB2-84F5-ECE66D0FA50B}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\HandyControl.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" Guid="{C88993A3-9096-44D2-B775-1715ABE2224F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MathNet.Numerics.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -572,6 +587,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Release" Guid="{1206228A-1535-475F-B94F-42DA2ACA531E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_HandyControl_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\HandyControl.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" Guid="{B3CBD377-5C6D-478B-96FB-266F81648611}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\MathNet.Numerics.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -676,6 +694,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -768,6 +789,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_HandyControl_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_HandyControl_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_HandyControl_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
