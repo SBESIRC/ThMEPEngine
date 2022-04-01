@@ -64,6 +64,11 @@ namespace ThMEPLighting.ParkingStall.CAD
                     default:
                         throw new NotSupportedException();
                 }
+                var visitor = new ThLightingParkingStallVisitor()
+                {
+                    LayerFilter = ThParkingStallLayerManager.XrefLayers(acadDb.Database),
+                };
+                parkingStallRecognitionEngine.ParkingStallVisitor = visitor;
                 parkingStallRecognitionEngine.Recognize(acadDb.Database, m_previewWindow);
 
                 foreach (var space in parkingStallRecognitionEngine.Elements.Cast<ThIfcParkingStall>().ToList())
