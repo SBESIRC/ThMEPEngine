@@ -20,6 +20,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("电线电缆参数")]
         [DisplayName("燃料特性代号")]
         public string ConductorMaterial
         {
@@ -27,6 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("电线电缆参数")]
         [DisplayName("材料特征及结构")]
         public string OuterSheathMaterial
         {
@@ -34,6 +36,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("电缆根数")]
+        [Category("电线电缆参数")]
         [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int NumberOfPhaseWire
         {
@@ -46,6 +49,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("电线电缆参数")]
         [DisplayName("相导体截面")]
         [Editor(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
         public double ConductorCrossSectionalArea
@@ -75,6 +79,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("敷设方式")]
+        [Category("电线电缆参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<Pipelaying>), typeof(PropertyEditorBase))]
         public Pipelaying Pipelaying
         {
@@ -83,6 +88,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("管材")]
+        [Category("电线电缆参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<PipeMaterial>), typeof(PropertyEditorBase))]
         public PipeMaterial PipeMaterial
         {
@@ -91,6 +97,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("穿管直径")]
+        [Category("电线电缆参数")]
         public int PipeDiameter
         {
             get => _conductor.PipeDiameter;

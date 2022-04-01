@@ -21,16 +21,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
         public string Content => $"{RatedCurrent}/{PolesNum}";
 
-
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _contactor.ComponentType.GetDescription();
 
-
         [DisplayName("型号")]
+        [Category("元器件参数")]
         [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
         public string Model
         {
@@ -44,6 +43,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
+        [Category("元器件参数")]
         [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
@@ -56,6 +56,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("额定电流")]
         [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent

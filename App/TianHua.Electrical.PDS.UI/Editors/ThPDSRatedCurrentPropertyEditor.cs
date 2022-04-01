@@ -38,6 +38,11 @@ namespace TianHua.Electrical.PDS.UI.Editors
                 //  1. 型号决定了可选的额定电流选项
                 return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
+            if (propertyItem.Value is ThPDSIsolatingSwitchModel isolator)
+            {
+                // 1. 型号决定了可选的额定电流选项
+                IsolatorConfiguration.isolatorInfos.Where(o => o.Model == isolator.Model).Select(o => o.Amps.ToString()).Distinct();
+            }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {
                 return cps.AlternativeRatedCurrents;

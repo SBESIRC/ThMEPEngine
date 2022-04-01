@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         }
 
+        [Category("元器件参数")]
         [DisplayName("电能表规格")]
         [Editor(typeof(ThPDSMTSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string MTSpecification
@@ -27,6 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("互感器规格")]
         [Editor(typeof(ThPDSCTSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string CTSpecification

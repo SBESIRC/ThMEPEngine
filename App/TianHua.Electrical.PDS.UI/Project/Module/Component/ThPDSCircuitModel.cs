@@ -20,6 +20,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("回路编号")]
+        [Category("配电回路参数")]
         public string CircuitNumber
         {
             get => _edge.Circuit.ID.CircuitNumber.LastOrDefault();
@@ -27,6 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("回路形式")]
+        [Category("配电回路参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSCircuitType>), typeof(PropertyEditorBase))]
         public ThPDSCircuitType CircuitType
         {
@@ -34,6 +36,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率")]
+        [Category("配电回路参数")]
         public double Power
         {
             get => _edge.Target.Details.LowPower;
@@ -45,7 +48,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("相序")]
-        [EditorAttribute(typeof(ThPDSCircuitPhaseSequenceEnumPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("配电回路参数")]
+        [Editor(typeof(ThPDSCircuitPhaseSequenceEnumPropertyEditor), typeof(PropertyEditorBase))]
         public PhaseSequence PhaseSequence
         {
             get => _edge.Target.Details.PhaseSequence;
@@ -58,6 +62,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("负载类型")]
+        [Category("配电回路参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<PDSNodeType>), typeof(PropertyEditorBase))]
         public PDSNodeType LoadType
         {
@@ -65,7 +70,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("负载编号")]
-        [EditorAttribute(typeof(ThPDSLoadIdPlainTextPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("配电回路参数")]
+        [Editor(typeof(ThPDSLoadIdPlainTextPropertyEditor), typeof(PropertyEditorBase))]
         public string LoadId
         {
             get => _edge.Circuit.ID.LoadID;
@@ -77,6 +83,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功能描述")]
+        [Category("配电回路参数")]
         public string Description
         {
             get => _edge.Target.Load.ID.Description;
@@ -88,7 +95,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("需要系数")]
-        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("配电回路参数")]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
         {
             get => _edge.Target.Load.DemandFactor;
@@ -100,7 +108,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率因数")]
-        [EditorAttribute(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("配电回路参数")]
+        [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
         {
             get => _edge.Target.Load.PowerFactor;
@@ -113,6 +122,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("计算电流")]
+        [Category("配电回路参数")]
         public double CalculateCurrent
         {
             get => _edge.Target.Load.CalculateCurrent;

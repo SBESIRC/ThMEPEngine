@@ -18,11 +18,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _meter.ComponentType.GetDescription();
 
         [ReadOnly(true)]
         [DisplayName("极数")]
+        [Category("元器件参数")]
         public string PolesNum
         {
             get => _meter.PolesNum;

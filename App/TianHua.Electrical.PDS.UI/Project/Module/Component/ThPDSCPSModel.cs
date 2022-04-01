@@ -18,14 +18,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
         public string Content => $"{Model}{Combination}-{FrameSpecification}/{CodeLevel}{RatedCurrent}/{PolesNum}{RatedCurrent}";
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _cps.ComponentType.GetDescription();
 
         [DisplayName("型号")]
+        [Category("元器件参数")]
         [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
         public string Model
         {
@@ -37,6 +38,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("壳架规格")]
         [Editor(typeof(ThPDSFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string FrameSpecification
@@ -50,6 +52,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
+        [Category("元器件参数")]
         [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
@@ -61,6 +64,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("额定电流")]
         [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public double RatedCurrent
@@ -73,6 +77,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("组合形式")]
         [Editor(typeof(ThPDSCombinationPropertyEditor), typeof(PropertyEditorBase))]
         public string Combination
@@ -85,6 +90,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("级别代号")]
         [Editor(typeof(ThPDSCodeLevelPropertyEditor), typeof(PropertyEditorBase))]
         public string CodeLevel
