@@ -15,14 +15,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var torlerance = 0.035;
             var lenTor = 20;
-            var ang = line.Angle;
-            if(Math.Abs(ang - Math.PI/4) < torlerance || Math.Abs(ang - Math.PI * 5 / 4) < torlerance)
+            if (line.Length < 180 && line.Length > 400)//线长不合理直接返回false
             {
-                if(Math.Abs(line.Length - 200) < lenTor)
+                return false;
+            }
+            var ang = line.Angle;
+            if(ang > 0)
+            {
+                while(ang > 0)
                 {
-                    return true;
+                    if(Math.Abs(ang - Math.PI / 4) < torlerance)
+                    {
+                        return true;
+                    }
+                    ang -= Math.PI / 2;
                 }
             }
+            else
+            {
+                while (ang < 0)
+                {
+                    if (Math.Abs(ang + Math.PI / 4) < torlerance)
+                    {
+                        return true;
+                    }
+                    ang += Math.PI / 2;
+                }
+            }
+            
             return false;
         }
     }

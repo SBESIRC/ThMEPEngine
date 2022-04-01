@@ -69,9 +69,49 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     {
                         return typeof(ThermalRelayProtectionCircuit);
                     }
+                case CircuitFormOutType.配电计量_上海CT:
+                    {
+                        return typeof(DistributionMetering_ShanghaiCTCircuit);
+                    }
+                case CircuitFormOutType.配电计量_上海直接表:
+                    {
+                        return typeof(DistributionMetering_ShanghaiMTCircuit);
+                    }
+                case CircuitFormOutType.配电计量_CT表在前:
+                    {
+                        return typeof(DistributionMetering_CTInFrontCircuit);
+                    }
+                case CircuitFormOutType.配电计量_直接表在前:
+                    {
+                        return typeof(DistributionMetering_MTInFrontCircuit);
+                    }
+                case CircuitFormOutType.配电计量_CT表在后:
+                    {
+                        return typeof(DistributionMetering_CTInBehindCircuit);
+                    }
+                case CircuitFormOutType.配电计量_直接表在后:
+                    {
+                        return typeof(DistributionMetering_MTInBehindCircuit);
+                    }
+                case CircuitFormOutType.电动机_分立元件:
+                    {
+                        return typeof(Motor_DiscreteComponentsCircuit);
+                    }
+                case CircuitFormOutType.电动机_分立元件星三角启动:
+                    {
+                        return typeof(Motor_DiscreteComponentsStarTriangleStartCircuit);
+                    }
+                case CircuitFormOutType.电动机_CPS:
+                    {
+                        return typeof(Motor_CPSCircuit);
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        return typeof(Motor_CPSStarTriangleStartCircuit);
+                    }
                 default:
                     {
-                        //初步测试，暂时只测试以上四种回路
+                        //暂时只测试以上回路
                         throw new NotSupportedException();
                     }
             }

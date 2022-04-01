@@ -32,8 +32,7 @@ namespace TianHua.Electrical.PDS.Engine
             var entities = new List<Entity>();
             if (IsAnnotationElement(entity) && CheckLayerValid(entity))
             {
-                var clone = entity.Clone() as Entity;
-                entities.Add(clone);
+                entities.Add(entity);
             }
             return entities.Select(o => CreateAnnotationElementData(o)).ToList();
         }

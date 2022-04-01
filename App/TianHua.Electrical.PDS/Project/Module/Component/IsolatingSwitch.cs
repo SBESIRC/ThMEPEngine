@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
@@ -13,10 +10,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class IsolatingSwitch : PDSBaseComponent
     {
         /// <summary>
-        /// 隔离开关
+        /// 构造函数
         /// </summary>
-        /// <param name="calculateCurrent">计算电流</param>
-        /// <param name="polesNum">极数</param>
+        /// <param name="calculateCurrent"></param>
+        /// <param name="polesNum"></param>
+        /// <exception cref="NotSupportedException"></exception>
         public IsolatingSwitch(double calculateCurrent, string polesNum)
         {
             ComponentType = ComponentType.QL;
@@ -25,17 +23,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 throw new NotSupportedException();
             }
-            IsolatingSwitchType = isolator.ModelName;
+            MaxKV = isolator.MaxKV;
             PolesNum = isolator.Poles;
+            Model = isolator.Model;
             RatedCurrent = isolator.Amps.ToString();
         }
 
-        public string Content { get { return $"{IsolatingSwitchType} {RatedCurrent}/{PolesNum}"; } }
-
         /// <summary>
-        /// 隔离开关类型
+        /// 型号
         /// </summary>
-        public string IsolatingSwitchType { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 极数
@@ -46,5 +43,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 额定电流
         /// </summary>
         public string RatedCurrent { get; set; }
+
+        /// <summary>
+        /// 额定电压
+        /// </summary>
+        public string MaxKV { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using DotNetARX;
 using System;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {

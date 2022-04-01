@@ -1,12 +1,12 @@
-﻿using System;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Block;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using System.Linq;
 using System.Collections.Generic;
+using ThMEPWSS.Uitl.ExtensionsNs;
+using System;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -58,7 +58,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     var stPt = stPt1;
                     double floorHeight = sprayIn.FloorHeight;
                     double alarmGap = sprayIn.PipeGap;
-                    int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][j];
+                    if(j==2)
+                    {
+                        ;
+                    }
+                    //int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][j];
+                    int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
                     var pipeLen = floorHeight - 1800;
                     var pt1 = stPt.OffsetY(-height);
                     var spt1 = stPt.OffsetX(1000);
@@ -97,7 +102,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         if (type.Contains("AlarmValve"))
                         {
                             var alarmValve = new AlarmValveSys(stPt, fireAreaIndex, floorHeight);
-
+                            if(spraySystem.BranchPtDic.ContainsKey(pt))
+                            {
+                                ;
+                            }
                             spraySystem.BranchPtDic.Add(pt, alarmValve.EndPt);
                             sprayOut.AlarmValves.Add(alarmValve);//插入湿式报警阀平面
                             foreach (var apt in sprayIn.AlarmTextDic.Keys)
@@ -108,7 +116,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     sprayOut.Texts.Add(text);
                                 }
                             }
-                            spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 5200));
+                            spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 3900));
                             stPt = stPt.OffsetX(alarmGap);
 
                             if (!spraySystem.BranchDic.ContainsKey(pt))
@@ -141,11 +149,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         //    spraySystem.BranchPtDic.Add(pt, stPt.OffsetXY(15000, 1200));
                         //}
                     }
+                    if (stPt.X > spraySystem.MaxOffSetX)
+                    {
+                        spraySystem.MaxOffSetX = stPt.X;
+                    }
                     lastGap += 1000 + 1700 + (alarmValveNums - 1) * alarmGap + 1000 + 1700 + fireAreaNum * 5500 + 1500;
                     lastInsertPt = spt1;
                     pathIndex++;
                 }
-                catch
+                catch(Exception ex)
                 {
                     ;
                 }

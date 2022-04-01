@@ -33,35 +33,36 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\EnumValuesConverter.cs" />
     <Compile Include="Converters\EqualsThenNotVisibeConverter.cs" />
     <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
-    <Compile Include="Editors\ThPDSBreakerFrameSpecificationPropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerModelPropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerPolesNumPropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerRatedCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
-    <Compile Include="Editors\ThPDSBreakerResidualCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCodeLevelPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorWireNumbersPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSCTSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSEnumDescriptionConverter.cs" />
     <Compile Include="Editors\ThPDSEnumPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSFrameSpecificationPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSLoadIdPlainTextPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSModelPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSMTSpecificationPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSPolesPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRangedNumberPropertyEditor.cs" />
-    <Compile Include="Models\Component\ThPDSContactorModel.cs" />
-    <Compile Include="Models\Component\ThPDSIsolatingSwitchModel.cs" />
-    <Compile Include="Models\Component\ThPDSThermalRelayModel.cs" />
+    <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSResidualCurrentPropertyEditor.cs" />
     <Compile Include="Models\DrawUtils.cs" />
-    <Compile Include="Models\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Models\ThPDSBranchBus.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
     <Compile Include="Models\ThPDSComponentGraph.cs" />
     <Compile Include="Models\ThPDSComponentGraphEdge.cs" />
     <Compile Include="Models\ThPDSComponentGraphNode.cs" />
-    <Compile Include="Models\Component\ThPDSComponentModel.cs" />
     <Compile Include="Models\ThPDSContactorControl.cs" />
     <Compile Include="Models\ThPDSControlSlaveContactor.cs" />
     <Compile Include="Models\ThPDSControlSlaveCPS.cs" />
@@ -89,17 +90,22 @@
     <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
+    <Compile Include="Project\Module\Component\ThPDSATSEModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMTSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSCurrentTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSMeterModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSResidualCurrentBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSTransferSwitchBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSUESandboxParameterModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
@@ -111,6 +117,9 @@
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSBatchGenerate.xaml.cs">
+      <DependentUpon>ThPDSBatchGenerate.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserContorls\ThPDSCircuitGraphCanvas.xaml.cs">
       <DependentUpon>ThPDSCircuitGraphCanvas.xaml</DependentUpon>
@@ -139,6 +148,9 @@
     <Compile Include="UserContorls\ThPDSInfoCompare.xaml.cs">
       <DependentUpon>ThPDSInfoCompare.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSLoadDistribution.xaml.cs">
+      <DependentUpon>ThPDSLoadDistribution.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserContorls\ThPDSLowPressurePanel.xaml.cs">
       <DependentUpon>ThPDSLowPressurePanel.xaml</DependentUpon>
     </Compile>
@@ -161,10 +173,15 @@
     <Compile Include="ViewModels\ThPDSCircuitGraphTreeBuilder.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphWpfRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitWpfGraphRenderContext.cs" />
+    <Compile Include="ViewModels\ThPDSConductorUsageModel.cs" />
     <Compile Include="ViewModels\ThPDSDistributionPanelVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ElecSandboxUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSBatchGenerate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -201,6 +218,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserContorls\ThPDSInfoCompare.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSLoadDistribution.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

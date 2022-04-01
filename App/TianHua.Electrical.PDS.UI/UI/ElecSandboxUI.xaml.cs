@@ -22,7 +22,11 @@ namespace TianHua.Electrical.PDS.UI.UI
             InitializeComponent();
             this.Loaded += ElecSandboxUI_Loaded;
         }
-        public static ElecSandboxUI TryGetSingleWindow()
+        public static ElecSandboxUI TryGetCurrentWindow()
+        {
+            return singleton;
+        }
+        public static ElecSandboxUI TryCreateSingleton()
         {
             if (singleton == null)
             {

@@ -21,20 +21,21 @@ namespace TianHua.Electrical.PDS.Service
         private ThCADCoreNTSSpatialIndex LineIndex { get; set; }
         private ThCADCoreNTSSpatialIndex TextIndex { get; set; }
         private ThCADCoreNTSSpatialIndex PointIndex { get; set; }
+        private Dictionary<Entity, ObjectId> TextDic { get; set; }
+        private Dictionary<DBPoint, Tuple<List<string>, ObjectId>> PointDic { get; set; }
 
-        private Dictionary<DBPoint, List<string>> MarkDic { get; set; }
-
-        public ThMarkService(List<Entity> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
-            List<Entity> tchDimension)
+        public ThMarkService(List<ThPDSEntityInfo> markDatas, Dictionary<Entity, ThPDSBlockReferenceData> markBlocks,
+            List<ThPDSEntityInfo> tchDimension)
         {
             var lines = new DBObjectCollection();
-            var texts = new DBObjectCollection();
-            MarkDic = new Dictionary<DBPoint, List<string>>();
-            markDatas.ForEach(entity =>
+            TextDic = new Dictionary<Entity, ObjectId>();
+            PointDic = new Dictionary<DBPoint, Tuple<List<string>, ObjectId>>();
+            markDatas.ForEach(data =>
             {
+                var entity = data.Entity;
                 if (entity is DBText)
                 {
-                    texts.Add(entity);
+                    TextDic.Add(entity, data.SourceObjectId);
                 }
                 else if (entity is Line)
                 {
@@ -84,9 +85,9 @@ namespace TianHua.Electrical.PDS.Service
                     if (continueDo)
                     {
                         var point = ToDbPoint(vertex);
-                        if (!MarkDic.ContainsKey(point))
+                        if (!PointDic.ContainsKey(point))
                         {
-                            MarkDic.Add(point, GetTexts(mLeader.MText));
+                            PointDic.Add(point, Tuple.Create(GetTexts(mLeader.MText), data.SourceObjectId));
                         }
                     }
                 }
@@ -94,7 +95,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     var objs = new DBObjectCollection();
                     entity.Explode(objs);
-                    objs.OfType<DBText>().ForEach(l => texts.Add(l));
+                    objs.OfType<DBText>().ForEach(l => TextDic.Add(l, data.SourceObjectId));
                 }
                 else if (entity is Table table)
                 {
@@ -103,11 +104,12 @@ namespace TianHua.Electrical.PDS.Service
                     var marks = new List<string>();
                     objs.OfType<MText>().ForEach(t => marks.AddRange(GetTexts(t)));
                     var obb = objs.OfType<Line>().ToCollection().GetMinimumRectangle();
-                    obb.Vertices().OfType<Point3d>().ForEach(pt => MarkDic.Add(ToDbPoint(pt), marks));
+                    obb.Vertices().OfType<Point3d>()
+                        .ForEach(pt => PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, data.SourceObjectId)));
                 }
             });
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
-            TextIndex = new ThCADCoreNTSSpatialIndex(texts);
+            TextIndex = new ThCADCoreNTSSpatialIndex(TextDic.Keys.ToCollection());
 
             markBlocks.ForEach(o =>
             {
@@ -117,7 +119,7 @@ namespace TianHua.Electrical.PDS.Service
                     var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
                     obb.Vertices().OfType<Point3d>().ForEach(pt =>
                     {
-                        MarkDic.Add(ToDbPoint(pt), marks);
+                        PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, o.Value.ObjId));
                     });
                 }
                 else if (o.Value.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS))
@@ -127,18 +129,18 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         value.Add(o.Value.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
                     }
-                    MarkDic.Add(ToDbPoint((o.Key as BlockReference).Position), value);
+                    PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(value, o.Value.ObjId));
                 }
                 else
                 {
-                    MarkDic.Add(ToDbPoint((o.Key as BlockReference).Position), GetTexts(o.Value));
+                    PointDic.Add(ToDbPoint((o.Key as BlockReference).Position), Tuple.Create(GetTexts(o.Value), o.Value.ObjId));
                 }
             });
 
             tchDimension.ForEach(o =>
             {
                 var objs = new DBObjectCollection();
-                o.Explode(objs);
+                o.Entity.Explode(objs);
                 var basePoint = objs.OfType<Line>().First().GetCenter();
                 var textList = new List<string>();
                 objs.OfType<Entity>().ForEach(e =>
@@ -150,10 +152,10 @@ namespace TianHua.Electrical.PDS.Service
                         textList.Add(text.OfType<DBText>().First().TextString);
                     }
                 });
-                MarkDic.Add(ToDbPoint(basePoint), textList);
+                PointDic.Add(ToDbPoint(basePoint), Tuple.Create(textList, o.SourceObjectId));
             });
 
-            PointIndex = new ThCADCoreNTSSpatialIndex(MarkDic.Keys.ToCollection());
+            PointIndex = new ThCADCoreNTSSpatialIndex(PointDic.Keys.ToCollection());
         }
 
         /// <summary>
@@ -161,34 +163,42 @@ namespace TianHua.Electrical.PDS.Service
         /// </summary>
         /// <param name="frame"></param>
         /// <returns></returns>
-        public List<string> GetMarks(Polyline frame)
+        public ThPDSTextInfo GetMarks(Polyline frame)
         {
-            var dbTexts = new List<DBText>();
+            var dbTexts = new List<Tuple<DBText, ObjectId>>();
             var result = GetMarks(frame, dbTexts);
-            dbTexts.Distinct().ForEach(o => result.Add(o.TextString));
+            dbTexts.Distinct().ForEach(o =>
+            {
+                result.Texts.Add(o.Item1.TextString);
+                result.ObjectIds.Add(o.Item2);
+            });
             return result;
         }
 
-        public List<List<string>> GetMultiMarks(Polyline frame)
+        public List<ThPDSTextInfo> GetMultiMarks(Polyline frame)
         {
-            var multiList = new List<List<string>>();
-            var dbTexts = new List<DBText>();
+            var multiList = new List<ThPDSTextInfo>();
+            var dbTexts = new List<Tuple<DBText, ObjectId>>();
             var result = GetMarks(frame, dbTexts);
-            if (result.Count > 0)
+            if (result.Texts.Count > 0)
             {
-                result.ForEach(o =>
+                result.Texts.ForEach(o =>
                 {
-                    multiList.Add(new List<string> { o });
+                    multiList.Add(new ThPDSTextInfo
+                    {
+                        Texts = new List<string> { o },
+                        ObjectIds = result.ObjectIds,
+                    });
                 });
             }
 
-            multiList.AddRange(DBTextSort(dbTexts.Distinct().ToList()));
+            multiList.AddRange(DBTextSort(dbTexts));
             return multiList;
         }
 
-        private List<string> GetMarks(Polyline frame, List<DBText> dbTexts)
+        private ThPDSTextInfo GetMarks(Polyline frame, List<Tuple<DBText, ObjectId>> dbTexts)
         {
-            var result = new List<string>();
+            var result = new ThPDSTextInfo();
             var textLeads = new List<Line>();
             SearchMarkLine(frame, textLeads);
             var tolerence = 3.0 * Math.PI / 180.0;
@@ -206,7 +216,7 @@ namespace TianHua.Electrical.PDS.Service
                         var lineAngle = o.Angle % Math.PI;
                         if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
                         {
-                            dbTexts.Add(t);
+                            dbTexts.Add(Tuple.Create(t, TextDic[t]));
                         }
                     });
                 }
@@ -215,7 +225,8 @@ namespace TianHua.Electrical.PDS.Service
                     var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
                     if (pointCollection.Count > 0)
                     {
-                        result.AddRange(MarkDic[pointCollection[0] as DBPoint]);
+                        result.Texts.AddRange((PointDic[pointCollection[0] as DBPoint]).Item1);
+                        result.ObjectIds.Add((PointDic[pointCollection[0] as DBPoint]).Item2);
                     }
                 }
             });
@@ -225,7 +236,8 @@ namespace TianHua.Electrical.PDS.Service
             {
                 points.OfType<DBPoint>().ForEach(p =>
                 {
-                    result.AddRange(MarkDic[p]);
+                    result.Texts.AddRange(PointDic[p].Item1);
+                    result.ObjectIds.Add(PointDic[p].Item2);
                 });
             }
             else
@@ -236,12 +248,14 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     TextCollection.OfType<DBText>().ForEach(o =>
                     {
-                        result.Add(o.TextString);
+                        result.Texts.Add(o.TextString);
+                        result.ObjectIds.Add(TextDic[o]);
                     });
                 }
             }
 
-            return result.Distinct().Select(o => Filter(o)).ToList();
+            result.Texts = Filter(result.Texts);
+            return result;
         }
 
         private void SearchMarkLine(Polyline frame, List<Line> textLeads)
@@ -258,48 +272,70 @@ namespace TianHua.Electrical.PDS.Service
             });
         }
 
-        private List<List<string>> DBTextSort(List<DBText> texts)
+        /// <summary>
+        /// 将同行的文字归到一起
+        /// </summary>
+        /// <param name="texts"></param>
+        /// <returns></returns>
+        private List<ThPDSTextInfo> DBTextSort(List<Tuple<DBText, ObjectId>> texts)
         {
-            var results = new List<ThPDSDBText>();
+            var textCollection = new List<ThPDSDBTextCollection>();
             foreach (var text in texts)
             {
-                var rad = text.Rotation * Math.PI / 180.0;
+                var rad = text.Item1.Rotation * Math.PI / 180.0;
                 var direction = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
-                if (results.Count == 0)
+                if (textCollection.Count == 0)
                 {
-                    var pdsDBText = new ThPDSDBText
+                    var pdsDBText = new ThPDSDBTextCollection
                     {
-                        FirstPosition = text.Position,
+                        FirstPosition = text.Item1.Position,
                         Direction = direction,
-                        Texts = new List<string> { text.TextString },
+                        Texts = new List<Tuple<List<string>, ObjectId>>
+                        {
+                            Tuple.Create(new List<string>{ text.Item1.TextString },text.Item2 ),
+                        },
                     };
-                    results.Add(pdsDBText);
+                    textCollection.Add(pdsDBText);
                 }
                 else
                 {
                     var i = 0;
-                    for (; i < results.Count; i++)
+                    for (; i < textCollection.Count; i++)
                     {
-                        if (Math.Abs((results[i].FirstPosition - text.Position).GetNormal().DotProduct(results[i].Direction)) > 0.995)
+                        if (Math.Abs((textCollection[i].FirstPosition - text.Item1.Position).GetNormal().DotProduct(textCollection[i].Direction)) > 0.995)
                         {
-                            results[i].Texts.Add(text.TextString);
+                            textCollection[i].Texts.Add(Tuple.Create(new List<string> { text.Item1.TextString }, text.Item2));
                             break;
                         }
                     }
-                    if (i == results.Count)
+                    if (i == textCollection.Count)
                     {
-                        var pdsDBText = new ThPDSDBText
+                        var pdsDBText = new ThPDSDBTextCollection
                         {
-                            FirstPosition = text.Position,
+                            FirstPosition = text.Item1.Position,
                             Direction = direction,
-                            Texts = new List<string> { text.TextString },
+                            Texts = new List<Tuple<List<string>, ObjectId>>
+                            {
+                                Tuple.Create(new List<string>{ text.Item1.TextString },text.Item2 ),
+                            },
                         };
-                        results.Add(pdsDBText);
+                        textCollection.Add(pdsDBText);
                     }
                 }
             }
 
-            return results.Select(x => x.Texts).ToList();
+            var result = new List<ThPDSTextInfo>();
+            textCollection.ForEach(text =>
+            {
+                var info = new ThPDSTextInfo();
+                text.Texts.ForEach(o =>
+                {
+                    info.Texts.AddRange(o.Item1);
+                    info.ObjectIds.Add(o.Item2);
+                });
+                result.Add(info);
+            });
+            return result;
         }
 
         private DBPoint ToDbPoint(Point3d point)
@@ -318,9 +354,9 @@ namespace TianHua.Electrical.PDS.Service
             return dic.Select(o => o.Value).ToList();
         }
 
-        private string Filter(string info)
+        private List<string> Filter(List<string> info)
         {
-            return info.Replace(" ", "");
+            return info.Select(o => o.Replace(" ", "")).ToList();
         }
     }
 }

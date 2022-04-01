@@ -1,9 +1,9 @@
-﻿using System;
-using ThCADExtension;
+﻿using ThCADExtension;
 using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -21,27 +21,30 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
-        public string Content => _contactor.Content;
-
+        public string Content => $"{RatedCurrent}/{PolesNum}";
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _contactor.ComponentType.GetDescription();
 
-
         [DisplayName("型号")]
-        public ContactorModel Model
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => (ContactorModel)Enum.Parse(typeof(ContactorModel), _contactor.ContactorType);
+            get => _contactor.Model;
             set
             {
-                _contactor.ContactorType = value.ToString();
+                _contactor.Model = value;
                 OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
         [DisplayName("极数")]
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _contactor.PolesNum;
@@ -49,16 +52,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _contactor.PolesNum = value;
                 OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("额定电流")]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _contactor.RatedCurrent;
             set
             {
                 _contactor.RatedCurrent = value;
+                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
         }

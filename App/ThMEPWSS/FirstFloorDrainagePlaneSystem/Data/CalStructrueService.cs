@@ -376,11 +376,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 vModel.IsEuiqmentPipe = true;
                 if (model.EnumEquipmentType == EnumEquipmentType.toilet)
                 {
-                    vModel.PipeType = VerticalPipeType.SewagePipe;
+                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
                 }
                 else
                 {
-                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
+                    vModel.PipeType = VerticalPipeType.SewagePipe;
                 }
                 resModels.Add(vModel);
             }

@@ -113,40 +113,40 @@ namespace TianHua.Electrical.PDS.Project.Module
         [Description("电缆支架")]
         CR,
     }
-    
+
     /// <summary>
     /// 穿管敷设
     /// </summary>
     public enum Pipelaying
     {
         [Description("无穿管")]
-        None,
+        None = 1,
         [Description("穿管明敷")]
-        E,
+        E = 2,
         [Description("穿管暗敷")]
-        C,
+        C = 3,
         [Description("沿或跨梁（屋架）明敷")]
-        AB,
+        AB = 4,
         [Description("沿或跨柱明敷")]
-        AC,
+        AC = 5,
         [Description("沿吊顶或顶板面明敷")]
-        CE,
+        CE = 6,
         [Description("吊顶内明敷")]
-        SCE,
+        SCE = 7,
         [Description("沿墙面明敷")]
-        WS,
+        WS = 8,
         [Description("沿屋面明敷")]
-        RS,
+        RS = 9,
         [Description("顶板内暗敷")]
-        CC,
+        CC = 10,
         [Description("梁内暗敷")]
-        BC,
+        BC = 11,
         [Description("柱内暗敷")]
-        CLC,
+        CLC = 12,
         [Description("墙内暗敷")]
-        WC,
+        WC = 13,
         [Description("地板或地面下暗敷")]
-        FC,
+        FC = 14,
     }
 
     /// <summary>
@@ -154,22 +154,22 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum PipeMaterial
     {
-        [Description("None")]
-        None,
+        [Description("无管材")]
+        None = 1,
         [Description("热镀锌低压流体输送用焊接钢管")]
-        SC,
+        SC = 2,
         [Description("碳素结构钢电线套管")]
-        MT,
+        MT = 3,
         [Description("套接紧定式钢管")]
-        JDG,
+        JDG = 4,
         [Description("可挠金属电线保护套管")]
-        CP,
+        CP = 5,
         [Description("难燃（材料燃烧性能等级B1）以上硬质塑料套管")]
-        PC,
+        PC = 6,
         [Description("阻燃半硬质塑料套管")]
-        FPC,
+        FPC = 7,
         [Description("塑料波纹套管")]
-        KPC
+        KPC = 8,
     }
 
     /// <summary>
@@ -243,22 +243,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         Specification300,
         [Description("500mA")]
         Specification500,
-    }
-
-    /// <summary>
-    /// 接触器型号
-    /// </summary>
-    public enum ContactorModel
-    {
-        CJ20,
-    }
-
-    /// <summary>
-    /// 热继电器型号
-    /// </summary>
-    public enum ThermalRelayModel
-    {
-        JR20,
     }
 
     /// <summary>

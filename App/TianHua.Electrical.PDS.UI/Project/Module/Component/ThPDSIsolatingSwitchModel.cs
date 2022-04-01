@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.UI.Editors;
+using HandyControl.Controls;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -17,6 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type
         {
@@ -24,17 +27,22 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("型号")]
-        public string IsolatingSwitchType
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => _isolatingSwitch.IsolatingSwitchType;
+            get => _isolatingSwitch.Model;
             set
             {
-                _isolatingSwitch.IsolatingSwitchType = value;
-                OnPropertyChanged(nameof(IsolatingSwitchType));
+                _isolatingSwitch.Model = value;
+                OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
         [DisplayName("极数")]
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _isolatingSwitch.PolesNum;
@@ -42,10 +50,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _isolatingSwitch.PolesNum = value;
                 OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("额定电流")]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _isolatingSwitch.RatedCurrent;
@@ -53,14 +64,18 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _isolatingSwitch.RatedCurrent = value;
                 OnPropertyChanged(nameof(RatedCurrent));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
+        [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
-        public string Content
-        {
-            get => _isolatingSwitch.Content;
-        }
+        [Category("元器件参数")]
+        [DisplayName("额定电压")]
+        public string MaxKV => _isolatingSwitch.MaxKV;
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
     }
 }

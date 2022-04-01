@@ -8,6 +8,7 @@ using Dreambuild.AutoCAD;
 
 using ThMEPEngineCore.Engine;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -35,10 +36,10 @@ namespace TianHua.Electrical.PDS.Engine
     {
         public ThCircuitMarkRecognitionEngine()
         {
-            Results = new DBObjectCollection();
+            Results = new List<ThPDSEntityInfo>();
         }
 
-        public DBObjectCollection Results { get; protected set; }
+        public List<ThPDSEntityInfo> Results { get; protected set; }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -58,13 +59,15 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 if (o is Polyline polyline)
                 {
+                    var polyInfo = new ThPDSEntityInfo(o, true);
                     var lines = new DBObjectCollection();
-                    polyline.Explode(lines);
-                    lines.OfType<Line>().Where(e => e.Length > 1.0).ForEach(e => Results.Add(e));
+                    polyInfo.Entity.Explode(lines);
+                    lines.OfType<Line>().Where(e => e.Length > 1.0)
+                        .ForEach(e => Results.Add(new ThPDSEntityInfo(e, polyInfo)));
                 }
                 else
                 {
-                    Results.Add(o);
+                    Results.Add(new ThPDSEntityInfo(o, true));
                 }
             });
         }

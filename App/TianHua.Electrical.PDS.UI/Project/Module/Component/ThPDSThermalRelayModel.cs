@@ -1,9 +1,9 @@
-﻿using System;
-using ThCADExtension;
+﻿using ThCADExtension;
 using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -21,26 +21,30 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
-        public string Content => _thermalRelay.Content;
+        public string Content => $"{RatedCurrent}A";
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _thermalRelay.ComponentType.GetDescription();
 
         [DisplayName("型号")]
-        public ThermalRelayModel Model
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
+        public string Model
         {
-            get => (ThermalRelayModel)Enum.Parse(typeof(ThermalRelayModel), _thermalRelay.ThermalRelayType);
+            get => _thermalRelay.Model;
             set
             {
-                _thermalRelay.ThermalRelayType = value.ToString();
+                _thermalRelay.Model = value;
                 OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
-        [ReadOnly(true)]
         [DisplayName("极数")]
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _thermalRelay.PolesNum;
@@ -51,14 +55,16 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("电流整定范围")]
+        [Editor(typeof(ThPDSRatedCurrentRangePropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _thermalRelay.RatedCurrent;
             set
             {
                 _thermalRelay.RatedCurrent = value;
+                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
         }

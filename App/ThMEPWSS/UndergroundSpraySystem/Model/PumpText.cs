@@ -14,9 +14,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class PumpText
     {
         public DBObjectCollection DBObjs { get; set; }
-        public PumpText()
+        public DBObjectCollection TextDbObjs { get; set; }
+        public PumpText(DBObjectCollection textDbObjs)
         {
             DBObjs = new DBObjectCollection();
+            TextDbObjs = new DBObjectCollection();
+            foreach (var obj in textDbObjs)
+            {
+                TextDbObjs.Add((DBObject)obj);
+            }
         }
         public void Extract(Database database, SprayIn sprayIn)
         {
@@ -34,7 +40,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                     dbObjs.Cast<Entity>()
-                        .Where(e => IsTCHNote(e))
+                        .Where(e => e.IsTCHText())
                         .ForEach(e => ExplodeTCHNote(e, DBObjs));
                     dbObjs.Cast<Entity>()
                         .Where(e => e is DBText)
@@ -43,8 +49,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         .Where(e => e is BlockReference)
                         .ForEach(e => ExplodeBlockNote(e, DBObjs));
                 }
+                foreach (var obj in TextDbObjs)
+                {
+                    var entity = obj as Entity;
+                    AddObj(entity);
+                }
             }
         }
+
+        private void AddObj(Entity entity)
+        {
+
+            if (entity is DBText dBText)
+            {
+                AddDbText(dBText);
+            }
+            if (entity.IsTCHText())
+            {
+                AddTchText(entity);
+            }
+        }
+
         public List<DBText> GetTexts()
         {
             var dbTexts = new List<DBText>();
@@ -58,6 +83,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                   (layer.Contains("-DIMS") ||
                    layer.Contains("-NOTE") ||
                    layer.Contains("-FRPT-HYDT-DIMS") ||
+                   layer.Contains("-FRPT-SPRL-DIMS") ||
                    layer.Contains("-SHET-PROF")) || 
                    layer.Contains("TWT_TEXT");
         }
@@ -107,7 +133,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 foreach (var db in dbObjs)
                 {
                     var ent = db as Entity;
-                    if(IsTCHNote(ent))
+                    if(ent.IsTCHText())
                     {
                         ExplodeTCHNote(ent, DBObjs);
                     }

@@ -29,7 +29,9 @@ namespace ThMEPElectrical.EarthingGrid.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var engine = new ThDownConductorExtractionEngine();
+            engine.ExtractFromMS(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)

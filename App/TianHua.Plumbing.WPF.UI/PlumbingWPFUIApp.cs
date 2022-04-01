@@ -385,6 +385,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
+        /// 消火栓灭火器调整
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THXHSYH", CommandFlags.Modal)]
+        public void THHydrantLayoutUI()
+        {
+            var ui = new HydrantLayoutUI();
+            AcadApp.ShowModelessWindow(ui);
+        }
+
+
+
+        /// <summary>
         /// 全局参数设置
         /// </summary>
         [CommandMethod("TIANHUACAD", "THMEPOPTIONS", CommandFlags.Modal)]

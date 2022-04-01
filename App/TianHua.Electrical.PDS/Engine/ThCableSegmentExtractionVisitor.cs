@@ -30,13 +30,11 @@ namespace TianHua.Electrical.PDS.Engine
 
         private List<ThRawIfcFlowSegmentData> Handle(Curve curve)
         {
-            var clone = curve.Clone() as Curve;
             return new List<ThRawIfcFlowSegmentData>
             {
                 new ThRawIfcFlowSegmentData()
                 {
-                    Data = clone,
-                    Geometry = clone,
+                    Data = curve,
                 }
             };
         }

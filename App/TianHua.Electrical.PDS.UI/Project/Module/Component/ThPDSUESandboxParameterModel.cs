@@ -1,14 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
+using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {
+        public ThPDSConductorUsageModel[] ConductorUsages { get; } = new ConductorUse[]
+        {
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunk,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionBranchCircuiCables,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionWire,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireDistributionBranchCircuiCables,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireDistributionWire,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionControlCable,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireDistributionControlCable,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireControlSignalWire,
+                PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireControlSignalWire,
+        }.Select(x => new ThPDSConductorUsageModel(x)).ToArray();
+        public ThPDSConductorUsageModel FireDistributionTrunk => ConductorUsages[0];
+        public ThPDSConductorUsageModel FireDistributionBranchCircuiCables => ConductorUsages[1];
+        public ThPDSConductorUsageModel FireDistributionWire => ConductorUsages[2];
+        public ThPDSConductorUsageModel NonFireDistributionBranchCircuiCables => ConductorUsages[3];
+        public ThPDSConductorUsageModel NonFireDistributionWire => ConductorUsages[4];
+        public ThPDSConductorUsageModel FireDistributionControlCable => ConductorUsages[5];
+        public ThPDSConductorUsageModel NonFireDistributionControlCable => ConductorUsages[6];
+        public ThPDSConductorUsageModel FireControlSignalWire => ConductorUsages[7];
+        public ThPDSConductorUsageModel NonFireControlSignalWire => ConductorUsages[8];
         string _DefaultLengthOfMunicipalPowerLine;
         public string DefaultLengthOfMunicipalPowerLine
         {
@@ -107,29 +132,27 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        string _DefaultConductorMaterial;
-        public string DefaultConductorMaterial
+        public ConductorMaterial DefaultConductorMaterial
         {
-            get => _DefaultConductorMaterial;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DefaultConductorMaterial;
             set
             {
-                if (value != _DefaultConductorMaterial)
+                if (value != DefaultConductorMaterial)
                 {
-                    _DefaultConductorMaterial = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DefaultConductorMaterial = value;
                     OnPropertyChanged(nameof(DefaultConductorMaterial));
                 }
             }
         }
 
-        string _FirePowerDistributionTrunkLineAndBranchTrunkLine;
-        public string FirePowerDistributionTrunkLineAndBranchTrunkLine
+        public MaterialStructure FirePowerDistributionTrunkLineAndBranchTrunkLine
         {
-            get => _FirePowerDistributionTrunkLineAndBranchTrunkLine;
+            get =>FireDistributionTrunk.OuterSheathMaterial;
             set
             {
-                if (value != _FirePowerDistributionTrunkLineAndBranchTrunkLine)
+                if (value != FirePowerDistributionTrunkLineAndBranchTrunkLine)
                 {
-                    _FirePowerDistributionTrunkLineAndBranchTrunkLine = value;
+                    FireDistributionTrunk.OuterSheathMaterial= value;
                     OnPropertyChanged(nameof(FirePowerDistributionTrunkLineAndBranchTrunkLine));
                 }
             }
@@ -205,71 +228,67 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        string _GeneralRequirements;
-        public string GeneralRequirements
+        public PipeMaterial GeneralRequirements
         {
-            get => _GeneralRequirements;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UndergroundMaterial;
             set
             {
-                if (value != _GeneralRequirements)
+                if (value != GeneralRequirements)
                 {
-                    _GeneralRequirements = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UndergroundMaterial = value;
                     OnPropertyChanged(nameof(GeneralRequirements));
                 }
             }
         }
 
-        string _FireFightingLineLess;
-        public string FireFightingLineLess
+        public PipeMaterial FireFightingLineLess
         {
-            get => _FireFightingLineLess;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireOnTheGroundSmallDiameterMaterial;
             set
             {
-                if (value != _FireFightingLineLess)
+                if (value != FireFightingLineLess)
                 {
-                    _FireFightingLineLess = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireOnTheGroundSmallDiameterMaterial = value;
                     OnPropertyChanged(nameof(FireFightingLineLess));
                 }
             }
         }
 
-        string _FireFightingLineMore;
-        public string FireFightingLineMore
+
+        public PipeMaterial FireFightingLineMore
         {
-            get => _FireFightingLineMore;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireOnTheGroundLargeDiameterMaterial;
             set
             {
-                if (value != _FireFightingLineMore)
+                if (value != FireFightingLineMore)
                 {
-                    _FireFightingLineMore = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireOnTheGroundLargeDiameterMaterial = value;
                     OnPropertyChanged(nameof(FireFightingLineMore));
                 }
             }
         }
 
-        string _NonFireFightingLineLess;
-        public string NonFireFightingLineLess
+        public PipeMaterial NonFireFightingLineLess
         {
-            get => _NonFireFightingLineLess;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireOnTheGroundSmallDiameterMaterial;
             set
             {
-                if (value != _NonFireFightingLineLess)
+                if (value != NonFireFightingLineLess)
                 {
-                    _NonFireFightingLineLess = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireOnTheGroundSmallDiameterMaterial = value;
                     OnPropertyChanged(nameof(NonFireFightingLineLess));
                 }
             }
         }
 
-        string _NonFireFightingLineMore;
-        public string NonFireFightingLineMore
+        public PipeMaterial NonFireFightingLineMore
         {
-            get => _NonFireFightingLineMore;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireOnTheGroundLargeDiameterMaterial;
             set
             {
-                if (value != _NonFireFightingLineMore)
+                if (value != NonFireFightingLineMore)
                 {
-                    _NonFireFightingLineMore = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireOnTheGroundLargeDiameterMaterial = value;
                     OnPropertyChanged(nameof(NonFireFightingLineMore));
                 }
             }
@@ -288,71 +307,66 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-        string _SelectionOfMainCircuitOfMotor;
-        public string SelectionOfMainCircuitOfMotor
+        public MotorUIChoise SelectionOfMainCircuitOfMotor
         {
-            get => _SelectionOfMainCircuitOfMotor;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MotorUIChoise;
             set
             {
-                if (value != _SelectionOfMainCircuitOfMotor)
+                if (value != SelectionOfMainCircuitOfMotor)
                 {
-                    _SelectionOfMainCircuitOfMotor = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MotorUIChoise = value;
                     OnPropertyChanged(nameof(SelectionOfMainCircuitOfMotor));
                 }
             }
         }
 
-        string _FireMotorPowerLess;
-        public string FireMotorPowerLess
+        public double FireMotorPowerLess
         {
-            get => _FireMotorPowerLess;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireMotorPower;
             set
             {
-                if (value != _FireMotorPowerLess)
+                if (value != FireMotorPowerLess)
                 {
-                    _FireMotorPowerLess = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireMotorPower = value;
                     OnPropertyChanged(nameof(FireMotorPowerLess));
                 }
             }
         }
 
-        string _FireMotorPowerMore;
-        public string FireMotorPowerMore
+        public FireStartType FireMotorPowerMore
         {
-            get => _FireMotorPowerMore;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireStartType;
             set
             {
-                if (value != _FireMotorPowerMore)
+                if (value != FireMotorPowerMore)
                 {
-                    _FireMotorPowerMore = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireStartType = value;
                     OnPropertyChanged(nameof(FireMotorPowerMore));
                 }
             }
         }
 
-        string _CommonMotorPowerLess;
-        public string CommonMotorPowerLess
+        public double CommonMotorPowerLess
         {
-            get => _CommonMotorPowerLess;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NormalMotorPower;
             set
             {
-                if (value != _CommonMotorPowerLess)
+                if (value != CommonMotorPowerLess)
                 {
-                    _CommonMotorPowerLess = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NormalMotorPower = value;
                     OnPropertyChanged(nameof(CommonMotorPowerLess));
                 }
             }
         }
 
-        string _CommonMotorPowerMore;
-        public string CommonMotorPowerMore
+        public FireStartType CommonMotorPowerMore
         {
-            get => _CommonMotorPowerMore;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NormalStartType;
             set
             {
-                if (value != _CommonMotorPowerMore)
+                if (value != CommonMotorPowerMore)
                 {
-                    _CommonMotorPowerMore = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NormalStartType = value;
                     OnPropertyChanged(nameof(CommonMotorPowerMore));
                 }
             }

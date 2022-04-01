@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 电动机-分立元件 回路
     /// </summary>
+    [CircuitGroup(CircuitGroup.Group2)]
     public class Motor_DiscreteComponentsCircuit : PDSBaseOutCircuit
     {
         public Motor_DiscreteComponentsCircuit()
@@ -15,7 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// <summary>
         /// 坑位1: 断路器
         /// </summary>
-        public Breaker breaker { get; set; }
+        public BreakerBaseComponent breaker { get; set; }
 
         /// <summary>
         /// 坑位2：接触器

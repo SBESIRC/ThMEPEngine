@@ -311,8 +311,8 @@ namespace ThMEPWSS
         }
 
 
-        [CommandMethod("TIANHUACAD", "CleanDebugDraw", CommandFlags.Modal)]
-        public void ThCleanDrainageDebugDraw()
+        [CommandMethod("TIANHUACAD", "ThCleanDebugDraw", CommandFlags.Modal)]
+        public void ThCleanDebugDraw()
         {
 
             var frame = new Polyline();
@@ -336,7 +336,7 @@ namespace ThMEPWSS
 
         }
 
-        [CommandMethod("TIANHUACAD", "CleanDYFinalDraw", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "ThCleanDYFinalDraw", CommandFlags.Modal)]
         public void ThCleanDYFinalDraw()
         {
 

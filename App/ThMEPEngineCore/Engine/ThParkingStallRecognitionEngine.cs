@@ -17,45 +17,52 @@ namespace ThMEPEngineCore.Engine
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
-
+        public ThParkingStallVisitorBase ParkingStallVisitor { get; set; }
         public override void Extract(Database database)
         {
-            var visitor = new ThParkingStallExtractionVisitor()
+            if (ParkingStallVisitor == null) 
             {
-                LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
-            };
+                ParkingStallVisitor = new ThLightingParkingStallVisitor()
+                {
+                    LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
+                };
+            }
+            
             if (CheckQualifiedLayer != null)
             {
-                visitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
+                ParkingStallVisitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
             }
             if (CheckQualifiedBlockName != null)
             {
-                visitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
+                ParkingStallVisitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
             }
             var extractor = new ThSpatialElementExtractor();
-            extractor.Accept(visitor);
+            extractor.Accept(ParkingStallVisitor);
             extractor.Extract(database);
-            Results.AddRange(visitor.Results);
+            Results.AddRange(ParkingStallVisitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThParkingStallExtractionVisitor()
+            if (ParkingStallVisitor == null)
             {
-                LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
-            };
+                ParkingStallVisitor = new ThLightingParkingStallVisitor()
+                {
+                    LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
+                };
+            }
             if (CheckQualifiedLayer != null)
             {
-                visitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
+                ParkingStallVisitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
             }
             if (CheckQualifiedBlockName != null)
             {
-                visitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
+                ParkingStallVisitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
             }
             var extractor = new ThSpatialElementExtractor();
-            extractor.Accept(visitor);
+            extractor.Accept(ParkingStallVisitor);
             extractor.ExtractFromMS(database);
-            Results.AddRange(visitor.Results);
+            Results.AddRange(ParkingStallVisitor.Results);
         }
 
         public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
@@ -67,13 +74,14 @@ namespace ThMEPEngineCore.Engine
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
-
+        public ThParkingStallVisitorBase ParkingStallVisitor { get; set; }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             var engine = new ThParkingStallExtractionEngine()
             {
                 CheckQualifiedLayer = this.CheckQualifiedLayer,
                 CheckQualifiedBlockName = this.CheckQualifiedBlockName,
+                ParkingStallVisitor = ParkingStallVisitor,
             };
             engine.Extract(database);
             Recognize(engine.Results, polygon);
@@ -84,6 +92,7 @@ namespace ThMEPEngineCore.Engine
             {
                 CheckQualifiedLayer = this.CheckQualifiedLayer,
                 CheckQualifiedBlockName = this.CheckQualifiedBlockName,
+                ParkingStallVisitor = ParkingStallVisitor,
             };
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);

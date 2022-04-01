@@ -10,12 +10,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 型号
         /// </summary>
-        public BreakerModel BreakerType { get; set; }
+        public BreakerModel Model { get; set; }
 
         /// <summary>
         /// 壳架规格
         /// </summary>
-        public string FrameSpecifications { get; set; }
+        public string FrameSpecification { get; set; }
 
         /// <summary>
         /// 极数

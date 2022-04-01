@@ -7,12 +7,17 @@ using ThCADExtension;
 
 namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 {
+    public enum ConductorMaterial
+    {
+        铜,
+    }
     public class ProjectGlobalConfiguration
     {
         #region 导体及敷设管材选型
         //默认导体材料
         //理论上要用枚举，暂时不知道是什么用，暂时用string代替
-        public string DefaultConductorMaterial = "铜";
+        //public string DefaultConductorMaterial = "铜";
+        public ConductorMaterial DefaultConductorMaterial = ConductorMaterial.铜;
 
         //消防配电干线及分支干线采用""矿物绝缘电力
         //对应ui的第二行，Combox只显示 FireDistributionTrunk.OuterSheathMaterial
@@ -77,16 +82,29 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         #endregion
 
         #region 常用用电设备供电
-        public string MotorUIChoise = "分立元件";//UI端的Combox要做成分立元件和CPS，两种模式
+        //public string MotorUIChoise = "分立元件";//UI端的Combox要做成分立元件和CPS，两种模式
+        public MotorUIChoise MotorUIChoise = MotorUIChoise.分立元件;//UI端的Combox要做成分立元件和CPS，两种模式
         //消防电动机
         public double FireMotorPower = 45;//kw
-        public string FireStartType = "星三角启动";//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
+        //public string FireStartType = "星三角启动";//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
+        public FireStartType FireStartType = FireStartType.星三角启动;//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
         //普通电动机
         public double NormalMotorPower = 45;//kw
-        public string NormalStartType = "星三角启动";//同上
+        //public string NormalStartType = "星三角启动";//同上
+        public FireStartType NormalStartType = FireStartType.星三角启动;//同上
         #endregion
     }
-
+    public enum FireStartType
+    {
+        星三角启动,
+        软启动器启动,
+        变频器启动,
+    }
+    public enum MotorUIChoise
+    {
+        分立元件,
+        CPS,
+    }
     /// <summary>
     /// 导体用途
     /// </summary>

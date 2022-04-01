@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 电动机-分立元件星三角启动 回路
     /// </summary>
+    [CircuitGroup(CircuitGroup.Group2)]
     public class Motor_DiscreteComponentsStarTriangleStartCircuit : PDSBaseOutCircuit
     {
         public Motor_DiscreteComponentsStarTriangleStartCircuit()

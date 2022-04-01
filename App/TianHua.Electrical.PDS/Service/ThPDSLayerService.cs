@@ -55,9 +55,22 @@ namespace TianHua.Electrical.PDS.Service
             };
         }
 
+        /// <summary>
+        /// 配电箱框线图层
+        /// </summary>
+        /// <returns></returns>
         public static string DistBoxFrameLayer()
         {
             return "E-REQU-WALL";
+        }
+
+        /// <summary>
+        /// 表格框线图层
+        /// </summary>
+        /// <returns></returns>
+        public static string TableFrameLayer()
+        {
+            return "E-UNIV-DIAG";
         }
 
         public static void SelectCircuitType(ThPDSCircuit circuit, ThPDSLoad load, string layer, bool needAssign)

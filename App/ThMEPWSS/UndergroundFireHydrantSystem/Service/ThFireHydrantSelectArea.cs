@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return ptCollect;
         }
 
-        public static Point3dCollection CreateArea(Line line)
+        public static Point3dCollection CreateArea(Line line, double len = 200)
         {
             var pt1 = new Point3d();
             var pt2 = new Point3d();
@@ -31,12 +31,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 //线是竖着的
                 if (line.StartPoint.Y < line.EndPoint.Y)//起点在上面
                 {
-                    pt1 = new Point3d(line.StartPoint.X - 100, line.StartPoint.Y, 0);
+                    pt1 = new Point3d(line.StartPoint.X - len, line.StartPoint.Y, 0);
                     pt2 = line.EndPoint;
                 }
                 else//起点在下面
                 {
-                    pt1 = new Point3d(line.EndPoint.X - 100, line.EndPoint.Y, 0);
+                    pt1 = new Point3d(line.EndPoint.X - len, line.EndPoint.Y, 0);
                     pt2 = line.StartPoint;
                 }
             }
@@ -44,12 +44,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 if (line.StartPoint.X < line.EndPoint.X)//起点在左面
                 {
-                    pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y + 100, 0);
+                    pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y + len, 0);
                     pt2 = line.EndPoint;
                 }
                 else//起点在右面
                 {
-                    pt1 = new Point3d(line.EndPoint.X, line.EndPoint.Y + 100, 0);
+                    pt1 = new Point3d(line.EndPoint.X, line.EndPoint.Y + len, 0);
                     pt2 = line.StartPoint;
                 }
             }

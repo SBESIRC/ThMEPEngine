@@ -41,14 +41,26 @@ namespace ThMEPElectrical.EarthingGrid.Engine
                             visitor.DoExtract(elements, e, Matrix3d.Identity);
                         }
                     });
-                    Results.AddRange(elements);
+                    Results=elements;
                 }
             }
         }
 
         public override void ExtractFromMS(Database database)
         {
-            throw new NotImplementedException();
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var visitor = new ThDownConductorExtractionVisitor();
+                var elements = new List<ThRawIfcDistributionElementData>();
+                acadDatabase.ModelSpace.OfType<BlockReference>().ForEach(b =>
+                {
+                    if (visitor.CheckLayerValid(b) && visitor.IsDistributionElement(b))
+                    {
+                        visitor.DoExtract(elements, b, Matrix3d.Identity);
+                    }
+                });
+                Results=elements;
+            }
         }
     }
 }

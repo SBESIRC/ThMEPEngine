@@ -41,21 +41,25 @@
             <Separator Width="1"  HorizontalAlignment="Center"/>
             <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
         </StatusBar>
-        <Grid Width="950" Height="700">
-            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,117">
+        <Grid Width="994" Height="700">
+            <Border BorderBrush="Black" BorderThickness="1"  Background="White" Margin="1,0,267,0">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <Canvas Background="Transparent" x:Name="canvas" Style="{x:Null}" Width="10000" Height="10000"></Canvas>
                 </ScrollViewer>
             </Border>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,0,10,442">
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,0,0,442">
                 <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                            <TextBlock Text="{Binding Name}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                <TextBlock Text="{Binding Name}"/>
+                            </StackPanel>
                         </HierarchicalDataTemplate>
                     </TreeView.ItemTemplate>
                     <TreeView.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="批量生成" Command="{Binding BatchGenerate}"></MenuItem>
                             <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
                             <MenuItem Header="电气火灾监控"  IsCheckable="True" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}"/>
                             <MenuItem Header="浪涌保护器">
@@ -69,14 +73,9 @@
                     </TreeView.ContextMenu>
                 </TreeView>
             </Border>
-            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="688,263,10,117">
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,0">
                 <hc:PropertyGrid x:Name="propertyGrid" />
             </Border>
-            <TextBox x:Name="tbxConsole" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Style="{x:Null}" Margin="6,588,225,65"></TextBox>
-            <Button Click="btnBalance" Style="{x:Null}" Margin="725,588,121,92">平衡相序</Button>
-            <Button Click="btnSelectFast" Style="{x:Null}" Margin="834,588,13,92">快速选型</Button>
-            <Button Click="btnGenMulti" Style="{x:Null}" Margin="725,611,119,69">批量生成</Button>
-            <Button x:Name="btn" Click="btnGenSingle" Style="{x:Null}" Margin="834,612,10,68">单独生成</Button>
         </Grid>
     </DockPanel>
 </UserControl>

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
@@ -21,22 +18,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             ComponentType = ComponentType.QAC;
             var contactor = ContactorConfiguration.contactorInfos.FirstOrDefault(o => o.Poles == polesNum && o.Amps > calculateCurrent);
-            if(contactor.IsNull())
+            if (contactor.IsNull())
             {
                 throw new NotSupportedException();
             }
-            ContactorType = contactor.ModelName;
+            Model = contactor.Model;
             PolesNum = contactor.Poles;
             RatedCurrent = contactor.Amps.ToString();
         }
 
-        public string Content { get { return $"{ContactorType} {RatedCurrent}/{PolesNum}"; } }
-
-
         /// <summary>
-        /// 接触器类型
+        /// 模型
         /// </summary>
-        public string ContactorType { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 极数

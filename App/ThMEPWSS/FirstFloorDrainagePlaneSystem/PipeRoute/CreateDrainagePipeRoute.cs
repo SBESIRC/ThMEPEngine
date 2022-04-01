@@ -27,7 +27,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double lineWieght = 3;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
-            List<Curve> grids, List<Polyline> _outUserPoly, ParamSettingViewModel _paramSetting)
+            List<Curve> grids, List<Polyline> _outUserPoly, List<Polyline> _rooms, ParamSettingViewModel _paramSetting)
         {
             frame = polyline;
             mainSewagePipes = sewagePolys;
@@ -36,6 +36,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             wallPolys = walls;
             gridLines = grids;
             outUserPoly = _outUserPoly;
+            rooms = _rooms;
             paramSetting = _paramSetting;
         }
 
@@ -46,17 +47,59 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         public List<RouteModel> Routing()
         {
             var resRoutes = new List<RouteModel>();
-            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var holeConnectLines = new List<Polyline>();
-            var gridInfo = ClassifyGridInfo();
-            var connecLines = new List<Line>(sewageLines);
-            connecLines.AddRange(rainLines);
-
             RoomPolyService roomPolyService = new RoomPolyService();
             var roomDeep = roomPolyService.GetRoomDeep(rooms, outUserPoly);
 
-            var connectPipes = OrderPipeConnect(connecLines);
+            HandleConfluenceService handleConfluenceService = new HandleConfluenceService(paramSetting.SewageWasteWater, verticalPipes, roomDeep);
+            handleConfluenceService.GetMainPolyVerticalPipe();
+            foreach (var pipeTuple in handleConfluenceService.pipeTuples)
+            {
+                var mainPipes = new List<VerticalPipeModel>() { pipeTuple.Item1 };
+                mainPipes.Add(pipeTuple.Item2);
+                mainPipes.AddRange(pipeTuple.Item5);
+                mainPipes = mainPipes.Where(x => x != null).ToList();
+                var routing = RoutingMainPipe(mainPipes);
+                ReprocessingPipe reprocessingPipe = new ReprocessingPipe(routing, outUserPoly);     //后处理间距
+                routing = reprocessingPipe.Reprocessing();
+
+                if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Confluence)
+                {
+                    var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
+                    otherPipes.AddRange(pipeTuple.Item4);
+                    var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
+                }
+                else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
+                {
+                    var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
+
+                    var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
+                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                }
+                resRoutes.AddRange(routing);
+            }
+
+           
+            return resRoutes;
+        }
+
+        /// <summary>
+        /// 连接主管（连接污水、废水主管和立管）
+        /// </summary>
+        /// <param name="mainPipes"></param>
+        /// <returns></returns>
+        private List<RouteModel> RoutingMainPipe(List<VerticalPipeModel> mainPipes)
+        {
+            var resRoutes = new List<RouteModel>();
+            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var connecLines = new List<Line>(sewageLines);
+            connecLines.AddRange(rainLines);
+            var gridInfo = ClassifyGridInfo();
+            var holeConnectLines = new List<Polyline>();
+
+            var connectPipes = OrderPipeConnect(connecLines, mainPipes);
             foreach (var pipe in connectPipes)
             {
                 var allLines = sewageLines;
@@ -87,8 +130,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
-            ReprocessingPipe reprocessingPipe = new ReprocessingPipe(resRoutes, outUserPoly);
-            resRoutes = reprocessingPipe.Reprocessing();
             return resRoutes;
         }
 
@@ -132,7 +173,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="allLines"></param>
         /// <returns></returns>
-        private List<VerticalPipeModel> OrderPipeConnect(List<Line> allLines)
+        private List<VerticalPipeModel> OrderPipeConnect(List<Line> allLines, List<VerticalPipeModel> mainPipes)
         {
             var longLine = allLines.OrderByDescending(x => x.Length).FirstOrDefault();
             if (longLine != null)
@@ -144,7 +185,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix.Inverse())).ToList();
                     double minX = polyPts.OrderBy(x => x.X).First().X;
                     double maxX = polyPts.OrderByDescending(x => x.X).First().X;
-                    var orderPipeDic = verticalPipes.ToDictionary(x => x, y => y.Position.TransformBy(matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
+                    var orderPipeDic = mainPipes.ToDictionary(x => x, y => y.Position.TransformBy(matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
                     var indexX = minX + 200;
                     var leftPipes = new Dictionary<VerticalPipeModel, Point3d>();
                     var rightPipes = new Dictionary<VerticalPipeModel, Point3d>();
@@ -168,7 +209,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
-            return verticalPipes;
+            return mainPipes;
         }
 
         /// <summary>

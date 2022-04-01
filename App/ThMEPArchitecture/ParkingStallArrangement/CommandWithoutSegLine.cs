@@ -247,10 +247,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars,ref Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
                 var partitionpro_final = new ParkingPartitionPro();
                 partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
+                partitionpro_final.OutputLanes = Lanes;
                 partitionpro_final.Display();
             }
             layoutPara.Set(solution.Genome);

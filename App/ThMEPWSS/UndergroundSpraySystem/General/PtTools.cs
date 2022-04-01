@@ -3,8 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
@@ -16,6 +14,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
         {
             double tolerance = 100;
+            if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
             if(objs.Count != 2)
             {
                 //不是两根线，不必进行连接
@@ -105,18 +104,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             return new Line();
         }
 
-        public static Point3d GetClosestTermPt(this Point3d pt, Line line)
-        {
-            if(pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint))
-            {
-                return line.StartPoint;
-            }
-            else
-            {
-                return line.EndPoint;
-            }
-        }
-
         public static Point3d GetMidPt(Point3d pt1, Point3d pt2)
         {
             double x = (pt1.X + pt2.X) / 2;
@@ -124,23 +111,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             return new Point3d(x, y, 0);
         }
 
-        public static Point3d OffsetX(this Point3d pt, double x)
-        {
-            return new Point3d(pt.X + x, pt.Y, 0);
-        }
-
         public static Point3d OffsetXReverse(this Point3d pt, double x)
         {
             return new Point3d(pt.X - x, pt.Y, 0);
         }
-        public static Point3d OffsetY(this Point3d pt, double y)
-        {
-            return new Point3d(pt.X, pt.Y + y, 0);
-        }
-        public static Point3d OffsetXY(this Point3d pt, double x, double y)
-        {
-            return new Point3d(pt.X + x, pt.Y + y, 0);
-        }
+
+
         public static Point3d OffsetXReverseY(this Point3d pt, double x, double y)
         {
             return new Point3d(pt.X - x, pt.Y + y, 0);

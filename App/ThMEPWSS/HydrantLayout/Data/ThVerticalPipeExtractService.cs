@@ -19,11 +19,14 @@ namespace ThMEPWSS.HydrantLayout.Data
     public class ThVerticalPipeExtractService
     {
         //---input
+        public List<string> LayerFilter { get; set; } = new List<string>();
+        public List<double> Radius { get; set; } = new List<double>();
+
         //public List<string> LayerName { get; set; } = new List<string>();
         //public ThMEPOriginTransformer Transformer { get; set; }
         //---output
         public List<ThIfcVirticalPipe> VerticalPipe { get; protected set; }
-        private List<string> LayerFilter;
+ 
         public ThVerticalPipeExtractService()
         {
             VerticalPipe = new List<ThIfcVirticalPipe>();
@@ -71,14 +74,14 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         private List<ThIfcVirticalPipe> ExtractCVPipe(Point3dCollection pts)
         {
-            var radiusList = new List<double>() { 100 / 2, 150 / 2 };
+         //   var radiusList = new List<double>() { 100 / 2, 150 / 2 };
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var cPipeRecognize = new ThCircleVPipeRecognitionEngine()
                 {
                     LayerFilter = LayerFilter,
-                    Radius = radiusList,
+                    Radius = Radius,
                 };
                 cPipeRecognize.RecognizeMS(acadDatabase.Database, pts);
                 var cResult = cPipeRecognize.Elements.OfType<ThIfcVirticalPipe>().ToList();

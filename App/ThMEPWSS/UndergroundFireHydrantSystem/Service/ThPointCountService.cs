@@ -18,7 +18,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
         public Point3dEx(Point3d pt, double tol = 1)
         {
-            _pt = pt;
+            _pt = new Point3d(pt.X,pt.Y,0);
             Tolerance = tol;
         }
 

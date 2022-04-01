@@ -1,12 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
+using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
+using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
+
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
 {
@@ -50,10 +51,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         {
             if (!leadLineDic.ContainsKey(l1))
             {
-                var ptls = new List<Line>
-                {
-                    l2
-                };
+                var ptls = new List<Line> { l2 };
                 leadLineDic.Add(l1, ptls);
             }
             else
@@ -85,14 +83,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 var pt1 = new Point3dEx(line.StartPoint);
                 var pt2 = new Point3dEx(line.EndPoint);
-                if(pt1._pt.DistanceTo(pt2._pt) <= 1)
+
+                if (pt1._pt.DistanceTo(pt2._pt) <= 1)
                 {
                     continue;
-                }
-                var tpt = new Point3d(1688488.94475489,803281.067637163, 0);
-                if (pt1._pt.DistanceTo(tpt) < 1 || pt2._pt.DistanceTo(tpt) < 1)
-                {
-                    ;
                 }
                 AddPtDicItem(sprayIn, pt1, pt2);
             }
@@ -101,56 +95,83 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         public static void CreatePtDic(SprayIn sprayIn)
         {
             double maxDist = 1000;
-            double minDist = 100;
+            double minDist = 400;
             var ptOffsetDic = new Dictionary<Point3dEx, Point3d>();
-            foreach(var pt in sprayIn.PtDic.Keys)
+            foreach(var pt in sprayIn.Verticals)
             {
-                if(pt._pt.DistanceTo(new Point3d(18294056.2876, 21162391.4571, 0)) < 10)
+                if(ptOffsetDic.ContainsKey(pt))
                 {
-
+                    continue;
                 }
-                if (pt._pt.DistanceTo(new Point3d(18294024.7330, 19662352.8282, 0)) < 10)
-                {
-
-                }
-                
                 var point = pt._pt;
                 var f1 = pt._pt.GetFloor(sprayIn.FloorRectDic);
-                if(f1.Equals(""))
+                if (f1.Equals(""))
                 {
                     continue;
                 }
                 var jizhunPt = sprayIn.FloorPtDic[f1];
                 var offsetPt = new Point3d(point.X - jizhunPt.X, point.Y - jizhunPt.Y, 0);
                 ptOffsetDic.Add(pt, offsetPt);
-                
             }
             var usedPt = new List<Point3dEx>();
             foreach(var pt1 in ptOffsetDic.Keys)
             {
-                if(usedPt.Contains(pt1))
+                if(pt1._pt.DistanceTo(new Point3d(56146.8942, -697632.8504, 0))<10)
                 {
-                    continue;
+                    ;
                 }
-                foreach(var pt2 in ptOffsetDic.Keys)
+                if (pt1._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
                 {
-                    if(usedPt.Contains(pt2))
+                    ;
+                }
+                if (usedPt.Contains(pt1)) continue;
+                
+                if (!sprayIn.PtTextDic.ContainsKey(pt1)) continue;
+                
+                var str1 = sprayIn.PtTextDic[pt1].First();
+                foreach (var pt2 in ptOffsetDic.Keys)
+                {
+                    if (pt2._pt.DistanceTo(new Point3d(1016854.2, 2754896.8, 0)) < 10)
                     {
-                        continue;
+                        ;
                     }
-                    if(pt1._pt.DistanceTo(pt2._pt) > maxDist && ptOffsetDic[pt1].DistanceTo(ptOffsetDic[pt2]) < minDist)
+                    if (pt2._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
+                    {
+                        ;
+                    }
+                    if (usedPt.Contains(pt2)) continue;
+                    if (!sprayIn.PtTextDic.ContainsKey(pt2)) continue;
+                    
+                    var str2 = sprayIn.PtTextDic[pt2].First();
+                    //两点case1
+                    if (  pt1._pt.DistanceTo(pt2._pt) > maxDist 
+                       && ptOffsetDic[pt1].DistanceTo(ptOffsetDic[pt2]) < minDist
+                       && str1.Equals(str2))
                     {
                         AddPtDicItem(sprayIn, pt1, pt2);
 
                         sprayIn.ThroughPt.AddItem(pt1);
                         sprayIn.ThroughPt.AddItem(pt2);
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        {
+                            Draw.ThroughPt(currentDb,pt1);
+                            Draw.ThroughPt(currentDb,pt2);
+                        }
+                
                         usedPt.Add(pt1);
                         usedPt.Add(pt2);
+
+                        continue;
                     }
                 }
             }
-            ;
-            ;
+            foreach(var pt in sprayIn.ThroughPt)
+            {
+                if(sprayIn.TermPtDic.ContainsKey(pt))
+                {
+                    sprayIn.TermPtDic[pt].Type = 2;
+                }
+            }
         }
 
         public static void CreatePtTypeDic(List<Point3dEx> pts, string ptType, SprayIn sprayIn)
@@ -168,6 +189,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 sprayIn.FlowBlocks.Add((DBObject)objs);
             }
         }
+
         public static void CreatePtTypeDic1(List<Point3d> pts, string ptType, ref SprayIn sprayIn)
         {
             var restPts = new List<Point3d>();
@@ -200,7 +222,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-
         public static void SetPointType(SprayIn sprayIn, List<List<Point3dEx>> rstPaths, List<Point3dEx> extraNodes)
         {
             foreach (var ptls in rstPaths)
@@ -231,7 +252,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                                 typeFlag = true;
                                 break;
                             }
-                            ;
                             foreach(var p2 in sprayIn.PtDic[p])
                             {
                                 if(ptls.Contains(p2))
@@ -277,5 +297,72 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 }
             }
         }
+
+        public static void SetPointType(SprayIn sprayIn, List<Point3dEx> ptls)
+        {
+            {
+                for (int i = 0; i < ptls.Count; i++)
+                {
+                    var pt = ptls[i];
+                    if (sprayIn.PtDic[pt].Count == 1)
+                    {
+                        continue;
+                    }
+                    bool typeFlag = false;
+                    if (sprayIn.PtDic[pt].Count == 3)//3个邻接点： 次环点SubLoop  或  支路点 Branch 或 AlarmValve
+                    {
+                        if (sprayIn.PtTypeDic[pt].Contains("AlarmValve"))
+                        {
+                            continue;
+                        }
+                        foreach (var p in sprayIn.PtDic[pt])
+                        {
+                            if (ptls.Contains(p))
+                            {
+                                continue;
+                            }
+                            if (sprayIn.PtTypeDic[p].Contains("PressureValve"))
+                            {
+                                sprayIn.PtTypeDic.AddType(pt, "SubLoop");
+                                typeFlag = true;
+                                break;
+                            }
+                            foreach (var p2 in sprayIn.PtDic[p])
+                            {
+                                if (ptls.Contains(p2))
+                                {
+                                    continue;
+                                }
+                                if (sprayIn.PtTypeDic[p2].Contains("PressureValve"))
+                                {
+                                    sprayIn.PtTypeDic.AddType(pt, "SubLoop");
+                                    typeFlag = true;
+                                    break;
+                                }
+                            }
+
+                        }
+                        if (typeFlag)
+                        {
+                            continue;
+                        }
+                        if (typeFlag)
+                        {
+                            continue;
+                        }
+                        sprayIn.PtTypeDic.AddType(pt, "Branch");
+                    }
+
+                    if (sprayIn.PtDic[pt].Count == 2)//2个邻接点： 主环点MainLoop  或  阀门 Valve
+                    {
+                        if (!sprayIn.PtTypeDic.ContainsKey(pt))//没有初始化的必定是 主环点MainLoop
+                        {
+                            sprayIn.PtTypeDic.Add(pt, "MainLoop");
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

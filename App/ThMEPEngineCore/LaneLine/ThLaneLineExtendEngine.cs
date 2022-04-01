@@ -27,7 +27,29 @@ namespace ThMEPEngineCore.LaneLine
             });
             return curves.Cast<Line>().Union(extendedLines).ToCollection();
         }
+        public static DBObjectCollection ExtendBufferEx(DBObjectCollection curves)
+        {
+            var extendedInfo = CreateExtendedLinesEx(curves);
+            var extendedLines = extendedInfo.SelectMany(x => x.Value).ToList();
+            var allLines = curves.Cast<Line>().Union(extendedLines).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(allLines);
+            extendedLines.RemoveAll(o =>
+            {
+                // T字型区域SelectFence不能求到交线
+                var pl = o.Buffer(1);
+                var objs = spatialIndex.SelectCrossingPolygon(pl);
+                objs.Remove(o);
+                var exLines = extendedInfo.Where(x => x.Value.Contains(o)).Select(x => x.Key).ToList();
+                foreach (var exLine in exLines)
+                {
+                    objs.Remove(exLine);
+                }
 
+                return !IsProperIntersectsBufferEx(objs, o);
+            });
+
+            return curves.Cast<Line>().Union(extendedLines).ToCollection();
+        }
         public static DBObjectCollection ExtendEx(DBObjectCollection curves)
         {
             var extendedInfo = CreateExtendedLinesEx(curves);
@@ -75,6 +97,20 @@ namespace ThMEPEngineCore.LaneLine
                 objs.Add(new Line(o.StartPoint, o.StartPoint - direction * extend_distance));
             });
             return objs;
+        }
+
+        private static bool IsProperIntersectsBufferEx(DBObjectCollection lines, Line line)
+        {
+            // 计算交点(Intersection对T字型线求不到交点(误差:10-7))
+            var dirVec = (line.EndPoint - line.StartPoint).GetNormal();
+            var detectLine = new Line(line.StartPoint - dirVec, line.EndPoint + dirVec);
+            var geometry = lines.Intersection(detectLine);
+            // 判断是否存在多个交点（但是要排查共线的情况）
+            if (geometry is Point || geometry is MultiPoint)
+            {
+                return true;
+            }
+            return false;
         }
 
         private static bool IsProperIntersectsEx(DBObjectCollection lines, Line line)

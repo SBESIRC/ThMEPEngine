@@ -1,24 +1,42 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
+using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
+
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class LineTools
     {
+        private static Point3d GetClosedPt(this Line line, Point3dEx verticalPt)
+        {
+            var spt = line.StartPoint;
+            var ept = line.EndPoint;
+            var sdist = spt.DistanceTo(verticalPt._pt);
+            var edist = ept.DistanceTo(verticalPt._pt);
+            if(sdist < edist)
+            {
+                return spt;
+            }
+            else
+            {
+                return ept;
+            }
+        }
         public static List<Line> ConnectVerticalLine(this List<Line> pipeLines, SprayIn sprayIn)
         {
             //基于竖管连接管线
@@ -27,88 +45,207 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var connectVreticals = new List<Point3dEx>();
             foreach (var ver in sprayIn.Verticals)
             {
-                if(ver._pt.DistanceTo(new Point3d(927732.7, 419553, 0)) < 200)
-                {
+                if (ver._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
                     ;
-                }
-                var rect = ver._pt.GetRect();
+                var rect = ver._pt.GetRect(100);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
                 var flag = sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
-                if(flag)
+                if (dbObjs.Count >= 2)
                 {
                     connectVreticals.Add(ver);
                 }
+                else if(dbObjs.Count == 1)
+                {
+                    var l = dbObjs[0] as Line;
+                    var closedPt = l.GetClosedPt(ver);//获取最近点
+                    var cl = new Line(closedPt, ver._pt);
+                    if(cl.Length > 1.0 && cl.Length < 100)
+                    {
+                        pipeLines.Add(cl);
+#if DEBUG
+                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        {
+                            var layerNames = "立管和支管的单链接线";
+                            if (!acadDatabase.Layers.Contains(layerNames))
+                            {
+                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                            }
+                            cl.LayerId = DbHelper.GetLayerId(layerNames);
+                            cl.ColorIndex = (int)ColorIndex.Red;
+                            acadDatabase.CurrentSpace.Add(cl);
+
+                        }
+#endif
+                    }
+
+                }
             }
-            foreach(var cv in connectVreticals)
+            var leadLines = sprayIn.LeadLines.ToCollection();
+            var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leadLines);
+
+
+
+            foreach (var cv in connectVreticals)
             {
-                sprayIn.Verticals.Remove(cv);
+                if (cv._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
+                    ;
+                var rect = cv._pt.GetRect(50);
+                var rst = leadLineSpatialIndex.SelectCrossingPolygon(rect);
+                if(rst.Count == 0)
+                {
+                    Draw.RemovedVerticalPt(cv);
+                    sprayIn.Verticals.Remove(cv);
+                }
             }
-            
+
             pipeLines.AddRange(lines);
+
+            //把单连通立管和横管连起来
+
+
             return pipeLines;
         }
-        public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn)
+
+        public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
-            lineList = PipeLineList.CleanLaneLines3(lineList);//merge
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 2);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1001, 2);//打断部分 自动连接
 
             foreach (var gl in GLineConnectList)
             {
-                try
+                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                if (pt1.DistanceToEx(pt2) > 763 && pt1.DistanceToEx(pt2) < 764)
+                    ;
+                if (pt1.DistanceToEx(pt2) > 1001 || pt1.DistanceToEx(pt2) < 1)
                 {
-                    var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-                    var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                    if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                    continue;
+                }
+                if (sprayIn.PtDic.ContainsKey(pt1) && sprayIn.PtDic.ContainsKey(pt2))
+                {
+                    if (sprayIn.PtDic[pt1].Count >= 2 || sprayIn.PtDic[pt2].Count >= 2)
                     {
                         continue;
                     }
-                    if (sprayIn.PtDic.ContainsKey(pt1) && sprayIn.PtDic.ContainsKey(pt2))
-                    {
-                        if (sprayIn.PtDic[pt1].Count >= 3 || sprayIn.PtDic[pt2].Count >= 3)
-                        {
-                            continue;
-                        }
-                    }
-                    var line = new Line(pt1._pt, pt2._pt);
+                }
+                var line = new Line(pt1._pt, pt2._pt);
+                if (verticalSpatialIndex is null)
+                {
                     lineList.Add(line);
                 }
-                catch
+                else
                 {
-                    ;
+                    var rst = verticalSpatialIndex.SelectFence(line);
+                    if (rst.Count == 0)
+                    {
+                        lineList.Add(line);
+                    }
                 }
-                
+
+#if DEBUG
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    var layerNames = "自动连接线";
+                    if (!acadDatabase.Layers.Contains(layerNames))
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                    }
+                    line.LayerId = DbHelper.GetLayerId(layerNames);
+                    line.ColorIndex = (int)ColorIndex.Red;
+                    acadDatabase.CurrentSpace.Add(line);
+
+                }
+#endif
             }
-            return PipeLineList.CleanLaneLines3(lineList);//merge
+
+
+            //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+            ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+            var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
+            var tmpLines = new List<Line>();
+            foreach (var l in lineColl)
+            {
+                tmpLines.Add(l as Line);
+            }
+            var cleanLines = LineMerge.CleanLaneLines(tmpLines);
+
+            ;
+
+            //var cleanLine = PipeLineList.CleanLaneLines3(lineList);//merge
+#if DEBUG
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var layerNames = "自动连接并合并的线";
+                if (!acadDatabase.Layers.Contains(layerNames))
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                }
+                foreach (var line in cleanLines)
+                {
+                    line.LayerId = DbHelper.GetLayerId(layerNames);
+                    line.ColorIndex = (int)ColorIndex.Red;
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+
+
+            }
+#endif
+
+
+            return cleanLines;
+            //return lineList;//merge
         }
 
         public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
         {
-            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
-            double alarmValveRidus = 200 + 50;//湿式报警阀半径
-            foreach(var pt in alarmPts)
+            var dbPts = new List<DBPoint>();
+            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
+            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+            foreach(var apt in alarmPts)
             {
-                var rect = pt.GetRect(alarmValveRidus);
-                var lines = lineSpatialIndex.SelectCrossingPolygon(rect);
-                var pts = pt.GetRectPt(sprayIn, lines, alarmValveRidus);
-                AddPtDic(sprayIn, pts, pt);
+                var rect = apt.GetRect(210);
+                var rst = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+                foreach(var obj in rst)
+                {
+                    var pt = (obj as DBPoint).Position;
+                    var line = new Line(apt, pt);
+                    if(line.Length > 1.0)
+                    {
+                        lineList.Add(line);
+#if DEBUG
+                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        {
+                            var layerNames = "报警阀连接的线段";
+                            if (!acadDatabase.Layers.Contains(layerNames))
+                            {
+                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                            }
+                            line.LayerId = DbHelper.GetLayerId(layerNames);
+                            line.ColorIndex = (int)ColorIndex.Red;
+                            acadDatabase.CurrentSpace.Add(line);
+                        }
+#endif
+                    }
+                }
             }
         }
+
 
         public static void AddPtDic(SprayIn sprayIn, List<Point3d> pts, Point3d centerPt)
         {
             var centPtex = new Point3dEx(centerPt);//报警阀中心点
-            if(sprayIn.PtDic.Keys.Contains(centPtex))//字典包含报警阀中心点
+            if (sprayIn.PtDic.Keys.Contains(centPtex))//字典包含报警阀中心点
             {
-                foreach(var pt in pts)
+                foreach (var pt in pts)
                 {
                     var ptex = new Point3dEx(pt);
-                    if(centPtex.Equals(ptex))
+                    if (centPtex.Equals(ptex))
                     {
                         continue;
                     }
@@ -121,7 +258,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             else//字典不包含报警阀中心点
             {
                 var ptsNew = new List<Point3dEx>();
-                foreach(var pt in pts)
+                foreach (var pt in pts)
                 {
                     var ptex = new Point3dEx(pt);
                     if (centPtex.Equals(ptex))
@@ -133,7 +270,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 sprayIn.PtDic.Add(centPtex, ptsNew);
             }
 
-            foreach(var pt in pts)
+            foreach (var pt in pts)
             {
                 var ptex = new Point3dEx(pt);
                 if (centPtex.Equals(ptex))
@@ -142,7 +279,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 }
                 if (sprayIn.PtDic.Keys.Contains(ptex))
                 {
-                    if(!sprayIn.PtDic[ptex].Contains(centPtex))
+                    if (!sprayIn.PtDic[ptex].Contains(centPtex))
                     {
                         sprayIn.PtDic[ptex].Add(centPtex);
                     }

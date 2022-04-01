@@ -10,19 +10,15 @@ using ThCADCore.NTS;
 using ThMEPWSS.UndergroundSpraySystem.Method;
 using Autodesk.AutoCAD.EditorInput;
 using GeometryExtensions;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
 using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
-using Autodesk.AutoCAD.DatabaseServices;
-using System;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
-using ThMEPEngineCore.Service.Hvac;
+using System.Diagnostics;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
     class SpraySys
     {
-        public static bool GetInsertPt(AcadDatabase acadDatabase, out Point3d insertPt)
+        public static bool GetPipeMarkPt(AcadDatabase acadDatabase, out Point3d insertPt)
         {
             insertPt = new Point3d();
             var database = acadDatabase.Database;
@@ -32,32 +28,56 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 insertPt = propRes.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS());
                 var loopMarkPt = new LoopMarkPt();//环管标记点
-                if(loopMarkPt.Extract(database, insertPt))
+                if (loopMarkPt.Extract(database, insertPt))
                 {
                     return true;
                 }
             }
             return false;
-
         }
+
+        public static bool GetInsertPoint(out Point3d insertPt)
+        {
+            insertPt = new Point3d();
+            var opt = new PromptPointOptions("\n指定喷淋系统图插入点");
+            var propPtRes = Active.Editor.GetPoint(opt);
+            if (propPtRes.Status == PromptStatus.OK)
+            {
+                insertPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+                return true;
+            }
+            return false;
+        }
+
         public static bool GetInput(AcadDatabase acadDatabase, SprayIn sprayIn, Point3dCollection selectArea, Point3d startPt)
         {
+            var endpt = new Point3dEx(1062056.9, 555638.7,0);
             var database = acadDatabase.Database;
 
             var pipe = new SprayPipe();
             pipe.Extract(database, sprayIn);//提取管道
             var pipeLines = pipe.CreateSprayLines();//生成管道线
+            pipeLines = LineMerge.CleanLaneLines(pipeLines);
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             var vertical = new Verticalpipe();
             vertical.Extract(database, sprayIn);//提取竖管
+            //var verticalSpatialIndex = vertical.CreateVerticalSpatialIndex();
+
+            var leadLine = new LeadLine();
+            leadLine.Extract(database, sprayIn);//3,283ms
+            sprayIn.LeadLines = leadLine.GetLines();
+            Dics.CreateLeadLineDic(ref sprayIn);//3,559ms
+
+            var alarmValve = new AlarmValveTCH();
+            var alarmPts = alarmValve.Extract(database, selectArea);
+            pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
 
             pipeLines = pipeLines.ConnectVerticalLine(sprayIn);
-
             pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
 
-            
-
             pipeLines.CreatePtDic(sprayIn);
+
+
             pipeLines = pipeLines.ConnectBreakLine(sprayIn);
             pipeLines.CreatePtDic(sprayIn);
             pipeLines = pipeLines.PipeLineSplit(sprayIn.PtDic.Keys.ToList());
@@ -70,13 +90,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 if (sprayIn.PtDic[spt].Count == 1 || sprayIn.PtDic[ept].Count == 1)
                 {
                     var l = line.Length;
-                    if(l < 10)
+                    if (l < 10)
                     {
                         pipeLines.Remove(line);
                     }
                 }
             }
-            
+
             var pipeNo = new PipeNo();
             pipeNo.Extract(database, sprayIn);
 
@@ -86,7 +106,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var valve = new Valve();
             valve.Extract(database, sprayIn);
             valve.CreateValveLine();
-            
+
             pipeLines = pipeLines.PipeLineSplit(valve.SignalValves);
             pipeLines = pipeLines.PipeLineSplit(valve.PressureValves);
             pipeLines = pipeLines.PipeLineSplit(valve.DieValves);
@@ -102,87 +122,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines.PipeLineSplit(flowPts);
 
             pipeLines.CreatePtDic(sprayIn);
-            using (var db = AcadDatabase.Active())
-            {
-                var groups = db.Groups;
-                var entIds = groups.SelectMany(g => g.GetAllEntityIds().ToList());
-                var ents = entIds.Select(e => db.Element<Entity>(e)).Where(e => e.Layer.Contains("SPRL-PIPE")).ToCollection();
-                var pts = new List<Point3dEx>();
-                foreach (var ent in ents)
-                {
-                    var lines = new DBObjectCollection();
-                    (ent as Entity).Explode(lines);
-                    foreach (var line in lines)
-                    {
-                        if (line is Polyline)
-                        {
-                            ;
-                            var pt1 = new Point3dEx((line as Polyline).StartPoint);
-                            pts.Add(pt1);
-                        }
-                        if (line is Line)
-                        {
-                            var pt1 = new Point3dEx((line as Line).StartPoint);
-                            var pt2 = new Point3dEx((line as Line).EndPoint);
-                            if (sprayIn.PtDic.ContainsKey(pt1))
-                            {
-                                if (sprayIn.PtDic[pt1].Count == 1)
-                                {
-                                    if (!sprayIn.PtDic[pt1][0].Equals(pt2))
-                                    {
-                                        sprayIn.PtDic[pt1].Add(pt2);
-                                        if (!sprayIn.PtTypeDic.ContainsKey(pt2))
-                                        {
-                                            sprayIn.PtTypeDic[pt2] = "MainLoop";
-                                        }
-                                        if (!sprayIn.PtTypeDic.ContainsKey(pt1))
-                                        {
-                                            sprayIn.PtTypeDic[pt1] = "MainLoop";
-                                        }
-                                        if (!sprayIn.PtDic.ContainsKey(pt2))
-                                        {
-                                            sprayIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
-                                        }
-                                        break;
-                                    }
 
-                                }
-                            }
-                            if (sprayIn.PtDic.ContainsKey(pt2))
-                            {
-                                if (sprayIn.PtDic[pt2].Count == 1)
-                                {
-                                    if (!sprayIn.PtDic[pt2][0].Equals(pt1))
-                                    {
-                                        sprayIn.PtDic[pt2].Add(pt1);
-                                        if (!sprayIn.PtTypeDic.ContainsKey(pt2))
-                                        {
-                                            sprayIn.PtTypeDic[pt2] = "MainLoop";
-                                        }
-                                        if (!sprayIn.PtTypeDic.ContainsKey(pt1))
-                                        {
-                                            sprayIn.PtTypeDic[pt1] = "MainLoop";
-                                        }
-                                        if (!sprayIn.PtDic.ContainsKey(pt1))
-                                        {
-                                            sprayIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
             DicTools.CreatFlowBlocks(objs, sprayIn);
 
-            var leadLine = new LeadLine();
-            leadLine.Extract(database, sprayIn);//3,283ms
-            sprayIn.LeadLines = leadLine.GetLines();
+            
 
-            Dics.CreateLeadLineDic(ref sprayIn);//3,559ms
 
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
             DNLineEngine.Extract(database, selectArea);
@@ -198,7 +143,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.SlashDic = DNPipeEngine.GetSlashDic(leadLineDic, segLineDic);//斜点标注对
             PtDic.CreateDNDic(sprayIn, PipeDN, pipeLines);//创建DN字典对
 
-            var pumpText = new PumpText();
+            var pumpText = new PumpText(leadLine.TextDbObjs);
             pumpText.Extract(database, sprayIn);//2,820ms
             sprayIn.PumpTexts = pumpText.GetTexts();
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(pumpText.DBObjs);
@@ -207,9 +152,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             sprayIn.CreateTermPt(textSpatialIndex);//针对存在缺省立管的标注
 
-            var alarmValve = new AlarmValveTCH();
-            var alarmPts = alarmValve.Extract(database, selectArea);
-            //pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
+            
 
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
@@ -219,17 +162,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             var loopMarkPt = new LoopMarkPt();//环管标记点
             loopMarkPt.Extract(database, sprayIn);
-            loopMarkPt.CreateStartPts(pipeLines, ref sprayIn, startPt);//获取环管的起始终止点
-            if(sprayIn.LoopStartPt.Equals(new Point3d()))
+            loopMarkPt.CreateStartPts(pipeLines, sprayIn, startPt);//获取环管的起始终止点
+            if (sprayIn.LoopStartPt.Equals(new Point3d()))
             {
                 return false;
             }
 
             DicTools.CreatePtDic(sprayIn);
-            
-            return true;
 
+            return true;
         }
+       
         public static bool Processing(AcadDatabase acadDatabase, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
@@ -237,33 +180,44 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var visited = new HashSet<Point3dEx>();//访问标志
             var neverVisited = new HashSet<Point3dEx>();//访问标志
             var tempPath = new List<Point3dEx>();//主环路临时路径
-             
+
             visited.Add(sprayIn.LoopStartPt);
             tempPath.Add(sprayIn.LoopStartPt);
             //主环路提取
-            DepthSearch.DfsMainLoop(sprayIn.LoopStartPt, tempPath, visited, ref mainPathList, sprayIn, ref extraNodes, neverVisited);
-            DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
-            spraySystem.MainLoop.AddRange(mainPathList[0]);
-            Draw.MainLoop(acadDatabase, mainPathList);
-            if(LoopCheck.IsSingleLoop(spraySystem, sprayIn))//主环上存在报警阀
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var mainPath = new List<Point3dEx>();
+            DepthSearch.DfsMainLoopWithoutAlarmValve(sprayIn.LoopStartPt, tempPath, visited, ref mainPath, sprayIn, stopwatch);
+            if(mainPath.Count == 0)
             {
-                foreach(var path in mainPathList)
-                {
-                    spraySystem.MainLoops.Add(path);
-                }
-                BranchDeal2.Get(ref visited, sprayIn, spraySystem);
+                DepthSearch.DfsMainLoop(sprayIn.LoopStartPt, tempPath, visited, ref mainPathList, sprayIn, ref extraNodes, neverVisited);
+                DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
+                spraySystem.MainLoop.AddRange(mainPathList[0]);
 
-                BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
-                return false;
+                if (LoopCheck.IsSingleLoop(spraySystem, sprayIn))//主环上存在报警阀
+                {
+                    Draw.MainLoops(acadDatabase, mainPathList);
+                    foreach (var path in mainPathList)
+                    {
+                        spraySystem.MainLoops.Add(path);
+                    }
+                    BranchDeal2.Get(ref visited, sprayIn, spraySystem);
+
+                    BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
+                    return false;
+                }
             }
+            mainPathList.Add(mainPath);
+            Draw.MainLoop(acadDatabase, mainPathList);
             SubLoopDeal.Get(ref visited, mainPathList, sprayIn, spraySystem);
-            //Draw.SubLoop(acadDatabase, spraySystem);
+            Draw.SubLoop(acadDatabase, spraySystem);
             BranchLoopDeal.Get(ref visited, sprayIn, spraySystem);
-            //Draw.BranchLoop(acadDatabase, spraySystem);
+            Draw.BranchLoop(acadDatabase, spraySystem);
             SubLoopDeal.SetType(sprayIn, spraySystem);
             BranchDeal.Get(ref visited, sprayIn, spraySystem);
             BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
             return true;
+            
         }
 
         public static void GetOutput(SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)

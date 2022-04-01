@@ -1,7 +1,8 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 using TianHua.Electrical.PDS.Model;
 
@@ -13,7 +14,7 @@ namespace TianHua.Electrical.PDS.Service
         public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
 
         public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
-            List<string> distBoxKey)
+            List<string> distBoxKey, List<ObjectId> objectIds)
         {
             var node = new ThPDSCircuitGraphNode
             {
@@ -21,10 +22,11 @@ namespace TianHua.Electrical.PDS.Service
             };
             var frame = ThPDSBufferService.Buffer(entity, database);
             var marks = markService.GetMarks(frame);
+            objectIds.AddRange(marks.ObjectIds);
             var service = new ThPDSMarkAnalysisService();
             node.Loads = new List<ThPDSLoad>
             {
-                service.DistBoxMarkAnalysis(marks, distBoxKey, DistBoxBlocks[entity]),
+                service.DistBoxMarkAnalysis(marks.Texts, distBoxKey, DistBoxBlocks[entity]),
             };
             return node;
         }
@@ -44,7 +46,7 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphNode CreateNode(List<Entity> entities, Database database, ThMarkService markService,
-            List<string> distBoxKey, ref string attributesCopy)
+            List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
@@ -60,6 +62,7 @@ namespace TianHua.Electrical.PDS.Service
                     // 只要有一个有效负载，则认为整个节点为有效负载
                     noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
+                    objectIds.Add(LoadBlocks[e].ObjId);
                     if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
                         loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
@@ -68,7 +71,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
-                        loads.Add(service.LoadMarkAnalysis(marks, distBoxKey, LoadBlocks[e], ref attributesCopy));
+                        loads.Add(service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy));
                     }
                 }
             }
@@ -91,11 +94,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode target, List<string> list, List<string> distBoxKey)
+            ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
-            edge.Circuit = service.CircuitMarkAnalysis(list, distBoxKey);
+            var srcPanelID = source.Loads.Count > 0 ? source.Loads[0].ID.LoadID : "";
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
             if (source.NodeType == PDSNodeType.CableCarrier)
             {
                 edge.Circuit.ViaCableTray = true;
@@ -106,7 +110,7 @@ namespace TianHua.Electrical.PDS.Service
                 edge.Circuit.ViaConduit = true;
             }
 
-            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.FirstOrDefault());
+            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.Last());
             if (circuitModel.CircuitType != ThPDSCircuitType.None)
             {
                 if (target.Loads.Count > 0)
@@ -114,35 +118,30 @@ namespace TianHua.Electrical.PDS.Service
                     target.Loads[0].CircuitType = circuitModel.CircuitType;
                 }
             }
-            var circuitIDs = target.Loads.Select(o => o.ID.CircuitID).Distinct().OfType<string>().ToList();
-            if (circuitIDs.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault()))
+            // 仅当回路编号有效个数为1时，添加至回路的回路编号中
+            if (string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
-                edge.Circuit.ID.CircuitID.Add(circuitIDs[0]);
-            }
-            else
-            {
-                edge.Circuit.ID.CircuitID.Add("");
-            }
-            var circuitNumbers = target.Loads.Select(o => o.ID.CircuitNumber).Distinct().OfType<string>().ToList();
-            if (circuitNumbers.Count == 1 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault()))
-            {
-                edge.Circuit.ID.CircuitNumber.Add(circuitNumbers[0]);
-            }
-            else
-            {
-                edge.Circuit.ID.CircuitNumber.Add("");
+                var circuitIDs = new List<string>();
+                target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
+                    .ForEach(id => circuitIDs.Add(id)));
+                circuitIDs = circuitIDs.Distinct().ToList();
+                var sourcePanelIDs = new List<string>();
+                target.Loads.ForEach(o => o.ID.SourcePanelID.Where(id => !string.IsNullOrEmpty(id))
+                    .ForEach(id => sourcePanelIDs.Add(id)));
+                sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
+                if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
+                {
+                    edge.Circuit.ID.SourcePanelID.Add(sourcePanelIDs.First());
+                    edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
+                }
             }
 
             if (source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.FirstOrDefault())
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.FirstOrDefault())
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
                 && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.CircuitNumber.Add(source.Loads[0].ID.LoadID + "-" + edge.Circuit.ID.CircuitID.First());
-            }
-            else
-            {
-                edge.Circuit.ID.CircuitNumber.Add("");
+                edge.Circuit.ID.SourcePanelID.Add(source.Loads[0].ID.LoadID);
             }
 
             if (target.NodeType == PDSNodeType.None)
@@ -153,11 +152,11 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode target, List<string> list)
+            ThPDSCircuitGraphNode target, List<string> srcPanelID, List<string> circuitID)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
-            edge.Circuit = service.CircuitMarkAnalysis(list);
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, circuitID);
             return edge;
         }
     }

@@ -49,7 +49,8 @@ namespace ThMEPWSS.Command
                     var thRooms = frame.GetRoomInfo(acad, originTransformer);
                     var userOutFrame = frame.GetUserFrame(acad, originTransformer);
                     frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
-                    var roomWalls = CalStructrueService.GetRoomWall(CalAllRoomPolylines(thRooms), userOutFrame);
+                    var rooms = CalAllRoomPolylines(thRooms);
+                    var roomWalls = CalStructrueService.GetRoomWall(rooms, userOutFrame);
                     var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
                     holeWalls.AddRange(columns);
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
@@ -59,7 +60,7 @@ namespace ThMEPWSS.Command
                     var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = frame.GetAxis(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, paramSetting);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
                     using (acad.Database.GetDocument().LockDocument())
@@ -78,21 +79,6 @@ namespace ThMEPWSS.Command
                     }
                 }
             }
-        }
-
-        private void ClassifyRoomVerticalPipe(List<ThIfcRoom> thRooms, List<VerticalPipeModel> verticalPipes)
-        {
-            var rooms = thRooms.Select(x => x.Boundary).ToList();
-            foreach (Polyline room in rooms)
-            {
-                var pipes = verticalPipes.Where(x => room.Contains(x.Position)).ToList();
-
-            }
-        }
-
-        private void ClassifyPipes(List<VerticalPipeModel> verticalPipes)
-        {
-
         }
 
         /// <summary>

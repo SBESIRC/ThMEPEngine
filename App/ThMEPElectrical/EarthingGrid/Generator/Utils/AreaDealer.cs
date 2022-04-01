@@ -12,6 +12,88 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 {
     class AreaDealer
     {
+        /// <summary>
+        /// Build a structure
+        /// can find a polyline by any line in this polyline
+        /// </summary>
+        /// <param name="dicTuples"></param>
+        /// <param name="findPolylineFromLines"></param>
+        public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
+        {
+            HashSet<Tuple<Point3d, Point3d>> lineVisit = new HashSet<Tuple<Point3d, Point3d>>();
+            HashSet<Tuple<Point3d, Point3d>> tuppleList = LineDealer.Graph2Tuples(dicTuples);
+            foreach (var tuple in tuppleList)
+            {
+                if (!lineVisit.Contains(tuple))
+                {
+                    var tmpLines = new List<Tuple<Point3d, Point3d>>();
+                    lineVisit.Add(tuple);
+                    tmpLines.Add(tuple);
+                    var curTuple = new Tuple<Point3d, Point3d>(tuple.Item1, tuple.Item2);
+                    int flag = 0;
+                    while (true)
+                    {
+                        Point3d nextPt = GetNextConnectPoint(curTuple.Item1, curTuple.Item2, dicTuples);
+
+                        curTuple = new Tuple<Point3d, Point3d>(curTuple.Item2, nextPt);
+                        if (lineVisit.Contains(curTuple))
+                        {
+                            if (curTuple.Item2 != nextPt)
+                            {
+                                flag = 1;
+                            }
+                            break;
+                        }
+                        if (!lineVisit.Contains(curTuple))
+                        {
+                            lineVisit.Add(curTuple);
+                        }
+                        tmpLines.Add(curTuple);
+                        if (nextPt == tuple.Item1) // had find a circle
+                        {
+                            break;
+                        }
+                    }
+                    //if (LineDealer.Tuples2Polyline(tmpLines).Closed == true && tmpLines.Count > 1 && flag != 1)
+                    if (flag != 1)
+                    {
+                        foreach (var tmpLine in tmpLines)
+                        {
+                            if (!findPolylineFromLines.ContainsKey(tmpLine))
+                            {
+                                findPolylineFromLines.Add(tmpLine, tmpLines);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Get the next point in the polyline based on this corrent line
+        /// </summary>
+        /// <returns>if the return value equals to baseStPt，means there is no next point，also means this is a leaf point</returns>
+        public static Point3d GetNextConnectPoint(Point3d baseStPt, Point3d baseEdPt, Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            double minDegree = double.MaxValue;
+            Vector3d baseVec = baseStPt - baseEdPt;
+            Point3d aimEdPt = baseStPt;
+            double curDegree;
+            foreach (var curEdPt in dicTuples[baseEdPt])
+            {
+                if (curEdPt == baseStPt)
+                {
+                    continue;
+                }
+                curDegree = (curEdPt - baseEdPt).GetAngleTo(baseVec, Vector3d.ZAxis);
+                if (curDegree < minDegree)
+                {
+                    minDegree = curDegree;
+                    aimEdPt = curEdPt;
+                }
+            }
+            return aimEdPt;
+        }
+
         //线集生成多边形
         public static void BuildPolygonsCustom(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
@@ -60,19 +142,17 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             List<Tuple<Point3d, Point3d>> lines = findPolylineFromLines.Keys.ToList();
             foreach (var line in lines)
             {
-                if (!lineVisit.Contains(line) && findPolylineFromLines.ContainsKey(line))
+                if (!lineVisit.Contains(line))
                 {
-                    var polyline = LineDealer.Tuples2Polyline(findPolylineFromLines[line], 1.0);
                     if (findPolylineFromLines[line].Count > 4)
                     {
                         SplitPolyline(findPolylineFromLines[line], ref splitedPolylines);
-                        var lList = findPolylineFromLines[line].ToList();
-                        foreach (var l in lList)
+                    }
+                    foreach (var l in findPolylineFromLines[line])
+                    {
+                        if (!lineVisit.Contains(l))
                         {
-                            if (!lineVisit.Contains(l))
-                            {
-                                lineVisit.Add(l);
-                            }
+                            lineVisit.Add(l);
                         }
                     }
                 }
@@ -97,7 +177,8 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 
             if (n < 5)
             {
-                if (LineDealer.Tuples2Polyline(tuples).Closed == true)
+                var pl = LineDealer.Tuples2Polyline(tuples);
+                if (pl.Closed == true)
                 {
                     tupleLines.Add(tuples);
                 }
@@ -114,8 +195,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             int splitB;
             int flag;
             double mindis = double.MaxValue;
-            //double minCross = double.MaxValue;
-            //double halfArea = polyline.Area / 2;
             double curdis;
 
             //Catulate
@@ -143,13 +222,15 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 var tmpTuplesA = new List<Tuple<Point3d, Point3d>>();
                 var tmpTuplesB = new List<Tuple<Point3d, Point3d>>();
                 Split2Order(tuples, splitA, splitB, ref tmpTuplesA, ref tmpTuplesB);
-                //var polylineA = LineDealer.Tuples2Polyline(tmpTuplesA);
-                //var polylineB = LineDealer.Tuples2Polyline(tmpTuplesB);
-                //var curCross = Math.Pow(curdis, 2) * (polylineA.Area - halfArea);
-                //if (curCross < minCross)
+
+                var plA = LineDealer.Tuples2Polyline(tmpTuplesA);
+                var plB = LineDealer.Tuples2Polyline(tmpTuplesB);
+                if(plA.Area < 1000000 || plB.Area < 1000000)
+                {
+                    continue;
+                }
                 if (curdis < mindis)
                 {
-                    //minCross = curCross;
                     mindis = curdis;
                     tuplesA = tmpTuplesA;
                     tuplesB = tmpTuplesB;
@@ -171,7 +252,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     {
                         if (findPolylineFromLines.ContainsKey(l))
                         {
-                            findPolylineFromLines.Remove(l);
+                            foreach(var ll in findPolylineFromLines[l])
+                            {
+                                findPolylineFromLines.Remove(ll);
+                            }
+                            //findPolylineFromLines.Remove(l); //上三行替换下面是重要调整
                         }
                         findPolylineFromLines.Add(l, splitedPolyline);
                     }

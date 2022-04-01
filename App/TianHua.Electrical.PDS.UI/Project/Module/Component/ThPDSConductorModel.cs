@@ -8,6 +8,9 @@ using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    /// <summary>
+    /// 导体（配电回路）
+    /// </summary>
     public class ThPDSConductorModel : NotifyPropertyChangedBase
     {
         private readonly Conductor _conductor;
@@ -17,6 +20,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("电线电缆参数")]
         [DisplayName("燃料特性代号")]
         public string ConductorMaterial
         {
@@ -24,6 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("电线电缆参数")]
         [DisplayName("材料特征及结构")]
         public string OuterSheathMaterial
         {
@@ -31,7 +36,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("电缆根数")]
-        [EditorAttribute(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int NumberOfPhaseWire
         {
             get => _conductor.NumberOfPhaseWire; 
@@ -43,8 +49,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("电线电缆参数")]
         [DisplayName("相导体截面")]
-        [EditorAttribute(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
         public double ConductorCrossSectionalArea
         {
             get => _conductor.ConductorCrossSectionalArea;
@@ -56,29 +63,41 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
-        [DisplayName("中性线导体截面")]
-        public double NeutralConductorCrossSectionalArea
-        {
-            get => _conductor.NeutralConductorCrossSectionalArea;
-        }
+        //[ReadOnly(true)]
+        //[DisplayName("中性线导体截面")]
+        //public double NeutralConductorCrossSectionalArea
+        //{
+        //    get => _conductor.NeutralConductorCrossSectionalArea;
+        //}
 
-        [ReadOnly(true)]
-        [DisplayName("PE线导体截面")]
-        public double PECrossSectionalArea
-        {
-            get => _conductor.PECrossSectionalArea;
-        }
+        //[ReadOnly(true)]
+        //[DisplayName("PE线导体截面")]
+        //public double PECrossSectionalArea
+        //{
+        //    get => _conductor.PECrossSectionalArea;
+        //}
 
         [ReadOnly(true)]
         [DisplayName("敷设方式")]
-        public BridgeLaying BridgeLaying
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<Pipelaying>), typeof(PropertyEditorBase))]
+        public Pipelaying Pipelaying
         {
-            get => _conductor.BridgeLaying;
+            get => _conductor.Pipelaying;
+        }
+
+        [ReadOnly(true)]
+        [DisplayName("管材")]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSEnumPropertyEditor<PipeMaterial>), typeof(PropertyEditorBase))]
+        public PipeMaterial PipeMaterial
+        {
+            get => _conductor.PipeMaterial;
         }
 
         [ReadOnly(true)]
         [DisplayName("穿管直径")]
+        [Category("电线电缆参数")]
         public int PipeDiameter
         {
             get => _conductor.PipeDiameter;

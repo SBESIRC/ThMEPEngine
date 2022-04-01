@@ -1,9 +1,5 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThMEPWSS.Command;
 
 namespace ThMEPWSS
 {
@@ -13,6 +9,15 @@ namespace ThMEPWSS
         public void ThTestBlockConfig()
         {
             using (var cmd = new BlockNameConfig.Cmd(null))
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THWTKBQ", CommandFlags.Modal)]
+        public void THWTKBQ()
+        {
+            using (var cmd = new ThBlockTagCmd())
             {
                 cmd.Execute();
             }

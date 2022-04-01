@@ -1,0 +1,64 @@
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+
+namespace TianHua.Electrical.PDS.Project.Module.Component
+{
+    /// <summary>
+    /// 直接表
+    /// </summary>
+    public class MeterTransformer : Meter
+    {
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="calculateCurrent"></param>
+        /// <param name="polesNum"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public MeterTransformer(double calculateCurrent, string polesNum)
+        {
+            this.ComponentType = ComponentType.MT;
+            if (polesNum != "1P" && polesNum != "3P")
+            {
+                throw new NotSupportedException();
+            }
+            var meters = MeterTransformerConfiguration.MeterComponentInfos.Where(o => o.Amps > calculateCurrent).ToList();
+            if (meters.Count == 0)
+            {
+                throw new NotSupportedException();
+            }
+            Meters = meters;
+            PolesNum = polesNum;
+            var meter = meters.First();
+            MeterSwitchType = meter.parameter;
+            AlternativeParameters = meters.Select(o => o.parameter).ToList();
+        }
+
+        public override List<string> GetParameters()
+        {
+            return AlternativeParameters;
+        }
+        public override void SetParameters(string parameters)
+        {
+            if (Meters.Any(o => o.parameter == parameters))
+            {
+                MeterSwitchType = parameters;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// 电能表类型
+        /// </summary>
+        public string MeterSwitchType { get; set; }
+
+        /// <summary>
+        /// 断路器信息
+        /// </summary>
+        private List<MTComponentInfo> Meters { get; set; }
+    }
+}

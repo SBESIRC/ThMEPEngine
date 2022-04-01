@@ -26,6 +26,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadMTSEConfig();
             LoadConductorConfig();
             LoadCableCondiutConfig();
+            LoadMotorConfig();
+            LoadMeterConfig();
+            LoadMTConfig();
+            LoadCPSConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -212,9 +216,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             for (int i = 1; i < TableCJ.Rows.Count; i++)
             {
                 var row = TableCJ.Rows[i];
-                ContactorConfiguration.contactorInfos.Add(new ContactorComponentInfo()
+                ContactorConfiguration.contactorInfos.Add(new ContactorConfigurationItem()
                 {
-                    ModelName = row["型号"].ToString(),
+                    Model = row["型号"].ToString(),
                     MaxKV = row["额定电压"].ToString(),
                     Poles = row["级数"].ToString(),
                     Amps = double.Parse(row["额定电流"].ToString()),
@@ -237,9 +241,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             for (int i = 1; i < Table.Rows.Count; i++)
             {
                 var row = Table.Rows[i];
-                IsolatorConfiguration.isolatorInfos.Add(new IsolatorComponentInfo()
+                IsolatorConfiguration.isolatorInfos.Add(new IsolatorConfigurationItem()
                 {
-                    ModelName = row["型号"].ToString(),
+                    Model = row["型号"].ToString(),
                     MaxKV = row["额定电压"].ToString(),
                     Poles = row["级数"].ToString(),
                     Amps = double.Parse(row["额定电流"].ToString()),
@@ -264,9 +268,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = Table.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ThermalRelayConfiguration.thermalRelayInfos.Add(new ThermalRelayComponentInfo()
+                    ThermalRelayConfiguration.thermalRelayInfos.Add(new ThermalRelayConfigurationItem()
                     {
-                        ModelName = row["型号"].ToString(),
+                        Model = row["型号"].ToString(),
                         MaxKV = row["额定电压"].ToString(),
                         Poles = row["级数"].ToString(),
                         MaxAmps = double.Parse(row["整定电流上限"].ToString()),
@@ -441,6 +445,176 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         DIN_JDG = (value = row["JDG穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
                         DIN_PC = (value = row["PC穿管管径"].ToString()).IsNullOrWhiteSpace() ? -1 : int.Parse(value),
                     });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载电机配置
+        /// </summary>
+        private static void LoadMotorConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            //非消防
+            {
+                var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.MotorTypeOneCoordinationUrl, true);
+                var Table = dataSet.Tables["电动机（分立元件）"];
+                for (int i = 1; i < Table.Rows.Count; i++)
+                {
+                    var row = Table.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_DiscreteComponentsInfos.Add(new Motor_DiscreteComponentsInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CB = row["断路器规格"].ToString(),
+                            QAC = row["接触器规格"].ToString(),
+                            KH = row["热继电器规格"].ToString(),
+                            Conductor = row["导体根数x每根导体截面积"].ToString(),
+                        });
+                    }
+                }
+
+                var Table2 = dataSet.Tables["电动机（分立元件星三角启动）"];
+                for (int i = 1; i < Table2.Rows.Count; i++)
+                {
+                    var row = Table2.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_DiscreteComponentsStarTriangleStartInfos.Add(new Motor_DiscreteComponentsStarTriangleStartInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CB = row["断路器规格"].ToString(),
+                            QAC1 = row[4].ToString(),
+                            QAC2 = row[5].ToString(),
+                            QAC3 = row[6].ToString(),
+                            KH = row["热继电器规格"].ToString(),
+                            Conductor1 = row[8].ToString(),
+                            Conductor2 = row[9].ToString(),
+                        });
+                    }
+                }
+            }
+            //消防
+            {
+                var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.MotorTypeTwoCoordinationUrl, true);
+                var Table = dataSet.Tables["电动机（分立元件）"];
+                for (int i = 1; i < Table.Rows.Count; i++)
+                {
+                    var row = Table.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_DiscreteComponentsInfos.Add(new Motor_DiscreteComponentsInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CB = row["断路器规格"].ToString(),
+                            QAC = row["接触器规格"].ToString(),
+                            KH = row["热继电器规格"].ToString(),
+                            Conductor = row["导体根数x每根导体截面积"].ToString(),
+                        });
+                    }
+                }
+
+                var Table2 = dataSet.Tables["电动机（分立元件星三角启动）"];
+                for (int i = 1; i < Table2.Rows.Count; i++)
+                {
+                    var row = Table2.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_DiscreteComponentsStarTriangleStartInfos.Add(new Motor_DiscreteComponentsStarTriangleStartInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CB = row["断路器规格"].ToString(),
+                            QAC1 = row[4].ToString(),
+                            QAC2 = row[5].ToString(),
+                            QAC3 = row[6].ToString(),
+                            KH = row["热继电器规格"].ToString(),
+                            Conductor1 = row[8].ToString(),
+                            Conductor2 = row[9].ToString(),
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载电能表配置
+        /// </summary>
+        private static void LoadMeterConfig()
+        {
+            MeterTransformerConfiguration.MeterComponentInfos = new List<MTComponentInfo>()
+            {
+                new MTComponentInfo(){ Amps = 6, parameter = "1.5(6)"},
+                new MTComponentInfo(){ Amps = 8, parameter = "2(8)"},
+                new MTComponentInfo(){ Amps = 10, parameter = "2.5(10)"},
+                new MTComponentInfo(){ Amps = 12, parameter = "3(12)"},
+                new MTComponentInfo(){ Amps = 20, parameter = "5(20)"},
+                new MTComponentInfo(){ Amps = 40, parameter = "10(40)"},
+                new MTComponentInfo(){ Amps = 60, parameter = "15(60)"},
+                new MTComponentInfo(){ Amps = 80, parameter = "20(80)"},
+                new MTComponentInfo(){ Amps = 100, parameter = "30(100)"},
+            };
+        }
+
+        /// <summary>
+        /// 加载电流互感器配置
+        /// </summary>
+        private static void LoadMTConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CurrentTransformerUrl, true);
+            var Table = dataSet.Tables["Sheet1"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    CurrentTransformerConfiguration.CTComponentInfos.Add(new CTComponentInfo()
+                    {
+                        Amps = double.Parse(row[0].ToString()),
+                        parameter = $"{row[0]}/{row[1]}",
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载CPS配置
+        /// </summary>
+        private static void LoadCPSConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.CPSUrl, true);
+            var Table = dataSet.Tables["CPS"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
+                    {
+                        CPSConfiguration.CPSComponentInfos.Add(new CPSComponentInfo()
+                        {
+                            Model = row["型号"].ToString(),
+                            FrameSize = row["壳架规格"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            ResidualCurrent = row["剩余电流动作"].ToString(),
+                            CPSCombination = row["组合形式"].ToString(),
+                            CPSCharacteristics = row["类别代号"].ToString(),
+                            InstallMethod = row["安装方式"].ToString()
+                        });
+                    }
                 }
             }
         }

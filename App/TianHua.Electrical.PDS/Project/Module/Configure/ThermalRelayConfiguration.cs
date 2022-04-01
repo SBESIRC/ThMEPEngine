@@ -9,19 +9,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// LV_AC_Isolator_19DX101.xlsx
     /// </summary>
-    public class ThermalRelayConfiguration
+    public class ThermalRelayConfiguration : PDSBaseComponentConfiguration
     {
         /// <summary>
         /// 热继电器配置
         /// </summary>
-        public static List<ThermalRelayComponentInfo> thermalRelayInfos = new List<ThermalRelayComponentInfo>();
+        public static List<ThermalRelayConfigurationItem> thermalRelayInfos = new List<ThermalRelayConfigurationItem>();
     }
-    public class ThermalRelayComponentInfo
+    public class ThermalRelayConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>
-        /// 型号（全称）
+        /// 型号
         /// </summary>
-        public string ModelName { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 整定电流上限

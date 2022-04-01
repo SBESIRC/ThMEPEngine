@@ -23,11 +23,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         ATSE,
         [Description("手动转换开关")]
         MTSE,
-        [Description("电能表")]
+        [Description("直接表")]
         MT,
-        [Description("电流互感器")]
+        [Description("间接表")]
         CT,
-        [Description("电动机综合保护开关")]
+        [Description("控制保护开关")]
         CPS,
         [Description("熔断器")]
         FU,

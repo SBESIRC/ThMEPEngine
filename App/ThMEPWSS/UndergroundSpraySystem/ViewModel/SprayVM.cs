@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows.Forms;
 using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Uitl;
@@ -75,7 +76,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                         numDic.Add("B" + Convert.ToString(i), -i);
                         numDic.Add("-" + Convert.ToString(i), -i);
                     }
-                    
+                    numDic.Add("B1M", -0);//这儿应该是-0.5，考虑到地下不会出现0层，故采用 0
                     FloorRect = FloorRect.OrderByDescending(e => e.Key).ToDictionary(e=>e.Key, e=>e.Value);
                     
                     storeysRecEngine.Elements
@@ -98,7 +99,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
 
     public static class SprayViewModel
     {
-        public static void InsertNodeMark()
+        public static void InsertNodeMark(string layerName = "W-FRPT-NOTE", string blockName = "喷淋总管标记")
         {
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
@@ -107,9 +108,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                 {
                     using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
                     {
-                        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("喷淋总管标记"), true);
+                        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), true);
+                        if (!acadDatabase.Layers.Contains(layerName))
+                        {
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerName, 0);
+                        }
                     }
                 }
+                
 
                 while (true)
                 {
@@ -121,7 +127,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                     }
                     using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
                     {
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
+                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layerName, blockName,
                                     pt.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0);
                     }
                 }

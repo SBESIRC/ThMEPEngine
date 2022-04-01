@@ -42,11 +42,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     .ForEach(e => DBObjs.Add(ExplodeValve(e)));
             }
         }
-        private bool IsTargetLayer(string layer)
-        {
-            return layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
-                   layer.ToUpper() == "W-FRPT-SPRL-EQPM";
-        }
+
         private bool IsTarget(Entity entity)
         {
             if (entity is BlockReference blockReference)

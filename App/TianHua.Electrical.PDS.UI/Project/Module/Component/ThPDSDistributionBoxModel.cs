@@ -19,6 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("配电箱参数")]
         [DisplayName("配电箱编号")]
         public string ID
         {
@@ -26,6 +27,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("功率")]
+        [Category("配电箱参数")]
         public double InstallCapacity
         {
             get => _node.Details.LowPower;
@@ -38,12 +40,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [DisplayName("相数")]
+        [Category("配电箱参数")]
         [Editor(typeof(ThPDSEnumPropertyEditor<ThPDSPhase>), typeof(PropertyEditorBase))]
         public ThPDSPhase Phase
         {
             get => _node.Load.Phase;
         }
 
+        [Category("配电箱参数")]
         [DisplayName("需要系数")]
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double DemandFactor
@@ -56,6 +60,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("配电箱参数")]
         [DisplayName("功率因数")]
         [Editor(typeof(ThPDSRangedNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double PowerFactor
@@ -69,12 +74,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Category("配电箱参数")]
         [DisplayName("计算电流")]
         public double CalculateCurrent
         {
             get => _node.Load.CalculateCurrent;
         }
 
+        [Category("配电箱参数")]
         [DisplayName("用途描述")]
         public string Description
         {
@@ -86,6 +93,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("配电箱参数")]
         [DisplayName("箱体尺寸")]
         [Editor(typeof(ThPDSEnumPropertyEditor<BoxSize>), typeof(PropertyEditorBase))]
         public BoxSize BoxSize
@@ -98,6 +106,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("配电箱参数")]
         [DisplayName("安装方式")]
         [Editor(typeof(ThPDSEnumPropertyEditor<BoxInstallationType>), typeof(PropertyEditorBase))]
         public BoxInstallationType BoxInstallationType

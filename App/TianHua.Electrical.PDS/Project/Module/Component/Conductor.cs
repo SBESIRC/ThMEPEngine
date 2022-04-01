@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
@@ -15,12 +13,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType , ThPDSLoadTypeCat_1 loadType,bool FireLoad,bool ViaConduit,bool ViaCableTray,string FloorNumber)
+        public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
             ChooseMaterial(loadType, FireLoad, calculateCurrent, phase);
             ChooseCrossSectionalArea(calculateCurrent);
-            ChooseLaying(FloorNumber,circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
         }
 
         /// <summary>
@@ -36,28 +34,28 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 if (fireLoad)
                 {
-                    if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
+                    if (phase == ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
                         this.ConductorUse = config.FireDistributionBranchCircuiCables;
-                        IsWire  = false;
+                        IsWire = false;
                     }
                     else
                     {
                         this.ConductorUse = config.FireDistributionWire;
-                        IsWire  = true;
+                        IsWire = true;
                     }
                 }
                 else
                 {
-                    if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
+                    if (phase == ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
                         this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
-                        IsWire  = false;
+                        IsWire = false;
                     }
                     else
                     {
                         this.ConductorUse = config.NonFireDistributionWire;
-                        IsWire  = true;
+                        IsWire = true;
                     }
 
                 }
@@ -66,28 +64,28 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 if (fireLoad)
                 {
-                    if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
+                    if (phase == ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
                         this.ConductorUse = config.FireDistributionBranchCircuiCables;
-                        IsWire  = false;
+                        IsWire = false;
                     }
                     else
                     {
                         this.ConductorUse = config.FireDistributionWire;
-                        IsWire  = true;
+                        IsWire = true;
                     }
                 }
                 else
                 {
-                    if (phase== ThPDSPhase.三相 && calculateCurrent >= 200)
+                    if (phase == ThPDSPhase.三相 && calculateCurrent >= 200)
                     {
                         this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
-                        IsWire  = false;
+                        IsWire = false;
                     }
                     else
                     {
                         this.ConductorUse = config.NonFireDistributionWire;
-                        IsWire  = true;
+                        IsWire = true;
                     }
                 }
             }
@@ -107,9 +105,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.ConductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse = config.NonFireDistributionWire;
                     else
-                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.DistributionPanel)
@@ -126,9 +124,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.ConductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse = config.NonFireDistributionWire;
                     else
-                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.LumpedLoad)
@@ -147,9 +145,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 else
                 {
                     if (phase == ThPDSPhase.一相)
-                        this.ConductorUse=config.NonFireDistributionWire;
+                        this.ConductorUse = config.NonFireDistributionWire;
                     else
-                        this.ConductorUse=config.NonFireDistributionBranchCircuiCables;
+                        this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
                 }
             }
             if (ConductorUse.ConductorMaterial.Contains('N'))
@@ -207,7 +205,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             else if (conductorCrossSectionalArea <= 400)
             {
-                this.PECrossSectionalArea = conductorCrossSectionalArea/2;
+                this.PECrossSectionalArea = conductorCrossSectionalArea / 2;
             }
             else if (conductorCrossSectionalArea <= 800)
             {
@@ -215,7 +213,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             else
             {
-                this.PECrossSectionalArea = conductorCrossSectionalArea/4;
+                this.PECrossSectionalArea = conductorCrossSectionalArea / 4;
             }
             if (AllMotor)
             {
@@ -496,7 +494,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 穿管管材
         /// </summary>
-        private PipeMaterial PipeMaterial { get; set; }
+        public PipeMaterial PipeMaterial { get; set; }
 
         /// <summary>
         /// 穿管

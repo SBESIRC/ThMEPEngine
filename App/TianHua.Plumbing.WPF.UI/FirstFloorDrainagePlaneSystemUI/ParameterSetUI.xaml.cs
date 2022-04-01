@@ -9,13 +9,9 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
     /// </summary>
     public partial class ParameterSetUI : ThCustomWindow
     {
-        public static ParamSettingViewModel paramSetting;
+        public static ParamSettingViewModel paramSetting = new ParamSettingViewModel();
         public ParameterSetUI()
         {
-            if (paramSetting == null)
-            {
-                paramSetting = new ParamSettingViewModel();
-            }
             this.DataContext = paramSetting;
             InitializeComponent();
         }

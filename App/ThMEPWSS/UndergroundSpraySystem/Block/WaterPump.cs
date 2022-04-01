@@ -3,8 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundSpraySystem.Service;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -21,7 +20,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         }
         public void Insert(AcadDatabase acadDatabase)
         {
-            //BlocksImport.ImportElementsFromStdDwg();
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
                     StPt.OffsetXY(-3200, 1200), new Scale3d(1, 1, 1), 0);
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",

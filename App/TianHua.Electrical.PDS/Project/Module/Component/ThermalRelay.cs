@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     public class ThermalRelay : PDSBaseComponent
     {
         /// <summary>
-        /// 计算电流
+        /// 构造函数
         /// </summary>
         /// <param name="calculateCurrent"></param>
         public ThermalRelay(double calculateCurrent)
@@ -23,15 +23,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
             }
-            ThermalRelayType = thermalRelay.ModelName;
+            Model = thermalRelay.Model;
             PolesNum = thermalRelay.Poles;
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
         }
 
         /// <summary>
-        /// 热继电器类型
+        /// 型号
         /// </summary>
-        public string ThermalRelayType { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 极数
@@ -42,10 +42,5 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 电流整定范围
         /// </summary>
         public string RatedCurrent { get; set; }
-
-        /// <summary>
-        /// 标签
-        /// </summary>
-        public string Content { get { return $"{ThermalRelayType} {RatedCurrent}A"; } }
     }
 }

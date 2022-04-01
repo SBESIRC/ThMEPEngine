@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure
 {
     /// <summary>
     /// LV_AC_Contactor_19DX101.xlsx
     /// </summary>
-    public class ContactorConfiguration
+    public class ContactorConfiguration : PDSBaseComponentConfiguration
     {
         /// <summary>
         /// 接触器配置
         /// </summary>
-        public static List<ContactorComponentInfo> contactorInfos = new List<ContactorComponentInfo>();
+        public static List<ContactorConfigurationItem> contactorInfos = new List<ContactorConfigurationItem>();
     }
-    public class ContactorComponentInfo
+    public class ContactorConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>
-        /// 型号（全称）
+        /// 型号
         /// </summary>
-        public string ModelName { get; set; }
+        public string Model { get; set; }
 
         /// <summary>
         /// 额定电压

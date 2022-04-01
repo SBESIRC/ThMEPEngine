@@ -15,6 +15,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPWSS.Service;
 using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.Pipe.Model;
@@ -152,18 +153,13 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
         {
-            var vertical = new ThVerticalPipeExtractService();
+            var vertical = new ThVerticalPipeExtractService()
+            {
+                LayerFilter = new List<string>() { ThHydrantCommon.Layer_Vertical },
+                Radius = ThHydrantCommon.Radius_Vertical,
+            };
             vertical.Extract(database, framePts);
             VerticalPipe = vertical.VerticalPipe;
-
-            //var blkVertical = new ThBlkVerticalPipeExtractService();
-            //blkVertical.Extract(database, framePts);
-            //BlkVerticalPipe = blkVertical.VerticalPipe;
-
-            //var cVertical = new ThCircleVerticalPipeExtractService();
-            //cVertical.Extract(database, framePts);
-            //CVerticalPipe = cVertical.VerticalPipe;
-
         }
 
         private void ExtractHydrant(Database database, Point3dCollection framePts)

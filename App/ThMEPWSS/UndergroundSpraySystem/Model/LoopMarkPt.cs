@@ -81,7 +81,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             return blkName.Contains("喷淋总管标记");
         }
 
-        public void CreateStartPts(List<Line> pipeLine, ref SprayIn sprayIn, Point3d startPt)
+        public void CreateStartPts(List<Line> pipeLine, SprayIn sprayIn, Point3d startPt)
         {
             var StartPoints = new List<List<Point3d>>();
             foreach (var db in DBObjs)

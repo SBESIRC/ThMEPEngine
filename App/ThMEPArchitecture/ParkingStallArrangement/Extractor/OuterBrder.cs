@@ -200,7 +200,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     var rect = blk.GetRect();
                     RampLists.Add(new Ramps(segLine.Intersect(rect, 0).First(), blk));
 
-                    SegLines.RemoveAt(i);
+                    if(HelperEX.GetAllIntSecPoints(i, SegLines, WallLine).Count < 2)
+                    {
+                        SegLines.RemoveAt(i);
+                    }
                 }
             }
         }
@@ -608,7 +611,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return vaildSegLines;
         }
-        private static List<Point3d> GetAllIntSecPoints(int idx, List<Line> segline, Polyline wallLine)//获取segline中某一跟全部的交点，跟外边框的交点选取最外的交点-车道宽
+        public static List<Point3d> GetAllIntSecPoints(int idx, List<Line> segline, Polyline wallLine)//获取segline中某一跟全部的交点，跟外边框的交点选取最外的交点-车道宽
         {
             double tol = ParameterStock.VerticalSpotWidth *2;// 边界剪掉两个车位宽
             var IntSecPoints = new List<Point3d>();//断点列表

@@ -23,18 +23,19 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        [DisplayName("内容")]
         public string Content => _breaker.Content;
 
         [ReadOnly(true)]
+        [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _breaker.ComponentType.GetDescription();
 
         [DisplayName("型号")]
-        [Editor(typeof(ThPDSBreakerModelPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSModelPropertyEditor), typeof(PropertyEditorBase))]
         public BreakerModel Model
         {
-            get => _breaker.BreakerType;
+            get => _breaker.Model;
             set
             {
                 _breaker.SetModel(value);
@@ -42,11 +43,12 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("壳架规格")]
-        [Editor(typeof(ThPDSBreakerFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string FrameSpecifications
         {
-            get => _breaker.FrameSpecifications;
+            get => _breaker.FrameSpecification;
             set
             {
                 _breaker.SetFrameSpecification(value);
@@ -55,7 +57,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("极数")]
-        [Editor(typeof(ThPDSBreakerPolesNumPropertyEditor), typeof(PropertyEditorBase))]
+        [Category("元器件参数")]
+        [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
         public string PolesNum
         {
             get => _breaker.PolesNum;
@@ -66,8 +69,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("额定电流")]
-        [Editor(typeof(ThPDSBreakerRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSRatedCurrentPropertyEditor), typeof(PropertyEditorBase))]
         public string RatedCurrent
         {
             get => _breaker.RatedCurrent;
@@ -78,6 +82,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
         [DisplayName("脱扣器类型")]
         [Editor(typeof(ThPDSBreakerTripDevicePropertyEditor), typeof(PropertyEditorBase))]
         public string TripUnitType
@@ -91,6 +96,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [DisplayName("附件")]
+        [Category("元器件参数")]
         public string Appendix
         {
             get => _breaker.Appendix;

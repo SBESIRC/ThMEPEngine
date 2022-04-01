@@ -29,16 +29,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public List<FireDistrictRight> FireDistricts { get; set; }
         public List<FireDistrictLeft> FireDistrictLefts { get; set; }
         public List<WaterPump>  WaterPumps{ get; set; }
-        public SprayOut()
+        public SprayOut(Point3d insertPt)
         {
-            var opt = new PromptPointOptions("\n指定喷淋系统图插入点");
-
-            var propPtRes = Active.Editor.GetPoint(opt);
-            InsertPoint = new Point3d();
-            if (propPtRes.Status == PromptStatus.OK)
-            {
-                InsertPoint = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
-            }
+            InsertPoint = insertPt;
             PipeInsertPoint = InsertPoint.Cloned();
             CurrentFloor = "B1";
             PipeLine = new List<Line>();

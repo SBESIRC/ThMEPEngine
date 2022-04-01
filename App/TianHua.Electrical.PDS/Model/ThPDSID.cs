@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -9,8 +10,8 @@ namespace TianHua.Electrical.PDS.Model
             BlockName = "";
             LoadID = "";
             Description = "";
-            CircuitID = new List<string>();
-            CircuitNumber = new List<string>(); 
+            CircuitID = new List<string> { "" };
+            SourcePanelID = new List<string> { "" };
         }
 
         /// <summary>
@@ -29,6 +30,11 @@ namespace TianHua.Electrical.PDS.Model
         public string Description { get; set; }
 
         /// <summary>
+        /// 上级配电箱编号
+        /// </summary>
+        public List<string> SourcePanelID { get; set; }
+
+        /// <summary>
         /// 回路ID
         /// </summary>
         public List<string> CircuitID { get; set; }
@@ -36,11 +42,24 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 回路编号
         /// </summary>
-        public List<string>  CircuitNumber { get; set; }
-
-        /// <summary>
-        /// 上级配电箱编号
-        /// </summary>
-        public string SourcePanelID { get; set; }
+        public List<string> CircuitNumber
+        {
+            get
+            {
+                var circuitNumber = new List<string>();
+                for (var i = 0; i < CircuitID.Count; i++)
+                {
+                    if(!string.IsNullOrEmpty( SourcePanelID[i]) && !string.IsNullOrEmpty(CircuitID[i]))
+                    {
+                        circuitNumber.Add(SourcePanelID[i] + "-" + CircuitID[i]);
+                    }
+                    else
+                    {
+                        circuitNumber.Add("");
+                    }
+                }
+                return circuitNumber;
+            }
+        }
     }
 }
