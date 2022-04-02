@@ -60,22 +60,29 @@ namespace ThMEPHVAC.LoadCalculation.Service
         {
             using (OpenCloseTransaction tx = database.TransactionManager.StartOpenCloseTransaction())
             {
-                var nod_collection = tx.GetObject(database.NamedObjectsDictionaryId, OpenMode.ForWrite) as DBDictionary;
-                if (nod_collection.Contains(NOD_THMEP_MainUI))
+                try
                 {
-                    nod_collection.Remove(NOD_THMEP_MainUI);
-                }
-                var dictionary = new DBDictionary();
-                nod_collection.SetAt(NOD_THMEP_MainUI, dictionary);
-                tx.AddNewlyCreatedDBObject(dictionary, true);
+                    var nod_collection = tx.GetObject(database.NamedObjectsDictionaryId, OpenMode.ForWrite) as DBDictionary;
+                    if (nod_collection.Contains(NOD_THMEP_MainUI))
+                    {
+                        nod_collection.Remove(NOD_THMEP_MainUI);
+                    }
+                    var dictionary = new DBDictionary();
+                    nod_collection.SetAt(NOD_THMEP_MainUI, dictionary);
+                    tx.AddNewlyCreatedDBObject(dictionary, true);
 
-                var xres = new Xrecord()
+                    var xres = new Xrecord()
+                    {
+                        Data = ToResultBuffer(CompressBinary(SerializeBinary(mainUIData))),
+                    };
+                    dictionary.SetAt("outdoorParameterData", xres);
+                    tx.AddNewlyCreatedDBObject(xres, true);
+                    tx.Commit();
+                }
+                catch (Exception ex)
                 {
-                    Data = ToResultBuffer(CompressBinary(SerializeBinary(mainUIData))),
-                };
-                dictionary.SetAt("outdoorParameterData", xres);
-                tx.AddNewlyCreatedDBObject(xres, true);
-                tx.Commit();
+                    //DB有时会有eWasOpenForRead崩溃，暂时先屏蔽这种崩溃
+                }
             }
         }
 

@@ -27,6 +27,8 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 .OfType<BlockReference>()
                 .Where(o =>
                 {
+                    if(o.BlockTableRecord.IsNull || !o.BlockTableRecord.IsValid)
+                        return false;
                     var blockName = o.GetEffectiveName();
                     return blockName== LoadCalculationParameterFromConfig.RoomFunctionBlockName | blockName == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New;
                 })
