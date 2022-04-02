@@ -38,10 +38,10 @@
                     <ComboBox Name ="cbAntiSeismicGrade" Width="100" Grid.Row="1" Grid.Column="1"
                               ItemsSource="{Binding AntiSeismicGrades,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
                               Text="{Binding Model.AntiSeismicGrade,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                    <Label Content="构造部位：" Grid.Row="2" Grid.Column="0"/>
-                    <ComboBox Name ="cbGbzPlace" Width="100" Grid.Row="2" Grid.Column="1"
-                              ItemsSource="{Binding GbzPlaces,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
-                              Text="{Binding Model.GbzPlace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="墙所在部位：" Grid.Row="2" Grid.Column="0"/>
+                    <ComboBox Name ="cbWallLocation" Width="100" Grid.Row="2" Grid.Column="1"
+                              ItemsSource="{Binding WallLocations,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.WallLocation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
                     <Label Content="保护层(mm)：" Grid.Row="3" Grid.Column="0"/>
                     <TextBox Name="tbProtectThick" Width="100" Grid.Row="3" Grid.Column="1" 
                              Text="{Binding Model.C,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
