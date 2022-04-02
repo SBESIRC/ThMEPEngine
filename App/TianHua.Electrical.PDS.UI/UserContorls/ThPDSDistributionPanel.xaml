@@ -48,30 +48,33 @@
                 </ScrollViewer>
             </Border>
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,0,0,442">
-                <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
-                                <TextBlock Text="{Binding Name}"/>
-                            </StackPanel>
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
-                    <TreeView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="批量生成" Command="{Binding BatchGenerate}"></MenuItem>
-                            <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
-                            <MenuItem Header="电气火灾监控"  IsCheckable="True" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}"/>
-                            <MenuItem Header="浪涌保护器">
-                                <MenuItem Header="无" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=None}"/>
-                                <MenuItem Header="SPD1" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD1}"/>
-                                <MenuItem Header="SPD2" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD2}"/>
-                                <MenuItem Header="SPD3" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD3}"/>
-                                <MenuItem Header="SPD4" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD4}"/>
-                            </MenuItem>
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
-                </TreeView>
+                <DockPanel>
+                    <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" DockPanel.Dock="Top" x:Name="searchBar" Command="{Binding SearchCmd}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
+                    <TreeView x:Name="tv" ItemsSource="{Binding DataList}">
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource="{Binding DataList}">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="批量生成" Command="{Binding BatchGenerate}"></MenuItem>
+                                <MenuItem Header="消防电源监控" IsCheckable="True" IsChecked="{Binding Path=Current.FirePowerMonitoring}"/>
+                                <MenuItem Header="电气火灾监控"  IsCheckable="True" IsChecked="{Binding Path=Current.ElectricalFireMonitoring}"/>
+                                <MenuItem Header="浪涌保护器">
+                                    <MenuItem Header="无" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=None}"/>
+                                    <MenuItem Header="SPD1" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD1}"/>
+                                    <MenuItem Header="SPD2" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD2}"/>
+                                    <MenuItem Header="SPD3" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD3}"/>
+                                    <MenuItem Header="SPD4" IsCheckable="True" IsChecked="{Binding Path=Current.SurgeProtection, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=SPD4}"/>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
+                    </TreeView>
+                </DockPanel>
             </Border>
             <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="732,263,0,0">
                 <hc:PropertyGrid x:Name="propertyGrid" />
