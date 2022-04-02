@@ -6,7 +6,6 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.EarthingGrid.Generator.Utils;
 using ThMEPElectrical.EarthingGrid.Generator.Data;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Utils

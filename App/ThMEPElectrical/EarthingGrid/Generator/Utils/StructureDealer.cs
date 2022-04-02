@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -218,11 +217,22 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// Close a polyline by its border points
         /// 注意：要考虑最外边框和包含型边框的区别
         /// </summary>
-        public static void CloseBorder(List<Polyline> polylines, List<Point3d> oriPoints, 
+        public static void CloseBorder(List<Polyline> polylines, HashSet<Point3d> oriPoints, 
             ref Dictionary<Polyline, List<Tuple<Point3d, Point3d>>> closeBorderLine)
         {
+            foreach(var pl in polylines)
+            {
+                for(int i = 0; i < pl.NumberOfVertices; ++i)
+                {
+                    var pt = pl.GetPoint3dAt(i);
+                    if (!oriPoints.Contains(pt))
+                    {
+                        oriPoints.Add(pt);
+                    }
+                }
+            }
+
             var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints);
-            HashSet<Point3d> ptVisit = new HashSet<Point3d>();
             foreach (var dic in outline2BorderPts)
             {
                 Polyline polyline = dic.Key;
@@ -243,12 +253,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     tmpPts = tmpPts.OrderBy(p => p.DistanceTo(tmpLine.StartPoint)).ToList();
                     points.AddRange(tmpPts);
                 }
-                for (int i = 1; i <= points.Count; i++)
+                for (int i = 1; i <= points.Count; ++i)
                 {
-                    if (!ptVisit.Contains(points[i % points.Count]))
                     {
-                        ptVisit.Add(points[i % points.Count]);
-                        closeBorderLine[polyline].Add(new Tuple<Point3d, Point3d>(points[i % points.Count], points[i - 1]));
+                        closeBorderLine[polyline].Add(new Tuple<Point3d, Point3d>(points[i % points.Count], points[(i + points.Count - 1) % points.Count]));
                     }
                 }
             }

@@ -83,7 +83,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             //生成一个Polyline对应一堆其上的线的结构
             //在后面分割的时候不处理这堆东西
             var outlineWithBorderLine = new Dictionary<Polyline, List<Tuple<Point3d, Point3d>>>();
-            StructureDealer.CloseBorder(allOutlines, graph.Keys.ToList(), ref outlineWithBorderLine); ///////////////////这个不一定符合要求，要加入拐点
+            StructureDealer.CloseBorder(allOutlines, graph.Keys.ToHashSet(), ref outlineWithBorderLine);
 
             outlineWithBorderLine.Values.ForEach(tups=> tups.ForEach(o => GraphDealer.AddLineToGraph(o.Item1, o.Item2, ref graph)));
 
@@ -92,10 +92,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             ////此处加到StructureDealer里一个函数：从findPolylineFromLines删除掉outlineWithBorderLine
             //AreaDealer.DeleteBuildingLines(ref findPolylineFromLines, outlineWithBorderLine);
 
-            AreaDealer.SplitBlock(ref findPolylineFromLines); //这个split一定会分割
-
-            //StructureDealer.FixFindPolylineFromLines(ref findPolylineFromLines, graph.Keys.ToList());
-            //让结构中所有点的位置变正确，因为切割会造成误差
+            AreaDealer.SplitBlock(ref findPolylineFromLines);
         }
     }
 }

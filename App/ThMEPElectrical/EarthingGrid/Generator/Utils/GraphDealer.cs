@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using AcHelper;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 {
@@ -559,8 +557,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             }
             return false;
         }
-
-
 
         /// <summary>
         /// Delete lines who connect with eachother with same class in a line set

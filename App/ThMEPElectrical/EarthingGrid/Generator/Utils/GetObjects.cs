@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using ThCADCore.NTS;
 using AcHelper;
 using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.ApplicationServices;
-using NetTopologySuite.Geometries;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 {

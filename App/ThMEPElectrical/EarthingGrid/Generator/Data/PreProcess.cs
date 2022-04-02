@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPElectrical.EarthingGrid.Data;
 using ThMEPElectrical.EarthingGrid.Service;
 using ThMEPElectrical.EarthingGrid.Generator.Connect;
-using ThMEPElectrical.EarthingGrid.Generator.Utils;
-
-using AcHelper;
-using NFox.Cad;
-using ThCADCore.NTS;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Data
 {
@@ -65,6 +59,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
             {
                 outlines.Add(outline);
                 extOutline.Add(outline);
+                buildingWithWalls.Add(outline, new List<Polyline>{ outline });
             }
 
             //输入墙、外边框，获得外边框对应的墙点/边界点，获得外边框对应的近点，点集

@@ -60,7 +60,13 @@ namespace ThMEPElectrical.Command
                 preProcess.Process();
 
                 //3、Generate
-                GridGenerator.Genterate(preProcess, faceSize);
+                var earthGridLines = GridGenerator.Genterate(preProcess, faceSize);
+
+                //4、Display
+                string layerName = "E-GRND-WIRE";
+                //string layerName = LayerDealer.GetLayer();
+                LayerDealer.AddLayer(layerName, 4);
+                LayerDealer.Output(earthGridLines, layerName);
             }
         }
         //public void Execute()

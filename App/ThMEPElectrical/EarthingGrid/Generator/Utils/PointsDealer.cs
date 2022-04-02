@@ -8,11 +8,6 @@ using AcHelper;
 using ThCADExtension;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
-
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 {
@@ -55,7 +50,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// <param name="outlines"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(List<Polyline> outlines, List<Point3d> points, double bufferLength = 500)
+        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(List<Polyline> outlines, HashSet<Point3d> points, double bufferLength = 500)
         {
             var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
             var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();

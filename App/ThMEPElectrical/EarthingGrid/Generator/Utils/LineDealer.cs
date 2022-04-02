@@ -218,7 +218,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             return ansTuples;
         }
 
-        public static HashSet<Tuple<Point3d, Point3d>> Graph2Tuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static HashSet<Tuple<Point3d, Point3d>> Graph2Lines(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
             if (dicTuples.IsNull())
@@ -236,12 +236,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 }
             }
             return tuples;
-        }
-
-
-        public static void RemoveIntersectsLines()
-        {
-
         }
     }
 }
