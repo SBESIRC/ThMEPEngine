@@ -732,14 +732,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             if(componentType == ComponentType.YBZ)
             {
-                if (antiSeismicGrade == "一级" || antiSeismicGrade == "二级")
-                {
-                    return "约束一二级";
-                }
-                else
-                {
-                    return "约束" + antiSeismicGrade;
-                }                
+                return "约束" + antiSeismicGrade;
             }
             else if(componentType == ComponentType.GBZ)
             {
