@@ -33,6 +33,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ThPDSCommand.cs" />
     <Compile Include="Converters\EnumValuesConverter.cs" />
     <Compile Include="Converters\EqualsThenNotVisibeConverter.cs" />
     <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />

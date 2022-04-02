@@ -1,7 +1,6 @@
 ﻿using System;
 using QuikGraph;
 using System.Linq;
-using ThCADExtension;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -13,27 +12,11 @@ using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Commands;
 using TianHua.Electrical.PDS.UI.Converters;
-using System.Windows.Controls.Primitives;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
-    public class PDSCommand : ICommand
-    {
-        public event EventHandler CanExecuteChanged;
-        readonly Action cb;
-        public PDSCommand(Action cb)
-        {
-            this.cb = cb;
-        }
-        public bool CanExecute(object parameter)
-        {
-            return true;
-        }
-        public void Execute(object parameter)
-        {
-            cb();
-        }
-    }
     public class COR
     {
         readonly Dictionary<string, Action> dict = new();
@@ -383,8 +366,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     {
         public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
         {
-            PDSCommand _BatchGenerate;
-            public PDSCommand BatchGenerate
+            ThPDSCommand _BatchGenerate;
+            public ThPDSCommand BatchGenerate
             {
                 get => _BatchGenerate;
                 set
@@ -500,7 +483,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
-            var batchGenCmd = new PDSCommand(() =>
+            var batchGenCmd = new ThPDSCommand(() =>
             {
                 UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                 try
@@ -591,7 +574,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "单独生成",
-                        Command = new PDSCommand(() =>
+                        Command = new ThPDSCommand(() =>
                         {
                             UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                             try
@@ -1249,7 +1232,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 yield return new MenuItem()
                                                 {
                                                     Header = "切换为直接表",
-                                                    Command = new PDSCommand(() =>
+                                                    Command = new ThPDSCommand(() =>
                                                     {
                                                         ThPDSProjectGraphService.ComponentSwitching(edge, meter, PDS.Project.Module.Component.ComponentType.MT);
                                                         UpdateCanvas();
@@ -1261,7 +1244,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 yield return new MenuItem()
                                                 {
                                                     Header = "切换为间接表",
-                                                    Command = new PDSCommand(() =>
+                                                    Command = new ThPDSCommand(() =>
                                                     {
                                                         ThPDSProjectGraphService.ComponentSwitching(edge, meter, PDS.Project.Module.Component.ComponentType.CT);
                                                         UpdateCanvas();
@@ -1276,7 +1259,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 yield return new MenuItem()
                                                 {
                                                     Header = "切换为剩余电流动作断路器",
-                                                    Command = new PDSCommand(() =>
+                                                    Command = new ThPDSCommand(() =>
                                                     {
                                                         ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.RCD);
                                                         UpdateCanvas();
@@ -1288,7 +1271,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 yield return new MenuItem()
                                                 {
                                                     Header = "切换为断路器",
-                                                    Command = new PDSCommand(() =>
+                                                    Command = new ThPDSCommand(() =>
                                                     {
                                                         ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.CB);
                                                         UpdateCanvas();
@@ -2017,7 +2000,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var m = new MenuItem();
                                     mi.Items.Add(m);
                                     m.Header = outType;
-                                    m.Command = new PDSCommand(() =>
+                                    m.Command = new ThPDSCommand(() =>
                                     {
                                         edge.Details.CircuitForm.CircuitFormType = sw.Switch(outType);
                                         UpdateCanvas();
@@ -2029,7 +2012,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 menu.Items.Add(m);
                                 var cvt = new NormalValueConverter(v => (bool)v ? "解锁回路数据" : "锁定回路数据");
                                 m.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new ThPDSCommand(() =>
                                 {
                                     circuitVM.CircuitLock = !circuitVM.CircuitLock;
                                 });
@@ -2038,11 +2021,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 menu.Items.Add(m);
                                 m.Header = "分配负载";
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new ThPDSCommand(() =>
                                 {
                                     var w = new Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                     var ctrl = new UserContorls.ThPDSLoadDistribution();
-                                    ctrl.btnYes.Command = new PDSCommand(() =>
+                                    ctrl.btnYes.Command = new ThPDSCommand(() =>
                                     {
                                         w.Close();
                                     });
@@ -2055,7 +2038,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 menu.Items.Add(m);
                                 m.Header = "删除";
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new ThPDSCommand(() =>
                                 {
                                     var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                                     if (r == MessageBoxResult.Cancel) return;
@@ -2300,7 +2283,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 mi.Items.Add(m);
                                 m.Header = outType;
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new ThPDSCommand(() =>
                                 {
                                     ThPDSProjectGraphService.AddCircuit(graph, vertice, outType);
                                     UpdateCanvas();
@@ -2318,7 +2301,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 mi.Items.Add(m);
                                 m.Header = inType;
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new ThPDSCommand(() =>
                                 {
                                     ThPDSProjectGraphService.UpdateFormInType(graph, vertice, inType);
                                     UpdateCanvas();
