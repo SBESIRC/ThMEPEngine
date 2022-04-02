@@ -542,6 +542,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             canvas.Height = 2000;
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var cvt = new GlyphsUnicodeStringConverter();
+            var cvt2 = new IsStringNullOrWhiteSpaceToVisibilityConverter();
             Action clear = null;
             this.TreeView.DataContext = tree;
             Project.Module.Component.ThPDSDistributionBoxModel boxVM = null;
@@ -1063,23 +1064,57 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "回路编号");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding("Content") 
+                                { 
+                                    Converter = cvt, 
+                                    Source = circuitVM, 
+                                    Path = new PropertyPath(nameof(circuitVM.CircuitID)), 
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                var bd2 = new Binding("Visibility")
+                                {
+                                    Converter = cvt2,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.CircuitID)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                };
+                                item.Key.SetBinding(UIElement.VisibilityProperty, bd2);
                             }
                         }
                         {
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功率");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? " " : v.ToString()), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding("Content") 
+                                { 
+                                    Source = circuitVM, 
+                                    Path = new PropertyPath(nameof(circuitVM.Power)), 
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                    Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? " " : v.ToString()),
+                                };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                var bd2 = new Binding("Visibility")
+                                {
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.Power)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                    Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? false : true),
+                                };
+                                item.Key.SetBinding(UIElement.VisibilityProperty, bd2);
                             }
                         }
                         {
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "相序");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding("Content")
+                                { 
+                                    Converter = cvt, 
+                                    Source = circuitVM, 
+                                    Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), 
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                             }
                         }
@@ -1087,16 +1122,44 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "负载编号");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding("Content") 
+                                { 
+                                    Converter = cvt, 
+                                    Source = circuitVM, 
+                                    Path = new PropertyPath(nameof(circuitVM.LoadId)), 
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                var bd2 = new Binding("Visibility")
+                                {
+                                    Converter = cvt2,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.LoadId)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                };
+                                item.Key.SetBinding(UIElement.VisibilityProperty, bd2);
                             }
                         }
                         {
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功能用途");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding("Content")
+                                {
+                                    Converter = cvt,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.Description)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                var bd2 = new Binding("Visibility")
+                                {
+                                    Converter = cvt2,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.Description)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                                };
+                                item.Key.SetBinding(UIElement.VisibilityProperty, bd2);
                             }
                         }
                     };

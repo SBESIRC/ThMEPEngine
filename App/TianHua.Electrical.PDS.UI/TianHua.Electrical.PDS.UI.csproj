@@ -36,6 +36,7 @@
     <Compile Include="Converters\EnumValuesConverter.cs" />
     <Compile Include="Converters\EqualsThenNotVisibeConverter.cs" />
     <Compile Include="Converters\GlyphsUnicodeStringConverter.cs" />
+    <Compile Include="Converters\IsStringNullOrWhiteSpaceToVisibilityConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
     <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
