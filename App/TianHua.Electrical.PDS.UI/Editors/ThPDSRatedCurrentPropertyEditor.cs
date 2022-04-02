@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
             if (propertyItem.Value is ThPDSIsolatingSwitchModel isolator)
             {
                 // 1. 型号决定了可选的额定电流选项
-                IsolatorConfiguration.isolatorInfos.Where(o => o.Model == isolator.Model).Select(o => o.Amps.ToString()).Distinct();
+                return IsolatorConfiguration.isolatorInfos.Where(o => o.Model == isolator.Model).Select(o => o.Amps.ToString()).Distinct();
             }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {
