@@ -10,10 +10,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Commands;
 using TianHua.Electrical.PDS.UI.Converters;
+using TianHua.Electrical.PDS.UI.Services;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
@@ -364,95 +364,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
-        public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
-        {
-            ThPDSCommand _BatchGenerate;
-            public ThPDSCommand BatchGenerate
-            {
-                get => _BatchGenerate;
-                set
-                {
-                    if (value != _BatchGenerate)
-                    {
-                        _BatchGenerate = value;
-                        OnPropertyChanged(nameof(BatchGenerate));
-                    }
-                }
-            }
-            ThPDSDistributionPanelConfigState _Current;
-            public ThPDSDistributionPanelConfigState Current
-            {
-                get => _Current;
-                set
-                {
-                    if (value != _Current)
-                    {
-                        _Current = value;
-                        OnPropertyChanged(nameof(Current));
-                    }
-                }
-            }
-        }
-        readonly ThPDSDistributionPanelConfig Config = new();
-        public class ThPDSDistributionPanelConfigState : NotifyPropertyChangedBase
-        {
-            PDS.Project.Module.ThPDSProjectGraphNode vertice;
-            public ThPDSDistributionPanelConfigState(PDS.Project.Module.ThPDSProjectGraphNode vertice)
-            {
-                this.vertice = vertice;
-            }
-            public bool FirePowerMonitoring
-            {
-                get => vertice.Details.FirePowerMonitoring;
-                set
-                {
-                    if (value != FirePowerMonitoring)
-                    {
-                        vertice.Details.FirePowerMonitoring = value;
-                        OnPropertyChanged(nameof(FirePowerMonitoring));
-                    }
-                }
-            }
-            public bool ElectricalFireMonitoring
-            {
-                get => vertice.Details.ElectricalFireMonitoring;
-                set
-                {
-                    if (value != ElectricalFireMonitoring)
-                    {
-                        vertice.Details.ElectricalFireMonitoring = value;
-                        OnPropertyChanged(nameof(ElectricalFireMonitoring));
-                    }
-                }
-            }
-            public Array SurgeProtectionTypes => Enum.GetValues(typeof(PDS.Project.Module.SurgeProtectionDeviceType));
-            public PDS.Project.Module.SurgeProtectionDeviceType SurgeProtection
-            {
-                get => vertice.Details.SurgeProtection;
-                set
-                {
-                    if (value != SurgeProtection)
-                    {
-                        vertice.Details.SurgeProtection = value;
-                        OnPropertyChanged(nameof(SurgeProtection));
-                    }
-                }
-            }
-            double _busLength;
-            public double BusLength
-            {
-                get => _busLength;
-                set
-                {
-                    if (value != _busLength)
-                    {
-                        _busLength = value;
-                        OnPropertyChanged(nameof(BusLength));
-                    }
-                }
-            }
-        }
-        public UserContorls.ThPDSDistributionPanel Panel;
+        private readonly ThPDSDistributionPanelConfig Config = new();
         public TreeView TreeView;
         public Canvas Canvas;
         public ThPDSContext Context;
@@ -1047,12 +959,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "回路编号");
                             if (item.Key != null)
                             {
-                                var bd = new Binding("Content") 
-                                { 
-                                    Converter = cvt, 
-                                    Source = circuitVM, 
-                                    Path = new PropertyPath(nameof(circuitVM.CircuitID)), 
-                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                var bd = new Binding("Content")
+                                {
+                                    Converter = cvt,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.CircuitID)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                                 };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 var bd2 = new Binding("Visibility")
@@ -1069,10 +981,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功率");
                             if (item.Key != null)
                             {
-                                var bd = new Binding("Content") 
-                                { 
-                                    Source = circuitVM, 
-                                    Path = new PropertyPath(nameof(circuitVM.Power)), 
+                                var bd = new Binding("Content")
+                                {
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.Power)),
                                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                                     Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? " " : v.ToString()),
                                 };
@@ -1092,11 +1004,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             if (item.Key != null)
                             {
                                 var bd = new Binding("Content")
-                                { 
-                                    Converter = cvt, 
-                                    Source = circuitVM, 
-                                    Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), 
-                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                {
+                                    Converter = cvt,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.PhaseSequence)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                                 };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                             }
@@ -1105,12 +1017,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "负载编号");
                             if (item.Key != null)
                             {
-                                var bd = new Binding("Content") 
-                                { 
-                                    Converter = cvt, 
-                                    Source = circuitVM, 
-                                    Path = new PropertyPath(nameof(circuitVM.LoadId)), 
-                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, 
+                                var bd = new Binding("Content")
+                                {
+                                    Converter = cvt,
+                                    Source = circuitVM,
+                                    Path = new PropertyPath(nameof(circuitVM.LoadId)),
+                                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                                 };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 var bd2 = new Binding("Visibility")
@@ -1397,7 +1309,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 breaker = idx == 0 ? breaker1 : (idx == 1 ? breaker2 : breaker3);
                                                 if (breaker != null)
                                                 {
-                                                    reg(breaker, "CB"+(idx+1));
+                                                    reg(breaker, "CB" + (idx + 1));
                                                 }
                                                 else
                                                 {
