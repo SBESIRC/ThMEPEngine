@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.Reinforcement.Draw;
 using ThMEPStructure.Reinforcement.Model;
+using ThMEPStructure.Reinforcement.Service;
 
 namespace ThMEPStructure.Reinforcement.Command
 {
@@ -51,6 +52,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 //datas.Add(ThReinforceTestData.TTypeEdgeComponent);
                 //datas.Add(ThReinforceTestData.TTypeCalEdgeComponent);
 
+                acadDb.Database.Import();
                 var results = tableBuilder.Build(datas);
                 results.OfType<Entity>().ForEach(e =>
                 {

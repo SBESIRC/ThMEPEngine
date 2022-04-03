@@ -5,6 +5,8 @@ using ThMEPStructure.Reinforcement.Model;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Service;
 using Dreambuild.AutoCAD;
+using AcHelper;
+
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class ThReinforceTableBuilder
@@ -25,9 +27,6 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public DBObjectCollection Build(List<ThEdgeComponent> components)
         {
-            Database database = new Database();
-            database.Import();
-
             DBObjectCollection objectCollection=new DBObjectCollection();
             DBObjectCollection tmpColllection = new DBObjectCollection();
             //整个区域的宽
@@ -90,7 +89,6 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
 
             return objectCollection;
-            throw new NotImplementedException();
         }
     }
 }
