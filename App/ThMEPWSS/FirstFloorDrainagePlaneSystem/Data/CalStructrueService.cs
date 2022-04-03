@@ -155,7 +155,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 var frame = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
                 originTransformer.Transform(frame);
-                if (polyline.Contains(frame))
+                if (polyline.Contains(frame) || polyline.IsIntersects(frame))
                 {
                     frameLst.Add(frame);
                 }

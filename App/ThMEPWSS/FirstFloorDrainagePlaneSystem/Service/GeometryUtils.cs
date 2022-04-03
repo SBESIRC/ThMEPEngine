@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPEngineCore.CAD;
 
@@ -62,10 +63,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         {
             var resLines = new List<Line>();
             var allLines = new List<Line>(lines);
-            var connectLines = lines.Where(x => x.StartPoint.DistanceTo(line.StartPoint) < tol ||
-                x.StartPoint.DistanceTo(line.EndPoint) < tol ||
-                x.EndPoint.DistanceTo(line.StartPoint) < tol ||
-                x.EndPoint.DistanceTo(line.EndPoint) < tol).ToList();
+            var connectLines = lines.Where(x => x.Distance(line) < tol).ToList();
             resLines.AddRange(connectLines);
             allLines = allLines.Except(connectLines).ToList();
             var resConnectLines = new List<Line>();

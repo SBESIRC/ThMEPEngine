@@ -33,7 +33,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 分类连管（找到连管主管）
         /// </summary>
         public void GetMainPolyVerticalPipe()
-        {
+         {
             pipeTuples = new List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>>();
             foreach (var dRoom in deepRooms)
             {
@@ -246,7 +246,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 
             var mainLinePt = originMainLine.StartPoint.DistanceTo(connectPt) < originMainLine.EndPoint.DistanceTo(connectPt) ?
                 originMainLine.StartPoint : originMainLine.EndPoint;
-            routeModel.route.AddVertexAt(routeModel.route.NumberOfVertices, mainLinePt.ToPoint2D(), 0, 0, 0);
+            if (originMainLine.GetClosestPointTo(connectPt, false).DistanceTo(connectPt) > 0.1)
+            {
+                routeModel.route.AddVertexAt(routeModel.route.NumberOfVertices, mainLinePt.ToPoint2D(), 0, 0, 0);
+            }
             return routeModel;
         }
 
@@ -309,7 +312,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var outRooms = deepRooms.Select(x => x.Key).ToList();
             var frames = outFrames.Where(x =>
             {
-                var bufferFrame = x;//.Buffer(100)[0] as Polyline;
+                var bufferFrame = x.Buffer(100)[0] as Polyline;
                 return outRooms.Where(y => y.Intersects(bufferFrame)).Count() == 1;
             }).ToList();
             var mainLine = mainRoute.route.GetAllLineByPolyline().FirstOrDefault(x => frames.Any(y => y.IsIntersects(x)));

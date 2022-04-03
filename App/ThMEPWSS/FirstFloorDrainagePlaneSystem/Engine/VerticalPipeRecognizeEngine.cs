@@ -71,7 +71,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 if (connectPipe != null)
                 {
                     canUseLines.Remove(line);
-                    var connectLines = GeometryUtils.GetConenctLine(canUseLines, line);
+                    var connectLines = GeometryUtils.GetConenctLine(canUseLines, line).Distinct().ToList();
                     canUseLines = canUseLines.Except(connectLines).ToList();
                     connectLines.Add(line);
                     var resText = GetMathcingMarkTextByLine(connectLines, markTxts);

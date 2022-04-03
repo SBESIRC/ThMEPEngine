@@ -21,10 +21,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<Polyline> outUserPoly;                         //出户框线
         List<Polyline> rooms;                               //房间框线
         List<Curve> gridLines;                              //轴网线
-        ParamSettingViewModel paramSetting = null;          //
+        ParamSettingViewModel paramSetting = null;          //参数
         readonly double step = 50;                          //步长
         readonly double lineDis = 210;                      //连接线区域范围
-        readonly double lineWieght = 3;                     //连接线区域权重
+        readonly double lineWieght = 5;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
             List<Curve> grids, List<Polyline> _outUserPoly, List<Polyline> _rooms, ParamSettingViewModel _paramSetting)
@@ -116,7 +116,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
                 weightHoles.Add(CreateOtherPipeHoles(connectPipes, pipe, closetLine.Key), double.MaxValue);
-                weightHoles.Add(holeConnectLines, lineWieght);
+                weightHoles.Add(holeConnectLines, 8);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
@@ -181,30 +181,35 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var closePoly = outUserPoly.OrderBy(x => x.Distance(longLine)).FirstOrDefault();
                 if (closePoly != null)
                 {
+                    var dir = StructGeoService.GetPolylineDir(closePoly);
                     var matrix = GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
-                    var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix.Inverse())).ToList();
+                    var classifyMatrix = GetMatrix(dir);
+                    var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(classifyMatrix.Inverse())).ToList();
                     double minX = polyPts.OrderBy(x => x.X).First().X;
                     double maxX = polyPts.OrderByDescending(x => x.X).First().X;
+                    var classifyPipeDic = mainPipes.ToDictionary(x => x, y => y.Position.TransformBy(classifyMatrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
                     var orderPipeDic = mainPipes.ToDictionary(x => x, y => y.Position.TransformBy(matrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, y => y.Value);
                     var indexX = minX + 200;
+                    var midIndec = (minX + maxX) / 2;
                     var leftPipes = new Dictionary<VerticalPipeModel, Point3d>();
                     var rightPipes = new Dictionary<VerticalPipeModel, Point3d>();
-                    foreach (var pipe in orderPipeDic)
+                    foreach (var pipe in classifyPipeDic)
                     {
-                        if (pipe.Value.X < indexX)
+                        if (pipe.Value.X < indexX || pipe.Value.X < midIndec)
                         {
-                            leftPipes.Add(pipe.Key, pipe.Value);
+                            leftPipes.Add(pipe.Key, orderPipeDic[pipe.Key]);
                             indexX += 300;
+                            midIndec -= 300;
                         }
                         else
                         {
-                            rightPipes.Add(pipe.Key, pipe.Value);
+                            rightPipes.Add(pipe.Key, orderPipeDic[pipe.Key]);
                         }
                     }
 
                     var resPipes = new List<VerticalPipeModel>();
-                    resPipes.AddRange(OrderDistance(matrix, leftPipes, closePoly, true));
-                    resPipes.AddRange(OrderDistance(matrix, rightPipes, closePoly, false));
+                    resPipes.AddRange(OrderDistance(matrix, leftPipes, longLine, true));
+                    resPipes.AddRange(OrderDistance(matrix, rightPipes, longLine, false));
                     return resPipes;
                 }
             }
@@ -219,14 +224,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="pipes"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<VerticalPipeModel> OrderDistance(Matrix3d matrix, Dictionary<VerticalPipeModel, Point3d> pipes, Polyline polyline, bool isLeft)
+        private List<VerticalPipeModel> OrderDistance(Matrix3d matrix, Dictionary<VerticalPipeModel, Point3d> pipes, Line polyline, bool isLeft)
         {
             if (pipes.Count <= 0)
             {
                 return new List<VerticalPipeModel>();
             }
-            var pipePt = pipes.First().Value;
-            var checkDir = (pipePt - polyline.GetClosestPointTo(pipePt, false)).GetNormal();
+            var pipePt = pipes.First().Key.Position;
+            var checkDir = (pipePt - polyline.GetClosestPointTo(pipePt, true)).GetNormal();
             if (checkDir.DotProduct(matrix.CoordinateSystem3d.Yaxis) < 0)
             {
                 if (isLeft)

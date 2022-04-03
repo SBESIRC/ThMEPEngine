@@ -194,7 +194,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         private Line FindRouteIntersectLine(Polyline routePoly, Polyline frame)
         {
             var allLines = routePoly.GetAllLineByPolyline();
-            return allLines.FirstOrDefault(x => x.IsIntersects(frame));
+            var interLines = allLines.Where(x => x.IsIntersects(frame)).ToList();
+            var dir = StructGeoService.GetPolylineDir(frame);
+            interLines = interLines.OrderBy(x => Math.Abs((x.EndPoint - x.StartPoint).GetNormal().DotProduct(dir))).ToList();
+            return interLines.FirstOrDefault();
         }
 
         /// <summary>

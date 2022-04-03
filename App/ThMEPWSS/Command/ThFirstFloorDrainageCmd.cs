@@ -65,11 +65,11 @@ namespace ThMEPWSS.Command
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
-                        //foreach (var item in holeWalls)
-                        //{
-                        //    originTransformer.Reset(item);
-                        //    acad.ModelSpace.Add(item);
-                        //}
+                        foreach (var item in holeWalls)
+                        {
+                            originTransformer.Reset(item);
+                            acad.ModelSpace.Add(item);
+                        }
                         foreach (var item in routes)
                         {
                             var line = item.route;
