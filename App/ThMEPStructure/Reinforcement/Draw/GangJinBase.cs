@@ -10,6 +10,10 @@ namespace ThMEPStructure.Reinforcement.Draw
     abstract class GangJinBase
     {
         public abstract void Draw();
+
+        /// <summary>
+        /// 钢筋类型，0为纵筋，1为箍筋，2为拉筋
+        /// </summary>
         public int GangjinType;
     }
 }
