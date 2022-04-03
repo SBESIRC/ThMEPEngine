@@ -72,30 +72,44 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         private ThEdgeComponent ParseYBZ(ShapeCode shape, List<Tuple<string, string>> values)
         {
-            switch (shape)
+            if (values.Count > 0)
             {
-                case ShapeCode.Rect:
-                    return ParseYBZRectType(values);
-                case ShapeCode.L:
-                    return ParseYBZLType(values);
-                case ShapeCode.T:
-                    return ParseYBZTType(values);
-                default:
-                    return null;
+                switch (shape)
+                {
+                    case ShapeCode.Rect:
+                        return ParseYBZRectType(values);
+                    case ShapeCode.L:
+                        return ParseYBZLType(values);
+                    case ShapeCode.T:
+                        return ParseYBZTType(values);
+                    default:
+                        return null;
+                }
+            }
+            else
+            {
+                return null;
             }
         }
         private ThEdgeComponent ParseGBZ(ShapeCode shape,List<Tuple<string,string>> values)
         {
-            switch (shape)
+            if (values.Count > 0)
             {
-                case ShapeCode.Rect:
-                    return ParseGBZRectType(values);
-                case ShapeCode.L:
-                    return ParseGBZLType(values);
-                case ShapeCode.T:
-                    return ParseGBZTType(values);
-                default:
-                    return null;
+                switch (shape)
+                {
+                    case ShapeCode.Rect:
+                        return ParseGBZRectType(values);
+                    case ShapeCode.L:
+                        return ParseGBZLType(values);
+                    case ShapeCode.T:
+                        return ParseGBZTType(values);
+                    default:
+                        return null;
+                }
+            }
+            else
+            {
+                return null;
             }
         }
         private ThRectangleEdgeComponent ParseYBZRectType(List<Tuple<string, string>> values)

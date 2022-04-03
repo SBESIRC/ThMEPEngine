@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ThMEPStructure.Reinforcement.Model;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
@@ -13,11 +14,11 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public WallColumnReinforceSetVM()
         {
             Model = new ThWallColumnReinforceSetModel();
-            WallLocations = new ObservableCollection<string>() { "底部加强区", "其它部位" };
-            Frames = new ObservableCollection<string>() { "A0", "A1", "A2", "A3" };
-            AntiSeismicGrades = new ObservableCollection<string>() { "一级", "二级", "三级", "四级" };
-            DrawScales = new ObservableCollection<string>() { "1:1", "1:10", "1:20", "1:25", "1:30", "1:50" };
-            ConcreteStrengthGrades = new ObservableCollection<string>() { "C35", "C40", "C45", "C50", "C55", "C60" }; 
+            Frames = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.Frames);
+            DrawScales = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.DrawScales);
+            WallLocations = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.WallLocations);            
+            AntiSeismicGrades = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.AntiSeismicGrades);            
+            ConcreteStrengthGrades = new ObservableCollection<string>(ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrades); 
         }
         public void Set()
         {

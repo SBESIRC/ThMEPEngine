@@ -25,13 +25,14 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public ObservableCollection<string> MarkPositions { get; set; }
         private string LayerLinkCharater = "、";
         private static List<DBObjectCollection> ComponentBoundaries { get; set; }
+        private List<List<EdgeComponentExtractInfo>> GroupResults { get; set; }
         public EdgeComponentDrawVM()
         {
             DrawModel = new EdgeComponentDrawModel();
-            DwgSources = new ObservableCollection<string>() { "YJK" };
-            SortWays = new ObservableCollection<string>() { "从左到右，从下到上" };
-            LeaderTypes = new ObservableCollection<string>() { "折现引出" };
-            MarkPositions = new ObservableCollection<string>() { "右上", "右下", "左上", "左下" };
+            DwgSources = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.DwgSources);
+            SortWays = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.SortWays);
+            LeaderTypes = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.LeaderTypes);
+            MarkPositions = new ObservableCollection<string>(ThEdgeComponentDrawConfig.Instance.MarkPositions);
             EdgeComponents = new ObservableCollection<EdgeComponentExtractInfo>();
             if(ComponentBoundaries==null)
             {
@@ -41,6 +42,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             {
                 RemoveComponentFrames();
             }
+            GroupResults = new List<List<EdgeComponentExtractInfo>>();
         }
         public void Select()
         {
@@ -72,15 +74,17 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         }
         public void Merge()
         {
+            // 分组
             var infos = new List<EdgeComponentExtractInfo>();
-            for(int i =0;i< EdgeComponents.Count;i++)
+            for (int i = 0; i < EdgeComponents.Count; i++)
             {
                 infos.Add(EdgeComponents[i]);
             }
             var grouper = new ThDataGroupService(DrawModel.IsConsiderWall,
                 DrawModel.StirrupRatio, DrawModel.ReinforceRatio);
-            var results = grouper.Group(infos);
-            var groups = results
+            GroupResults = grouper.Group(infos); // 保存分组的结果
+
+            var groups = GroupResults
                 .Where(o => o.Count > 0).Select(o => o.First())
                 .GroupBy(o => o.ComponentType.ToString())
                 .ToList();
@@ -97,10 +101,27 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                     EdgeComponents.Add(items[i]);
                 }
             }
+            // 把编号再赋值给同组的其它成员
+            foreach(var info in EdgeComponents)
+            {
+                GroupResults.ForEach(g =>
+                {
+                    if (g.Contains(info))
+                    {
+                        g.ForEach(o => o.Number = info.Number);
+                    }
+                });
+            }
         }
         public void Draw()
         {
-            //throw new NotImplementedException();
+            using (var cmd = new ThReinforceDrawCmd())
+            {
+                cmd.ExtractInfos = EdgeComponents.ToList();
+                cmd.ExtractInfoGroups = GroupResults;
+                DrawModel.SetConfig(); // 把参数传递配置中
+                cmd.Execute();
+            }
         }
         public void SetWallColumnLayer()
         {

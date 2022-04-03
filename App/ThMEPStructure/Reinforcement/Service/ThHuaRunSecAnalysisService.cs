@@ -14,6 +14,14 @@ namespace ThMEPStructure.Reinforcement.Service
     /// </summary>
     internal abstract class ThHuaRunSecAnalysisService
     {
+        public const string BwKword = "Bw";
+        public const string HcKword = "Hc";
+        public const string Hc1Kword = "Hc1";
+        public const string Hc2Kword = "Hc2";
+        public const string BfKword = "Bf";
+        public const string Hc2sKword = "Hc2s";
+        public const string Hc2lKword = "Hc2l";
+
         protected string AntiSeismicGrade { get; set; }
         protected DBObjectCollection Walls { get; set; }
         protected double EnvelopeSearchLength = 2.0;        
@@ -94,8 +102,8 @@ namespace ThMEPStructure.Reinforcement.Service
             // 附加规格
             Hc = specService.A;
             Bw = specService.B;
-            componentExtractInfo.SpecDict.Add("Hc", Hc);
-            componentExtractInfo.SpecDict.Add("Bw", Bw);
+            componentExtractInfo.SpecDict.Add(HcKword, Hc);
+            componentExtractInfo.SpecDict.Add(BwKword, Bw);
             componentExtractInfo.Spec = this.Spec;
         }
         private int GetLinkWallEdgeCount(List<Tuple<Point3d,Point3d>> edges)
@@ -208,10 +216,10 @@ namespace ThMEPStructure.Reinforcement.Service
                     }
                 }
             }
-            componentExtractInfo.SpecDict.Add("Hc1", Hc1);
-            componentExtractInfo.SpecDict.Add("Bw", Bw);
-            componentExtractInfo.SpecDict.Add("Hc2", Hc2);
-            componentExtractInfo.SpecDict.Add("Bf", Bf);
+            componentExtractInfo.SpecDict.Add(Hc1Kword, Hc1);
+            componentExtractInfo.SpecDict.Add(BwKword, Bw);
+            componentExtractInfo.SpecDict.Add(Hc2Kword, Hc2);
+            componentExtractInfo.SpecDict.Add(BfKword, Bf);
             componentExtractInfo.Spec = this.Spec;
         }
     }
@@ -330,11 +338,11 @@ namespace ThMEPStructure.Reinforcement.Service
             Hc2s = Math.Min(specService.C, specService.G);
             Hc2l = Math.Max(specService.C, specService.G);
             Bf = specService.E;
-            componentExtractInfo.SpecDict.Add("Hc1", Hc1);
-            componentExtractInfo.SpecDict.Add("Bw", Bw);
-            componentExtractInfo.SpecDict.Add("Hc2s", Hc2s);
-            componentExtractInfo.SpecDict.Add("Hc2l", Hc2l);
-            componentExtractInfo.SpecDict.Add("Bf", Bf);
+            componentExtractInfo.SpecDict.Add(Hc1Kword, Hc1);
+            componentExtractInfo.SpecDict.Add(BwKword, Bw);
+            componentExtractInfo.SpecDict.Add(Hc2sKword, Hc2s);
+            componentExtractInfo.SpecDict.Add(Hc2lKword, Hc2l);
+            componentExtractInfo.SpecDict.Add(BfKword, Bf);
             componentExtractInfo.Spec = this.Spec;
         }
     }

@@ -7,6 +7,7 @@ namespace ThMEPStructure.Reinforcement.Service
 {
     public static class ThImportTemplateStyleService
     {
+        public static string ThStyle3TextStyle = "TH-STYLE3";
         public static void Import(this Database database)
         {
             using (var acadDb = AcadDatabase.Use(database))
@@ -30,7 +31,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             get
             {
-                return new List<string> { "TSSD_REIN", "TH-STYLE3"};
+                return new List<string> { "TSSD_REIN", ThStyle3TextStyle};
             }
         }
         private static List<string> DimStyles

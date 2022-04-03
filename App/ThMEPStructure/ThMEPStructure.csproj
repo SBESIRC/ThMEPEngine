@@ -71,6 +71,7 @@
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\ConnectSecondaryBeamService.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Service\GetPrimitivesService.cs" />
     <Compile Include="GirderConnect\Service\ImportService.cs" />
+    <Compile Include="Reinforcement\Command\ThReinforceDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThReinforceTableDrawCmd.cs" />
     <Compile Include="Reinforcement\Command\ThReinforceTestData.cs" />
     <Compile Include="Reinforcement\Command\ThTTypeReinforceDrawCmd.cs" />

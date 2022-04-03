@@ -66,7 +66,9 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 
         private void btnDraw_Click(object sender, RoutedEventArgs e)
         {
+            this.Hide();
             drawVM.Draw();
+            this.Show();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)

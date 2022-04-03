@@ -138,6 +138,22 @@ namespace ThMEPStructure.Reinforcement.Model
                 }
             }
         }
+        /// <summary>
+        /// 查询对应的规格
+        /// </summary>
+        /// <param name="key">关键字</param>
+        /// <returns>规格值</returns>
+        public int? QuerySpec(string key)
+        {
+            foreach (var item in SpecDict)
+            {
+                if (item.Key.ToLower() == key.ToLower())
+                {
+                    return item.Value;
+                }
+            }
+            return null;
+        }
     }
     public enum ShapeCode
     {

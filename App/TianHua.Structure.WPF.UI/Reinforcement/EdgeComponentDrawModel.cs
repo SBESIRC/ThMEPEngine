@@ -1,4 +1,5 @@
 ﻿using ThControlLibraryWPF.ControlUtils;
+using ThMEPStructure.Reinforcement.Model;
 
 namespace TianHua.Structure.WPF.UI.Reinforcement
 {
@@ -146,18 +147,32 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             }
         }
         public EdgeComponentDrawModel()
+        {     
+            size = ThEdgeComponentDrawConfig.Instance.Size;
+            sortWay = ThEdgeComponentDrawConfig.Instance.SortWay;
+            textLayer = ThEdgeComponentDrawConfig.Instance.TextLayer;
+            wallLayer = ThEdgeComponentDrawConfig.Instance.WallLayer;
+            dwgSource = ThEdgeComponentDrawConfig.Instance.DwgSource;
+            leaderType = ThEdgeComponentDrawConfig.Instance.LeaderType;
+            stirrupRatio = ThEdgeComponentDrawConfig.Instance.StirrupRatio;
+            markPosition = ThEdgeComponentDrawConfig.Instance.MarkPosition;
+            reinforceRatio = ThEdgeComponentDrawConfig.Instance.ReinforceRatio;
+            isConsiderWall = ThEdgeComponentDrawConfig.Instance.IsConsiderWall;
+            wallColumnLayer = ThEdgeComponentDrawConfig.Instance.WallColumnLayer;
+        }
+        public void SetConfig()
         {
-            size = 1;
-            stirrupRatio = 1;
-            wallLayer = "砼墙";
-            dwgSource = "YJK";
-            isConsiderWall = true;
-            reinforceRatio = 0.06;
-            markPosition = "右上";
-            leaderType = "折现引出";
-            wallColumnLayer = "边构";
-            sortWay = "从左到右，从下到上";
-            textLayer = "dsptext_walledge、dsptext_walledgeCal、dsptext_walledgeCX";
+            ThEdgeComponentDrawConfig.Instance.Size = size;
+            ThEdgeComponentDrawConfig.Instance.SortWay = sortWay;
+            ThEdgeComponentDrawConfig.Instance.TextLayer = textLayer;
+            ThEdgeComponentDrawConfig.Instance.WallLayer = wallLayer;
+            ThEdgeComponentDrawConfig.Instance.DwgSource = dwgSource;
+            ThEdgeComponentDrawConfig.Instance.LeaderType = leaderType;
+            ThEdgeComponentDrawConfig.Instance.StirrupRatio = stirrupRatio;
+            ThEdgeComponentDrawConfig.Instance.MarkPosition = markPosition;
+            ThEdgeComponentDrawConfig.Instance.ReinforceRatio = reinforceRatio;
+            ThEdgeComponentDrawConfig.Instance.IsConsiderWall = isConsiderWall;
+            ThEdgeComponentDrawConfig.Instance.WallColumnLayer = wallColumnLayer;
         }
     }
 }
