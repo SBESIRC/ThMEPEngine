@@ -1,39 +1,9 @@
 ﻿using System;
 using QuikGraph;
 using System.Collections.Generic;
-using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>
-    {
-        public ThPDSLoad Load { get; set; }
-        public PDSNodeType Type { get; set; }
-        public NodeDetails Details { get; set; }
-        public bool IsStartVertexOfGraph { get; set; }
-        public ThPDSProjectGraphNode()
-        {
-            Load = new ThPDSLoad();
-            Type = PDSNodeType.None;
-            IsStartVertexOfGraph = false;
-            Details = new NodeDetails();
-        }
-        public bool Equals(ThPDSProjectGraphNode other)
-        {
-            return this.Type == other.Type && this.Load.Equals(other.Load);
-        }
-    }
-
-    public class ThPDSProjectGraphEdge<T> : EquatableTaggedEdge<T, ThPDSProjectGraphEdgeTag> where T : ThPDSProjectGraphNode
-    {
-        public ThPDSCircuit Circuit { get; set; }
-        public CircuitDetails Details { get; set; }
-        public ThPDSProjectGraphEdge(T source, T target) : base(source, target, null)
-        {
-            //
-        }
-    }
-
     [Serializable]
     public class ThPDSProjectGraph
     {

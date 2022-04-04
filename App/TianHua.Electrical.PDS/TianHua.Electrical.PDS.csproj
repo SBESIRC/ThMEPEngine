@@ -73,7 +73,10 @@
     <Compile Include="Project\Module\Configure\MotorConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphEdge.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeTag.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNode.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
