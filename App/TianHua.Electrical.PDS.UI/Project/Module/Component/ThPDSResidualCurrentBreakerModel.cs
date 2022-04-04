@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [Category("元器件参数")]
         [DisplayName("剩余电流动作")]
-        [Editor(typeof(ThPDSResidualCurrentPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSResidualCurrentPropertyEditor<ResidualCurrentSpecification>), typeof(PropertyEditorBase))]
         public ResidualCurrentSpecification ResidualCurrent
         {
             get => RCBreaker.ResidualCurrent;

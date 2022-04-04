@@ -234,15 +234,15 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum ResidualCurrentSpecification
     {
         [Description("10mA")]
-        Specification10,
+        Specification10 = 1,
         [Description("30mA")]
-        Specification30,
+        Specification30 = 2,
         [Description("100mA")]
-        Specification100,
+        Specification100 = 3,
         [Description("300mA")]
-        Specification300,
+        Specification300 = 4,
         [Description("500mA")]
-        Specification500,
+        Specification500 = 5,
     }
 
     /// <summary>
