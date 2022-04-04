@@ -19,15 +19,31 @@ namespace TianHua.Electrical.PDS.Project.Module
             Details = new NodeDetails();
         }
 
+        #region
         public event EventHandler TagChanged;
         protected virtual void OnTagChanged(EventArgs args)
         {
             this.TagChanged?.Invoke(this, args);
         }
+        #endregion
 
-        public bool Equals(ThPDSProjectGraphNode other)
+        #region
+        public virtual bool Equals(ThPDSProjectGraphNode other)
         {
-            return this.Type == other.Type && this.Load.Equals(other.Load);
+            if (other != null)
+            {
+                return this.Type == other.Type && this.Load.Equals(other.Load);
+            }
+            return false;
         }
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ThPDSProjectGraphNode);
+        }
+        public override int GetHashCode()
+        {
+            return this.Load.GetHashCode();
+        }
+        #endregion
     }
 }
