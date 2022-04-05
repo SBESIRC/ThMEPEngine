@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="Graph"></param>
         public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
         {
-            var ProjectGraph = new ThPDSProjectGraph() { Graph = graph };
+            var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
             return ProjectGraph;
         }
