@@ -71,7 +71,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 if (connectPipe != null)
                 {
                     canUseLines.Remove(line);
-                    var connectLines = GeometryUtils.GetConenctLine(canUseLines, line).Distinct().ToList();
+                    var connectLines = GeometryUtils.GetConenctLine(canUseLines, line, 0.001).Distinct().ToList();
                     canUseLines = canUseLines.Except(connectLines).ToList();
                     connectLines.Add(line);
                     var resText = GetMathcingMarkTextByLine(connectLines, markTxts);
@@ -197,7 +197,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             var connectPipes = pipes.Where(x => markLine.GetClosestPointTo(x.Center, false).DistanceTo(x.Center) < x.Radius).ToList();
             if (connectPipes.Count > dBTexts.Count - 1)
             {
-                connectPipes.OrderBy(x => x.Center.DistanceTo(connectPipe.Center)).ToList().RemoveRange(dBTexts.Count - 1, connectPipes.Count - 1);
+                connectPipes = connectPipes.OrderBy(x => x.Center.DistanceTo(connectPipe.Center)).ToList();
+                connectPipes.RemoveRange(dBTexts.Count - 1, connectPipes.Count - 1);
             }
             connectPipes.Add(connectPipe);
             connectPipes.ToDictionary(x => x, y => dBTexts.OrderByDescending(z => z.Position.DistanceTo(y.Center)).First());

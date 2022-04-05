@@ -16,15 +16,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     public class HandleConfluenceService
     {
         //item1.洁具废水主管 item2.洁具污水主管 item3.其他废水支管 item4.其他污水支管 item5.房间内其他立管 item6. 带权联通房间
-        public List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>> pipeTuples;
+        public List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>> pipeTuples;
         public List<VerticalPipeModel> otherOutPoly;
         List<VerticalPipeModel> verticalPipes;
         SewageWasteWaterEnum sewageWasteWaterEnum;
-        List<Dictionary<Polyline, int>> deepRooms;
+        SingleRowSettingEnum singleRowSettingEnum;
+        List<Dictionary<KeyValuePair<Polyline, List<string>>, int>> deepRooms;
         readonly double step = 50;                          //步长
-        public HandleConfluenceService(SewageWasteWaterEnum _sewageWasteWaterEnum, List<VerticalPipeModel> _verticalPipes, List<Dictionary<Polyline, int>> _deepRooms)
+        public HandleConfluenceService(ParamSettingViewModel paramSetting, List<VerticalPipeModel> _verticalPipes, List<Dictionary<KeyValuePair<Polyline, List<string>>, int>> _deepRooms)
         {
-            sewageWasteWaterEnum = _sewageWasteWaterEnum;
+            sewageWasteWaterEnum = paramSetting.SewageWasteWater;
+            singleRowSettingEnum = paramSetting.SingleRowSetting;
             verticalPipes = _verticalPipes;
             deepRooms = _deepRooms;
         }
@@ -34,12 +36,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public void GetMainPolyVerticalPipe()
          {
-            pipeTuples = new List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>>();
+            pipeTuples = new List<Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>>();
             foreach (var dRoom in deepRooms)
             {
                 var rooms = dRoom.Select(x => x.Key).ToList();
-                var roomPipeDic = verticalPipes.ToDictionary(x => x, y => dRoom.FirstOrDefault(z => z.Key.Contains(y.Position)))
-                    .Where(x => !default(KeyValuePair<Polyline, int>).Equals(x.Value))
+                var roomPipeDic = verticalPipes.ToDictionary(x => x, y => dRoom.FirstOrDefault(z => z.Key.Key.Contains(y.Position)))
+                    .Where(x => !default(KeyValuePair<KeyValuePair<Polyline, List<string>>, int>).Equals(x.Value))
                     .OrderByDescending(x => x.Value.Value)
                     .ToDictionary(x => x.Key, y => y.Value);
                 var roomEquipementPipes = roomPipeDic.Where(x => x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList(); //洁具点位
@@ -52,7 +54,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (roomEquipementPipes.Count > 0)
                 {
                     wasteMainPoly = roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe).FirstOrDefault();
-                    if (sewageWasteWaterEnum == SewageWasteWaterEnum.Confluence)
+                    if (sewageWasteWaterEnum == SewageWasteWaterEnum.Confluence || singleRowSettingEnum == SingleRowSettingEnum.ReservedPlug)
                     {
                         roomEquipementPipes.ForEach(x => x.PipeType = VerticalPipeType.ConfluencePipe);
                         if (wasteMainPoly == null)
@@ -70,7 +72,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     otherSewagePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.SewagePipe).ToList();
                 }
                 otherVerPipes = roomPipeDic.Where(x => !x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList();
-                var tuple = new Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<Polyline, int>>(wasteMainPoly, sewageMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
+                var tuple = new Tuple<VerticalPipeModel, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>(wasteMainPoly, sewageMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
                 pipeTuples.Add(tuple);
 
                 verticalPipes = verticalPipes.Except(roomPipeDic.Select(x => x.Key)).ToList();
@@ -90,7 +92,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="outFrames"></param>
         /// <returns></returns>
         public List<RouteModel> ConnectPipe(Polyline frame, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys,
-            RouteModel mainRoute, Dictionary<Polyline, int> rooms, List<Polyline> outFrames)
+            RouteModel mainRoute, Dictionary<KeyValuePair<Polyline, List<string>>, int> rooms, List<Polyline> outFrames)
         {
             if (otherPipes.Count <= 0 || mainRoute == null)
             {
@@ -307,9 +309,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="deepRooms"></param>
         /// <param name="outFrames"></param>
         /// <returns></returns>
-        private KeyValuePair<Polyline, Line> GetMainPipeLine(RouteModel mainRoute, Dictionary<Polyline, int> deepRooms, List<Polyline> outFrames, List<Polyline> wallPolys)
+        private KeyValuePair<Polyline, Line> GetMainPipeLine(RouteModel mainRoute, Dictionary<KeyValuePair<Polyline, List<string>>, int> deepRooms, List<Polyline> outFrames, List<Polyline> wallPolys)
         {
-            var outRooms = deepRooms.Select(x => x.Key).ToList();
+            var outRooms = deepRooms.Select(x => x.Key.Key).ToList();
             var frames = outFrames.Where(x =>
             {
                 var bufferFrame = x.Buffer(100)[0] as Polyline;

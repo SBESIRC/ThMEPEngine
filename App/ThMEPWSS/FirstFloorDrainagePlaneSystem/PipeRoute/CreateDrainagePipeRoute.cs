@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<VerticalPipeModel> verticalPipes;              //排雨水立管
         List<Polyline> wallPolys;                           //墙线
         List<Polyline> outUserPoly;                         //出户框线
-        List<Polyline> rooms;                               //房间框线
+        Dictionary<Polyline, List<string>> rooms;           //房间框线
         List<Curve> gridLines;                              //轴网线
         ParamSettingViewModel paramSetting = null;          //参数
         readonly double step = 50;                          //步长
@@ -27,7 +28,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double lineWieght = 5;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
-            List<Curve> grids, List<Polyline> _outUserPoly, List<Polyline> _rooms, ParamSettingViewModel _paramSetting)
+            List<Curve> grids, List<Polyline> _outUserPoly, Dictionary<Polyline, List<string>> _rooms, ParamSettingViewModel _paramSetting)
         {
             frame = polyline;
             mainSewagePipes = sewagePolys;
@@ -50,7 +51,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             RoomPolyService roomPolyService = new RoomPolyService();
             var roomDeep = roomPolyService.GetRoomDeep(rooms, outUserPoly);
 
-            HandleConfluenceService handleConfluenceService = new HandleConfluenceService(paramSetting.SewageWasteWater, verticalPipes, roomDeep);
+            HandleConfluenceService handleConfluenceService = new HandleConfluenceService(paramSetting, verticalPipes, roomDeep);
             handleConfluenceService.GetMainPolyVerticalPipe();
             foreach (var pipeTuple in handleConfluenceService.pipeTuples)
             {
@@ -62,26 +63,64 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 ReprocessingPipe reprocessingPipe = new ReprocessingPipe(routing, outUserPoly);     //后处理间距
                 routing = reprocessingPipe.Reprocessing();
 
-                if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Confluence)
+                if (paramSetting.SingleRowSetting == SingleRowSettingEnum.DrawDetail)
                 {
-                    var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
-                    otherPipes.AddRange(pipeTuple.Item4);
-                    var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
-                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
-                }
-                else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
-                {
-                    var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
-                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
+                    if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Confluence)
+                    {
+                        var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
+                        otherPipes.AddRange(pipeTuple.Item4);
+                        var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
+                    }
+                    else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
+                    {
+                        var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
 
-                    var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
-                    resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                        var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
+                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                    }
                 }
+                else if (paramSetting.SingleRowSetting == SingleRowSettingEnum.ReservedPlug)
+                {
+                    if (pipeTuple.Item1 != null)
+                    {
+                        CreateReservedPlug(routing, pipeTuple.Item1.Position);
+                    }
+                }
+                
                 resRoutes.AddRange(routing);
             }
 
            
             return resRoutes;
+        }
+
+        /// <summary>
+        /// 计算堵头
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="point"></param>
+        private void CreateReservedPlug(List<RouteModel> routes, Point3d point)
+        {
+            var mainWasteRoute = routes.Where(x => x.startPosition.DistanceTo(point) < 0.01).FirstOrDefault();
+            if (mainWasteRoute != null)
+            {
+                var poly = mainWasteRoute.route;
+                var frame = GeometryUtils.FindOutFrame(poly, outUserPoly, point);
+                var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, frame);
+                var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
+                var pts = new Point3dCollection();
+                intersectLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                if (pts.Count > 0)
+                {
+                    var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();
+                    var dir = (lastPt - sp).GetNormal();
+                    var ep = lastPt + dir * 200;
+                    var resPoly = GeometryUtils.GetBreakLine(poly, sp, ep);
+                    mainWasteRoute.route = resPoly;
+                }
+            }
         }
 
         /// <summary>
@@ -116,9 +155,20 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
                 weightHoles.Add(CreateOtherPipeHoles(connectPipes, pipe, closetLine.Key), double.MaxValue);
-                weightHoles.Add(holeConnectLines, 8);
+                weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
+                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                using (acad.Database.GetDocument().LockDocument())
+                {
+                    foreach (var item in weightHoles)
+                    {
+                        foreach (var s in item.Key)
+                        {
+                           //acad.ModelSpace.Add(s);
+                        }
+                    }
+                }
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
@@ -162,7 +212,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var pipeHoles = new List<Polyline>();
             foreach (var pipe in otherPipes)
             {
-                pipeHoles.Add(pipe.Position.CreatePolylineByPt(step / 2 + 1, dir));
+                pipeHoles.Add(pipe.Position.CreatePolylineByPt(step / 2, dir));
             }
             
             return pipeHoles;

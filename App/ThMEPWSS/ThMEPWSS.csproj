@@ -45,6 +45,7 @@
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreatePipePlugService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\HandleConfluenceService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\RoomPolyService.cs" />
     <Compile Include="DrainageADPrivate\Data\ThVerticalPipeExtractService.cs" />
