@@ -121,6 +121,11 @@ namespace ThMEPHVAC.FanLayout.Command
                 double holeAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
                 //通过，point1和point2构造一条直线，然后进行buffer，得到一个很小的范围，再在这个范围没，提取风管
                 var tmpLine = new Line(point1, point2);
+                if(tmpLine.Length < 1.0)
+                {
+                    Active.Editor.WriteMessage("请选择风管中心线上位置不同的两个点\n");
+                    return;
+                }
                 var tmpAre = tmpLine.Buffer(10);
                 //提取到风管，然后进行数据提取
                 ThDuctInfo info;
