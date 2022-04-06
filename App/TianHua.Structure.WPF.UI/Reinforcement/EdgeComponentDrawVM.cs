@@ -117,6 +117,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         {
             using (var cmd = new ThReinforceDrawCmd())
             {
+                RemoveComponentFrames();
                 cmd.ExtractInfos = EdgeComponents.ToList();
                 cmd.ExtractInfoGroups = GroupResults;
                 DrawModel.SetConfig(); // 把参数传递配置中

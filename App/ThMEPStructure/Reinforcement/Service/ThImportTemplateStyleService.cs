@@ -23,8 +23,10 @@ namespace ThMEPStructure.Reinforcement.Service
         { 
             get
             {
-                return new List<string> { "COLU_DE_TH", "LABEL" , "COLU_DE_TEXT",
-                    "TAB", "TAB_TEXT", "LABEL","z-详图标注","THIN","LINK","REIN"};
+                return new List<string> { 
+                    "COLU_DE_TH","COLU_DE_DIM","COLU_DE_TEXT","Defpoints",
+                    "LABEL" ,"LINK","REIN", "TAB", "TAB_TEXT","THIN",
+                    "xk-biaozhu","z-详图标注"};
             }
         }
         private static List<string> TextStyles

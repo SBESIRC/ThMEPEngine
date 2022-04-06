@@ -298,13 +298,13 @@ namespace ThMEPStructure.Reinforcement.Service
             var preStr = reinforceText.Substring(0, firstIndex);
             var nextStr = reinforceText.Substring(firstIndex + 1);
 
-            var pattern1 = @"\d+\.{0,1}\d+[(]\d+\.{0,1}\d+[%]{1}[)]{1}";
-            var pattern2 = @"\d+\.{0,1}\d+[%]{1}";
+            var pattern1 = @"\d+[.]{0,1}(\d+){0,}[(|（]\d+\.{0,1}\d+[%]{1,}[)|）]{1}";
+            var pattern2 = @"\d+[.]{0,1}\d+[%]{1,}";
             var rg1 = new Regex(pattern1);
             var rg2 = new Regex(pattern2);
             if(rg1.IsMatch(preStr) && rg2.IsMatch(nextStr))
             {
-                var pattern3 = @"\d+\.{0,1}\d+";
+                var pattern3 = @"\d+[.]{0,1}\d+";
                 var rg3 = new Regex(pattern3);
                 foreach (Match match in rg3.Matches(preStr))
                 {
