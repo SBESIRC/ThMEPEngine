@@ -16,6 +16,8 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Diagnostics;
+using ThMEPEngineCore.CAD;
+
 using ThMEPWSS.Sprinkler.Data;
 
 using ThMEPWSS.HydrantLayout.Service;
@@ -71,7 +73,7 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         public void Transform(ThMEPOriginTransformer transformer)
         {
-            VerticalPipe.ForEach(x => transformer.Transform (x.Outline));
+            VerticalPipe.ForEach(x => transformer.Transform(x.Outline));
             HydrantModel.ForEach(x => x.Transform(transformer));
 
             Wall.ForEach(x => transformer.Transform(x));
@@ -83,7 +85,19 @@ namespace ThMEPWSS.HydrantLayout.Data
             Car.ForEach(x => transformer.Transform(x));
             Well.ForEach(x => transformer.Transform(x));
         }
+        public void ProjectOntoXYPlane()
+        {
+            VerticalPipe.ForEach(x => x.Outline.ProjectOntoXYPlane());
+            HydrantModel.ForEach(x => x.ProjectOntoXYPlane());
+            Wall.ForEach(x => x.ProjectOntoXYPlane());
+            Column.ForEach(x => x.ProjectOntoXYPlane());
+            Door.ForEach(x => x.ProjectOntoXYPlane());
+            FireProof.ForEach(x =>x.ProjectOntoXYPlane());
+            Room.ForEach(x => x.ProjectOntoXYPlane());
 
+            Car.ForEach(x => x.ProjectOntoXYPlane());
+            Well.ForEach(x => x.ProjectOntoXYPlane());
+        }
         public void Reset(ThMEPOriginTransformer transformer)
         {
             VerticalPipe.ForEach(x => transformer.Reset(x.Outline));
@@ -104,7 +118,7 @@ namespace ThMEPWSS.HydrantLayout.Data
         {
             VerticalPipe.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0VerticalPipe", 140));
             HydrantModel.ForEach(x => DrawUtils.ShowGeometry(x.Center, "l0Hydrant", 140));
-            HydrantModel.ForEach(x => DrawUtils.ShowGeometry(x.Outline , "l0Hydrant", 140));
+            HydrantModel.ForEach(x => DrawUtils.ShowGeometry(x.Outline, "l0Hydrant", 140));
 
             Wall.ForEach(x => DrawUtils.ShowGeometry(x, "l0wall", 1));
             Column.ForEach(x => DrawUtils.ShowGeometry(x, "l0column", 3));
