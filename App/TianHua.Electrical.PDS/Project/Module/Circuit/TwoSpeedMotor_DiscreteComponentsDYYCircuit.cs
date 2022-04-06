@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 双速电动机-分立元件星三角启动 回路
     /// </summary>
+    [CircuitGroup(CircuitGroup.Group3)]
     public class TwoSpeedMotor_DiscreteComponentsDYYCircuit : PDSBaseOutCircuit
     {
         public TwoSpeedMotor_DiscreteComponentsDYYCircuit()
@@ -41,5 +43,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位6：接触器3 
         /// </summary>
         public Contactor contactor3 { get; set; }
+
+        /// <summary>
+        /// 低速导体
+        /// </summary>
+        public Conductor conductor1 { get; set; }
+
+        /// <summary>
+        /// 高速导体
+        /// </summary>
+        public Conductor conductor2 { get; set; }
     }
 }

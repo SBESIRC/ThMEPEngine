@@ -1,7 +1,9 @@
 ﻿using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
+    [CircuitGroup(CircuitGroup.Group3)]
     public class TwoSpeedMotor_DiscreteComponentsYYCircuit : PDSBaseOutCircuit
     {
         /// <summary>
@@ -36,5 +38,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位5：热继电器2
         /// </summary>
         public ThermalRelay thermalRelay2 { get; set; }
+
+        /// <summary>
+        /// 低速导体
+        /// </summary>
+        public Conductor conductor1 { get; set; }
+
+        /// <summary>
+        /// 高速导体
+        /// </summary>
+        public Conductor conductor2 { get; set; }
     }
 }

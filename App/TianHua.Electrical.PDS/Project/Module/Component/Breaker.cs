@@ -4,6 +4,7 @@ using ThCADExtension;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
+using System.Text.RegularExpressions;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -33,7 +34,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="characteristics">瞬时脱扣器类型</param>
         public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
         {
-            if(ProjectSystemConfiguration.SinglePhasePolesNum.Contains(polesNum))
+            ComponentType = ComponentType.CB;
+
+            if (ProjectSystemConfiguration.SinglePhasePolesNum.Contains(polesNum))
             {
                 AlternativePolesNum = ProjectSystemConfiguration.SinglePhasePolesNum;
             }
@@ -41,7 +44,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectSystemConfiguration.ThreePhasePolesNum;
             }
-            ComponentType = ComponentType.CB;
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)
@@ -59,13 +61,64 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             RatedCurrent =breaker.Amps.ToString();
             TripUnitType =breaker.TripDevice;
 
-            
             Characteristics = characteristics;
             Breakers = breakers;
             AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
             AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
             AlternativeTripDevice = tripDevice;
+            AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 断路器
+        /// </summary>
+        /// <param name="breakerConfig">指定断路器配置</param>
+        public Breaker(string breakerConfig)
+        {
+            ComponentType = ComponentType.CB;
+
+            //例：MCB63-MA2.5/3P
+            string[] configs = breakerConfig.Split('-');
+            string[] detaileds = configs[1].Split('/');
+            var model = (BreakerModel)Enum.Parse(typeof(BreakerModel), Regex.Replace(configs[0], @"\d", ""));
+            var frameSpecification = Regex.Replace(configs[0], @"\D", "");
+            var polesNum =detaileds[1];
+            int numIndex = detaileds[0].IndexOfAny(ProjectSystemConfiguration.NumberArray);
+            var ratedCurrent = detaileds[0].Substring(numIndex);
+            var tripUnitType = detaileds[0].Substring(0,numIndex);
+
+            var breakers = BreakerConfiguration.breakerComponentInfos.
+                Where(o => o.Model == model
+                && o.FrameSize == frameSpecification
+                && o.Poles == polesNum
+                && o.TripDevice == tripUnitType
+                && o.Amps.ToString() == ratedCurrent
+                && o.ResidualCurrent.IsNullOrWhiteSpace()).Take(1).ToList();
+            if (breakers.Count == 0)
+            {
+                throw new NotSupportedException();
+            }
+            var breaker = breakers.First();
+            Model = breaker.Model;
+            FrameSpecification = breaker.FrameSize;
+            PolesNum =breaker.Poles;
+            RatedCurrent =breaker.Amps.ToString();
+            TripUnitType =breaker.TripDevice;
+
+            Characteristics = "";
+            Breakers = breakers;
+            AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
+            AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
+            AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+            AlternativeTripDevice = new List<string>() { TripUnitType };
+            AlternativePolesNum = new List<string>() { PolesNum };
+            //Characteristics = "C";
+            //AlternativePolesNum = new List<string>() { PolesNum };
+            //AlternativeModel = new List<BreakerModel>() { Model };
+            //AlternativeFrameSpecifications = new List<string>() { FrameSpecification };
+            //AlternativeRatedCurrent = new List<string>() { RatedCurrent };
+            //AlternativeTripDevice = new List<string>() { TripUnitType };
         }
 
         /// <summary>
