@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
+    <Compile Include="Command\ThPDSInfoModifyCommand.cs" />
     <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
     <Compile Include="Diagram\ThPDSComponentContentExtension.cs" />
@@ -53,7 +54,9 @@
     <Compile Include="Model\ThPDSBlockReferenceData.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSDBTextCollection.cs" />
+    <Compile Include="Model\ThPDSEdgeMap.cs" />
     <Compile Include="Model\ThPDSEntityInfo.cs" />
+    <Compile Include="Model\ThPDSNodeMap.cs" />
     <Compile Include="Model\ThPDSTextInfo.cs" />
     <Compile Include="Project\Module\CircuitFormInSwitcher.cs" />
     <Compile Include="Project\Module\CircuitFormOutSwitcher.cs" />

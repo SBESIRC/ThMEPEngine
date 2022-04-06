@@ -35,7 +35,6 @@ namespace TianHua.Electrical.PDS.Service
                 FireLoad = false,
                 Location = new ThPDSLocation
                 {
-                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
                     BasePoint = distBoxData.Position,
                 }
             };

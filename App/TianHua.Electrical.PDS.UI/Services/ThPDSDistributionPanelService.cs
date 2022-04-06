@@ -408,11 +408,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         foreach (var n in node.DataList) dfs(n);
                     }
                     dfs(tree);
-                    foreach (var vertice in checkeddVertices)
-                    {
-                        var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
-                        drawCmd.Execute();
-                    }
+                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                    drawCmd.Execute();
                     AcHelper.Active.Editor.Regen();
                 }
                 finally
@@ -493,7 +490,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 if (TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
                                 var vertices = graph.Vertices.ToList();
-                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertices[sel.Id]);
+                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertices);
                                 drawCmd.Execute();
                                 AcHelper.Active.Editor.Regen();
                             }
