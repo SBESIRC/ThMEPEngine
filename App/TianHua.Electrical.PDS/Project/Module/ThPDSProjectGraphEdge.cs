@@ -11,5 +11,30 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             //
         }
+
+        #region
+        public override bool Equals(EquatableEdge<ThPDSProjectGraphNode> other)
+        {
+            if (other is ThPDSProjectGraphEdge edge)
+            {
+                return Circuit.ID.CircuitID.Equals(edge.Circuit.ID.CircuitID);
+            }
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ThPDSProjectGraphEdge edge)
+            {
+                return Circuit.ID.CircuitID.Equals(edge.Circuit.ID.CircuitID);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Circuit.ID.CircuitID.GetHashCode();
+        }
+        #endregion
     }
 }
