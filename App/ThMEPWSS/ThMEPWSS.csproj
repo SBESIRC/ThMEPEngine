@@ -295,6 +295,38 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
+    <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
+    <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
+    <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemUtils.cs" />
+    <Compile Include="UndergroundWaterSystem\Engine\ThBreakExtractionEngine.cs" />
+    <Compile Include="UndergroundWaterSystem\Engine\ThDimExtractionEngine.cs" />
+    <Compile Include="UndergroundWaterSystem\Engine\ThMarkExtractionEngine.cs" />
+    <Compile Include="UndergroundWaterSystem\Engine\ThPipeExtractionEngine.cs" />
+    <Compile Include="UndergroundWaterSystem\Engine\ThRiserExtractionEngine.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThBaseModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThDimModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThFloorInfo.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThFloorModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThMarkModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThBreakExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThDimExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThFloorInfoExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThFloorHandleService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThSystemMapService.cs" />
+    <Compile Include="UndergroundWaterSystem\Tree\ThPipeModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Tree\ThPointModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThBreakModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThMarkExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThPipeHandleService.cs" />
+    <Compile Include="UndergroundWaterSystem\Tree\ThPipeTree.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThRiserModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThPipeExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThRiserExtracionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Tree\ThTreeNode.cs" />
+    <Compile Include="UndergroundWaterSystem\Tree\ThPointTree.cs" />
+    <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemInfoModel.cs" />
+    <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemInfoViewModel.cs" />
+    <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemParamViewModel.cs" />
     <Compile Include="UndergroundSpraySystem\General\LineMerge.cs" />
     <Compile Include="UndergroundSpraySystem\Method\BranchDealWithAcorssFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Method\CheckSprayType.cs" />
@@ -799,6 +831,8 @@
     <Folder Include="HydrantLayout\tmp\Model\" />
     <Folder Include="HydrantLayout\tmp\Service\" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup />
   <ItemGroup />
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />

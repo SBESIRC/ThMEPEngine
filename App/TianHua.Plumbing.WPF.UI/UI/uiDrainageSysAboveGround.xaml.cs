@@ -128,7 +128,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 FormUtil.EnableForm(gridForm);
             }
-            
         }
 
         private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
