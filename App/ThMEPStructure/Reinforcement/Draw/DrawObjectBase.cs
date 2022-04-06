@@ -106,7 +106,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             DBText dBText = new DBText();
             dBText.TextString = number;
             dBText.Height = 300;
-
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight, 300, number);
             dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
@@ -114,6 +114,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             dBText = new DBText();
             dBText.TextString = elevation;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 2, 300, elevation);
             dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
@@ -121,6 +122,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             dBText = new DBText();
             dBText.TextString = Reinforce;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 2, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 3, 300, Reinforce);
             dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
@@ -128,6 +130,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             dBText = new DBText();
             dBText.TextString = Stirrup;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 3, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 4, 300, Stirrup);
             dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
