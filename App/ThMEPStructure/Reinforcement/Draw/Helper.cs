@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class StrToReinforce
@@ -306,6 +307,140 @@ namespace ThMEPStructure.Reinforcement.Draw
         public static double TwoPointDist(Point3d A, Point3d B)
         {
             return Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
+        }
+
+        public static void CreateRectAndLabel(Point3d Left,Point3d Right,int num,int size,List<Polyline>polylist,List<DBText>txtlist,double dist1,double dist2,int type,double width)
+        {
+
+            //线框
+            Polyline Rect = new Polyline();
+            var pts = new Point3dCollection
+            {
+                //逆时针方向
+                Left+new Vector3d(-width,width,0),
+                new Point3d(Left.X,Right.Y,0)+new Vector3d(-width,-width,0),
+                Right+new Vector3d(width,-width,0),
+                new Point3d(Right.X, Left.Y,0)+new Vector3d(width,width,0)
+            };
+            Rect = pts.CreatePolyline();
+
+           
+
+            //引线
+            Point3d L = Rect.GetPoint3dAt(0);
+            Point3d R = Rect.GetPoint3dAt(2);
+            Polyline label = new Polyline();
+         
+            
+            if (type == 1)
+            {
+                //折线方向：上左
+                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D() + new Vector2d(0, dist1), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D() + new Vector2d(-dist2, dist1), 0, 0, 0);
+            }
+            else if (type == 2)
+            {
+                //折线方向：上右
+                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D() + new Vector2d(0, dist1), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, L.Y, 0).ToPoint2D() + new Vector2d(dist2, dist1), 0, 0, 0);
+            }
+            else if (type == 3)
+            {
+                //折线方向：左上
+                label.AddVertexAt(0, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(L.X, (L.Y+R.Y)/2, 0).ToPoint2D() + new Vector2d(-dist1, 0), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(-dist1, dist2), 0, 0, 0);
+            }
+            else if (type == 4)
+            {
+                //折线方向：左下
+                label.AddVertexAt(0, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(-dist1, 0), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(-dist1, -dist2), 0, 0, 0);
+            }
+            else if (type == 5)
+            {
+                //折线方向：下左
+                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() , 0, 0, 0);
+                label.AddVertexAt(1, new Point3d((L.X+R.X)/2, R.Y, 0).ToPoint2D() + new Vector2d(0, -dist1), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(-dist2,-dist1), 0, 0, 0);
+            }
+            else if (type == 6)
+            {
+                //折线方向：下右
+                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(0, -dist1), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(dist2, -dist1), 0, 0, 0);
+            }
+            else if (type == 7)
+            {
+                //折线方向：右上
+                label.AddVertexAt(0, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(R.X,(L.Y+ R.Y)/2, 0).ToPoint2D() + new Vector2d(dist1, 0), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1,dist2), 0, 0, 0);
+            }
+            else if (type == 8)
+            {
+                //折线方向：右下
+                label.AddVertexAt(0, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1, 0), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1, -dist2), 0, 0, 0);
+            }
+
+            //文字
+            DBText txt = new DBText();
+            txt.Height = 300;
+            txt.TextString = num + "C" + size;
+            if (type == 1)
+            {
+                txt.Position = label.GetPoint3dAt(2) + new Vector3d(50, 50, 0);
+            }
+            else if (type == 2)
+            {
+                txt.Position = label.GetPoint3dAt(1) + new Vector3d(50, 50, 0);
+            }
+            else if (type == 3)
+            {
+                txt.Position = label.GetPoint3dAt(1) + new Vector3d(-50, 50, 0);
+                txt.Rotation = Math.PI / 2;
+            }
+            else if (type == 4)
+            {
+                txt.Position = label.GetPoint3dAt(2) + new Vector3d(-50, 50, 0);
+                txt.Rotation = Math.PI / 2;
+            }
+            else if (type == 5)
+            {
+                txt.Position = label.GetPoint3dAt(2) + new Vector3d(50, 50, 0);
+            }
+            else if (type == 6)
+            {
+                txt.Position = label.GetPoint3dAt(1) + new Vector3d(50, 50, 0);
+            }
+            else if (type == 7)
+            {
+                txt.Position = label.GetPoint3dAt(2) + new Vector3d(50, 50, 0);
+                txt.Rotation = -Math.PI / 2;
+            }
+            else if (type == 8)
+            {
+                txt.Position = label.GetPoint3dAt(1) + new Vector3d(50, 50, 0);
+                txt.Rotation = -Math.PI / 2;
+            }
+
+            //加入多段线和文本
+            polylist.Add(Rect);
+            polylist.Add(label);
+            txtlist.Add(txt);
+
+        }
+
+        public static Point3d getMid(Point3d A,Point3d B)
+        {
+            Point3d res = new Point3d((A.X + B.X) / 2, (A.Y + B.Y) / 2, (A.Z + B.Z) / 2);
+            return res;
         }
     }
 }
