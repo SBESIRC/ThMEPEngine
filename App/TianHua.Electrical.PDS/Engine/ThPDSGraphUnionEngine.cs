@@ -12,15 +12,11 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSGraphUnionEngine
     {
-        private Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> NodeMap;
+        private List<ThPDSEdgeMap> EdgeMapList;
 
-        private Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> EdgeMap;
-
-        public ThPDSGraphUnionEngine(Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
-            Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap)
+        public ThPDSGraphUnionEngine(List<ThPDSEdgeMap> edgeMapList)
         {
-            NodeMap = nodeMap;
-            EdgeMap = edgeMap;
+            EdgeMapList = edgeMapList;
         }
 
         public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
@@ -71,10 +67,20 @@ namespace TianHua.Electrical.PDS.Engine
                             edge.Circuit.ViaConduit = true;
                         }
                         addEdgeList.Add(edge);
+                        
                         var objectIds = new List<ObjectId>();
-                        objectIds.AddRange(EdgeMap[cabletrayEdgeList[j]]);
-                        objectIds.AddRange(EdgeMap[cabletrayEdgeList[i]]);
-                        EdgeMap.Add(edge, objectIds);
+                        var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
+                        if (targetMap != null)
+                        {
+                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                        }
+                        var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
+                        if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
+                        {
+                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                        }
+                        targetMap.EdgeMap.Add(edge, objectIds);
+
                         break;
                     }
                 }

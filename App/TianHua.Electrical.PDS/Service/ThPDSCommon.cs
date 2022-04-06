@@ -44,12 +44,14 @@
 
         public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
         public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
+        public const double INNER_TOLERANCE = 57400.0;  //内框高度
 
         public static readonly string MOTOR_AND_LOAD_LABELS = "电动机及负载标注";
         public static readonly string LOAD_LABELS = "负载标注";
         public static readonly string LOAD_DETAILS = "负载明细";
         public static readonly string PUMP_LABELS = "水泵标注";
 
+        public static readonly string SYSTEM_DIAGRAM_TABLE_FRAME = "THAPE_A1L_inner";
         public static readonly string SYSTEM_DIAGRAM_TABLE_HEADER = "系统图内框及标题栏";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TITLE = "系统图标题栏";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE = "单相计算表";

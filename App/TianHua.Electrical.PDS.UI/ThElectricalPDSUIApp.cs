@@ -53,14 +53,21 @@ namespace TianHua.Electrical.PDS.UI
         {
             var cmd = new ThPDSCommand();
             cmd.Execute();
+
+            // 系统图绘制
             var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-            if (graph == null) return;
-            var vertices = graph.Vertices.ToList();
-            for (var i = 0; i < vertices.Count; i++)
+            if (graph == null)
             {
-                var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices[i]);
-                drawCmd.Execute();
+                return;
             }
+            var vertices = graph.Vertices.ToList();
+            var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
+            drawCmd.Execute();
+
+            // 标注修改
+            //var modifyCmd = new ThPDSInfoModifyCommand(cmd.GetNodeMapList(), cmd.GetEdgeMapList());
+            //modifyCmd.Execute();
+
             Active.Editor.Regen();
         }
     }

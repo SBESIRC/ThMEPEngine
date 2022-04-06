@@ -1037,7 +1037,7 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
-        public void AssignStorey(string floorNumber, Point3d storeyBasePoint)
+        public void AssignStorey(Database database, string floorNumber, Point3d storeyBasePoint)
         {
             PDSGraph.Graph.Vertices.ForEach(o =>
             {
@@ -1045,6 +1045,7 @@ namespace TianHua.Electrical.PDS.Engine
                 {
                     e.Location.FloorNumber = floorNumber;
                     e.Location.StoreyBasePoint = storeyBasePoint;
+                    e.Location.ReferenceDWG = database.OriginalFileName.Split("\\".ToCharArray()).Last();
                 });
             });
         }
