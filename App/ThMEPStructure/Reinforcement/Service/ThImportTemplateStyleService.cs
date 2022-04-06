@@ -33,14 +33,15 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             get
             {
-                return new List<string> { "TSSD_REIN", ThStyle3TextStyle};
+                return new List<string> { "TSSD_REIN", "TSSD_Norm","Bw_Dim",
+                    ThStyle3TextStyle};
             }
         }
         private static List<string> DimStyles
         {
             get
             {
-                return new List<string> { "FT_25_100" };
+                return new List<string> { "FT_25_100","TSSD_25_100", "TSSD_100_100", };
             }
         }
         private static List<string> LineTypes
