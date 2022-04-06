@@ -21,7 +21,7 @@ namespace TianHua.Electrical.PDS.UI.Models
     {
         static Point ToPoint(Point2d pt) => new(pt.X, pt.Y);
         static Rect ToRect(GRect r) => new(r.MinX, r.MinY, r.Width, r.Height);
-        public void Render(Canvas canvas, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
+        public void Render(Canvas canvas, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             var shapeOutlinePen = new Pen(Brushes.Black, 1);
             shapeOutlinePen.Freeze();

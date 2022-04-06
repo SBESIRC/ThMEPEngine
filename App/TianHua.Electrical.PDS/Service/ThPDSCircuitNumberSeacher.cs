@@ -8,7 +8,7 @@ namespace TianHua.Electrical.PDS.Service
     public static class ThPDSCircuitNumberSeacher
     {
         public static List<string> Seach(ThPDSProjectGraphNode node,
-             AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
+             AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             return graph.Edges.Where(e => e.Target.Equals(node))
                 .Select(e => e.Circuit.ID.CircuitNumber.Last())

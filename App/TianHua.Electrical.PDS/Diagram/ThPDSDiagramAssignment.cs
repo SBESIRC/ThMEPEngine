@@ -60,7 +60,7 @@ namespace TianHua.Electrical.PDS.Diagram
         }
 
         public Tuple<bool, Polyline> EnterCircuitAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference circuitBlock,
-            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, Scale3d scale, List<Entity> tableObjs)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, circuitBlock);
@@ -289,7 +289,7 @@ namespace TianHua.Electrical.PDS.Diagram
         }
 
         public void OutCircuitAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference circuitBlock,
-             ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, Scale3d scale, List<Entity> tableObjs)
+             ThPDSProjectGraphEdge edge, Scale3d scale, List<Entity> tableObjs)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, circuitBlock);
             objs.OfType<Entity>().ForEach(o => tableObjs.Add(o)) ;

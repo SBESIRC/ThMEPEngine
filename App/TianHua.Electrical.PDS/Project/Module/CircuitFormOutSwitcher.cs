@@ -20,8 +20,8 @@ namespace TianHua.Electrical.PDS.Project.Module
          *双速电机Y-Y
          *分支母排
          */
-        private readonly ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
-        public CircuitFormOutSwitcher(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        private readonly ThPDSProjectGraphEdge _edge;
+        public CircuitFormOutSwitcher(ThPDSProjectGraphEdge edge)
         {
             _edge = edge;
         }

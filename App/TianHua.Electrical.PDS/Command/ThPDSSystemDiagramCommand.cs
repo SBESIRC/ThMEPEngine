@@ -24,10 +24,10 @@ namespace TianHua.Electrical.PDS.Command
 {
     public class ThPDSSystemDiagramCommand : ThMEPBaseCommand, IDisposable
     {
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
+        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
         public List<ThPDSProjectGraphNode> NodeList { get; set; }
 
-        public ThPDSSystemDiagramCommand(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+        public ThPDSSystemDiagramCommand(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             List<ThPDSProjectGraphNode> nodeList)
         {
             Graph = graph;

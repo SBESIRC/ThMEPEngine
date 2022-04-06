@@ -21,7 +21,7 @@ namespace TianHua.Electrical.PDS.UI.Models
         public List<string> Rights;
         public List<PDSBlockInfo> PDSBlockInfos;
         public Canvas Canvas;
-        public override void Render(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph, ThPDSProjectGraphNode node, ThPDSCircuitGraphRenderContext context)
+        public override void Render(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, ThPDSCircuitGraphRenderContext context)
         {
             var infos = PDSBlockInfos;
             using var bmp = new System.Drawing.Bitmap(1000, 1000);

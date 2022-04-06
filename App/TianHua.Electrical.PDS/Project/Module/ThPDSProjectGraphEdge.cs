@@ -3,11 +3,11 @@ using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphEdge<T> : EquatableTaggedEdge<T, ThPDSProjectGraphEdgeCompareTag> where T : ThPDSProjectGraphNode
+    public class ThPDSProjectGraphEdge : EquatableTaggedEdge<ThPDSProjectGraphNode, ThPDSProjectGraphEdgeCompareTag>
     {
         public ThPDSCircuit Circuit { get; set; }
         public CircuitDetails Details { get; set; }
-        public ThPDSProjectGraphEdge(T source, T target) : base(source, target, null)
+        public ThPDSProjectGraphEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target) : base(source, target, null)
         {
             //
         }
