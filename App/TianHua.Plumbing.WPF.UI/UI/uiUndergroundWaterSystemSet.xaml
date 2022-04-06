@@ -1,0 +1,28 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiUndergroundWaterSystemSet"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             Title="参数设置"
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+             mc:Ignorable="d" Width="156.8" Height="124.8">
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Label x:Name="label" Content="楼层线间距"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="10,0,0,0">
+            <TextBox x:Name="textBox" TextWrapping="Wrap" Width="80" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Text="{Binding strFloorLineSpace}"/>
+            <Label x:Name="label1" Content="mm"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
+            <Button x:Name="btnOK" Content="确定" Width="65" Margin="0,0,5,0" Click="btnOK_Click"/>
+            <Button x:Name="btnCancel" Content="取消" Width="65" Click="btnCancel_Click"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

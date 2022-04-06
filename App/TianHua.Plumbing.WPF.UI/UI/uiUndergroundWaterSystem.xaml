@@ -1,0 +1,35 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiUndergroundWaterSystem"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+             mc:Ignorable="d" 
+             Title="地下给水系统图"
+             SizeToContent="Height" Width="180" Height="250.8">
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <WrapPanel Orientation="Vertical" Margin="0,0,5,0">
+                <cus:ImageButton  Content="楼层框定" Name="btnFloorLimit" Height="25" Width="60" Margin="0,0,0,0" TabIndex="1" Click="btnFloorLimit_Click" />
+                <cus:ImageButton  Content="读取楼层" Name="btnFloorRead" Height="25" Width="60" Margin="0,5,0,0" TabIndex="2" Click="btnFloorRead_Click"/>
+            </WrapPanel>
+            <cus:ImageButton Content="参数设置" Name="btnParaSet" Height="55" Width="85" Margin="10,0,0,0" Click="btnParaSet_Click" ImageTextLocation="TextOnly" TabIndex="3"/>
+            
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <Label x:Name="label" Content="楼层表"/>
+            <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="100" Width="155" ItemsSource="{Binding FloorListDatas}"/>
+            <Rectangle Margin="0,5,5,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="1 1" SnapsToDevicePixels="True"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+            <Button x:Name="btnMarkStartPt" Content="标记起点" Width ="70" Margin="0,0,15,0" TabIndex="4"/>
+            <Button x:Name="btnCreateSystemMap" Content="生成" Width ="70" TabIndex="5" Click="btnCreateSystemMap_Click"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>
