@@ -202,6 +202,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Secondary_Circuit_MatchTable_Default" Guid="{3BFFDC1B-3845-47C1-B5A7-97921CC66FAC}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Secondary_Circuit_MatchTable_Default" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\Secondary_Circuit_MatchTable_Default.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_LV_AC_OUVP_19DX101" Guid="{D89B83A5-F212-4F48-A8E2-A5759DBBCD8B}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_LV_AC_OUVP_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_OUVP_19DX101.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
     </Fragment>
     <Fragment>
@@ -268,6 +271,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_Conductor_Selector_Default" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_Current_Transformer_19DX101" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Secondary_Circuit_MatchTable_Default" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_AC_OUVP_19DX101" />
         </ComponentGroup>
     </Fragment>
 </Wix>
