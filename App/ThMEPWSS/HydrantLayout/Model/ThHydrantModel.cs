@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.HydrantLayout.Model
@@ -30,7 +30,13 @@ namespace ThMEPWSS.HydrantLayout.Model
             transformer.Transform(Outline);
             Center = transformer.Transform(Center);
         }
-
+        public void ProjectOntoXYPlane()
+        {
+            Outline.ProjectOntoXYPlane();
+            var cDBP = new DBPoint(Center);
+            cDBP.ProjectOntoXYPlane();
+            Center = cDBP.Position;
+        }
         public void Reset(ThMEPOriginTransformer transformer)
         {
             transformer.Reset(Outline);

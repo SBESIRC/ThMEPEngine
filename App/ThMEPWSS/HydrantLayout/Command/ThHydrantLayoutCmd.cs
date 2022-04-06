@@ -104,6 +104,7 @@ namespace ThMEPWSS.HydrantLayout.Command
             
                 //转换到原点
                 dataQuery.Transform(transformer);
+                dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
 
                 //Engine start

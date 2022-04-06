@@ -61,7 +61,7 @@ namespace ThMEPWSS
             HydrantLayoutSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>()
                                 {
                                     { "集水井", new List<string>() { "A-Well-1" }},
-                                    { "非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437" } }
+                                    { "非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437", "停车位2" } }
                                 };
             using (var cmd = new ThHydrantLayoutCmd())
             {
@@ -89,7 +89,7 @@ namespace ThMEPWSS
 
                 var BlockNameDict = new Dictionary<string, List<string>>() {
                                         {"集水井", new List<string>() { "A-Well-1" }},
-                                        {"非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437" } } };
+                                        {"非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437" , "停车位2" } } };
 
                 var dataFactory = new ThHydrantLayoutDataFactory()
                 {
@@ -110,6 +110,7 @@ namespace ThMEPWSS
                 dataQuery.ProcessArchitechData();
                 dataQuery.ProcessHydrant();
                 dataQuery.Transform(transformer);
+                dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
 
 
