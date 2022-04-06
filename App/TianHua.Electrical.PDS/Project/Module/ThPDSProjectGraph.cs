@@ -9,11 +9,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 回路图
         /// </summary>
-        public readonly AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph;
+        public readonly AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph;
         /// <summary>
         /// 构造函数
         /// </summary>
-        public ThPDSProjectGraph(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
+        public ThPDSProjectGraph(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             Graph = graph;
         }

@@ -369,7 +369,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
         public Canvas Canvas;
         public ThPDSContext Context;
         public dynamic propertyGrid;
-        public AdjacencyGraph<PDS.Project.Module.ThPDSProjectGraphNode, PDS.Project.Module.ThPDSProjectGraphEdge<PDS.Project.Module.ThPDSProjectGraphNode>> Graph;
+        public AdjacencyGraph<PDS.Project.Module.ThPDSProjectGraphNode, PDS.Project.Module.ThPDSProjectGraphEdge> Graph;
         public void Init()
         {
             var graph = TianHua.Electrical.PDS.UI.Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;

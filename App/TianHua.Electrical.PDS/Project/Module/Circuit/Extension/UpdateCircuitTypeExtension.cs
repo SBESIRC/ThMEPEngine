@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
 {
     public static class UpdateCircuitTypeExtension
     {
-        public static void UpdateCircuit(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,PDSBaseOutCircuit circuit, CircuitFormOutType circuitFormOutType)
+        public static void UpdateCircuit(this ThPDSProjectGraphEdge edge ,PDSBaseOutCircuit circuit, CircuitFormOutType circuitFormOutType)
         {
             var NewType = circuitFormOutType.GetCircuitType();
             if(NewType.EqualsGroup(circuit.GetType()))

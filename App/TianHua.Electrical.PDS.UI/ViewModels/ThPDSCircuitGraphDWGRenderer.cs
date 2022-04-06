@@ -70,7 +70,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         public ThPDSCircuitGraphComponentGenerator ComponentGenerator { get; set; }
         public Database DWG { get; set; }
         public override void Render(
-            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, ThPDSCircuitGraphRenderContext context)
         {
             {

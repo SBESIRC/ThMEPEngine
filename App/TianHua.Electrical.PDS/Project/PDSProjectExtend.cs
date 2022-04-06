@@ -20,7 +20,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
@@ -121,7 +121,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// Node元器件选型
         /// </summary>
-        public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
         {
             if (node.Type == PDSNodeType.DistributionBox)
             {
@@ -189,7 +189,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
-        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void ComponentSelection(this ThPDSProjectGraphEdge edge)
         {
             edge.Details = new CircuitDetails();
             var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
@@ -315,7 +315,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 回路元器件选型/指定元器件选型
         /// </summary>
         /// <returns></returns>
-        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, Type type, CircuitFormOutType circuitFormOutType)
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge edge, Type type, CircuitFormOutType circuitFormOutType)
         {
             if (type.IsSubclassOf(typeof(PDSBaseComponent)))
             {
@@ -403,7 +403,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
-        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge , CircuitFormOutType circuitFormOutType)
+        public static void ComponentSelection(this ThPDSProjectGraphEdge edge , CircuitFormOutType circuitFormOutType)
         {
             edge.Details = new CircuitDetails();
             var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
@@ -606,7 +606,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 平衡相序
         /// </summary>
-        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge> edges)
         {
             var onePhase = new List<ThPDSProjectGraphNode>();
             foreach (var edge in edges)
@@ -740,7 +740,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="Graph"></param>
         /// <param name="NewGraph"></param>
-        public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> NewGraph)
+        public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> NewGraph)
         {
             //暂时不考虑
         }
@@ -764,7 +764,7 @@ namespace TianHua.Electrical.PDS.Project
             edges.ForEach(e => graph.UpdateWithEdge(e));
         }
 
-        public static void UpdateWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, bool permission = true)
+        public static void UpdateWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge, bool permission = true)
         {
             if (permission)
             {
@@ -778,7 +778,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// Node元器件选型检查
         /// </summary>
-        public static void ComponentCheck(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void ComponentCheck(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
         {
             if (node.Type == PDSNodeType.DistributionBox)
             {
@@ -848,7 +848,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 回路元器件选型检查
         /// </summary>
-        public static void ComponentCheck(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void ComponentCheck(this ThPDSProjectGraphEdge edge)
         {
             edge.Details = new CircuitDetails();
             var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流

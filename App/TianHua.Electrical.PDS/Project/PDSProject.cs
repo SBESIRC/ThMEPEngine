@@ -49,7 +49,7 @@ namespace TianHua.Electrical.PDS.Project
             if(string.IsNullOrEmpty(url))
             {
                 //Creat New Project
-                this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>().CreatPDSProjectGraph();
+                this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>().CreatPDSProjectGraph();
                 this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 if (!instance.DataChanged.IsNull())
                 {
@@ -71,11 +71,11 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public void PushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
         {
-            var ProjectGraph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            var ProjectGraph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
             graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
             graph.Edges.ForEach(o => ProjectGraph.AddEdge(
-                new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
+                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
                 ));
             if(!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
             {

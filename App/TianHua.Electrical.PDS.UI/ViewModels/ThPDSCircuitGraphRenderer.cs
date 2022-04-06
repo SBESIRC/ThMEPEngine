@@ -11,7 +11,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
     public abstract class ThPDSCircuitGraphRenderer
     {
         public abstract void Render(
-            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+            AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, ThPDSCircuitGraphRenderContext context);
     }
 }

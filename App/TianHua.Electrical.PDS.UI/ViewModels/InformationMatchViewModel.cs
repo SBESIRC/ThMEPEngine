@@ -20,12 +20,12 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         {
             this.graphInfo = GraphInfo;
             this.Graph = GraphInfo.graphData;
-            //this.Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            //this.Circuit = new ObservableCollection<ThPDSProjectGraphEdge>();
         }
         private ThPDSProjectVMGraphInfo graphInfo { get; set; }
 
-        private AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph;
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph
+        private AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph;
+        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph
         {
             get { return graph; }
             set { graph = value; }
@@ -38,13 +38,13 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         //    set
         //    {
         //        currentNode = value;
-        //        Circuit = new ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+        //        Circuit = new ObservableCollection<ThPDSProjectGraphEdge>();
         //        graph.Edges.Where(o => o.Source.Equals(value)).ForEach(o => Circuit.Add(o));
         //    }
         //}
 
-        //private ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> circuits;
-        //public ObservableCollection<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Circuit
+        //private ObservableCollection<ThPDSProjectGraphEdge> circuits;
+        //public ObservableCollection<ThPDSProjectGraphEdge> Circuit
         //{
         //    get { return circuits; } 
         //    set { circuits = value; }

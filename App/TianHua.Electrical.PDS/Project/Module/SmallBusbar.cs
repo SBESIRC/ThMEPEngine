@@ -11,6 +11,6 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class SmallBusbar
     {
-        List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges { get; set; }
+        List<ThPDSProjectGraphEdge> edges { get; set; }
     }
 }

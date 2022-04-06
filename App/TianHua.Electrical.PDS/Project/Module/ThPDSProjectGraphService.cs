@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="node"></param>
         /// <param name="type"></param>
         /// <exception cref="NotSupportedException"></exception>
-        public static void UpdateFormInType(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+        public static void UpdateFormInType(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, CircuitFormInType type)
         {
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
@@ -107,8 +107,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void DistributeLoad(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
-            ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void DistributeLoad(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+            ThPDSProjectGraphEdge edge)
         {
             //
         }
@@ -118,8 +118,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void DeleteCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
-            ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void DeleteCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+            ThPDSProjectGraphEdge edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
             //所以删除后，后面的负载会失去原有的回路,需要人再去分配
@@ -181,7 +181,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             graph.UpdateWithNode(node, false);
         }
 
-        public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
         {
             graph.UpdateWithEdge(edge, false);
         }
@@ -190,7 +190,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 元器件切换
         /// </summary>
         /// <returns></returns>
-        public static void ComponentSwitching(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, PDSBaseComponent component, ComponentType componentType)
+        public static void ComponentSwitching(ThPDSProjectGraphEdge edge, PDSBaseComponent component, ComponentType componentType)
         {
             if (component.ComponentType !=componentType && edge.Details.CircuitForm.Contains(component))
             {
@@ -207,7 +207,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="edge"></param>
         /// <returns></returns>
-        public static CircuitFormOutSwitcher GetCircuitFormOutSwitcher(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static CircuitFormOutSwitcher GetCircuitFormOutSwitcher(ThPDSProjectGraphEdge edge)
         {
             return new CircuitFormOutSwitcher(edge);
         }
@@ -227,7 +227,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="type"></param>
-        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, CircuitFormOutType type)
+        public static void SwitchFormOutType(ThPDSProjectGraphEdge edge, CircuitFormOutType type)
         {
             if (!edge.Details.CircuitForm.CircuitFormType.Equals(type))
             {
@@ -241,7 +241,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="edge"></param>
         /// <param name="type"></param>
-        public static void SwitchFormOutType(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, string type)
+        public static void SwitchFormOutType(ThPDSProjectGraphEdge edge, string type)
         {
             var CircuitFormOutType = Switch(edge, type);
             SwitchFormOutType(edge, CircuitFormOutType);
@@ -250,14 +250,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
             //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
             graph.AddVertex(target);
             //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
@@ -267,14 +267,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph,
+        public static void AddCircuit(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
             ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
             graph.AddVertex(target);
             //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:获取对应的CircuitFormOutType
             var CircuitFormOutType = Switch(newEdge, type);
             //Step 4:回路选型
@@ -288,7 +288,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <returns></returns>
         /// <exception cref="NotSupportedException"></exception>
-        public static List<string> AvailableTypes(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static List<string> AvailableTypes(ThPDSProjectGraphEdge edge)
         {
             CircuitGroup circuitGroup = edge.Details.CircuitForm.CircuitFormType.GetCircuitType().GetCircuitGroup();
             switch (circuitGroup)
@@ -354,7 +354,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="CircuitName"></param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException"></exception>
-        public static CircuitFormOutType Switch(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,string circuitName)
+        public static CircuitFormOutType Switch(ThPDSProjectGraphEdge edge ,string circuitName)
         {
             if (circuitName == "常规配电回路")
                 return CircuitFormOutType.常规;

@@ -11,8 +11,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSCircuitModel : NotifyPropertyChangedBase
     {
-        private readonly ThPDSProjectGraphEdge<ThPDSProjectGraphNode> _edge;
-        public ThPDSCircuitModel(ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        private readonly ThPDSProjectGraphEdge _edge;
+        public ThPDSCircuitModel(ThPDSProjectGraphEdge edge)
         {
             _edge = edge;
         }

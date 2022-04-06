@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.UI.Project
 {
     public class ThPDSProjectVMGraphInfo
     {
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graphData;
+        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graphData;
 
         /// <summary>
         /// 平衡相序
