@@ -3,7 +3,7 @@ using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphEdge<T> : EquatableTaggedEdge<T, ThPDSProjectGraphEdgeTag> where T : ThPDSProjectGraphNode
+    public class ThPDSProjectGraphEdge<T> : EquatableTaggedEdge<T, ThPDSProjectGraphEdgeCompareTag> where T : ThPDSProjectGraphNode
     {
         public ThPDSCircuit Circuit { get; set; }
         public CircuitDetails Details { get; set; }
