@@ -77,11 +77,15 @@
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphCompareService.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphComparingUnit.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdge.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeCompareTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphExtension.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNode.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompareTag.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphStructuralComparingUnit.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphQualitativeComparingUnit.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphQuantitativeComparingUnit.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
