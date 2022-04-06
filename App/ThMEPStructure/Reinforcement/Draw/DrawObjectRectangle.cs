@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPStructure.Reinforcement.Service;
 using ThMEPEngineCore.CAD;
-
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectRectangle : DrawObjectBase
@@ -839,7 +839,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                         plinks[2].Add(tmp);
                     }
                 }
-                tmp.Layer = "LINK";
+                tmp.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(tmp);
             }
             if (!thRectangleEdgeComponent.Link2.IsNullOrEmpty() &&

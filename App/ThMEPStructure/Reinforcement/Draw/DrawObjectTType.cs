@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     class DrawObjectTType : DrawObjectBase
@@ -2183,7 +2184,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (flag)
                     {
-                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
+                        tmp = Helper.ShrinkToHalf(Links[i], vec, centrePt);
                     }
                     else
                     {
@@ -2199,23 +2200,23 @@ namespace ThMEPStructure.Reinforcement.Draw
                 }
                 else if (LinksFlag[i] == 3)
                 {
-                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 200), centrePt);
+                    tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 200), centrePt);
                     plinks[2].Add(tmp);
                 }
                 else if (LinksFlag[i] == 4)
                 {
                     if (Math.Abs((Links[i].GetPoint2dAt(1) - Links[i].GetPoint2dAt(0)).X) < 1)
                     {
-                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 300), centrePt);
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 400), centrePt);
                         plinks[3].Add(tmp);
                     }
                     else
                     {
-                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(300, 0), centrePt);
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(200, 0), centrePt);
                         plinks[4].Add(tmp);
                     }
                 }
-                tmp.Layer = "LINK";
+                tmp.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(tmp);
             }
             //绘制必要的标注

@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class ZongjinPoint
@@ -2090,16 +2091,16 @@ namespace ThMEPStructure.Reinforcement.Draw
                 {
                     if (Math.Abs((Links[i].GetPoint2dAt(1) - Links[i].GetPoint2dAt(0)).X) < 1)
                     {
-                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 300), centrePt);
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(0, 400), centrePt);
                         plinks[3].Add(tmp);
                     }
                     else
                     {
-                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(300, 0), centrePt);
+                        tmp = Helper.ShrinkToHalf(Links[i], vec + new Vector2d(400, 0), centrePt);
                         plinks[4].Add(tmp);
                     }
                 }
-                tmp.Layer = "LINK";
+                tmp.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(tmp);
             }
             if (!thLTypeEdgeComponent.Link2.IsNullOrEmpty() &&

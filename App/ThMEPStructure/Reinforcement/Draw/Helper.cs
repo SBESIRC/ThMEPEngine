@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     public class StrToReinforce
@@ -323,14 +324,15 @@ namespace ThMEPStructure.Reinforcement.Draw
                 new Point3d(Right.X, Left.Y,0)+new Vector3d(width,width,0)
             };
             Rect = pts.CreatePolyline();
-
+            Rect.LayerId = DbHelper.GetLayerId("LABEL");
+            
            
 
             //引线
             Point3d L = Rect.GetPoint3dAt(0);
             Point3d R = Rect.GetPoint3dAt(2);
             Polyline label = new Polyline();
-         
+            label.LayerId = DbHelper.GetLayerId("LAEBL");
             
             if (type == 1)
             {
@@ -393,6 +395,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             DBText txt = new DBText();
             txt.Height = 300;
             txt.TextString = num + "C" + size;
+            txt.LayerId = DbHelper.GetLayerId("LABEL");
+            txt.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            txt.WidthFactor = 0.7;
             if (type == 1)
             {
                 txt.Position = label.GetPoint3dAt(2) + new Vector3d(50, 50, 0);

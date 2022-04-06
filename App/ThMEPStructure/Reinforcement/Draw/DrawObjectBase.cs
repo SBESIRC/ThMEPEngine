@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.Reinforcement.Model;
 using ThMEPEngineCore.CAD;
+using Dreambuild.AutoCAD;
 namespace ThMEPStructure.Reinforcement.Draw
 {
     abstract class DrawObjectBase
@@ -32,7 +33,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public string Stirrup;
         public List<Polyline> LabelAndRect=new List<Polyline>();//存放C筋标注的多段线以及引线
         public List<DBText> CJintText = new List<DBText>();//存放C筋标注的文本信息
-
+        
 
 
 
@@ -97,29 +98,42 @@ namespace ThMEPStructure.Reinforcement.Draw
             polyline.AddVertexAt(11, point, 0, 0, 0);
             point = new Point2d(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 3);
             polyline.AddVertexAt(12, point, 0, 0, 0);
+            
+            polyline.LayerId = DbHelper.GetLayerId("TAB");
             objectCollection.Add(polyline);
             //填装文字，文字行款固定为300，第一行编号，第二行标高，第三行纵筋，第四行箍筋，位置放在 Y从上往下800/2-150的位置上 X计算居中？
             //第一个文字编号
             DBText dBText = new DBText();
             dBText.TextString = number;
             dBText.Height = 300;
-
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight, 300, number);
+            dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             dBText = new DBText();
             dBText.TextString = elevation;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 2, 300, elevation);
+            dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             dBText = new DBText();
             dBText.TextString = Reinforce;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 2, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 3, 300, Reinforce);
+            dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             dBText = new DBText();
             dBText.TextString = Stirrup;
             dBText.Height = 300;
+            dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 3, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 4, 300, Stirrup);
+            dBText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             return objectCollection;
         }
@@ -189,7 +203,6 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         protected void CalGangjinPosition(ThEdgeComponent component)
         {
-
             //重新计算轮廓得到polyline
             DrawOutline();
             ////计算表格轮廓
@@ -274,24 +287,24 @@ namespace ThMEPStructure.Reinforcement.Draw
             //绘制箍筋、拉筋
             foreach (var link in Links)
             {
-                link.Layer = "LINK";
+                link.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(link);
             }
 
             //轮廓、墙体、尺寸
-
-            Outline.Layer = "COLU_DE_TH";
+            Outline.LayerId = DbHelper.GetLayerId("COLU_DE_TH");
             objectCollection.Add(Outline);
             DrawWall();
             foreach (var wallLine in LinkedWallLines)
             {
-                wallLine.Layer = "THIN";
+                wallLine.LayerId = DbHelper.GetLayerId("THIN");
                 objectCollection.Add(wallLine);
             }
             DrawDim();
             foreach (var dimension in rotatedDimensions)
             {
-                dimension.Layer = "COLU_DE_DIM";
+                dimension.LayerId = DbHelper.GetLayerId("COLU_DE_DIM");
+                dimension.DimensionStyle = DbHelper.GetDimstyleId("FT_25_100");
                 objectCollection.Add(dimension);
             }
             
@@ -331,6 +344,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             for (int i = 0; i < pts.Count; i++)
             {
                 Polyline tmp = Helper.LinkMark(pts[i]);
+                tmp.LayerId = DbHelper.GetLayerId("LABEL");
                 objectCollection.Add(tmp);
                 label.AddVertexAt(i, pts[i], 0, 0, 0);
             }
@@ -371,9 +385,11 @@ namespace ThMEPStructure.Reinforcement.Draw
                 dbText.Rotation = Math.PI / 2;
             }
             label.AddVertexAt(pts.Count + 1, pt, 0, 0, 0);
-            label.Layer = "LABEL";
+            label.LayerId = DbHelper.GetLayerId("LABEL");
             objectCollection.Add(label);
-            dbText.Layer = "TAB_TEXT";
+            dbText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dbText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
+            dbText.WidthFactor = 0.7;
             objectCollection.Add(dbText);
         }
         /// <summary>
