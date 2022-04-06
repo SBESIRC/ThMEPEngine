@@ -70,6 +70,9 @@
     <Compile Include="Project\Module\Component\ManualTransferSwitch.cs" />
     <Compile Include="Project\Module\Component\MeterTransformer.cs" />
     <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
+    <Compile Include="Project\Module\Configure\ComponentFactory\PDSBaseComponentFactory.cs" />
+    <Compile Include="Project\Module\Configure\ComponentFactory\SelectionComponentFactory.cs" />
+    <Compile Include="Project\Module\Configure\ComponentFactory\SpecifyComponentFactory.cs" />
     <Compile Include="Project\Module\Configure\CPSConfiguration.cs" />
     <Compile Include="Project\Module\Configure\CurrentTransformerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\MeterTransformerConfiguration.cs" />

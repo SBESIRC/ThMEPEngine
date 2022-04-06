@@ -1269,13 +1269,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                             {
-                                                breaker1 = twoSpeedMotor_CPSDYYCircuit.breaker1;
-                                                breaker2 = twoSpeedMotor_CPSDYYCircuit.breaker2;
+                                                //tian->feng
+                                                //breaker1 = twoSpeedMotor_CPSDYYCircuit.breaker1;
+                                                //breaker2 = twoSpeedMotor_CPSDYYCircuit.breaker2;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                             {
-                                                breaker1 = twoSpeedMotor_CPSYYCircuit.breaker1;
-                                                breaker2 = twoSpeedMotor_CPSYYCircuit.breaker2;
+                                                //tian->feng
+                                                //breaker1 = twoSpeedMotor_CPSYYCircuit.breaker1;
+                                                //breaker2 = twoSpeedMotor_CPSYYCircuit.breaker2;
                                             }
                                             void reg(PDS.Project.Module.Component.BreakerBaseComponent breaker, string templateStr)
                                             {
@@ -1504,7 +1506,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                             {
-                                                contactor1 = twoSpeedMotor_CPSDYYCircuit.contactor1;
+                                                //tian->feng
+                                                //contactor1 = twoSpeedMotor_CPSDYYCircuit.contactor1;
                                             }
                                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                             {

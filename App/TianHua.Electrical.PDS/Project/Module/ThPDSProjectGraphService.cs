@@ -10,6 +10,7 @@ using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -27,40 +28,15 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
             {
-                var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
                 var edges = graph.Edges.Where(e => e.Source.Equals(node)).ToList();
-                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
-                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
-                var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-                var SpecialPolesNum = "4P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
-                if (node.Load.Phase == ThPDSPhase.一相)
-                {
-                    PolesNum = "1P";
-                    //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
-                    //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
-                    if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
-                    {
-                        SpecialPolesNum = "1P";
-                    }
-                    else
-                    {
-                        SpecialPolesNum = "2P";
-                    }
-                }
-                else if (node.Load.Phase == ThPDSPhase.三相)
-                {
-                    if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
-                    {
-                        SpecialPolesNum = "3P";
-                    }
-                }
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
                 switch (type)
                 {
                     case CircuitFormInType.一路进线:
                         {
                             node.Details.CircuitFormType = new OneWayInCircuit()
                             {
-                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum)
+                                isolatingSwitch = componentFactory.CreatIsolatingSwitch(),
                             };
                             break;
                         }
@@ -68,9 +44,9 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new TwoWayInCircuit()
                             {
-                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, PolesNum)
+                                isolatingSwitch1 = componentFactory.CreatIsolatingSwitch(),
+                                isolatingSwitch2 = componentFactory.CreatIsolatingSwitch(),
+                                transferSwitch = componentFactory.CreatAutomaticTransferSwitch(),
                             };
                             break;
                         }
@@ -78,11 +54,11 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new ThreeWayInCircuit()
                             {
-                                isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
-                                transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum),
-                                transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, PolesNum),
+                                isolatingSwitch1 = componentFactory.CreatIsolatingSwitch(),
+                                isolatingSwitch2 = componentFactory.CreatIsolatingSwitch(),
+                                isolatingSwitch3 = componentFactory.CreatIsolatingSwitch(),
+                                transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch(),
+                                transferSwitch2 = componentFactory.CreatManualTransferSwitch(),
                             };
                             break;
                         }
@@ -90,7 +66,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new CentralizedPowerCircuit()
                             {
-                                isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum),
+                                isolatingSwitch = componentFactory.CreatIsolatingSwitch(),
                             };
                             break;
                         }
@@ -99,6 +75,9 @@ namespace TianHua.Electrical.PDS.Project.Module
                             throw new NotSupportedException();
                         }
                 }
+                //统计节点级联电流
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+                node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
             }
         }
 
@@ -408,6 +387,28 @@ namespace TianHua.Electrical.PDS.Project.Module
                     {
                         return CircuitFormOutType.电动机_CPS星三角启动;
                     }
+                }
+            }
+            else if(circuitName == "双速电机D-YY")
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    return CircuitFormOutType.双速电动机_分立元件detailYY;
+                }
+                else
+                {
+                    return CircuitFormOutType.双速电动机_CPSdetailYY;
+                }
+            }
+            else if(circuitName == "双速电机Y-Y")
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    return CircuitFormOutType.双速电动机_分立元件YY;
+                }
+                else
+                {
+                    return CircuitFormOutType.双速电动机_CPSYY;
                 }
             }
             else

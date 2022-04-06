@@ -477,6 +477,23 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                     }
                 }
 
+                var Table1 = dataSet.Tables["电动机（CPS）"];
+                for (int i = 1; i < Table1.Rows.Count; i++)
+                {
+                    var row = Table1.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_CPSInfos.Add(new Motor_CPS()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            Conductor = row["导体根数x每根导体截面积"].ToString(),
+                        });
+                    }
+                }
+
                 var Table2 = dataSet.Tables["电动机（分立元件星三角启动）"];
                 for (int i = 1; i < Table2.Rows.Count; i++)
                 {
@@ -495,6 +512,80 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             KH = row["热继电器规格"].ToString(),
                             Conductor1 = row[8].ToString(),
                             Conductor2 = row[9].ToString(),
+                        });
+                    }
+                }
+
+                var Table3 = dataSet.Tables["电动机（CPS星三角启动）"];
+                for (int i = 1; i < Table3.Rows.Count; i++)
+                {
+                    var row = Table3.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_CPSStarTriangleStartInfos.Add(new Motor_CPSStarTriangleStartInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            QAC1 = row[4].ToString(),
+                            QAC2 = row[5].ToString(),
+                            Conductor1 = row[6].ToString(),
+                            Conductor2 = row[7].ToString(),
+                        });
+                    }
+                }
+
+                var Table4 = dataSet.Tables["双速电动机（分立元件D-YY）"];
+                for (int i = 1; i < Table4.Rows.Count; i++)
+                {
+                    var row = Table4.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_TwoSpeedMotor_DiscreteComponentsDYYCircuitInfos.Add(new TwoSpeedMotor_DiscreteComponentsDYYInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            QAC3 = row["接触器规格3"].ToString(),
+                            Conductor1 = row["导体根数x每根导体截面积1"].ToString(),
+                            Conductor2 = row["导体根数x每根导体截面积2"].ToString(),
+                        });
+                    }
+                }
+
+                var Table5 = dataSet.Tables["双速电动机（分立元件Y-Y）"];
+                for (int i = 1; i < Table5.Rows.Count; i++)
+                {
+                    var row = Table5.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_TwoSpeedMotor_DiscreteComponentsYYCircuitInfos.Add(new TwoSpeedMotor_DiscreteComponentsYYInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            Conductor1 = row[3].ToString(),
+                            Conductor2 = row[4].ToString(),
+                        });
+                    }
+                }
+
+                var Table6 = dataSet.Tables["双速电动机（CPS）"];
+                for (int i = 1; i < Table6.Rows.Count; i++)
+                {
+                    var row = Table6.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.NonFire_TwoSpeedMotor_CPSInfos.Add(new TwoSpeedMotor_CPSInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            QAC = row["接触器规格"].ToString(),
+                            Conductor1 = row["导体根数x每根导体截面积1"].ToString(),
+                            Conductor2 = row["导体根数x每根导体截面积2"].ToString(),
                         });
                     }
                 }
@@ -521,6 +612,23 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                     }
                 }
 
+                var Table1 = dataSet.Tables["电动机（CPS）"];
+                for (int i = 1; i < Table1.Rows.Count; i++)
+                {
+                    var row = Table1.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_CPSInfos.Add(new Motor_CPS()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            Conductor = row["导体根数x每根导体截面积"].ToString(),
+                        });
+                    }
+                }
+
                 var Table2 = dataSet.Tables["电动机（分立元件星三角启动）"];
                 for (int i = 1; i < Table2.Rows.Count; i++)
                 {
@@ -539,6 +647,80 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             KH = row["热继电器规格"].ToString(),
                             Conductor1 = row[8].ToString(),
                             Conductor2 = row[9].ToString(),
+                        });
+                    }
+                }
+
+                var Table3 = dataSet.Tables["电动机（CPS星三角启动）"];
+                for (int i = 1; i < Table3.Rows.Count; i++)
+                {
+                    var row = Table3.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_CPSStarTriangleStartInfos.Add(new Motor_CPSStarTriangleStartInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            QAC1 = row[4].ToString(),
+                            QAC2 = row[5].ToString(),
+                            Conductor1 = row[6].ToString(),
+                            Conductor2 = row[7].ToString(),
+                        });
+                    }
+                }
+
+                var Table4 = dataSet.Tables["双速电动机（分立元件D-YY）"];
+                for (int i = 1; i < Table4.Rows.Count; i++)
+                {
+                    var row = Table4.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsDYYCircuitInfos.Add(new TwoSpeedMotor_DiscreteComponentsDYYInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            QAC3 = row["接触器规格3"].ToString(),
+                            Conductor1 = row["导体根数x每根导体截面积1"].ToString(),
+                            Conductor2 = row["导体根数x每根导体截面积2"].ToString(),
+                        });
+                    }
+                }
+
+                var Table5 = dataSet.Tables["双速电动机（分立元件Y-Y）"];
+                for (int i = 1; i < Table5.Rows.Count; i++)
+                {
+                    var row = Table5.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_TwoSpeedMotor_DiscreteComponentsYYCircuitInfos.Add(new TwoSpeedMotor_DiscreteComponentsYYInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            Conductor1 = row[3].ToString(),
+                            Conductor2 = row[4].ToString(),
+                        });
+                    }
+                }
+
+                var Table6 = dataSet.Tables["双速电动机（CPS）"];
+                for (int i = 1; i < Table6.Rows.Count; i++)
+                {
+                    var row = Table6.Rows[i];
+                    if (!row[0].ToString().IsNullOrWhiteSpace())
+                    {
+                        MotorConfiguration.Fire_TwoSpeedMotor_CPSInfos.Add(new TwoSpeedMotor_CPSInfo()
+                        {
+                            InstalledCapacity = double.Parse(row["电机功率"].ToString()),
+                            CalculateCurrent = double.Parse(row["计算电流"].ToString()),
+                            StartingCurrent = double.Parse(row["启动电流"].ToString()),
+                            CPS = row["CPS规格"].ToString(),
+                            QAC = row["接触器规格"].ToString(),
+                            Conductor1 = row["导体根数x每根导体截面积1"].ToString(),
+                            Conductor2 = row["导体根数x每根导体截面积2"].ToString(),
                         });
                     }
                 }

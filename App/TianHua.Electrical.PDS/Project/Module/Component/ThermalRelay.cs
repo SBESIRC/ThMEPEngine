@@ -28,6 +28,32 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
         }
 
+        public ThermalRelay(string thermalRelayConfig)
+        {
+            ComponentType = ComponentType.KH;
+
+            //JR20-10 0.8/1.2A
+            string[] configs = thermalRelayConfig.Split(' ');
+            string[] detaileds = configs[1].Split('/');
+            var model = configs[0];
+            var poles = "3P";
+            var minAmps = detaileds[0];
+            var maxAmps = detaileds[1].Replace("A", "");
+
+            var thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.
+                FirstOrDefault(o => o.Model == model
+                && o.MinAmps.ToString() == minAmps 
+                && o.MaxAmps.ToString() == maxAmps
+                && o.Poles == poles);
+            if (thermalRelay.IsNull())
+            {
+                thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
+            }
+            Model = thermalRelay.Model;
+            PolesNum = thermalRelay.Poles;
+            RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
+        }
+
         /// <summary>
         /// 型号
         /// </summary>

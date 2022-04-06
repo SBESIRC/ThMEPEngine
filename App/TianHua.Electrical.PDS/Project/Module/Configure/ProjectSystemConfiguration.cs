@@ -47,5 +47,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             "双速电机Y-Y",
             "双速电机D-YY",
         };
+
+        public static char[] NumberArray = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
     }
 }
