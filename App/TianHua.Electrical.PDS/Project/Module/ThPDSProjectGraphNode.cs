@@ -4,12 +4,12 @@ using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeTag>
+    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeCompareTag>
     {
         public ThPDSLoad Load { get; set; }
         public PDSNodeType Type { get; set; }
         public NodeDetails Details { get; set; }
-        public ThPDSProjectGraphNodeTag Tag { get; set; }
+        public ThPDSProjectGraphNodeCompareTag Tag { get; set; }
         public bool IsStartVertexOfGraph { get; set; }
         public ThPDSProjectGraphNode()
         {
