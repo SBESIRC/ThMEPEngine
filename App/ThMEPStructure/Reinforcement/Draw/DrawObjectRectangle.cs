@@ -293,7 +293,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                         plinks[2].Add(tmp);
                     }
                 }
-                tmp.Layer = "LINK";
+                tmp.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(tmp);
             }
             if (!thRectangleEdgeComponent.Link2.IsNullOrEmpty() &&

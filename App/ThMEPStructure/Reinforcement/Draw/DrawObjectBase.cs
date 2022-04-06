@@ -287,24 +287,24 @@ namespace ThMEPStructure.Reinforcement.Draw
             //绘制箍筋、拉筋
             foreach (var link in Links)
             {
-                link.Layer = "LINK";
+                link.LayerId = DbHelper.GetLayerId("LINK");
                 objectCollection.Add(link);
             }
 
             //轮廓、墙体、尺寸
-
-            Outline.Layer = "COLU_DE_TH";
+            Outline.LayerId = DbHelper.GetLayerId("COLU_DE_TH");
             objectCollection.Add(Outline);
             DrawWall();
             foreach (var wallLine in LinkedWallLines)
             {
-                wallLine.Layer = "THIN";
+                wallLine.LayerId = DbHelper.GetLayerId("THIN");
                 objectCollection.Add(wallLine);
             }
             DrawDim();
             foreach (var dimension in rotatedDimensions)
             {
-                dimension.Layer = "COLU_DE_DIM";
+                dimension.LayerId = DbHelper.GetLayerId("COLU_DE_DIM");
+                dimension.DimensionStyle = DbHelper.GetDimstyleId("FT_25_100");
                 objectCollection.Add(dimension);
             }
             
@@ -344,6 +344,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             for (int i = 0; i < pts.Count; i++)
             {
                 Polyline tmp = Helper.LinkMark(pts[i]);
+                tmp.LayerId = DbHelper.GetLayerId("LABEL");
                 objectCollection.Add(tmp);
                 label.AddVertexAt(i, pts[i], 0, 0, 0);
             }
@@ -384,9 +385,11 @@ namespace ThMEPStructure.Reinforcement.Draw
                 dbText.Rotation = Math.PI / 2;
             }
             label.AddVertexAt(pts.Count + 1, pt, 0, 0, 0);
-            label.Layer = "LABEL";
+            label.LayerId = DbHelper.GetLayerId("LABEL");
             objectCollection.Add(label);
-            dbText.Layer = "TAB_TEXT";
+            dbText.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
+            dbText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
+            dbText.WidthFactor = 0.7;
             objectCollection.Add(dbText);
         }
         /// <summary>

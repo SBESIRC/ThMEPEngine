@@ -189,7 +189,6 @@ namespace ThMEPStructure.Reinforcement.Draw
             Polyline res = new Polyline();
             res.AddVertexAt(0, point - new Vector2d(40, 40), 0, 19, 19);
             res.AddVertexAt(1, point + new Vector2d(40, 40), 0, 19, 19);
-            res.Layer = "LABEL";
             return res;
         }
         /// <summary>
