@@ -379,7 +379,7 @@ namespace TianHua.Electrical.PDS.Model
         {
             if (other != null)
             {
-                return this.ID.LoadID.Equals(other.ID.LoadID);
+                return this.LoadUID.Equals(other.LoadUID);
             }
             return false;
         }

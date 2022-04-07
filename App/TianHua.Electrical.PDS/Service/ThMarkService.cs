@@ -255,6 +255,7 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             result.Texts = Filter(result.Texts);
+            Filter(dbTexts);
             return result;
         }
 
@@ -302,7 +303,7 @@ namespace TianHua.Electrical.PDS.Service
                     var i = 0;
                     for (; i < textCollection.Count; i++)
                     {
-                        if (Math.Abs((textCollection[i].FirstPosition - text.Item1.Position).GetNormal().DotProduct(textCollection[i].Direction)) > 0.995)
+                        if (Math.Abs((textCollection[i].FirstPosition - text.Item1.Position).GetNormal().DotProduct(textCollection[i].Direction)) > 0.9995)
                         {
                             textCollection[i].Texts.Add(Tuple.Create(new List<string> { text.Item1.TextString }, text.Item2));
                             break;
@@ -357,6 +358,21 @@ namespace TianHua.Electrical.PDS.Service
         private List<string> Filter(List<string> info)
         {
             return info.Select(o => o.Replace(" ", "")).ToList();
+        }
+
+        private void Filter(List<Tuple<DBText, ObjectId>> dbTexts)
+        {
+            var results = new List<Tuple<DBText, ObjectId>>();
+            dbTexts.ForEach(o =>
+            {
+                var objectIds = results.Select(t => t.Item2).ToList();
+                if (!objectIds.Contains(o.Item2))
+                {
+                    results.Add(o);
+                }
+            });
+            dbTexts.Clear();
+            results.ForEach(o => dbTexts.Add(o));
         }
     }
 }

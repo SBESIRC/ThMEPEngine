@@ -123,9 +123,13 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public override bool CheckLayerValid(Entity curve)
+        public override bool CheckLayerValid(Entity entity)
         {
-            var layer = curve.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
+            if(!entity.LayerId.IsValid)
+            {
+                return false;
+            }
+            var layer = entity.LayerId.GetObject(OpenMode.ForRead) as LayerTableRecord;
             return !layer.IsFrozen && !layer.IsOff && !layer.IsHidden;
         }
 

@@ -184,23 +184,26 @@ namespace TianHua.Electrical.PDS.Engine
                                 {
                                     continue;
                                 }
+                                var strMatch = false;
                                 foreach (var str in mark.Texts)
                                 {
-                                    var strMatch = false;
                                     if (str.Contains("/W") || str.Contains("-W"))
                                     {
                                         continue;
                                     }
                                     if (str.Contains(key))
                                     {
-                                        // 第一次做严格匹配，第二次模糊匹配
+                                        // 第一次做严格匹配，第二次模糊匹配 具体匹配细节存疑
                                         if (i == 0)
                                         {
-                                            var regex = new Regex(@key + "[a-zA-Z0-9]{1,}");
-                                            var match = regex.Match(str);
-                                            if (!match.Success)
+                                            if (key.Count() > 2)
                                             {
-                                                strMatch = true;
+                                                var regex = new Regex(@key + "[a-zA-Z0-9]{0,}");
+                                                var match = regex.Match(str);
+                                                if (match.Success)
+                                                {
+                                                    strMatch = true;
+                                                }
                                             }
                                         }
                                         else
@@ -208,16 +211,17 @@ namespace TianHua.Electrical.PDS.Engine
                                             strMatch = true;
                                         }
                                     }
-                                    if (strMatch)
-                                    {
-                                        thisMark.Texts.AddRange(mark.Texts);
-                                        thisMark.ObjectIds.AddRange(mark.ObjectIds);
-                                        thisMark.ObjectIds = thisMark.ObjectIds.Distinct().ToList();
-                                        cacheMarkList.Add(mark);
-                                    }
+                                }
+                                if (strMatch)
+                                {
+                                    thisMark.Texts.AddRange(mark.Texts);
+                                    thisMark.ObjectIds.AddRange(mark.ObjectIds);
+                                    thisMark.ObjectIds = thisMark.ObjectIds.Distinct().ToList();
+                                    cacheMarkList.Add(mark);
+                                    break;
                                 }
                             }
-                            if (thisMark.Texts.Count == 0)
+                            if (thisMark.Texts.Count == 0 && i == 0)
                             {
                                 return;
                             }
@@ -238,7 +242,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 // 此时节点需要和桥架建立多条回路，由于在dictionary中是通过判断两个节点是否都相同，
                                 // 进而判断两个edge是否相同的，所以此时dictionary认为它们是同一个key
                                 // 故需要对这种情况特殊处理，将所有回路图元ObjectId添加到一个key中
-                                if(EdgeMap.ContainsKey(newEdge))
+                                if (EdgeMap.ContainsKey(newEdge))
                                 {
                                     EdgeMap[newEdge].AddRange(thisMark.ObjectIds.Distinct().ToList());
                                     EdgeMap[newEdge] = EdgeMap[newEdge].Distinct().ToList();

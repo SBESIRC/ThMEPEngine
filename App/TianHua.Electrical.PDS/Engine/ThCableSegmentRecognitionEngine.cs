@@ -36,6 +36,7 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var entityInfos = datas.Select(data => data.Data as Curve)
                 .Where(o => o.GetLength() > 1.0)
+                .Where(o => !o.Closed)
                 .Select(data => new ThPDSEntityInfo(data, true)).ToList();
             var curves = entityInfos.Select(e => e.Entity).ToCollection();
             if (polygon.Count > 0)
