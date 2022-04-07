@@ -2176,21 +2176,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "新建回路";
-                            var outTypes = new string[]
-                            {
-                                "常规配电回路",
-                                "漏电保护回路",
-                                "带接触器回路",
-                                "带热继电器回路",
-                                "计量(上海)",
-                                "计量(表在前)",
-                                "计量(表在后)",
-                                "电动机配电回路",
-                                "双速电机D-YY",
-                                "双速电机Y-Y",
-                                "分支母排",
-                            };
-                            foreach (var outType in outTypes)
+                            foreach (var outType in ThPDSProjectGraphService.AvailableTypes())
                             {
                                 var m = new MenuItem();
                                 mi.Items.Add(m);

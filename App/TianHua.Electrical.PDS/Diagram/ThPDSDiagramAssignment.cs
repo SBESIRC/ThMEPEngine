@@ -483,7 +483,8 @@ namespace TianHua.Electrical.PDS.Diagram
                         conductor.TextString = circuit.Conductor.Content;
                         break;
                     }
-                case CircuitFormOutType.配电计量_上海CT | CircuitFormOutType.配电计量_上海直接表:
+                case CircuitFormOutType.配电计量_上海CT:
+                case CircuitFormOutType.配电计量_上海直接表:
                     {
                         BreakerBaseComponent breaker1, breaker2;
                         Meter meter;
@@ -557,7 +558,8 @@ namespace TianHua.Electrical.PDS.Diagram
                         conductorText.TextString = conductor.Content;
                         break;
                     }
-                case CircuitFormOutType.配电计量_CT表在前 | CircuitFormOutType.配电计量_直接表在前:
+                case CircuitFormOutType.配电计量_CT表在前:
+                case CircuitFormOutType.配电计量_直接表在前:
                     {
                         BreakerBaseComponent breaker;
                         Meter meter;
@@ -614,7 +616,8 @@ namespace TianHua.Electrical.PDS.Diagram
                         conductorText.TextString = conductor.Content;
                         break;
                     }
-                case CircuitFormOutType.配电计量_CT表在后 | CircuitFormOutType.配电计量_直接表在后:
+                case CircuitFormOutType.配电计量_CT表在后:
+                case CircuitFormOutType.配电计量_直接表在后:
                     {
                         BreakerBaseComponent breaker;
                         Meter meter;

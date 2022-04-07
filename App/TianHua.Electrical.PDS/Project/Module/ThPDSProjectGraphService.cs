@@ -263,6 +263,28 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 获取可新建出线回路列表
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> AvailableTypes()
+        {
+            return new List<string>()
+            {
+                "常规配电回路",
+                "漏电保护回路",
+                "带接触器回路",
+                "带热继电器回路",
+                "计量(上海)",
+                "计量(表在前)",
+                "计量(表在后)",
+                "电动机配电回路",
+                "双速电机D-YY",
+                "双速电机Y-Y",
+                /*"分支母排"*/
+            };
+        }
+
+        /// <summary>
         /// 获取可选择出线回路列表
         /// </summary>
         /// <returns></returns>
