@@ -826,6 +826,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void ReDefinePillarDimensions()
         {
+            IniPillar.AddRange(Pillars.Select(e => e.Clone() as Polyline));
             if (HasImpactOnDepthForPillarConstruct)
             {
                 Pillars = Pillars.Select(e =>

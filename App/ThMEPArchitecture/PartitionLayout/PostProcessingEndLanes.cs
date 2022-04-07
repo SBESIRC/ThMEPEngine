@@ -15,7 +15,7 @@ using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
-    public static class LayoutPostProcessing
+    public static partial class LayoutPostProcessing
     {
         /// <summary>
         /// 全局判断识别，对于分隔线尽端如果能生成车位的情况，重新排布局部区域
@@ -42,6 +42,11 @@ namespace ThMEPArchitecture.PartitionLayout
                     if (CanAddCarSpots(lane, CreateVector(lane).GetNormal(), pointest, vec, carspacialindex, ref carLine))
                     {
                         generate_cars(Walls,lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, vm);
+                        var pe=lane.GetClosestPointTo(carLine.StartPoint, false);
+                        var ps = pe - CreateVector(carLine).GetNormal() * ParkingPartitionPro.DisLaneWidth/2;
+                        var l = SplitLine(lane, new List<Point3d>() { ps }).OrderByDescending(p => p.GetCenter().DistanceTo(carLine.GetCenter())).First();
+                        lane = l;
+                        lanes[i] = l;
                     }
                 }
                 if (boundary.GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 10)
@@ -53,6 +58,11 @@ namespace ThMEPArchitecture.PartitionLayout
                     if (CanAddCarSpots(lane, -CreateVector(lane).GetNormal(), pointest, vec, carspacialindex, ref carLine))
                     {
                         generate_cars(Walls,lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars,vm, false);
+                        var pe = lane.GetClosestPointTo(carLine.StartPoint, false);
+                        var ps = pe - CreateVector(carLine).GetNormal() * ParkingPartitionPro.DisLaneWidth/2;
+                        var l = SplitLine(lane, new List<Point3d>() { ps }).OrderByDescending(p => p.GetCenter().DistanceTo(carLine.GetCenter())).First();
+                        lane = l;
+                        lanes[i] = l;
                     }
                 }
             }
