@@ -111,6 +111,12 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Components" Guid="{A910B414-4CCE-42D5-8EFB-288D53089E31}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PDS_Components" Source="$(var.AutoloaderContentsPath)\Support\平面关注对象.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Reinforcement_Template" Guid="{2F45C338-BDFB-4C95-8DEB-0D16CAAF0AB7}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Reinforcement_Template" Source="$(var.AutoloaderContentsPath)\Support\配筋模板.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Wall_Column_Table" Guid="{F3487F91-F532-4A74-B00C-D9A2045D7AD8}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Wall_Column_Table" Source="$(var.AutoloaderContentsPath)\Support\天华内置墙柱表.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -272,6 +278,8 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_Current_Transformer_19DX101" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Secondary_Circuit_MatchTable_Default" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LV_AC_OUVP_19DX101" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Wall_Column_Table" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Reinforcement_Template" />
         </ComponentGroup>
     </Fragment>
 </Wix>
