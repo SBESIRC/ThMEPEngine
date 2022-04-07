@@ -42,7 +42,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 for (int j = i + 1; j < lanes.Count; j++)
                 {
-                    if (IsParallelLine(lanes[i], lanes[j]))
+                    if (IsParallelLine(lanes[i], lanes[j]) && lanes[j].GetClosestPointTo(lanes[i].GetCenter(), true).DistanceTo(lanes[i].GetCenter()) < 0.001)
                     {
                         if (lanes[j].GetClosestPointTo(lanes[i].StartPoint, false).DistanceTo(lanes[i].StartPoint) < 0.001
                             && lanes[j].GetClosestPointTo(lanes[i].EndPoint, false).DistanceTo(lanes[i].EndPoint) > 0.001)
@@ -67,10 +67,8 @@ namespace ThMEPArchitecture.PartitionLayout
             for (int i = 0; i < lanes.Count - 1; i++)
             {
                 for (int j = i + 1; j < lanes.Count; j++)
-                {
-                    bool isSimilarDuplicated = IsParallelLine(lanes[i], lanes[j]) && lanes[j].GetClosestPointTo(lanes[i].GetCenter(), false).DistanceTo(lanes[i].GetCenter()) < tol
-                        && Math.Abs(lanes[j].GetClosestPointTo(lanes[i].StartPoint, false).DistanceTo(lanes[i].StartPoint) - lanes[j].GetClosestPointTo(lanes[i].EndPoint, false).DistanceTo(lanes[i].EndPoint)) < 1;
-                    if (IsSubLine(lanes[i], lanes[j]) || isSimilarDuplicated)
+                {              
+                    if (IsSubLine(lanes[i], lanes[j]))
                     {
                         lanes.RemoveAt(i);
                         i--;
@@ -80,6 +78,22 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             //合并车道线
             JoinLines(lanes);
+            //删除近似重复的子车道线
+            lanes = lanes.OrderBy(e => e.Length).ToList();
+            for (int i = 0; i < lanes.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lanes.Count; j++)
+                {
+                    bool isSimilarDuplicated = IsParallelLine(lanes[i], lanes[j]) && lanes[j].GetClosestPointTo(lanes[i].GetCenter(), false).DistanceTo(lanes[i].GetCenter()) < tol
+                        && Math.Abs(lanes[j].GetClosestPointTo(lanes[i].StartPoint, false).DistanceTo(lanes[i].StartPoint) - lanes[j].GetClosestPointTo(lanes[i].EndPoint, false).DistanceTo(lanes[i].EndPoint)) < 1;
+                    if (isSimilarDuplicated)
+                    {
+                        lanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
         }
         private static void GetConnectedRelationship(List<Line> lanes, ref List<int> Sindexes, ref List<int> Eindexes)
         {
