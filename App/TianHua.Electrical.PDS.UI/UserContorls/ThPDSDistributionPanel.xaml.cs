@@ -25,11 +25,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             }
             else
             {
-                Service.TreeView = tv;
-                Service.Canvas = canvas;
-                Service.propertyGrid = propertyGrid;
-                Service.Graph = Graph;
-                Service.Init();
+                Service.Init(this);
             }
         }
 
