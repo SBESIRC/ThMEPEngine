@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
     public partial class ThPDSDistributionPanel : UserControl
     {
         public WpfServices.ThPDSDistributionPanelService Service = new();
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
+        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
         public ThPDSDistributionPanel()
         {
             InitializeComponent();

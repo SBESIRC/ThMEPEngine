@@ -9,7 +9,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class ThPDSCircuitGraphTreeBuilder
     {
-        public ThPDSCircuitGraphTreeModel Build(AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        public ThPDSCircuitGraphTreeModel Build(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             var lst = new ObservableCollection<ThPDSCircuitGraphTreeModel>();
             var nodeId = -1;

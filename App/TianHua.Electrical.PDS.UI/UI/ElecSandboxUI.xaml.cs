@@ -49,7 +49,7 @@ namespace TianHua.Electrical.PDS.UI.UI
 
         static bool hasInited;
 
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
+        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
 
         /// <summary>
         /// 初始化数据，只执行一次！

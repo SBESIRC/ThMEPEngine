@@ -24,8 +24,8 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         }
         private ThPDSProjectVMGraphInfo graphInfo { get; set; }
 
-        private AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph;
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph
+        private BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph;
+        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph
         {
             get { return graph; }
             set { graph = value; }

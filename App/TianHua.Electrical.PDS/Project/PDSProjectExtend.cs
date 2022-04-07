@@ -21,7 +21,7 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
@@ -667,7 +667,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="Graph"></param>
         /// <param name="NewGraph"></param>
-        public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> NewGraph)
+        public static void Compatible(this ThPDSProjectGraph Graph, BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> NewGraph)
         {
             //暂时不考虑
         }
