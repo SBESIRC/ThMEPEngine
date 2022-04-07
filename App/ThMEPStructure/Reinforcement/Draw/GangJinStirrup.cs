@@ -19,7 +19,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public void CalPositionR(ThRectangleEdgeComponent thRectangleEdgeComponent)
         {
             Point3d pt = Outline.GetPoint3dAt(0);
-            double offset = (thRectangleEdgeComponent.C + 5) * scale + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
+            double offset = thRectangleEdgeComponent.C * scale + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
             pt += new Vector3d(offset, -offset, 0);
             double r = thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight / 2;
             double width = thRectangleEdgeComponent.Hc * scale - 2 * offset;
@@ -31,7 +31,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public void CalPositionL(ThLTypeEdgeComponent thLTypeEdgeComponent)
         {
             Point3d pt = Outline.GetPoint3dAt(0);
-            double offset = (thLTypeEdgeComponent.C + 5) * scale + thLTypeEdgeComponent.PointReinforceLineWeight + thLTypeEdgeComponent.StirrupLineWeight;
+            double offset = thLTypeEdgeComponent.C * scale + thLTypeEdgeComponent.PointReinforceLineWeight + thLTypeEdgeComponent.StirrupLineWeight;
             pt += new Vector3d(offset, -offset, 0);
             double r = thLTypeEdgeComponent.PointReinforceLineWeight + thLTypeEdgeComponent.StirrupLineWeight / 2;
             double width = thLTypeEdgeComponent.Bf * scale - 2 * offset;
@@ -50,7 +50,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public void CalPositionT(ThTTypeEdgeComponent thTTypeEdgeComponent)
         {
             Point3d pt = Outline.GetPoint3dAt(0);
-            double offset = (thTTypeEdgeComponent.C + 5) * scale + thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight;
+            double offset = thTTypeEdgeComponent.C * scale + thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight;
             pt += new Vector3d(offset, -offset, 0);
             double r = thTTypeEdgeComponent.PointReinforceLineWeight + thTTypeEdgeComponent.StirrupLineWeight / 2;
             double width = thTTypeEdgeComponent.Bf * scale - 2 * offset;
