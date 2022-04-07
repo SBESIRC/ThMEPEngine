@@ -304,7 +304,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             foreach (var dimension in rotatedDimensions)
             {
                 dimension.LayerId = DbHelper.GetLayerId("COLU_DE_DIM");
-                dimension.DimensionStyle = DbHelper.GetDimstyleId("FT_25_100");
+                dimension.DimensionStyle = DbHelper.GetDimstyleId("TSSD_25_100");
                 objectCollection.Add(dimension);
             }
             
