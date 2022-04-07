@@ -1,5 +1,4 @@
-﻿using System;
-using TianHua.Electrical.PDS.UI.WpfServices;
+﻿using TianHua.Electrical.PDS.UI.WpfServices;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
@@ -52,7 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Services
 
         public static bool IsOUVP(this BlockInfo info)
         {
-            throw new NotSupportedException();
+            return info.BlockName == "过欠电压保护器";
         }
     }
 }

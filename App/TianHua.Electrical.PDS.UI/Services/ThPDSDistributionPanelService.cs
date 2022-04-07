@@ -808,7 +808,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                 }
                             }
-                            if (info.BlockName is "Isolator" or "CircuitBreaker" or "过欠电压保护器")
+                            if (info.IsIsolator() || info.IsBreaker())
                             {
                                 var cmenu = new ContextMenu();
                                 foreach (var m in getInputMenus())
