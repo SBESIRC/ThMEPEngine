@@ -615,7 +615,7 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             if(sheet!=null && IsValidRowIndex(row) && IsValidColumnIndex(column))
             {
-                var value = sheet.Cells[row, column].Value;
+                var value = sheet.Cells[row, column].Text;
                 if(value!=null)
                 {
                     return value.ToString();
