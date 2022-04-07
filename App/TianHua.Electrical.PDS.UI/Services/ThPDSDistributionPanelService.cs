@@ -1,7 +1,5 @@
 ﻿using System;
-using QuikGraph;
 using System.Linq;
-using ThCADExtension;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -10,15 +8,14 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
-using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Models;
-using TianHua.Electrical.PDS.UI.Converters;
-using System.Windows.Controls.Primitives;
-using System.Collections.ObjectModel;
-using Microsoft.Toolkit.Mvvm.Input;
-using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Services;
+using TianHua.Electrical.PDS.UI.Converters;
+using TianHua.Electrical.PDS.UI.ViewModels;
+using Microsoft.Toolkit.Mvvm.Input;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class StringCommand : ICommand
@@ -347,16 +344,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSVertex
     {
-        public TianHua.Electrical.PDS.Project.Module.NodeDetails Detail;
-        public TianHua.Electrical.PDS.Model.PDSNodeType Type;
+        public NodeDetails Detail;
+        public PDSNodeType Type;
     }
     public class ThPDSContext
     {
-        public List<ThPDSVertex> Vertices;
         public List<int> Souces;
         public List<int> Targets;
-        public List<TianHua.Electrical.PDS.Model.ThPDSCircuit> Circuits;
-        public List<TianHua.Electrical.PDS.Project.Module.CircuitDetails> Details;
+        public List<ThPDSVertex> Vertices;
+        public List<ThPDSCircuit> Circuits;
+        public List<CircuitDetails> Details;
     }
     public class ThPDSDistributionPanelService
     {
