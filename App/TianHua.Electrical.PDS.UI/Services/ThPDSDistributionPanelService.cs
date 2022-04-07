@@ -1104,9 +1104,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                         foreach (var info in item.brInfos)
                         {
-                            var breakers = item.brInfos.Where(x => x.BlockName is "CircuitBreaker" or "RCD").ToList();
+                            var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                             PDS.Project.Module.Component.BreakerBaseComponent breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                            if (info.BlockName is "CircuitBreaker" or "RCD")
+                            if (info.IsBreaker())
                             {
                                 if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
                                 {
@@ -1160,6 +1160,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                                 {
+                                    throw new NotSupportedException();
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                 {
@@ -1167,9 +1168,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
                                 {
+                                    throw new NotSupportedException();
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
                                 {
+                                    throw new NotSupportedException();
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
                                 {
@@ -1181,13 +1184,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                 {
+                                    throw new NotSupportedException();
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                 {
+                                    throw new NotSupportedException();
                                 }
                                 var idx = breakers.IndexOf(info);
                                 if (breaker != null)
                                 {
+                                    //
                                 }
                                 else if (breakers.Count > 1)
                                 {
@@ -1273,7 +1279,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 };
                                             }
                                         }
-                                        if (info.BlockName is "CircuitBreaker" or "RCD")
+                                        if (info.IsBreaker())
                                         {
                                             void reg(PDS.Project.Module.Component.BreakerBaseComponent breaker, string templateStr)
                                             {
@@ -1321,7 +1327,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 cvs.ContextMenu = cmenu;
                                             }
                                         }
-                                        else if (info.BlockName == "Contactor")
+                                        else if (info.IsContactor())
                                         {
                                             var contactors = item.brInfos.Where(x => x.BlockName == "Contactor").ToList();
                                             var idx = contactors.IndexOf(info);
@@ -1431,7 +1437,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
-                                        else if (info.BlockName == "ThermalRelay")
+                                        else if (info.IsThermalRelay())
                                         {
                                             PDS.Project.Module.Component.ThermalRelay thermalRelay = null;
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
@@ -1516,7 +1522,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
-                                        else if (info.BlockName == "CPS")
+                                        else if (info.IsCPS())
                                         {
                                             PDS.Project.Module.Component.CPS cps = null;
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
@@ -1597,7 +1603,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 cb += () => UpdatePropertyGrid(null);
                                             }
                                         }
-                                        else if (info.BlockName == "Meter")
+                                        else if (info.IsMeter())
                                         {
                                             PDS.Project.Module.Component.Meter meter = null;
                                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
@@ -1709,7 +1715,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 cvs.ContextMenu = cmenu;
                                             }
                                         }
-                                        else if (info.BlockName == "Motor")
+                                        else if (info.IsMotor())
                                         {
                                             cb += () => UpdatePropertyGrid(null);
                                         }
