@@ -64,7 +64,53 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             dB.Height = height;
             return;
         }
-        
+        public static string AnalysisLine(Line a)
+        {
+            string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
+                a.EndPoint.X.ToString() + "," + a.EndPoint.Y.ToString() + ",";
+            return s;
+        }
+        public static string AnalysisLineList(List<Line> a)
+        {
+            string s = "";
+            foreach (var e in a)
+            {
+                s += AnalysisLine(e);
+            }
+            return s;
+        }
+        public static string AnalysisPoly(Polyline a)
+        {
+            string s = "";
+            var e = a.Vertices().Cast<Point3d>().ToList();
+            for (int i = 0; i < e.Count; i++)
+            {
+                s += e[i].X.ToString() + "," + e[i].Y.ToString() + ",";
+            }
+            return s;
+        }
+
+        public static string AnalysisPolyList(List<Polyline> pls)
+        {
+            string s = "";
+            foreach (var e in pls)
+            {
+                s += AnalysisPoly(e);
+                s.Remove(s.Length - 1);
+                s += ";";
+            }
+            return s;
+        }
+        public static string AnalysisPointList(List<Point3d> points)
+        {
+            string s = "";
+            foreach (var pt in points)
+            {
+                s += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            return s;
+        }
+
         /// <summary>
         /// 判断两直线是否相交
         /// </summary>
