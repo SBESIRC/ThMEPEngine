@@ -332,140 +332,162 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
-        public static void ComponentSelection(this ThPDSProjectGraphEdge edge , CircuitFormOutType circuitFormOutType)
+        public static void ComponentSelection(this ThPDSProjectGraphEdge edge, CircuitFormOutType circuitFormOutType)
         {
             edge.Details = new CircuitDetails();
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
             SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
-            if (circuitFormOutType == CircuitFormOutType.常规)
+            switch (circuitFormOutType)
             {
-                edge.Details.CircuitForm = new RegularCircuit()
-                {
-                    breaker = componentFactory.CreatBreaker(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.漏电)
-            {
-                edge.Details.CircuitForm = new LeakageCircuit()
-                {
-                    breaker= componentFactory.CreatResidualCurrentBreaker(),
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.接触器控制)
-            {
-                edge.Details.CircuitForm = new ContactorControlCircuit()
-                {
-                    breaker= componentFactory.CreatBreaker(),
-                    contactor = componentFactory.CreatContactor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.热继电器保护)
-            {
-                edge.Details.CircuitForm = new ThermalRelayProtectionCircuit()
-                {
-                    breaker= componentFactory.CreatBreaker(),
-                    thermalRelay = componentFactory.CreatThermalRelay(),
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.配电计量_上海CT)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
-                {
-                    breaker1 = componentFactory.CreatBreaker(),
-                    meter = componentFactory.CreatCurrentTransformer(),
-                    breaker2 = componentFactory.CreatBreaker(),
-                    Conductor = componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
-                {
-                    breaker1 = componentFactory.CreatBreaker(),
-                    meter = componentFactory.CreatMeterTransformer(),
-                    breaker2 = componentFactory.CreatBreaker(),
-                    Conductor = componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_CT表在前)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
-                {
-                    meter = componentFactory.CreatCurrentTransformer(),
-                    breaker = componentFactory.CreatBreaker(),
-                    Conductor = componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_直接表在前)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
-                {
-                    meter = componentFactory.CreatMeterTransformer(),
-                    breaker = componentFactory.CreatBreaker(),
-                    Conductor = componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_CT表在后)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
-                {
-                    breaker = componentFactory.CreatBreaker(),
-                    meter = componentFactory.CreatCurrentTransformer(),
-                    Conductor= componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_MTInBehindCircuit()
-                {
-                    breaker = componentFactory.CreatBreaker(),
-                    meter = componentFactory.CreatMeterTransformer(),
-                    Conductor = componentFactory.CreatConductor(),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_CPS)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件星三角启动)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
-            }
-            else if(circuitFormOutType == CircuitFormOutType.电动机_CPS星三角启动)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.消防应急照明回路WFEL)
-            {
-                edge.Details.CircuitForm = new FireEmergencyLighting() 
-                {
-                    Conductor = componentFactory.CreatConductor()
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.双速电动机_CPSdetailYY)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSDYYCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.双速电动机_CPSYY)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.双速电动机_分立元件detailYY)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
-            }
-            else if (circuitFormOutType == CircuitFormOutType.双速电动机_CPSdetailYY)
-            {
-                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
-            }
-            else
-            {
-                //暂未支持该回路类型，请暂时不要选择该回路
-                throw new NotSupportedException();
+                case CircuitFormOutType.常规:
+                    {
+                        edge.Details.CircuitForm = new RegularCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.漏电:
+                    {
+                        edge.Details.CircuitForm = new LeakageCircuit()
+                        {
+                            breaker= componentFactory.CreatResidualCurrentBreaker(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.接触器控制:
+                    {
+                        edge.Details.CircuitForm = new ContactorControlCircuit()
+                        {
+                            breaker= componentFactory.CreatBreaker(),
+                            contactor = componentFactory.CreatContactor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.热继电器保护:
+                    {
+                        edge.Details.CircuitForm = new ThermalRelayProtectionCircuit()
+                        {
+                            breaker= componentFactory.CreatBreaker(),
+                            thermalRelay = componentFactory.CreatThermalRelay(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_上海CT:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
+                        {
+                            breaker1 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            breaker2 = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_上海直接表:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
+                        {
+                            breaker1 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatMeterTransformer(),
+                            breaker2 = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在前:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
+                        {
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            breaker = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在前:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
+                        {
+                            meter = componentFactory.CreatMeterTransformer(),
+                            breaker = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在后:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            Conductor= componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在后:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_MTInBehindCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatMeterTransformer(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.电动机_分立元件:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_CPS:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_分立元件星三角启动:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.消防应急照明回路WFEL:
+                    {
+                        edge.Details.CircuitForm = new FireEmergencyLighting()
+                        {
+                            Conductor = componentFactory.CreatConductor()
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSDYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件YY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
+                        break;
+                    }
+                default:
+                    {
+                        //暂未支持该回路类型，请暂时不要选择该回路
+                        throw new NotSupportedException();
+                    }
             }
             //统计回路级联电流
             edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
