@@ -113,7 +113,34 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void InsertUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            var edges = graph.Graph.OutEdges(node).ToList();
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+            if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+            {
+                if (oneWayInCircuit.reservedComponent.IsNull() || oneWayInCircuit.reservedComponent is Meter)
+                {
+                    oneWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                }
+            }
+            else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+            {
+                if (twoWayInCircuit.reservedComponent.IsNull() || twoWayInCircuit.reservedComponent is Meter)
+                {
+                    twoWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                }
+            }
+            else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+            {
+                if (threeWayInCircuit.reservedComponent.IsNull() || threeWayInCircuit.reservedComponent is Meter)
+                {
+                    threeWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                }
+            }
+            else
+            {
+                //业务逻辑：别的回路不允许插入该元器件
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -124,7 +151,32 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void RemoveUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+            {
+                if (oneWayInCircuit.reservedComponent is OUVP)
+                {
+                    oneWayInCircuit.reservedComponent = null ;
+                }
+            }
+            else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+            {
+                if (twoWayInCircuit.reservedComponent is OUVP)
+                {
+                    twoWayInCircuit.reservedComponent = null;
+                }
+            }
+            else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+            {
+                if (threeWayInCircuit.reservedComponent is OUVP)
+                {
+                    threeWayInCircuit.reservedComponent = null;
+                }
+            }
+            else
+            {
+                //业务逻辑：别的回路不允许删除该元器件
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -135,7 +187,34 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void InsertEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            var edges = graph.Graph.OutEdges(node).ToList();
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+            if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+            {
+                if (oneWayInCircuit.reservedComponent.IsNull() || oneWayInCircuit.reservedComponent is OUVP)
+                {
+                    oneWayInCircuit.reservedComponent = componentFactory.CreatMeterTransformer();
+                }
+            }
+            else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+            {
+                if (twoWayInCircuit.reservedComponent.IsNull() || twoWayInCircuit.reservedComponent is OUVP)
+                {
+                    twoWayInCircuit.reservedComponent = componentFactory.CreatMeterTransformer();
+                }
+            }
+            else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+            {
+                if (threeWayInCircuit.reservedComponent.IsNull() || threeWayInCircuit.reservedComponent is OUVP)
+                {
+                    threeWayInCircuit.reservedComponent = componentFactory.CreatMeterTransformer();
+                }
+            }
+            else
+            {
+                //业务逻辑：别的回路不允许插入该元器件
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -146,7 +225,32 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void RemoveEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            throw new NotImplementedException();
+            if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+            {
+                if (oneWayInCircuit.reservedComponent is Meter)
+                {
+                    oneWayInCircuit.reservedComponent = null;
+                }
+            }
+            else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+            {
+                if (twoWayInCircuit.reservedComponent is Meter)
+                {
+                    twoWayInCircuit.reservedComponent = null;
+                }
+            }
+            else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+            {
+                if (threeWayInCircuit.reservedComponent is Meter)
+                {
+                    threeWayInCircuit.reservedComponent = null;
+                }
+            }
+            else
+            {
+                //业务逻辑：别的回路不允许删除该元器件
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -176,7 +280,16 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var ComponentType = componentType.GetComponentType();
                 if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
                 {
-                    edge.Details.CircuitForm.SetCircuitComponentValue(component, edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType));
+                    if (component is Breaker breaker && componentType == Component.ComponentType.RCD)
+                    {
+                        //只有 CB -> RCD是特殊处理
+                        var residualCurrentBreaker = new ResidualCurrentBreaker(breaker);
+                        edge.Details.CircuitForm.SetCircuitComponentValue(component, residualCurrentBreaker);
+                    }
+                    else
+                    {
+                        edge.Details.CircuitForm.SetCircuitComponentValue(component, edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType));
+                    }
                 }
             }
         }

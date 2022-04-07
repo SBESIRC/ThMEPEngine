@@ -36,5 +36,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         /// 坑位5: 转换开关2
         /// </summary>
         public TransferSwitch transferSwitch2 { get; set; }
+
+        /// <summary>
+        /// 坑位6：OUVP/Meter
+        /// </summary>
+        public PDSBaseComponent reservedComponent { get; set; }
     }
 }

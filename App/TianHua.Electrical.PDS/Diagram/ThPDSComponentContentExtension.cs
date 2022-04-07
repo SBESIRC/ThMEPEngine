@@ -23,5 +23,10 @@ namespace TianHua.Electrical.PDS.Diagram
         {
             return $"{cps.Model}{cps.Combination}-{cps.FrameSpecification}/{cps.CodeLevel}{cps.RatedCurrent}/{cps.PolesNum}{cps.RatedCurrent}";
         }
+
+        public static string Content(this OUVP cps)
+        {
+            return "自复式过欠电压保护器";
+        }
     }
 }

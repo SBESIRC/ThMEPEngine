@@ -4,6 +4,7 @@ using ThCADExtension;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
+using System.Reflection;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -79,6 +80,43 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeTripDevice = tripDevice;
             AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
             AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+            AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 断路器
+        /// </summary>
+        /// <param name="breaker"></param>
+        public ResidualCurrentBreaker(Breaker breaker)
+        {
+            Type typeBreaker = typeof(Breaker);
+            Type typeResidualCurrentBreaker = typeof(ResidualCurrentBreaker);
+            BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var ResidualCurrentBreakeProps = typeResidualCurrentBreaker.GetProperties(InstanceBindFlags);
+            foreach (PropertyInfo prop in typeBreaker.GetProperties(InstanceBindFlags))
+            {
+                var ResidualCurrentProp = ResidualCurrentBreakeProps.FirstOrDefault(o => o.Name == prop.Name);
+                if(!ResidualCurrentProp.IsNull() && ResidualCurrentProp.Name != "Content")
+                {
+                    object oValue = prop.GetValue(breaker);
+                    ResidualCurrentProp.SetValue(this, oValue);
+                }
+            }
+            ComponentType = ComponentType.RCD;
+  
+            //IsMotor = isMotor;
+            //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
+            RCDType = RCDType.A;
+            if (IsMotor)
+            {
+                ResidualCurrent = ResidualCurrentSpecification.Specification300;
+            }
+            else
+            {
+                ResidualCurrent = ResidualCurrentSpecification.Specification30;
+            }
+            AlternativeRCDTypes = new List<RCDType>() { RCDType.A, RCDType.AC, RCDType.B, RCDType.F };
+            AlternativeResidualCurrents = new List<ResidualCurrentSpecification>() { ResidualCurrentSpecification.Specification10, ResidualCurrentSpecification.Specification30, ResidualCurrentSpecification.Specification100, ResidualCurrentSpecification.Specification300, ResidualCurrentSpecification.Specification500 };
         }
 
         /// <summary>

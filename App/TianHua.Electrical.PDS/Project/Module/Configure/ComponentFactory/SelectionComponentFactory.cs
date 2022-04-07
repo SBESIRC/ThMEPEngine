@@ -19,6 +19,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private double _maxCalculateCurrent;//获取Target级联电流
         private string _polesNum;//级数
         private string _specialPolesNum;//特殊元器件级数
+        private string _ouvpPolesNum;//OUVP元器件级数
         private string _characteristics;//瞬时脱扣器类型
         private List<string> _tripDevice;//脱扣器类型
         public SelectionComponentFactory(ThPDSProjectGraphEdge edge)
@@ -55,6 +56,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             if (node.Load.Phase == ThPDSPhase.一相)
             {
                 _polesNum = "1P";
+                _ouvpPolesNum = "1P+N";
                 //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
                 //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
                 if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
@@ -68,6 +70,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             }
             else if (node.Load.Phase == ThPDSPhase.三相)
             {
+                _ouvpPolesNum = "3P+N";
                 if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
                 {
                     _specialPolesNum = "3P";
@@ -134,6 +137,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public override ThermalRelay CreatThermalRelay()
         {
             return new ThermalRelay(_calculateCurrent);
+        }
+
+        public override OUVP CreatOUVP()
+        {
+            return new OUVP(_calculateCurrent, _ouvpPolesNum);
         }
     }
 }

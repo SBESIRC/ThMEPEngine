@@ -37,6 +37,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         SS,
         [Description("变频器")]
         FC,
+        [Description("过欠电压保护器")]
+        OUVP,
     }
 
     /// <summary>

@@ -69,6 +69,7 @@
     <Compile Include="Project\Module\Component\Extension\ComponentTypeSelector.cs" />
     <Compile Include="Project\Module\Component\ManualTransferSwitch.cs" />
     <Compile Include="Project\Module\Component\MeterTransformer.cs" />
+    <Compile Include="Project\Module\Component\OUVP.cs" />
     <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
     <Compile Include="Project\Module\Configure\ComponentFactory\PDSBaseComponentFactory.cs" />
     <Compile Include="Project\Module\Configure\ComponentFactory\SelectionComponentFactory.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Project\Module\Configure\CurrentTransformerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\MeterTransformerConfiguration.cs" />
     <Compile Include="Project\Module\Configure\MotorConfiguration.cs" />
+    <Compile Include="Project\Module\Configure\OUVPConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphCompareService.cs" />

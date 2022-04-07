@@ -333,5 +333,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             throw new NotImplementedException();
         }
+
+        public override OUVP CreatOUVP()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

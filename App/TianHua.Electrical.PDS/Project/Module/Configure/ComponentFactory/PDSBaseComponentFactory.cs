@@ -23,5 +23,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public abstract AutomaticTransferSwitch CreatAutomaticTransferSwitch(); 
         public abstract ManualTransferSwitch CreatManualTransferSwitch();
         public abstract Conductor CreatConductor();
+        public abstract OUVP CreatOUVP();
     }
 }

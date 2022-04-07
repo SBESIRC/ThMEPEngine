@@ -30,6 +30,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadMeterConfig();
             LoadMTConfig();
             LoadCPSConfig();
+            LoadOUVPConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -797,6 +798,34 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             InstallMethod = row["安装方式"].ToString()
                         });
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载CPS配置
+        /// </summary>
+        private static void LoadOUVPConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.OUVPUrl, true);
+            var Table = dataSet.Tables["OUVP"];
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    OUVPConfiguration.OUVPComponentInfos.Add(new OUVPComponentInfo()
+                    {
+                        Model = row["型号"].ToString(),
+                        MaxKV = row["额定电压"].ToString(),
+                        Poles = row["级数"].ToString(),
+                        Amps = double.Parse(row["额定电流"].ToString()),
+                        InstallMethod = row["安装方式"].ToString(),
+                        Width = row["宽度"].ToString(),
+                        Depth = row["深度"].ToString(),
+                        Height = row["高度"].ToString(),
+                    });
                 }
             }
         }
