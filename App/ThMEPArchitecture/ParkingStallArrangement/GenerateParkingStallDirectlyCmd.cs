@@ -14,6 +14,8 @@ using ThMEPArchitecture.ParkingStallArrangement.General;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using System.Linq;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -98,6 +100,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var Walls = new List<Polyline>();
                 var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
+                var IniPillars = new List<Polyline>();
+                var ObsVertices = new List<Point3d>();
                 var Lanes = new List<Line>();
                 var Boundary = layoutPara.OuterBoundary;
                 var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
@@ -107,9 +111,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                     Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
+                    ObsVertices.AddRange(partitionpro.ObstacleVertexes);
                     try
                     {
-                        count += partitionpro.Process(Cars,Pillars,Lanes);
+                        count += partitionpro.Process(Cars,Pillars,Lanes, IniPillars);
                     }
                     catch (Exception ex)
                     {
@@ -117,19 +122,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         Active.Editor.WriteMessage(ex.Message);
                     }
                 }
-                try
-                {
-                    LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
-                }
-                catch(Exception ex)
-                {
-                    ;
-                }
+                GeoUtilities.RemoveDuplicatedLines(Lanes);
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, ref Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                LayoutPostProcessing.PostProcessLanes(ref Lanes, Cars.Select(e => e.Polyline).ToList(), IniPillars, ObsVertices);
                 count = Cars.Count;
                 var partitionpro_final = new ParkingPartitionPro();
                 partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;
-                partitionpro_final.OutputLanes= Lanes;
+                partitionpro_final.OutputLanes = Lanes;
                 partitionpro_final.Display();
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);

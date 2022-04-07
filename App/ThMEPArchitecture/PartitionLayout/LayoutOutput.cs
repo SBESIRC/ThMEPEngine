@@ -22,6 +22,7 @@ namespace ThMEPArchitecture.PartitionLayout
         }
         public static string CarLayerName;
         public static string ColumnLayerName;
+        public static string LaneLayerName;
         public static string PCarLayerName = "平行式";
         public static string VCarLayerName = "C-标准车位-背靠背";
         public static string PCARBLKNAME = "AI-平行式2460";
@@ -30,6 +31,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public List<Polyline> Columns;
         public List<Line> Lanes;
         public int ColumnDisplayColorIndex = -1;
+        public static int LaneDisplayColorIndex = -1;
         public static void InitializeLayer()
         {
             using (AcadDatabase adb = AcadDatabase.Active())
@@ -316,8 +318,13 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                return;
-                Lanes.AddToCurrentSpace();
+                if (!adb.Layers.Contains(LaneLayerName))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, LaneLayerName, (short)LaneDisplayColorIndex);
+                Lanes.Select(e =>
+                {
+                    e.Layer = LaneLayerName;
+                    return e;
+                }).AddToCurrentSpace();
             }
         }
     }

@@ -17,6 +17,7 @@ using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -182,6 +183,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var Cars = new List<InfoCar>();
                 var Pillars = new List<Polyline>();
                 var Lanes = new List<Line>();
+                var IniPillars = new List<Polyline>();
+                var ObsVertices = new List<Point3d>();
                 var Boundary = layoutPara.OuterBoundary;
                 var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
@@ -190,9 +193,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                     Walls.AddRange(partitionpro.Walls);
                     if (!partitionpro.Validate()) continue;
+                    ObsVertices.AddRange(partitionpro.ObstacleVertexes);
                     try
                     {
-                        partitionpro.Process(Cars, Pillars, Lanes);
+                        partitionpro.Process(Cars, Pillars, Lanes, IniPillars);
                     }
                     catch (Exception ex)
                     {
@@ -201,6 +205,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                 }
                 LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars,ref Lanes, Walls, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                LayoutPostProcessing.PostProcessLanes(ref Lanes, Cars.Select(e => e.Polyline).ToList(), IniPillars, ObsVertices);
                 var partitionpro_final = new ParkingPartitionPro();
                 partitionpro_final.Cars = Cars;
                 partitionpro_final.Pillars = Pillars;

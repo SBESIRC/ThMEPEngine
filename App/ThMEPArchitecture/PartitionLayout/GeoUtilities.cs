@@ -745,7 +745,71 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return distance;
         }
-
+        public static bool IsSubLine(Line a, Line b)
+        {
+            if (b.GetClosestPointTo(a.StartPoint, false).DistanceTo(a.StartPoint) < 0.001
+                && b.GetClosestPointTo(a.EndPoint, false).DistanceTo(a.EndPoint) < 0.001)
+                return true;
+            return false;
+        }
+        public static void JoinLines(List<Line> lines)
+        {
+            double tol = 0.001;
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (IsParallelLine(lines[i], lines[j]) && !IsSubLine(lines[i], lines[j]))
+                    {
+                        if (lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].EndPoint, lines[j].EndPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].EndPoint, lines[j].StartPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].StartPoint, lines[j].EndPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < tol)
+                        {
+                            lines[j] = new Line(lines[i].StartPoint, lines[j].StartPoint);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        public static List<Line> GetLinesByInterruptingIntersections(List<Line> lines)
+        {
+            if (lines.Count < 2) return lines;
+            var points = new List<Point3d>();
+            var res = new List<Line>();
+            for (int i = 0; i < lines.Count - 1; i++)
+                for (int j = i + 1; j < lines.Count; j++)
+                    points.AddRange(lines[i].Intersect(lines[j], Intersect.OnBothOperands));
+            points = points.Distinct().ToList();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var pts = points.Where(p => lines[i].GetClosestPointTo(p, false).DistanceTo(p) < 0.001).ToList();
+                res.AddRange(SplitLine(lines[i], pts));
+            }
+            return res;
+        }
         public static string AnalysisLine(Line a)
         {
             string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
@@ -792,5 +856,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return s;
         }
+
     }
 }
