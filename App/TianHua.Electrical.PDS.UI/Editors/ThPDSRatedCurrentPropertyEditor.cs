@@ -51,6 +51,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return breaker.AlternativeRatedCurrents;
             }
+            if (propertyItem.Value is ThPDSOUVPModel ouvp)
+            {
+                return ouvp.AlternativeRatedCurrents;
+            }
             throw new NotSupportedException();
         }
     }

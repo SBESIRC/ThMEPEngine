@@ -52,6 +52,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return breaker.AlternativeModels;
             }
+            if (propertyItem.Value is ThPDSOUVPModel ouvp)
+            {
+                return ouvp.AlternativeModels;
+            }
             throw new NotSupportedException();
         }
     }

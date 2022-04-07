@@ -100,6 +100,7 @@
     <Compile Include="Project\Module\Component\ThPDSIsolatingSwitchModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSOUVPModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSResidualCurrentBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
