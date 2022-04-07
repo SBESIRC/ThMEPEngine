@@ -42,11 +42,23 @@
     <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
       <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Command\WallColumnReinforceSetCmd.cs" />
     <Compile Include="Command\MainBeamCmd.cs" />
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
+    <Compile Include="Reinforcement\EdgeComponentDrawModel.cs" />
+    <Compile Include="Reinforcement\EdgeComponentDrawUI.xaml.cs">
+      <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetUI.xaml.cs">
+      <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reinforcement\WallColumnReinforceSetVM.cs" />
     <Compile Include="StructureWPFUIApp.cs" />
+    <Compile Include="Validations\GreaterThanZeroRule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="BeamStructure\BuildBeam\BuildBeamUI.xaml">
@@ -58,6 +70,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\EdgeComponentDrawUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\WallColumnReinforceSetUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -84,7 +104,9 @@
       <Name>ThMEPStructure</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resource\Image\Layer.png" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

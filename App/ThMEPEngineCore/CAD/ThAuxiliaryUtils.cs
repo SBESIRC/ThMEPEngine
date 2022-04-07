@@ -173,5 +173,19 @@ namespace ThMEPEngineCore.CAD
                 return acdb.Element<LayerTableRecord>(acdb.Database.Clayer).Name;
             }
         }
+        public static double OverlapDis(this Line first, Line second)
+        {
+            if (first.Length == 0.0 || second.Length == 0.0)
+            {
+                return 0.0;
+            }
+            var newSp = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var newEp = first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pts = new List<Point3d> { newSp, newEp, second.StartPoint, second.EndPoint };
+            var maxPair = pts.GetCollinearMaxPts();
+            var maxLength = maxPair.Item1.DistanceTo(maxPair.Item2);
+            var sum = newSp.DistanceTo(newEp) + second.Length;
+            return maxLength >= sum ? 0.0 : sum - maxLength;
+        }
     }
 }

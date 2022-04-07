@@ -243,6 +243,19 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
         }
+        /// <summary>
+        /// 室内机导出数据模板
+        /// </summary>
+        /// <returns></returns>
+        public static string TianhuaBuiltInWallColumnTablePath()
+        {
+            return Path.Combine(SupportPath(), "天华内置墙柱表.xlsx");
+        }
+
+        public static string ReinforceTemplateDwgPath()
+        {
+            return Path.Combine(SupportPath(), "配筋模板.dwg");
+        }
 
         // 运行时根目录
         private static string RootPath()
