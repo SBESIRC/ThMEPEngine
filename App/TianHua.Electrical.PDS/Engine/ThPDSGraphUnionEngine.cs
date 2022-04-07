@@ -29,7 +29,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 graph.Edges.ForEach(e =>
                 {
-                    if (e.Source == cableTrayNode)
+                    if (e.Source.Equals(cableTrayNode))
                     {
                         cabletrayEdgeList.Add(e);
                     }
@@ -119,7 +119,6 @@ namespace TianHua.Electrical.PDS.Engine
                     };
                     unionGraph.AddEdge(newEdge);
                 }
-
             });
 
             // 设置图的遍历起点

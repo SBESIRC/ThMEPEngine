@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.Service
         public static List<string> Seach(ThPDSProjectGraphNode node,
              BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
-            return graph.Edges.Where(e => e.Target.Equals(node))
+            return graph.InEdges(node)
                 .Select(e => e.Circuit.ID.CircuitNumber.Last())
                 .OrderBy(str => str)
                 .ToList();

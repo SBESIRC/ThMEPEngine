@@ -111,8 +111,8 @@ namespace TianHua.Electrical.PDS.Command
                     var busbarStartPoint = new Point3d(firstRowPoint.X, firstRowPoint.Y - 500 * scaleFactor, 0);
 
                     // 插入出线回路
-                    basePoint = PointClone(firstRowPoint);
-                    var edges = Graph.Edges.Where(e => e.Source.Equals(thisNode))
+                    basePoint = new Point3d(firstRowPoint.X, firstRowPoint.Y - 1000.0 * scaleFactor, 0);
+                    var edges = Graph.OutEdges(thisNode)
                         .OrderBy(e => e.Circuit.ID.CircuitNumber.Last())
                         .ToList();
                     foreach (var edge in edges)
@@ -122,22 +122,22 @@ namespace TianHua.Electrical.PDS.Command
                             continue;
                         }
                         var outType = GetOutType(edge.Details.CircuitForm);
-                        basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
-                        var outCircuit = insertEngine.Insert1(activeDb, configDb, outType, basePoint, scale);
+                        var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
                         assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
+                        basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
                     }
 
                     if (edges.Count < blankLineCount)
                     {
                         for (var i = 0; i < blankLineCount - edges.Count; i++)
                         {
-                            basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
                             insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
+                            basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
                         }
                     }
 
                     // 母排终点
-                    var busbarEndPoint = new Point3d(basePoint.X, basePoint.Y - 500 * scaleFactor, 0);
+                    var busbarEndPoint = new Point3d(basePoint.X, basePoint.Y + 500 * scaleFactor, 0);
 
                     // 变换母排
                     if (busbar.Item1)
@@ -147,11 +147,10 @@ namespace TianHua.Electrical.PDS.Command
                     }
 
                     // 插入空白行
-                    var lastRowPoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
-                    insertEngine.InsertBlankLine(activeDb, configDb, lastRowPoint, scale, tableObjs);
+                    insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
+                    basePoint = new Point3d(basePoint.X - 5000 * scaleFactor, basePoint.Y - 500 * scaleFactor, 0);
 
                     // 插入表尾
-                    basePoint = new Point3d(lastRowPoint.X - 5000 * scaleFactor, lastRowPoint.Y - 500 * scaleFactor, 0);
                     var tableTable = thisNode.Load.Phase == ThPDSPhase.一相
                         ? ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE : ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE;
                     var tail = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
@@ -205,29 +204,51 @@ namespace TianHua.Electrical.PDS.Command
             }
         }
 
-        private static string GetOutType(PDSBaseOutCircuit circuitForm)
+        private static Tuple<string, double> GetOutType(PDSBaseOutCircuit circuitForm)
         {
             switch (circuitForm.CircuitFormType)
             {
+                case CircuitFormOutType.常规:
+                    {
+                        return Tuple.Create(CircuitFormOutType.常规.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.漏电:
+                    {
+                        return Tuple.Create(CircuitFormOutType.漏电.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.接触器控制:
+                    {
+                        return Tuple.Create(CircuitFormOutType.接触器控制.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.热继电器保护:
+                    {
+                        return Tuple.Create(CircuitFormOutType.热继电器保护.GetDescription(), 1000.0);
+                    }
                 case CircuitFormOutType.配电计量_上海CT:
                     {
                         var circuit = circuitForm as DistributionMetering_ShanghaiCTCircuit;
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_上海直接表.GetDescription();
+                            return Tuple.Create( CircuitFormOutType.配电计量_上海直接表.GetDescription(),1000.0);
                         }
-                        break;
-                    }
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_上海CT.GetDescription(), 1000.0);
+                        }
+                    } 
                 case CircuitFormOutType.配电计量_上海直接表:
                     {
                         var circuit = circuitForm as DistributionMetering_ShanghaiMTCircuit;
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_上海CT.GetDescription();
+                            return Tuple.Create(CircuitFormOutType.配电计量_上海CT.GetDescription(),1000.0);
                         }
-                        break;
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_上海直接表.GetDescription(), 1000.0);
+                        }
                     }
                 case CircuitFormOutType.配电计量_CT表在前:
                     {
@@ -235,9 +256,12 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_直接表在前.GetDescription();
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在前.GetDescription(),1000.0);
                         }
-                        break;
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在前.GetDescription(), 1000.0);
+                        }
                     }
                 case CircuitFormOutType.配电计量_直接表在前:
                     {
@@ -245,9 +269,12 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_CT表在前.GetDescription();
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在前.GetDescription(),1000.0);
                         }
-                        break;
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在前.GetDescription(), 1000.0);
+                        }
                     }
                 case CircuitFormOutType.配电计量_CT表在后:
                     {
@@ -255,9 +282,12 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_直接表在后.GetDescription();
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在后.GetDescription(),1000.0);
                         }
-                        break;
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在后.GetDescription(), 1000.0);
+                        }
                     }
                 case CircuitFormOutType.配电计量_直接表在后:
                     {
@@ -265,12 +295,58 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return CircuitFormOutType.配电计量_CT表在后.GetDescription();
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在后.GetDescription(),1000.0);
                         }
-                        break;
+                        else
+                        {
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在后.GetDescription(), 1000.0);
+                        }
+                    }
+                case CircuitFormOutType.电动机_分立元件:
+                    {
+                        return Tuple.Create(CircuitFormOutType.电动机_分立元件.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.电动机_CPS:
+                    {
+                        return Tuple.Create(CircuitFormOutType.电动机_CPS.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.电动机_分立元件星三角启动:
+                    {
+                        return Tuple.Create(CircuitFormOutType.电动机_分立元件星三角启动.GetDescription(), 3000.0);
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        return Tuple.Create(CircuitFormOutType.电动机_CPS星三角启动.GetDescription(), 3000.0);
+                    }
+                case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    {
+                        return Tuple.Create(CircuitFormOutType.双速电动机_分立元件detailYY.GetDescription(), 3000.0);
+                    }
+                case CircuitFormOutType.双速电动机_分立元件YY:
+                    {
+                        return Tuple.Create(CircuitFormOutType.双速电动机_分立元件YY.GetDescription(), 2000.0);
+                    }
+                case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    {
+                        return Tuple.Create(CircuitFormOutType.双速电动机_CPSdetailYY.GetDescription(), 2000.0);
+                    }
+                case CircuitFormOutType.双速电动机_CPSYY:
+                    {
+                        return Tuple.Create(CircuitFormOutType.双速电动机_CPSYY.GetDescription(), 3000.0);
+                    }
+                case CircuitFormOutType.消防应急照明回路WFEL:
+                    {
+                        return Tuple.Create(CircuitFormOutType.消防应急照明回路WFEL.GetDescription(), 1000.0);
+                    }
+                case CircuitFormOutType.SPD:
+                    {
+                        return Tuple.Create(CircuitFormOutType.SPD.GetDescription(), 1000.0);
+                    }
+                default:
+                    {
+                        throw new NotSupportedException();
                     }
             }
-            return circuitForm.CircuitFormType.GetDescription();
         }
 
         private static bool TrySelectPoint(out Point3d basePt)
