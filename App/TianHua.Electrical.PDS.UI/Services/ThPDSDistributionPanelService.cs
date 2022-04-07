@@ -18,23 +18,6 @@ using Microsoft.Toolkit.Mvvm.Input;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
-    public class StringCommand : ICommand
-    {
-        public event EventHandler CanExecuteChanged;
-        readonly Action<string> cb;
-        public StringCommand(Action<string> cb)
-        {
-            this.cb = cb;
-        }
-        public bool CanExecute(object parameter)
-        {
-            return true;
-        }
-        public void Execute(object parameter)
-        {
-            cb((string)parameter);
-        }
-    }
     public struct GArc
     {
         public double X;
