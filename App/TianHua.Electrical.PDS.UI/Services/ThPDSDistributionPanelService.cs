@@ -683,11 +683,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
                             cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
-                            if (info.BlockName is "过欠电压保护器")
+                            if (info.IsOUVP())
                             {
-                                cb += () => UpdatePropertyGrid(new { Type = "过欠电压保护器", });
+                                throw new NotSupportedException();
                             }
-                            else if (info.BlockName is "Isolator")
+                            else if (info.IsIsolator())
                             {
                                 void reg(PDS.Project.Module.Component.IsolatingSwitch isolatingSwitch, string templateStr)
                                 {
@@ -746,7 +746,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     cb += () => UpdatePropertyGrid(null);
                                 }
                             }
-                            else if (info.BlockName is "ATSE")
+                            else if (info.IsATSE())
                             {
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                 {
@@ -783,7 +783,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                 }
                             }
-                            else if (info.BlockName == "TSE")
+                            else if (info.IsMTSE())
                             {
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                 {

@@ -1,4 +1,5 @@
-﻿using TianHua.Electrical.PDS.UI.WpfServices;
+﻿using System;
+using TianHua.Electrical.PDS.UI.WpfServices;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
@@ -32,6 +33,26 @@ namespace TianHua.Electrical.PDS.UI.Services
         public static bool IsMotor(this BlockInfo info)
         {
             return info.BlockName == "Motor";
+        }
+
+        public static bool IsIsolator(this BlockInfo info)
+        {
+            return info.BlockName == "Isolator";
+        }
+
+        public static bool IsATSE(this BlockInfo info)
+        {
+            return info.BlockName == "ATSE";
+        }
+
+        public static bool IsMTSE(this BlockInfo info)
+        {
+            return info.BlockName == "TSE";
+        }
+
+        public static bool IsOUVP(this BlockInfo info)
+        {
+            throw new NotSupportedException();
         }
     }
 }
