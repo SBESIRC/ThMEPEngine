@@ -112,6 +112,7 @@
     <Compile Include="Converters\RadioUiValueConverter.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
+    <Compile Include="Services\ThPDSComponentBlockInfoService.cs" />
     <Compile Include="Services\ThPDSDistributionPanelConfig.cs" />
     <Compile Include="Services\ThPDSDistributionPanelService.cs" />
     <Compile Include="ThElectricalPDSUIApp.cs" />
