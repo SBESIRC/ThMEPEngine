@@ -1,4 +1,4 @@
-﻿using PDSGraph = QuikGraph.AdjacencyGraph<
+﻿using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
