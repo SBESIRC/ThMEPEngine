@@ -55,7 +55,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             handleConfluenceService.GetMainPolyVerticalPipe();
             foreach (var pipeTuple in handleConfluenceService.pipeTuples)
             {
-                var mainPipes = new List<VerticalPipeModel>() { pipeTuple.Item1 };
+                var mainPipes = new List<VerticalPipeModel>(pipeTuple.Item1);
                 mainPipes.Add(pipeTuple.Item2);
                 mainPipes.AddRange(pipeTuple.Item5);
                 mainPipes = mainPipes.Where(x => x != null).ToList();
@@ -69,12 +69,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
                         otherPipes.AddRange(pipeTuple.Item4);
-                        var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                        var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
                         resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
                     }
                     else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
                     {
-                        var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.Position) < 0.01).FirstOrDefault();
+                        var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
                         resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
 
                         var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
@@ -85,7 +85,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     if (pipeTuple.Item1 != null)
                     {
-                        CreateReservedPlug(routing, pipeTuple.Item1.Position);
+                        CreateReservedPlug(routing, pipeTuple.Item1);
                     }
                 }
                 
@@ -101,24 +101,28 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="routes"></param>
         /// <param name="point"></param>
-        private void CreateReservedPlug(List<RouteModel> routes, Point3d point)
+        private void CreateReservedPlug(List<RouteModel> routes, List<VerticalPipeModel> pipes)
         {
-            var mainWasteRoute = routes.Where(x => x.startPosition.DistanceTo(point) < 0.01).FirstOrDefault();
-            if (mainWasteRoute != null)
+            foreach (var pipe in pipes)
             {
-                var poly = mainWasteRoute.route;
-                var frame = GeometryUtils.FindOutFrame(poly, outUserPoly, point);
-                var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, frame);
-                var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
-                var pts = new Point3dCollection();
-                intersectLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                if (pts.Count > 0)
+                var point = pipe.Position;
+                var mainWasteRoute = routes.Where(x => x.startPosition.DistanceTo(point) < 0.01).FirstOrDefault();
+                if (mainWasteRoute != null)
                 {
-                    var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();
-                    var dir = (lastPt - sp).GetNormal();
-                    var ep = lastPt + dir * 200;
-                    var resPoly = GeometryUtils.GetBreakLine(poly, sp, ep);
-                    mainWasteRoute.route = resPoly;
+                    var poly = mainWasteRoute.route;
+                    var frame = GeometryUtils.FindOutFrame(poly, outUserPoly, point, false);
+                    var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, frame);
+                    var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
+                    var pts = new Point3dCollection();
+                    intersectLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    if (pts.Count > 0)
+                    {
+                        var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();
+                        var dir = (lastPt - sp).GetNormal();
+                        var ep = lastPt + dir * 200;
+                        var resPoly = GeometryUtils.GetBreakLine(poly, sp, ep);
+                        mainWasteRoute.route = resPoly;
+                    }
                 }
             }
         }

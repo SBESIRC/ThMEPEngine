@@ -202,7 +202,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// 寻找出户的框线
         /// </summary>
         /// <returns></returns>
-        public static Polyline FindOutFrame(Polyline polyline, List<Polyline> outrFrames, Point3d startPosition)
+        public static Polyline FindOutFrame(Polyline polyline, List<Polyline> outrFrames, Point3d startPosition, bool lastFrame = true)
         {
             var frames = outrFrames.Where(x => polyline.IsIntersects(x)).ToList();
             var ep = polyline.EndPoint;
@@ -210,8 +210,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             {
                 ep = polyline.StartPoint;
             }
-            var needFrame = frames.OrderBy(x => x.DistanceTo(ep, false)).First();
-            return needFrame;
+            
+            if (lastFrame)
+            {
+                return frames.OrderBy(x => x.DistanceTo(ep, false)).First();
+            }
+            else
+            {
+                return frames.OrderByDescending(x => x.DistanceTo(ep, false)).First();
+            }
         }
 
         /// <summary>
