@@ -35,8 +35,9 @@ namespace ThMEPWSS.HydrantLayout.Service
         MPolygon LeanWall;
         Polyline Shell = new Polyline();
         List<Curve> Holes = new List<Curve>();
+       
 
-        public SearchRangeFrame(Point3d center)
+        public SearchRangeFrame(Point3d center )
         {
             this.center = center;
             FindFeasibleArea();
@@ -55,52 +56,145 @@ namespace ThMEPWSS.HydrantLayout.Service
             var selectRooms = ProcessedData.LeanWallIndex.SelectCrossingPolygon(cpolyline);
 
             var overlapArea = new DBObjectCollection();
+
             //搜索所在房间
             if (selectRooms.Count > 0)
             {
                 overlapArea = cpolyline.IntersectionMP(selectRooms);
+
+                foreach (var a in overlapArea)
+                {
+                    if (a is MPolygon mpl)
+                    {
+                        if (mpl.Shell().Contains(center))
+                        {
+                            LeanWall = mpl;
+                            IfFind = true;
+                            break;
+                        }
+                    }
+                    else if (a is Polyline pl)
+                    {
+                        if (pl.Contains(center))
+                        {
+                            //var plNew = ThMPolygonTool.CreateMPolygon(pl);
+                            Shell = pl;
+                            IfFind = true;
+                            break;
+                        }
+                    }
+                }
+
+                //如果找到的是polyline，有可能会没读到hole，手动把所有hole都放进去。
+                if (Shell.Contains(center))
+                {
+                    foreach (Polyline a in overlapArea)
+                    {
+                        if (a == Shell) continue;
+                        if (Shell.Contains(a))
+                        {
+                            Holes.Add(a);
+                        }
+                    }
+                    var mpl = ThMPolygonTool.CreateMPolygon(Shell, Holes);
+                    LeanWall = mpl;
+                }
+
+                //如果不在这个重合区域内，则把自己造的圈当作房间
+                if (!IfFind) 
+                {
+                    var differobj0 = ProcessedData.EntityAggregationIndex.SelectCrossingPolygon(cpolyline);
+                    foreach (MPolygon mp in selectRooms) 
+                    {
+                        differobj0.Add(mp.Shell());
+                    }
+                    var differedArea = cpolyline.DifferenceMP(differobj0);
+
+
+                    foreach (var a in differedArea)
+                    {
+                        if (a is MPolygon mpl)
+                        {
+                            if (mpl.Shell().Contains(center))
+                            {
+                                LeanWall = mpl;
+                                IfFind = true;
+                                break;
+                            }
+                        }
+                        else if (a is Polyline pl)
+                        {
+                            if (pl.Contains(center))
+                            {
+                                //var plNew = ThMPolygonTool.CreateMPolygon(pl);
+                                Shell = pl;
+                                IfFind = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    //如果找到的是polyline，有可能会没读到hole，手动把所有hole都放进去。
+                    if (Shell.Contains(center))
+                    {
+                        foreach (Polyline a in differedArea)
+                        {
+                            if (a == Shell) continue;
+                            if (Shell.Contains(a))
+                            {
+                                Holes.Add(a);
+                            }
+                        }
+                        var mpl = ThMPolygonTool.CreateMPolygon(Shell, Holes);
+                        LeanWall = mpl;
+                    }
+                }
             }
-            else 
+            else   //周围直接没有房间
             {
-                return;
+                var differobj0 = ProcessedData.EntityAggregationIndex.SelectCrossingPolygon(cpolyline);
+                var differedArea = cpolyline.DifferenceMP(differobj0);
+
+                foreach (var a in differedArea)
+                {
+                    if (a is MPolygon mpl)
+                    {
+                        if (mpl.Shell().Contains(center))
+                        {
+                            LeanWall = mpl;
+                            IfFind = true;
+                            break;
+                        }
+                    }
+                    else if (a is Polyline pl)
+                    {
+                        if (pl.Contains(center))
+                        {
+                            //var plNew = ThMPolygonTool.CreateMPolygon(pl);
+                            Shell = pl;
+                            IfFind = true;
+                            break;
+                        }
+                    }
+                }
+
+                //如果找到的是polyline，有可能会没读到hole，手动把所有hole都放进去。
+                if (Shell.Contains(center))
+                {
+                    foreach (Polyline a in differedArea)
+                    {
+                        if (a == Shell) continue;
+                        if (Shell.Contains(a))
+                        {
+                            Holes.Add(a);
+                        }
+                    }
+                    var mpl = ThMPolygonTool.CreateMPolygon(Shell, Holes);
+                    LeanWall = mpl;
+                }
             }
             //overlapArea.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1overlap", 2));
-            foreach (var a in overlapArea)
-            {
-                if (a is MPolygon mpl)
-                {
-                    if (mpl.Shell().Contains(center))
-                    {
-                        LeanWall = mpl;
-                        IfFind = true;
-                        break;
-                    }
-                }
-                else if (a is Polyline pl)
-                {
-                    if (pl.Contains(center))
-                    {
-                        //var plNew = ThMPolygonTool.CreateMPolygon(pl);
-                        Shell = pl;
-                        IfFind = true;
-                        break;
-                    }
-                }
-            }
-
-            if (Shell.Contains(center))
-            {
-                foreach (Polyline a in overlapArea)
-                {
-                    if (a == Shell) continue;
-                    if (Shell.Contains(a))
-                    {
-                        Holes.Add(a);
-                    }
-                }
-                var mpl = ThMPolygonTool.CreateMPolygon(Shell, Holes);
-                LeanWall = mpl;
-            }
+           
 
         }
 

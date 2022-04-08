@@ -83,7 +83,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             Info.Type = dataPass0.LayoutObject;
             Info.Mode = dataPass0.LayoutMode;
             Info.OriginRadius = dataPass0.SearchRadius;
-            Info.AllowDoorInPaking = dataPass0.AvoidParking;
+            Info.AllowDoorInPaking = !dataPass0.AvoidParking;
 
             //根据全局参数修改数据
             Info.Radius = Info.OriginRadius + 500;

@@ -137,6 +137,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
                 for (int j = start; j <= end; j++)
                 {
+                    //if (j == 6 || j == 7) continue;
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
                         List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);
@@ -158,6 +159,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, LeanWall.Shell());
                                 double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
                                 int againstWallLength = (int)(againstWallLength0 + againstWallLength1)/100;
+                                //againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight/2);
 
                                 Point3d fireCenter = new Point3d();
                                 Vector3d fireDir = new Vector3d();
@@ -217,6 +219,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
                 for (int j = start; j <= end; j++)
                 {
+                    if (j != 0 && j != 5 && j!= 8 && j!=9) continue;
+
+                    if (searchPoint0.BasePointPosition[i] == 0 && j == 8) continue;
+                    if (searchPoint0.BasePointPosition[i] == 2 && j == 9) continue;
+
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
                         List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);

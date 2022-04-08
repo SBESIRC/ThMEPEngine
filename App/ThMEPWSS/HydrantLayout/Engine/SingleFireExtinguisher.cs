@@ -51,6 +51,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //读取属性
             this.model = model;
             CenterPoint = model.Center;
+            CenterPoint = new Point3d(model.Center.X, model.Center.Y, 0); 
             //Type = type;
             CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
             SideGeneration();
@@ -132,7 +133,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     {
                         Polyline doorArea = fireExtinguisher0.GetDoorAreaObb(j);
                         //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
-                        if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        //if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        if(true)
                         {
                             double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
 
@@ -199,7 +201,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     {
                         Polyline doorArea = fireExtinguisher0.GetDoorAreaObb(j);
                         //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
-                        if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        //if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        if(true)
                         {
                             double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
 
@@ -266,7 +269,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {                      
                         Polyline doorArea = fireExtinguisher0.GetDoorAreaObb(j);
-                        if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        //if (FeasibilityCheck.IsDoorFeasible(doorArea, LeanWall.Shell()))      //如果门没有被阻挡,找到一个可以摆放的模型
+                        if (true)
                         {
                             double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
 
