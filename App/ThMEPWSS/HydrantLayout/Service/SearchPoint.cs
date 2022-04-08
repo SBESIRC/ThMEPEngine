@@ -54,6 +54,11 @@ namespace ThMEPWSS.HydrantLayout.Service
 
             //var clockwise90 = new Vector3d(dir.Y, -dir.X, dir.Z).GetNormal();
             //var clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
+           
+        }
+
+        public void Pipeline() 
+        {
             ClearShell();
             FindColumns();     //分离立柱
         }

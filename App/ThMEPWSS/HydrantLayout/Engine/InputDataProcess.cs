@@ -64,15 +64,23 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public InputDataProcess(RawData rawData)
         {
             rawData0 = rawData;
+            
+        }
+
+        public void Pipeline()
+        {
             InstallationClassification();
 
             //OtherProcess();
             FindLeanWall();
-            
+
             ParkingSpaceExpansion();
             ForbiddenCreate();
             Classification();
         }
+
+
+
 
         //处理没有房间的情况
         public void OtherProcess() 
@@ -275,16 +283,27 @@ namespace ThMEPWSS.HydrantLayout.Engine
         {
             var bufferTol = 10;
             //门 buffer
-            var doorObjs = new DBObjectCollection();
-            rawData0.Door.ForEach(x => doorObjs.Add(x));
-            var bufferDoor= doorObjs.BufferPolygons(bufferTol);
-            rawData0.Door = bufferDoor.OfType<Polyline>().ToList();
+            //var doorObjs = new DBObjectCollection();
+            //rawData0.Door.ForEach(x => doorObjs.Add(x));
+            //var bufferDoor= doorObjs.BufferPolygons(bufferTol);
+            //rawData0.Door = bufferDoor.OfType<Polyline>().ToList();
+
+            List<Polyline> tmpDoors = new List<Polyline>();
+            foreach (Polyline pl in rawData0.Door)
+            {
+                var bufferDoors = pl.Buffer(bufferTol).OfType<Polyline>().ToList();
+                tmpDoors.AddRange(bufferDoors);
+            }
+            rawData0.Door = tmpDoors;
 
             //卷帘 buffer
-            var fpObjs = new DBObjectCollection();
-            rawData0.FireProof.ForEach(x => fpObjs.Add(x));
-            var bufferFp =  fpObjs.BufferPolygons(bufferTol);
-            rawData0.FireProof = bufferFp.OfType<Polyline>().ToList();
+            List<Polyline> tmpFireProofs = new List<Polyline>();
+            foreach (Polyline pl in rawData0.FireProof)
+            {
+                var bufferFireProofs = pl.Buffer(bufferTol).OfType<Polyline>().ToList();
+                tmpFireProofs.AddRange(bufferFireProofs);
+            }
+            rawData0.FireProof = tmpFireProofs;
 
             //立柱buffer
             foreach (var model in VerticalPipeIgnore)

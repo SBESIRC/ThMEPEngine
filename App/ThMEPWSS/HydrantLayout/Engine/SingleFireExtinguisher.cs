@@ -54,10 +54,14 @@ namespace ThMEPWSS.HydrantLayout.Engine
             CenterPoint = new Point3d(model.Center.X, model.Center.Y, 0); 
             //Type = type;
             CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
-            SideGeneration();
+        }
 
+
+        public void Pipeline()
+        {
             //搜索实体周边环境
             SearchRangeFrame searchRangeFrame0 = new SearchRangeFrame(CenterPoint);
+            searchRangeFrame0.Pipeline();
             if (searchRangeFrame0.IfFind)
             {
                 LeanWall = searchRangeFrame0.output();
@@ -69,6 +73,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
             //建立寻找定位点的类
             searchPoint0 = new SearchPoint(LeanWall, CenterPoint);
+            searchPoint0.Pipeline();
 
             //建立用于测试的类
             feasibilityCheck0 = new FeasibilityCheck();
@@ -100,6 +105,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 ThirdPriorityTest(basePointList, dirList);
             }
         }
+
+
 
         //寻找第一优先级定位点并测试摆放
         public void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
@@ -304,9 +311,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 fireCompareModelbest.Draw2(ShortSide, LongSide);
             }
         }
-        
-        private void SideGeneration()
-        { }
+
 
         public OutPutModel OutPutSingleModel()
         {

@@ -53,12 +53,20 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public SingleFireHydrant(ThHydrantModel model)
         {
             this.model = model;
-            CenterPoint = model.Center;
+            this.CenterPoint = model.Center;
             //Type = type;
-            CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
 
+            //读取边长
+            CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
+        }
+
+
+        public void Pipeline() 
+        {
             //搜索实体周边环境
             SearchRangeFrame searchRangeFrame0 = new SearchRangeFrame(CenterPoint);
+            searchRangeFrame0.Pipeline();
+
             if (searchRangeFrame0.IfFind)
             {
                 LeanWall = searchRangeFrame0.output();
@@ -70,6 +78,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
             //建立寻找定位点的类
             searchPoint0 = new SearchPoint(LeanWall, CenterPoint);
+            searchPoint0.Pipeline();
 
             //建立用于测试的类
             feasibilityCheck0 = new FeasibilityCheck();
@@ -87,7 +96,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             FirstPriorityTest(basePointList, dirList);
 
             //寻找第二优先级定位点并测试摆放
-            if(Done == false) 
+            if (Done == false)
             {
                 searchPoint0.FindColumnPoint(out basePointList, out dirList);
                 SecondPriorityTest(basePointList, dirList);
@@ -358,8 +367,9 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         void FindBest() 
-        {            
-            fireCompareModelsMix= fireCompareModelsMix.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+        {
+            fireCompareModelsMix = fireCompareModelsMix.OrderBy(x => x.doorGood).ThenByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+
             if (fireCompareModelsMix.Count > 0)
             {
                 Done = true;
