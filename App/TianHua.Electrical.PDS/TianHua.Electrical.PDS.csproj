@@ -66,6 +66,7 @@
     <Compile Include="Project\Module\Component\AutomaticTransferSwitch.cs" />
     <Compile Include="Project\Module\Component\BreakerBaseComponent.cs" />
     <Compile Include="Project\Module\Component\CurrentTransformer.cs" />
+    <Compile Include="Project\Module\Component\BreakerEx.cs" />
     <Compile Include="Project\Module\Component\Extension\ComponentTypeSelector.cs" />
     <Compile Include="Project\Module\Component\ManualTransferSwitch.cs" />
     <Compile Include="Project\Module\Component\MeterTransformer.cs" />

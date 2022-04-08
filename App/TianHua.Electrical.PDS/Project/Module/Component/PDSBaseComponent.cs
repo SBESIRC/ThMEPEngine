@@ -18,7 +18,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         [Description("断路器")]
         CB,
         [Description("剩余电流动作断路器")]
-        RCD,
+        一体式RCD,
+        [Description("剩余电流动作断路器")]
+        组合式RCD,
         [Description("自动转换开关")]
         ATSE,
         [Description("手动转换开关")]

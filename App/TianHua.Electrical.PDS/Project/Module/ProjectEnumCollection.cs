@@ -227,6 +227,25 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// 断路器附件类型
+    /// </summary>
+    public enum AppendixType
+    {
+        [Description("无")]
+        无,
+        [Description("分励脱扣")]
+        ST,
+        [Description("报警")]
+        AL,
+        [Description("辅助触点")]
+        AX,
+        [Description("失压脱扣")]
+        UR,
+        [Description("Residual Current")]
+        RC,
+    }
+
+    /// <summary>
     /// 剩余电流规格
     /// </summary>
     public enum ResidualCurrentSpecification
