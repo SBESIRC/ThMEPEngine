@@ -48,11 +48,11 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 参考尺寸
             var overallDimensions = texts.Where(t => t.TextString == ThPDSCommon.OVERALL_DIMENSIONS).First();
-            overallDimensions.TextString = node.Load.Location.FloorNumber;
+            overallDimensions.TextString = "";
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
-            location.TextString = "";
+            location.TextString = node.Load.Location.FloorNumber;
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
@@ -274,7 +274,14 @@ namespace TianHua.Electrical.PDS.Diagram
             var table = objs.OfType<Table>().First();
 
             // Pn
-            CellAssign(table.Cells[0, 1], node.Details.LowPower);
+            if(node.Details.IsDualPower)
+            {
+                CellAssign(table.Cells[0, 1], node.Details.HighPower);
+            }
+            else
+            {
+                CellAssign(table.Cells[0, 1], node.Details.LowPower);
+            }
             // Kx
             CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
             // cos(\Phi)

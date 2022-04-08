@@ -60,7 +60,7 @@
 
         public static readonly string MOTOR_AND_LOAD_LABELS = "电动机及负载标注";
         public static readonly string LOAD_LABELS = "负载标注";
-        public static readonly string LOAD_DETAILS = "负载明细";
+        public static readonly string LOAD_DETAILS = "E-电力平面-负荷明细";
         public static readonly string PUMP_LABELS = "水泵标注";
 
         public static readonly string SYSTEM_DIAGRAM_TABLE_FRAME = "THAPE_A1L_inner";
