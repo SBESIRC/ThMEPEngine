@@ -28,7 +28,7 @@ namespace ThMEPStructure.Reinforcement.Command
         private readonly string EdgeComponentLayer = "边构";
         public ThReinforceDrawCmd()
         {
-            ActionName = "打印信息";
+            ActionName = "生成柱表";
             CommandName = "THHRBYGJ";
         }
 

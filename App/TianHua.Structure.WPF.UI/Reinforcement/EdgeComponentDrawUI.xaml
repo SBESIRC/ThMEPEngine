@@ -17,8 +17,8 @@
             <RowDefinition Height="0.06*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.75*"/>
-            <ColumnDefinition Width="0.25*"/>
+            <ColumnDefinition Width="0.72*"/>
+            <ColumnDefinition Width="0.28*"/>
         </Grid.ColumnDefinitions>
         <DataGrid Name="table1" Grid.Row="0" Grid.Column="0" AutoGenerateColumns="False" RowBackground="White" 
                   Background="White"  BorderThickness="1,1,0,0"
@@ -93,31 +93,31 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                        <ColumnDefinition Width="3.0*"></ColumnDefinition>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Content="墙柱："></Label>
                     <Label Grid.Row="1" Grid.Column="0" Content="文字："></Label>
                     <Label Grid.Row="2" Grid.Column="0" Content="墙层："></Label>
-                    <TextBox Name="tbWallColumnLayer" Grid.Row="0" Height="20"
-                             Text="{Binding DrawModel.WallColumnLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="3" Margin="43,6,32,0" VerticalAlignment="Top"/>
+                    <TextBox Name="tbWallColumnLayer" Grid.Row="0" Grid.Column="1" Height="20"
+                             Text="{Binding DrawModel.WallColumnLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBox Name="tbTextLayer" Grid.Row="1" Grid.Column="1" Height="20"
                              Text="{Binding DrawModel.TextLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBox Name="tbWallLayer" Grid.Row="2" Grid.Column="1" Height="20"
                              Text="{Binding DrawModel.WallLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <Image Name="imgWallColumnLayer" Grid.Row="0" Grid.Column="2" Width="32" Height="32"
-                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgWallColumnLayer_MouseLeftButtonDown"/>
-                    <Image Name="imgTextLayer" Grid.Row="1" Grid.Column="2" Width="32" Height="32"
-                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgTextLayer_MouseLeftButtonDown"/>
-                    <Image Name="imgWallLayer" Grid.Row="2" Grid.Column="2" Width="32" Height="32"
-                           Source="../Resource/Image/Layer.png" MouseLeftButtonDown="imgWallLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgWallColumnLayer" Grid.Row="0" Grid.Column="2" Width="24" Height="24"
+                           Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgWallColumnLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgTextLayer" Grid.Row="1" Grid.Column="2" Width="24" Height="24"
+                           Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgTextLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgWallLayer" Grid.Row="2" Grid.Column="2" Width="24" Height="24"
+                           Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgWallLayer_MouseLeftButtonDown"/>
                 </Grid>
             </GroupBox>
             <GroupBox Margin="0,10">
                 <GroupBox.Header>
                     排序
                 </GroupBox.Header>
-                <ComboBox Name="cbSort" Height="20" Width="160"
+                <ComboBox Name="cbSort" Height="20" Width="180"
                           ItemsSource="{Binding SortWays,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                           Text="{Binding DrawModel.SortWay,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
