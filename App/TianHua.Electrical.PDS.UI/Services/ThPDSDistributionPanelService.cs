@@ -1425,7 +1425,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     Header = "切换为剩余电流动作断路器",
                                                     Command = new RelayCommand(() =>
                                                     {
-                                                        ThPDSProjectGraphService.ComponentSwitching(edge, breaker, ComponentType.RCD);
+                                                        ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.一体式RCD);
                                                         UpdateCanvas();
                                                     }),
                                                 };

@@ -67,6 +67,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         public abstract string Content { get; }
 
+
         /// <summary>
         /// 设置级数
         /// </summary>

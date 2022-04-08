@@ -283,7 +283,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var ComponentType = componentType.GetComponentType();
                 if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
                 {
-                    if (component is Breaker breaker && componentType == Component.ComponentType.RCD)
+                    if (component is Breaker breaker && componentType == Component.ComponentType.一体式RCD)
                     {
                         //只有 CB -> RCD是特殊处理
                         var residualCurrentBreaker = new ResidualCurrentBreaker(breaker);

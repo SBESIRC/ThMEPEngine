@@ -108,18 +108,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     if (Phase == ThPDSPhase.一相)
                     {
                         this.ConductorUse = config.FireDistributionWire;
+                        IsWire = true;
                     }
                     else
                     {
                         this.ConductorUse = config.FireDistributionBranchCircuiCables;
+                        IsWire = false;
                     }
                 }
                 else
                 {
                     if (Phase == ThPDSPhase.一相)
+                    {
                         this.ConductorUse = config.NonFireDistributionWire;
+                        IsWire =true;
+                    }
                     else
+                    {
                         this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
+                        IsWire =false;
+                    }
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.DistributionPanel)
@@ -129,6 +137,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     if (Phase == ThPDSPhase.一相)
                     {
                         this.ConductorUse = config.FireDistributionWire;
+                        IsWire =true;
                     }
                     else
                         this.ConductorUse = config.FireDistributionTrunk;
@@ -136,9 +145,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 else
                 {
                     if (Phase == ThPDSPhase.一相)
+                    {
                         this.ConductorUse = config.NonFireDistributionWire;
+                        IsWire =true;
+                    }
                     else
+                    {
                         this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
+                        IsWire =false;
+                    }
                 }
             }
             else if (circuitType == ThPDSLoadTypeCat_1.LumpedLoad)
@@ -148,18 +163,26 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     if (Phase == ThPDSPhase.一相)
                     {
                         this.ConductorUse = config.FireDistributionWire;
+                        IsWire =true;
                     }
                     else
                     {
                         this.ConductorUse = config.FireDistributionBranchCircuiCables;
+                        IsWire =false;
                     }
                 }
                 else
                 {
                     if (Phase == ThPDSPhase.一相)
+                    {
                         this.ConductorUse = config.NonFireDistributionWire;
+                        IsWire =true;
+                    }
                     else
+                    {
                         this.ConductorUse = config.NonFireDistributionBranchCircuiCables;
+                        IsWire =false;
+                    }
                 }
             }
             if (ConductorUse.ConductorMaterial.Contains('N'))

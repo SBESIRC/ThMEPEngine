@@ -42,7 +42,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectSystemConfiguration.ThreePhasePolesNum;
             }
-            ComponentType = ComponentType.RCD;
+            ComponentType = ComponentType.一体式RCD;
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)
@@ -102,7 +102,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     ResidualCurrentProp.SetValue(this, oValue);
                 }
             }
-            ComponentType = ComponentType.RCD;
+            ComponentType = ComponentType.一体式RCD;
   
             //IsMotor = isMotor;
             //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30

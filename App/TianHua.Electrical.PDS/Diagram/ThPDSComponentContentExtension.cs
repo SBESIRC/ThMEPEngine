@@ -1,4 +1,7 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using System;
+using ThCADExtension;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Diagram
 {
@@ -27,6 +30,22 @@ namespace TianHua.Electrical.PDS.Diagram
         public static string Content(this OUVP cps)
         {
             return "自复式过欠电压保护器";
+        }
+
+        public static string Content(this BreakerEx breaker)
+        {
+            if(breaker.ComponentType == ComponentType.CB || breaker.ComponentType == ComponentType.一体式RCD)
+            {
+                return $"{breaker.Model}{breaker.FrameSpecification} {breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}{(breaker.Appendix == Project.Module.AppendixType.ST?"/ST":"")}";
+            }
+            else if(breaker.ComponentType == ComponentType.组合式RCD)
+            {
+                return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/RC {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
