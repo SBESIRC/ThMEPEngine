@@ -48,11 +48,11 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 参考尺寸
             var overallDimensions = texts.Where(t => t.TextString == ThPDSCommon.OVERALL_DIMENSIONS).First();
-            overallDimensions.TextString = node.Load.Location.FloorNumber;
+            overallDimensions.TextString = "";
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
-            location.TextString = "";
+            location.TextString = node.Load.Location.FloorNumber;
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
@@ -274,7 +274,14 @@ namespace TianHua.Electrical.PDS.Diagram
             var table = objs.OfType<Table>().First();
 
             // Pn
-            CellAssign(table.Cells[0, 1], node.Details.LowPower);
+            if(node.Details.IsDualPower)
+            {
+                CellAssign(table.Cells[0, 1], node.Details.HighPower);
+            }
+            else
+            {
+                CellAssign(table.Cells[0, 1], node.Details.LowPower);
+            }
             // Kx
             CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
             // cos(\Phi)
@@ -305,8 +312,18 @@ namespace TianHua.Electrical.PDS.Diagram
             phaseSequence.TextString = edge.Target.Details.PhaseSequence.GetDescription();
 
             // 功率
-            var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).First();
-            power.TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+            var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).ToList();
+            if(power.Count == 1)
+            {
+                power[0].TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+            }
+            else
+            {
+                var lowPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_LOW_POWER).First();
+                lowPower.TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+                var highPower = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_HIGH_POWER).First();
+                highPower.TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
+            }
 
             // 负载编号
             var loadID = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_LOAD_ID).First();
@@ -720,6 +737,7 @@ namespace TianHua.Electrical.PDS.Diagram
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
                         conductor.TextString = circuit.Conductor.Content;
+
                         break;
                     }
                 case CircuitFormOutType.电动机_CPS:
@@ -727,8 +745,31 @@ namespace TianHua.Electrical.PDS.Diagram
                         var circuit = edge.Details.CircuitForm as Motor_CPSCircuit;
 
                         // 元器件1
-                        var srcBreaker = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CPS).First();
+                        var srcCPS = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CPS).First();
                         var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.cps.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcCPS.Name))
+                        {
+                            var firstPosition = srcCPS.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS.Erase();
+                        }
+                        var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS).First();
+                        CBText.TextString = circuit.cps.Content();
+
+                        // Conductor
+                        var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
+                        conductor.TextString = circuit.Conductor.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.电动机_分立元件星三角启动:
+                    {
+                        var circuit = edge.Details.CircuitForm as Motor_DiscreteComponentsStarTriangleStartCircuit;
+
+                        // 元器件1
+                        var srcBreaker = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CIRCUIT_BREAKER).First();
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.breaker.ComponentType.GetDescription()];
                         if (!firstComponentName.Equals(srcBreaker.Name))
                         {
                             var firstPosition = srcBreaker.Position;
@@ -737,11 +778,413 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        //CBText.TextString = circuit.cps.Content;
+                        CBText.TextString = circuit.breaker.Content;
+
+                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件2
+                        var srcContactor1 = srcContactor[0];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor1.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcContactor1.Name))
+                        {
+                            var secondPosition = srcContactor1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor1.Erase();
+                        }
+                        var QAC1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC1).First();
+                        QAC1Text.TextString = circuit.contactor1.Content();
+
+                        // 元器件3
+                        var srcContactor2 = srcContactor[1];
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!thirdComponentName.Equals(srcContactor2.Name))
+                        {
+                            var thirdPosition = srcContactor2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor2.Erase();
+                        }
+                        var QAC2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC2).First();
+                        QAC2Text.TextString = circuit.contactor2.Content();
+
+                        // 元器件4
+                        var srcContactor3 = srcContactor[2];
+                        var forthComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!forthComponentName.Equals(srcContactor3.Name))
+                        {
+                            var forthPosition = srcContactor3.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, forthComponentName, forthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor3.Erase();
+                        }
+                        var QAC3Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC3).First();
+                        QAC3Text.TextString = circuit.contactor3.Content();
+
+                        // 元器件5
+                        var srcThermalRelay = components.Where(c => c.Name == ThPDSCommon.DEFAULT_THERMAL_RELAY).First();
+                        var fifthComponentName = ThPDSComponentMap.ComponentMap[circuit.thermalRelay.ComponentType.GetDescription()];
+                        if (!fifthComponentName.Equals(srcThermalRelay.Name))
+                        {
+                            var fifthPosition = srcThermalRelay.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, fifthComponentName, fifthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcThermalRelay.Erase();
+                        }
+                        var KHText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH).First();
+                        KHText.TextString = circuit.thermalRelay.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.Conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.Conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        var circuit = edge.Details.CircuitForm as Motor_CPSStarTriangleStartCircuit;
+
+                        // 元器件1
+                        var srcCPS = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CPS).First();
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.cps.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcCPS.Name))
+                        {
+                            var firstPosition = srcCPS.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS.Erase();
+                        }
+                        var CPSText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS).First();
+                        CPSText.TextString = circuit.cps.Content();
+
+                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件2
+                        var srcContactor1 = srcContactor[0];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor1.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcContactor1.Name))
+                        {
+                            var secondPosition = srcContactor1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor1.Erase();
+                        }
+                        var QAC1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC1).First();
+                        QAC1Text.TextString = circuit.contactor1.Content();
+
+                        // 元器件3
+                        var srcContactor2 = srcContactor[1];
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!thirdComponentName.Equals(srcContactor2.Name))
+                        {
+                            var thirdPosition = srcContactor2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor2.Erase();
+                        }
+                        var QAC2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC2).First();
+                        QAC2Text.TextString = circuit.contactor2.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.Conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.Conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    {
+                        var circuit = edge.Details.CircuitForm as TwoSpeedMotor_DiscreteComponentsDYYCircuit;
+
+                        // 元器件1
+                        var srcBreaker = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CIRCUIT_BREAKER).First();
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.breaker.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcBreaker.Name))
+                        {
+                            var firstPosition = srcBreaker.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcBreaker.Erase();
+                        }
+                        var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
+                        CBText.TextString = circuit.breaker.Content;
+
+                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件2
+                        var srcContactor1 = srcContactor[0];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor1.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcContactor1.Name))
+                        {
+                            var secondPosition = srcContactor1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor1.Erase();
+                        }
+                        var QAC1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC1).First();
+                        QAC1Text.TextString = circuit.contactor1.Content();
+
+                        // 元器件3
+                        var srcContactor2 = srcContactor[1];
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!thirdComponentName.Equals(srcContactor2.Name))
+                        {
+                            var thirdPosition = srcContactor2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor2.Erase();
+                        }
+                        var QAC2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC2).First();
+                        QAC2Text.TextString = circuit.contactor2.Content();
+
+                        // 元器件4
+                        var srcContactor3 = srcContactor[2];
+                        var forthComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!forthComponentName.Equals(srcContactor3.Name))
+                        {
+                            var forthPosition = srcContactor3.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, forthComponentName, forthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor3.Erase();
+                        }
+                        var QAC3Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC3).First();
+                        QAC3Text.TextString = circuit.contactor3.Content();
+
+                        var thermalRelays = components.Where(c => c.Name == ThPDSCommon.DEFAULT_THERMAL_RELAY).ToList();
+                        // 元器件5
+                        var srcThermalRelay1 = thermalRelays[0];
+                        var fifthComponentName = ThPDSComponentMap.ComponentMap[circuit.thermalRelay1.ComponentType.GetDescription()];
+                        if (!fifthComponentName.Equals(srcThermalRelay1.Name))
+                        {
+                            var fifthPosition = srcThermalRelay1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, fifthComponentName, fifthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcThermalRelay1.Erase();
+                        }
+                        var KH1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH1).First();
+                        KH1Text.TextString = circuit.thermalRelay1.Content();
+
+                        // 元器件6
+                        var srcThermalRelay2 = thermalRelays[1];
+                        var sixthComponentName = ThPDSComponentMap.ComponentMap[circuit.thermalRelay2.ComponentType.GetDescription()];
+                        if (!sixthComponentName.Equals(srcThermalRelay2.Name))
+                        {
+                            var sixthPosition = srcThermalRelay2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, sixthComponentName, sixthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcThermalRelay2.Erase();
+                        }
+                        var KH2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH2).First();
+                        KH2Text.TextString = circuit.thermalRelay2.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件YY:
+                    {
+                        var circuit = edge.Details.CircuitForm as TwoSpeedMotor_DiscreteComponentsYYCircuit;
+
+                        // 元器件1
+                        var srcBreaker = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CIRCUIT_BREAKER).First();
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.breaker.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcBreaker.Name))
+                        {
+                            var firstPosition = srcBreaker.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcBreaker.Erase();
+                        }
+                        var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
+                        CBText.TextString = circuit.breaker.Content;
+
+                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件2
+                        var srcContactor1 = srcContactor[0];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor1.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcContactor1.Name))
+                        {
+                            var secondPosition = srcContactor1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor1.Erase();
+                        }
+                        var QAC1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC1).First();
+                        QAC1Text.TextString = circuit.contactor1.Content();
+
+                        // 元器件3
+                        var srcContactor2 = srcContactor[1];
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor2.ComponentType.GetDescription()];
+                        if (!thirdComponentName.Equals(srcContactor2.Name))
+                        {
+                            var thirdPosition = srcContactor2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor2.Erase();
+                        }
+                        var QAC2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC2).First();
+                        QAC2Text.TextString = circuit.contactor2.Content();
+
+                        var thermalRelays = components.Where(c => c.Name == ThPDSCommon.DEFAULT_THERMAL_RELAY).ToList();
+                        // 元器件4
+                        var srcThermalRelay1 = thermalRelays[0];
+                        var forthComponentName = ThPDSComponentMap.ComponentMap[circuit.thermalRelay1.ComponentType.GetDescription()];
+                        if (!forthComponentName.Equals(srcThermalRelay1.Name))
+                        {
+                            var forthPosition = srcThermalRelay1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, forthComponentName, forthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcThermalRelay1.Erase();
+                        }
+                        var KH1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH1).First();
+                        KH1Text.TextString = circuit.thermalRelay1.Content();
+
+                        // 元器件5
+                        var srcThermalRelay2 = thermalRelays[1];
+                        var fifthComponentName = ThPDSComponentMap.ComponentMap[circuit.thermalRelay2.ComponentType.GetDescription()];
+                        if (!fifthComponentName.Equals(srcThermalRelay2.Name))
+                        {
+                            var fifthPosition = srcThermalRelay2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, fifthComponentName, fifthPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcThermalRelay2.Erase();
+                        }
+                        var KH2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_KH2).First();
+                        KH2Text.TextString = circuit.thermalRelay2.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    {
+                        var circuit = edge.Details.CircuitForm as TwoSpeedMotor_CPSDYYCircuit;
+
+                        var CPS = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CPS)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件1
+                        var srcCPS1 = CPS[0];
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.cps1.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcCPS1.Name))
+                        {
+                            var firstPosition = srcCPS1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS1.Erase();
+                        }
+                        var CPS1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS1).First();
+                        CPS1Text.TextString = circuit.cps1.Content();
+                        
+                        // 元器件2
+                        var srcCPS2 = CPS[1];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.cps2.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcCPS2.Name))
+                        {
+                            var secondPosition = srcCPS2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS2.Erase();
+                        }
+                        var CPS2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS2).First();
+                        CPS2Text.TextString = circuit.cps2.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSYY:
+                    {
+                        var circuit = edge.Details.CircuitForm as TwoSpeedMotor_CPSYYCircuit;
+
+                        var CPS = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CPS)
+                            .OrderByDescending(c => c.Position.Y).ToList();
+                        // 元器件1
+                        var srcCPS1 = CPS[0];
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.cps1.ComponentType.GetDescription()];
+                        if (!firstComponentName.Equals(srcCPS1.Name))
+                        {
+                            var firstPosition = srcCPS1.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS1.Erase();
+                        }
+                        var CPS1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS1).First();
+                        CPS1Text.TextString = circuit.cps1.Content();
+
+                        // 元器件2
+                        var srcCPS2 = CPS[1];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.cps2.ComponentType.GetDescription()];
+                        if (!secondComponentName.Equals(srcCPS2.Name))
+                        {
+                            var secondPosition = srcCPS2.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcCPS2.Erase();
+                        }
+                        var CPS2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS2).First();
+                        CPS2Text.TextString = circuit.cps2.Content();
+
+                        // 元器件3
+                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR).First();
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor.ComponentType.GetDescription()];
+                        if (!thirdComponentName.Equals(srcContactor.Name))
+                        {
+                            var thirdPosition = srcContactor.Position;
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                            tableObjs.Add(newComponent);
+                            srcContactor.Erase();
+                        }
+                        var QACText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC).First();
+                        QACText.TextString = circuit.contactor.Content();
+
+                        // Conductor1
+                        var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
+                        conductor1.TextString = circuit.conductor1.Content;
+
+                        // Conductor2
+                        var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
+                        conductor2.TextString = circuit.conductor2.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.消防应急照明回路WFEL:
+                    {
+                        var circuit = edge.Details.CircuitForm as FireEmergencyLighting;
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
                         conductor.TextString = circuit.Conductor.Content;
+
+                        break;
+                    }
+                case CircuitFormOutType.SPD:
+                    {
                         break;
                     }
                 default:
