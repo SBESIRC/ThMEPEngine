@@ -1018,9 +1018,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
                             {
@@ -1052,6 +1054,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                             {
@@ -1076,9 +1079,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             var w = 200.0;
                             void reg(Rect r, object vm)
