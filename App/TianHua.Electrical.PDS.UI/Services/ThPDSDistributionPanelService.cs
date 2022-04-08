@@ -8,14 +8,15 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
-using Microsoft.Toolkit.Mvvm.Input;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using Microsoft.Toolkit.Mvvm.Input;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
-using TianHua.Electrical.PDS.Project.Module;
-using TianHua.Electrical.PDS.Project.Module.Component;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public struct GArc
@@ -340,7 +341,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
-        readonly ThPDSDistributionPanelConfig Config = new();
+        private readonly ThPDSDistributionPanelConfig Config = new();
         public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
             var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;

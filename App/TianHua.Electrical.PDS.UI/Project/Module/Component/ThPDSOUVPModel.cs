@@ -17,6 +17,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         }
 
         [ReadOnly(true)]
+        [Browsable(false)]
+        public object Content => "过欠电压保护器";
+
+        [ReadOnly(true)]
         [Category("元器件参数")]
         [DisplayName("元器件类型")]
         public string Type => _ouvp.ComponentType.GetDescription();
@@ -90,7 +94,5 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 return _ouvp.GetRatedCurrents();
             }
         }
-
-        public object Content { get; internal set; } = "Content哪里拿呀";
     }
 }
