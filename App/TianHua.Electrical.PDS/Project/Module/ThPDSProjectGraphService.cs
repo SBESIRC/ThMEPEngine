@@ -268,7 +268,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             graph.UpdateWithEdge(edge, false);
         }
+        public static void ComponentSwitching(ThPDSProjectGraphNode node, PDSBaseComponent component, ComponentType componentType)
+        {
 
+        }
         /// <summary>
         /// 元器件切换
         /// </summary>

@@ -90,5 +90,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 return _ouvp.GetRatedCurrents();
             }
         }
+
+        public object Content { get; internal set; } = "Content哪里拿呀";
     }
 }
