@@ -29,7 +29,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private bool GetIsEnabled(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSBreakerExModel breaker)
+            if (propertyItem.Value is ThPDSBreakerModel breaker)
             {
                 return breaker.Type.GetEnumName<ComponentType>() != ComponentType.组合式RCD;
             }

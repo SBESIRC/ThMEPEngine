@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSResidualCurrentBreakerModel rcBreaker)
+            if (propertyItem.Value is ThPDSBreakerModel rcBreaker)
             {
                 return rcBreaker.AlternativeResidualCurrents
                     .OfType<T>()

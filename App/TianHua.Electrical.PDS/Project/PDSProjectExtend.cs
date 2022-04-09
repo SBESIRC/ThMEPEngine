@@ -268,20 +268,12 @@ namespace TianHua.Electrical.PDS.Project
             if (type.IsSubclassOf(typeof(PDSBaseComponent)))
             {
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
-                if (type.Equals(typeof(BreakerBaseComponent)))
+                if (type.Equals(typeof(Breaker)))
                 {
                     if(circuitFormOutType == CircuitFormOutType.漏电)
                         return componentFactory.CreatResidualCurrentBreaker();
                     else
                         return componentFactory.CreatBreaker();
-                }
-                else if(type.Equals(typeof(Breaker)))
-                {
-                    return componentFactory.CreatBreaker();
-                }
-                else if (type.Equals(typeof(ResidualCurrentBreaker)))
-                {
-                    return componentFactory.CreatResidualCurrentBreaker();
                 }
                 else if (type.Equals(typeof(ThermalRelay)))
                 {
@@ -784,7 +776,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 if(regularCircuit.breaker.GetCascadeRatedCurrent() <= CascadeCurrent)
                 {
-                    regularCircuit.breaker = new Breaker(CascadeCurrent, new List<string>() { regularCircuit.breaker.TripUnitType }, regularCircuit.breaker.PolesNum, regularCircuit.breaker.TripUnitType);
+                    regularCircuit.breaker = new Breaker(CascadeCurrent, new List<string>() { regularCircuit.breaker.TripUnitType }, regularCircuit.breaker.PolesNum, regularCircuit.breaker.TripUnitType, false, false) ;
                 }
             }
         }

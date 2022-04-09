@@ -283,16 +283,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var ComponentType = componentType.GetComponentType();
                 if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
                 {
-                    if (component is Breaker breaker && componentType == Component.ComponentType.一体式RCD)
-                    {
-                        //只有 CB -> RCD是特殊处理
-                        var residualCurrentBreaker = new ResidualCurrentBreaker(breaker);
-                        edge.Details.CircuitForm.SetCircuitComponentValue(component, residualCurrentBreaker);
-                    }
-                    else
-                    {
-                        edge.Details.CircuitForm.SetCircuitComponentValue(component, edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType));
-                    }
+                    edge.Details.CircuitForm.SetCircuitComponentValue(component, edge.ComponentSelection(ComponentType, edge.Details.CircuitForm.CircuitFormType));
                 }
             }
         }

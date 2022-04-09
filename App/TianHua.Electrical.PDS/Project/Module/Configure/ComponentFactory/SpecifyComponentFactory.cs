@@ -329,7 +329,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             throw new NotImplementedException();
         }
 
-        public override ResidualCurrentBreaker CreatResidualCurrentBreaker()
+        public override Breaker CreatResidualCurrentBreaker()
         {
             throw new NotImplementedException();
         }

@@ -64,14 +64,12 @@
     <Compile Include="Project\Module\Circuit\Extension\CircuitGroupAttribute.cs" />
     <Compile Include="Project\Module\Circuit\Extension\UpdateCircuitTypeExtension.cs" />
     <Compile Include="Project\Module\Component\AutomaticTransferSwitch.cs" />
-    <Compile Include="Project\Module\Component\BreakerBaseComponent.cs" />
     <Compile Include="Project\Module\Component\CurrentTransformer.cs" />
-    <Compile Include="Project\Module\Component\BreakerEx.cs" />
+    <Compile Include="Project\Module\Component\Breaker.cs" />
     <Compile Include="Project\Module\Component\Extension\ComponentTypeSelector.cs" />
     <Compile Include="Project\Module\Component\ManualTransferSwitch.cs" />
     <Compile Include="Project\Module\Component\MeterTransformer.cs" />
     <Compile Include="Project\Module\Component\OUVP.cs" />
-    <Compile Include="Project\Module\Component\ResidualCurrentBreaker.cs" />
     <Compile Include="Project\Module\Configure\ComponentFactory\PDSBaseComponentFactory.cs" />
     <Compile Include="Project\Module\Configure\ComponentFactory\SelectionComponentFactory.cs" />
     <Compile Include="Project\Module\Configure\ComponentFactory\SpecifyComponentFactory.cs" />
@@ -126,7 +124,6 @@
     <Compile Include="Project\Module\Circuit\PDSBaseOutCircuit.cs" />
     <Compile Include="Project\Module\Circuit\RegularCircuit.cs" />
     <Compile Include="Project\Module\Circuit\ThermalRelayProtectionCircuit.cs" />
-    <Compile Include="Project\Module\Component\Breaker.cs" />
     <Compile Include="Project\Module\Component\Conductor.cs" />
     <Compile Include="Project\Module\Component\CPS.cs" />
     <Compile Include="Project\Module\Component\Extension\CascadeComponentAttribute.cs" />

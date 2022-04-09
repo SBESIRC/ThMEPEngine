@@ -2,9 +2,9 @@
 using System.Linq;
 using ThCADExtension;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using System.Text.RegularExpressions;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -12,19 +12,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// 断路器
     /// </summary>
     [CascadeComponent]
-    public class Breaker : BreakerBaseComponent
+    public class Breaker : PDSBaseComponent
     {
-        /// <summary>
-        /// 标签
-        /// </summary>
-        public override string Content
-        {
-            get
-            {
-                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}";
-            }
-        }
-
         /// <summary>
         /// 断路器
         /// </summary>
@@ -32,10 +21,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="tripDevice">脱扣器类型</param>
         /// <param name="polesNum">极数</param>
         /// <param name="characteristics">瞬时脱扣器类型</param>
-        public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics)
+        /// <param name="IsDomesticWaterPump">是否是生活水泵</param>
+        /// <param name="HasLeakageProtection">是否带漏电保护</param>
+        public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics, bool isDomesticWaterPump , bool hasLeakageProtection)
         {
-            ComponentType = ComponentType.CB;
-
             if (ProjectSystemConfiguration.SinglePhasePolesNum.Contains(polesNum))
             {
                 AlternativePolesNum = ProjectSystemConfiguration.SinglePhasePolesNum;
@@ -44,17 +33,53 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 AlternativePolesNum = ProjectSystemConfiguration.ThreePhasePolesNum;
             }
-            var breakers = BreakerConfiguration.breakerComponentInfos.
+            CalculateCurrent = calculateCurrent;
+            IsDomesticWaterPump = isDomesticWaterPump;
+            IsSpecifiedSelection = false;
+            List<BreakerComponentInfo> breakers;
+            BreakerComponentInfo breaker;
+            if (hasLeakageProtection)
+            {
+                ComponentType = ComponentType.一体式RCD;
+                breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
                 && tripDevice.Contains(o.TripDevice)
+                && !o.ResidualCurrent.IsNullOrWhiteSpace()
                 && AlternativePolesNum.Contains(o.Poles)
-                && o.ResidualCurrent.IsNullOrWhiteSpace()
                 && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics))).ToList();
-            if (breakers.Count == 0)
-            {
-                throw new NotSupportedException();
+                if (breakers.Count == 0)
+                {
+                    throw new NotSupportedException();
+                }
+                breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
+                //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
+                RCDType = RCDType.A;
+                if (IsDomesticWaterPump)
+                {
+                    ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                }
+                else
+                {
+                    ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                }
+                AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
             }
-            var breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
+            else
+            {
+                ComponentType = ComponentType.CB;
+                breakers = BreakerConfiguration.breakerComponentInfos.
+                    Where(o => o.Amps > calculateCurrent
+                    && tripDevice.Contains(o.TripDevice)
+                    && AlternativePolesNum.Contains(o.Poles)
+                    && o.ResidualCurrent.IsNullOrWhiteSpace()
+                    && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics))).ToList();
+                if (breakers.Count == 0)
+                {
+                    throw new NotSupportedException();
+                }
+                breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
+            }
             Model = breaker.Model;
             FrameSpecification = breaker.FrameSize;
             PolesNum =breaker.Poles;
@@ -68,6 +93,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
             AlternativeTripDevice = tripDevice;
             AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
+            Appendix = AppendixType.无;
+            AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
         }
 
         /// <summary>
@@ -78,15 +105,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             ComponentType = ComponentType.CB;
 
+            IsSpecifiedSelection = true;
             //例：MCB63-MA2.5/3P
             string[] configs = breakerConfig.Split('-');
             string[] detaileds = configs[1].Split('/');
             var model = (BreakerModel)Enum.Parse(typeof(BreakerModel), Regex.Replace(configs[0], @"\d", ""));
             var frameSpecification = Regex.Replace(configs[0], @"\D", "");
-            var polesNum =detaileds[1];
+            var polesNum = detaileds[1];
             int numIndex = detaileds[0].IndexOfAny(ProjectSystemConfiguration.NumberArray);
             var ratedCurrent = detaileds[0].Substring(numIndex);
-            var tripUnitType = detaileds[0].Substring(0,numIndex);
+            var tripUnitType = detaileds[0].Substring(0, numIndex);
 
             var breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Model == model
@@ -113,25 +141,160 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
             AlternativeTripDevice = new List<string>() { TripUnitType };
             AlternativePolesNum = new List<string>() { PolesNum };
-            //Characteristics = "C";
-            //AlternativePolesNum = new List<string>() { PolesNum };
-            //AlternativeModel = new List<BreakerModel>() { Model };
-            //AlternativeFrameSpecifications = new List<string>() { FrameSpecification };
-            //AlternativeRatedCurrent = new List<string>() { RatedCurrent };
-            //AlternativeTripDevice = new List<string>() { TripUnitType };
+        }
+
+        /// <summary>
+        /// 型号
+        /// </summary>
+        public BreakerModel Model { get; set; }
+
+        /// <summary>
+        /// 壳架规格
+        /// </summary>
+        public string FrameSpecification { get; set; }
+
+        /// <summary>
+        /// 极数
+        /// </summary>
+        public string PolesNum { get; set; }
+
+        /// <summary>
+        /// 额定电流
+        /// </summary>
+        public string RatedCurrent { get; set; }
+
+        /// <summary>
+        /// 脱扣器类型
+        /// </summary>
+        public string TripUnitType { get; set; }
+
+        /// <summary>
+        /// 附件
+        /// </summary>
+        public AppendixType Appendix { get; set; }
+
+        /// <summary>
+        /// RCD类型(仅RCD可见)
+        /// </summary>
+        public RCDType RCDType { get; set; }
+
+        /// <summary>
+        /// 剩余电流动作(仅RCD可见)
+        /// </summary>
+        public ResidualCurrentSpecification ResidualCurrent { get; set; }
+
+        public void SetBreakerType(ComponentType componentType)
+        {
+            if (this.ComponentType == componentType)
+            {
+                return;
+            }
+            if (this.ComponentType == ComponentType.CB && componentType == ComponentType.组合式RCD)
+            {
+                this.ComponentType = ComponentType.组合式RCD;
+            }
+            else if (this.ComponentType == ComponentType.组合式RCD && componentType == ComponentType.CB)
+            {
+                this.ComponentType = ComponentType.CB;
+            }
+            else
+            {
+                if (!IsSpecifiedSelection)
+                {
+                    List<BreakerComponentInfo> breakers;
+                    BreakerComponentInfo breaker;
+                    if (componentType == ComponentType.一体式RCD)
+                    {
+                        ComponentType = ComponentType.一体式RCD;
+                        breakers = BreakerConfiguration.breakerComponentInfos.
+                        Where(o => o.Amps > CalculateCurrent
+                        && AlternativeTripDevice.Contains(o.TripDevice)
+                        && !o.ResidualCurrent.IsNullOrWhiteSpace()
+                        && AlternativePolesNum.Contains(o.Poles)
+                        && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
+                        if (breakers.Count == 0)
+                        {
+                            throw new NotSupportedException();
+                        }
+                        breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
+                        //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
+                        RCDType = RCDType.A;
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                        AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                        AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    }
+                    else
+                    {
+                        breakers = BreakerConfiguration.breakerComponentInfos.
+                            Where(o => o.Amps > CalculateCurrent
+                            && AlternativeTripDevice.Contains(o.TripDevice)
+                            && AlternativePolesNum.Contains(o.Poles)
+                            && o.ResidualCurrent.IsNullOrWhiteSpace()
+                            && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
+                        if (breakers.Count == 0)
+                        {
+                            throw new NotSupportedException();
+                        }
+                        breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
+                        if(componentType == ComponentType.CB)
+                        {
+                            Appendix = AppendixType.无;
+                            ComponentType = ComponentType.CB;
+                        }
+                        else
+                        {
+                            ComponentType = ComponentType.组合式RCD;
+                            Appendix = AppendixType.RC;
+                            //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
+                            RCDType = RCDType.A;
+                            if (IsDomesticWaterPump)
+                            {
+                                ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                            }
+                            else
+                            {
+                                ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                            }
+                            AlternativeRCDTypes = new List<RCDType>() { RCDType.A,RCDType.AC,RCDType.B,RCDType.F};
+                            AlternativeResidualCurrents = new List<ResidualCurrentSpecification>() { ResidualCurrentSpecification.Specification10,ResidualCurrentSpecification.Specification30,ResidualCurrentSpecification.Specification100,ResidualCurrentSpecification.Specification300,ResidualCurrentSpecification.Specification500};
+                        }
+                    }
+                    Model = breaker.Model;
+                    FrameSpecification = breaker.FrameSize;
+                    PolesNum =breaker.Poles;
+                    RatedCurrent =breaker.Amps.ToString();
+                    TripUnitType =breaker.TripDevice;
+
+                    Characteristics = Characteristics;
+                    Breakers = breakers;
+                    AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
+                    AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
+                    AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+                    AlternativeTripDevice = AlternativeTripDevice;
+                    AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
+                    AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
+                }
+            }
         }
 
         /// <summary>
         /// 修改级数
         /// </summary>
         /// <param name="polesNum"></param>
-        public override void SetPolesNum(string polesNum)
+        public void SetPolesNum(string polesNum)
         {
-            if (Breakers.Any(o => o.Poles == polesNum 
+            if (Breakers.Any(o => o.Poles == polesNum
             && o.Model == Model
-            && o.FrameSize == FrameSpecification 
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
-            && o.TripDevice == TripUnitType 
+            && o.TripDevice == TripUnitType
             && o.Amps == double.Parse(RatedCurrent)))
             {
                 this.PolesNum = polesNum;
@@ -144,9 +307,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
             }
         }
-        public override List<string> GetPolesNums()
+        public List<string> GetPolesNums()
         {
             return AlternativePolesNum;
         }
@@ -155,11 +334,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改脱扣器类型
         /// </summary>
         /// <param name="tripDevice"></param>
-        public override void SetTripDevice(string tripDevice)
+        public void SetTripDevice(string tripDevice)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == Model
-            && o.FrameSize == FrameSpecification 
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == tripDevice
             && o.Amps == double.Parse(RatedCurrent)))
@@ -174,9 +353,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
             }
         }
-        public override List<string> GetTripDevices()
+        public List<string> GetTripDevices()
         {
             return AlternativeTripDevice;
         }
@@ -185,12 +380,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改额定电流
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public override void SetRatedCurrent(string ratedCurrentStr)
+        public void SetRatedCurrent(string ratedCurrentStr)
         {
             var ratedCurrent = double.Parse(ratedCurrentStr);
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == Model
-            && o.FrameSize == FrameSpecification 
+            && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
             && o.Amps == ratedCurrent))
@@ -205,9 +400,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
             }
         }
-        public override List<string> GetRatedCurrents()
+        public List<string> GetRatedCurrents()
         {
             return AlternativeRatedCurrent;
         }
@@ -216,7 +427,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改壳架规格
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public override void SetFrameSpecification(string frameSpecifications)
+        public void SetFrameSpecification(string frameSpecifications)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == Model
@@ -235,9 +446,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
             }
         }
-        public override List<string> GetFrameSpecifications()
+        public List<string> GetFrameSpecifications()
         {
             return AlternativeFrameSpecifications;
         }
@@ -246,7 +473,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改型号
         /// </summary>
         /// <param name="ratedCurrentStr"></param>
-        public override void SetModel(BreakerModel model)
+        public void SetModel(BreakerModel model)
         {
             if (Breakers.Any(o => o.Poles ==  PolesNum
             && o.Model == model
@@ -265,11 +492,53 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
             }
         }
-        public override List<BreakerModel> GetModels()
+        public List<BreakerModel> GetModels()
         {
             return AlternativeModel;
+        }
+
+        /// <summary>
+        /// 修改RCD类型
+        /// </summary>
+        /// <param name="type"></param>
+        public void SetRCDType(RCDType type)
+        {
+            RCDType = type;
+        }
+        public List<RCDType> GetRCDTypes()
+        {
+            return AlternativeRCDTypes;
+        }
+
+        /// <summary>
+        /// 修改剩余电流动作
+        /// </summary>
+        /// <param name="type"></param>
+        public void SetResidualCurrent(ResidualCurrentSpecification type)
+        {
+            ResidualCurrent = type;
+        }
+        public List<ResidualCurrentSpecification> GetResidualCurrents()
+        {
+            return AlternativeResidualCurrents;
         }
 
         /// <summary>
@@ -285,6 +554,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             return 0;
         }
 
+
         /// <summary>
         /// 瞬时脱扣器类型
         /// </summary>
@@ -294,5 +564,49 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 断路器信息
         /// </summary>
         private List<BreakerComponentInfo> Breakers { get; set; }
+
+        /// <summary>
+        /// 额定电流
+        /// </summary>
+        private List<string> AlternativeRatedCurrent { get; set; }
+
+        /// <summary>
+        /// 级数
+        /// </summary>
+        private List<string> AlternativePolesNum { get; set; }
+
+        /// <summary>
+        /// 脱扣器类型
+        /// </summary>
+        private List<string> AlternativeTripDevice { get; set; }
+
+        /// <summary>
+        /// 壳架规格
+        /// </summary>
+        private List<string> AlternativeFrameSpecifications { get; set; }
+
+        /// <summary>
+        /// 模型
+        /// </summary>
+        private List<BreakerModel> AlternativeModel { get; set; }
+
+        /// <summary>
+        /// 是否是生活水泵
+        /// </summary>
+        private bool IsDomesticWaterPump { get; set; }
+
+        /// <summary>
+        /// 是否是指定选型
+        /// </summary>
+        private bool IsSpecifiedSelection { get; set; }
+
+        /// <summary>
+        /// 计算电流
+        /// </summary>
+        private double CalculateCurrent { get; set; }
+
+        private List<RCDType> AlternativeRCDTypes { get; set; }
+        private List<ResidualCurrentSpecification> AlternativeResidualCurrents { get; set; }
+        private List<AppendixType> AlternativeAppendixs { get; set; }
     }
 }

@@ -380,7 +380,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         // 元器件2
                         if (circuit.reservedComponent1 != null)
@@ -421,7 +421,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var RCDText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_RCD).First();
-                        RCDText.TextString = circuit.breaker.Content;
+                        RCDText.TextString = circuit.breaker.Content();
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -444,7 +444,7 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
 
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         // 元器件2
                         var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR).First();
@@ -480,7 +480,7 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
 
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         // 元器件2
                         var srcThermalRelay = components.Where(c => c.Name == ThPDSCommon.DEFAULT_THERMAL_RELAY).First();
@@ -503,7 +503,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 case CircuitFormOutType.配电计量_上海CT:
                 case CircuitFormOutType.配电计量_上海直接表:
                     {
-                        BreakerBaseComponent breaker1, breaker2;
+                        Breaker breaker1, breaker2;
                         Meter meter;
                         Conductor conductor;
                         if (edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.配电计量_上海CT)
@@ -536,7 +536,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstBreaker.Erase();
                         }
                         var CB1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB1).First();
-                        CB1Text.TextString = breaker1.Content;
+                        CB1Text.TextString = breaker1.Content();
 
                         // 元器件2
                         var srcMeter = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CURRENT_TRANSFORMER).FirstOrDefault();
@@ -568,7 +568,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             secondBreaker.Erase();
                         }
                         var CB2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB2).First();
-                        CB2Text.TextString = breaker2.Content;
+                        CB2Text.TextString = breaker2.Content();
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -578,7 +578,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 case CircuitFormOutType.配电计量_CT表在前:
                 case CircuitFormOutType.配电计量_直接表在前:
                     {
-                        BreakerBaseComponent breaker;
+                        Breaker breaker;
                         Meter meter;
                         Conductor conductor;
                         if (edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.配电计量_CT表在前)
@@ -626,7 +626,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = breaker.Content;
+                        CBText.TextString = breaker.Content();
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -636,7 +636,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 case CircuitFormOutType.配电计量_CT表在后:
                 case CircuitFormOutType.配电计量_直接表在后:
                     {
-                        BreakerBaseComponent breaker;
+                        Breaker breaker;
                         Meter meter;
                         Conductor conductor;
                         if (edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.配电计量_CT表在后)
@@ -684,7 +684,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = breaker.Content;
+                        CBText.TextString = breaker.Content();
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
@@ -706,7 +706,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         // 元器件2
                         var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR).First();
@@ -778,7 +778,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
                             .OrderByDescending(c => c.Position.Y).ToList();
@@ -914,7 +914,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
                             .OrderByDescending(c => c.Position.Y).ToList();
@@ -1009,7 +1009,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcBreaker.Erase();
                         }
                         var CBText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CB).First();
-                        CBText.TextString = circuit.breaker.Content;
+                        CBText.TextString = circuit.breaker.Content();
 
                         var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR)
                             .OrderByDescending(c => c.Position.Y).ToList();

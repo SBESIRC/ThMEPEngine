@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.Diagram
             return "自复式过欠电压保护器";
         }
 
-        public static string Content(this BreakerEx breaker)
+        public static string Content(this Breaker breaker)
         {
             if(breaker.ComponentType == ComponentType.CB || breaker.ComponentType == ComponentType.一体式RCD)
             {

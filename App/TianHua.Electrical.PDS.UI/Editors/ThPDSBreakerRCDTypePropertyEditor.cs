@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSResidualCurrentBreakerModel;
+            var model = propertyItem.Value as ThPDSBreakerModel;
             if (model != null)
             {
                 return model.AlternativeRCDTypes;

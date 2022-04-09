@@ -80,7 +80,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatBreaker()
         {
-            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics);
+            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump, false);
         }
 
         public override Conductor CreatConductor()
@@ -129,9 +129,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             return new ManualTransferSwitch(_calculateCurrent, _polesNum);
         }
 
-        public override ResidualCurrentBreaker CreatResidualCurrentBreaker()
+        public override Breaker CreatResidualCurrentBreaker()
         {
-            return new ResidualCurrentBreaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor);
+            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump, true);
         }
 
         public override ThermalRelay CreatThermalRelay()

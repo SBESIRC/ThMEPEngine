@@ -59,8 +59,7 @@
     <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSResidualCurrentPropertyEditor.cs" />
-    <Compile Include="Helpers\ThPDSBreakerCustomTypeDescriptor.cs" />
-    <Compile Include="Helpers\ThPDSBreakerTypeDescriptionProvider.cs" />
+    <Compile Include="Helpers\ThPDSPropertyDescriptorHelper.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\ThPDSBranchBus.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
@@ -93,10 +92,8 @@
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
     <Compile Include="Project\Module\Component\ThPDSATSEModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSBreakerExModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSMTSEModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSMTSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSConductorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSContactorModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCPSModel.cs" />
@@ -105,7 +102,6 @@
     <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSOUVPModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSResidualCurrentBreakerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />

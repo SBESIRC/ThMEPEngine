@@ -17,7 +17,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component.Extension
                 case ComponentType.CB:
                     return typeof(Breaker);
                 case ComponentType.一体式RCD:
-                    return typeof(ResidualCurrentBreaker);
+                    return typeof(Breaker);
+                case ComponentType.组合式RCD:
+                    return typeof(Breaker);
                 case ComponentType.ATSE:
                     return typeof(AutomaticTransferSwitch);
                 case ComponentType.MTSE:

@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
     public abstract class PDSBaseComponentFactory
     {
         public abstract Breaker CreatBreaker();
-        public abstract ResidualCurrentBreaker CreatResidualCurrentBreaker();
+        public abstract Breaker CreatResidualCurrentBreaker();
         public abstract ThermalRelay CreatThermalRelay();
         public abstract Contactor CreatContactor();
         public abstract CPS CreatCPS();
