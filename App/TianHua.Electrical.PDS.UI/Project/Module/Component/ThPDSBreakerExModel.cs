@@ -1,7 +1,9 @@
-﻿using ThCADExtension;
+﻿using System;
+using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -20,7 +22,33 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => "";
+        public string Content
+        {
+            get
+            {
+                switch(_breaker.ComponentType)
+                {
+                    case ComponentType.CB:
+                    case ComponentType.一体式RCD:
+                        {
+                            if (_breaker.Appendix == AppendixType.ST)
+                            {
+                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix}";
+                            }
+                            else
+                            {
+                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}";
+                            }
+                        }
+                    case ComponentType.组合式RCD:
+                        {
+                            return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix} {RCDType}{ResidualCurrent.GetDescription()}";
+                        }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
 
         [ReadOnly(true)]
         [Category("元器件参数")]
@@ -43,7 +71,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Category("元器件参数")]
         [DisplayName("壳架规格")]
         [Editor(typeof(ThPDSFrameSpecificationPropertyEditor), typeof(PropertyEditorBase))]
-        public string FrameSpecifications
+        public string FrameSpecification
         {
             get => _breaker.FrameSpecification;
             set
@@ -94,8 +122,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [DisplayName("附件")]
         [Category("元器件参数")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<AppendixType>), typeof(PropertyEditorBase))]
-
+        [Editor(typeof(ThPDSBreakerAppendixPropertyEditor), typeof(PropertyEditorBase))]
         public AppendixType Appendix
         {
             get => _breaker.Appendix;
@@ -181,6 +208,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _breaker.GetFrameSpecifications();
         }
 
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsAppendixEnabled
+        {
+            get => _breaker.ComponentType != ComponentType.组合式RCD;
+        }
+
         protected virtual void OnPropertyChanged()
         {
             OnPropertyChanged(nameof(Model));
@@ -190,7 +224,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             OnPropertyChanged(nameof(RatedCurrent));
             OnPropertyChanged(nameof(TripUnitType));
             OnPropertyChanged(nameof(ResidualCurrent));
-            OnPropertyChanged(nameof(FrameSpecifications));
+            OnPropertyChanged(nameof(FrameSpecification));
         }
     }
 }
