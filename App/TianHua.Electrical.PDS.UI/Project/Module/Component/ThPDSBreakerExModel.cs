@@ -8,9 +8,11 @@ using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using TianHua.Electrical.PDS.UI.Helpers;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
+    [TypeDescriptionProvider(typeof(ThPDSBreakerCustomTypeDescriptor))]
     public abstract class ThPDSBreakerExModel : NotifyPropertyChangedBase
     {
         protected readonly BreakerEx _breaker;
