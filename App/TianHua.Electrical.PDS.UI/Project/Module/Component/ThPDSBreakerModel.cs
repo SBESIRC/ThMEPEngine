@@ -119,9 +119,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [ReadOnly(true)]
         [DisplayName("附件")]
         [Category("元器件参数")]
-        [Editor(typeof(ThPDSBreakerAppendixPropertyEditor), typeof(PropertyEditorBase))]
+        [Editor(typeof(ThPDSEnumPropertyEditor<AppendixType>), typeof(PropertyEditorBase))]
         public AppendixType Appendix
         {
             get => _breaker.Appendix;

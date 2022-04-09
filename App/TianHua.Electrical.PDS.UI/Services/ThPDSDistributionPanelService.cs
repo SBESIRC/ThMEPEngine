@@ -445,6 +445,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", true);
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", true);
                     }
+                    if (breaker.ComponentType == ComponentType.组合式RCD)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", true);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", false);
+                    }
                 }
                 var pg = panel.propertyGrid;
                 pg.SelectedObject = vm ?? new object();
