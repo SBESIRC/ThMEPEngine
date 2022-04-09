@@ -7,6 +7,7 @@ using System.Collections;
 using System.Windows.Controls.Primitives;
 using HandyControl.Controls;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Editors
@@ -30,9 +31,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
         {
             if (propertyItem.Value is ThPDSBreakerExModel breaker)
             {
-                return breaker.IsAppendixEnabled;
+                return breaker.Type.GetEnumName<ComponentType>() != ComponentType.组合式RCD;
             }
-            return false;
+            throw new NotSupportedException();
         }
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)

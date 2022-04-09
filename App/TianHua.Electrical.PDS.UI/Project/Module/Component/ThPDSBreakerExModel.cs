@@ -210,13 +210,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _breaker.GetFrameSpecifications();
         }
 
-        [ReadOnly(true)]
-        [Browsable(false)]
-        public bool IsAppendixEnabled
-        {
-            get => _breaker.ComponentType != ComponentType.组合式RCD;
-        }
-
         protected virtual void OnPropertyChanged()
         {
             OnPropertyChanged(nameof(Model));
