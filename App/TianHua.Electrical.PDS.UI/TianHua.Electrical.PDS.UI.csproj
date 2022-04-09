@@ -90,6 +90,7 @@
     <Compile Include="Project\ConverterFactory.cs" />
     <Compile Include="Models\UTableItem.cs" />
     <Compile Include="Project\Module\Component\ThPDSATSEModel.cs" />
+    <Compile Include="Project\Module\Component\ThPDSBreakerExModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMTSEModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSBreakerModel.cs" />

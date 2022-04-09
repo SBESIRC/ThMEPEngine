@@ -232,17 +232,17 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum AppendixType
     {
         [Description("无")]
-        无,
+        无 = 1,
         [Description("分励脱扣")]
-        ST,
+        ST = 2,
         [Description("报警")]
-        AL,
+        AL = 3,
         [Description("辅助触点")]
-        AX,
+        AX = 4,
         [Description("失压脱扣")]
-        UR,
+        UR = 5,
         [Description("Residual Current")]
-        RC,
+        RC = 6,
     }
 
     /// <summary>
