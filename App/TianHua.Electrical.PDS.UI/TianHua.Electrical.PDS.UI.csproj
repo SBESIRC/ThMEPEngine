@@ -59,6 +59,9 @@
     <Compile Include="Editors\ThPDSRatedCurrentPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSResidualCurrentPropertyEditor.cs" />
+    <Compile Include="Helpers\ThPDSBreakerCustomTypeDescriptor.cs" />
+    <Compile Include="Helpers\ThPDSBreakerTypeDescriptionProvider.cs" />
+    <Compile Include="Helpers\ThPDSCustomField.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\ThPDSBranchBus.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
