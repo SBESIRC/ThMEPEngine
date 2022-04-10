@@ -336,8 +336,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static void AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
-            ThPDSProjectGraphNode node, CircuitFormOutType type)
+        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
         {
             //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
@@ -348,13 +347,14 @@ namespace TianHua.Electrical.PDS.Project.Module
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
             graph.AddEdge(newEdge);
+
+            return newEdge;
         }
 
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static void AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
-            ThPDSProjectGraphNode node, string type)
+        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建未知负载
             var target = new ThPDSProjectGraphNode();
@@ -367,6 +367,100 @@ namespace TianHua.Electrical.PDS.Project.Module
             newEdge.ComponentSelection(CircuitFormOutType);
             //Step 5:添加到Graph
             graph.AddEdge(newEdge);
+
+            return newEdge;
+        }
+
+        /// <summary>
+        /// 新建小母排
+        /// </summary>
+        public static void AddSmallBusbar(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        {
+            var smallBusbar = new SmallBusbar();
+            node.Details.SmallBusbars.Add(smallBusbar);
+            var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
+            AssignCircuit2SmallBusbar(node, smallBusbar, edge);
+
+            //这个地方后期要做优化，需再找张皓好好聊一下
+            var edges = GetSmallBusbarCircuit(graph, node, smallBusbar);
+            smallBusbar.Power = edges.Select(o => o.Target).ToList().CalculatePower();
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+            smallBusbar.breaker = componentFactory.CreatBreaker();
+        }
+
+        /// <summary>
+        /// 获取小母排节下分支
+        /// </summary>
+        public static List<ThPDSProjectGraphEdge> GetSmallBusbarCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, SmallBusbar smallBusbar)
+        {
+            if (node.Details.SmallBusbars.Contains(smallBusbar))
+            {
+                var edges = graph.OutEdges(node);
+                return edges.Where(o => o.Details.CircuitForm.IsAttachedSmallBusbar && o.Details.CircuitForm.SmallBusbar.Equals(smallBusbar)).ToList();
+            }
+            else
+            {
+                return new List<ThPDSProjectGraphEdge>();
+            }
+        }
+
+        /// <summary>
+        /// 获取负载节下所有分支(包含在小母排上的分支)
+        /// </summary>
+        /// <returns></returns>
+        public static List<ThPDSProjectGraphEdge> GetCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        {
+            return graph.OutEdges(node).ToList();
+        }
+
+        /// <summary>
+        /// 获取控制回路节下所有分支
+        /// </summary>
+        /// <returns></returns>
+        public static List<ThPDSProjectGraphEdge> GetControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node,SecondaryCircuit secondaryCircuit)
+        {
+            if(node.Details.SecondaryCircuits.Contains(secondaryCircuit))
+            {
+                return secondaryCircuit.edges;
+            }
+            else
+            {
+                return new List<ThPDSProjectGraphEdge>();
+            }
+        }
+
+        /// <summary>
+        /// 获取负载节下所有直接连接分支(不在小母排上的分支)
+        /// </summary>
+        /// <returns></returns>
+        public static List<ThPDSProjectGraphEdge> GetNonSmallBusbarCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        {
+            return graph.OutEdges(node).Where(o => !o.Details.CircuitForm.IsAttachedSmallBusbar).ToList();
+        }
+
+        /// <summary>
+        /// 小母排新建母排分支
+        /// </summary>
+        public static void SmallBusbarAddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+            ThPDSProjectGraphNode node, SmallBusbar smallBusbar)
+        {
+            if (node.Details.SmallBusbars.Contains(smallBusbar))
+            {
+                var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
+                AssignCircuit2SmallBusbar(node, smallBusbar, edge);
+            }
+        }
+
+        /// <summary>
+        /// 指定回路至小母排
+        /// </summary>
+        public static void AssignCircuit2SmallBusbar(ThPDSProjectGraphNode node, SmallBusbar smallBusbar,ThPDSProjectGraphEdge edge)
+        {
+            if(node.Details.SmallBusbars.Contains(smallBusbar) && edge.Source.Equals(node) && edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规)
+            {
+                edge.Details.CircuitForm.IsAttachedSmallBusbar = true;
+                edge.Details.CircuitForm.SmallBusbar = smallBusbar;
+            }
         }
 
         /// <summary>

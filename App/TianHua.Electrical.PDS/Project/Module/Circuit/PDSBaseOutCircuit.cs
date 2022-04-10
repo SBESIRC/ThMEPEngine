@@ -11,6 +11,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 出线回路类型
         /// </summary>
         public CircuitFormOutType CircuitFormType { get; set; }
+        public bool IsAttachedSmallBusbar { get; set; }
+        public SmallBusbar SmallBusbar { get; set; }
     }
 
     /// <summary>

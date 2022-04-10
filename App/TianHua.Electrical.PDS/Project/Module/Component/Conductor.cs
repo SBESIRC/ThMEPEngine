@@ -22,6 +22,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
         }
 
+        /// <summary>
+        /// 导体
+        /// </summary>
         public Conductor(string conductorConfig , double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
@@ -31,6 +34,57 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
             ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+        }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor(string conductorConfig , string conductorType , ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
+        {
+            this.ComponentType = ComponentType.ControlConductor;
+            this.IsMotor = true;
+            this.IsControlCircuit = true;
+            this.Phase = phase;
+            ChooseMaterial(conductorType);
+            ChooseCrossSectionalArea(conductorConfig);
+            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+        }
+
+        private void ChooseMaterial(string conductorType)
+        {
+            var config = PDSProject.Instance.projectGlobalConfiguration;
+            if(string.IsNullOrWhiteSpace(conductorType))
+            {
+                IsBAControl = true;
+            }
+            else if(conductorType == "消防配电控制电缆")
+            {
+                this.ConductorUse = config.FireDistributionControlCable;
+                IsWire =false;
+            }
+            else if (conductorType == "非消防配电控制电缆")
+            {
+                this.ConductorUse = config.NonFireDistributionControlCable;
+                IsWire = false;
+            }
+            else if (conductorType == "消防控制信号软线")
+            {
+                this.ConductorUse = config.FireControlSignalWire;
+                IsWire = true;
+            }
+            else if (conductorType == "非消防控制信号软线")
+            {
+                this.ConductorUse = config.NonFireControlSignalWire;
+                IsWire = true;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            if (ConductorUse.ConductorMaterial.Contains('N'))
+            {
+                Refractory = true;
+            }
         }
 
         /// <summary>
@@ -236,27 +290,40 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             string config = conductorConfig;
             var Allconfigs = IsWire ? ConductorConfigration.WireConductorInfos : ConductorConfigration.CableConductorInfos;
             {
-                if (config.Contains('('))
+                if (config.Contains('-'))
                 {
-                    this.NumberOfPhaseWire = 2;
-                    int index1 = config.IndexOf('(');
-                    int index2 = config.IndexOf(')');
-                    config = config.Substring(index1 + 1, index2 - index1);
+                    IsBAControl = true;
                 }
                 else
                 {
-                    this.NumberOfPhaseWire = 1;
+                    if (config.Contains('('))
+                    {
+                        this.NumberOfPhaseWire = 2;
+                        int index1 = config.IndexOf('(');
+                        int index2 = config.IndexOf(')');
+                        config = config.Substring(index1 + 1, index2 - index1);
+                    }
+                    else
+                    {
+                        this.NumberOfPhaseWire = 1;
+                    }
+                    if (config.Contains('E'))
+                    {
+                        int index = config.IndexOf('+');
+                        config = config.Substring(0, index);
+                        HasPELine = true;
+                    }
+                    else
+                    {
+                        HasPELine = false;
+                    }
+                    string[] conductorInfos = config.Split('x');
+                    this.ConductorCount = int.Parse(conductorInfos[0]);
+                    this.ConductorCrossSectionalArea = double.Parse(conductorInfos[1]);
+                    AlternativeNumberOfPhaseWire = new List<int>() { NumberOfPhaseWire };
+                    AlternativeConductorCrossSectionalAreas = new List<double>() { ConductorCrossSectionalArea };
+                    CalculateCrossSectionalArea(ConductorCrossSectionalArea);
                 }
-                if (config.Contains('E'))
-                {
-                    int index = config.IndexOf('+');
-                    config = config.Substring(0, index);
-                }
-                string[] conductorInfos = config.Split('x');
-                this.ConductorCrossSectionalArea = double.Parse(conductorInfos[1]);
-                AlternativeNumberOfPhaseWire = new List<int>() { NumberOfPhaseWire };
-                AlternativeConductorCrossSectionalAreas = new List<double>() { ConductorCrossSectionalArea };
-                CalculateCrossSectionalArea(ConductorCrossSectionalArea);
             }
         }
 
@@ -409,7 +476,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
         //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
         //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
-        public string Content { get { return $"{ConductorUse.Content}-{ConductorInfo}-{LayingTyle}"; } }
+        public string Content { get { return $"{(IsBAControl ? "" : ConductorUse.Content+"-"+ConductorInfo+"-")}{LayingTyle}"; } }
 
         /// <summary>
         /// 燃烧特性代号
@@ -489,10 +556,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                var ViaConduitStr = ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial + PipeDiameter + "-" + Pipelaying;
+                var ViaConduitStr = ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial.ToString() + PipeDiameter + "-" + Pipelaying;
                 if (ViaCableTray && ViaConduit)
                 {
-                    return $"{this.BridgeLaying}/ {ViaConduitStr }";
+                    return $"{this.BridgeLaying.ToString()}/ {ViaConduitStr }";
                 }
                 else if (ViaCableTray)
                 {
@@ -525,7 +592,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     string val = string.Empty;
                     if (IsMotor)
                     {
-                        val = $"3×{ConductorCrossSectionalArea}{(HasPELine ? "+E"+PECrossSectionalArea : "")}";
+                        val = $"{ConductorCount}×{ConductorCrossSectionalArea}{(HasPELine ? "+E"+PECrossSectionalArea : "")}";
                     }
                     else
                     {
@@ -611,6 +678,21 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 是否是电动机回路
         /// </summary>
         private bool IsMotor { get; set; } = false;
+
+        /// <summary>
+        /// 是否是控制回路
+        /// </summary>
+        private bool IsControlCircuit { get; set; } = false;
+
+        /// <summary>
+        /// 是否是BA控制
+        /// </summary>
+        private bool IsBAControl { get; set; } = false;
+
+        /// <summary>
+        /// 导体根数
+        /// </summary>
+        private int ConductorCount { get; set; }
         #endregion
     }
 }

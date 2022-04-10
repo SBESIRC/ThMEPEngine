@@ -9,6 +9,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     {
         [Description("导体")]
         Conductor,
+        [Description("控制回路导体")]
+        ControlConductor,
         [Description("隔离开关")]
         QL,
         [Description("接触器")]

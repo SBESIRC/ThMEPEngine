@@ -31,6 +31,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
             LoadMTConfig();
             LoadCPSConfig();
             LoadOUVPConfig();
+            LoadSecondaryCircuitConfig();
         }
 
         public static List<string> GetTripDevice(this ThPDSLoadTypeCat_1 type, bool FireLoad, out string characteristics)
@@ -826,6 +827,90 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                         Depth = row["深度"].ToString(),
                         Height = row["高度"].ToString(),
                     });
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 加载控制回路配置
+        /// </summary>
+        private static void LoadSecondaryCircuitConfig()
+        {
+            var excelSrevice = new ReadExcelService();
+            var dataSet = excelSrevice.ReadExcelToDataSet(ProjectSystemConfiguration.SecondaryCircuitUrl, true);
+            var Table = dataSet.Tables["Sheet1"];
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("SmokeExhaustFan", new List<SecondaryCircuitInfo>());//消防排烟风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("MakeupAirFan", new List<SecondaryCircuitInfo>());//消防补风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("StaircasePressurizationFan", new List<SecondaryCircuitInfo>());//消防加压送风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("ExhaustFan_Smoke", new List<SecondaryCircuitInfo>());//消防排烟兼平时排风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("SupplyFan_Smoke", new List<SecondaryCircuitInfo>());//消防补风兼平时送风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("ExhaustFan", new List<SecondaryCircuitInfo>());//平时排风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("SupplyFan", new List<SecondaryCircuitInfo>());//平时送风风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("KitchenExhaustFan", new List<SecondaryCircuitInfo>());//厨房排油烟风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("EmergencyFan", new List<SecondaryCircuitInfo>());//事故风机
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("DomesticWaterPump", new List<SecondaryCircuitInfo>());//生活水泵
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("FirePump", new List<SecondaryCircuitInfo>());//消防泵/喷淋泵/消火栓泵
+            SecondaryCircuitConfiguration.SecondaryCircuitInfos.Add("SubmersiblePump", new List<SecondaryCircuitInfo>());//潜水泵
+            for (int i = 1; i < Table.Rows.Count; i++)
+            {
+                var row = Table.Rows[i];
+                if (!row[0].ToString().IsNullOrWhiteSpace())
+                {
+                    SecondaryCircuitInfo info = new SecondaryCircuitInfo()
+                    {
+                        SecondaryCircuitCode = row["二次回路代号"].ToString(),
+                        Description = row["功能描述"].ToString(),
+                        Conductor = row["导体根数x每根导体截面积"].ToString(),
+                        ConductorCategory = row["导体选择类别"].ToString(),
+                    };
+                    if (row["消防排烟风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["SmokeExhaustFan"].Add(info);
+                    }
+                    if (row["消防补风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["MakeupAirFan"].Add(info);
+                    }
+                    if (row["消防加压送风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["StaircasePressurizationFan"].Add(info);
+                    }
+                    if (row["消防排烟兼平时排风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["ExhaustFan_Smoke"].Add(info);
+                    }
+                    if (row["消防补风兼平时送风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["SupplyFan_Smoke"].Add(info);
+                    }
+                    if (row["消防泵"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["FirePump"].Add(info);
+                    }
+                    if (row["平时排风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["ExhaustFan"].Add(info);
+                    }
+                    if (row["平时送风风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["SupplyFan"].Add(info);
+                    }
+                    if (row["事故风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["EmergencyFan"].Add(info);
+                    }
+                    if (row["厨房排油烟风机"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["KitchenExhaustFan"].Add(info);
+                    }
+                    if (row["生活水泵"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["DomesticWaterPump"].Add(info);
+                    }
+                    if (row["潜水泵"].ToString()== "Y")
+                    {
+                        SecondaryCircuitConfiguration.SecondaryCircuitInfos["SubmersiblePump"].Add(info);
+                    }
                 }
             }
         }

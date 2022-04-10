@@ -25,6 +25,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
+            ProjectGraph.CalculateSecondaryCircuit();
             return ProjectGraph;
         }
 
@@ -257,6 +258,30 @@ namespace TianHua.Electrical.PDS.Project
 
             //统计回路级联电流
             edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+        }
+
+        /// <summary>
+        /// 计算控制回路
+        /// </summary>
+        public static void CalculateSecondaryCircuit(this ThPDSProjectGraph PDSProjectGraph)
+        {
+            var projectGraph = PDSProjectGraph.Graph;
+            foreach (ThPDSProjectGraphEdge edge in projectGraph.Edges)
+            {
+                if(edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
+                {
+                    var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitInfos[edge.Target.Load.LoadTypeCat_3.ToString()];
+                    foreach (SecondaryCircuitInfo item in secondaryCircuitInfos)
+                    {
+                        int index = edge.Source.Details.SecondaryCircuits.Count+ 1;
+                        var secondaryCircuit = new SecondaryCircuit(index);
+                        secondaryCircuit.edges.Add(edge);
+                        secondaryCircuit.CircuitDescription = item.Description;
+                        secondaryCircuit.conductor = new Conductor(item.Conductor,item.ConductorCategory , edge.Target.Load.Phase, edge.Target.Load.CircuitType,  edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber);
+                        edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit);
+                    }
+                }
+            }
         }
 
         /// <summary>

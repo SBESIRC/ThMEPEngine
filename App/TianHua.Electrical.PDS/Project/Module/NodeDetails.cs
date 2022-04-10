@@ -54,13 +54,25 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public BoxInstallationType BoxInstallationType { get; set; }
 
+        /// <summary>
+        /// 小母排
+        /// </summary>
+        public List<SmallBusbar> SmallBusbars { get; set; }
+
+        /// <summary>
+        /// 控制回路 
+        /// </summary>
+        public List<SecondaryCircuit> SecondaryCircuits { get; set; }
+
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
-            if(Convert.ToUInt32(BoxSize) > 6)
+            SmallBusbars = new List<SmallBusbar>();
+            SecondaryCircuits = new List<SecondaryCircuit>();
+            if (Convert.ToUInt32(BoxSize) > 6)
             {
                 BoxInstallationType = BoxInstallationType.落地安装;
             }

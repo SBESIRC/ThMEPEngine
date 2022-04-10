@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -11,6 +13,29 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class SmallBusbar
     {
-        List<ThPDSProjectGraphEdge> edges { get; set; }
+        /// <summary>
+        /// 用来标识小母排的唯一ID
+        /// </summary>
+        //public string SmallBusbarGuid { get; set; }
+
+        /// <summary>
+        /// 功率
+        /// </summary>
+        public double Power { get; set; }
+
+        /// <summary>
+        /// 级联电流额定值
+        /// </summary>
+        public double CascadeCurrent { get; set; }
+
+        /// <summary>
+        /// 坑位1：预留
+        /// </summary>
+        public Breaker breaker { get; set; }
+
+        /// <summary>
+        /// 坑位2：预留
+        /// </summary>
+        public PDSBaseComponent reservedComponent { get; set; }
     }
 }
