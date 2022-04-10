@@ -39,7 +39,6 @@
     <Compile Include="Converters\IsStringNullOrWhiteSpaceToVisibilityConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
-    <Compile Include="Editors\ThPDSBreakerAppendixPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
