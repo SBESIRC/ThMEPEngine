@@ -19,9 +19,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         KH,
         [Description("断路器")]
         CB,
-        [Description("剩余电流动作断路器")]
+        [Description("剩余电流动作断路器一体式RCD")]
         一体式RCD,
-        [Description("剩余电流动作断路器")]
+        [Description("剩余电流动作断路器组合式RCD")]
         组合式RCD,
         [Description("自动转换开关")]
         ATSE,
