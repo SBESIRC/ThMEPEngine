@@ -39,6 +39,7 @@
     <Compile Include="Converters\IsStringNullOrWhiteSpaceToVisibilityConverter.cs" />
     <Compile Include="Converters\NormalValueConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
+    <Compile Include="Editors\ThPDSBreakerAppendixPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerRCDTypePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSBreakerTripDevicePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="ViewModels\GlobalParameterViewModel.cs" />
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
+    <Compile Include="ViewModels\ThPDSBlockViewModel.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphDWGRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphHighDpiRenderer.cs" />
     <Compile Include="ViewModels\ThPDSCircuitGraphRenderContext.cs" />
