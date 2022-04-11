@@ -26,7 +26,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             points = new List<Point3d>();
             pointsFlag = new List<int>();
             //纵筋相对轮廓的偏移值
-            double offset = scale * (thRectangleEdgeComponent.C + 5) + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
+            double offset = scale * (thRectangleEdgeComponent.C ) + thRectangleEdgeComponent.PointReinforceLineWeight + thRectangleEdgeComponent.StirrupLineWeight;
             //根据点的对数所有点的位置确定位置
             //polyline从左上角逆时针旋转，四个点先获取
             points = new List<Point3d>();

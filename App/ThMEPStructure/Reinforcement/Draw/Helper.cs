@@ -33,6 +33,22 @@ namespace ThMEPStructure.Reinforcement.Draw
 
     class Helper
     {
+        //public static string ChangeCStr(string str)
+        //{
+        //    string result;
+        //    result = str.Replace("C","%%132");
+        //    //foreach(var c in str)
+        //    //{
+        //    //    if(c=='C'||c=='c')
+        //    //    {
+        //    //        result.
+        //    //    }
+        //    //    else
+        //    //    {
+
+        //    //    }
+        //    //}
+        //}
         public static StrToReinforce StrToRein(string Reinforce)
         {
             //解析表格中的Reinforce

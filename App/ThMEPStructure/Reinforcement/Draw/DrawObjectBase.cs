@@ -120,7 +120,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             dBText = new DBText();
-            dBText.TextString = Reinforce;
+            dBText.TextString = Reinforce.Replace("C", "%%132");
             dBText.Height = 300;
             dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 2, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 3, 300, Reinforce);
@@ -128,7 +128,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             dBText.LayerId = DbHelper.GetLayerId("TAB_TEXT");
             objectCollection.Add(dBText);
             dBText = new DBText();
-            dBText.TextString = Stirrup;
+            dBText.TextString = Stirrup.Replace("C", "%%132");
             dBText.Height = 300;
             dBText.WidthFactor = 0.7;
             dBText.Position = Helper.CalCenterPosition(TableStartPt.X, TableStartPt.Y - firstRowHeight - rowHeight * 3, TableStartPt.X + firstRowWidth, TableStartPt.Y - firstRowHeight - rowHeight * 4, 300, Stirrup);
