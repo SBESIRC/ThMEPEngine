@@ -173,14 +173,7 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
                 if (type.Equals(typeof(Meter)))
                 {
-                    if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在前 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
-                    {
-                        return componentFactory.CreatMeterTransformer();
-                    }
-                    else
-                    {
-                        return componentFactory.CreatCurrentTransformer();
-                    }
+                    return componentFactory.CreatMeterTransformer();
                 }
                 else if (type.Equals(typeof(MeterTransformer)))
                 {
