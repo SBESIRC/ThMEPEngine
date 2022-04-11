@@ -12,11 +12,10 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class SecondaryCircuit
     {
-        private int _index;
+        public int Index;
         public SecondaryCircuit(int index)
         {
-            _index = index;
-            edges = new List<ThPDSProjectGraphEdge>();
+            Index = index;
         }
 
         /// <summary>
@@ -25,7 +24,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public string CircuitID { 
             get 
             { 
-                return $"WC{_index.ToString("00")}"; 
+                return $"WC{Index.ToString("00")}"; 
             } 
         }
 
@@ -33,8 +32,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 回路描述
         /// </summary>
         public string CircuitDescription { get; set; }
-
-        public List<ThPDSProjectGraphEdge> edges { get; set; }
 
         /// <summary>
         /// 导体

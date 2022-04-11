@@ -57,12 +57,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 小母排
         /// </summary>
-        public List<SmallBusbar> SmallBusbars { get; set; }
+        public Dictionary<SmallBusbar,List<ThPDSProjectGraphEdge>> SmallBusbars { get; set;}
 
         /// <summary>
         /// 控制回路 
         /// </summary>
-        public List<SecondaryCircuit> SecondaryCircuits { get; set; }
+        public Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>> SecondaryCircuits { get; set; }
 
         public NodeDetails()
         {
@@ -70,8 +70,8 @@ namespace TianHua.Electrical.PDS.Project.Module
             CascadeCurrent = 0;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
-            SmallBusbars = new List<SmallBusbar>();
-            SecondaryCircuits = new List<SecondaryCircuit>();
+            SmallBusbars = new Dictionary<SmallBusbar, List<ThPDSProjectGraphEdge>>();
+            SecondaryCircuits = new Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>>();
             if (Convert.ToUInt32(BoxSize) > 6)
             {
                 BoxInstallationType = BoxInstallationType.落地安装;

@@ -77,18 +77,36 @@ namespace TianHua.Electrical.PDS.Project
             graph.Edges.ForEach(o => ProjectGraph.AddEdge(
                 new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
                 ));
-            if(!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
-            {
-                this.graphData = ProjectGraph.CreatPDSProjectGraph();
-                //this.graphData.Compatible(ProjectGraph);暂未支持校验功能
-            }
-            else
-            {
-                this.graphData = ProjectGraph.CreatPDSProjectGraph();
-            }
+            this.graphData = ProjectGraph.CreatPDSProjectGraph();
             if (!instance.DataChanged.IsNull())
             {
                 instance.DataChanged();//推送消息告知VM刷新
+            }
+        }
+
+        /// <summary>
+        /// 二次推送Data数据
+        /// </summary>
+        public void SecondaryPushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
+        {
+            var ProjectGraph = new BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>();
+            var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
+            graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
+            graph.Edges.ForEach(o => ProjectGraph.AddEdge(
+                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
+                ));
+            if (!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
+            {
+                //this.graphData.Graph = Diff(this.graphData.Graph, ProjectGraph);//对接泽林算法
+                if (!instance.DataChanged.IsNull())
+                {
+                    instance.DataChanged();//推送消息告知VM刷新
+                }
+            }
+            else
+            {
+                //Project未加载，此时不应该二次抓取数据
+                //暂时不报错，跳过处理
             }
         }
 

@@ -43,6 +43,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 ComponentType = ComponentType.一体式RCD;
                 breakers = BreakerConfiguration.breakerComponentInfos.
                 Where(o => o.Amps > calculateCurrent
+                && o.Amps >= 16
                 && tripDevice.Contains(o.TripDevice)
                 && !o.ResidualCurrent.IsNullOrWhiteSpace()
                 && AlternativePolesNum.Contains(o.Poles)
@@ -70,6 +71,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 ComponentType = ComponentType.CB;
                 breakers = BreakerConfiguration.breakerComponentInfos.
                     Where(o => o.Amps > calculateCurrent
+                    && o.Amps >= 16
                     && tripDevice.Contains(o.TripDevice)
                     && AlternativePolesNum.Contains(o.Poles)
                     && o.ResidualCurrent.IsNullOrWhiteSpace()
@@ -208,6 +210,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         ComponentType = ComponentType.一体式RCD;
                         breakers = BreakerConfiguration.breakerComponentInfos.
                         Where(o => o.Amps > CalculateCurrent
+                        && o.Amps >= 16
                         && AlternativeTripDevice.Contains(o.TripDevice)
                         && !o.ResidualCurrent.IsNullOrWhiteSpace()
                         && AlternativePolesNum.Contains(o.Poles)
@@ -234,6 +237,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     {
                         breakers = BreakerConfiguration.breakerComponentInfos.
                             Where(o => o.Amps > CalculateCurrent
+                            && o.Amps >= 16
                             && AlternativeTripDevice.Contains(o.TripDevice)
                             && AlternativePolesNum.Contains(o.Poles)
                             && o.ResidualCurrent.IsNullOrWhiteSpace()

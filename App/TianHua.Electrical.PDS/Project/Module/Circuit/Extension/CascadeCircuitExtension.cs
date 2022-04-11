@@ -22,11 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     if (oValue.IsNull())
                         continue;
                     PDSBaseComponent component = (PDSBaseComponent)oValue;
-                    if (component.IsCascadeComponent())
-                    {
-                        var value = component.GetCascadeRatedCurrent();
-                        resultValue =System.Math.Max(resultValue, value);
-                    }
+                    resultValue =System.Math.Max(resultValue, component.GetCascadeCurrent());
                 }
             }
             return resultValue;
@@ -46,14 +42,23 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     if (oValue.IsNull())
                         continue;
                     PDSBaseComponent component = (PDSBaseComponent)oValue;
-                    if (component.IsCascadeComponent())
-                    {
-                        var value = component.GetCascadeRatedCurrent();
-                        resultValue =System.Math.Max(resultValue, value);
-                    }
+                    resultValue =System.Math.Max(resultValue, component.GetCascadeCurrent());
                 }
             }
             return resultValue;
+        }
+
+        public static double GetCascadeCurrent(this PDSBaseComponent component)
+        {
+            if (component.IsCascadeComponent())
+            {
+                var value = component.GetCascadeRatedCurrent();
+                return value;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 return;
             }
-            var edges = PDSProjectGraph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+            var edges = PDSProjectGraph.Graph.OutEdges(node).ToList();
             edges.ForEach(e =>
             {
                 PDSProjectGraph.CalculateProjectInfo(e.Target);
@@ -80,7 +80,7 @@ namespace TianHua.Electrical.PDS.Project
             }
             else
             {
-                var count = PDSProjectGraph.Graph.Edges.Count(o => o.Target.Equals(node));
+                var count = PDSProjectGraph.Graph.InDegree(node);
                 if (count == 1)
                 {
                     node.Details.CircuitFormType = new OneWayInCircuit();
@@ -121,7 +121,7 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
-        /// Node元器件选型
+        /// Node元器件选型/默认选型
         /// </summary>
         public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
         {
@@ -159,6 +159,59 @@ namespace TianHua.Electrical.PDS.Project
                 //统计节点级联电流
                 var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;//额定级联电流
                 node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            }
+        }
+
+        /// <summary>
+        /// Node元器件选型/指定元器件选型
+        /// </summary>
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphNode node, Type type)
+        {
+            if (type.IsSubclassOf(typeof(PDSBaseComponent)))
+            {
+                var edges = PDSProject.Instance.graphData.Graph.OutEdges(node).ToList();
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+                if (type.Equals(typeof(Meter)))
+                {
+                    if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在前 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
+                    {
+                        return componentFactory.CreatMeterTransformer();
+                    }
+                    else
+                    {
+                        return componentFactory.CreatCurrentTransformer();
+                    }
+                }
+                else if (type.Equals(typeof(MeterTransformer)))
+                {
+                    return componentFactory.CreatMeterTransformer();
+                }
+                else if (type.Equals(typeof(CurrentTransformer)))
+                {
+                    return componentFactory.CreatCurrentTransformer();
+                }
+                else if (type.Equals(typeof(CPS)))
+                {
+                    return componentFactory.CreatCPS();
+                }
+                else if(type.Equals(typeof(AutomaticTransferSwitch)))
+                {
+                    return componentFactory.CreatAutomaticTransferSwitch();
+                }
+                else if (type.Equals(typeof(ManualTransferSwitch)))
+                {
+                    return componentFactory.CreatManualTransferSwitch();
+                }
+                else
+                {
+                    //暂未支持的元器件类型
+                    throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                //非元器件类型
+                throw new NotSupportedException();
             }
         }
 
@@ -275,10 +328,11 @@ namespace TianHua.Electrical.PDS.Project
                     {
                         int index = edge.Source.Details.SecondaryCircuits.Count+ 1;
                         var secondaryCircuit = new SecondaryCircuit(index);
-                        secondaryCircuit.edges.Add(edge);
                         secondaryCircuit.CircuitDescription = item.Description;
                         secondaryCircuit.conductor = new Conductor(item.Conductor,item.ConductorCategory , edge.Target.Load.Phase, edge.Target.Load.CircuitType,  edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber);
-                        edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit);
+                        edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>() { });
+
+                        ThPDSProjectGraphService.AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, edge);
                     }
                 }
             }
@@ -691,7 +745,7 @@ namespace TianHua.Electrical.PDS.Project
 
         public static void UpdateWithNode(this ThPDSProjectGraph graph, ThPDSProjectGraphNode node , bool permission = true)
         {
-            var edges = graph.Graph.Edges.Where(e => e.Source.Equals(node)).ToList();
+            var edges = graph.Graph.OutEdges(node).ToList();
             if (permission)
             {
                 node.Details.LowPower = edges.Select(e => e.Target).ToList().CalculatePower();
@@ -703,8 +757,9 @@ namespace TianHua.Electrical.PDS.Project
             }
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+            CascadeCurrent = Math.Max(CascadeCurrent, node.Details.SmallBusbars.Count > 0 ? node.Details.SmallBusbars.Max(o => o.Key.CascadeCurrent) : 0);
             node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
-            edges = graph.Graph.Edges.Where(e => e.Target.Equals(node)).ToList();
+            edges = graph.Graph.InEdges(node).ToList();
             edges.ForEach(e => graph.UpdateWithEdge(e));
         }
 
