@@ -36,10 +36,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
             var polys = routes.Select(x => x.route).ToList();
             var frame = FindOutFrame(routes);
-            var line = FindRouteIntersectLine(polys.First(), frame);
+            var line = GeometryUtils.FindRouteIntersectLine(polys.First(), frame);
             var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
 
-            var routeDic = routes.ToDictionary(x => x, y => FindRouteIntersectLine(y.route, frame));
+            var routeDic = routes.ToDictionary(x => x, y => GeometryUtils.FindRouteIntersectLine(y.route, frame));
             return AdjustRoute(routeDic, dir);
         }
 
@@ -183,18 +183,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 resPoly.AddVertexAt(resPoly.NumberOfVertices, pt.ToPoint2D(), 0, 0, 0);
             }
             return resPoly;
-        }
-
-        /// <summary>
-        /// 找到相交段的线
-        /// </summary>
-        /// <param name="routePoly"></param>
-        /// <param name="frame"></param>
-        /// <returns></returns>
-        private Line FindRouteIntersectLine(Polyline routePoly, Polyline frame)
-        {
-            var allLines = routePoly.GetAllLineByPolyline();
-            return allLines.FirstOrDefault(x => x.IsIntersects(frame));
         }
 
         /// <summary>

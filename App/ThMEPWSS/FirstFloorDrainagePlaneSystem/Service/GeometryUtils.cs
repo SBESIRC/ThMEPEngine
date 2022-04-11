@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPEngineCore.CAD;
 
@@ -62,10 +64,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         {
             var resLines = new List<Line>();
             var allLines = new List<Line>(lines);
-            var connectLines = lines.Where(x => x.StartPoint.DistanceTo(line.StartPoint) < tol ||
-                x.StartPoint.DistanceTo(line.EndPoint) < tol ||
-                x.EndPoint.DistanceTo(line.StartPoint) < tol ||
-                x.EndPoint.DistanceTo(line.EndPoint) < tol).ToList();
+            var connectLines = lines.Where(x => x.DistanceTo(line.StartPoint, false) < tol ||
+                 x.DistanceTo(line.EndPoint, false) < tol ||
+                 line.DistanceTo(x.StartPoint, false) < tol ||
+                 line.DistanceTo(x.EndPoint, false) < tol).ToList();
             resLines.AddRange(connectLines);
             allLines = allLines.Except(connectLines).ToList();
             var resConnectLines = new List<Line>();
@@ -195,6 +197,85 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 
             return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
         }
+
+        /// <summary>
+        /// 寻找出户的框线
+        /// </summary>
+        /// <returns></returns>
+        public static Polyline FindOutFrame(Polyline polyline, List<Polyline> outrFrames, Point3d startPosition, bool lastFrame = true)
+        {
+            var frames = outrFrames.Where(x => polyline.IsIntersects(x)).ToList();
+            var ep = polyline.EndPoint;
+            if (startPosition.DistanceTo(ep) < 1)
+            {
+                ep = polyline.StartPoint;
+            }
+            
+            if (lastFrame)
+            {
+                return frames.OrderBy(x => x.DistanceTo(ep, false)).First();
+            }
+            else
+            {
+                return frames.OrderByDescending(x => x.DistanceTo(ep, false)).First();
+            }
+        }
+
+        /// <summary>
+        /// 找到相交段的线
+        /// </summary>
+        /// <param name="routePoly"></param>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        public static Line FindRouteIntersectLine(Polyline routePoly, Polyline frame)
+        {
+            var allLines = routePoly.GetAllLineByPolyline();
+            var interLines = allLines.Where(x => x.IsIntersects(frame)).ToList();
+            var dir = StructGeoService.GetPolylineDir(frame);
+            interLines = interLines.OrderBy(x => Math.Abs((x.EndPoint - x.StartPoint).GetNormal().DotProduct(dir))).ToList();
+            return interLines.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 用polyline 上的line打断polyline，并找到起点部分的被打断的polyline
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <returns></returns>
+        public static Polyline GetBreakLine(Polyline poly, Point3d sp, Point3d ep)
+        {
+            Polyline breakPoly1 = new Polyline();
+            breakPoly1.AddVertexAt(breakPoly1.NumberOfVertices, poly.GetPoint3dAt(0).ToPoint2D(), 0, 0, 0);
+            Polyline breakPoly2 = new Polyline();
+            bool isBreak = false;
+            for (int i = 1; i < poly.NumberOfVertices; i++)
+            {
+                if (!isBreak)
+                {
+                    var line = new Line(poly.GetPoint3dAt(i - 1), poly.GetPoint3dAt(i));
+                    if (line.GetClosestPointTo(ep, false).DistanceTo(ep) < 0.01)
+                    {
+                        isBreak = true;
+                        breakPoly1.AddVertexAt(breakPoly1.NumberOfVertices, ep.ToPoint2D(), 0, 0, 0);
+                        breakPoly2.AddVertexAt(breakPoly2.NumberOfVertices, ep.ToPoint2D(), 0, 0, 0);
+                    }
+                    else
+                    {
+                        breakPoly1.AddVertexAt(breakPoly1.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                }
+                else
+                {
+                    breakPoly2.AddVertexAt(breakPoly2.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                }
+            }
+
+            if (breakPoly2.NumberOfVertices <= 0)
+            {
+                return breakPoly1;
+            }
+            return breakPoly1.GetClosestPointTo(sp, false).DistanceTo(sp) < breakPoly2.GetClosestPointTo(sp, false).DistanceTo(sp) ? breakPoly1 : breakPoly2;
+        }
     }
 }
-

@@ -64,13 +64,42 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public InputDataProcess(RawData rawData)
         {
             rawData0 = rawData;
-            FindLeanWall();
+            
+        }
+
+        public void Pipeline()
+        {
             InstallationClassification();
+
+            //OtherProcess();
+            FindLeanWall();
+
             ParkingSpaceExpansion();
             ForbiddenCreate();
             Classification();
         }
 
+
+
+
+        //处理没有房间的情况
+        public void OtherProcess() 
+        {
+            if (rawData0.Room.Count == 0) 
+            {
+                foreach (var model in HydrantModel0) {
+                    var c = new Circle(model.Center, Vector3d.ZAxis, Info.Radius);
+                    var cpolyline = c.Tessellate(1000);
+                    rawData0.Room.Add(cpolyline);
+                }
+                foreach (var model in HydrantModel1)
+                {
+                    var c = new Circle(model.Center, Vector3d.ZAxis, Info.Radius);
+                    var cpolyline = c.Tessellate(1000);
+                    rawData0.Room.Add(cpolyline);
+                }
+            }
+        } 
 
         //求差集，求出可倚靠框线
         public void FindLeanWall()
@@ -83,6 +112,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             rawData0.Door.ForEach(x => obj.Add(x));
             rawData0.FireProof.ForEach(x => obj.Add(x));
             DifferIndex = new ThCADCoreNTSSpatialIndex(obj);
+            
             //var mroom = room.OfType<MPolygon>().ToList();
             //var differ0 = mroom[0].DifferenceMP(obj);
             //differ0.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x,"l0mroom"));
@@ -229,10 +259,22 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //车位外扩
         public void ParkingSpaceExpansion()
         {
-            var pakingObjs = new DBObjectCollection();
-            rawData0.Car.ForEach(x => pakingObjs.Add(x));
-         var bufferPaking=   pakingObjs.BufferPolygons(50);
-            rawData0.Car = bufferPaking.OfType<Polyline>().ToList();
+            //var pakingObjs = new DBObjectCollection();
+
+            //rawData0.Car.ForEach(x => pakingObjs.Add(x));
+            //var bufferPaking=   pakingObjs.BufferPolygons(50);
+            //rawData0.Car = bufferPaking.OfType<Polyline>().ToList();
+
+
+            List<Polyline> tmpPakings = new List<Polyline>();
+            foreach (Polyline pl in rawData0.Car) 
+            {
+                var bufferPaking = pl.Buffer(50).OfType<Polyline>().ToList();
+                tmpPakings.AddRange(bufferPaking);
+            }
+            rawData0.Car = tmpPakings;
+
+
             rawData0.Car.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1car", 6));
         }
 
@@ -241,16 +283,27 @@ namespace ThMEPWSS.HydrantLayout.Engine
         {
             var bufferTol = 10;
             //门 buffer
-            var doorObjs = new DBObjectCollection();
-            rawData0.Door.ForEach(x => doorObjs.Add(x));
-            var bufferDoor= doorObjs.BufferPolygons(bufferTol);
-            rawData0.Door = bufferDoor.OfType<Polyline>().ToList();
+            //var doorObjs = new DBObjectCollection();
+            //rawData0.Door.ForEach(x => doorObjs.Add(x));
+            //var bufferDoor= doorObjs.BufferPolygons(bufferTol);
+            //rawData0.Door = bufferDoor.OfType<Polyline>().ToList();
+
+            List<Polyline> tmpDoors = new List<Polyline>();
+            foreach (Polyline pl in rawData0.Door)
+            {
+                var bufferDoors = pl.Buffer(bufferTol).OfType<Polyline>().ToList();
+                tmpDoors.AddRange(bufferDoors);
+            }
+            rawData0.Door = tmpDoors;
 
             //卷帘 buffer
-            var fpObjs = new DBObjectCollection();
-            rawData0.FireProof.ForEach(x => fpObjs.Add(x));
-            var bufferFp =  fpObjs.BufferPolygons(bufferTol);
-            rawData0.FireProof = bufferFp.OfType<Polyline>().ToList();
+            List<Polyline> tmpFireProofs = new List<Polyline>();
+            foreach (Polyline pl in rawData0.FireProof)
+            {
+                var bufferFireProofs = pl.Buffer(bufferTol).OfType<Polyline>().ToList();
+                tmpFireProofs.AddRange(bufferFireProofs);
+            }
+            rawData0.FireProof = tmpFireProofs;
 
             //立柱buffer
             foreach (var model in VerticalPipeIgnore)
@@ -294,6 +347,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             ProcessedData.ForbiddenIndex = ForbiddenIndex;
             ProcessedData.LeanWallIndex = LeanWallIndex;
             ProcessedData.ParkingIndex = PakingIndex;
+            ProcessedData.EntityAggregationIndex = DifferIndex;
 
             processedData1.VerticalPipeOut = VerticalPipeOut;
             processedData1.FireHydrant = HydrantModel0;

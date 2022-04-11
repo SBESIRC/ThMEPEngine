@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -38,10 +39,6 @@ namespace TianHua.Electrical.PDS.Service
                     TextDic.Add(entity, data.SourceObjectId);
                 }
                 else if (entity is Line)
-                {
-                    lines.Add(entity);
-                }
-                else if (entity is Polyline)
                 {
                     lines.Add(entity);
                 }
@@ -111,9 +108,96 @@ namespace TianHua.Electrical.PDS.Service
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
             TextIndex = new ThCADCoreNTSSpatialIndex(TextDic.Keys.ToCollection());
 
+            // 多回路标注情形
+            lines.OfType<Line>().ForEach(l =>
+            {
+                var lineFrame = ThPDSBufferService.Buffer(l);
+                var filter = LineIndex.SelectCrossingPolygon(lineFrame).OfType<Line>().ToList();
+                var obliqueLines = filter.Where(o => o.Length < 1000.0)
+                    .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1)
+                    .ToList();
+                if (obliqueLines.Count > 1)
+                {
+                    var crossPoints = new List<Point3d>();
+                    obliqueLines.ForEach(o =>
+                    {
+                        crossPoints.AddRange(l.Intersect(o, Intersect.OnBothOperands));
+                    });
+
+                    var textSearchFrame = filter.Except(obliqueLines).ToCollection()
+                        .Buffer(10 * ThPDSCommon.ALLOWABLE_TOLERANCE)
+                        .OfType<Polyline>()
+                        .OrderByDescending(p => p.Area)
+                        .First();
+                    var texts = TextIndex.SelectCrossingPolygon(textSearchFrame)
+                        .OfType<DBText>()
+                        .OrderByDescending(o => o.Position.Y)
+                        .ToList();
+                    var circuitNumbers = new List<Tuple<string, ObjectId>>();
+                    var startPoint = new Point3d();
+                    var direction = new Vector3d(1, 0, 0);
+
+                    texts.ForEach(o =>
+                    {
+                        var info = o.TextString;
+                        var regex1 = new Regex(@"[左].+[右]");
+                        var match1 = regex1.Match(info);
+                        if (match1.Success)
+                        {
+                            startPoint = o.Position.DistanceTo(l.StartPoint) < o.Position.DistanceTo(l.EndPoint) ?
+                                l.StartPoint : l.EndPoint;
+                            direction = new Vector3d(1, 0, 0);
+                            return;
+                        }
+
+                        if (info.Contains("/"))
+                        {
+                            info = info.Replace("/", "~");
+                        }
+                        if (info.Contains("~"))
+                        {
+                            var numberRegex = new Regex(@"[0-9]+~[A-Z]*[0-9]+");
+                            var numberMatch = numberRegex.Match(info);
+                            if (numberMatch.Success)
+                            {
+                                var loadId = info.Replace(numberMatch.Value, "");
+                                var first = new Regex(@"[0-9]+");
+                                var firstMatch = first.Match(numberMatch.Value);
+                                var secondMatch = firstMatch.NextMatch();
+                                if (firstMatch.Success && secondMatch.Success)
+                                {
+                                    var leftNum = Convert.ToInt32(firstMatch.Value);
+                                    var rightNum = Convert.ToInt32(secondMatch.Value);
+                                    for (var i = leftNum; i <= rightNum; i++)
+                                    {
+                                        if (i < 10)
+                                        {
+                                            circuitNumbers.Add(Tuple.Create( loadId + "0" + i.ToString(), TextDic[o]));
+                                        }
+                                        else
+                                        {
+                                            circuitNumbers.Add(Tuple.Create(loadId + i.ToString(), TextDic[o]));
+                                        }
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                        circuitNumbers.Add(Tuple.Create(info, TextDic[o]));
+                    });
+
+                    crossPoints = crossPoints.OrderBy(x => (x - startPoint).DotProduct(direction)).ToList();
+                    for (var j = 0; j < crossPoints.Count && j < circuitNumbers.Count; j++)
+                    {
+                        PointDic.Add(ToDbPoint(crossPoints[j]),
+                            Tuple.Create(new List<string> { circuitNumbers[j].Item1 }, circuitNumbers[j].Item2));
+                    }
+                }
+            });
+
             markBlocks.ForEach(o =>
             {
-                if (o.Value.EffectiveName.Equals("E-电力平面-负荷明细"))
+                if (o.Value.EffectiveName.Equals(ThPDSCommon.LOAD_DETAILS))
                 {
                     var marks = GetTexts(o.Value);
                     var obb = ThPDSBufferService.Buffer(o.Key, o.Key.Database);
@@ -199,38 +283,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThPDSTextInfo GetMarks(Polyline frame, List<Tuple<DBText, ObjectId>> dbTexts)
         {
             var result = new ThPDSTextInfo();
-            var textLeads = new List<Line>();
-            SearchMarkLine(frame, textLeads);
-            var tolerence = 3.0 * Math.PI / 180.0;
-            textLeads.ForEach(o =>
-            {
-                var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
-                var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
-                if (TextCollection.Count > 0)
-                {
-                    TextCollection.OfType<DBText>().ForEach(t =>
-                    {
-                        // 只取与引线方向相同的文字
-                        var rad = t.Rotation * Math.PI / 180.0;
-                        var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
-                        var lineAngle = o.Angle % Math.PI;
-                        if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
-                        {
-                            dbTexts.Add(Tuple.Create(t, TextDic[t]));
-                        }
-                    });
-                }
-                else
-                {
-                    var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
-                    if (pointCollection.Count > 0)
-                    {
-                        result.Texts.AddRange((PointDic[pointCollection[0] as DBPoint]).Item1);
-                        result.ObjectIds.Add((PointDic[pointCollection[0] as DBPoint]).Item2);
-                    }
-                }
-            });
-
+            var doSearch = true;
             var points = PointIndex.SelectWindowPolygon(frame);
             if (points.Count > 0)
             {
@@ -238,6 +291,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     result.Texts.AddRange(PointDic[p].Item1);
                     result.ObjectIds.Add(PointDic[p].Item2);
+                    doSearch = false;
                 });
             }
             else
@@ -250,11 +304,48 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         result.Texts.Add(o.TextString);
                         result.ObjectIds.Add(TextDic[o]);
+                        doSearch = false;
                     });
                 }
             }
 
+            if(doSearch)
+            {
+                var textLeads = new List<Line>();
+                SearchMarkLine(frame, textLeads);
+                var tolerence = 3.0 * Math.PI / 180.0;
+                textLeads.ForEach(o =>
+                {
+                    var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
+                    var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
+                    if (TextCollection.Count > 0)
+                    {
+                        TextCollection.OfType<DBText>().ForEach(t =>
+                        {
+                            // 只取与引线方向相同的文字
+                            var rad = t.Rotation * Math.PI / 180.0;
+                            var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
+                            var lineAngle = o.Angle % Math.PI;
+                            if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
+                            {
+                                dbTexts.Add(Tuple.Create(t, TextDic[t]));
+                            }
+                        });
+                    }
+                    else
+                    {
+                        var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
+                        if (pointCollection.Count > 0)
+                        {
+                            result.Texts.AddRange((PointDic[pointCollection[0] as DBPoint]).Item1);
+                            result.ObjectIds.Add((PointDic[pointCollection[0] as DBPoint]).Item2);
+                        }
+                    }
+                });
+            }
+
             result.Texts = Filter(result.Texts);
+            Filter(dbTexts);
             return result;
         }
 
@@ -302,7 +393,7 @@ namespace TianHua.Electrical.PDS.Service
                     var i = 0;
                     for (; i < textCollection.Count; i++)
                     {
-                        if (Math.Abs((textCollection[i].FirstPosition - text.Item1.Position).GetNormal().DotProduct(textCollection[i].Direction)) > 0.995)
+                        if (Math.Abs((textCollection[i].FirstPosition - text.Item1.Position).GetNormal().DotProduct(textCollection[i].Direction)) > 0.9995)
                         {
                             textCollection[i].Texts.Add(Tuple.Create(new List<string> { text.Item1.TextString }, text.Item2));
                             break;
@@ -357,6 +448,21 @@ namespace TianHua.Electrical.PDS.Service
         private List<string> Filter(List<string> info)
         {
             return info.Select(o => o.Replace(" ", "")).ToList();
+        }
+
+        private void Filter(List<Tuple<DBText, ObjectId>> dbTexts)
+        {
+            var results = new List<Tuple<DBText, ObjectId>>();
+            dbTexts.ForEach(o =>
+            {
+                var objectIds = results.Select(t => t.Item2).ToList();
+                if (!objectIds.Contains(o.Item2))
+                {
+                    results.Add(o);
+                }
+            });
+            dbTexts.Clear();
+            results.ForEach(o => dbTexts.Add(o));
         }
     }
 }

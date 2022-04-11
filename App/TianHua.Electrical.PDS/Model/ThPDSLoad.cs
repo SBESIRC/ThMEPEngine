@@ -1,4 +1,6 @@
-﻿namespace TianHua.Electrical.PDS.Model
+﻿using System;
+
+namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 一级负载类型
@@ -192,6 +194,9 @@
         None,
     }
 
+    /// <summary>
+    /// 三级负载类型
+    /// </summary>
     public enum ThPDSLoadTypeCat_3
     {
         /// <summary>
@@ -263,7 +268,7 @@
     /// <summary>
     /// 负载
     /// </summary>
-    public class ThPDSLoad
+    public class ThPDSLoad : IEquatable<ThPDSLoad>
     {
         public ThPDSLoad()
         {
@@ -368,5 +373,24 @@
         /// 用于存储需要复制的块名
         /// </summary>
         public string AttributesCopy { get; set; }
+
+        #region
+        public virtual bool Equals(ThPDSLoad other)
+        {
+            if (other != null)
+            {
+                return this.LoadUID.Equals(other.LoadUID);
+            }
+            return false;
+        }
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ThPDSLoad);
+        }
+        public override int GetHashCode()
+        {
+            return this.ID.LoadID.GetHashCode();
+        }
+        #endregion
     }
 }

@@ -18,7 +18,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private List<string> GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSBreakerBaseModel;
+            var model = propertyItem.Value as ThPDSBreakerModel;
             if (model != null)
             {
                 return model.AlternativeTripDevices;

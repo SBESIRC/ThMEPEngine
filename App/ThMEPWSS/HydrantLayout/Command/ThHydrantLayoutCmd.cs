@@ -104,11 +104,13 @@ namespace ThMEPWSS.HydrantLayout.Command
             
                 //转换到原点
                 dataQuery.Transform(transformer);
+                dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
 
                 //Engine start
-                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutObject, _avoidParking);
+                DataPass dataPass0 = new DataPass(_radius, _layoutObject, _layoutMode, _avoidParking);
                 Run run0 = new Run(dataQuery, dataPass0);
+                run0.Pipeline();
                 List<OutPutModel> outPutModels = run0.outPutModels;
                 List<ThIfcVirticalPipe> VerticalPipeOut = run0.VerticalPipeOut;
 

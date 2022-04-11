@@ -32,14 +32,14 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         Matrix<double> ProjectMatrix;
         Matrix<double> ScaleZMatrix;
 
-        internal TransformTopToADService()
+        public TransformTopToADService()
         {
             TransMatrix = IdentityTransformMatrix();
             ProjectMatrix = IdentityProjectMatrix();
             ScaleZMatrix = IdentityScaleZMatrix();
         }
 
-        internal Line TransformLine(Line line)
+        public Line TransformLine(Line line)
         {
             var transPts = TransformPt(line.StartPoint);
             var transPte = TransformPt(line.EndPoint);

@@ -16,5 +16,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         /// 坑位1: 隔离开关
         /// </summary>
         public IsolatingSwitch isolatingSwitch { get; set; }
+
+        /// <summary>
+        /// 坑位2：OUVP/Meter
+        /// </summary>
+        public PDSBaseComponent reservedComponent { get; set; }
     }
 }

@@ -10,6 +10,7 @@ using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project
@@ -20,10 +21,11 @@ namespace TianHua.Electrical.PDS.Project
         /// 创建PDSProjectGraph
         /// </summary>
         /// <param name="Graph"></param>
-        public static ThPDSProjectGraph CreatPDSProjectGraph(this AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> graph)
+        public static ThPDSProjectGraph CreatPDSProjectGraph(this BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
-            var ProjectGraph = new ThPDSProjectGraph() { Graph = graph };
+            var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
+            ProjectGraph.CalculateSecondaryCircuit();
             return ProjectGraph;
         }
 
@@ -121,57 +123,32 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// Node元器件选型
         /// </summary>
-        public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void ComponentSelection(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
         {
             if (node.Type == PDSNodeType.DistributionBox)
             {
-                var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
-                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
-                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);//进线回路暂时没有需要级联的元器件
-                var PolesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-                var SpecialPolesNum = "4P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
-                if (node.Load.Phase == ThPDSPhase.一相)
-                {
-                    PolesNum = "1P";
-                    //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
-                    //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
-                    if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
-                    {
-                        SpecialPolesNum = "1P";
-                    }
-                    else
-                    {
-                        SpecialPolesNum = "2P";
-                    }
-                }
-                else if (node.Load.Phase == ThPDSPhase.三相)
-                {
-                    if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
-                    {
-                        SpecialPolesNum = "3P";
-                    }
-                }
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
-                    oneWayInCircuit.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
+                    oneWayInCircuit.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
                 }
                 else if(node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
-                    twoWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    twoWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    twoWayInCircuit.transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, PolesNum);
+                    twoWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
                 }
                 else if(node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
-                    threeWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    threeWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    threeWayInCircuit.isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
-                    threeWayInCircuit.transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, PolesNum);
-                    threeWayInCircuit.transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, PolesNum);
+                    threeWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
+                    threeWayInCircuit.transferSwitch2 = componentFactory.CreatManualTransferSwitch();
                 }
                 else if(node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
-                    centralized.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, SpecialPolesNum);
+                    centralized.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
                 }
                 else
                 {
@@ -180,6 +157,7 @@ namespace TianHua.Electrical.PDS.Project
                 }
 
                 //统计节点级联电流
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;//额定级联电流
                 node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
             }
         }
@@ -189,96 +167,26 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
-        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void ComponentSelection(this ThPDSProjectGraphEdge edge)
         {
             edge.Details = new CircuitDetails();
-            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
-            var CascadeCurrent = edge.Target.Details.CascadeCurrent;
-            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
-            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-            var SpecialPolesNum = "3P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
-            if (edge.Target.Load.Phase == ThPDSPhase.一相)
-            {
-                PolesNum = "1P";
-                if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
-                {
-                    SpecialPolesNum = "1P";
-                }
-                else
-                {
-                    SpecialPolesNum = "2P";
-                }
-            }
-            var Characteristics = "";//瞬时脱扣器类型
-            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
             if (edge.Target.Type == PDSNodeType.None)
             {
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent,edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray,edge.Target.Load.Location.FloorNumber),
+                    breaker = componentFactory.CreatBreaker(),
+                    Conductor = componentFactory.CreatConductor(),
                 };
-            }
-            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
-            {
-                //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
-                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
-                {
-                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
-                    {
-                        edge.Details.CircuitForm = new Motor_DiscreteComponentsCircuit()
-                        {
-                            breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                            contactor = new Contactor(CalculateCurrent, PolesNum),
-                            thermalRelay = new ThermalRelay(CalculateCurrent),
-                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                        };
-                    }
-                    else
-                    {
-                        edge.Details.CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit()
-                        {
-                            breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                            contactor1 = new Contactor(CalculateCurrent, PolesNum),
-                            thermalRelay = new ThermalRelay(CalculateCurrent),
-                            contactor2 = new Contactor(CalculateCurrent, PolesNum),
-                            contactor3 = new Contactor(CalculateCurrent, PolesNum),
-                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                        };
-                    }
-                }
-                else
-                {
-                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
-                    {
-                        edge.Details.CircuitForm = new Motor_CPSCircuit()
-                        {
-                            cps = new CPS(CalculateCurrent),
-                            Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                        };
-                    }
-                    else
-                    {
-                        edge.Details.CircuitForm = new Motor_CPSStarTriangleStartCircuit()
-                        {
-                            cps = new CPS(CalculateCurrent),
-                            contactor1 = new Contactor(CalculateCurrent, PolesNum),
-                            contactor2 = new Contactor(CalculateCurrent, PolesNum),
-                            Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                            Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                        };
-                    }
-                }
             }
             else if (edge.Target.Load.ID.BlockName == "E-BDB006-1" && edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
             {
                 edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
                 {
-                    breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new CurrentTransformer(CalculateCurrent, PolesNum),
-                    breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    breaker1 = componentFactory.CreatBreaker(),
+                    meter = componentFactory.CreatCurrentTransformer(),
+                    breaker2 = componentFactory.CreatBreaker(),
+                    Conductor = componentFactory.CreatConductor(),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Socket || (new List<string>() { "E-BDB111", "E-BDB112", "E-BDB114", "E-BDB131" }.Contains(edge.Target.Load.ID.BlockName) && edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.LumpedLoad))
@@ -286,8 +194,8 @@ namespace TianHua.Electrical.PDS.Project
                 //漏电
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
-                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics,edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    breaker= componentFactory.CreatBreaker(),
+                    Conductor = componentFactory.CreatConductor(),
                 };
             }
             else if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
@@ -295,95 +203,133 @@ namespace TianHua.Electrical.PDS.Project
                 //消防应急照明回路
                 edge.Details.CircuitForm = new FireEmergencyLighting()
                 {
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    Conductor = componentFactory.CreatConductor(),
                 };
+            }
+            else if (edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor)
+            {
+                SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
+                //电动机需要特殊处理-不通过读表的方式，而是通过读另一个配置表，直接选型
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    if (edge.Target.Details.IsDualPower)
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
+                    }
+                    else
+                    {
+                        if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                        }
+                    }
+                }
+                else
+                {
+                    if (edge.Target.Details.IsDualPower)
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
+                    }
+                    else
+                    {
+                        if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                        }
+                    }
+                }
             }
             else
             {
                 edge.Details.CircuitForm = new RegularCircuit()
                 {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
+                    breaker = componentFactory.CreatBreaker(),
+                    Conductor = componentFactory.CreatConductor(),
                 };
             }
 
             //统计回路级联电流
-            edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+        }
+
+        /// <summary>
+        /// 计算控制回路
+        /// </summary>
+        public static void CalculateSecondaryCircuit(this ThPDSProjectGraph PDSProjectGraph)
+        {
+            var projectGraph = PDSProjectGraph.Graph;
+            foreach (ThPDSProjectGraphEdge edge in projectGraph.Edges)
+            {
+                if(edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
+                {
+                    var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitInfos[edge.Target.Load.LoadTypeCat_3.ToString()];
+                    foreach (SecondaryCircuitInfo item in secondaryCircuitInfos)
+                    {
+                        int index = edge.Source.Details.SecondaryCircuits.Count+ 1;
+                        var secondaryCircuit = new SecondaryCircuit(index);
+                        secondaryCircuit.edges.Add(edge);
+                        secondaryCircuit.CircuitDescription = item.Description;
+                        secondaryCircuit.conductor = new Conductor(item.Conductor,item.ConductorCategory , edge.Target.Load.Phase, edge.Target.Load.CircuitType,  edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber);
+                        edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit);
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// 回路元器件选型/指定元器件选型
         /// </summary>
         /// <returns></returns>
-        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, Type type, CircuitFormOutType circuitFormOutType)
+        public static PDSBaseComponent ComponentSelection(this ThPDSProjectGraphEdge edge, Type type, CircuitFormOutType circuitFormOutType)
         {
             if (type.IsSubclassOf(typeof(PDSBaseComponent)))
             {
-                var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
-                var CascadeCurrent = edge.Target.Details.CascadeCurrent;
-                var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
-                var PolesNum = "3P"; //极数
-                var SpecialPolesNum = "3P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
-                if (edge.Target.Load.Phase == ThPDSPhase.一相)
-                {
-                    PolesNum = "1P";
-                    if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
-                    {
-                        SpecialPolesNum = "1P";
-                    }
-                    else
-                    {
-                        SpecialPolesNum = "2P";
-                    }
-                }
-                var Characteristics = "";//瞬时脱扣器类型
-                var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
-
-                if (type.Equals(typeof(BreakerBaseComponent)))
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+                if (type.Equals(typeof(Breaker)))
                 {
                     if(circuitFormOutType == CircuitFormOutType.漏电)
-                        return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor);
+                        return componentFactory.CreatResidualCurrentBreaker();
                     else
-                        return new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics);
-                }
-                else if(type.Equals(typeof(Breaker)))
-                {
-                    return new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics);
-                }
-                else if (type.Equals(typeof(ResidualCurrentBreaker)))
-                {
-                    return new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor);
+                        return componentFactory.CreatBreaker();
                 }
                 else if (type.Equals(typeof(ThermalRelay)))
                 {
-                    return new ThermalRelay(CalculateCurrent);
+                    return componentFactory.CreatThermalRelay();
                 }
                 else if (type.Equals(typeof(Contactor)))
                 {
-                    return new Contactor(CalculateCurrent, PolesNum);
+                    return componentFactory.CreatContactor();
                 }
                 else if(type.Equals(typeof(Meter)))
                 {
                     if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在前 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
                     {
-                        return new MeterTransformer(CalculateCurrent, PolesNum);
+                        return componentFactory.CreatMeterTransformer();
                     }
                     else
                     {
-                        return new CurrentTransformer(CalculateCurrent, PolesNum);
+                        return componentFactory.CreatCurrentTransformer();
                     }
                 }
                 else if (type.Equals(typeof(MeterTransformer)))
                 {
-                    return new MeterTransformer(CalculateCurrent, PolesNum);
+                    return componentFactory.CreatMeterTransformer();
                 }
                 else if (type.Equals(typeof(CurrentTransformer)))
                 {
-                    return new CurrentTransformer(CalculateCurrent, PolesNum);
+                    return componentFactory.CreatCurrentTransformer();
                 }
                 else if (type.Equals(typeof(CPS)))
                 {
-                    return new CPS(CalculateCurrent);
+                    return componentFactory.CreatCPS();
                 }
                 else
                 {
@@ -403,167 +349,165 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="pDSCircuit"></param>
         /// <returns></returns>
-        public static void ComponentSelection(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge , CircuitFormOutType circuitFormOutType)
+        public static void ComponentSelection(this ThPDSProjectGraphEdge edge, CircuitFormOutType circuitFormOutType)
         {
             edge.Details = new CircuitDetails();
-            var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
-            var CascadeCurrent = edge.Target.Details.CascadeCurrent;
-            var MaxCalculateCurrent = Math.Max(CalculateCurrent, CascadeCurrent);
-            var PolesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
-            var SpecialPolesNum = "3P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
-            if (edge.Target.Load.Phase == ThPDSPhase.一相)
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+            SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
+            switch (circuitFormOutType)
             {
-                PolesNum = "1P";
-                if (edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.OutdoorLights)
-                {
-                    SpecialPolesNum = "1P";
-                }
-                else
-                {
-                    SpecialPolesNum = "2P";
-                }
-            }
-            var Characteristics = "";//瞬时脱扣器类型
-            var TripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out Characteristics);//脱扣器类型
-            if (circuitFormOutType == CircuitFormOutType.常规)
-            {
-                edge.Details.CircuitForm = new RegularCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.漏电)
-            {
-                edge.Details.CircuitForm = new LeakageCircuit()
-                {
-                    breaker= new ResidualCurrentBreaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics, edge.Target.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.Motor),
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.接触器控制)
-            {
-                edge.Details.CircuitForm = new ContactorControlCircuit()
-                {
-                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    contactor = new Contactor(CalculateCurrent, PolesNum),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.热继电器保护)
-            {
-                edge.Details.CircuitForm = new ThermalRelayProtectionCircuit()
-                {
-                    breaker= new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    thermalRelay = new ThermalRelay(CalculateCurrent),
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.配电计量_上海CT)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
-                {
-                    breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new CurrentTransformer(CalculateCurrent, PolesNum),
-                    breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
-                {
-                    breaker1 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new MeterTransformer(CalculateCurrent, PolesNum),
-                    breaker2 = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_CT表在前)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
-                {
-                    meter = new CurrentTransformer(CalculateCurrent, PolesNum),
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_直接表在前)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
-                {
-                    meter = new MeterTransformer(CalculateCurrent, PolesNum),
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_CT表在后)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new CurrentTransformer(CalculateCurrent, PolesNum),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
-            {
-                edge.Details.CircuitForm = new DistributionMetering_MTInBehindCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    meter = new MeterTransformer(CalculateCurrent, PolesNum),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件)
-            {
-                edge.Details.CircuitForm = new Motor_DiscreteComponentsCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    contactor = new Contactor(CalculateCurrent, PolesNum),
-                    thermalRelay = new ThermalRelay(CalculateCurrent),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_CPS)
-            {
-                edge.Details.CircuitForm = new Motor_CPSCircuit()
-                {
-                    cps = new CPS(CalculateCurrent),
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.电动机_分立元件星三角启动)
-            {
-                edge.Details.CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit()
-                {
-                    breaker = new Breaker(MaxCalculateCurrent, TripDevice, SpecialPolesNum, Characteristics),
-                    contactor1 = new Contactor(CalculateCurrent, PolesNum),
-                    thermalRelay = new ThermalRelay(CalculateCurrent),
-                    contactor2 = new Contactor(CalculateCurrent, PolesNum),
-                    contactor3 = new Contactor(CalculateCurrent, PolesNum),
-                };
-            }
-            else if(circuitFormOutType == CircuitFormOutType.电动机_CPS星三角启动)
-            {
-                edge.Details.CircuitForm = new Motor_CPSStarTriangleStartCircuit()
-                {
-                    cps = new CPS(CalculateCurrent),
-                    contactor1 = new Contactor(CalculateCurrent, PolesNum),
-                    contactor2 = new Contactor(CalculateCurrent, PolesNum),
-                    Conductor1 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                    Conductor2 = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber),
-                };
-            }
-            else if (circuitFormOutType == CircuitFormOutType.消防应急照明回路WFEL)
-            {
-                edge.Details.CircuitForm = new FireEmergencyLighting() 
-                {
-                    Conductor = new Conductor(CalculateCurrent, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.LoadTypeCat_1, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber)
-                };
-            }
-            else
-            {
-                //暂未支持该回路类型，请暂时不要选择该回路
-                throw new NotSupportedException();
+                case CircuitFormOutType.常规:
+                    {
+                        edge.Details.CircuitForm = new RegularCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.漏电:
+                    {
+                        edge.Details.CircuitForm = new LeakageCircuit()
+                        {
+                            breaker= componentFactory.CreatResidualCurrentBreaker(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.接触器控制:
+                    {
+                        edge.Details.CircuitForm = new ContactorControlCircuit()
+                        {
+                            breaker= componentFactory.CreatBreaker(),
+                            contactor = componentFactory.CreatContactor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.热继电器保护:
+                    {
+                        edge.Details.CircuitForm = new ThermalRelayProtectionCircuit()
+                        {
+                            breaker= componentFactory.CreatBreaker(),
+                            thermalRelay = componentFactory.CreatThermalRelay(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_上海CT:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_ShanghaiCTCircuit()
+                        {
+                            breaker1 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            breaker2 = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_上海直接表:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
+                        {
+                            breaker1 = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatMeterTransformer(),
+                            breaker2 = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在前:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
+                        {
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            breaker = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在前:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
+                        {
+                            meter = componentFactory.CreatMeterTransformer(),
+                            breaker = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_CT表在后:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatCurrentTransformer(),
+                            Conductor= componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.配电计量_直接表在后:
+                    {
+                        edge.Details.CircuitForm = new DistributionMetering_MTInBehindCircuit()
+                        {
+                            breaker = componentFactory.CreatBreaker(),
+                            meter = componentFactory.CreatMeterTransformer(),
+                            Conductor = componentFactory.CreatConductor(),
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.电动机_分立元件:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_CPS:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_分立元件星三角启动:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.电动机_CPS星三角启动:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.消防应急照明回路WFEL:
+                    {
+                        edge.Details.CircuitForm = new FireEmergencyLighting()
+                        {
+                            Conductor = componentFactory.CreatConductor()
+                        };
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSDYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_CPSYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
+                        break;
+                    }
+                case CircuitFormOutType.双速电动机_分立元件YY:
+                    {
+                        edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
+                        break;
+                    }
+                default:
+                    {
+                        //暂未支持该回路类型，请暂时不要选择该回路
+                        throw new NotSupportedException();
+                    }
             }
             //统计回路级联电流
-            edge.Details.CascadeCurrent = Math.Max(CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
         }
 
         public static double CalculatePower(this List<ThPDSProjectGraphNode> nodes)
@@ -606,7 +550,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 平衡相序
         /// </summary>
-        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge> edges)
         {
             var onePhase = new List<ThPDSProjectGraphNode>();
             foreach (var edge in edges)
@@ -740,7 +684,7 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         /// <param name="Graph"></param>
         /// <param name="NewGraph"></param>
-        public static void Compatible(this ThPDSProjectGraph Graph, AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> NewGraph)
+        public static void Compatible(this ThPDSProjectGraph Graph, BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> NewGraph)
         {
             //暂时不考虑
         }
@@ -764,7 +708,7 @@ namespace TianHua.Electrical.PDS.Project
             edges.ForEach(e => graph.UpdateWithEdge(e));
         }
 
-        public static void UpdateWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge, bool permission = true)
+        public static void UpdateWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge, bool permission = true)
         {
             if (permission)
             {
@@ -778,64 +722,64 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// Node元器件选型检查
         /// </summary>
-        public static void ComponentCheck(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> edges)
+        public static void ComponentCheck(this ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
         {
             if (node.Type == PDSNodeType.DistributionBox)
             {
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
                 var CalculateCurrent = node.Load.CalculateCurrent;//计算电流
                 var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
                     if(oneWayInCircuit.isolatingSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        oneWayInCircuit.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, oneWayInCircuit.isolatingSwitch.PolesNum);
+                        oneWayInCircuit.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
                     }
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
                     if (twoWayInCircuit.isolatingSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        twoWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, twoWayInCircuit.isolatingSwitch1.PolesNum);
+                        twoWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
                     }
                     if (twoWayInCircuit.isolatingSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        twoWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, twoWayInCircuit.isolatingSwitch2.PolesNum);
+                        twoWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
                     }
                     if (twoWayInCircuit.transferSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        twoWayInCircuit.transferSwitch = new AutomaticTransferSwitch(CalculateCurrent, (twoWayInCircuit.transferSwitch as AutomaticTransferSwitch).PolesNum);
+                        twoWayInCircuit.transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
                     }
                 }
                 else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
                     if (threeWayInCircuit.isolatingSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.isolatingSwitch1 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch1.PolesNum);
+                        threeWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
                     }
                     if (threeWayInCircuit.isolatingSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.isolatingSwitch2 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch2.PolesNum);
+                        threeWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
                     }
                     if (threeWayInCircuit.transferSwitch1.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.transferSwitch1 = new AutomaticTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch1 as AutomaticTransferSwitch).PolesNum);
+                        threeWayInCircuit.transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
                     }
                     if (threeWayInCircuit.isolatingSwitch3.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.isolatingSwitch3 = new IsolatingSwitch(CalculateCurrent, threeWayInCircuit.isolatingSwitch2.PolesNum);
+                        threeWayInCircuit.isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
                     }
                     if (threeWayInCircuit.transferSwitch2.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        threeWayInCircuit.transferSwitch2 = new ManualTransferSwitch(CalculateCurrent, (threeWayInCircuit.transferSwitch2 as ManualTransferSwitch).PolesNum);
+                        threeWayInCircuit.transferSwitch2 = componentFactory.CreatManualTransferSwitch();
                     }
                 }
                 else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
                     if (centralized.isolatingSwitch.GetCascadeRatedCurrent() < CalculateCurrent)
                     {
-                        centralized.isolatingSwitch = new IsolatingSwitch(CalculateCurrent, centralized.isolatingSwitch.PolesNum);
+                        centralized.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
                     }
-
                 }
                 else
                 {
@@ -848,7 +792,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 回路元器件选型检查
         /// </summary>
-        public static void ComponentCheck(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge)
+        public static void ComponentCheck(this ThPDSProjectGraphEdge edge)
         {
             edge.Details = new CircuitDetails();
             var CalculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
@@ -857,7 +801,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 if(regularCircuit.breaker.GetCascadeRatedCurrent() <= CascadeCurrent)
                 {
-                    regularCircuit.breaker = new Breaker(CascadeCurrent, new List<string>() { regularCircuit.breaker.TripUnitType }, regularCircuit.breaker.PolesNum, regularCircuit.breaker.TripUnitType);
+                    regularCircuit.breaker = new Breaker(CascadeCurrent, new List<string>() { regularCircuit.breaker.TripUnitType }, regularCircuit.breaker.PolesNum, regularCircuit.breaker.TripUnitType, false, false) ;
                 }
             }
         }

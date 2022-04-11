@@ -26,14 +26,14 @@ namespace TianHua.Electrical.PDS.Command
 {
     public class ThPDSCommand : ThMEPBaseCommand, IDisposable
     {
-        private Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> NodeMap;
+        private List<ThPDSNodeMap> NodeMapList;
 
-        private Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> EdgeMap;
+        private List<ThPDSEdgeMap> EdgeMapList;
 
         public override void SubExecute()
         {
-            NodeMap = new Dictionary<ThPDSCircuitGraphNode, List<ObjectId>>();
-            EdgeMap = new Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>>();
+            NodeMapList = new List<ThPDSNodeMap>();
+            EdgeMapList = new List<ThPDSEdgeMap>();
 
             // 记录所有图纸中的图
             var graphList = new List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>>();
@@ -70,6 +70,15 @@ namespace TianHua.Electrical.PDS.Command
                     {
                         continue;
                     }
+
+                    var nodeMap = new ThPDSNodeMap
+                    {
+                        ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                    };
+                    var edgeMap = new ThPDSEdgeMap
+                    {
+                        ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                    };
 
                     var storeysGeometry = new List<Polyline>();
                     storeysEngine.Elements.ForEach(o =>
@@ -169,18 +178,21 @@ namespace TianHua.Electrical.PDS.Command
                         var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
                         var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                            distBoxKey, cableTrayNode, NodeMap, EdgeMap);
+                            distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap);
 
                         graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
                         graphEngine.CreatGraph();
                         graphEngine.CopyAttributes();
                         var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),
                             storey.Data.Position.Y - (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
-                        graphEngine.AssignStorey(storey.StoreyNumber, storeyBasePoint);
+                        graphEngine.AssignStorey(doc.Database, storey.StoreyNumber, storeyBasePoint);
 
                         var graph = graphEngine.GetGraph();
                         graphList.Add(graph);
                     }
+
+                    NodeMapList.Add(nodeMap);
+                    EdgeMapList.Add(edgeMap);
 
                     // 移回原位
                     EntitiesReset(transformer, loadExtractService.MarkBlocks.Keys.ToCollection());
@@ -189,7 +201,7 @@ namespace TianHua.Electrical.PDS.Command
                 }
             }
 
-            var unionEngine = new ThPDSGraphUnionEngine(NodeMap, EdgeMap);
+            var unionEngine = new ThPDSGraphUnionEngine(EdgeMapList);
             var unionGraph = unionEngine.GraphUnion(graphList, cableTrayNode);
             PDSProject.Instance.PushGraphData(unionGraph);
         }
@@ -225,6 +237,16 @@ namespace TianHua.Electrical.PDS.Command
             {
                 transformer.Reset(o);
             });
+        }
+
+        public List<ThPDSNodeMap> GetNodeMapList()
+        {
+            return NodeMapList;
+        }
+
+        public List<ThPDSEdgeMap> GetEdgeMapList()
+        {
+            return EdgeMapList;
         }
     }
 }

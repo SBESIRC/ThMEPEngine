@@ -49,7 +49,7 @@ namespace TianHua.Electrical.PDS.Project
             if(string.IsNullOrEmpty(url))
             {
                 //Creat New Project
-                this.graphData = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>().CreatPDSProjectGraph();
+                this.graphData = new BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>().CreatPDSProjectGraph();
                 this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 if (!instance.DataChanged.IsNull())
                 {
@@ -71,11 +71,11 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public void PushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
         {
-            var ProjectGraph = new AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>>();
+            var ProjectGraph = new BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
             graph.Vertices.ForEach(o => ProjectGraph.AddVertex(VertexDir[o]));
             graph.Edges.ForEach(o => ProjectGraph.AddEdge(
-                new ThPDSProjectGraphEdge<ThPDSProjectGraphNode>(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
+                new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
                 ));
             if(!this.graphData.IsNull() && this.graphData.Graph.Vertices.Count() > 0)
             {
@@ -98,9 +98,33 @@ namespace TianHua.Electrical.PDS.Project
             newNode.Type = node.NodeType;
             newNode.IsStartVertexOfGraph = node.IsStartVertexOfGraph;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
-            //newNode.Load.InstalledCapacity = node.Loads.Sum(O => O.InstalledCapacity);
-            //newNode.nodeDetails.IsDualPower = node.Loads[0];
-            newNode.Details.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
+            if(node.Loads.Count > 1)
+            {
+                //多负载必定单功率
+                newNode.Details.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
+                newNode.Details.IsDualPower = false;
+            }
+            else
+            {
+                var load = node.Loads[0];
+                var power = load.InstalledCapacity.UsualPower.Union(load.InstalledCapacity.FirePower).ToList();
+                if(power.Count == 0)
+                {
+                    newNode.Details.LowPower = 0;
+                    newNode.Details.IsDualPower = false;
+                }
+                else if(power.Count == 1)
+                {
+                    newNode.Details.LowPower = power.First();
+                    newNode.Details.IsDualPower = false;
+                }
+                else
+                {
+                    newNode.Details.LowPower = power.Min();
+                    newNode.Details.HighPower = power.Max();
+                    newNode.Details.IsDualPower = true;
+                }
+            }
             newNode.Details.IsOnlyLoad = node.Loads.Count == 1;
             //newNode.nodeDetails = new NodeDetails();
             return newNode;

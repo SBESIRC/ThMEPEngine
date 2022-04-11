@@ -11,7 +11,7 @@ namespace ThMEPWSS.DrainageADPrivate.Model
 {
     internal class ThDrainageADPDataPass
     {
-        //--input
+        //--- data
         public List<Line> HotPipeTopView { get; set; }
         public List<Line> CoolPipeTopView { get; set; }
         public List<Line> ADHotPipe { get; set; }
@@ -19,6 +19,12 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public List<Line> VerticalPipe { get; set; }
         public Point3d StartPt { get; set; }
         public List<ThSaniterayTerminal> Terminal { get; set; }
-        //--output
+
+        //--- parameter
+        public double qL { get; set; }//最高用水日的用水定额，[L/(人天)]  UI输入值
+        public double m { get; set; } //每户用水人数	UI输入值
+        public double Kh { get; set; } //小时变化系数 UI输入值
+     
+
     }
 }

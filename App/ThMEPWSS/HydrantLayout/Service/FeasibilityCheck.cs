@@ -44,7 +44,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl);
             bool NotInPaking = FeasibilityCheck.NotInPaking(fireArea, shell);
             objs1.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1forbidden", 8));
-            //objs2.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1paking", 9));
+            objs2.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1paking", 9));
             if (objs1.Count == 0 && objs2.Count == 0 && shell.Contains(pl) && NotInPaking)
             {
                 flag = true;

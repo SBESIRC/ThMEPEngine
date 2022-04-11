@@ -217,6 +217,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
         /// <summary>
+        /// 地下给水系统图
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDXJSXT", CommandFlags.Modal)]
+        public void ThUnDergroundWaterSystmUI()
+        {
+            var ui = new uiUndergroundWaterSystem();
+            AcadApp.ShowModelessWindow(ui);
+        }
+        /// <summary>
         /// 消火栓系统图（目前只实现了塔楼部分）
         /// </summary>
         [CommandMethod("TIANHUACAD", "THXHSXTT", CommandFlags.Modal)]

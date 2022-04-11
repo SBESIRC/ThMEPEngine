@@ -11,6 +11,18 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThDB3ColumnExtractionVisitor : ThBuildingElementExtractionVisitor
     {
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Hatch hatch)

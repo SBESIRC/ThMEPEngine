@@ -35,7 +35,6 @@ namespace TianHua.Electrical.PDS.Service
                 FireLoad = false,
                 Location = new ThPDSLocation
                 {
-                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
                     BasePoint = distBoxData.Position,
                 }
             };
@@ -420,7 +419,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThInstalledCapacity AnalysisPower(List<string> infos)
         {
             var results = new ThInstalledCapacity();
-            var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
+            var check = "[0-9]*[.]?[0-9]*[/]?[0-9]+[.]?[0-9]*[kK]?[wW]{1}";
             var r = new Regex(@check);
             for (var i = 0; i < infos.Count; i++)
             {
@@ -432,14 +431,19 @@ namespace TianHua.Electrical.PDS.Service
                     result = result.Replace("K", "");
                     result = result.Replace("w", "");
                     result = result.Replace("W", "");
-                    if (!m.Value.Contains("k") && !m.Value.Contains("K"))
+                    var value = result.Split("/".ToCharArray()).ToList();
+                    value.ForEach(x =>
                     {
-                        results.UsualPower.Add(double.Parse(result) / 1000.0);
-                    }
-                    else
-                    {
-                        results.UsualPower.Add(double.Parse(result));
-                    }
+                        if (!m.Value.Contains("k") && !m.Value.Contains("K"))
+                        {
+                            results.UsualPower.Add(double.Parse(x) / 1000.0);
+                        }
+                        else
+                        {
+                            results.UsualPower.Add(double.Parse(x));
+                        }
+                    });
+
                     var numRegex = new Regex(@"[2-9][xX]");
                     var numMatch = numRegex.Match(infos[i]);
                     if (numMatch.Success)
@@ -451,6 +455,8 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
+            results.UsualPower = results.UsualPower.OrderBy(o => o).ToList();
+            results.FirePower = results.FirePower.OrderBy(o => o).ToList();
             return results;
         }
 

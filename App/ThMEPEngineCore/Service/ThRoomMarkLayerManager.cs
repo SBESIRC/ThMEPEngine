@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using Linq2Acad;
+﻿using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
@@ -44,17 +44,23 @@ namespace ThMEPEngineCore.Service
         private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            if (!layerName.Contains("AD-FLOOR-AREA") && !layerName.Contains("AD-NAME-ROOM"))
-            {
-                return false;
-            }
-            string[] patterns = layerName.Split('-').Reverse().ToArray();
-            if (patterns.Count() < 3)
-            {
-                return false;
-            }
-            return (patterns[0] == "AREA" && patterns[1] == "FLOOR"&& patterns[2] == "AD")||
-               (patterns[0] == "ROOM" && patterns[1] == "NAME" && patterns[2] == "AD");
+            return IsNameRoomLayer(layerName) || IsFloorAreaLayer(layerName);
+        }
+        private static bool IsNameRoomLayer(string mark)
+        {
+            //*-NAME-ROOM都可以
+            //整个字符被"-"分成N段（N>=3)，最后两段是NAME和ROOM即可，前面有N段都无所谓
+            string newMark = mark.Trim().ToUpper();
+            string pattern = @"^\S[\s\S]*[-]{1}\s{0,}(NAME)\s{0,}[-]{1}\s{0,}(ROOM)$";
+            return Regex.IsMatch(newMark,pattern);
+        }
+        private static bool IsFloorAreaLayer(string mark)
+        {
+            //*-FLOOR-AREA都可以
+            //整个字符被"-"分成N段（N>=3)，最后两段是FLOOR和AREA即可，前面有N段都无所谓
+            string newMark = mark.Trim().ToUpper();
+            string pattern = @"^\S[\s\S]*[-]{1}\s{0,}(FLOOR)\s{0,}[-]{1}\s{0,}(AREA)$";
+            return Regex.IsMatch(newMark, pattern);
         }
         private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
         {

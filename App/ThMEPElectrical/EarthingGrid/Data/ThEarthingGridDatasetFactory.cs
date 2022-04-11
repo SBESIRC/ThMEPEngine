@@ -43,7 +43,7 @@ namespace ThMEPElectrical.EarthingGrid.Data
             Conductors = ExtractDownConductors(database, collection);
             ConductorWires = ExtractDownConductorWires(database, collection);
             ArchitectOutlines = ExtractArchitectureOutlines(database, collection);
-            MainBuildings = ExtractMainBuildings(database, collection);
+            MainBuildings = ExtractMainBuildingsA(database, collection);
             BeamCenterLinePts = GetLinearBeamPts(beams);
             Beams = beams.Select(o => o.Outline).ToCollection();
             Columns = columns.Select(o => o.Outline).ToCollection();
@@ -99,6 +99,24 @@ namespace ThMEPElectrical.EarthingGrid.Data
                 var outlines = acadDb.ModelSpace
                     .OfType<Polyline>()
                     .Where(p => p.Layer.ToUpper() == "AI-AREA-EXT") //AI-建筑轮廓线
+                    .Select(o => o.Clone() as Polyline)
+                    .ToCollection();
+                var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
+                transformer.Transform(outlines);
+                var newPts = transformer.Transform(pts);
+                var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(outlines);
+                var results = spatialIndex.SelectCrossingPolygon(newPts);
+                transformer.Reset(results);
+                return results;
+            }
+        }
+        private DBObjectCollection ExtractMainBuildingsA(Database database, Point3dCollection pts)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Use(database))
+            {
+                var outlines = acadDb.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(p => p.Layer.ToUpper() == "AI-AREA-INT") 
                     .Select(o => o.Clone() as Polyline)
                     .ToCollection();
                 var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());

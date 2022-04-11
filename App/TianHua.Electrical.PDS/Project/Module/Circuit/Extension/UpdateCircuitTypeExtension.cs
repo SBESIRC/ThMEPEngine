@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
 {
     public static class UpdateCircuitTypeExtension
     {
-        public static void UpdateCircuit(this ThPDSProjectGraphEdge<ThPDSProjectGraphNode> edge ,PDSBaseOutCircuit circuit, CircuitFormOutType circuitFormOutType)
+        public static void UpdateCircuit(this ThPDSProjectGraphEdge edge ,PDSBaseOutCircuit circuit, CircuitFormOutType circuitFormOutType)
         {
             var NewType = circuitFormOutType.GetCircuitType();
             if(NewType.EqualsGroup(circuit.GetType()))
             {
                 //仅同组的回路才可以来回切换
+                if(NewType.GetCircuitGroup() == CircuitGroup.Group1)
                 {
                     var newCircuit = (PDSBaseOutCircuit)System.Activator.CreateInstance(NewType);
                     var OriginalComponents = circuit.GetType().GetProperties().Where(prop => prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent))).Select(prop => prop.GetValue(circuit)).Cast<PDSBaseComponent>().ToList();
@@ -45,6 +44,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                         }
                     }
                     edge.Details.CircuitForm = newCircuit;
+                }
+                else
+                {
+                    SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
+                    edge.Details.CircuitForm = specifyComponentFactory.GetMotorCircuit(NewType);
                 }
             }
         }
@@ -108,6 +112,22 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                 case CircuitFormOutType.电动机_CPS星三角启动:
                     {
                         return typeof(Motor_CPSStarTriangleStartCircuit);
+                    }
+                case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    {
+                        return typeof(TwoSpeedMotor_DiscreteComponentsDYYCircuit);
+                    }
+                case CircuitFormOutType.双速电动机_分立元件YY:
+                    {
+                        return typeof(TwoSpeedMotor_DiscreteComponentsYYCircuit);
+                    }
+                case CircuitFormOutType.双速电动机_CPSYY:
+                    {
+                        return typeof(TwoSpeedMotor_CPSYYCircuit);
+                    }
+                case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    {
+                        return typeof(TwoSpeedMotor_CPSDYYCircuit);
                     }
                 default:
                     {

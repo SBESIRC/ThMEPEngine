@@ -16,8 +16,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component.Extension
                     return typeof(ThermalRelay);
                 case ComponentType.CB:
                     return typeof(Breaker);
-                case ComponentType.RCD:
-                    return typeof(ResidualCurrentBreaker);
+                case ComponentType.一体式RCD:
+                    return typeof(Breaker);
+                case ComponentType.组合式RCD:
+                    return typeof(Breaker);
                 case ComponentType.ATSE:
                     return typeof(AutomaticTransferSwitch);
                 case ComponentType.MTSE:

@@ -32,6 +32,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" Guid="{E89533EA-5033-4401-98AA-AB95C1990841}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\EPPlus.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" Guid="{825E44B3-6BBA-4276-88FF-853AB8596097}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Microsoft.IO.RecyclableMemoryStream.dll" />
+            </Component>    
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" Guid="{A14FD45E-1BDC-48AE-BB95-94FD6A9DF234}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.dll" />
             </Component>
@@ -131,6 +134,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" Guid="{41A86DB9-B06A-4630-AFB7-D1B34C559E49}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\EPPlus.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Debug" Guid="{392835FF-B2DC-4C48-BA06-A763913EF877}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.IO.RecyclableMemoryStream.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" Guid="{B8D1B2EC-C8E0-4E69-B9D6-B1523BC2EABE}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\QuikGraph.dll" />
             </Component>
@@ -229,6 +235,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" Guid="{35C3DEE7-AF2A-495C-A72A-DE2D96C6F42A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\EPPlus.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Debug" Guid="{F50532AD-C2A2-4FFA-916E-CF5436CBE8F8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Microsoft.IO.RecyclableMemoryStream.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" Guid="{D3C3F5ED-72D5-408C-91FA-D941F0AC07C8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\QuikGraph.dll" />
@@ -330,6 +339,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" Guid="{3D99CBBA-2951-4C2C-84BC-67450D37F4F5}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\EPPlus.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" Guid="{00E068D4-F645-4B7E-818A-25B8030DCE4A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Microsoft.IO.RecyclableMemoryStream.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" Guid="{4F7A3338-2713-4F30-B8FA-D38B181EAAD8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.dll" />
             </Component>
@@ -428,6 +440,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" Guid="{1A953CCD-9883-4B72-81BA-D5D8A4FB7EBD}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\EPPlus.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Release" Guid="{DE829FA1-EBF6-45F4-8E8B-642790C61357}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.IO.RecyclableMemoryStream.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" Guid="{0733FE9D-B92A-45D6-A3FD-710695F1A03F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\QuikGraph.dll" />
@@ -528,6 +543,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" Guid="{0675244C-1263-47C1-A6C3-BCC4546D0EC9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\EPPlus.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Release" Guid="{FD89C192-4D01-4255-AFDA-475D638D25F3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Microsoft.IO.RecyclableMemoryStream.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" Guid="{6F50C334-472D-4CC0-9998-0CA04845B6FF}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\QuikGraph.dll" />
             </Component>
@@ -611,6 +629,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" />
@@ -632,6 +651,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Debug" />
@@ -706,6 +727,7 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Microsoft_IO_RecyclableMemoryStream_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
@@ -727,6 +749,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Microsoft_IO_RecyclableMemoryStream_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Microsoft_IO_RecyclableMemoryStream_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_Release" />

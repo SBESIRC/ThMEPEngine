@@ -143,7 +143,7 @@
     <None Include="Resources\向下加一行.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="5.4.0" />
+    <PackageReference Include="EPPlus" Version="5.8.8" />
     <PackageReference Include="Catel.Core" Version="5.12.10" />
     <PackageReference Include="NetTopologySuite" Version="2.4.0" />
   </ItemGroup>

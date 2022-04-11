@@ -60,7 +60,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static ThCADCoreNTSSpatialIndex LeanWallIndex;
         public static ThCADCoreNTSSpatialIndex ParkingIndex;
         //public static ThCADCoreNTSSpatialIndex LineWallIndex;
-
+        public static ThCADCoreNTSSpatialIndex EntityAggregationIndex;
         //输出的立管
         public List<ThIfcVirticalPipe> VerticalPipeOut;
         //立柱起点

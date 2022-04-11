@@ -17,6 +17,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" Guid="{3A86EAE5-7857-4C26-A139-3DA5B43E0BE6}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" Guid="{B437349D-4EC3-4884-830B-FBF097252A4E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.ValueTuple.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -32,6 +35,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" Guid="{40CB951E-636D-4602-ADA2-BD1CEE12EB3A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" Guid="{61010982-83B7-429B-AAF7-8BE7D71C8318}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.ValueTuple.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -46,6 +52,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" Guid="{20545542-66DB-4829-A18E-CBDA3392213D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" Guid="{D4E6BEAA-5657-4A14-92B1-FEABB3AD7860}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.ValueTuple.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -63,6 +72,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" Guid="{08418D5F-E4EA-4995-8542-F4EF1254C14E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" Guid="{2F8B3496-4BF0-404C-B46D-2D260B04E9A5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.ValueTuple.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -78,6 +90,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" Guid="{33826F69-4401-45C6-AD98-8702202C1D2E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" Guid="{80399139-098B-4AA8-B6B9-CF479FAD8D36}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.ValueTuple.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -92,6 +107,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" Guid="{5FFAA0B3-EDD4-4103-8092-389136AD447F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" Guid="{996A813E-0861-4943-BAD4-E2A1454AC0C7}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.ValueTuple.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -111,6 +129,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" />
@@ -124,6 +145,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Runtime_Compiler_Services_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Runtime_Compiler_Services_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_ValueTuple_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_ValueTuple_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_ValueTuple_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

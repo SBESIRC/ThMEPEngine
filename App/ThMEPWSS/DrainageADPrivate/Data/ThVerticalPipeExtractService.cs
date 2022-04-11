@@ -27,7 +27,7 @@ using ThMEPWSS.Pipe.Engine;
 
 namespace ThMEPWSS.DrainageADPrivate.Data
 {
-    internal class ThVerticalPipeExtractService
+    public class ThVerticalPipeExtractService
     {
         //---input
         public List<string> LayerFilter { get; set; } = new List<string>();

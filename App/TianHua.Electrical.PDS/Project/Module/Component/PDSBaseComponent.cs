@@ -9,6 +9,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     {
         [Description("导体")]
         Conductor,
+        [Description("控制回路导体")]
+        ControlConductor,
         [Description("隔离开关")]
         QL,
         [Description("接触器")]
@@ -17,8 +19,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         KH,
         [Description("断路器")]
         CB,
-        [Description("剩余电流动作断路器")]
-        RCD,
+        [Description("剩余电流动作断路器一体式RCD")]
+        一体式RCD,
+        [Description("剩余电流动作断路器组合式RCD")]
+        组合式RCD,
         [Description("自动转换开关")]
         ATSE,
         [Description("手动转换开关")]
@@ -37,6 +41,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         SS,
         [Description("变频器")]
         FC,
+        [Description("过欠电压保护器")]
+        OUVP,
     }
 
     /// <summary>

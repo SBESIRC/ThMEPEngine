@@ -7,50 +7,48 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum CircuitFormOutType
     {
-        [Description("常规")]
-        常规,
-        [Description("漏电")]
-        漏电,
-        [Description("接触器控制")]
-        接触器控制,
-        [Description("热继电器保护")]
-        热继电器保护,
-        [Description("配电计量（上海CT）")]
-        配电计量_上海CT,
-        [Description("配电计量（上海直接表）")]
-        配电计量_上海直接表,
-        [Description("配电计量（CT表在前）")]
-        配电计量_CT表在前,
-        [Description("配电计量（直接表在前）")]
-        配电计量_直接表在前,
-        [Description("配电计量（CT表在后）")]
-        配电计量_CT表在后,
-        [Description("配电计量（直接表在后）")]
-        配电计量_直接表在后,
-        [Description("电动机（分立元件）")]
-        电动机_分立元件,
-        [Description("电动机（CPS）")]
-        电动机_CPS,
-        [Description("电动机（分立元件星三角启动）")]
-        电动机_分立元件星三角启动,
-        [Description("电动机（CPS星三角启动）")]
-        电动机_CPS星三角启动,
-        [Description("双速电动机（分立元件 D-YY）")]
-        双速电动机_分立元件detailYY,
-        [Description("双速电动机（分立元件 Y-Y）")]
-        双速电动机_分立元件YY,
-        [Description("双速电动机（CPS D-YY）")]
-        双速电动机_CPSdetailYY,
-        [Description("双速电动机（CPS Y-Y）")]
-        双速电动机_CPSYY,
-        [Description("消防应急照明回路（WFEL）")]
-        消防应急照明回路WFEL,
-        [Description("SPD")]
-        SPD,
-        [Description("小母排")]
-        小母排,
         [Description("None")]
-        None
+        None = 0,
+        [Description("常规")]
+        常规 = 1,
+        [Description("漏电")]
+        漏电 = 2,
+        [Description("接触器控制")]
+        接触器控制 = 3,
+        [Description("热继电器保护")]
+        热继电器保护 = 4,
+        [Description("配电计量（上海CT）")]
+        配电计量_上海CT = 5,
+        [Description("配电计量（上海直接表）")]
+        配电计量_上海直接表 = 6,
+        [Description("配电计量（CT表在前）")]
+        配电计量_CT表在前 = 7,
+        [Description("配电计量（直接表在前）")]
+        配电计量_直接表在前 = 8,
+        [Description("配电计量（CT表在后）")]
+        配电计量_CT表在后 = 9,
+        [Description("配电计量（直接表在后）")]
+        配电计量_直接表在后 = 10,
+        [Description("电动机（分立元件）")]
+        电动机_分立元件 = 11,
+        [Description("电动机（CPS）")]
+        电动机_CPS = 12,
+        [Description("电动机（分立元件星三角启动）")]
+        电动机_分立元件星三角启动 = 13,
+        [Description("电动机（CPS星三角启动）")]
+        电动机_CPS星三角启动 = 14,
+        [Description("双速电动机（分立元件 D-YY）")]
+        双速电动机_分立元件detailYY = 15,
+        [Description("双速电动机（分立元件 Y-Y）")]
+        双速电动机_分立元件YY = 16,
+        [Description("双速电动机（CPS D-YY）")]
+        双速电动机_CPSdetailYY = 17,
+        [Description("双速电动机（CPS Y-Y）")]
+        双速电动机_CPSYY = 18,
+        [Description("消防应急照明回路（WFEL）")]
+        消防应急照明回路WFEL = 19,
+        [Description("SPD")]
+        SPD = 20,
     }
 
     /// <summary>
@@ -229,20 +227,39 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// 断路器附件类型
+    /// </summary>
+    public enum AppendixType
+    {
+        [Description("无")]
+        无 = 1,
+        [Description("分励脱扣")]
+        ST = 2,
+        [Description("报警")]
+        AL = 3,
+        [Description("辅助触点")]
+        AX = 4,
+        [Description("失压脱扣")]
+        UR = 5,
+        [Description("Residual Current")]
+        RC = 6,
+    }
+
+    /// <summary>
     /// 剩余电流规格
     /// </summary>
     public enum ResidualCurrentSpecification
     {
         [Description("10mA")]
-        Specification10,
+        Specification10 = 1,
         [Description("30mA")]
-        Specification30,
+        Specification30 = 2,
         [Description("100mA")]
-        Specification100,
+        Specification100 = 3,
         [Description("300mA")]
-        Specification300,
+        Specification300 = 4,
         [Description("500mA")]
-        Specification500,
+        Specification500 = 5,
     }
 
     /// <summary>

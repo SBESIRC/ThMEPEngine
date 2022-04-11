@@ -28,7 +28,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThDrainageADTermianlService
     {
-        internal static Polyline GetVisibleOBB(BlockReference blk)
+        public static Polyline GetVisibleOBB(BlockReference blk)
         {
             var objs = new DBObjectCollection();
             blk.ExplodeWithVisible(objs);
@@ -40,7 +40,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return obb;
         }
 
-        internal static ThDrainageADCommon.TerminalType GetTerminalType(string name, Dictionary<string, List<string>> BlockNameDict)
+        public static ThDrainageADCommon.TerminalType GetTerminalType(string name, Dictionary<string, List<string>> BlockNameDict)
         {
             var blkName = name.ToUpper();
             ThDrainageADCommon.TerminalType type = ThDrainageADCommon.TerminalType.Unknow;

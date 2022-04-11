@@ -31,7 +31,9 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
     public class ThDrainageADPCmd : ThMEPBaseCommand, IDisposable
     {
         private Dictionary<string, List<string>> _BlockNameDict;
-
+        private double _qL = 230;
+        private double _m = 3.5;
+        private double _Kh = 1.5;
         public ThDrainageADPCmd()
         {
             InitialCmdInfo();
@@ -40,22 +42,17 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
         }
         private void InitialCmdInfo()
         {
-            ActionName = "优化布置";
-            CommandName = "THZCGJ";
+            ActionName = "布置";
+            CommandName = "THHXDY";
         }
         private void InitialSetting()
         {
-            _BlockNameDict = new Dictionary<string, List<string>>() {
-                                        { "拖把池", new List<string>() { }},
-                                        { "洗衣机", new List<string>() {  "sdr ter t"} } ,
-                                        { "阳台洗手盆",new List<string> { } },
-                                        { "厨房洗涤盆", new List<string>() { "edrcgergc", } } ,
-                                        { "坐便器", new List<string>() { "fdtes" } } ,
-                                        { "单盆洗手台", new List<string>() { "EWRYTY","xishoupen" } } ,
-                                        { "双盆洗手台", new List<string>() { } } ,
-                                        { "淋浴器", new List<string>() { "QADAD", "WF" } } ,
-                                        { "浴缸", new List<string>() { } } ,
-                                        };
+
+
+            _qL = ThDrainageADSetting.Instance.qL;
+            _m = ThDrainageADSetting.Instance.m;
+            _Kh = ThDrainageADSetting.Instance.Kh;
+            _BlockNameDict = ThDrainageADSetting.Instance.BlockNameDict;
 
         }
 
@@ -112,7 +109,7 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
 
                 //处理数据
-                var dataQuery = new ThDrainageADDataQueryService( )
+                var dataQuery = new ThDrainageADDataQueryService()
                 {
                     BlockNameDict = _BlockNameDict,
                     VerticalPipeData = dataFactory.VerticalPipe,
@@ -138,7 +135,10 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 dataPass.VerticalPipe = dataQuery.VerticalPipe;
                 dataPass.StartPt = dataQuery.GetStartPt();
                 dataPass.Terminal = dataQuery.Terminal;
-
+                dataPass.qL = _qL;
+                dataPass.m = _m;
+                dataPass.Kh = _Kh;
+                
 
                 ThDrainageADEngine.DrainageTransADEngine(dataPass);
 

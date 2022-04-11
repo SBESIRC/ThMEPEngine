@@ -1,12 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
+﻿using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace ThMEPHVAC.LoadCalculation.Service
@@ -25,11 +21,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
             {
                 var roomFunctionBlks = acdb.ModelSpace
                 .OfType<BlockReference>()
-                .Where(o =>
-                {
-                    var blockName = o.GetEffectiveName();
-                    return blockName== LoadCalculationParameterFromConfig.RoomFunctionBlockName | blockName == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New;
-                })
+                .Where(o => IsRoomFunctionBlock(o))
                 .ToList();
                 roomFunctionBlks.ForEach(o =>
                 {
@@ -38,6 +30,20 @@ namespace ThMEPHVAC.LoadCalculation.Service
                     o.DowngradeOpen();
                 });
                 return roomFunctionBlks;
+            }
+        }
+
+        private bool IsRoomFunctionBlock(BlockReference reference)
+        {
+            try
+            {
+                var blockName = reference.GetEffectiveName();
+                return blockName == LoadCalculationParameterFromConfig.RoomFunctionBlockName |
+                    blockName == LoadCalculationParameterFromConfig.RoomFunctionBlockName_New;
+            }
+            catch
+            {
+                return false;
             }
         }
 

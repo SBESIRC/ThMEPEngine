@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Runtime;
 using ThMEPWSS.Command;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.UndergroundWaterSystem.Command;
 
 namespace ThMEPWSS
 {
@@ -30,6 +31,14 @@ namespace ThMEPWSS
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ThApplyPipesEngine.Apply(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THDXSXT_TEMP", CommandFlags.Modal)]
+        public static void THDXSXT()
+        {
+            using(var cmd = new ThUndergroundWaterSystemCmd())
+            {
+                cmd.Execute();
             }
         }
     }

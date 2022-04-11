@@ -32,24 +32,38 @@
         public static readonly string OUT_CIRCUIT_CB2 = "CB2";
         public static readonly string OUT_CIRCUIT_RCD = "RCD";
         public static readonly string OUT_CIRCUIT_QAC = "QAC";
+        public static readonly string OUT_CIRCUIT_QAC1 = "QAC1";
+        public static readonly string OUT_CIRCUIT_QAC2 = "QAC2";
+        public static readonly string OUT_CIRCUIT_QAC3 = "QAC3";
         public static readonly string OUT_CIRCUIT_KH = "KH";
+        public static readonly string OUT_CIRCUIT_KH1 = "KH1";
+        public static readonly string OUT_CIRCUIT_KH2 = "KH2";
         public static readonly string OUT_CIRCUIT_CT = "CT";
         public static readonly string OUT_CIRCUIT_MT = "MT";
+        public static readonly string OUT_CIRCUIT_CPS = "CPS";
+        public static readonly string OUT_CIRCUIT_CPS1 = "CPS1";
+        public static readonly string OUT_CIRCUIT_CPS2 = "CPS2";
         public static readonly string OUT_CIRCUIT_CONDUCTOR = "Conductor";
+        public static readonly string OUT_CIRCUIT_CONDUCTOR1 = "Conductor1";
+        public static readonly string OUT_CIRCUIT_CONDUCTOR2 = "Conductor2";
         public static readonly string OUT_CIRCUIT_CIRCUIT_NUMBER = "回路编号";
         public static readonly string OUT_CIRCUIT_PHSAE = "相序";
         public static readonly string OUT_CIRCUIT_POWER = "功率";
+        public static readonly string OUT_CIRCUIT_LOW_POWER = "功率(低)";
+        public static readonly string OUT_CIRCUIT_HIGH_POWER = "功率(高)";
         public static readonly string OUT_CIRCUIT_LOAD_ID = "负载编号";
         public static readonly string OUT_CIRCUIT_DESCRIPTION = "功能用途";
 
         public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
         public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
+        public const double INNER_TOLERANCE = 57400.0;  //内框高度
 
         public static readonly string MOTOR_AND_LOAD_LABELS = "电动机及负载标注";
         public static readonly string LOAD_LABELS = "负载标注";
-        public static readonly string LOAD_DETAILS = "负载明细";
+        public static readonly string LOAD_DETAILS = "E-电力平面-负荷明细";
         public static readonly string PUMP_LABELS = "水泵标注";
 
+        public static readonly string SYSTEM_DIAGRAM_TABLE_FRAME = "THAPE_A1L_inner";
         public static readonly string SYSTEM_DIAGRAM_TABLE_HEADER = "系统图内框及标题栏";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TITLE = "系统图标题栏";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE = "单相计算表";

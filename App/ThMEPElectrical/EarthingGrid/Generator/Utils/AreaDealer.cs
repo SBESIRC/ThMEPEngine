@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using AcHelper;
 using NFox.Cad;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -21,7 +19,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             HashSet<Tuple<Point3d, Point3d>> lineVisit = new HashSet<Tuple<Point3d, Point3d>>();
-            HashSet<Tuple<Point3d, Point3d>> tuppleList = LineDealer.Graph2Tuples(dicTuples);
+            HashSet<Tuple<Point3d, Point3d>> tuppleList = LineDealer.Graph2Lines(dicTuples);
             foreach (var tuple in tuppleList)
             {
                 if (!lineVisit.Contains(tuple))

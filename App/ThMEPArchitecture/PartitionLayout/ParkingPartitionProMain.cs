@@ -82,9 +82,10 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<CarBoxPlus> CarBoxesPlus = new List<CarBoxPlus>();
         private List<Polyline> LaneBoxes = new List<Polyline>();
         private List<CarModule> CarModules = new List<CarModule>();
-        private List<Point3d> ObstacleVertexes = new List<Point3d>();
+        public List<Point3d> ObstacleVertexes = new List<Point3d>();
         public List<Polyline> BuildingBoxes = new List<Polyline>();
         public List<Ramps> RampList = new List<Ramps>();
+        public List<Polyline> IniPillar = new List<Polyline>();
 
         public static bool GeneratePillars = true;
         public static bool GenerateMiddlePillars = true;
@@ -231,11 +232,12 @@ namespace ThMEPArchitecture.PartitionLayout
             return count;
         }
 
-        public int Process(List<InfoCar> cars, List<Polyline> pillars, List<Line> lanes, string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
+        public int Process(List<InfoCar> cars, List<Polyline> pillars, List<Line> lanes, List<Polyline> inipillars, string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
             GenerateParkingSpaces();
             cars.AddRange(Cars);
             pillars.AddRange(Pillars);
+            inipillars.AddRange(IniPillar);
             lanes.AddRange(IniLanes.Select(e => CreateLine(e.Line)));
             Dispose();
             return CarSpots.Count;
@@ -318,10 +320,12 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-        public void Display(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
+        public void Display(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", string laneLayerName = "AI-车道中心线", int carindex = 30, int columncolor = -1, int lanecolor = 20)
         {
             LayoutOutput.CarLayerName = carLayerName;
             LayoutOutput.ColumnLayerName = columnLayerName;
+            LayoutOutput.LaneLayerName = laneLayerName;
+            LayoutOutput.LaneDisplayColorIndex=lanecolor;
             LayoutOutput.InitializeLayer();
             var vertcar = LayoutOutput.VCar;
             var pcar = LayoutOutput.PCar;
@@ -990,6 +994,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false, null, true);
+            SortLaneByDirection(vertlanes, LayoutMode);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;
@@ -1000,6 +1005,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     , true, false, false, false, true, true, false, false, true, false, false, false, true);
             }
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
+            SortLaneByDirection(vertlanes, LayoutMode);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;

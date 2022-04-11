@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
     public partial class ThPDSDistributionPanel : UserControl
     {
         public WpfServices.ThPDSDistributionPanelService Service = new();
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
+        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
         public ThPDSDistributionPanel()
         {
             InitializeComponent();
@@ -25,12 +25,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             }
             else
             {
-                Service.Panel = this;
-                Service.TreeView = tv;
-                Service.Canvas = canvas;
-                Service.propertyGrid = propertyGrid;
-                Service.Graph = Graph;
-                Service.Init();
+                Service.Init(this);
             }
         }
 

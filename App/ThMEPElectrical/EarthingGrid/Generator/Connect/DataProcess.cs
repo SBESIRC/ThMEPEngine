@@ -37,7 +37,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         {
             //Columns -> columnPts
             AddCrossPtInPts(Columns.Cast<Polyline>(), ref columnPts);
-
             var dbPoints = columnPts.Select(p => new DBPoint(p)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
 
@@ -87,7 +86,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 //选取合适的墙点加入数据集
                 if (!outlinewithBorderPts.ContainsKey(curOutline))
                 {
-                    outlinewithBorderPts.Add(curOutline, wallPts.Where(pt => curOutline.GetClosePoint(pt).DistanceTo(pt) < inBufferLength).ToHashSet());
+                    outlinewithBorderPts.Add(curOutline, innerColumnPoints.Where(pt => curOutline.GetClosePoint(pt).DistanceTo(pt) < inBufferLength).ToHashSet());
+                    foreach(var pt in wallPts.Where(pt => curOutline.GetClosePoint(pt).DistanceTo(pt) < inBufferLength).ToHashSet())
+                    {
+                        outlinewithBorderPts[curOutline].Add(pt);
+                    }
                 }
             }
         }
@@ -113,9 +116,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             }
         }
 
-        /// <summary>
-        /// 这个nearPts是临时的，后面会进行删除处理
-        /// </summary>
         private void FindOutline2Pts(ThCADCoreNTSSpatialIndex spatialIndex, ref Dictionary<Polyline, HashSet<Point3d>> outlinewithNearPts, double bufferLength = 8000)
         {
             foreach(var outline in outlines)

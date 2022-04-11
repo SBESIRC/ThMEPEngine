@@ -49,7 +49,13 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //处理输入数据
             this.rawData = new RawData(dataQuery);
             dataQueryService = dataQuery;
+        }
+
+        public void Pipeline() 
+        {
             InputDataProcess inputDataProcess0 = new InputDataProcess(rawData);
+            inputDataProcess0.Pipeline();
+
             ProcessedData processedData0 = inputDataProcess0.Output();
             VerticalPipeOut = processedData0.VerticalPipeOut;
 
@@ -60,6 +66,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 for (int i = 0; i < processedData0.FireHydrant.Count; i++)
                 {
                     SingleFireHydrant singleFireHydrant0 = new SingleFireHydrant(processedData0.FireHydrant[i]);
+                    singleFireHydrant0.Pipeline();
                     outPutModels.AddRange(singleFireHydrant0.OutPutSingleModel());
 
                 }
@@ -70,11 +77,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 for (int i = 0; i < processedData0.FireExtinguisher.Count; i++)
                 {
                     SingleFireExtinguisher singleFireExtinguisher0 = new SingleFireExtinguisher(processedData0.FireExtinguisher[i]);
+                    singleFireExtinguisher0.Pipeline();
                     outPutModels.Add(singleFireExtinguisher0.OutPutSingleModel());
                 }
             }
         }
-
 
 
         private void ParameterSetting(DataPass dataPass0)
@@ -83,7 +90,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             Info.Type = dataPass0.LayoutObject;
             Info.Mode = dataPass0.LayoutMode;
             Info.OriginRadius = dataPass0.SearchRadius;
-            Info.AllowDoorInPaking = dataPass0.AvoidParking;
+            Info.AllowDoorInPaking = !dataPass0.AvoidParking;
 
             //根据全局参数修改数据
             Info.Radius = Info.OriginRadius + 500;

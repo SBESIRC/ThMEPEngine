@@ -1,7 +1,5 @@
 ﻿using System;
-using QuikGraph;
 using System.Linq;
-using ThCADExtension;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -10,55 +8,17 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
-using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using Microsoft.Toolkit.Mvvm.Input;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Helpers;
+using TianHua.Electrical.PDS.UI.Services;
+using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
-using System.Windows.Controls.Primitives;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
-    public class PDSCommand : ICommand
-    {
-        public event EventHandler CanExecuteChanged;
-        readonly Action cb;
-        public PDSCommand(Action cb)
-        {
-            this.cb = cb;
-        }
-        public bool CanExecute(object parameter)
-        {
-            return true;
-        }
-        public void Execute(object parameter)
-        {
-            cb();
-        }
-    }
-    public class COR
-    {
-        readonly Dictionary<string, Action> dict = new();
-        public void Register(string key, Action cb)
-        {
-            if (cb is null) return;
-            if (!dict.ContainsKey(key))
-            {
-                dict[key] = cb;
-            }
-            else
-            {
-                dict[key] += cb;
-            }
-        }
-        bool hasExecuted;
-        public void Execute(string key)
-        {
-            if (dict.TryGetValue(key, out Action cb))
-            {
-                cb();
-                hasExecuted = true;
-            }
-        }
-    }
     public struct GArc
     {
         public double X;
@@ -368,126 +328,39 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSVertex
     {
-        public TianHua.Electrical.PDS.Project.Module.NodeDetails Detail;
-        public TianHua.Electrical.PDS.Model.PDSNodeType Type;
+        public NodeDetails Detail;
+        public PDSNodeType Type;
     }
     public class ThPDSContext
     {
         public List<ThPDSVertex> Vertices;
         public List<int> Souces;
         public List<int> Targets;
-        public List<TianHua.Electrical.PDS.Model.ThPDSCircuit> Circuits;
-        public List<TianHua.Electrical.PDS.Project.Module.CircuitDetails> Details;
+        public List<ThPDSCircuit> Circuits;
+        public List<CircuitDetails> Details;
     }
     public class ThPDSDistributionPanelService
     {
-        public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
+        public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
-            PDSCommand _BatchGenerate;
-            public PDSCommand BatchGenerate
-            {
-                get => _BatchGenerate;
-                set
-                {
-                    if (value != _BatchGenerate)
-                    {
-                        _BatchGenerate = value;
-                        OnPropertyChanged(nameof(BatchGenerate));
-                    }
-                }
-            }
-            ThPDSDistributionPanelConfigState _Current;
-            public ThPDSDistributionPanelConfigState Current
-            {
-                get => _Current;
-                set
-                {
-                    if (value != _Current)
-                    {
-                        _Current = value;
-                        OnPropertyChanged(nameof(Current));
-                    }
-                }
-            }
-        }
-        readonly ThPDSDistributionPanelConfig Config = new();
-        public class ThPDSDistributionPanelConfigState : NotifyPropertyChangedBase
-        {
-            PDS.Project.Module.ThPDSProjectGraphNode vertice;
-            public ThPDSDistributionPanelConfigState(PDS.Project.Module.ThPDSProjectGraphNode vertice)
-            {
-                this.vertice = vertice;
-            }
-            public bool FirePowerMonitoring
-            {
-                get => vertice.Details.FirePowerMonitoring;
-                set
-                {
-                    if (value != FirePowerMonitoring)
-                    {
-                        vertice.Details.FirePowerMonitoring = value;
-                        OnPropertyChanged(nameof(FirePowerMonitoring));
-                    }
-                }
-            }
-            public bool ElectricalFireMonitoring
-            {
-                get => vertice.Details.ElectricalFireMonitoring;
-                set
-                {
-                    if (value != ElectricalFireMonitoring)
-                    {
-                        vertice.Details.ElectricalFireMonitoring = value;
-                        OnPropertyChanged(nameof(ElectricalFireMonitoring));
-                    }
-                }
-            }
-            public Array SurgeProtectionTypes => Enum.GetValues(typeof(PDS.Project.Module.SurgeProtectionDeviceType));
-            public PDS.Project.Module.SurgeProtectionDeviceType SurgeProtection
-            {
-                get => vertice.Details.SurgeProtection;
-                set
-                {
-                    if (value != SurgeProtection)
-                    {
-                        vertice.Details.SurgeProtection = value;
-                        OnPropertyChanged(nameof(SurgeProtection));
-                    }
-                }
-            }
-            double _busLength;
-            public double BusLength
-            {
-                get => _busLength;
-                set
-                {
-                    if (value != _busLength)
-                    {
-                        _busLength = value;
-                        OnPropertyChanged(nameof(BusLength));
-                    }
-                }
-            }
-        }
-        public UserContorls.ThPDSDistributionPanel Panel;
-        public TreeView TreeView;
-        public Canvas Canvas;
-        public ThPDSContext Context;
-        public dynamic propertyGrid;
-        public AdjacencyGraph<PDS.Project.Module.ThPDSProjectGraphNode, PDS.Project.Module.ThPDSProjectGraphEdge<PDS.Project.Module.ThPDSProjectGraphNode>> Graph;
-        public void Init()
-        {
-            var graph = TianHua.Electrical.PDS.UI.Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
             var vertices = graph.Vertices.Select(x => new ThPDSVertex { Detail = x.Details, Type = x.Type }).ToList();
             var srcLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Source)).ToList();
             var dstLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Target)).ToList();
             var circuitLst = graph.Edges.Select(x => x.Circuit).ToList();
             var details = graph.Edges.Select(x => x.Details).ToList();
-            Context = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
-            var treeCMenu = TreeView.ContextMenu;
-            treeCMenu.DataContext = Config;
+            var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
+            var tv = panel.tv;
+            var treeCMenu = tv.ContextMenu;
+            var config = new ThPDSDistributionPanelConfig();
+            treeCMenu.DataContext = config;
             var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
             var tree = builder.Build(graph);
+            static string FixString(string text)
+            {
+                if (string.IsNullOrEmpty(text)) return " ";
+                return text;
+            }
             {
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
@@ -500,7 +373,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
-            var batchGenCmd = new PDSCommand(() =>
+            var batchGenCmd = new RelayCommand(() =>
             {
                 UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                 try
@@ -513,11 +386,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         foreach (var n in node.DataList) dfs(n);
                     }
                     dfs(tree);
-                    foreach (var vertice in checkeddVertices)
-                    {
-                        var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertice);
-                        drawCmd.Execute();
-                    }
+                    if (checkeddVertices.Count == 0) return;
+                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                    drawCmd.Execute();
                     AcHelper.Active.Editor.Regen();
                 }
                 finally
@@ -535,69 +406,96 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     },
                 },
             };
-            TreeView.ContextMenu = treeCmenu;
-            var canvas = Canvas;
+            tv.ContextMenu = treeCmenu;
+            var canvas = panel.canvas;
             canvas.Background = Brushes.Transparent;
             canvas.Width = 2000;
             canvas.Height = 2000;
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var cvt = new GlyphsUnicodeStringConverter();
             Action clear = null;
-            this.TreeView.DataContext = tree;
-            Project.Module.Component.ThPDSDistributionBoxModel boxVM = null;
+            tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
             var br = Brushes.Black;
             var pen = new Pen(br, 1);
-            this.TreeView.SelectedItemChanged += (s, e) =>
+            tv.SelectedItemChanged += (s, e) =>
             {
-                if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
+                var vertice = GetCurrentVertice();
+                if (vertice is not null)
                 {
-                    TreeView.ContextMenu = treeCMenu;
-                    var vertice = graph.Vertices.ToList()[sel.Id];
-                    boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                    tv.ContextMenu = treeCMenu;
+                    var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
                 else
                 {
-                    TreeView.ContextMenu = treeCmenu;
+                    tv.ContextMenu = treeCmenu;
                     UpdatePropertyGrid(null);
                 }
                 UpdateCanvas();
             };
             void UpdatePropertyGrid(object vm)
             {
-                propertyGrid.SelectedObject = vm ?? new object();
+                var pg = panel.propertyGrid;
+                if (vm is Project.Module.Component.ThPDSBreakerModel breaker)
+                {
+                    if (breaker.ComponentType == ComponentType.CB)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", false);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", true);
+                    }
+                    if (breaker.ComponentType == ComponentType.组合式RCD)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", true);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", false);
+                    }
+                }
                 if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
                 {
-                    propertyGrid.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
+                    pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
                 }
                 else
                 {
-                    BindingOperations.ClearBinding(propertyGrid, UIElement.IsEnabledProperty);
+                    BindingOperations.ClearBinding(pg, UIElement.IsEnabledProperty);
                 }
+                pg.SelectedObject = vm ?? new object();
+            }
+            ThPDSProjectGraphNode GetCurrentVertice()
+            {
+                var id = tv.SelectedItem is ThPDSCircuitGraphTreeModel sel1 ? sel1.Id : (tv.SelectedItem is ThPDSGraphTreeModel sel2 ? sel2.Id : -1);
+                if (id < 0) return null;
+                return graph.Vertices.ToList()[id];
             }
             void UpdateCanvas()
             {
                 canvas.Children.Clear();
                 clear?.Invoke();
                 dccbs = null;
-                if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                Config.Current = new(graph.Vertices.ToList()[sel.Id]);
-                Config.BatchGenerate = batchGenCmd;
+                canvas.ContextMenu = null;
+                var vertice = GetCurrentVertice();
+                if (vertice is null) return;
+                config.Current = new(vertice);
+                config.BatchGenerate = batchGenCmd;
                 {
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "单独生成",
-                        Command = new PDSCommand(() =>
+                        Command = new RelayCommand(() =>
                         {
                             UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                             try
                             {
-                                if (TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                var vertices = graph.Vertices.ToList();
-                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, vertices[sel.Id]);
+                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, new List<ThPDSProjectGraphNode>() { vertice, });
                                 drawCmd.Execute();
                                 AcHelper.Active.Editor.Regen();
                             }
@@ -614,25 +512,87 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var leftTemplates = new List<Glyphs>();
                 Action render = null;
                 var dv = new DrawingVisual();
-                var circuitInType = graph.Vertices.ToList()[sel.Id].Details.CircuitFormType.CircuitFormType;
+                var circuitInType = vertice.Details.CircuitFormType.CircuitFormType;
                 var left = ThCADExtension.ThEnumExtension.GetDescription(circuitInType) ?? "1路进线";
-                var v = graph.Vertices.ToList()[sel.Id];
-                var rights = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm?.CircuitFormType ?? default) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
+                var circuitIDSortNames = "WPE、WP、WLE、WL、WS、WFEL".Split('、').ToList();
+                var edges = (from edge in graph.Edges
+                             where edge.Source == vertice
+                             let circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge)
+                             let id = circuitVM.CircuitID ?? ""
+                             orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                             select edge
+                             ).ToList();
+                var rights = edges.Select(eg => ThCADExtension.ThEnumExtension.GetDescription(eg.Details.CircuitForm?.CircuitFormType ?? default) ?? "常规").Select(x => x.Replace("(", "（").Replace(")", "）")).ToList();
                 FrameworkElement selElement = null;
                 Rect selArea = default;
                 Point busStart, busEnd;
                 var trans = new ScaleTransform(1, -1, 0, 0);
+                OUVP GetInputOUVP()
                 {
-                    var item = PDSItemInfo.Create(left, default);
-                    DrawGeos(canvas, trans, item);
-                    void DrawGeos(Canvas canvas, Transform trans, PDSItemInfo item, Brush strockBrush = null)
+                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneWayInCircuit)
+                    {
+                        return oneWayInCircuit.reservedComponent as OUVP;
+                    }
+                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                    {
+                        return twoWayInCircuit.reservedComponent as OUVP;
+                    }
+                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                    {
+                        return threeWayInCircuit.reservedComponent as OUVP;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                Meter GetInputMeter()
+                {
+                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneWayInCircuit)
+                    {
+                        return oneWayInCircuit.reservedComponent as Meter;
+                    }
+                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                    {
+                        return twoWayInCircuit.reservedComponent as Meter;
+                    }
+                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                    {
+                        return threeWayInCircuit.reservedComponent as Meter;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                UpdatePropertyGrid(boxVM);
+                {
+                    PDSItemInfo item;
+                    if (GetInputOUVP() != null)
+                    {
+                        item = PDSItemInfo.Create(left.Contains("进线") ? left + "（带过欠电压保护）" : left, default);
+                    }
+                    else if (GetInputMeter() != null)
+                    {
+                        item = PDSItemInfo.Create(left.Contains("进线") ? left + "（带电表）" : left, default);
+                    }
+                    else
+                    {
+                        item = PDSItemInfo.Create(left, default);
+                    }
+                    foreach (var fe in CreateDrawingObjects(canvas, trans, item))
+                    {
+                        canvas.Children.Add(fe);
+                    }
+                    IEnumerable<FrameworkElement> CreateDrawingObjects(Canvas canvas, Transform trans, PDSItemInfo item, Brush strockBrush = null)
                     {
                         strockBrush ??= Brushes.Black;
                         foreach (var info in item.lineInfos)
                         {
                             var st = info.Line.StartPoint;
                             var ed = info.Line.EndPoint;
-                            DrawLine(canvas, trans, strockBrush, st, ed);
+                            yield return CreateLine(trans, strockBrush, st, ed);
                         }
                         {
                             var path = new Path();
@@ -649,7 +609,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 figure.Segments.Add(arcSeg);
                                 geo.Figures.Add(figure);
                             }
-                            canvas.Children.Add(path);
+                            yield return path;
                         }
                         foreach (var info in item.circleInfos)
                         {
@@ -658,11 +618,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             path.Stroke = strockBrush;
                             path.Data = geo;
                             path.RenderTransform = trans;
-                            canvas.Children.Add(path);
+                            yield return path;
                         }
                         foreach (var info in item.textInfos)
                         {
-                            var glyph = new Glyphs() { UnicodeString = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                            var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
                             leftTemplates.Add(glyph);
                             if (info.Height > 0)
                             {
@@ -670,7 +630,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             Canvas.SetLeft(glyph, info.BasePoint.X);
                             Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
-                            canvas.Children.Add(glyph);
+                            yield return glyph;
                         }
                         foreach (var hatch in item.hatchInfos)
                         {
@@ -692,197 +652,375 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 figure.Segments.Add(new LineSegment(hatch.Points[i], false));
                             }
                             geo.Figures.Add(figure);
-                            canvas.Children.Add(path);
+                            yield return path;
                         }
-                        var vertice = graph.Vertices.ToList()[sel.Id];
-                        var cor = new COR();
                         render += () =>
                         {
                             {
                                 var circuitNumbers = Service.ThPDSCircuitNumberSeacher.Seach(vertice, graph);
                                 var str = string.Join(",", circuitNumbers);
                                 {
-                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号");
+                                    var item = leftTemplates.FirstOrDefault(x => x.Tag as string == "进线回路编号");
                                     if (item != null)
                                     {
-                                        if (string.IsNullOrEmpty(str)) str = " ";
-                                        item.UnicodeString = str;
+                                        item.UnicodeString = FixString(str);
                                     }
                                 }
                                 {
-                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号1");
+                                    var item = leftTemplates.FirstOrDefault(x => x.Tag as string == "进线回路编号1");
                                     if (item != null)
                                     {
                                         var s = circuitNumbers.Count >= 1 ? circuitNumbers[0] : str;
-                                        if (string.IsNullOrEmpty(s)) s = " ";
-                                        item.UnicodeString = s;
+                                        item.UnicodeString = FixString(s);
                                     }
                                 }
                                 {
-                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号2");
+                                    var item = leftTemplates.FirstOrDefault(x => x.Tag as string == "进线回路编号2");
                                     if (item != null)
                                     {
                                         var s = circuitNumbers.Count >= 2 ? circuitNumbers[1] : str;
-                                        if (string.IsNullOrEmpty(s)) s = " ";
-                                        item.UnicodeString = s;
+                                        item.UnicodeString = FixString(s);
                                     }
                                 }
                                 {
-                                    var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "进线回路编号3");
+                                    var item = leftTemplates.FirstOrDefault(x => x.Tag as string == "进线回路编号3");
                                     if (item != null)
                                     {
                                         var s = circuitNumbers.Count >= 3 ? circuitNumbers[2] : str;
-                                        if (string.IsNullOrEmpty(s)) s = " ";
-                                        item.UnicodeString = s;
-                                    }
-                                }
-                                {
-                                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
-                                    {
-                                        var isolatingSwitch = oneway.isolatingSwitch;
-                                        if (isolatingSwitch != null)
-                                        {
-                                            var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                            if (item != null)
-                                            {
-                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                            }
-                                            cor.Register("Isolator", () => UpdatePropertyGrid(vm));
-                                        }
-                                        else
-                                        {
-                                            cor.Register("Isolator", () => UpdatePropertyGrid(null));
-                                        }
-                                    }
-                                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
-                                    {
-                                        {
-                                            var isolatingSwitch = twoWayInCircuit.isolatingSwitch1;
-                                            if (isolatingSwitch != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                                var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                                if (item != null)
-                                                {
-                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                    item.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                }
-                                                cor.Register("Isolator", () => UpdatePropertyGrid(vm));
-                                            }
-                                            else
-                                            {
-                                                cor.Register("Isolator", () => UpdatePropertyGrid(null));
-                                            }
-                                        }
-                                        {
-                                            var sw = twoWayInCircuit.transferSwitch;
-                                            if (sw != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSATSEModel(sw);
-                                                cor.Register("ATSE", () => UpdatePropertyGrid(vm));
-                                            }
-                                            else
-                                            {
-                                                cor.Register("ATSE", () => UpdatePropertyGrid(null));
-                                            }
-                                        }
-                                    }
-                                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
-                                    {
-                                        {
-                                            var isolatingSwitch = threeWayInCircuit.isolatingSwitch1;
-                                            if (isolatingSwitch != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                                var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                                if (item != null)
-                                                {
-                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                    item.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                }
-                                                cor.Register("Isolator", () => UpdatePropertyGrid(vm));
-                                            }
-                                            else
-                                            {
-                                                cor.Register("Isolator", () => UpdatePropertyGrid(null));
-                                            }
-                                        }
-                                        {
-                                            var sw = threeWayInCircuit.transferSwitch1;
-                                            if (sw != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSATSEModel(sw);
-                                                cor.Register("ATSE", () => UpdatePropertyGrid(vm));
-                                            }
-                                            else
-                                            {
-                                                cor.Register("ATSE", () => UpdatePropertyGrid(null));
-                                            }
-                                        }
-                                        {
-                                            var sw = threeWayInCircuit.transferSwitch2;
-                                            if (sw != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSMTSEModel(sw);
-                                                cor.Register("TSE", () => UpdatePropertyGrid(vm));
-                                            }
-                                            else
-                                            {
-                                                cor.Register("TSE", () => UpdatePropertyGrid(null));
-                                            }
-                                        }
-                                    }
-                                    else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
-                                    {
-                                        var isolatingSwitch = centralizedPowerCircuit.isolatingSwitch;
-                                        if (isolatingSwitch != null)
-                                        {
-                                            var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString == "QL");
-                                            if (item != null)
-                                            {
-                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                            }
-                                            cor.Register("Isolator", () => UpdatePropertyGrid(vm));
-                                        }
+                                        item.UnicodeString = FixString(s);
                                     }
                                 }
                             }
                         };
                         foreach (var info in item.brInfos)
                         {
-                            DrawGeos(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red);
-                            var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
-                            if (_info != null)
+                            foreach (var el in CreateDrawingObjects(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red))
                             {
-                                var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                yield return el;
+                            }
+                            var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
+                            if (_info is null) continue;
+                            var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                            var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                            var cvs = new Canvas
+                            {
+                                Width = r.Width,
+                                Height = r.Height,
+                                Background = Brushes.Transparent,
+                                RenderTransform = tr
+                            };
+                            Action cb = null;
+                            IEnumerable<MenuItem> getInputMenus()
+                            {
+                                if (GetInputOUVP() == null && GetInputMeter() == null)
                                 {
-                                    var tr = new TranslateTransform(r.X, -r.Y - r.Height);
-                                    var cvs = new Canvas
+                                    yield return new MenuItem()
                                     {
-                                        Width = r.Width,
-                                        Height = r.Height,
-                                        Background = Brushes.Transparent,
-                                        RenderTransform = tr
-                                    };
-                                    hoverDict[cvs] = cvs;
-                                    dccbs += dc =>
-                                    {
-                                        var rect = new Rect(r.X, -r.Y - r.Height, r.Width, r.Height);
-                                        dc.DrawRectangle(br, pen, rect);
-                                        cbDict[rect] = () =>
+                                        Header = "增加过欠电压保护",
+                                        Command = new RelayCommand(() =>
                                         {
-                                            setSel(rect);
-                                            cor.Execute(info.BlockName);
-                                        };
+                                            ThPDSProjectGraphService.InsertUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
+                                            UpdateCanvas();
+                                        }),
                                     };
-                                    cvs.Cursor = Cursors.Hand;
-                                    canvas.Children.Add(cvs);
+                                    yield return new MenuItem()
+                                    {
+                                        Header = "增加电能表",
+                                        Command = new RelayCommand(() =>
+                                        {
+                                            ThPDSProjectGraphService.InsertEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            UpdateCanvas();
+                                        }),
+                                    };
+                                }
+                                else
+                                {
+                                    yield return new MenuItem()
+                                    {
+                                        Header = "还原为标准样式",
+                                        Command = new RelayCommand(() =>
+                                        {
+                                            ThPDSProjectGraphService.RemoveUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.RemoveEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            UpdateCanvas();
+                                        }),
+                                    };
                                 }
                             }
+                            cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
+                            cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
+                            if (info.IsOUVP())
+                            {
+                                cb += () => UpdatePropertyGrid(new { Type = "过欠电压保护器", });
+                                var ouvp = GetInputOUVP();
+                                if (ouvp != null)
+                                {
+                                    var vm = new Project.Module.Component.ThPDSOUVPModel(ouvp);
+                                    cb += () => UpdatePropertyGrid(vm);
+                                    render += () =>
+                                    {
+                                        var item = leftTemplates.FirstOrDefault(x => x.Tag as string == "过欠电压保护器");
+                                        if (item != null)
+                                        {
+                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                        }
+                                    };
+                                }
+                                else
+                                {
+                                    cb += () => UpdatePropertyGrid(null);
+                                }
+                            }
+                            else if (info.IsIsolator())
+                            {
+                                void reg(IsolatingSwitch isolatingSwitch, string templateStr)
+                                {
+                                    var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
+                                    cb += () => UpdatePropertyGrid(vm);
+                                    render += () =>
+                                    {
+                                        var item = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
+                                        if (item != null)
+                                        {
+                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                        }
+                                    };
+                                }
+                                var isolatingSwitches = item.brInfos.Where(x => x.BlockName == info.BlockName).ToList();
+                                var idx = isolatingSwitches.IndexOf(info);
+                                IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                {
+                                    isolatingSwitch = oneway.isolatingSwitch;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                {
+                                    isolatingSwitch1 = twoWayInCircuit.isolatingSwitch1;
+                                    isolatingSwitch2 = twoWayInCircuit.isolatingSwitch2;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                {
+                                    isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1;
+                                    isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2;
+                                    isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                    isolatingSwitch = centralizedPowerCircuit.isolatingSwitch;
+                                }
+                                if (isolatingSwitch != null)
+                                {
+                                    reg(isolatingSwitch, "QL");
+                                }
+                                else if (isolatingSwitches.Count > 1)
+                                {
+                                    isolatingSwitch = idx == 0 ? isolatingSwitch1 : (idx == 1 ? isolatingSwitch2 : isolatingSwitch3);
+                                    if (isolatingSwitch != null)
+                                    {
+                                        reg(isolatingSwitch, "QL" + (idx + 1));
+                                    }
+                                    else
+                                    {
+                                        cb += () => UpdatePropertyGrid(null);
+                                    }
+                                }
+                                else
+                                {
+                                    cb += () => UpdatePropertyGrid(null);
+                                }
+                            }
+                            else if (info.IsATSE())
+                            {
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                {
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                {
+                                    var sw = twoWayInCircuit.transferSwitch;
+                                    if (sw != null)
+                                    {
+                                        var vm = new Project.Module.Component.ThPDSATSEModel(sw);
+                                        cb += () => UpdatePropertyGrid(vm);
+                                        render += () =>
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString is "ATSE");
+                                            if (item != null)
+                                            {
+                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        };
+                                    }
+                                    else
+                                    {
+                                        cb += () => UpdatePropertyGrid(null);
+                                    }
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                {
+                                    {
+                                        var sw = threeWayInCircuit.transferSwitch1;
+                                        if (sw != null)
+                                        {
+                                            var vm = new Project.Module.Component.ThPDSATSEModel(sw);
+                                            cb += () => UpdatePropertyGrid(vm);
+                                            render += () =>
+                                            {
+                                                var item = leftTemplates.FirstOrDefault(x => x.UnicodeString is "ATSE");
+                                                if (item != null)
+                                                {
+                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                }
+                                            };
+                                        }
+                                        else
+                                        {
+                                            cb += () => UpdatePropertyGrid(null);
+                                        }
+                                    }
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                }
+                            }
+                            else if (info.IsMTSE())
+                            {
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                {
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                {
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                {
+                                    var sw = threeWayInCircuit.transferSwitch2;
+                                    if (sw != null)
+                                    {
+                                        var vm = new Project.Module.Component.ThPDSMTSEModel(sw);
+                                        cb += () => UpdatePropertyGrid(vm);
+                                        render += () =>
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MTSE");
+                                            if (item != null)
+                                            {
+                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        };
+                                    }
+                                    else
+                                    {
+                                        cb += () => UpdatePropertyGrid(null);
+                                    }
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                }
+                            }
+                            else if (info.IsMeter())
+                            {
+                                var meter = GetInputMeter();
+                                if (meter != null)
+                                {
+                                    IEnumerable<MenuItem> getMeterMenus(Meter meter)
+                                    {
+                                        if (meter is CurrentTransformer)
+                                        {
+                                            yield return new MenuItem()
+                                            {
+                                                Header = "切换为直接表",
+                                                Command = new RelayCommand(() =>
+                                                {
+                                                    ThPDSProjectGraphService.ComponentSwitching(vertice, meter, ComponentType.MT);
+                                                    UpdateCanvas();
+                                                }),
+                                            };
+                                        }
+                                        else if (meter is MeterTransformer)
+                                        {
+                                            yield return new MenuItem()
+                                            {
+                                                Header = "切换为间接表",
+                                                Command = new RelayCommand(() =>
+                                                {
+                                                    ThPDSProjectGraphService.ComponentSwitching(vertice, meter, ComponentType.CT);
+                                                    UpdateCanvas();
+                                                }),
+                                            };
+                                        }
+                                    }
+                                    object vm = null;
+                                    if (meter is MeterTransformer meterTransformer)
+                                    {
+                                        var o = new Project.Module.Component.ThPDSMeterTransformerModel(meterTransformer); ;
+                                        vm = o;
+                                        render += () =>
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MT" or "CT");
+                                            if (item != null)
+                                            {
+                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        };
+                                    }
+                                    else if (meter is CurrentTransformer currentTransformer)
+                                    {
+                                        var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
+                                        vm = o;
+                                        render += () =>
+                                        {
+                                            var item = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MT" or "CT");
+                                            if (item != null)
+                                            {
+                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                item.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        };
+                                    }
+                                    cb += () => UpdatePropertyGrid(vm);
+                                    var cmenu = new ContextMenu();
+                                    cvs.ContextMenu = cmenu;
+                                    foreach (var menu in getMeterMenus(meter))
+                                    {
+                                        cmenu.Items.Add(menu);
+                                    }
+                                }
+                                else
+                                {
+                                    cb += () => UpdatePropertyGrid(null);
+                                    var cmenu = new ContextMenu();
+                                    cvs.ContextMenu = cmenu;
+                                }
+                            }
+                            {
+                                var cmenu = cvs.ContextMenu ?? new ContextMenu();
+                                foreach (var m in getInputMenus())
+                                {
+                                    cmenu.Items.Add(m);
+                                }
+                                cvs.ContextMenu = cmenu;
+                            }
+                            cvs.MouseUp += (s, e) =>
+                            {
+                                void Update()
+                                {
+                                    SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                    cb?.Invoke();
+                                }
+                                if (e.ChangedButton != MouseButton.Left)
+                                {
+                                    if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                    return;
+                                }
+                                Update();
+                                e.Handled = true;
+                            };
+                            cvs.Cursor = Cursors.Hand;
+                            canvas.Children.Add(cvs);
                         }
                     }
                     busStart = new Point(PDSItemInfo.GetBlockDefInfo(left).Bounds.Width, 0);
@@ -895,13 +1033,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     var name = rights[i];
                     var item = PDSItemInfo.Create(name, new Point(busStart.X, dy + 10));
-                    var vertice = graph.Vertices.ToList()[sel.Id];
-                    var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
+                    var edge = edges[i];
                     var circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge);
                     render += () =>
                     {
                         {
-                            PDS.Project.Module.Component.Conductor conductor = null, conductor1 = null, conductor2 = null;
+                            Conductor conductor = null, conductor1 = null, conductor2 = null;
                             if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
                             {
                                 conductor = regularCircuit.Conductor;
@@ -917,9 +1054,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
                             {
+                                conductor1 = twoSpeedMotor_DiscreteComponentsDYYCircuit.conductor1;
+                                conductor2 = twoSpeedMotor_DiscreteComponentsDYYCircuit.conductor2;
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
                             {
+                                conductor1 = twoSpeedMotor_DiscreteComponentsYYCircuit.conductor1;
+                                conductor2 = twoSpeedMotor_DiscreteComponentsYYCircuit.conductor2;
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
                             {
@@ -951,6 +1092,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                             {
@@ -975,9 +1117,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                             {
+                                throw new NotSupportedException();
                             }
                             var w = 200.0;
                             void reg(Rect r, object vm)
@@ -998,14 +1142,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 cvs.Cursor = Cursors.Hand;
                                 cvs.MouseUp += (s, e) =>
                                 {
-                                    if (e.ChangedButton != MouseButton.Left) return;
-                                    UpdatePropertyGrid(vm);
-                                    setSel(gr.ToWpfRect());
+                                    void Update()
+                                    {
+                                        UpdatePropertyGrid(vm);
+                                        SetSel(gr.ToWpfRect());
+                                    }
+                                    if (e.ChangedButton != MouseButton.Left)
+                                    {
+                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                        return;
+                                    }
+                                    Update();
                                     e.Handled = true;
                                 };
+                                cvs.ContextMenu = new();
                             }
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "Conductor");
+                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "Conductor");
                                 if (item.Key != null)
                                 {
                                     if (conductor != null)
@@ -1016,14 +1169,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
                                     }
-                                    else
-                                    {
-                                        item.Key.UnicodeString = " ";
-                                    }
                                 }
                             }
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "Conductor1");
+                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "Conductor1");
                                 if (item.Key != null)
                                 {
                                     if (conductor1 != null)
@@ -1034,14 +1183,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
                                     }
-                                    else
-                                    {
-                                        item.Key.UnicodeString = " ";
-                                    }
                                 }
                             }
                             {
-                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "Conductor2");
+                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "Conductor2");
                                 if (item.Key != null)
                                 {
                                     if (conductor2 != null)
@@ -1052,31 +1197,27 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var r = new Rect(Canvas.GetLeft(item.Key), Canvas.GetTop(item.Key), w, item.Key.FontRenderingEmSize);
                                         reg(r, vm);
                                     }
-                                    else
-                                    {
-                                        item.Key.UnicodeString = " ";
-                                    }
                                 }
                             }
                         }
                         {
-                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "回路编号");
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "回路编号");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitNumber)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                 item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                             }
                         }
                         {
-                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功率");
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "功率");
                             if (item.Key != null)
                             {
-                                var bd = new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? " " : v.ToString()), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                item.Key.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                item.Key.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Power)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                             }
                         }
                         {
-                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "相序");
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "相序");
                             if (item.Key != null)
                             {
                                 var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.PhaseSequence)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
@@ -1084,7 +1225,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                         }
                         {
-                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "负载编号");
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "负载编号");
                             if (item.Key != null)
                             {
                                 var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LoadId)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
@@ -1092,7 +1233,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                         }
                         {
-                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "功能用途");
+                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "功能用途");
                             if (item.Key != null)
                             {
                                 var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.Description)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
@@ -1113,14 +1254,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         continue;
                     }
-                    void DrawGeos(Canvas canvas, Transform trans, PDSItemInfo item, Brush strockBrush = null)
+                    IEnumerable<FrameworkElement> CreateDrawingObjects(Transform trans, PDSItemInfo item, Brush strockBrush = null)
                     {
                         strockBrush ??= Brushes.Black;
                         foreach (var info in item.lineInfos)
                         {
                             var st = info.Line.StartPoint;
                             var ed = info.Line.EndPoint;
-                            DrawLine(canvas, trans, strockBrush, st, ed);
+                            yield return CreateLine(trans, strockBrush, st, ed);
                         }
                         {
                             var path = new Path();
@@ -1137,7 +1278,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 figure.Segments.Add(arcSeg);
                                 geo.Figures.Add(figure);
                             }
-                            canvas.Children.Add(path);
+                            yield return path;
                         }
                         foreach (var info in item.circleInfos)
                         {
@@ -1146,11 +1287,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             path.Stroke = strockBrush;
                             path.Data = geo;
                             path.RenderTransform = trans;
-                            canvas.Children.Add(path);
+                            yield return path;
                         }
                         foreach (var info in item.textInfos)
                         {
-                            var glyph = new Glyphs() { UnicodeString = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                            var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
                             if (info.Height > 0)
                             {
                                 glyph.FontRenderingEmSize = info.Height;
@@ -1158,776 +1299,757 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             rightTemplates.Add(new KeyValuePair<Glyphs, int>(glyph, i));
                             Canvas.SetLeft(glyph, info.BasePoint.X);
                             Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
-                            canvas.Children.Add(glyph);
+                            yield return glyph;
                         }
                         foreach (var info in item.brInfos)
                         {
-                            DrawGeos(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red);
-                            var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
-                            if (_info != null)
+                            if (info.IsBreaker())
                             {
-                                var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
+                                Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
+                                var blkVm = new ThPDSBlockViewModel();
+                                Project.Module.Component.ThPDSBreakerModel vm;
+                                void UpdateBreakerViewModel()
                                 {
-                                    var tr = new TranslateTransform(r.X, -r.Y - r.Height);
-                                    var cvs = new Canvas
+                                    void reg(Breaker breaker, string templateStr)
                                     {
-                                        Width = r.Width,
-                                        Height = r.Height,
-                                        Background = Brushes.Transparent,
-                                        RenderTransform = tr
-                                    };
-                                    hoverDict[cvs] = cvs;
+                                        vm = new(breaker);
+                                        blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
+                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == templateStr);
+                                        if (item.Key != null && vm != null)
+                                        {
+                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                        }
+                                    }
+                                    if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
                                     {
-                                        Action cb = null;
-                                        IEnumerable<MenuItem> getMeterMenus(PDS.Project.Module.Component.Meter meter)
+                                        breaker = regularCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                                    {
+                                        breaker = motorCircuit_DiscreteComponents.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                                    {
+                                        breaker = motor_DiscreteComponentsStarTriangleStartCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                                    {
+                                        breaker = twoSpeedMotor_DiscreteComponentsDYYCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                                    {
+                                        breaker = twoSpeedMotor_DiscreteComponentsYYCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                                    {
+                                        breaker = contactorControlCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                                    {
+                                        breaker = distributionMetering_MTInBehindCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                                    {
+                                        breaker = distributionMetering_CTInFrontCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                                    {
+                                        breaker = distributionMetering_CTInBehindCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                                    {
+                                        breaker = distributionMetering_MTInFrontCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                                    {
+                                        breaker1 = distributionMetering_ShanghaiCTCircuit.breaker1;
+                                        breaker2 = distributionMetering_ShanghaiCTCircuit.breaker2;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                                    {
+                                        breaker1 = distributionMetering_ShanghaiMTCircuit.breaker1;
+                                        breaker2 = distributionMetering_ShanghaiMTCircuit.breaker2;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                                    {
+                                        throw new NotSupportedException();
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                    {
+                                        breaker = leakageCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                                    {
+                                        throw new NotSupportedException();
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                                    {
+                                        throw new NotSupportedException();
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                                    {
+                                        breaker = motor_DiscreteComponentsCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                                    {
+                                        breaker = thermalRelayProtectionCircuit.breaker;
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                                    {
+                                        throw new NotSupportedException();
+                                    }
+                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                                    {
+                                        throw new NotSupportedException();
+                                    }
+                                    var idx = breakers.IndexOf(info);
+                                    if (breakers.Count > 1)
+                                    {
+                                        breaker = idx == 0 ? breaker1 : (idx == 1 ? breaker2 : breaker3);
+                                        if (breaker != null)
                                         {
-                                            if (meter is PDS.Project.Module.Component.CurrentTransformer)
-                                            {
-                                                yield return new MenuItem()
-                                                {
-                                                    Header = "切换为直接表",
-                                                    Command = new PDSCommand(() =>
-                                                    {
-                                                        ThPDSProjectGraphService.ComponentSwitching(edge, meter, PDS.Project.Module.Component.ComponentType.MT);
-                                                        UpdateCanvas();
-                                                    }),
-                                                };
-                                            }
-                                            else if (meter is PDS.Project.Module.Component.MeterTransformer)
-                                            {
-                                                yield return new MenuItem()
-                                                {
-                                                    Header = "切换为间接表",
-                                                    Command = new PDSCommand(() =>
-                                                    {
-                                                        ThPDSProjectGraphService.ComponentSwitching(edge, meter, PDS.Project.Module.Component.ComponentType.CT);
-                                                        UpdateCanvas();
-                                                    }),
-                                                };
-                                            }
+                                            reg(breaker, "CB" + (idx + 1));
                                         }
-                                        IEnumerable<MenuItem> getBreakerMenus(PDS.Project.Module.Component.BreakerBaseComponent breaker)
+                                    }
+                                    else if (breaker != null)
+                                    {
+                                        reg(breaker, "CB");
+                                    }
+                                    if (breaker == null)
+                                    {
+                                        throw new NotSupportedException($"{edge?.Details?.CircuitForm?.CircuitFormType} {edge?.Details?.CircuitForm?.GetType()}");
+                                    }
+                                    blkVm.BlockName = GetBreakerBlockName(breaker.ComponentType);
+                                    blkVm.ContextMenuItems = GetBreakerMenus(breaker);
+                                    blkVm.RaisePropertyChangedEvent();
+                                }
+                                var names = new string[] { "CircuitBreaker", "RCD" };
+                                string GetBreakerBlockName(ComponentType type)
+                                {
+                                    if (type == ComponentType.CB)
+                                    {
+                                        return "CircuitBreaker";
+                                    }
+                                    else
+                                    {
+                                        return "RCD";
+                                    }
+                                }
+                                foreach (var name in names)
+                                {
+                                    foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(name, info.BasePoint), Brushes.Red))
+                                    {
+                                        el.SetBinding(UIElement.VisibilityProperty, new Binding(nameof(blkVm.BlockName)) { Source = blkVm, Converter = new NormalValueConverter(v => (string)v == name ? Visibility.Visible : Visibility.Collapsed), });
+                                        yield return el;
+                                    }
+                                }
+                                IEnumerable<MenuItem> GetBreakerMenus(Breaker breaker)
+                                {
+                                    var types = new ComponentType[] { ComponentType.CB, ComponentType.一体式RCD, ComponentType.组合式RCD, };
+                                    foreach (var type in types)
+                                    {
+                                        if (breaker.ComponentType != type)
                                         {
-                                            if (breaker is PDS.Project.Module.Component.Breaker)
+                                            yield return new MenuItem()
                                             {
-                                                yield return new MenuItem()
+                                                Header = "切换为" + ThCADExtension.ThEnumExtension.GetDescription(type),
+                                                Command = new RelayCommand(() =>
                                                 {
-                                                    Header = "切换为剩余电流动作断路器",
-                                                    Command = new PDSCommand(() =>
-                                                    {
-                                                        ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.RCD);
-                                                        UpdateCanvas();
-                                                    }),
-                                                };
-                                            }
-                                            else if (breaker is PDS.Project.Module.Component.ResidualCurrentBreaker)
-                                            {
-                                                yield return new MenuItem()
-                                                {
-                                                    Header = "切换为断路器",
-                                                    Command = new PDSCommand(() =>
-                                                    {
-                                                        ThPDSProjectGraphService.ComponentSwitching(edge, breaker, PDS.Project.Module.Component.ComponentType.CB);
-                                                        UpdateCanvas();
-                                                    }),
-                                                };
-                                            }
+                                                    breaker.SetBreakerType(type);
+                                                    UpdateBreakerViewModel();
+                                                    blkVm.UpdatePropertyGrid();
+                                                }),
+                                            };
                                         }
-                                        if (info.BlockName == "CircuitBreaker")
+                                    }
+                                }
+                                var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
+                                if (_info != null)
+                                {
+                                    var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                    {
+                                        var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                                        var cvs = new Canvas
                                         {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            var breakers = item.brInfos.Where(x => x.BlockName == "CircuitBreaker").ToList();
-                                            var idx = breakers.IndexOf(info);
-                                            PDS.Project.Module.Component.BreakerBaseComponent breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
-                                            {
-                                                breaker = regularCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
-                                            {
-                                                breaker = motorCircuit_DiscreteComponents.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
-                                            {
-                                                breaker = motor_DiscreteComponentsStarTriangleStartCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
-                                            {
-                                                breaker = twoSpeedMotor_DiscreteComponentsDYYCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
-                                            {
-                                                breaker = twoSpeedMotor_DiscreteComponentsYYCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
-                                            {
-                                                breaker = contactorControlCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
-                                            {
-                                                breaker = distributionMetering_MTInBehindCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
-                                            {
-                                                breaker = distributionMetering_CTInFrontCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
-                                            {
-                                                breaker = distributionMetering_CTInBehindCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
-                                            {
-                                                breaker = distributionMetering_MTInFrontCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
-                                            {
-                                                breaker1 = distributionMetering_ShanghaiCTCircuit.breaker1;
-                                                breaker2 = distributionMetering_ShanghaiCTCircuit.breaker2;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
-                                            {
-                                                breaker1 = distributionMetering_ShanghaiMTCircuit.breaker1;
-                                                breaker2 = distributionMetering_ShanghaiMTCircuit.breaker2;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
-                                            {
-                                                breaker = leakageCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
-                                            {
-                                                breaker = motor_DiscreteComponentsCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
-                                            {
-                                                breaker = thermalRelayProtectionCircuit.breaker;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
-                                            {
-                                                breaker1 = twoSpeedMotor_CPSDYYCircuit.breaker1;
-                                                breaker2 = twoSpeedMotor_CPSDYYCircuit.breaker2;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
-                                            {
-                                                breaker1 = twoSpeedMotor_CPSYYCircuit.breaker1;
-                                                breaker2 = twoSpeedMotor_CPSYYCircuit.breaker2;
-                                            }
-                                            void reg(PDS.Project.Module.Component.BreakerBaseComponent breaker, string templateStr)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
-                                                cb += () => UpdatePropertyGrid(vm);
-                                                render += () =>
-                                                {
-                                                    var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == templateStr);
-                                                    if (item.Key != null)
-                                                    {
-                                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                        item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                    }
-                                                };
-                                                var cmenu = new ContextMenu();
-                                                cvs.ContextMenu = cmenu;
-                                                foreach (var menu in getBreakerMenus(breaker))
-                                                {
-                                                    cmenu.Items.Add(menu);
-                                                }
-                                            }
-                                            if (breaker != null)
-                                            {
-                                                reg(breaker, "CB");
-                                            }
-                                            else if (breakers.Count > 1)
-                                            {
-                                                breaker = idx == 0 ? breaker1 : (idx == 1 ? breaker2 : breaker3);
-                                                if (breaker != null)
-                                                {
-                                                    reg(breaker, "CB"+(idx+1));
-                                                }
-                                                else
-                                                {
-                                                    cb += () => UpdatePropertyGrid(null);
-                                                    var cmenu = new ContextMenu();
-                                                    cvs.ContextMenu = cmenu;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                                var cmenu = new ContextMenu();
-                                                cvs.ContextMenu = cmenu;
-                                            }
-                                        }
-                                        else if (info.BlockName == "RCD")
+                                            Width = r.Width,
+                                            Height = r.Height,
+                                            Background = Brushes.Transparent,
+                                            RenderTransform = tr
+                                        };
+                                        hoverDict[cvs] = cvs;
+                                        var cm = new ContextMenu();
+                                        cvs.ContextMenu = cm;
+                                        cm.SetBinding(ItemsControl.ItemsSourceProperty, new Binding(nameof(blkVm.ContextMenuItems)) { Source = blkVm, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                        cvs.MouseUp += (s, e) =>
                                         {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                            void Update()
                                             {
-                                                void handleLeakageCircuit()
+                                                SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                blkVm.UpdatePropertyGrid();
+                                            }
+                                            if (e.ChangedButton != MouseButton.Left)
+                                            {
+                                                if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                return;
+                                            }
+                                            Update();
+                                            e.Handled = true;
+                                        };
+                                        cvs.Cursor = Cursors.Hand;
+                                        canvas.Children.Add(cvs);
+                                    }
+                                }
+                                UpdateBreakerViewModel();
+                                continue;
+                            }
+                            {
+                                foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red))
+                                {
+                                    yield return el;
+                                }
+                                if (info.IsMotor()) continue;
+                                {
+                                    var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
+                                    if (_info != null)
+                                    {
+                                        var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                        {
+                                            var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                                            var cvs = new Canvas
+                                            {
+                                                Width = r.Width,
+                                                Height = r.Height,
+                                                Background = Brushes.Transparent,
+                                                RenderTransform = tr
+                                            };
+                                            hoverDict[cvs] = cvs;
+                                            {
+                                                Action cb = null;
+                                                IEnumerable<MenuItem> getMeterMenus(Meter meter)
                                                 {
+                                                    if (meter is CurrentTransformer)
                                                     {
-                                                        var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.Breaker;
-                                                        if (breaker != null)
+                                                        yield return new MenuItem()
                                                         {
-                                                            var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
+                                                            Header = "切换为直接表",
+                                                            Command = new RelayCommand(() =>
+                                                            {
+                                                                ThPDSProjectGraphService.ComponentSwitching(edge, meter, ComponentType.MT);
+                                                                UpdateCanvas();
+                                                            }),
+                                                        };
+                                                    }
+                                                    else if (meter is MeterTransformer)
+                                                    {
+                                                        yield return new MenuItem()
+                                                        {
+                                                            Header = "切换为间接表",
+                                                            Command = new RelayCommand(() =>
+                                                            {
+                                                                ThPDSProjectGraphService.ComponentSwitching(edge, meter, ComponentType.CT);
+                                                                UpdateCanvas();
+                                                            }),
+                                                        };
+                                                    }
+                                                }
+                                                if (info.IsContactor())
+                                                {
+                                                    var contactors = item.brInfos.Where(x => x.BlockName == "Contactor").ToList();
+                                                    var idx = contactors.IndexOf(info);
+                                                    Contactor contactor = null, contactor1 = null, contactor2 = null, contactor3 = null;
+                                                    if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                                                    {
+                                                        contactor = motorCircuit_DiscreteComponents.contactor;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                                                    {
+                                                        contactor1 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor1;
+                                                        contactor2 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor2;
+                                                        contactor3 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor3;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                                                    {
+                                                        contactor1 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor1;
+                                                        contactor2 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor2;
+                                                        contactor3 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor3;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                                                    {
+                                                        contactor1 = twoSpeedMotor_DiscreteComponentsYYCircuit.contactor1;
+                                                        contactor2 = twoSpeedMotor_DiscreteComponentsYYCircuit.contactor2;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                                                    {
+                                                        contactor = contactorControlCircuit.contactor;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                                                    {
+                                                        contactor = motor_DiscreteComponentsCircuit.contactor;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    if (contactor != null)
+                                                    {
+                                                        var vm = new Project.Module.Component.ThPDSContactorModel(contactor);
+                                                        cb += () => UpdatePropertyGrid(vm);
+                                                        render += () =>
+                                                        {
+                                                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "QAC");
+                                                            if (item.Key != null)
+                                                            {
+                                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                            }
+                                                        };
+                                                    }
+                                                    else if (contactors.Count > 1)
+                                                    {
+                                                        contactor = idx == 0 ? contactor1 : (idx == 1 ? contactor2 : contactor3);
+                                                        if (contactor != null)
+                                                        {
+                                                            var vm = new Project.Module.Component.ThPDSContactorModel(contactor);
                                                             cb += () => UpdatePropertyGrid(vm);
                                                             render += () =>
                                                             {
-                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
+                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "QAC" + (idx + 1));
                                                                 if (item.Key != null)
                                                                 {
                                                                     var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                                     item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                                 }
                                                             };
-                                                            var cmenu = new ContextMenu();
-                                                            cvs.ContextMenu = cmenu;
-                                                            foreach (var menu in getBreakerMenus(breaker))
-                                                            {
-                                                                cmenu.Items.Add(menu);
-                                                            }
-                                                            return;
                                                         }
                                                     }
-                                                    {
-                                                        var breaker = leakageCircuit.breaker as PDS.Project.Module.Component.ResidualCurrentBreaker;
-                                                        if (breaker != null)
-                                                        {
-                                                            var vm = new Project.Module.Component.ThPDSResidualCurrentBreakerModel(breaker);
-                                                            cb += () => UpdatePropertyGrid(vm);
-                                                            render += () =>
-                                                            {
-                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
-                                                                if (item.Key != null)
-                                                                {
-                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                                }
-                                                            };
-                                                            var cmenu = new ContextMenu();
-                                                            cvs.ContextMenu = cmenu;
-                                                            foreach (var menu in getBreakerMenus(breaker))
-                                                            {
-                                                                cmenu.Items.Add(menu);
-                                                            }
-                                                            return;
-                                                        }
-                                                    }
+                                                    else
                                                     {
                                                         cb += () => UpdatePropertyGrid(null);
-                                                        var cmenu = new ContextMenu();
-                                                        cvs.ContextMenu = cmenu;
                                                     }
-                                                    return;
                                                 }
-                                                handleLeakageCircuit();
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
-                                            {
-                                                void handleRegularCircuit()
+                                                else if (info.IsThermalRelay())
                                                 {
+                                                    var thermalRelays = item.brInfos.Where(x => x.IsThermalRelay()).ToList();
+                                                    ThermalRelay thermalRelay = null, thermalRelay1 = null, thermalRelay2 = null, thermalRelay3 = null;
+                                                    void reg(ThermalRelay thermalRelay, string templateStr)
                                                     {
-                                                        var breaker = regularCircuit.breaker;
-                                                        if (breaker != null)
-                                                        {
-                                                            var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
-                                                            cb += () => UpdatePropertyGrid(vm);
-                                                            render += () =>
-                                                            {
-                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CB");
-                                                                if (item.Key != null)
-                                                                {
-                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                                }
-                                                            };
-                                                            var cmenu = new ContextMenu();
-                                                            cvs.ContextMenu = cmenu;
-                                                            foreach (var menu in getBreakerMenus(breaker))
-                                                            {
-                                                                cmenu.Items.Add(menu);
-                                                            }
-                                                            return;
-                                                        }
-                                                    }
-                                                    {
-                                                        cb += () => UpdatePropertyGrid(null);
-                                                        var cmenu = new ContextMenu();
-                                                        cvs.ContextMenu = cmenu;
-                                                    }
-                                                    return;
-                                                }
-                                                handleRegularCircuit();
-                                            }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                                var cmenu = new ContextMenu();
-                                                cvs.ContextMenu = cmenu;
-                                            }
-                                        }
-                                        else if (info.BlockName == "Contactor")
-                                        {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            var contactors = item.brInfos.Where(x => x.BlockName == "Contactor").ToList();
-                                            var idx = contactors.IndexOf(info);
-                                            PDS.Project.Module.Component.Contactor contactor = null, contactor1 = null, contactor2 = null, contactor3 = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
-                                            {
-                                                contactor = motorCircuit_DiscreteComponents.contactor;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
-                                            {
-                                                contactor1 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor1;
-                                                contactor2 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor2;
-                                                contactor3 = motor_DiscreteComponentsStarTriangleStartCircuit.contactor3;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
-                                            {
-                                                contactor1 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor1;
-                                                contactor2 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor2;
-                                                contactor3 = twoSpeedMotor_DiscreteComponentsDYYCircuit.contactor3;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
-                                            {
-                                                contactor1 = twoSpeedMotor_DiscreteComponentsYYCircuit.contactor1;
-                                                contactor2 = twoSpeedMotor_DiscreteComponentsYYCircuit.contactor2;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
-                                            {
-                                                contactor = contactorControlCircuit.contactor;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
-                                            {
-                                                contactor = motor_DiscreteComponentsCircuit.contactor;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
-                                            {
-                                                contactor1 = twoSpeedMotor_CPSDYYCircuit.contactor1;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
-                                            {
-                                            }
-                                            if (contactor != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSContactorModel(contactor);
-                                                cb += () => UpdatePropertyGrid(vm);
-                                                render += () =>
-                                                {
-                                                    var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "QAC");
-                                                    if (item.Key != null)
-                                                    {
-                                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                        item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                    }
-                                                };
-                                            }
-                                            else if (contactors.Count > 1)
-                                            {
-                                                contactor = idx == 0 ? contactor1 : (idx == 1 ? contactor2 : contactor3);
-                                                if (contactor != null)
-                                                {
-                                                    var vm = new Project.Module.Component.ThPDSContactorModel(contactor);
-                                                    cb += () => UpdatePropertyGrid(vm);
-                                                    render += () =>
-                                                    {
-                                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "QAC" + (idx + 1));
-                                                        if (item.Key != null)
+                                                        var vm = new Project.Module.Component.ThPDSThermalRelayModel(thermalRelay);
+                                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == templateStr);
+                                                        if (item.Key != null && vm != null)
                                                         {
                                                             var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                             item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                         }
-                                                    };
-                                                }
-                                            }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                            }
-                                        }
-                                        else if (info.BlockName == "ThermalRelay")
-                                        {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            PDS.Project.Module.Component.ThermalRelay thermalRelay = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
-                                            {
-                                                thermalRelay = motorCircuit_DiscreteComponents.thermalRelay;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
-                                            {
-                                                thermalRelay = motor_DiscreteComponentsStarTriangleStartCircuit.thermalRelay;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
-                                            {
-                                                thermalRelay = twoSpeedMotor_DiscreteComponentsDYYCircuit.thermalRelay1;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
-                                            {
-                                                thermalRelay = twoSpeedMotor_DiscreteComponentsYYCircuit.thermalRelay1;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
-                                            {
-                                                thermalRelay = motor_DiscreteComponentsCircuit.thermalRelay;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
-                                            {
-                                                thermalRelay = thermalRelayProtectionCircuit.thermalRelay;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
-                                            {
-                                            }
-                                            if (thermalRelay != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSThermalRelayModel(thermalRelay);
-                                                cb += () => UpdatePropertyGrid(vm);
-                                                render += () =>
-                                                {
-                                                    var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "KH");
-                                                    if (item.Key != null)
-                                                    {
-                                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                        item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                        cb += () => { UpdatePropertyGrid(vm); };
                                                     }
+                                                    if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                                                    {
+                                                        thermalRelay = motorCircuit_DiscreteComponents.thermalRelay;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                                                    {
+                                                        thermalRelay = motor_DiscreteComponentsStarTriangleStartCircuit.thermalRelay;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                                                    {
+                                                        thermalRelay1 = twoSpeedMotor_DiscreteComponentsDYYCircuit.thermalRelay1;
+                                                        thermalRelay2 = twoSpeedMotor_DiscreteComponentsDYYCircuit.thermalRelay2;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                                                    {
+                                                        thermalRelay1 = twoSpeedMotor_DiscreteComponentsYYCircuit.thermalRelay1;
+                                                        thermalRelay2 = twoSpeedMotor_DiscreteComponentsYYCircuit.thermalRelay2;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                                                    {
+                                                        thermalRelay = motor_DiscreteComponentsCircuit.thermalRelay;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                                                    {
+                                                        thermalRelay = thermalRelayProtectionCircuit.thermalRelay;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    var idx = thermalRelays.IndexOf(info);
+                                                    if (thermalRelays.Count > 1)
+                                                    {
+                                                        thermalRelay = idx == 0 ? thermalRelay1 : (idx == 1 ? thermalRelay2 : thermalRelay3);
+                                                        if (thermalRelay != null)
+                                                        {
+                                                            reg(thermalRelay, "KH" + (idx + 1));
+                                                        }
+                                                    }
+                                                    else if (thermalRelay != null)
+                                                    {
+                                                        reg(thermalRelay, "KH");
+                                                    }
+                                                    if (thermalRelay == null)
+                                                    {
+                                                        throw new NotSupportedException($"{edge?.Details?.CircuitForm?.CircuitFormType} {edge?.Details?.CircuitForm?.GetType()}");
+                                                    }
+                                                }
+                                                else if (info.IsCPS())
+                                                {
+                                                    CPS cps = null;
+                                                    if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                                                    {
+                                                        cps = motor_CPSCircuit.cps;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                                                    {
+                                                        cps = motor_CPSStarTriangleStartCircuit.cps;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    if (cps != null)
+                                                    {
+                                                        var vm = new Project.Module.Component.ThPDSCPSModel(cps);
+                                                        cb += () => UpdatePropertyGrid(vm);
+                                                        render += () =>
+                                                        {
+                                                            var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string == "CPS");
+                                                            if (item.Key != null)
+                                                            {
+                                                                var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                            }
+                                                        };
+                                                    }
+                                                    else
+                                                    {
+                                                        cb += () => UpdatePropertyGrid(null);
+                                                    }
+                                                }
+                                                else if (info.IsMeter())
+                                                {
+                                                    Meter meter = null;
+                                                    if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                                                    {
+                                                        meter = distributionMetering_MTInBehindCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                                                    {
+                                                        meter = distributionMetering_CTInFrontCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                                                    {
+                                                        meter = distributionMetering_CTInBehindCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                                                    {
+                                                        meter = distributionMetering_MTInFrontCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                                                    {
+                                                        meter = distributionMetering_ShanghaiCTCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                                                    {
+                                                        meter = distributionMetering_ShanghaiMTCircuit.meter;
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                                                    {
+                                                        throw new NotSupportedException();
+                                                    }
+                                                    if (meter != null)
+                                                    {
+                                                        object vm = null;
+                                                        if (meter is MeterTransformer meterTransformer)
+                                                        {
+                                                            var o = new Project.Module.Component.ThPDSMeterTransformerModel(meterTransformer); ;
+                                                            vm = o;
+                                                            render += () =>
+                                                            {
+                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string is "MT" or "CT");
+                                                                if (item.Key != null)
+                                                                {
+                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                }
+                                                            };
+                                                        }
+                                                        else if (meter is CurrentTransformer currentTransformer)
+                                                        {
+                                                            var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
+                                                            vm = o;
+                                                            render += () =>
+                                                            {
+                                                                var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.Tag as string is "MT" or "CT");
+                                                                if (item.Key != null)
+                                                                {
+                                                                    var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                    item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                }
+                                                            };
+                                                        }
+                                                        cb += () => UpdatePropertyGrid(vm);
+                                                        var cmenu = new ContextMenu();
+                                                        cvs.ContextMenu = cmenu;
+                                                        foreach (var menu in getMeterMenus(meter))
+                                                        {
+                                                            cmenu.Items.Add(menu);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        cb += () => UpdatePropertyGrid(null);
+                                                        var cmenu = new ContextMenu();
+                                                        cvs.ContextMenu = cmenu;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    cb += () => UpdatePropertyGrid(null);
+                                                }
+                                                cvs.MouseUp += (s, e) =>
+                                                {
+                                                    void Update()
+                                                    {
+                                                        SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                        cb?.Invoke();
+                                                    }
+                                                    if (e.ChangedButton != MouseButton.Left)
+                                                    {
+                                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                        return;
+                                                    }
+                                                    Update();
+                                                    e.Handled = true;
                                                 };
                                             }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                            }
+                                            cvs.ContextMenu ??= new();
+                                            cvs.Cursor = Cursors.Hand;
+                                            canvas.Children.Add(cvs);
                                         }
-                                        else if (info.BlockName == "CPS")
-                                        {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            PDS.Project.Module.Component.CPS cps = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
-                                            {
-                                                cps = motor_CPSCircuit.cps;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
-                                            {
-                                                cps = motor_CPSStarTriangleStartCircuit.cps;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
-                                            {
-                                            }
-                                            if (cps != null)
-                                            {
-                                                var vm = new Project.Module.Component.ThPDSCPSModel(cps);
-                                                cb += () => UpdatePropertyGrid(vm);
-                                                render += () =>
-                                                {
-                                                    var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString == "CPS");
-                                                    if (item.Key != null)
-                                                    {
-                                                        var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                        item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                    }
-                                                };
-                                            }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                            }
-                                        }
-                                        else if (info.BlockName == "Meter")
-                                        {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            var vertice = graph.Vertices.ToList()[sel.Id];
-                                            var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                            PDS.Project.Module.Component.Meter meter = null;
-                                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
-                                            {
-                                                meter = distributionMetering_MTInBehindCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
-                                            {
-                                                meter = distributionMetering_CTInFrontCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
-                                            {
-                                                meter = distributionMetering_CTInBehindCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
-                                            {
-                                                meter = distributionMetering_MTInFrontCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
-                                            {
-                                                meter = distributionMetering_ShanghaiCTCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
-                                            {
-                                                meter = distributionMetering_ShanghaiMTCircuit.meter;
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
-                                            {
-                                            }
-                                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
-                                            {
-                                            }
-                                            if (meter != null)
-                                            {
-                                                object vm = null;
-                                                if (meter is PDS.Project.Module.Component.MeterTransformer meterTransformer)
-                                                {
-                                                    var o = new Project.Module.Component.ThPDSMeterTransformerModel(meterTransformer); ;
-                                                    vm = o;
-                                                    render += () =>
-                                                    {
-                                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString is "MT" or "CT");
-                                                        if (item.Key != null)
-                                                        {
-                                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentMT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                            item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                        }
-                                                    };
-                                                }
-                                                else if (meter is PDS.Project.Module.Component.CurrentTransformer currentTransformer)
-                                                {
-                                                    var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
-                                                    vm = o;
-                                                    render += () =>
-                                                    {
-                                                        var item = rightTemplates.FirstOrDefault(x => x.Value == i && x.Key.UnicodeString is "MT" or "CT");
-                                                        if (item.Key != null)
-                                                        {
-                                                            var bd = new Binding() { Converter = cvt, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                            item.Key.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                        }
-                                                    };
-                                                }
-                                                cb += () => UpdatePropertyGrid(vm);
-                                                var cmenu = new ContextMenu();
-                                                cvs.ContextMenu = cmenu;
-                                                foreach (var menu in getMeterMenus(meter))
-                                                {
-                                                    cmenu.Items.Add(menu);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                cb += () => UpdatePropertyGrid(null);
-                                                var cmenu = new ContextMenu();
-                                                cvs.ContextMenu = cmenu;
-                                            }
-                                        }
-                                        else if (info.BlockName == "Motor")
-                                        {
-                                            if (this.TreeView.SelectedItem is not ThPDSCircuitGraphTreeModel sel) return;
-                                            cb += () => UpdatePropertyGrid(null);
-                                        }
-                                        else
-                                        {
-                                            cb += () => UpdatePropertyGrid(null);
-                                        }
-                                        dccbs += dc =>
-                                        {
-                                            var rect = new Rect(r.X, -r.Y - r.Height, r.Width, r.Height);
-                                            dc.DrawRectangle(br, pen, rect);
-                                            cbDict[rect] = () =>
-                                            {
-                                                setSel(rect);
-                                                cb?.Invoke();
-                                            };
-                                        };
                                     }
-                                    cvs.Cursor = Cursors.Hand;
-                                    canvas.Children.Add(cvs);
                                 }
-                            }
-                        }
-                    }
-                    var before = new HashSet<FrameworkElement>(canvas.Children.Count);
-                    foreach (var ui in canvas.Children)
-                    {
-                        if (ui is Path or Glyphs or TextBlock) before.Add((FrameworkElement)ui);
-                    }
-                    DrawGeos(canvas, trans, item);
-                    var after = new HashSet<FrameworkElement>(canvas.Children.Count - before.Count);
-                    foreach (var ui in canvas.Children)
-                    {
-                        if (ui is Path or Glyphs or TextBlock)
-                        {
-                            var fe = (FrameworkElement)ui;
-                            if (!before.Contains(fe))
-                            {
-                                after.Add(fe);
                             }
                         }
                     }
                     {
                         var cvt = new NormalValueConverter(v => (bool)v ? .6 : 1.0);
                         var bd = new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                        foreach (var fe in after)
+                        foreach (var fe in CreateDrawingObjects(trans, item))
                         {
-                            fe.SetBinding(UIElement.OpacityProperty, bd);
+                            canvas.Children.Add(fe);
+                            if (fe is Path or Glyphs or TextBlock)
+                            {
+                                fe.SetBinding(UIElement.OpacityProperty, bd);
+                            }
                         }
                     }
                     {
@@ -1954,7 +2076,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var m = new MenuItem();
                                     mi.Items.Add(m);
                                     m.Header = outType;
-                                    m.Command = new PDSCommand(() =>
+                                    m.Command = new RelayCommand(() =>
                                     {
                                         edge.Details.CircuitForm.CircuitFormType = sw.Switch(outType);
                                         UpdateCanvas();
@@ -1966,7 +2088,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 menu.Items.Add(m);
                                 var cvt = new NormalValueConverter(v => (bool)v ? "解锁回路数据" : "锁定回路数据");
                                 m.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding() { Converter = cvt, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new RelayCommand(() =>
                                 {
                                     circuitVM.CircuitLock = !circuitVM.CircuitLock;
                                 });
@@ -1975,11 +2097,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 menu.Items.Add(m);
                                 m.Header = "分配负载";
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new RelayCommand(() =>
                                 {
                                     var w = new Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                     var ctrl = new UserContorls.ThPDSLoadDistribution();
-                                    ctrl.btnYes.Command = new PDSCommand(() =>
+                                    ctrl.btnYes.Command = new RelayCommand(() =>
                                     {
                                         w.Close();
                                     });
@@ -1992,11 +2114,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 menu.Items.Add(m);
                                 m.Header = "删除";
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new RelayCommand(() =>
                                 {
                                     var r = MessageBox.Show("是否需要自动选型？\n注：已锁定的设备不会重新选型。", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                                     if (r == MessageBoxResult.Cancel) return;
-                                    var vertice = graph.Vertices.ToList()[sel.Id];
                                     ThPDSProjectGraphService.DeleteCircuit(graph, edge);
                                     UpdateCanvas();
                                 });
@@ -2015,39 +2136,28 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         Canvas.SetLeft(cvs2, item.BasePoint.X);
                         Canvas.SetTop(cvs2, -item.BasePoint.Y - offsetY);
                         hoverDict[cvs] = cvs2;
-                        dccbs += dc =>
+                        var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
+                        cvs.MouseUp += (s, e) =>
                         {
-                            var rect = new Rect(item.BasePoint.X + w1, -item.BasePoint.Y - offsetY, w2, h);
-                            dc.DrawRectangle(br, pen, rect);
-                            cbDict[rect] = () =>
+                            void Update()
                             {
-                                setSel(new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height));
-                                var ok = false;
-                                if (this.TreeView.SelectedItem is ThPDSCircuitGraphTreeModel sel)
-                                {
-                                    var vertice = graph.Vertices.ToList()[sel.Id];
-                                    var edge = graph.Edges.Where(eg => eg.Source == graph.Vertices.ToList()[sel.Id]).ToList()[i];
-                                    if (edge != null)
-                                    {
-                                        ok = true;
-                                        UpdatePropertyGrid(circuitVM);
-                                    }
-                                }
-                                if (!ok)
-                                {
-                                    UpdatePropertyGrid(null);
-                                }
-                            };
+                                SetSel(rect);
+                                UpdatePropertyGrid(circuitVM);
+                            }
+                            if (e.ChangedButton != MouseButton.Left)
+                            {
+                                if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                return;
+                            }
+                            Update();
+                            e.Handled = true;
                         };
                         cvs.Cursor = Cursors.Hand;
                         canvas.Children.Add(cvs);
                         canvas.Children.Add(cvs2);
                     }
                 }
-                foreach (var gap in insertGaps)
-                {
-                }
-                void setSel(Rect r)
+                void SetSel(Rect r)
                 {
                     selArea = r;
                     selElement.Width = r.Width;
@@ -2066,7 +2176,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     selElement = cvs;
                     canvas.Children.Add(selElement);
                 }
-                setSel(default);
+                SetSel(default);
                 {
                     {
                         {
@@ -2092,10 +2202,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             foreach (var fe in after)
                             {
-                                fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.SurgeProtection)), Converter = new EqualsThenNotVisibeConverter(PDS.Project.Module.SurgeProtectionDeviceType.None), });
+                                fe.SetBinding(UIElement.VisibilityProperty, new Binding() { Source = config.Current, Path = new PropertyPath(nameof(config.Current.SurgeProtection)), Converter = new EqualsThenNotVisibeConverter(PDS.Project.Module.SurgeProtectionDeviceType.None), });
                                 if (fe is Glyphs g)
                                 {
-                                    g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = Config.Current, Converter = cvt, Path = new PropertyPath(nameof(Config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+                                    g.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Source = config.Current, Converter = cvt, Path = new PropertyPath(nameof(config.Current.SurgeProtection)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
                                 }
                             }
                             var _info = PDSItemInfo.GetBlockDefInfo(name);
@@ -2112,7 +2222,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     var st = info.Line.StartPoint;
                                     var ed = info.Line.EndPoint;
-                                    DrawLine(canvas, trans, strockBrush, st, ed);
+                                    CreateLine(trans, strockBrush, st, ed);
                                 }
                                 {
                                     var path = new Path();
@@ -2142,7 +2252,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 foreach (var info in item.textInfos)
                                 {
-                                    var glyph = new Glyphs() { UnicodeString = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                                    var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
                                     leftTemplates.Add(glyph);
                                     if (info.Height > 0)
                                     {
@@ -2189,30 +2299,38 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         var len = busEnd.Y - busStart.Y;
                         var minLen = circuitInType == CircuitFormInType.三路进线 ? 200.0 : 100.0;
                         if (len < minLen) len = minLen;
-                        Config.Current.BusLength = len;
-                        var path = DrawLine(canvas, null, Brushes.Black, busStart, busEnd);
+                        config.Current.BusLength = len;
+                        var path = CreateLine(null, Brushes.Black, busStart, busEnd);
+                        canvas.Children.Add(path);
                         path.StrokeThickness = thickness;
-                        BindingOperations.SetBinding(path, Path.DataProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.BusLength)), Converter = new NormalValueConverter(v => new LineGeometry(busStart, busStart.OffsetXY(0, (double)v))), });
+                        BindingOperations.SetBinding(path, Path.DataProperty, new Binding() { Source = config.Current, Path = new PropertyPath(nameof(config.Current.BusLength)), Converter = new NormalValueConverter(v => new LineGeometry(busStart, busStart.OffsetXY(0, (double)v))), });
                     }
                     var cvs = new Canvas
                     {
                         Width = width,
                         Background = Brushes.Transparent,
                     };
-                    BindingOperations.SetBinding(cvs, FrameworkElement.HeightProperty, new Binding() { Source = Config.Current, Path = new PropertyPath(nameof(Config.Current.BusLength)) });
+                    BindingOperations.SetBinding(cvs, FrameworkElement.HeightProperty, new Binding() { Source = config.Current, Path = new PropertyPath(nameof(config.Current.BusLength)) });
                     Canvas.SetLeft(cvs, busStart.X - (width - thickness / 2) / 2);
                     Canvas.SetTop(cvs, busStart.Y);
                     hoverDict[cvs] = cvs;
                     cvs.MouseUp += (s, e) =>
                     {
-                        if (e.ChangedButton != MouseButton.Left) return;
-                        setSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
-                        UpdatePropertyGrid(boxVM);
+                        void Update()
+                        {
+                            SetSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
+                            UpdatePropertyGrid(boxVM);
+                        }
+                        if (e.ChangedButton != MouseButton.Left)
+                        {
+                            if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                            return;
+                        }
+                        Update();
                         e.Handled = true;
                     };
                     {
                         var menu = new ContextMenu();
-                        var vertice = graph.Vertices.ToList()[sel.Id];
                         cvs.ContextMenu = menu;
                         {
                             var mi = new MenuItem();
@@ -2237,7 +2355,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 mi.Items.Add(m);
                                 m.Header = outType;
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new RelayCommand(() =>
                                 {
                                     ThPDSProjectGraphService.AddCircuit(graph, vertice, outType);
                                     UpdateCanvas();
@@ -2255,7 +2373,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = new MenuItem();
                                 mi.Items.Add(m);
                                 m.Header = inType;
-                                m.Command = new PDSCommand(() =>
+                                m.Command = new RelayCommand(() =>
                                 {
                                     ThPDSProjectGraphService.UpdateFormInType(graph, vertice, inType);
                                     UpdateCanvas();
@@ -2269,7 +2387,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     void f(object sender, MouseButtonEventArgs e)
                     {
-                        if (e.ChangedButton != MouseButton.Left) return;
+                        if (e.ChangedButton != MouseButton.Left)
+                        {
+                            if (e.ChangedButton == MouseButton.Right && e.OriginalSource == canvas) SetSel(default);
+                            return;
+                        }
                         cbDict.Clear();
                         using (var dc = dv.RenderOpen())
                         {
@@ -2282,7 +2404,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             EnumDrawingGroup(VisualTreeHelper.GetDrawing(dv));
                             void EnumDrawingGroup(DrawingGroup drawingGroup)
                             {
-                                var drawingCollection = drawingGroup.Children;
+                                var drawingCollection = drawingGroup?.Children;
+                                if (drawingCollection is null) return;
                                 foreach (Drawing drawing in drawingCollection)
                                 {
                                     if (drawing is DrawingGroup group)
@@ -2311,7 +2434,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                         if (!ok)
                         {
-                            setSel(default);
+                            SetSel(default);
                             UpdatePropertyGrid(boxVM);
                         }
                         e.Handled = true;
@@ -2335,7 +2458,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             UpdateCanvas();
         }
-        private static Path DrawLine(Canvas canvas, Transform trans, Brush strockBrush, Point st, Point ed)
+        private static Path CreateLine(Transform trans, Brush strockBrush, Point st, Point ed)
         {
             var geo = new LineGeometry(st, ed);
             var path = new Path
@@ -2345,7 +2468,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 Data = geo,
                 RenderTransform = trans,
             };
-            canvas.Children.Add(path);
             return path;
         }
         static readonly SolidColorBrush LightBlue3 = new SolidColorBrush(Color.FromArgb(50, 0, 0, 150));
@@ -2369,7 +2491,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 new BlockDefInfo("CPS", new GRect(0, -10, 50, 5)),
                 new BlockDefInfo("RCD", new GRect(0, -10, 50, 6)),
                 new BlockDefInfo("ATSE", new GRect(-55, -35, 0, 35)),
-                new BlockDefInfo("TSE", new GRect(-50, -26, 0, 26)),
+                new BlockDefInfo("TSE", new GRect(-55, -26, 0, 26)),
                 new BlockDefInfo("SPD", new GRect(0, -10, 78, 5)),
                 new BlockDefInfo("常规", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("漏电", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
@@ -2399,6 +2521,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 new BlockDefInfo("集中电源", new GRect(0, -320, 200, 0).Expand(0, EXPY)),
                 new BlockDefInfo("设备自带控制箱", new GRect(0, -320, 200, 0).Expand(0, EXPY)),
                 new BlockDefInfo("Motor", new GRect(-10, -10, 10, 10)),
+                new BlockDefInfo("直接表", new GRect(0, -7, 50, 7)),
+                new BlockDefInfo("间接表", new GRect(0, -7, 50, 7)),
                 new BlockDefInfo("Meter", new GRect(-10, -4, 10, 10)),
                 new BlockDefInfo("CT", new GRect(0, -8, 50, 18)),
                 new BlockDefInfo("1路进线", new GRect(0, -140, 200, -2)),
@@ -2407,6 +2531,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 new BlockDefInfo("分支小母排", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("小母排分支", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
                 new BlockDefInfo("消防应急照明回路（WFEL）", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
+                new BlockDefInfo("过欠电压保护器", new GRect(0, -10, 50, 10)),
             };
             public static BlockDefInfo GetBlockDefInfo(string blkName)
             {
@@ -2418,6 +2543,142 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 r.BasePoint = px;
                 switch (name)
                 {
+                    case "直接表":
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(19.9599999999998, -5.90769230769251), "kWh", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 0.999999999999318), px.OffsetXY(35, 1)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(14.9999999999998, -6.99999999999977), px.OffsetXY(34.9999999999998, -6.99999999999977)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 6.99999999999977), px.OffsetXY(14.9999999999998, -6.99999999999977)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 6.99999999999977), px.OffsetXY(35, 6.99999999999977)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35, 6.99999999999977), px.OffsetXY(34.9999999999998, -6.99999999999977)), "0"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(34.9999999999998, 0), px.OffsetXY(50, 0)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(14.9999999999998, 0), px.OffsetXY(0, 0)), "E-UNIV-WIRE"));
+                        break;
+                    case "过欠电压保护器":
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(15.0000000000033, 0)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15.0000000000033, -9.99999999999727), px.OffsetXY(35.0000000000033, -9.99999999999727)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, -9.99999999999727), px.OffsetXY(35.0000000000033, 10.0000000000027)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, 10.0000000000027), px.OffsetXY(15.0000000000033, 10.0000000000027)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15.0000000000033, 10.0000000000027), px.OffsetXY(15.0000000000033, -9.99999999999727)), "E-UNIV-Oppo"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(22.7249999998486, -5.50000000050886), "U", "E-UNIV-EL", "TH-STYLE3") { Height = 13, });
+                        break;
+                    case "1路进线（带电表）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -40)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(140, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "2路进线ATSE（带电表）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -60)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(200, 0)), "内框"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(0, 0)), "内框"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "3路进线（带电表）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
+                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -165)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(200, 0)), "内框"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(0, 0)), "内框"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -155), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "1路进线（带过欠电压保护）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -40)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(155, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "2路进线ATSE（带过欠电压保护）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -60)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
+                    case "3路进线（带过欠电压保护）":
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
+                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
+                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -165)));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -165), px.OffsetXY(155, -165)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -155), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
+                        break;
                     case "1路进线":
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
@@ -2428,41 +2689,44 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     case "2路进线ATSE":
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(150, -60)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(95, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(95, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(150, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
                         break;
                     case "3路进线":
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(150, -60)));
-                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(145, -165)));
+                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(95, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(95, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(150, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(82, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(82, -115), px.OffsetXY(82, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(82, -145), px.OffsetXY(95, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(95, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(145, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
                         r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
                         break;
                     case "集中电源":
                         r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -240)));
@@ -3004,14 +3268,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(-5, 0)), "E-UNIV-Oppo"));
                         break;
                     case "TSE":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-50, 20), px.OffsetXY(-29, 20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-29, 14), px.OffsetXY(-29, 26)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, 20), px.OffsetXY(-34, 20)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, 14), px.OffsetXY(-34, 26)), "E-UNIV-Oppo"));
                         r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(0, 0)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-26, 20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-50, -20), px.OffsetXY(-29, -20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-29, -14), px.OffsetXY(-29, -26)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-26, -20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(-39.5, 0)), "E-UNIV-Oppo"));
+                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, 20), 3), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, -20), px.OffsetXY(-34, -20)), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, -14), px.OffsetXY(-34, -26)), "E-UNIV-Oppo"));
+                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, -20), 3), "E-UNIV-Oppo"));
+                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(-44.5, 0)), "E-UNIV-Oppo"));
                         break;
                     case "SPD附件":
                         r.brInfos.Add(new BlockInfo("SPD", "E-UNIV-Oppo", px.OffsetXY(0, -40)));

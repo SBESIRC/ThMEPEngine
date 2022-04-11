@@ -154,13 +154,14 @@
     <Compile Include="EarthingGrid\Generator\Connect\EarthGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\GridGenerator.cs" />
     <Compile Include="EarthingGrid\Generator\Data\ClassData.cs" />
+    <Compile Include="EarthingGrid\Generator\Data\LayerDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Data\PreProcess.cs" />
-    <Compile Include="EarthingGrid\Generator\Test\test.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\AreaDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\BorderNearConnect.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\GetObjects.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\GraphDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\LineDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\MergeGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\PointsDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\RangeConfine.cs" />
     <Compile Include="EarthingGrid\Generator\Utils\ShowInfo.cs" />

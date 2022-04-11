@@ -251,7 +251,7 @@ namespace ThMEPWSS.Command
                             break;
                         default:
                             break;
-                    }
+                    } 
                     var toDbService = new ThWaterWellToDBService();
                     foreach (var info in WellConfigInfo)
                     {

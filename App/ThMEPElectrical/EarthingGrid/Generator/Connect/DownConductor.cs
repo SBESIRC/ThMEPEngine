@@ -60,7 +60,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 
         private static void ConnectWithEarthGrid(List<HashSet<Point3d>> ptGroups, ref Dictionary<Point3d, HashSet<Point3d>> earthGrid)
         {
-            var lines = LineDealer.Graph2Tuples(earthGrid);
+            var lines = LineDealer.Graph2Lines(earthGrid);
             foreach (var ptGroup in ptGroups)
             {
                 double minDis = double.MaxValue;
@@ -84,7 +84,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 if(cloestBasePt != new Point3d() && cloestPt != new Point3d())
                 {
                     GraphDealer.AddLineToGraph(cloestBasePt, cloestPt, ref earthGrid);
-                    ShowInfo.ShowLine(cloestBasePt, cloestPt, 6);
                 }
             }
         }

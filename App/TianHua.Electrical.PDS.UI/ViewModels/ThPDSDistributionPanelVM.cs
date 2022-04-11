@@ -11,7 +11,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
 {
     public class ThPDSDistributionPanelVM
     {
-        public AdjacencyGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge<ThPDSProjectGraphNode>> Graph { get; set; }
+        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
 
         public ThPDSCircuitGraphTreeModel GraphTreeModel { get; private set; }
     }

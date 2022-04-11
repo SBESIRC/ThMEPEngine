@@ -50,12 +50,15 @@ namespace ThMEPWSS.Command
                     var userOutFrame = frame.GetUserFrame(acad, originTransformer);
                     frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
                     var rooms = CalAllRoomPolylines(thRooms);
-                    var roomWalls = CalStructrueService.GetRoomWall(rooms, userOutFrame);
+                    var roomWalls = CalStructrueService.GetRoomWall(rooms.Keys.ToList(), userOutFrame);
                     var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
                     holeWalls.AddRange(columns);
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
-                    var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
-                    verticalPipe.AddRange(drainingEquipment);
+                    if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)        //不考虑一层出户不需要读取洁具立管
+                    {
+                        var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
+                        verticalPipe.AddRange(drainingEquipment);
+                    }
                     var sewagePipes = frame.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = frame.GetAxis(acad, originTransformer);
@@ -86,23 +89,23 @@ namespace ThMEPWSS.Command
         /// </summary>
         /// <param name="thRooms"></param>
         /// <returns></returns>
-        private List<Polyline> CalAllRoomPolylines(List<ThIfcRoom> thRooms)
+        private Dictionary<Polyline, List<string>> CalAllRoomPolylines(List<ThIfcRoom> thRooms)
         {
-            var roomPolys = new List<Polyline>();
+            var polyDic = new Dictionary<Polyline, List<string>>();
             foreach (var room in thRooms)
             {
                 if (room.Boundary is Polyline polyline)
                 {
-                    roomPolys.Add(polyline);
+                    polyDic.Add(polyline, room.Tags);
                 }
                 else if (room.Boundary is MPolygon mPolygon)
                 {
-                    roomPolys.Add(mPolygon.Shell());
-                    roomPolys.AddRange(mPolygon.Holes());
+                    polyDic.Add(mPolygon.Shell(), room.Tags);
+                    //roomPolys.AddRange(mPolygon.Holes());
                 }
             }
 
-            return roomPolys;
+            return polyDic;
         }
 
         /// <summary>

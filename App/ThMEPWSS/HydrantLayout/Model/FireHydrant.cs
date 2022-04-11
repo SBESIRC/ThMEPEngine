@@ -132,7 +132,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             TFireDirList.Add(vBasePoint);
             //9
             TFireCenterPointList.Add(BasePoint + clockwise270 * 0.5 * (ss - vp) + vBasePoint * (vp + 0.5 * ls) );
-            TFireDirList.Add(clockwise90);
+            TFireDirList.Add(clockwise270);
             //10
             TFireCenterPointList.Add(BasePoint + clockwise90 * 0.5 * (ss - vp) +  vBasePoint * (vp + 0.5 * ls));
             TFireDirList.Add(clockwise90);
@@ -220,14 +220,14 @@ namespace ThMEPWSS.HydrantLayout.Model
         {
             int end = -1;
             List<Polyline> plList = new List<Polyline>();
-            if (tIndex <= 5)
+            if (tIndex <= 10)
             {
                 end = 2;
             }
-            else if (tIndex > 5 && tIndex < 10)
-            {
-                end = 4;
-            }
+            //else if (tIndex > 5 && tIndex < 10)
+            //{
+            //    end = 4;
+            //}
             for (int i = 0; i < end; i++)
             {
                 plList.Add(GetDoorAreaObb(tIndex, i));

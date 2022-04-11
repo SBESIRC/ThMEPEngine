@@ -94,6 +94,7 @@ namespace ThMEPWSS.Hydrant.Service
         private DBObjectCollection Intersection(Entity first, Entity other)
         {
             var results = ThCADCoreNTSEntityExtension.Intersection(first, other,true);
+            results = RemoveDBpoints(results);
             results = results.ClearZeroPolygon(); //清除面积为零
             results = results.MakeValid(); //解决自交的Case
             results = results.ClearZeroPolygon(); //清除面积为零
@@ -106,12 +107,18 @@ namespace ThMEPWSS.Hydrant.Service
         {
             //减去不在Entity里面的东西
             var results = ThCADCoreNTSEntityExtension.Difference(entity, objs,true);
+            results = RemoveDBpoints(results);
             results = results.ClearZeroPolygon(); //清除面积为零
             results = results.MakeValid(); //解决自交的Case
             results = results.ClearZeroPolygon(); //清除面积为零
             results = DuplicatedRemove(results); //去重
             var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
             return bufferDic.Where(o => entity.EntityContains(o.Value)).Select(o => o.Key).ToCollection();
+        }
+
+        private DBObjectCollection RemoveDBpoints(DBObjectCollection objs)
+        {
+            return objs.OfType<Entity>().Where(e => !(e is DBPoint)).ToCollection();
         }
 
         private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
