@@ -18,6 +18,8 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public ThDrainageTreeNode TerminalPair { get; set; } //如果是末端node，对应热/冷水口
         public bool IsCool { get; set; }
 
+        public int Dim { get; set; }
+
         public ThDrainageTreeNode(Point3d pt)
         {
             Node = pt;
@@ -124,6 +126,16 @@ namespace ThMEPWSS.DrainageADPrivate.Model
             }
 
             return i;
+        }
+
+        public ThDrainageTreeNode GetRoot()
+        {
+            var p = Parent;
+            while (p != null)
+            {
+                p = p.Parent;
+            }
+            return p;
         }
     }
 }

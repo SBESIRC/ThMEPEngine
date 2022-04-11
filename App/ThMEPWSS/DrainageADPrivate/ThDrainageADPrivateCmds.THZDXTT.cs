@@ -23,6 +23,7 @@ using ThMEPEngineCore.IO;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageADPrivate.Data;
 using ThMEPWSS.DrainageADPrivate.Cmd;
+using ThMEPWSS.DrainageADPrivate.Model;
 using ThMEPWSS.DrainageADPrivate;
 
 namespace ThMEPWSS
@@ -41,26 +42,26 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "ThDrainageADPNoUI", CommandFlags.Modal)]
         public void ThDrainageADPNoUI()
         {
+            var qL = ThMEPWSSUtils.SettingDouble("\nqL", 230.0);
+            var m = ThMEPWSSUtils.SettingDouble("\nm", 3.5);
+            var Kh = ThMEPWSSUtils.SettingDouble("\nKh", 1.5);
 
-            //var hintObject = new Dictionary<string, (string, string)>()
-            //            {{"0",("0","消火栓")},
-            //            {"1",("1","灭火器")},
-            //            {"2",("2","消火栓 & 灭火器")},
-            //            };
-            //var layoutObject = ThHydrantUtil.SettingSelection("\n优化对象", hintObject, "2");
-            //var radius = ThHydrantUtil.SettingInt("\n半径", 3000);
+            var BlockNameDict = new Dictionary<string, List<string>>() {
+                                        { "拖把池", new List<string>() { "A-Kitchen-9"}},
+                                        { "洗衣机", new List<string>() {  "sdr ter t","A-Toilet-9"} } ,
+                                        { "阳台洗手盆",new List<string> { } },
+                                        { "厨房洗涤盆", new List<string>() { "edrcgergc", "A-Kitchen-4" } } ,
+                                        { "坐便器", new List<string>() { "fdtes", "A-Toilet-5" } } ,
+                                        { "单盆洗手台", new List<string>() { "EWRYTY","xishoupen", "A-Toilet-1" } } ,
+                                        { "双盆洗手台", new List<string>() { } } ,
+                                        { "淋浴器", new List<string>() { "QADAD", "WF" } } ,
+                                        { "浴缸", new List<string>() { "A-Toilet-6" } } ,
+                                        };
 
-
-            //var hintMode = new Dictionary<string, (string, string)>()
-            //            {{"0",("0","一字")},
-            //            {"1",("1","L字")},
-            //            {"2",("2","自由布置")},
-            //            };
-            //var layoutMode = ThHydrantUtil.SettingSelection("\n摆放方式", hintMode, "2");
-
-            //HydrantLayoutSetting.Instance.LayoutObject = Convert.ToInt32(layoutObject);
-            //HydrantLayoutSetting.Instance.SearchRadius = radius;
-            //HydrantLayoutSetting.Instance.LayoutMode = Convert.ToInt32(layoutMode);
+            ThDrainageADSetting.Instance.qL = qL;
+            ThDrainageADSetting.Instance.m = m;
+            ThDrainageADSetting.Instance.Kh = Kh;
+            ThDrainageADSetting.Instance.BlockNameDict = BlockNameDict;
 
             using (var cmd = new ThDrainageADPCmd())
             {
@@ -94,15 +95,15 @@ namespace ThMEPWSS
                 var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
 
                 var BlockNameDict = new Dictionary<string, List<string>>() {
-                                        { "拖把池", new List<string>() { }},
-                                        { "洗衣机", new List<string>() {  "sdr ter t"} } ,
+                                        { "拖把池", new List<string>() { "A-Kitchen-9"}},
+                                        { "洗衣机", new List<string>() {  "sdr ter t","A-Toilet-9"} } ,
                                         { "阳台洗手盆",new List<string> { } },
-                                        { "厨房洗涤盆", new List<string>() { "edrcgergc", } } ,
-                                        { "坐便器", new List<string>() { "fdtes" } } ,
-                                        { "单盆洗手台", new List<string>() { "EWRYTY","xishoupen" } } ,
+                                        { "厨房洗涤盆", new List<string>() { "edrcgergc", "A-Kitchen-4" } } ,
+                                        { "坐便器", new List<string>() { "fdtes", "A-Toilet-5" } } ,
+                                        { "单盆洗手台", new List<string>() { "EWRYTY","xishoupen", "A-Toilet-1" } } ,
                                         { "双盆洗手台", new List<string>() { } } ,
                                         { "淋浴器", new List<string>() { "QADAD", "WF" } } ,
-                                        { "浴缸", new List<string>() { } } ,
+                                        { "浴缸", new List<string>() { "A-Toilet-6" } } ,
 
                 };
 

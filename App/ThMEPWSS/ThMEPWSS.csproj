@@ -42,7 +42,11 @@
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
     <Compile Include="DrainageADPrivate\Data\ThTCHValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThValveRecognitionEngine.cs" />
+    <Compile Include="DrainageADPrivate\Engine\ThCalculateDimEngine.cs" />
+    <Compile Include="DrainageADPrivate\Engine\ThDraingeTreeEngine.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageADSetting.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreatePipePlugService.cs" />
@@ -60,7 +64,6 @@
     <Compile Include="DrainageADPrivate\Data\ThDrainageADPrivateDataFactory.cs" />
     <Compile Include="DrainageADPrivate\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThTCHPipeRecognitionEngine.cs" />
-    <Compile Include="DrainageADPrivate\Model\ThDrainageADNode.cs" />
     <Compile Include="DrainageADPrivate\Model\ThSaniterayTerminal.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADCommon.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THZDXTT.cs" />

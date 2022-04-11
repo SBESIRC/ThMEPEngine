@@ -162,7 +162,10 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public Point3d GetStartPt()
         {
             var pt = new Point3d();
-            pt = StartPt.First().GeometricExtents.ToRectangle().GetCenter();
+            if (StartPt .Count >0)
+            {
+                pt = StartPt.First().GeometricExtents.ToRectangle().GetCenter();
+            }
             return pt;
         }
 

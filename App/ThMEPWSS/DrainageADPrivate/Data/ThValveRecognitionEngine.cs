@@ -17,7 +17,7 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.DrainageADPrivate.Data
 {
-    internal class ThValveExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThValveExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> BlockNameList { get; set; } = new List<string>();
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -101,7 +101,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         }
     }
 
-    internal class ThValveExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThValveExtractionEngine : ThDistributionElementExtractionEngine
     {
         public List<string> LayerFilter { get; set; } = new List<string>();
         public List<string> BlockNameList { get; set; } = new List<string>();
@@ -130,7 +130,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
     }
 
-    internal class ThValveRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThValveRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public List<string> LayerFilter { get; set; } = new List<string>();
         public List<string> BlockNameList { get; set; } = new List<string>();

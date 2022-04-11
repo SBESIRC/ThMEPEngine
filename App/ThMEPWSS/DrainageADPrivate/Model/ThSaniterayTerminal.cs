@@ -14,10 +14,10 @@ namespace ThMEPWSS.DrainageADPrivate.Model
 {
     internal class ThSaniterayTerminal
     {
-        internal Polyline Boundary { get; set; }
-        internal BlockReference Data { get; set; }
-        internal string Name { get; set; }
-        internal ThDrainageADCommon.TerminalType Type { get; set; }
+        public Polyline Boundary { get; set; }
+        public BlockReference Data { get; set; }
+        public string Name { get; set; }
+        public ThDrainageADCommon.TerminalType Type { get; set; }
 
     }
 }
