@@ -408,6 +408,7 @@ namespace TianHua.Electrical.PDS.Project
                         edge.Details.CircuitForm = new RegularCircuit()
                         {
                             breaker = componentFactory.CreatBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
                         };
                         break;
                     }
@@ -416,6 +417,7 @@ namespace TianHua.Electrical.PDS.Project
                         edge.Details.CircuitForm = new LeakageCircuit()
                         {
                             breaker= componentFactory.CreatResidualCurrentBreaker(),
+                            Conductor = componentFactory.CreatConductor(),
                         };
                         break;
                     }
@@ -425,6 +427,7 @@ namespace TianHua.Electrical.PDS.Project
                         {
                             breaker= componentFactory.CreatBreaker(),
                             contactor = componentFactory.CreatContactor(),
+                            Conductor = componentFactory.CreatConductor(),
                         };
                         break;
                     }
@@ -434,6 +437,7 @@ namespace TianHua.Electrical.PDS.Project
                         {
                             breaker= componentFactory.CreatBreaker(),
                             thermalRelay = componentFactory.CreatThermalRelay(),
+                            Conductor = componentFactory.CreatConductor(),
                         };
                         break;
                     }

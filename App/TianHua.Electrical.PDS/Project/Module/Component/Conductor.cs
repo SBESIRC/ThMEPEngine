@@ -16,6 +16,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
+            if(!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             Phase = phase;
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(calculateCurrent);
@@ -30,6 +34,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.ComponentType = ComponentType.Conductor;
             this.IsMotor = true;
             this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             //3x2.5+E2.5
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
@@ -45,6 +53,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.IsMotor = true;
             this.IsControlCircuit = true;
             this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             ChooseMaterial(conductorType);
             ChooseCrossSectionalArea(conductorConfig);
             ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
@@ -413,7 +425,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                     default:
                         {
-                            throw new NotSupportedException();
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
                         }
                 }
             }

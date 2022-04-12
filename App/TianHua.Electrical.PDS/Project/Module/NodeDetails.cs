@@ -68,6 +68,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
+            PhaseSequence = PhaseSequence.L123;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
             SmallBusbars = new Dictionary<SmallBusbar, List<ThPDSProjectGraphEdge>>();
