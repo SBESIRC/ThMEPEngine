@@ -151,9 +151,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public bool MatchRiser(Point3d pt, ThRiserInfo riser)
         {
             bool isMatch = false;
+            double tol = 80;//老版本:50
             foreach(var p in riser.RiserPts)
             {
-                if(p.DistanceTo(pt) < 50.0)
+                if(p.DistanceTo(pt) < tol)
                 {
                     isMatch = true;
                     riser.RiserPts.Remove(p);

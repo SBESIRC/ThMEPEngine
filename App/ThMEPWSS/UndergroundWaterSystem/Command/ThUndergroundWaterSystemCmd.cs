@@ -75,14 +75,23 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     {
                         InfoModel.FloorList[i].FloorInfo = floorInfoExtractionService.GetFloorInfo(InfoModel.FloorList[i], i);
                     }
-
                     //处理楼层立管数据
                     var floorHandleService = new ThFloorHandleService();
                     floorHandleService.MatchRiserMark(InfoModel.FloorList);
                     var risers = floorHandleService.MergeRiser(InfoModel.FloorList);
+                    //处理横管
+                    var riserpoints = new List<Point3d>();
+                    foreach (var riser in risers)
+                        riserpoints.AddRange(riser.RiserPts);
+                    for (int i = 0; i < InfoModel.FloorList.Count; i++)
+                    {
+                        ThPipeLineHandleService pipeLineHandleService = new ThPipeLineHandleService();
+                        InfoModel.FloorList[i].FloorInfo.PipeLines = pipeLineHandleService.ConnectLinesWithSpacing(
+                            InfoModel.FloorList[i].FloorInfo.PipeLines, riserpoints);
+                    }                   
                     //构造树
-                    var pipeTree = new ThPipeTree(startPt, InfoModel.FloorList, risers,mt);
-                    if(pipeTree.RootNode == null)
+                    var pipeTree = new ThPipeTree(startPt, InfoModel.FloorList, risers, mt);
+                    if (pipeTree.RootNode == null)
                     {
                         //生成数据错
                         return;
