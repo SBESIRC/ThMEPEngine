@@ -52,15 +52,17 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "排水平面"
+          - text: "布置优化"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "连管编号"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "消火栓系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "排水系统"
+          - text: "范围校核"
             attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "给水系统"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "消火栓系统"
+          - text: "距离校核"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWUNDERGROUNDPLAN"

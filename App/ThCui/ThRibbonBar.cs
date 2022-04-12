@@ -544,25 +544,43 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 消火栓连管
+                // 布置优化
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("消火栓连管",
-                    "天华消火栓连管",
-                    "THDXXHS",
-                    "天华消火栓连管",
-                    "IDI_THCAD_THDXXHS_SMALL",
-                    "IDI_THCAD_THDXXHS_LARGE",
+                subRow.AddNewButton("布置优化",
+                    "天华布置优化",
+                    "THXHSYH",
+                    "天华布置优化",
+                    "IDI_THCAD_THXHSYH_SMALL",
+                    "IDI_THCAD_THXHSYH_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
-                // 消火栓编号
+                // 连管编号
                 subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("消火栓编号",
-                    "天华消火栓编号",
-                    "THXHSBH",
-                    "天华消火栓编号",
-                    "IDI_THCAD_THXHSBH_SMALL",
-                    "IDI_THCAD_THXHSBH_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+                {
+                    var splitButton = subRow.AddNewSplitButton(
+                        "连管编号",
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
+                        RibbonSplitButtonListStyle.IconText,
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 消火栓连管
+                    splitButton.AddNewButton("消火栓连管",
+                        "天华消火栓连管",
+                        "THDXXHS",
+                        "天华消火栓连管",
+                        "IDI_THCAD_THDXXHS_SMALL",
+                        "IDI_THCAD_THDXXHS_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 消火栓编号
+                    splitButton.AddNewButton("消火栓编号",
+                        "天华消火栓编号",
+                        "THXHSBH",
+                        "天华消火栓编号",
+                        "IDI_THCAD_THXHSBH_SMALL",
+                        "IDI_THCAD_THXHSBH_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+                }
 
                 // 消火栓系统
                 subRow = subPanel.AddNewRibbonRow();
@@ -578,24 +596,24 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 布置优化
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("布置优化",
-                    "天华布置优化",
-                    "THXHSYH",
-                    "天华布置优化",
-                    "IDI_THCAD_THXHSYH_SMALL",
-                    "IDI_THCAD_THXHSYH_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
                 // 范围校核
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("范围校核",
                     "天华消火栓校核",
                     "THXHSJH",
                     "天华消火栓校核",
                     "IDI_THCAD_THXHSJH_SMALL",
                     "IDI_THCAD_THXHSJH_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 距离校核
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("距离校核",
+                    "天华距离校核",
+                    "MEASUREPATH",
+                    "天华距离校核",
+                    "IDI_THCAD_MEASUREPATH_SMALL",
+                    "IDI_THCAD_MEASUREPATH_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
         }
