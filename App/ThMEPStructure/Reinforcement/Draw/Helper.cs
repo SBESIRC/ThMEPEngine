@@ -328,7 +328,7 @@ namespace ThMEPStructure.Reinforcement.Draw
 
         public static void CreateRectAndLabel(Point3d Left, Point3d Right, int num, int size, List<Polyline> polylist, List<DBText> txtlist, double dist1, double dist2, int type, double width)
         {
-
+            //生成线框加文本
             //线框
             Polyline Rect = new Polyline();
             var pts = new Point3dCollection
