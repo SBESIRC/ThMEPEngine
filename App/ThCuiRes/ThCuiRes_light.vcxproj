@@ -432,6 +432,20 @@
     <Image Include="Images\WND3_light_large.ico" />
     <Image Include="Images\WND4_light_small.ico" />
     <Image Include="Images\WND4_light_large.ico" />
+    <Image Include="Images\FINDTEXT2_light_small.ico" />
+    <Image Include="Images\FINDTEXT2_light_large.ico" />
+    <Image Include="Images\FINDTEXTINCLUDE2_light_small.ico" />
+    <Image Include="Images\FINDTEXTINCLUDE2_light_large.ico" />
+    <Image Include="Images\TEXTMERGE_light_small.ico" />
+    <Image Include="Images\TEXTMERGE_light_large.ico" />
+    <Image Include="Images\THTZ_light_small.ico" />
+    <Image Include="Images\THTZ_light_large.ico" />
+    <Image Include="Images\WZJS_light_small.ico" />
+    <Image Include="Images\WZJS_light_large.ico" />
+    <Image Include="Images\DIMLINE_light_small.ico" />
+    <Image Include="Images\DIMLINE_light_large.ico" />
+    <Image Include="Images\REDIMLINE_light_small.ico" />
+    <Image Include="Images\REDIMLINE_light_large.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

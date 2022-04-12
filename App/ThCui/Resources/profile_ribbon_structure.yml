@@ -349,6 +349,10 @@ panels:
         items:
           - text: "文字镜像"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "刷新线长"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "标多段线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlGENERALMODIFY"
     name: "GENERALMODIFY"
@@ -366,6 +370,8 @@ panels:
         items:
           - text: "属性格式刷"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "数字批处理"
+            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "尺寸避让"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
@@ -377,6 +383,8 @@ panels:
         items:
           - text: "天华快选"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "画线选文字"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlGENERALAUXILIARY"
     name: "GENERALAUXILIARY"
@@ -385,6 +393,8 @@ panels:
       - text: ""
         items:
           - text: "Z值归零"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "坐标辅助"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
 

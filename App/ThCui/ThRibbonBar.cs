@@ -1250,8 +1250,24 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
 
                 // 刷新线长
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("刷新线长",
+                    "天华刷新线长",
+                    "REDIMLINE",
+                    "天华刷新线长",
+                    "IDI_THCAD_REDIMLINE_SMALL",
+                    "IDI_THCAD_REDIMLINE_LARGE",
+                    RibbonButtonStyle.SmallWithText);
 
                 // 标多段线
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("标多段线",
+                    "天华标多段线",
+                    "DIMLINE",
+                    "天华标多段线",
+                    "IDI_THCAD_DIMLINE_SMALL",
+                    "IDI_THCAD_DIMLINE_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
         }
 
@@ -1273,6 +1289,33 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THZ0_SMALL",
                     "IDI_THCAD_THZ0_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 坐标辅助
+                subRow = subPanel.AddNewRibbonRow();
+                {
+                    var splitButton = subRow.AddNewSplitButton("坐标辅助",
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
+                        RibbonSplitButtonListStyle.IconText,
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 两点坐标系
+                    splitButton.AddNewButton("两点坐标系",
+                        "天华两点坐标系",
+                        "U2P",
+                        "天华两点坐标系",
+                        "IDI_THCAD_U2P_SMALL",
+                        "IDI_THCAD_U2P_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 世界坐标系
+                    splitButton.AddNewButton("世界坐标系",
+                        "天华世界坐标系",
+                        "GOW",
+                        "天华世界坐标系",
+                        "IDI_THCAD_GOW_SMALL",
+                        "IDI_THCAD_GOW_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+                }
             }
         }
 
@@ -1378,6 +1421,33 @@ namespace TianHua.AutoCAD.ThCui
                         "IDI_THCAD_THQS_LASTSELECT_SMALL",
                         "IDI_THCAD_THQS_LASTSELECT_LARGE",
                         RibbonButtonStyle.LargeWithText);
+                }
+
+                // 画线选文字
+                subRow = subPanel.AddNewRibbonRow();
+                {
+                    var splitButton = subRow.AddNewSplitButton("画线选文字",
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
+                        RibbonSplitButtonListStyle.IconText,
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 相同文字选择
+                    splitButton.AddNewButton("相同文字选择",
+                        "天华相同文字选择",
+                        "FINDTEXT2",
+                        "天华相同文字选择",
+                        "IDI_THCAD_FINDTEXT2_SMALL",
+                        "IDI_THCAD_FINDTEXT2_LARGE",
+                        RibbonButtonStyle.SmallWithText);
+
+                    // 包含文字选择
+                    splitButton.AddNewButton("包含文字选择",
+                        "天华包含文字选择",
+                        "FINDTEXTINCLUDE2",
+                        "天华包含文字选择",
+                        "IDI_THCAD_FINDTEXTINCLUDE2_SMALL",
+                        "IDI_THCAD_FINDTEXTINCLUDE2_LARGE",
+                        RibbonButtonStyle.SmallWithText);
                 }
             }
         }
@@ -1513,6 +1583,14 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
 
                 // 数字批处理
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("数字批处理",
+                    "天华数字批处理",
+                    "WZJS",
+                    "天华数字批处理",
+                    "IDI_THCAD_WZJS_SMALL",
+                    "IDI_THCAD_WZJS_LARGE",
+                    RibbonButtonStyle.SmallWithText);
 
                 // 尺寸避让
                 subRow = subPanel.AddNewRibbonRow();
@@ -1522,6 +1600,30 @@ namespace TianHua.AutoCAD.ThCui
                     "调整交叉或重叠的标注文字以避免发生位置冲突",
                     "IDI_THCAD_THDTA_SMALL",
                     "IDI_THCAD_THDTA_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 文字合并
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("文字合并",
+                    "天华文字合并",
+                    "TEXTMERGE",
+                    "天华文字合并",
+                    "IDI_THCAD_TEXTMERGE_SMALL",
+                    "IDI_THCAD_TEXTMERGE_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 云线提资
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("云线提资",
+                    "天华云线提资",
+                    "TH-TZ",
+                    "天华云线提资",
+                    "IDI_THCAD_THTZ_SMALL",
+                    "IDI_THCAD_THTZ_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
         }
