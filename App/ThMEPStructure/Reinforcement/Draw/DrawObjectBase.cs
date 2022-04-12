@@ -332,8 +332,10 @@ namespace ThMEPStructure.Reinforcement.Draw
         protected void DrawLinkLabel(List<Point2d> pts, bool flag, string text, double length1, double length2)
         {
             DBText dbText = new DBText();
-            if (pts.Count == 1) dbText.TextString = text.Substring(1);
-            else dbText.TextString = text;
+            string s;
+            if (pts.Count == 1) s = text.Substring(1);
+            else s = text;
+            dbText.TextString = s.Replace("C", "%%132");
             dbText.Height = 300;
             if (pts.Count != 1)
             {
