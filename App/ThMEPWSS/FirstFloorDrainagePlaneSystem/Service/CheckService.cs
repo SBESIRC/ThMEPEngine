@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
 {
@@ -53,6 +54,30 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         public static bool CheckIntersectWithHoles(Curve line, List<Polyline> holes)
         {
             return holes.Any(x => x.IsIntersects(line));
+        }
+
+        /// <summary>
+        /// 判断立管类型是否相等
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="otherType"></param>
+        /// <returns></returns>
+        public static bool CheckVerticalType(VerticalPipeType type, VerticalPipeType otherType)
+        {
+            if (type == otherType)
+            {
+                return true;
+            }
+            else if (type != VerticalPipeType.CondensatePipe && type != VerticalPipeType.rainPipe && otherType != VerticalPipeType.CondensatePipe && otherType != VerticalPipeType.rainPipe)
+            {
+                return true;
+            }
+            else if ((type == VerticalPipeType.CondensatePipe || type == VerticalPipeType.rainPipe) && (otherType == VerticalPipeType.CondensatePipe || otherType == VerticalPipeType.rainPipe))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

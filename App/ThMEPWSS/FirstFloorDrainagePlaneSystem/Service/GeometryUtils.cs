@@ -277,5 +277,58 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             }
             return breakPoly1.GetClosestPointTo(sp, false).DistanceTo(sp) < breakPoly2.GetClosestPointTo(sp, false).DistanceTo(sp) ? breakPoly1 : breakPoly2;
         }
+
+        /// <summary>
+        /// 判断两根线是否相等
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="otherLine"></param>
+        /// <returns></returns>
+        public static bool IsEqualLine(this Line line, Line otherLine)
+        {
+            return (line.StartPoint.IsEqualTo(otherLine.StartPoint) && line.EndPoint.IsEqualTo(otherLine.EndPoint)) ||
+                (line.EndPoint.IsEqualTo(otherLine.StartPoint) && line.StartPoint.IsEqualTo(otherLine.EndPoint));
+        }
+
+        /// <summary>
+        /// 根据某个方向创建矩阵
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Matrix3d GetMatrix(Vector3d dir)
+        {
+            var xDir = dir;
+            var yDir = Vector3d.ZAxis.CrossProduct(xDir);
+            var zDir = Vector3d.ZAxis;
+            Matrix3d matrix = new Matrix3d(new double[]{
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0});
+            return matrix;
+        }
+
+        /// <summary>
+        /// 将polyline末端缩短一点长度
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Polyline ShortenPolyline(Polyline polyline, double length)
+        {
+            var polyNum = polyline.NumberOfVertices;
+            var pt1 = polyline.GetPoint3dAt(polyNum - 1);
+            var pt2 = polyline.GetPoint3dAt(polyNum - 2);
+            var dir = (pt2 - pt1).GetNormal();
+            var lastPt = pt1 + dir * length;
+            Polyline resPoly = new Polyline();
+            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+            {
+                resPoly.AddVertexAt(resPoly.NumberOfVertices, polyline.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+            }
+            resPoly.AddVertexAt(resPoly.NumberOfVertices, lastPt.ToPoint2D(), 0, 0, 0);
+            return resPoly;
+        }
     }
 }

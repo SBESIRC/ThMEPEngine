@@ -162,17 +162,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
-                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
-                using (acad.Database.GetDocument().LockDocument())
-                {
-                    foreach (var item in weightHoles)
-                    {
-                        foreach (var s in item.Key)
-                        {
-                           //acad.ModelSpace.Add(s);
-                        }
-                    }
-                }
+                //using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                //using (acad.Database.GetDocument().LockDocument())
+                //{
+                //    foreach (var item in weightHoles)
+                //    {
+                //        foreach (var s in item.Key)
+                //        {
+                //           //acad.ModelSpace.Add(s);
+                //        }
+                //    }
+                //}
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
@@ -180,6 +180,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         route.printCircle = pipe.PipeCircle;
                     }
+                    route.connecLine = closetLine.Key;
                     resRoutes.Add(route);
                 }
             }
@@ -236,8 +237,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (closePoly != null)
                 {
                     var dir = StructGeoService.GetPolylineDir(closePoly);
-                    var matrix = GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
-                    var classifyMatrix = GetMatrix(dir);
+                    var matrix = GeometryUtils.GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
+                    var classifyMatrix = GeometryUtils.GetMatrix(dir);
                     var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(classifyMatrix.Inverse())).ToList();
                     double minX = polyPts.OrderBy(x => x.X).First().X;
                     double maxX = polyPts.OrderByDescending(x => x.X).First().X;
@@ -300,25 +301,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 else
                     return pipes.OrderBy(x => Math.Floor(x.Value.Y)).ThenByDescending(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
             }
-        }
-
-        /// <summary>
-        /// 根据某个方向排序点
-        /// </summary>
-        /// <param name="pts"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        public Matrix3d GetMatrix(Vector3d dir)
-        {
-            var xDir = dir;
-            var yDir = Vector3d.ZAxis.CrossProduct(xDir);
-            var zDir = Vector3d.ZAxis;
-            Matrix3d matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
-                    0.0, 0.0, 0.0, 1.0});
-            return matrix;
         }
 
         /// <summary>
