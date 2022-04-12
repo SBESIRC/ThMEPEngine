@@ -143,6 +143,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
             AlternativeTripDevice = new List<string>() { TripUnitType };
             AlternativePolesNum = new List<string>() { PolesNum };
+            Appendix = AppendixType.无;
+            AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
         }
 
         /// <summary>
@@ -194,6 +196,18 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             if (this.ComponentType == ComponentType.CB && componentType == ComponentType.组合式RCD)
             {
                 this.ComponentType = ComponentType.组合式RCD;
+                //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
+                RCDType = RCDType.A;
+                if (IsDomesticWaterPump)
+                {
+                    ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                }
+                else
+                {
+                    ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                }
+                AlternativeRCDTypes = new List<RCDType>() { RCDType.A, RCDType.AC, RCDType.B, RCDType.F };
+                AlternativeResidualCurrents = new List<ResidualCurrentSpecification>() { ResidualCurrentSpecification.Specification10, ResidualCurrentSpecification.Specification30, ResidualCurrentSpecification.Specification100, ResidualCurrentSpecification.Specification300, ResidualCurrentSpecification.Specification500 };
             }
             else if (this.ComponentType == ComponentType.组合式RCD && componentType == ComponentType.CB)
             {
