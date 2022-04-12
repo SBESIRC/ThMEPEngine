@@ -446,6 +446,10 @@
     <Image Include="Images\DIMLINE_light_large.ico" />
     <Image Include="Images\REDIMLINE_light_small.ico" />
     <Image Include="Images\REDIMLINE_light_large.ico" />
+    <Image Include="Images\GOW_light_small.ico" />
+    <Image Include="Images\GOW_light_large.ico" />
+    <Image Include="Images\U2P_light_small.ico" />
+    <Image Include="Images\U2P_light_large.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
