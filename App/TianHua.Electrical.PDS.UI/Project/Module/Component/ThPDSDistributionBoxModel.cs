@@ -17,6 +17,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             _node = graphNode;
         }
+        [Browsable(false)]
+        public double LowPower => _node.Details.LowPower;
+        [Browsable(false)]
+        public double HighPower => _node.Details.HighPower;
 
         [ReadOnly(true)]
         [Category("配电箱参数")]
