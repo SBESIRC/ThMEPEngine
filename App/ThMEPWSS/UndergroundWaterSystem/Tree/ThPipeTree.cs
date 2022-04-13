@@ -9,6 +9,7 @@ using ThCADCore.NTS;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Tree;
 using ThMEPWSS.UndergroundWaterSystem.Service;
+using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
@@ -50,13 +51,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 return;
             }
             var cleanedLines = pipeHandleService.CleanLines(seriesLines, mt);
+            var points = new List<Point3d>();
+            riserInfo.ForEach(e => points.AddRange(e.RiserPts));
+            InterrptLineByPoints(cleanedLines, points);
             //todo3:在立管处打断cleanedLines
             //找到标注
             var markList = floorList[FloorIndex].FloorInfo.MarkList;
             //提取到管径
             var dimList = floorList[FloorIndex].FloorInfo.DimList;
+            //提取到阀门
+            var valveList = floorList[FloorIndex].FloorInfo.ValveList;
             //构建PointTree
-            var pointTree = new ThPointTree(startPt, cleanedLines, riserInfo, markList, dimList);
+            var pointTree = new ThPointTree(startPt, cleanedLines, riserInfo, markList, dimList,valveList);
             //构建RootNode
             RootNode = CreateRootNode(pointTree);
         }
