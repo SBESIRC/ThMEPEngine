@@ -2230,7 +2230,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                    breaker = sbb.breaker;
+                                    breaker = sbb.Breaker;
                                     var blkVm = new ThPDSBlockViewModel();
                                     Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
@@ -2464,7 +2464,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                         Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                        breaker = sbb.breaker;
+                                        breaker = sbb.Breaker;
                                         var blkVm = new ThPDSBlockViewModel();
                                         Project.Module.Component.ThPDSBreakerModel vm;
                                         void UpdateBreakerViewModel()

@@ -11,7 +11,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 小母排
     /// </summary>
-    public class SmallBusbar
+    public class MiniBusbar
     {
         /// <summary>
         /// 用来标识小母排的唯一ID
@@ -31,11 +31,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 坑位1：预留
         /// </summary>
-        public Breaker breaker { get; set; }
+        public Breaker Breaker { get; set; }
 
         /// <summary>
         /// 坑位2：预留
         /// </summary>
-        public PDSBaseComponent reservedComponent { get; set; }
+        public PDSBaseComponent ReservedComponent { get; set; }
     }
 }

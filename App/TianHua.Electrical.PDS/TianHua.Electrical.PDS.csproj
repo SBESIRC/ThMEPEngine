@@ -152,7 +152,7 @@
     <Compile Include="Project\Module\PDSProjectModule.cs" />
     <Compile Include="Project\Module\ProjectConfigure\ProjectGlobalConfiguration.cs" />
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
-    <Compile Include="Project\Module\SmallBusbar.cs" />
+    <Compile Include="Project\Module\MiniBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Project\PDSProject.cs" />
