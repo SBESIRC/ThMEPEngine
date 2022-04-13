@@ -2072,7 +2072,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         m.Header = outType;
                                         m.Command = new RelayCommand(() =>
                                         {
-                                            edge.Details.CircuitForm.CircuitFormType = sw.Switch(outType);
+                                            ThPDSProjectGraphService.SwitchFormOutType(edge, outType);
                                             UpdateCanvas();
                                         });
                                     }
@@ -3151,6 +3151,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     UpdateCanvas();
                                 });
                             }
+                            {
+                                var m = new MenuItem();
+                                mi.Items.Add(m);
+                                m.Header = "分支母排";
+                                m.Command = new RelayCommand(() =>
+                                {
+                                    ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
+                                    UpdateCanvas();
+                                });
+                            }
                         }
                         {
                             var mi = new MenuItem();
@@ -3169,16 +3179,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     UpdateCanvas();
                                 });
                             }
-                        }
-                        {
-                            var mi = new MenuItem();
-                            menu.Items.Add(mi);
-                            mi.Header = "新建小母排";
-                            mi.Command = new RelayCommand(() =>
-                            {
-                                ThPDSProjectGraphService.AddSmallBusbar(graph, vertice);
-                                UpdateCanvas();
-                            });
                         }
                     }
                     cvs.Cursor = Cursors.Hand;
