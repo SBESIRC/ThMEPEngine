@@ -91,8 +91,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 
                 resRoutes.AddRange(routing);
             }
+            resRoutes.AddRange(RoutingOutPipe(handleConfluenceService.otherOutPoly, resRoutes));
 
-           
             return resRoutes;
         }
 
@@ -146,7 +146,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             foreach (var pipe in connectPipes)
             {
                 var allLines = sewageLines;
-                if (pipe.PipeType == VerticalPipeType.rainPipe)
+                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
                 {
                     //allLines = rainLines;
                 }
@@ -162,17 +162,51 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
-                //using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
-                //using (acad.Database.GetDocument().LockDocument())
-                //{
-                //    foreach (var item in weightHoles)
-                //    {
-                //        foreach (var s in item.Key)
-                //        {
-                //           //acad.ModelSpace.Add(s);
-                //        }
-                //    }
-                //}
+                foreach (var line in connectLine)
+                {
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
+                    if (pipe.IsEuiqmentPipe)
+                    {
+                        route.printCircle = pipe.PipeCircle;
+                    }
+                    route.connecLine = closetLine.Key;
+                    resRoutes.Add(route);
+                }
+            }
+
+            return resRoutes;
+        }
+
+        /// <summary>
+        /// 连接主管（连接污水、废水主管和立管）
+        /// </summary>
+        /// <param name="mainPipes"></param>
+        /// <returns></returns>
+        private List<RouteModel> RoutingOutPipe(List<VerticalPipeModel> outPipes, List<RouteModel> routes)
+        {
+            var resRoutes = new List<RouteModel>();
+            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var holeConnectLines = routes.Select(x => x.route).ToList();
+            foreach (var pipe in outPipes)
+            {
+                var allLines = sewageLines;
+                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
+                {
+                    //allLines = rainLines;
+                }
+                if (allLines.Count <= 0)
+                {
+                    continue;
+                }
+                var closetLine = GetClosetLane(allLines, pipe.Position, frame);
+                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, new Dictionary<Vector3d, List<Line>>());
+                Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
+                weightHoles.Add(wallPolys, double.MaxValue);
+                weightHoles.Add(CreateOtherPipeHoles(outPipes, pipe, closetLine.Key), double.MaxValue);
+                weightHoles.Add(holeConnectLines, lineWieght);
+                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
+                holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);

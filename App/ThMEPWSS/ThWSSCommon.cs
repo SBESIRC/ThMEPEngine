@@ -93,5 +93,8 @@
         //室外主管图层
         public static string OutdoorSewagePipeLayerName = "AI-室外污水主管";
         public static string OutdoorRainPipeLayerName = "AI-室外雨水主管";
+        //处理冷凝水管
+        public static string DisconnectionLayerName = "W-WSUP-EQPM";
+        public static string DisconnectionBlockName = "断线";
     }
 }

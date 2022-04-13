@@ -55,6 +55,7 @@
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreatePipePlugService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateTubeWellService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\HandleConfluenceService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Print\InsertBlockService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\RoomPolyService.cs" />
     <Compile Include="DrainageADPrivate\Data\ThVerticalPipeExtractService.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDrainageADEngine.cs" />
@@ -835,7 +836,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
     <Folder Include="HydrantLayout\tmp\Engine\" />
     <Folder Include="HydrantLayout\tmp\Model\" />
     <Folder Include="HydrantLayout\tmp\Service\" />

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
@@ -20,6 +21,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
         public override void CreateDraningSetting()
         {
             var resPipe = CalTaggingPt();
+            Print(resPipe);
         }
 
         private List<RouteModel> CalTaggingPt()
@@ -37,6 +39,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
             }
 
             return pipes;
+        }
+
+        private void Print(List<RouteModel> pipes)
+        {
+            var layoutInfos = pipes.Select(x =>
+            {
+                var route = x.route;
+                var pt = route.GetPoint3dAt(route.NumberOfVertices - 1);
+                var secPt = route.GetPoint3dAt(route.NumberOfVertices - 2);
+                var dir = (pt - secPt).GetNormal();
+                return new KeyValuePair<Point3d, Vector3d>(pt, dir);
+            }).ToList();
+            InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
         }
     }
 }
