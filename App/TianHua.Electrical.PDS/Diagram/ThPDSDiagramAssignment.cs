@@ -270,11 +270,11 @@ namespace TianHua.Electrical.PDS.Diagram
         public void TableTailAssign(AcadDatabase activeDb, BlockReference tail, ThPDSProjectGraphNode node, List<Entity> tableObjs)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, tail);
-            objs.OfType<Entity>().ForEach (o => tableObjs.Add(o)) ;
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
             var table = objs.OfType<Table>().First();
 
             // Pn
-            if(node.Details.IsDualPower)
+            if (node.Details.IsDualPower)
             {
                 CellAssign(table.Cells[0, 1], node.Details.HighPower);
             }
@@ -299,7 +299,7 @@ namespace TianHua.Electrical.PDS.Diagram
              ThPDSProjectGraphEdge edge, Scale3d scale, List<Entity> tableObjs)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, circuitBlock);
-            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o)) ;
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
             var texts = objs.OfType<DBText>().ToList();
             var components = objs.OfType<BlockReference>().ToList();
 
@@ -313,7 +313,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 功率
             var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).ToList();
-            if(power.Count == 1)
+            if (power.Count == 1)
             {
                 power[0].TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
             }
@@ -1094,7 +1094,7 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
                         var CPS1Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS1).First();
                         CPS1Text.TextString = circuit.cps1.Content();
-                        
+
                         // 元器件2
                         var srcCPS2 = CPS[1];
                         var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.cps2.ComponentType.GetDescription()];
@@ -1192,6 +1192,57 @@ namespace TianHua.Electrical.PDS.Diagram
                         throw new NotSupportedException();
                     }
             }
+        }
+
+        public Polyline SmallBusbarAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference block,
+            List<Entity> tableObjs, SmallBusbar smallBusbar, Scale3d scale)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+            var components = objs.OfType<BlockReference>().ToList();
+            var insertEngine = new ThPDSBlockInsertEngine();
+
+            // 元器件1
+            var srcBreaker = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CIRCUIT_BREAKER).First();
+            var firstPosition = srcBreaker.Position;
+            var secondPosition = new Point3d(firstPosition.X + 2750, firstPosition.Y, 0);
+
+            var firstComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.breaker.ComponentType.GetDescription()];
+            if (!firstComponentName.Equals(srcBreaker.Name))
+            {
+                var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
+                tableObjs.Add(newComponent);
+                srcBreaker.Erase();
+            }
+
+            // 元器件2
+            if (!smallBusbar.reservedComponent.IsNull())
+            {
+                var secondComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.reservedComponent.ComponentType.GetDescription()];
+                var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
+                tableObjs.Add(newComponent);
+            }
+
+            return objs.OfType<Polyline>().First();
+        }
+
+        public void ControlCircuitAssign(AcadDatabase activeDb, BlockReference block, List<Entity> tableObjs, SecondaryCircuit secondaryCircuit)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+
+            var texts = objs.OfType<DBText>().ToList();
+            // Conductor
+            var conductor = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CONDUCTOR)).First();
+            conductor.TextString = secondaryCircuit.conductor.Content;
+
+            // 回路编号
+            var circuitId = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CIRCUIT_NUMBER)).First();
+            circuitId.TextString = secondaryCircuit.CircuitID;
+
+            // 控制回路
+            var description = texts.Where(t => t.TextString.Equals(ThPDSCommon.CONTROL_CIRCUIT_DESCRIPTION)).First();
+            description.TextString = secondaryCircuit.CircuitDescription;
         }
 
         private CircuitFormInType FetchDescription(string str)

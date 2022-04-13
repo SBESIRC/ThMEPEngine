@@ -69,7 +69,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 推送Data数据
         /// </summary>
-        public void PushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
+        public void PushGraphData(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
         {
             var ProjectGraph = new BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));
@@ -87,7 +87,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 二次推送Data数据
         /// </summary>
-        public void SecondaryPushGraphData(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
+        public void SecondaryPushGraphData(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph)
         {
             var ProjectGraph = new BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge>();
             var VertexDir = graph.Vertices.ToDictionary(key => key, value => CreatProjectNode(value));

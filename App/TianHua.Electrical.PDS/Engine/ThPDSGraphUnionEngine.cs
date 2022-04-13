@@ -19,8 +19,8 @@ namespace TianHua.Electrical.PDS.Engine
             EdgeMapList = edgeMapList;
         }
 
-        public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
-            List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
+        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
+            List<BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
             ThPDSCircuitGraphNode cableTrayNode)
         {
             var cabletrayEdgeList = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
@@ -86,7 +86,7 @@ namespace TianHua.Electrical.PDS.Engine
                 }
             }
 
-            var unionGraph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            var unionGraph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             cabletrayEdgeList.ForEach(edge =>
             {
                 if (!IsContains(unionGraph, edge.Target, out var originalNode))
@@ -140,7 +140,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="node"></param>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        private bool IsContains(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
+        private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
             if (node.NodeType != PDSNodeType.None)

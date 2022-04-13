@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -9,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
 using Linq2Acad;
 using QuikGraph;
+using Dreambuild.AutoCAD;
 
 using ThCADExtension;
 using ThMEPEngineCore.Command;
@@ -112,24 +112,78 @@ namespace TianHua.Electrical.PDS.Command
 
                     // 插入出线回路
                     basePoint = new Point3d(firstRowPoint.X, firstRowPoint.Y - 1000.0 * scaleFactor, 0);
-                    var edges = Graph.OutEdges(thisNode)
-                        .OrderBy(e => e.Circuit.ID.CircuitNumber.Last())
-                        .ToList();
-                    foreach (var edge in edges)
+                    var edgeCount = 0;
+                    // 所有不在小母排/控制回路上的分支
+                    var ordinaryEdges = ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode);
+                    DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
+                    edgeCount += ordinaryEdges.Count;
+                    // 小母排节下分支
+                    thisNode.Details.SmallBusbars.Keys.ForEach(o =>
                     {
-                        if (edge.Details == null)
+                        basePoint = new Point3d(basePoint.X, basePoint.Y - 500.0 * scaleFactor, 0);
+                        var smallBusbar = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SMALL_BUSBAR, basePoint, scale);
+                        var smallBusbarLine = assignment.SmallBusbarAssign(activeDb, configDb, smallBusbar, tableObjs, o, scale);
+                        basePoint = new Point3d(basePoint.X, basePoint.Y + 500.0 * scaleFactor, 0);
+
+                        var smallBusbarEdges = ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o);
+                        DrawCircuit(smallBusbarEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, true);
+                        edgeCount += smallBusbarEdges.Count;
+
+                        if (smallBusbarEdges.Count < 2)
                         {
-                            continue;
+                            for (var i = 0; i < 2 - smallBusbarEdges.Count; i++)
+                            {
+                                insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
+                                basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                            }
                         }
-                        var outType = GetOutType(edge.Details.CircuitForm);
-                        var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
-                        assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
-                        basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
+
+                        var smallBusbarEndPoint = new Point3d(basePoint.X + 4700.0 * scaleFactor, basePoint.Y + -500.0 * scaleFactor, 0);
+                        smallBusbarLine.SetPointAt(1, smallBusbarEndPoint.ToPoint2D());
+                    });
+
+                    // 控制回路节下分支
+                    if (thisNode.Details.SecondaryCircuits.Keys.Count > 0)
+                    {
+                        thisNode.Details.SecondaryCircuits.Keys.ForEach(o =>
+                        {
+                            var controlStartPoint1 = new Point3d(basePoint.X + 1333.4936 * scaleFactor, basePoint.Y - 211.6025 * scaleFactor, 0);
+                            var controlStartPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y - 156.25 * scaleFactor, 0);
+                            var belongToCPS = false;
+
+                            var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o);
+                            DrawCircuit(controlEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, ref belongToCPS);
+                            edgeCount += controlEdges.Count;
+
+                            if (belongToCPS)
+                            {
+                                var controlCircuit = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.CONTROL_CIRCUIT_BELONG_TO_CPS, basePoint, scale);
+                                assignment.ControlCircuitAssign(activeDb, controlCircuit, tableObjs, o);
+                                var controlEndPoint1 = new Point3d(basePoint.X + 1333.4936 * scaleFactor, basePoint.Y, 0);
+                                var line = new Line(controlStartPoint1, controlEndPoint1);
+                                tableObjs.Add(line);
+                                activeDb.ModelSpace.Add(line);
+                                line.Layer = ThPDSLayerService.ControlCircuitLayer();
+                            }
+                            else
+                            {
+                                var controlCircuit = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.CONTROL_CIRCUIT_BELONG_TO_QAC, basePoint, scale);
+                                assignment.ControlCircuitAssign(activeDb, controlCircuit, tableObjs, o);
+                                var controlEndPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y, 0);
+                                var line = new Line(controlStartPoint2, controlEndPoint2);
+                                tableObjs.Add(line);
+                                activeDb.ModelSpace.Add(line);
+                                line.Layer = ThPDSLayerService.ControlCircuitLayer();
+                            }
+
+                            edgeCount++;
+                            basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                        });
                     }
 
-                    if (edges.Count < blankLineCount)
+                    if (edgeCount < blankLineCount)
                     {
-                        for (var i = 0; i < blankLineCount - edges.Count; i++)
+                        for (var i = 0; i < blankLineCount - edgeCount; i++)
                         {
                             insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
                             basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
@@ -204,6 +258,50 @@ namespace TianHua.Electrical.PDS.Command
             }
         }
 
+        private static void DrawCircuit(List<ThPDSProjectGraphEdge> edges, AcadDatabase activeDb, AcadDatabase configDb,
+            Scale3d scale, double scaleFactor, List<Entity> tableObjs, ref Point3d basePoint, bool isSmallBusbar = false)
+        {
+            foreach (var edge in edges)
+            {
+                if (edge.Details == null)
+                {
+                    continue;
+                }
+                var outType = GetOutType(edge.Details.CircuitForm);
+                if (isSmallBusbar)
+                {
+                    outType = Tuple.Create(ThPDSCommon.SMALL_BUSBAR_Circuit, 1000.0);
+                }
+                var insertEngine = new ThPDSBlockInsertEngine();
+                var assignment = new ThPDSDiagramAssignment();
+                var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
+                assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
+                basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
+            }
+        }
+
+        private static void DrawCircuit(List<ThPDSProjectGraphEdge> edges, AcadDatabase activeDb, AcadDatabase configDb,
+            Scale3d scale, double scaleFactor, List<Entity> tableObjs, ref Point3d basePoint, ref bool belongToCPS)
+        {
+            foreach (var edge in edges)
+            {
+                if (edge.Details == null)
+                {
+                    continue;
+                }
+                if (!belongToCPS && edge.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"))
+                {
+                    belongToCPS = true;
+                }
+                var outType = GetOutType(edge.Details.CircuitForm);
+                var insertEngine = new ThPDSBlockInsertEngine();
+                var assignment = new ThPDSDiagramAssignment();
+                var outCircuit = insertEngine.Insert1(activeDb, configDb, outType.Item1, basePoint, scale);
+                assignment.OutCircuitAssign(activeDb, configDb, outCircuit, edge, scale, tableObjs);
+                basePoint = new Point3d(basePoint.X, basePoint.Y - outType.Item2 * scaleFactor, 0);
+            }
+        }
+
         private static Tuple<string, double> GetOutType(PDSBaseOutCircuit circuitForm)
         {
             switch (circuitForm.CircuitFormType)
@@ -230,20 +328,20 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return Tuple.Create( CircuitFormOutType.配电计量_上海直接表.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_上海直接表.GetDescription(), 1000.0);
                         }
                         else
                         {
                             return Tuple.Create(CircuitFormOutType.配电计量_上海CT.GetDescription(), 1000.0);
                         }
-                    } 
+                    }
                 case CircuitFormOutType.配电计量_上海直接表:
                     {
                         var circuit = circuitForm as DistributionMetering_ShanghaiMTCircuit;
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return Tuple.Create(CircuitFormOutType.配电计量_上海CT.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_上海CT.GetDescription(), 1000.0);
                         }
                         else
                         {
@@ -256,7 +354,7 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在前.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在前.GetDescription(), 1000.0);
                         }
                         else
                         {
@@ -269,7 +367,7 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在前.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在前.GetDescription(), 1000.0);
                         }
                         else
                         {
@@ -282,7 +380,7 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(MeterTransformer)))
                         {
-                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在后.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_直接表在后.GetDescription(), 1000.0);
                         }
                         else
                         {
@@ -295,7 +393,7 @@ namespace TianHua.Electrical.PDS.Command
                         var type = ComponentTypeSelector.GetComponentType(circuit.meter.ComponentType);
                         if (type.Equals(typeof(CurrentTransformer)))
                         {
-                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在后.GetDescription(),1000.0);
+                            return Tuple.Create(CircuitFormOutType.配电计量_CT表在后.GetDescription(), 1000.0);
                         }
                         else
                         {

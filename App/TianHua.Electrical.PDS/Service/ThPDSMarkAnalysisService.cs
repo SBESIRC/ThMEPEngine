@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
-using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 
@@ -104,7 +102,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (r.Match(str).Success)
                 {
-                    if (distBoxData.EffectiveName.Equals("E-BL001-1"))
+                    if (distBoxData.EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
                     {
                         thPDSLoad.ID.CircuitID.Add(str);
                     }
@@ -401,12 +399,15 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         results.UsualPower.Add(double.Parse(result));
                     }
-                    var numRegex = new Regex(@"[2-9][xX]");
+                    var numRegex = new Regex(@"[1-9][xX]");
                     var numMatch = numRegex.Match(infos[i]);
                     if (numMatch.Success)
                     {
                         infos[i] = infos[i].Replace(numMatch.Value, "");
-                        needCopy = true;
+                        if (Convert.ToInt16(numMatch.Value[0]) > 1)
+                        {
+                            needCopy = true;
+                        }
                     }
 
                     m = m.NextMatch();

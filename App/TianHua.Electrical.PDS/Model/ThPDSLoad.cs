@@ -282,6 +282,7 @@ namespace TianHua.Electrical.PDS.Model
             DemandFactor = 1.0;
             PowerFactor = 0.85;
             Location = new ThPDSLocation();
+            OnLightingCableTray = false;
         }
 
         /// <summary>
@@ -374,6 +375,11 @@ namespace TianHua.Electrical.PDS.Model
         /// </summary>
         public string AttributesCopy { get; set; }
 
+        /// <summary>
+        /// 判断配电箱是否在照明桥架上
+        /// </summary>
+        private bool OnLightingCableTray { get; set; }
+
         #region
         public virtual bool Equals(ThPDSLoad other)
         {
@@ -392,5 +398,15 @@ namespace TianHua.Electrical.PDS.Model
             return this.ID.LoadID.GetHashCode();
         }
         #endregion
+
+        public bool GetOnLightingCableTray()
+        {
+            return OnLightingCableTray;
+        }
+
+        public void SetOnLightingCableTray(bool onLightingCableTray)
+        {
+            OnLightingCableTray = onLightingCableTray;
+        }
     }
 }

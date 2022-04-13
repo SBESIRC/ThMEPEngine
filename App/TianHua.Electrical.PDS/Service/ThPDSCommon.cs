@@ -53,6 +53,7 @@
         public static readonly string OUT_CIRCUIT_HIGH_POWER = "功率(高)";
         public static readonly string OUT_CIRCUIT_LOAD_ID = "负载编号";
         public static readonly string OUT_CIRCUIT_DESCRIPTION = "功能用途";
+        public static readonly string CONTROL_CIRCUIT_DESCRIPTION = "控制回路";
 
         public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
         public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
@@ -62,6 +63,7 @@
         public static readonly string LOAD_LABELS = "负载标注";
         public static readonly string LOAD_DETAILS = "E-电力平面-负荷明细";
         public static readonly string PUMP_LABELS = "水泵标注";
+        public static readonly string LIGHTING_LOAD = "E-BL001";
 
         public static readonly string SYSTEM_DIAGRAM_TABLE_FRAME = "THAPE_A1L_inner";
         public static readonly string SYSTEM_DIAGRAM_TABLE_HEADER = "系统图内框及标题栏";
@@ -80,5 +82,10 @@
         public static readonly string DEFAULT_CONTACTOR = "E-BKM101";
         public static readonly string DEFAULT_THERMAL_RELAY = "E-BKH102";
         public static readonly string DEFAULT_CURRENT_TRANSFORMER = "E-BCT102";
+
+        public static readonly string CONTROL_CIRCUIT_BELONG_TO_CPS = "控制（从属CPS）";
+        public static readonly string CONTROL_CIRCUIT_BELONG_TO_QAC = "控制（从属接触器）";
+        public static readonly string SMALL_BUSBAR = "分支小母排";
+        public static readonly string SMALL_BUSBAR_Circuit = "小母排分支";
     }
 }

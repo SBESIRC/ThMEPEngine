@@ -93,6 +93,28 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
+        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
+            List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            var loads = new List<ThPDSLoad>();
+            
+            if(LoadBlocks[entity].EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
+            {
+                var service = new ThPDSMarkAnalysisService();
+                objectIds.Add(LoadBlocks[entity].ObjId);
+                var frame = ThPDSBufferService.Buffer(entity, database);
+                var marks = markService.GetMarks(frame);
+                var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[entity], ref attributesCopy);
+                load.SetOnLightingCableTray(true);
+                loads.Add(load);
+            }
+            
+            node.Loads = loads;
+            node.NodeType = PDSNodeType.Load;
+            return node;
+        }
+
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
         {
@@ -146,7 +168,7 @@ namespace TianHua.Electrical.PDS.Service
 
             if (target.NodeType == PDSNodeType.None)
             {
-                ThPDSLayerService.Assign(edge.Circuit, target.Loads[0]);
+                ThPDSLayerService.Assign(target.Loads[0]);
             }
             return edge;
         }

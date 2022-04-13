@@ -104,7 +104,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                 PDSGraph = new ThPDSCircuitGraph
                 {
-                    Graph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
+                    Graph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>()
                 };
                 CableTrayNode = cableTrayNode;
                 PDSGraph.Graph.AddVertex(CableTrayNode);
@@ -118,8 +118,16 @@ namespace TianHua.Electrical.PDS.Engine
                 // 搜索框线中的配电箱
                 var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
 
+                var bufferFrame = ThPDSBufferService.Buffer(frame);
+                var onLightingCableTray = false;
+                var cableTray = CableTrayIndex.SelectCrossingPolygon(bufferFrame).OfType<Curve>().FirstOrDefault();
+                if (!cableTray.IsNull() && ThPDSLayerService.LightingCableTrayLayer().Contains(cableTray.Layer))
+                {
+                    onLightingCableTray = true;
+                }
+
                 // 搜索框线周围的标注
-                var markList = MarkService.GetMultiMarks(ThPDSBufferService.Buffer(frame));
+                var markList = MarkService.GetMultiMarks(bufferFrame);
 
                 var cacheDistBoxes = new List<BlockReference>();
                 var cacheMarkList = new List<ThPDSTextInfo>();
@@ -226,6 +234,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 return;
                             }
                             var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey);
+                            newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
                             cacheDistBoxes.Add(distBox);
                             if (!CacheDistBoxes.ContainsKey(distBox))
                             {
@@ -366,6 +375,7 @@ namespace TianHua.Electrical.PDS.Engine
             //是桥架
             else if (startingEntity is Curve curve)
             {
+                var onLightingCableTray = ThPDSLayerService.LightingCableTrayLayer().Contains(curve.Layer);
                 var polyline = ThPDSBufferService.Buffer(curve, Database);
                 // 首先遍历从桥架搭出去的线
                 var results = FindNextLine(curve, polyline).OfType<Curve>();
@@ -378,7 +388,8 @@ namespace TianHua.Electrical.PDS.Engine
                     //都不相邻即无关系，都相邻即近似平行，都不符合
                     if (IsStart != IsEnd)
                     {
-                        PrepareNavigate(CableTrayNode, new List<Entity>(), new ThPDSTextInfo(), curve, findCurve);
+                        PrepareNavigate(CableTrayNode, new List<Entity>(), new ThPDSTextInfo(), curve, findCurve,
+                            onLightingCableTray);
                     }
                 }
 
@@ -390,6 +401,7 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         var objectIds = new List<ObjectId>();
                         var newNode = ThPDSGraphService.CreateNode(distBox, Database, MarkService, DistBoxKey, objectIds);
+                        newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
                         CacheDistBoxes.Add(distBox, newNode);
                         PDSGraph.Graph.AddVertex(newNode);
                         NodeMap.Add(newNode, objectIds);
@@ -410,6 +422,30 @@ namespace TianHua.Electrical.PDS.Engine
                         FindGraph(startingEntity, distBox);
                     }
                 }
+
+                // 遍历桥架内部的灯具负载
+                if (!onLightingCableTray)
+                {
+                    return;
+                }
+                var loads = FindNextLoad(curve, polyline);
+                loads.ForEach(x =>
+                {
+                    if (CacheLoads.Contains(x))
+                    {
+                        return;
+                    }
+                    var attributesCopy = "";
+                    var objectIds = new List<ObjectId>();
+                    var newNode = ThPDSGraphService.CreateNode(x, Database, MarkService, DistBoxKey,
+                        objectIds, ref attributesCopy);
+                    CacheLoads.Add(x);
+                    if (newNode.Loads.Count > 0)
+                    {
+                        PDSGraph.Graph.AddVertex(newNode);
+                        NodeMap.Add(newNode, objectIds);
+                    }
+                });
             }
         }
 
@@ -417,7 +453,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// 寻路（核心算法）
         /// </summary>
         public void PrepareNavigate(ThPDSCircuitGraphNode node, List<Entity> loads, ThPDSTextInfo logos,
-            Entity sourceEntity, Entity nextEntity)
+            Entity sourceEntity, Entity nextEntity, bool onLightingCableTray = false)
         {
             var distributionBox = Navigate(node, loads, logos, sourceEntity, nextEntity);
             if (loads.Count > 0)
@@ -426,6 +462,10 @@ namespace TianHua.Electrical.PDS.Engine
                 var objectIds = new List<ObjectId>();
                 var newNode = ThPDSGraphService.CreateNode(loads, Database, MarkService, DistBoxKey,
                     objectIds, ref attributesCopy);
+                if (onLightingCableTray)
+                {
+                    newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
+                }
                 PDSGraph.Graph.AddVertex(newNode);
                 NodeMap.Add(newNode, objectIds);
 
@@ -996,7 +1036,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GetGraph()
+        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GetGraph()
         {
             return PDSGraph.Graph;
         }
@@ -1023,6 +1063,7 @@ namespace TianHua.Electrical.PDS.Engine
                     targetEdge.ForEach(e =>
                     {
                         e.Target.Loads[0].InstalledCapacity = sourceEdge.Target.Loads[0].InstalledCapacity;
+                        e.Target.Loads[0].LoadTypeCat_3 = sourceEdge.Target.Loads[0].LoadTypeCat_3;
                         if (sourceEdge.Target.Loads[0].PrimaryAvail != 0)
                         {
                             e.Target.Loads[0].PrimaryAvail = sourceEdge.Target.Loads[0].PrimaryAvail;
@@ -1039,6 +1080,116 @@ namespace TianHua.Electrical.PDS.Engine
                     });
                 }
             });
+        }
+
+        public void UnionLightingEdge()
+        {
+            var distBoxes = PDSGraph.Graph.Vertices
+                .Where(v => v.NodeType == PDSNodeType.DistributionBox)
+                .Where(v => v.Loads[0].GetOnLightingCableTray()).ToList();
+            var loads = PDSGraph.Graph.Vertices
+                    .Where(v => v.NodeType == PDSNodeType.Load)
+                    .Where(v => v.Loads[0].GetOnLightingCableTray()).ToList();
+            if (loads.Count == 0)
+            {
+                return;
+            }
+
+            var cableTrayLoads = loads.Where(v => PDSGraph.Graph.InDegree(v) == 0).ToList();
+            var otherLoads = loads.Except(cableTrayLoads).ToList();
+            var sortNode = SortNode(cableTrayLoads);
+            var targets = new List<ThPDSCircuitGraphNode>();
+            for (var i = 0; i < sortNode.Count; i++)
+            {
+                for (var j = 1; j < sortNode[i].Item2.Count; j++)
+                {
+                    sortNode[i].Item2[0].Loads.AddRange(sortNode[i].Item2[j].Loads);
+                    NodeMap[sortNode[i].Item2[0]].AddRange(NodeMap[sortNode[i].Item2[j]]);
+                }
+                targets.Add(sortNode[i].Item2[0]);
+
+                for (var j = 1; j < sortNode[i].Item2.Count; j++)
+                {
+                    PDSGraph.Graph.RemoveVertex(sortNode[i].Item2[j]);
+                    NodeMap.Remove(sortNode[i].Item2[j]);
+                }
+            }
+
+            if (distBoxes.Count > 0)
+            {
+                if (distBoxes.Count == 1)
+                {
+                    CreateLightingEdge(targets, distBoxes[0]);
+                    return;
+                }
+                else
+                {
+                    var lightingBoxes = distBoxes.Where(o => o.Loads[0].LoadTypeCat_2 == ThPDSLoadTypeCat_2.LightingDistributionPanel)
+                        .ToList();
+                    if (lightingBoxes.Count == 1)
+                    {
+                        CreateLightingEdge(targets, lightingBoxes[0]);
+                        return;
+                    }
+                }
+            }
+
+            if (otherLoads.Count > 0)
+            {
+                var sourcePanelId = PDSGraph.Graph.InEdges(otherLoads[0]).First().Circuit.ID.SourcePanelID.Last();
+                CreateLightingEdge(targets, sourcePanelId);
+            }
+        }
+
+        private void CreateLightingEdge(List<ThPDSCircuitGraphNode> targets, ThPDSCircuitGraphNode distBox)
+        {
+            targets.ForEach(load =>
+            {
+                load.Loads.ForEach(o =>
+                {
+                    o.ID.SourcePanelID.Add(distBox.Loads[0].ID.LoadID);
+                });
+                var newEdge = ThPDSGraphService.CreateEdge(distBox, load, new List<string>(), DistBoxKey);
+                PDSGraph.Graph.AddEdge(newEdge);
+                EdgeMap.Add(newEdge, NodeMap[load]);
+            });
+        }
+
+        private void CreateLightingEdge(List<ThPDSCircuitGraphNode> targets, string sourcePanelId)
+        {
+            targets.ForEach(load =>
+            {
+                load.Loads.ForEach(o =>
+                {
+                    o.ID.SourcePanelID.Add(sourcePanelId);
+                });
+                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, load, new List<string>(), DistBoxKey);
+                PDSGraph.Graph.AddEdge(newEdge);
+                EdgeMap.Add(newEdge, NodeMap[load]);
+            });
+        }
+
+        private List<Tuple<string, List<ThPDSCircuitGraphNode>>> SortNode(List<ThPDSCircuitGraphNode> loads)
+        {
+            var results = new List<Tuple<string, List<ThPDSCircuitGraphNode>>>();
+            loads.ForEach(load =>
+            {
+                var added = true;
+                foreach (var item in results)
+                {
+                    if (item.Item1.Equals(load.Loads[0].ID.CircuitID.Last()))
+                    {
+                        item.Item2.Add(load);
+                        added = false;
+                    }
+                }
+
+                if (added)
+                {
+                    results.Add(Tuple.Create(load.Loads[0].ID.CircuitID.Last(), new List<ThPDSCircuitGraphNode> { load }));
+                }
+            });
+            return results;
         }
 
         public void AssignStorey(Database database, string floorNumber, Point3d storeyBasePoint)

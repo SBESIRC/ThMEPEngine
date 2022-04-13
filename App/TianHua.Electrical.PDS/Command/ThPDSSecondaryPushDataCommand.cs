@@ -8,7 +8,7 @@ using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Command
 {
-    public class ThPDSCommand : ThMEPBaseCommand, IDisposable
+    public class ThPDSSecondaryPushDataCommand : ThMEPBaseCommand, IDisposable
     {
         private List<ThPDSNodeMap> NodeMapList;
 
@@ -20,7 +20,7 @@ namespace TianHua.Electrical.PDS.Command
             var unionGraph = engine.Execute();
             NodeMapList = engine.GetNodeMapList();
             EdgeMapList = engine.GetEdgeMapList();
-            PDSProject.Instance.PushGraphData(unionGraph);
+            PDSProject.Instance.SecondaryPushGraphData(unionGraph);
         }
 
         public void Dispose()

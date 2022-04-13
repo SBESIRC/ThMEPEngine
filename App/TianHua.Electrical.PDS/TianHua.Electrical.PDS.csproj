@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Command\ThPDSInfoModifyCommand.cs" />
+    <Compile Include="Command\ThPDSSecondaryPushDataCommand.cs" />
     <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
     <Compile Include="Diagram\ThPDSComponentContentExtension.cs" />
@@ -41,6 +42,7 @@
     <Compile Include="Engine\ThCabletraySegmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThCircuitMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircuitMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThPDSCreateGraphEngine.cs" />
     <Compile Include="Engine\ThPDSDistBoxFrameExtraction.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
