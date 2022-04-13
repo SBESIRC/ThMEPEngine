@@ -1195,7 +1195,7 @@ namespace TianHua.Electrical.PDS.Diagram
         }
 
         public Polyline SmallBusbarAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference block,
-            List<Entity> tableObjs, SmallBusbar smallBusbar, Scale3d scale)
+            List<Entity> tableObjs, MiniBusbar smallBusbar, Scale3d scale)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
             objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
@@ -1207,7 +1207,7 @@ namespace TianHua.Electrical.PDS.Diagram
             var firstPosition = srcBreaker.Position;
             var secondPosition = new Point3d(firstPosition.X + 2750, firstPosition.Y, 0);
 
-            var firstComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.breaker.ComponentType.GetDescription()];
+            var firstComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.Breaker.ComponentType.GetDescription()];
             if (!firstComponentName.Equals(srcBreaker.Name))
             {
                 var newComponent = insertEngine.Insert1(activeDb, configDb, firstComponentName, firstPosition, 100 * scale);
@@ -1216,9 +1216,9 @@ namespace TianHua.Electrical.PDS.Diagram
             }
 
             // 元器件2
-            if (!smallBusbar.reservedComponent.IsNull())
+            if (!smallBusbar.ReservedComponent.IsNull())
             {
-                var secondComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.reservedComponent.ComponentType.GetDescription()];
+                var secondComponentName = ThPDSComponentMap.ComponentMap[smallBusbar.ReservedComponent.ComponentType.GetDescription()];
                 var newComponent = insertEngine.Insert1(activeDb, configDb, secondComponentName, secondPosition, 100 * scale);
                 tableObjs.Add(newComponent);
             }
