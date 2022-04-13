@@ -26,6 +26,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Command;
+using System.Linq;
 
 namespace ThMEPElectrical.Command
 {
@@ -103,8 +104,11 @@ namespace ThMEPElectrical.Command
                 }
                 else
                 {
-                    result.Value.GetObjectIds().ForEach(o =>
-                    results.Add(acadDb.ElementOrDefault<BlockReference>(o)));
+                    result.Value
+                        .GetObjectIds()
+                        .Select(o => acadDb.ElementOrDefault<BlockReference>(o))
+                        .Where(o => o.GetEffectiveName().ToUpper() == "AI-楼层框定E")
+                        .ForEach(o => results.Add(o));
                     return results;
                 }
             }
