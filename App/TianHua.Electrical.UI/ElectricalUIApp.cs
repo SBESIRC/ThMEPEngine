@@ -16,6 +16,7 @@ using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using TianHua.Electrical.UI.Command;
+using TianHua.Electrical.UI.EarthingGrid;
 
 namespace TianHua.Electrical.UI
 {
@@ -181,6 +182,17 @@ namespace TianHua.Electrical.UI
             {
                 cmd.Execute();
             }
+        }
+        /// <summary>
+        /// 防雷接地网
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THJDPM", CommandFlags.Modal)]
+        public void THJDPM()
+        {
+            var earthGridUI = new UIEarthingGrid();
+            earthGridUI.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(earthGridUI);
         }
     }
 }

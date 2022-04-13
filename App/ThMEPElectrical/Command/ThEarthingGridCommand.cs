@@ -21,16 +21,25 @@ using Autodesk.AutoCAD.Geometry;
 
 using ThMEPElectrical.EarthingGrid.Generator.Utils;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Runtime;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThEarthingGridCommand : IAcadCommand, IDisposable
+    public class ThEarthingGridCommand : ThMEPBaseCommand, IDisposable
     {
-        public void Dispose()
+        public ThEarthingGridCommand()
         {
-            
+            CommandName = "THJDPM";
+            ActionName = "防雷接地网";
         }
-        public void Execute()
+        public void Dispose()
+        {            
+        }
+        public override void SubExecute()
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -46,7 +55,7 @@ namespace ThMEPElectrical.Command
                 List<Tuple<double, double>> faceSize = new List<Tuple<double, double>> {
                     new Tuple<double, double>(20000, 20000),
                     new Tuple<double, double>(24000, 16000),
-                    new Tuple<double, double>(40000, 10000) 
+                    new Tuple<double, double>(40000, 10000)
                 };
                 //List<Tuple<double, double>> faceSize = new List<Tuple<double, double>> { //测试分割用
                 //    new Tuple<double, double>(5000, 5000)};
@@ -67,6 +76,37 @@ namespace ThMEPElectrical.Command
                 //string layerName = LayerDealer.GetLayer();
                 LayerDealer.AddLayer(layerName, 4);
                 LayerDealer.Output(earthGridLines, layerName);
+            }
+        }
+
+        private DBObjectCollection SelectFloorFrames()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var results = new DBObjectCollection();
+                // 获取框线
+                var options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择楼层框定",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return results;
+                }
+                else
+                {
+                    result.Value.GetObjectIds().ForEach(o =>
+                    results.Add(acadDb.ElementOrDefault<BlockReference>(o)));
+                    return results;
+                }
             }
         }
         //public void Execute()

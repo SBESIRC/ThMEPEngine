@@ -168,6 +168,7 @@
     <Compile Include="EarthingGrid\Generator\Utils\StructureDealer.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
     <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
+    <Compile Include="EarthingGrid\Service\ThEarthingGridDataService.cs" />
     <Compile Include="EarthingGrid\Service\ThShearwallGroupService.cs" />
     <Compile Include="EarthingGrid\ThEarthingGridCommon.cs" />
     <Compile Include="ElectricalLoadCalculation\ElectricalConfigDataModel.cs" />

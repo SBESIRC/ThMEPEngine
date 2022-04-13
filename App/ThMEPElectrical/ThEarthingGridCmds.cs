@@ -23,18 +23,6 @@ namespace ThMEPElectrical
     public class ThEarthingGridCmds
     {
         /// <summary>
-        /// 防雷接地网
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THJDPM", CommandFlags.Modal)]
-        public void THJDPM()
-        {
-            using (var cmd = new ThEarthingGridCommand())
-            {
-                cmd.Execute();
-            }
-        }
-
-        /// <summary>
         /// ucs分区
         /// </summary>
         [CommandMethod("TIANHUACAD", "THUCSDIV", CommandFlags.Modal)]

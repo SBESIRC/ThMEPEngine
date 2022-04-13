@@ -73,6 +73,10 @@
     </Compile>
     <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
     <Compile Include="Command\ThElectricalLoadCalculationUICmd.cs" />
+    <Compile Include="EarthingGrid\ThEarthingGridVM.cs" />
+    <Compile Include="EarthingGrid\UIEarthingGrid.xaml.cs">
+      <DependentUpon>UIEarthingGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ElectricalLoadCalculation\PowerNormConfig.xaml.cs">
       <DependentUpon>PowerNormConfig.xaml</DependentUpon>
     </Compile>
@@ -262,6 +266,10 @@
   <ItemGroup />
   <ItemGroup>
     <Page Include="CapitalConverter\CapitalConverterUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EarthingGrid\UIEarthingGrid.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
