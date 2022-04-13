@@ -51,11 +51,16 @@
       <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
+    <Compile Include="Reinforcement\ColumnReinforceSetModel.cs" />
     <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
+    <Compile Include="Reinforcement\ColumnReinforceSetUI.xaml.cs">
+      <DependentUpon>ColumnReinforceSetUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Reinforcement\WallColumnReinforceSetUI.xaml.cs">
       <DependentUpon>WallColumnReinforceSetUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reinforcement\ColumnReinforceSetVM.cs" />
     <Compile Include="Reinforcement\WallColumnReinforceSetVM.cs" />
     <Compile Include="StructureWPFUIApp.cs" />
     <Compile Include="Validations\GreaterThanZeroRule.cs" />
@@ -74,6 +79,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Reinforcement\EdgeComponentDrawUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\ColumnReinforceSetUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

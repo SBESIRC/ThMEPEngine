@@ -98,6 +98,7 @@
     <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThRectangleEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThTTypeEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThColumnReinforceConfig.cs" />
     <Compile Include="Reinforcement\Model\ThWallColumnReinforceConfig.cs" />
     <Compile Include="Reinforcement\Data\YJK\ThYJKDataSetFactory.cs" />
     <Compile Include="Reinforcement\Service\ThAnalysisService.cs" />

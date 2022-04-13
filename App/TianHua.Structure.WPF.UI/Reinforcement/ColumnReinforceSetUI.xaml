@@ -1,0 +1,128 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Structure.WPF.UI.Reinforcement.ColumnReinforceSetUI"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+                    xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    xmlns:validations ="clr-namespace:TianHua.Structure.WPF.UI.Validations"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="柱配筋设置">
+    <Grid Focusable="False" Margin="3,3">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Vertical" Width="212">
+            <GroupBox>
+                <GroupBox.Header>
+                    <Label>计算设置</Label>
+                </GroupBox.Header>
+                <Grid Margin="0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="砼强度等级：" Grid.Row="0" Grid.Column="0"/>
+                    <ComboBox Name="cbConcreteStrengthGrade" Width="100" Grid.Row="0" Grid.Column="1"
+                              ItemsSource="{Binding ConcreteStrengthGrades,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.ConcreteStrengthGrade,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="抗震等级：" Grid.Row="1" Grid.Column="0"/>
+                    <ComboBox Name ="cbAntiSeismicGrade" Width="100" Grid.Row="1" Grid.Column="1"
+                              ItemsSource="{Binding AntiSeismicGrades,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.AntiSeismicGrade,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="保护层(mm)：" Grid.Row="2" Grid.Column="0"/>
+                    <TextBox Name="tbProtectThick" Width="100" Grid.Row="2" Grid.Column="1" 
+                             Text="{Binding Model.C,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             TextChanged="tbProtectThick_TextChanged"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput">
+                    </TextBox>
+                    <Label Content="剪跨比：" Grid.Row="3" Grid.Column="0"/>
+                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" 
+                                VerticalAlignment="Center">
+                        <CheckBox x:Name="chkBiggerThanTwo" IsChecked="{Binding Model.IsBiggerThanTwo,
+                            Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                        <TextBlock Margin="5,0" Text="λ > 2"/>
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox>
+                <GroupBox.Header>
+                    <Label>柱表设置</Label>
+                </GroupBox.Header>
+                <Grid Margin="0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="自适应柱表：" Grid.Row="0" Grid.Column="0"/>
+                    <ComboBox Name="cbFrame" Width="100" Grid.Row="0" Grid.Column="1"
+                              ItemsSource="{Binding Frames,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.Frame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="字符行高：     " Grid.Row="1" Grid.Column="0"/>
+                    <TextBox Name="tbTableRowHeight" Width="100" Grid.Row="1" Grid.Column="1"
+                             Text="{Binding Model.TableRowHeight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+                </Grid>
+            </GroupBox>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Vertical" Width="200">
+            <GroupBox>
+                <GroupBox.Header>
+                    <Label>绘制</Label>
+                </GroupBox.Header>
+                <Grid Margin="0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="墙柱标高：" Grid.Row="0" Grid.Column="0"/>
+                    <TextBox Name="tbElevation" Width="100" Grid.Row="0" Grid.Column="1"
+                             Text="{Binding Model.Elevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <Label Content="绘图比例：" Grid.Row="1" Grid.Column="0"/>
+                    <ComboBox Name="cbDrawScale" Width="100" Grid.Row="1" Grid.Column="1"                              
+                              ItemsSource="{Binding DrawScales,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Model.DrawScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                    <Label Content="点筋线宽：" Grid.Row="2" Grid.Column="0"/>
+                    <TextBox x:Name="tbPointReinforceLineWeight" Width="100" Grid.Row="2" Grid.Column="1"
+                             Text="{Binding Model.PointReinforceLineWeight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+                    <Label Content="箍线线宽：  " Grid.Row="3" Grid.Column="0"/>
+                    <TextBox x:Name="tbStirrupLineWeight" Width="100" Grid.Row="3" Grid.Column="1"
+                             Text="{Binding Model.StirrupLineWeight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             InputMethod.IsInputMethodEnabled="False"
+                             PreviewKeyDown="TextBox_PreviewKeyDown"
+                             PreviewTextInput="TextBox_PreviewTextInput"></TextBox>
+                </Grid>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,40,0,0">
+                <cus:ImageButton Name="btnReset" Margin="10,0" Content="恢复默认" Width="80" Height="24"
+                                 Click="btnReset_Click"></cus:ImageButton>
+                <cus:ImageButton Name="btnConfirm" Margin="10,0" Content="确定" Width="80" Height="24" Click="btnConfirm_Click"></cus:ImageButton>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

@@ -58,5 +58,13 @@ namespace TianHua.Structure.WPF.UI
             ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(ui);
         }
+
+        [CommandMethod("TIANHUACAD", "THZPJSZ", CommandFlags.Session)]
+        public void THZPJSZ()
+        {
+            var ui = new ColumnReinforceSetUI();
+            ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModalWindow(ui);
+        }
     }
 }
