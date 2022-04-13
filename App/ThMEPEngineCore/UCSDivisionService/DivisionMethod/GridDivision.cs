@@ -190,7 +190,14 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                 if (intersectHulls.Count() > 1)
                 {
                     var belongPoly = CheckAreaBelong(area, intersectHulls, GridTypes);
-                    areaDic[belongPoly].Add(area);
+                    if (areaDic.Keys.Contains(belongPoly))
+                    {
+                        areaDic[belongPoly].Add(area);
+                    }
+                    else
+                    {
+                        areaDic.Add(belongPoly, new DBObjectCollection() { area });
+                    }
                 }
                 else if (intersectHulls.Count == 1)
                 {

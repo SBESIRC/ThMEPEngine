@@ -178,7 +178,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         }
 
         /// <summary>
-        /// 连接主管（连接污水、废水主管和立管）
+        /// 连接主管（连接房间外的各种管线）
         /// </summary>
         /// <param name="mainPipes"></param>
         /// <returns></returns>
