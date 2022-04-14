@@ -27,6 +27,7 @@ namespace ThMEPWSS.HydrantLayout.Model
 
     }
 
+    //比较模型，用于比较可摆放的模型中哪一种最优
     class FireCompareModel
     {
         //基本属性
@@ -62,6 +63,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             }
         }
 
+        //画消火栓
         public void Draw(double shortside,double longside)
         {
             double vp = Info.VPSide;
@@ -93,6 +95,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             objs.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1result", 2));
         }
 
+        //画灭火器
         public void Draw2(double shortside, double longside) 
         {
             DBObjectCollection objs = new DBObjectCollection();

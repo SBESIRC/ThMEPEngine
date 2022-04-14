@@ -107,9 +107,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
 
-
         //寻找第一优先级定位点并测试摆放
-        public void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -176,7 +175,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第二优先级定位点并测试摆放
-        public void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -247,7 +246,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第三优先级定位点并测试摆放
-        public void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();

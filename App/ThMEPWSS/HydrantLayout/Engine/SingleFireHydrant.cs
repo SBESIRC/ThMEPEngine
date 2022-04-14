@@ -27,7 +27,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public int Mode = Info.Mode;
         //外部输入
         ThHydrantModel model;
-        Point3d CenterPoint;
+        Point3d CenterPoint;    //中心点
         //形状信息
         double LongSide = 0;
         double ShortSide = 0;
@@ -35,9 +35,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //double DoorSs = LongSide;
         //double DoorLs = LongSide*1.5;
 
-
         //是否找到合适的摆放位置
-        bool Done = false;
+        bool Done = false;       
         FireCompareModel BestLayOut;
 
         //使用的类
@@ -47,7 +46,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //可倚靠区域
         MPolygon LeanWall;
 
-        //选优
+        //混排(二、三优先级混排)情况下，可摆放的情况的列表
         List<FireCompareModel> fireCompareModelsMix = new List<FireCompareModel>();
 
         public SingleFireHydrant(ThHydrantModel model)
@@ -59,7 +58,6 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //读取边长
             CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
         }
-
 
         public void Pipeline() 
         {
@@ -116,7 +114,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第一优先级定位点并测试摆放
-        public void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -201,7 +199,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第二优先级定位点并测试摆放
-        public void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -286,7 +284,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第三优先级定位点并测试摆放
-        public void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -366,7 +364,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //}
         }
 
-        void FindBest() 
+        //混排(二、三优先级混排)情况下，选取最优摆放方式
+        private void FindBest() 
         {
             fireCompareModelsMix = fireCompareModelsMix.OrderBy(x => x.doorGood).ThenByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
 

@@ -73,7 +73,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             GetFireAttribute();
         }
 
-        //计算消火栓外包框线
+        //搭建模型，为计算灭火器外包框线做准备
         private void GetFireAttribute()
         {
             Point3d tmppt0;
@@ -95,7 +95,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             TFireDirList.Add(vBasePoint);
         }
 
-        //获取消火栓外包框线列表
+        //获取灭火器外包框线列表
         public List<Polyline> GetFireObbList()
         {
             //直接输出全体
@@ -105,8 +105,8 @@ namespace ThMEPWSS.HydrantLayout.Model
             }
             return TFireObb;
         }
-        
-        //获取一种消火栓外包框线
+
+        //获取一种灭火器外包框线
         public void GetFireObb(int tIndex) { }
 
         //计算开门范围外包框线
@@ -117,7 +117,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             return plOut;
         }
 
-        //固定此消防栓
+        //读取灭火器的参数，之后要放入输出模型中
         public void SetModel(int tIndex, out Point3d fireCenterPoint, out Vector3d fireDir)
         {
             fireCenterPoint = TFireCenterPointList[tIndex];

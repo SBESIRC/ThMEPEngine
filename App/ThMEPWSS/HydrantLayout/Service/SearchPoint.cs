@@ -63,9 +63,14 @@ namespace ThMEPWSS.HydrantLayout.Service
             FindColumns();     //分离立柱
         }
 
+        //------------------------------------
+        //数据处理
+
+        //筛除 重合点+距离过段线段+直线多余点
         public void ClearShell()
         {
             //第一筛
+            //筛除 重合点+距离过段线段
             List<int> deleteList = new List<int>();
             int nums = Frame.NumberOfVertices;
 
@@ -73,7 +78,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             {
                 var pt1 = Frame.GetPoint3dAt(i);
                 //如果超出距离就跳出
-                if (pt1.DistanceTo(CenterPoint) > 2500) continue;
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius) continue;
                 var pt2 = Frame.GetPoint3dAt((i + 1) % Frame.NumberOfVertices);
                 Vector3d dir2 = pt2 - pt1;
                 if (dir2.Length < 5)
@@ -90,13 +95,14 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
 
             //第二筛
+            //筛除 直线多余点
             deleteList = new List<int>();
             nums = Frame.NumberOfVertices;
             for (int i = 0; i < nums; i++)
             {
                 var pt1 = Frame.GetPoint3dAt(i);
                 //如果超出距离就跳出
-                if (pt1.DistanceTo(CenterPoint) > 2500) continue;
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius) continue;
                 var pt0 = Frame.GetPoint3dAt((i + Frame.NumberOfVertices - 1) % Frame.NumberOfVertices);
                 var pt2 = Frame.GetPoint3dAt((i + 1) % Frame.NumberOfVertices);
                 Vector3d dir1 = pt1 - pt0;
@@ -118,6 +124,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             DrawUtils.ShowGeometry(Frame, "l1clearedframe", 5, lineWeightNum: 30);
         }
 
+        //判断是否是立柱
         public void FindColumns()
         {
             foreach (var pl in Holes)
@@ -136,6 +143,9 @@ namespace ThMEPWSS.HydrantLayout.Service
         }
 
 
+        //------------------------------------
+        //消火栓
+
         //寻找转角
         public void FindTurningPoint(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
@@ -147,7 +157,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             {
                 var pt1 = Frame.GetPoint3dAt(i);
                 //如果超出距离就跳出
-                if (pt1.DistanceTo(CenterPoint) > 2500) continue;
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius) continue;
 
                 var pt0 = Frame.GetPoint3dAt((i + Frame.NumberOfVertices - 1) % Frame.NumberOfVertices);
                 var pt2 = Frame.GetPoint3dAt((i + 1) % Frame.NumberOfVertices);
@@ -333,9 +343,11 @@ namespace ThMEPWSS.HydrantLayout.Service
         }
 
 
-        //消火栓
 
-        //
+        //------------------------------------
+        //灭火器
+
+        //寻找转角
         public void FindTurningPoint2(out List<Point3d> basePointList, out List<Vector3d> dirList,double shortside)
         {
             basePointList = new List<Point3d>();
@@ -371,6 +383,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
         }
 
+        //如果没找到转角，则寻找立柱
         public void FindColumnPoint2(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
             LeanWallList.Clear();
@@ -397,7 +410,8 @@ namespace ThMEPWSS.HydrantLayout.Service
                 }
             }
         }
-
+        
+        //如果都没找到,寻找第三优先级定位点
         public void FindOtherPoint2(out List<Point3d> basePointList, out List<Vector3d> dirList)
         {
             basePointList = new List<Point3d>();
@@ -413,7 +427,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                 Vector3d dir2 = pt2 - pt1;
 
                 //如果超出距离就跳出
-                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius && pt2.DistanceTo(CenterPoint)> Info.SearchRadius && dir2.Length < 2000) continue;
+                if (pt1.DistanceTo(CenterPoint) > Info.SearchRadius && pt2.DistanceTo(CenterPoint)> Info.SearchRadius && dir2.Length < Info.OriginRadius *2/3) continue;
 
                 Vector3d baseDir1 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
 
@@ -448,7 +462,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint2 = pt1 + dir2 / 2;
 
-                        if (basePoint2.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint2, baseDir1,Frame))
+                        if (basePoint2.DistanceTo(CenterPoint) > Info.SearchRadius && IsVPBlocked(basePoint2, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint2);
                             dirList.Add(baseDir1);
@@ -458,7 +472,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
                         Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
 
-                        if (basePoint3.DistanceTo(CenterPoint) > 2500 && IsVPBlocked(basePoint3, baseDir1,Frame))
+                        if (basePoint3.DistanceTo(CenterPoint) > Info.SearchRadius && IsVPBlocked(basePoint3, baseDir1,Frame))
                         {
                             basePointList.Add(basePoint3);
                             dirList.Add(baseDir1);
