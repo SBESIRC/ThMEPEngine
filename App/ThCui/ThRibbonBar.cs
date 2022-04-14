@@ -17,6 +17,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateElectricPanel(tab);
                 CreateStructurePanel(tab);
                 CreateArchitecturePanel(tab);
+                CreateGeneralLibraryPanel(tab);
                 CreateGeneralDrawingPanel(tab);
                 CreateGeneralModifyPanel(tab);
                 CreateGeneralSelectPanel(tab);
@@ -1219,6 +1220,27 @@ namespace TianHua.AutoCAD.ThCui
             //        "IDI_THCAD_THHLP_LARGE",
             //        RibbonButtonStyle.LargeWithText);
             //}
+        }
+
+        private static void CreateGeneralLibraryPanel(RibbonTabSource tab)
+        {
+            // 通用资料
+            var panel = tab.AddNewPanel("GENERALLIBRARY", "通用资料");
+            var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 标准图库
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("标准图库",
+                    "天华标准图库",
+                    "XTZS",
+                    "天华标准图库",
+                    "IDI_THCAD_XTZS_SMALL",
+                    "IDI_THCAD_XTZS_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
         }
 
         private static void CreateGeneralDrawingPanel(RibbonTabSource tab)

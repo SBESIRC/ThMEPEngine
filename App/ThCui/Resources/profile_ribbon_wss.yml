@@ -347,6 +347,15 @@ panels:
           - text: "基础对柱中"
             attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlGENERALLIBRARY"
+    name: "GENERALLIBRARY"
+    title: "通用资料"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "标准图库"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlGENERALDRAWING"
     name: "GENERALDRAWING"
     title: "通用绘制"

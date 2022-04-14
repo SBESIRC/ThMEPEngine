@@ -456,6 +456,8 @@
     <Image Include="Images\U2P_dark_large.ico" />
     <Image Include="Images\MEASUREPATH_dark_small.ico" />
     <Image Include="Images\MEASUREPATH_dark_large.ico" />
+    <Image Include="Images\XTZS_dark_small.ico" />
+    <Image Include="Images\XTZS_dark_large.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
