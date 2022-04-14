@@ -30,8 +30,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             ConnectBrokenLine(lines, points).Where(o => o.Length > 0).ForEach(o => mergedLines.Add(o));
             var objs = new DBObjectCollection();
             mergedLines.ForEach(o => objs.Add(o));
-            var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
-            return processedLines;
+            //var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
+            return mergedLines;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,6 +130,164 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             var crossObjs = spatialIndex.SelectCrossingPolygon(ptcoll);
             return crossObjs;
+        }
+        public static bool IsTianZhengElement(Entity ent)
+        {
+            return IsTianZhengElement(ent.GetType());
+        }
+        private static bool IsTianZhengElement(Type type)
+        {
+            return type.IsNotPublic && type.Name.StartsWith("Imp") && type.Namespace == "Autodesk.AutoCAD.DatabaseServices";
+        }
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
+        {
+            return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
+        }
+        public static void InterrptLineByPoints(List<Line> lines, List<Point3d> points)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                var pts = points.Where(p => line.GetClosestPointTo(p, false).DistanceTo(p) < 10)
+                    .Select(p => line.GetClosestPointTo(p, false))
+                    .Where(p => p.DistanceTo(line.StartPoint) > 10 && p.DistanceTo(line.EndPoint) > 10).ToList();
+                if (pts.Count == 0) continue;
+                else
+                {
+                    var res = SplitLine(line, pts);
+                    lines.AddRange(res);
+                    lines.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+        public static List<Line> SplitLine(Line line, List<Point3d> points)
+        {
+            points.Insert(0, line.StartPoint);
+            points.Add(line.EndPoint);
+            points = RemoveDuplicatePts(points);
+            points = points.Where(e => line.GetClosestPointTo(e, false).DistanceTo(e) < 0.1).ToList();
+            SortAlongCurve(points, line);
+            List<Line> results = new List<Line>();
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                Line r = new Line(points[i], points[i + 1]);
+                results.Add(r);
+            }
+            return results;
+        }
+        public static List<Point3d> RemoveDuplicatePts(List<Point3d> points, double tol = 0, bool preserve_order = true)
+        {
+            if (points.Count < 2) return points;
+            List<Point3d> results = new List<Point3d>(points);
+            if (preserve_order)
+            {
+                for (int i = 1; i < results.Count; i++)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (results[i].DistanceTo(results[j]) <= tol)
+                        {
+                            results.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+                return results;
+            }
+            else
+            {
+                results = results.OrderBy(e => e.X).ToList();
+                for (int i = 1; i < results.Count; i++)
+                {
+                    if (results[i].DistanceTo(results[i - 1]) <= tol)
+                    {
+                        results.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
+                }
+                return results;
+            }
+        }
+        public static void SortAlongCurve(List<Point3d> points, Curve curve)
+        {
+            var comparer = new PointAlongCurveComparer(curve);
+            points.Sort(comparer);
+            return;
+        }
+
+        private class PointAlongCurveComparer : IComparer<Point3d>
+        {
+            public PointAlongCurveComparer(Curve curve)
+            {
+                Curve = curve;
+            }
+            private Curve Curve;
+            public int Compare(Point3d a, Point3d b)
+            {
+                var param_a = 0.0;
+                var param_b = 0.0;
+                if (Curve is Line)
+                {
+                    var line = (Line)Curve;
+                    var pa = line.GetClosestPointTo(a, false);
+                    var pb = line.GetClosestPointTo(b, false);
+                    param_a = pa.DistanceTo(line.StartPoint);
+                    param_b = pb.DistanceTo(line.StartPoint);
+                }
+                else if (Curve is Polyline)
+                {
+                    var pl = (Polyline)Curve;
+                    param_a = GetDisOnPolyLine(a, pl);
+                    param_b = GetDisOnPolyLine(b, pl);
+                }
+                else
+                {
+                    try
+                    {
+                        param_a = Curve.GetDistAtPointX(a);
+                        param_b = Curve.GetDistAtPointX(b);
+                    }
+                    catch
+                    {
+                        //The func of GetDistAtPointX is unstable.
+                    }
+                }
+                if (param_a == param_b) return 0;
+                else if (param_a < param_b) return -1;
+                else return 1;
+            }
+        }
+        public static double GetDisOnPolyLine(Point3d pt, Polyline poly)
+        {
+            if (poly.GetClosestPointTo(pt, false).DistanceTo(pt) > 0.1)
+                return -1;
+            double distance = 0.0;
+            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+            {
+                var lineSeg = poly.GetLineSegmentAt(i);
+                if (lineSeg.IsOn(pt, new Tolerance(1.0, 1.0)))
+                {
+                    var newPt = pt.GetProjectPtOnLine(lineSeg.StartPoint, lineSeg.EndPoint);
+                    distance += lineSeg.StartPoint.DistanceTo(newPt);
+                    break;
+                }
+                else
+                    distance += lineSeg.Length;
+                lineSeg.Dispose();
+            }
+            return distance;
+        }
+        public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
+        public static Vector3d CreateVector(Line line)
+        {
+            return CreateVector(line.StartPoint, line.EndPoint);
         }
     }
 }

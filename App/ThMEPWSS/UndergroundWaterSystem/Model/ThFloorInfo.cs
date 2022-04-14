@@ -30,5 +30,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Model
         public List<ThDimModel> DimList { set; get; }
         //ToDo1:水角阀平面数据
         //ToDo2:阀门数据
+        public List<ThValveModel> ValveList { get; set; }
     }
 }

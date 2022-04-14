@@ -19,22 +19,22 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
     public class ThPointTree
     {
         public ThTreeNode<ThPointModel> RootNode { set; get; }
-        public ThPointTree(Point3d startPt, List<Line> lines, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList)
+        public ThPointTree(Point3d startPt, List<Line> lines, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList, List<ThValveModel> valveList)
         {
             //构建根节点RootNode
-            RootNode = CreateRootNode(startPt, lines, riserList, markList, dimList);
+            RootNode = CreateRootNode(startPt, lines, riserList, markList, dimList, valveList);
             BianLiTee(RootNode);
         }
-        public ThTreeNode<ThPointModel> CreateRootNode(Point3d startPt, List<Line> lines, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList)
+        public ThTreeNode<ThPointModel> CreateRootNode(Point3d startPt, List<Line> lines, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList, List<ThValveModel> valveList)
         {
             var startLine = ThUndergroundWaterSystemUtils.FindStartLine(startPt, lines);
             var pointModel = new ThPointModel();
             pointModel.Position = startLine.StartPoint;
             var rootNode = new ThTreeNode<ThPointModel>(pointModel);
-            InsertToNode(rootNode, riserList, markList, dimList, ref lines);
+            InsertToNode(rootNode, riserList, markList, dimList,valveList, ref lines);
             return rootNode;
         }
-        public void InsertToNode(ThTreeNode<ThPointModel> node, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList, ref List<Line> lines)
+        public void InsertToNode(ThTreeNode<ThPointModel> node, List<ThRiserInfo> riserList, List<ThMarkModel> markList, List<ThDimModel> dimList, List<ThValveModel> valveList, ref List<Line> lines)
         {
             //找到与node.Item.Position相连的线
             var point = node.Item.Position;
@@ -56,6 +56,21 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             }
             //ToDo1:判断节点是否有给水角阀平面
             //ToDo2:判断节点是否有阀门等
+            if (node.Parent != null)
+            {
+                var pt1 = node.Parent.Item.Position;
+                var pt2 = node.Item.Position;
+                var line = new Line(pt1, pt2);
+                var box = line.Buffer(200);
+                foreach (var valve in valveList)
+                {
+                    if (box.Contains(valve.Point))
+                    {
+                        node.Item.Valves.Add(valve);
+                        //break;
+                    }
+                }
+            }
             //查找当前节点是否有立管
             foreach (var riser in riserList)
             {
@@ -93,7 +108,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 childModel.Position = l.EndPoint;
                 var childNode = new ThTreeNode<ThPointModel>(childModel);
                 node.InsertChild(childNode);
-                InsertToNode(childNode, riserList, markList, dimList, ref lines);
+                InsertToNode(childNode, riserList, markList, dimList, valveList, ref lines);
             }
         }
         private List<Line> FindConnectLine(Point3d pt, ref List<Line> lines)
