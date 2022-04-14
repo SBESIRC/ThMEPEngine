@@ -11,8 +11,6 @@
         public static readonly string CMD_THFBK_GLOBAL_NAME = "THFBK";
         public static readonly string CMD_THT20PLUGINV4_GLOBAL_NAME = "T20V4";
         public static readonly string CMD_THT20PLUGINV5_GLOBAL_NAME = "T20V5";
-        public static readonly string CMD_THLOGIN_GLOBAL_NAME = "THLOGIN";
-        public static readonly string CMD_THLOGOUT_GLOBAL_NAME = "THLOGOUT";
         public static readonly string CMD_THPROFILE_GLOBAL_NAME = "THPROFILE";
         public static readonly string CMD_THPURGE_GLOBAL_NAME = "THPURGE";
         public static readonly string CMD_THDUMPCUI_GLOBAL_NAME = "THDUMPCUI";

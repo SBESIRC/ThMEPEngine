@@ -181,12 +181,6 @@ namespace ThAnalytics
                     ThCybrosService.Instance.RecordTHCommandEvent(cmdName, sw.Elapsed.TotalSeconds);
                     commandhashtable.Remove(cmdName);
                 }
-
-                // 若有新的用户登陆，则开启Session
-                if (cmdName == "THLOGIN")
-                {
-                    ThCybrosService.Instance.StartSession();
-                }
             }
             else
             {
@@ -231,12 +225,6 @@ namespace ThAnalytics
                     commandhashtable.Remove(cmdName);
                 }
                 commandhashtable.Add(cmdName, Stopwatch.StartNew());
-
-                // 若用户准备登出，则结束Session
-                if (cmdName == "THLOGOUT")
-                {
-                    ThCybrosService.Instance.EndSession();
-                }
             }
         }
     }
