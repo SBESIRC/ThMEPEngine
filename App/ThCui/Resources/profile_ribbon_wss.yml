@@ -196,6 +196,27 @@ panels:
           - text: "用电负荷"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlELECTRONIC"
+    name: "ELECTRONIC"
+    title: "消防弱电"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "报警平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "地库烟感"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "地库广播"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "火警系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "校核明细"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "安防平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELIGHTING"
     name: "ELIGHTING"
     title: "照明平面"
@@ -217,25 +238,13 @@ panels:
           - text: "应急照明连线"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
-  - UID: "pnlELECTRONIC"
-    name: "ELECTRONIC"
-    title: "消防弱电"
+  - UID: "pnlELIGHTNING"
+    name: "ELIGHTNING"
+    title: "防雷接地"
     rowPanels:
       - text: ""
         items:
-          - text: "报警平面"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "地库烟感"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "地库广播"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "火警系统"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "校核明细"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "安防平面"
+          - text: "接地平面"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEGENERAL"
