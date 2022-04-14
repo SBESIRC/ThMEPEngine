@@ -2977,7 +2977,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 foreach (var kv in vertice.Details.SecondaryCircuits)
                 {
                     var sc = kv.Key;
-                    var scVm = new PDS.UI.Project.Module.ThPDSControlCircuitModel(sc);
+                    var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(sc);
                     foreach (var edge in ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc))
                     {
                         DrawEdge(edge);

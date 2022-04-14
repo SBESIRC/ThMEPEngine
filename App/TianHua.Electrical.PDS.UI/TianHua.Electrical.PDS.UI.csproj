@@ -101,7 +101,7 @@
     <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSOUVPModel.cs" />
-    <Compile Include="Project\Module\ThPDSControlCircuitModel.cs" />
+    <Compile Include="Project\Module\ThPDSSecondaryCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
