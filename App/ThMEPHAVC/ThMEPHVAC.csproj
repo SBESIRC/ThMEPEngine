@@ -223,7 +223,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
     <Compile Include="Service\ThRoomSelector.cs" />
+    <Compile Include="Model\ThDrawDimension.cs" />
     <Compile Include="TCH\ThDrawTCHCross.cs" />
+    <Compile Include="TCH\ThDrawTCHDimension.cs" />
     <Compile Include="TCH\ThDrawTCHDuct.cs" />
     <Compile Include="TCH\ThDrawTCHElbow.cs" />
     <Compile Include="TCH\ThDrawTCHFlanges.cs" />
