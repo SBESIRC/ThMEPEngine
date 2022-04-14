@@ -435,7 +435,7 @@ namespace TianHua.AutoCAD.ThCui
 
         private static void CreateWGroundPlanPanel(RibbonTabSource tab)
         {
-            var panel = tab.AddNewPanel("WGROUNDPLAN", "地上给排水");
+            var panel = tab.AddNewPanel("WGROUNDPLAN", "地上给排水（住宅）");
             var row = panel.AddNewRibbonRow();
 
             {

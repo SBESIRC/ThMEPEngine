@@ -48,7 +48,7 @@ panels:
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWGROUNDPLAN"
     name: "WGROUNDPLAN"
-    title: "地上给排水"
+    title: "地上给排水（住宅）"
     rowPanels:
       - text: ""
         items:
