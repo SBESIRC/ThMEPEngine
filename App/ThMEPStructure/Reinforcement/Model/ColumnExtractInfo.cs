@@ -7,9 +7,9 @@ namespace ThMEPStructure.Reinforcement.Model
     {
         public Dictionary<string, int> SpecDict { get; set; }=new Dictionary<string, int>();
         /// <summary>
-        /// 边构
+        /// 柱子轮廓
         /// </summary>
-        public Polyline Column { get; set; }
+        public Polyline Outline { get; set; }
         /// <summary>
         /// 编号
         /// </summary>

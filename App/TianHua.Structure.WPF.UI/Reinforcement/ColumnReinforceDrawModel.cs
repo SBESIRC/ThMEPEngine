@@ -5,18 +5,18 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
 {
     public class ColumnReinforceDrawModel : NotifyPropertyChangedBase
     {
-        private string wallColumnLayer = "";
+        private string columnLayer = "";
         /// <summary>
-        /// 墙柱图层
+        /// 柱图层
         /// </summary>
 
-        public string WallColumnLayer
+        public string ColumnLayer
         {
-            get => wallColumnLayer; 
+            get => columnLayer; 
             set
             {
-                wallColumnLayer = value;
-                RaisePropertyChanged("WallColumnLayer");
+                columnLayer = value;
+                RaisePropertyChanged("ColumnLayer");
             }
         }
         private string textLayer = "";
@@ -102,8 +102,8 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             textLayer = ThColumnReinforceDrawConfig.Instance.TextLayer;            
             dwgSource = ThColumnReinforceDrawConfig.Instance.DwgSource;
             leaderType = ThColumnReinforceDrawConfig.Instance.LeaderType;            
-            markPosition = ThColumnReinforceDrawConfig.Instance.MarkPosition;           
-            wallColumnLayer = ThColumnReinforceDrawConfig.Instance.WallColumnLayer;
+            markPosition = ThColumnReinforceDrawConfig.Instance.MarkPosition;
+            columnLayer = ThColumnReinforceDrawConfig.Instance.ColumnLayer;
         }
         public void SetConfig()
         {
@@ -113,7 +113,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             ThColumnReinforceDrawConfig.Instance.DwgSource = dwgSource;
             ThColumnReinforceDrawConfig.Instance.LeaderType = leaderType;
             ThColumnReinforceDrawConfig.Instance.MarkPosition = markPosition;
-            ThColumnReinforceDrawConfig.Instance.WallColumnLayer = wallColumnLayer;
+            ThColumnReinforceDrawConfig.Instance.ColumnLayer = columnLayer;
         }
     }
 }

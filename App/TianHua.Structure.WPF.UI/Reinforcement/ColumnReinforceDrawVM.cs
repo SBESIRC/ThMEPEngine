@@ -22,8 +22,7 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         public ObservableCollection<string> DwgSources { get; set; }
         public ObservableCollection<string> SortWays { get; set; }
         public ObservableCollection<string> LeaderTypes { get; set; }
-        public ObservableCollection<string> MarkPositions { get; set; }
-        private string LayerLinkCharater = "、";
+        public ObservableCollection<string> MarkPositions { get; set; }        
         private static List<DBObjectCollection> ComponentBoundaries { get; set; }
         private List<List<ColumnExtractInfo>> GroupResults { get; set; }
         public ColumnReinforceDrawVM()
@@ -73,27 +72,23 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
         }
         public void Select()
         {
-            //using (var cmd = new ThYjkReinforceExtractCmd())
-            //{
-            //    // 传入参数
-            //    cmd.WallLayers = Split(DrawModel.WallLayer, LayerLinkCharater);
-            //    cmd.TextLayers = Split(DrawModel.TextLayer, LayerLinkCharater);
-            //    cmd.WallColumnLayers = Split(DrawModel.WallColumnLayer, LayerLinkCharater);
-
-            //    cmd.Execute();
-            //    if(cmd.IsSuccess)
-            //    {
-            //        Clear();
-            //        cmd.ExtractInfos.ForEach(o => EdgeComponents.Add(o));
-            //        var obbs = cmd.ExtractInfos
-            //            .Select(o => o.EdgeComponent)
-            //            .ToCollection()
-            //            .GetObbFrames();
-            //        RemoveComponentFrames();
-            //        ComponentBoundaries.Add(obbs);
-            //        ShowComponentFrames();
-            //    }
-            //};
+            using (var cmd = new ThYjkColumnReinforceExtractCmd())
+            {
+                // 传入参数
+                cmd.Execute();
+                if (cmd.IsSuccess)
+                {
+                    Clear();
+                    cmd.ExtractInfos.ForEach(o => Columns.Add(o));
+                    var obbs = cmd.ExtractInfos
+                        .Select(o => o.Outline)
+                        .ToCollection()
+                        .GetObbFrames();
+                    RemoveComponentFrames();
+                    ComponentBoundaries.Add(obbs);
+                    ShowComponentFrames();
+                }
+            };
         }
         public void Clear()
         {
@@ -151,10 +146,10 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             //    cmd.Execute();
             //}
         }
-        public void SetWallColumnLayer()
+        public void SetColumnLayer()
         {
             var layer = SelectEntityLayer();
-            DrawModel.WallColumnLayer = AddLayer(DrawModel.WallColumnLayer, layer);
+            DrawModel.ColumnLayer = AddLayer(DrawModel.ColumnLayer, layer);
         }
         public void SetTextLayer()
         {
@@ -181,7 +176,8 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             {
                 return originLayer;
             }
-            var splitStrs = Split(originLayer, "、");
+            var splitStrs = ThReinforcementUtils.Split(originLayer, 
+                ThColumnReinforceDrawConfig.Instance.LayerLinkCharater);
             if(splitStrs.Contains(newAdd))
             {
                 return string.Join("、", splitStrs);
@@ -191,17 +187,6 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
                 splitStrs.Add(newAdd);
                 return string.Join("、", splitStrs);
             }
-        }
-        private List<string> Split(string content,string splitChar)
-        {
-            var chars = new string[] { splitChar };
-            var splitStrs = content.Split(chars,StringSplitOptions.RemoveEmptyEntries);
-            var results = new List<string>();
-            foreach (string str in splitStrs)
-            {
-                results.Add(str.Trim());
-            }
-            return results;
         }
         private string SelectEntityLayer()
         {

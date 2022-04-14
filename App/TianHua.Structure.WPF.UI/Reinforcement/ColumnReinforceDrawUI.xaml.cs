@@ -16,10 +16,10 @@ namespace TianHua.Structure.WPF.UI.Reinforcement
             DataContext = drawVM;
         }
 
-        private void imgWallColumnLayer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void imgColumnLayer_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.Hide();
-            drawVM.SetWallColumnLayer();
+            drawVM.SetColumnLayer();
             this.Show();
         }
 

@@ -98,12 +98,12 @@
                     </Grid.ColumnDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Content="墙柱："></Label>
                     <Label Grid.Row="1" Grid.Column="0" Content="文字："></Label>
-                    <TextBox Name="tbWallColumnLayer" Grid.Row="0" Grid.Column="1" Height="20"
-                             Text="{Binding DrawModel.WallColumnLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox Name="tbColumnLayer" Grid.Row="0" Grid.Column="1" Height="20"
+                             Text="{Binding DrawModel.ColumnLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBox Name="tbTextLayer" Grid.Row="1" Grid.Column="1" Height="20"
                              Text="{Binding DrawModel.TextLayer, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <Image Name="imgWallColumnLayer" Grid.Row="0" Grid.Column="2" Width="24" Height="24"
-                           Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgWallColumnLayer_MouseLeftButtonDown"/>
+                    <Image Name="imgColumnLayer" Grid.Row="0" Grid.Column="2" Width="24" Height="24"
+                           Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgColumnLayer_MouseLeftButtonDown"/>
                     <Image Name="imgTextLayer" Grid.Row="1" Grid.Column="2" Width="24" Height="24"
                            Source="../Resource/Image/Layer.ico" MouseLeftButtonDown="imgTextLayer_MouseLeftButtonDown"/>
                 </Grid>

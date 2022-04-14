@@ -273,5 +273,16 @@ namespace ThMEPStructure.Reinforcement.Service
             transformer.Reset(results);
             return results;
         }
+        public static List<string> Split(string content, string splitChar)
+        {
+            var chars = new string[] { splitChar };
+            var splitStrs = content.Split(chars, StringSplitOptions.RemoveEmptyEntries);
+            var results = new List<string>();
+            foreach (string str in splitStrs)
+            {
+                results.Add(str.Trim());
+            }
+            return results;
+        }
     }
 }

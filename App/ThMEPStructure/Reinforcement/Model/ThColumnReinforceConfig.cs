@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ThMEPStructure.Reinforcement.Service;
 
 namespace ThMEPStructure.Reinforcement.Model
 {
@@ -112,6 +113,7 @@ namespace ThMEPStructure.Reinforcement.Model
         static ThColumnReinforceDrawConfig()
         {
         }
+        public string LayerLinkCharater { get; private set; } = "、";
         public List<string> DwgSources { get; private set; }
         public List<string> SortWays { get; private set; }
         public List<string> LeaderTypes { get; private set; }
@@ -128,13 +130,27 @@ namespace ThMEPStructure.Reinforcement.Model
         public string DwgSource { get; set; }
         public int Size { get; set; }     
         /// <summary>
-        /// 墙柱图层
+        /// 柱图层
         /// </summary>
-        public string WallColumnLayer { get; set; }
+        public string ColumnLayer { get; set; }
+        public List<string> ColumnLayers
+        {
+            get
+            {
+                return ThReinforcementUtils.Split(ColumnLayer,LayerLinkCharater);
+            }
+        }
         /// <summary>
         /// 文字图层
         /// </summary>
-        public string TextLayer { get; set; }        
+        public string TextLayer { get; set; }
+        public List<string> TextLayers
+        {
+            get
+            {
+                return ThReinforcementUtils.Split(TextLayer, LayerLinkCharater);
+            }
+        }
         private void Init()
         {
             Size = 1;
@@ -143,7 +159,7 @@ namespace ThMEPStructure.Reinforcement.Model
             MarkPosition = "右上";
             TextLayer = "dsptext_col";
             SortWay = "从左到右，从下到上";
-            WallColumnLayer = "砼柱、SPRE_SPECCL_JIAO";
+            ColumnLayer = "砼柱、SPRE_SPECCL_JIAO";
             DwgSources = new List<string>() { "YJK" };
             SortWays = new List<string>() { "从左到右，从下到上" };
             LeaderTypes = new List<string>() { "折线引出" };
