@@ -2164,8 +2164,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 foreach (var kv in vertice.Details.SmallBusbars)
                 {
-                    var sbb = kv.Key;
-                    var edges = ThPDSProjectGraphService.GetSmallBusbarCircuit(null, vertice, sbb);
+                    var mbb = kv.Key;
+                    var edges = ThPDSProjectGraphService.GetSmallBusbarCircuit(null, vertice, mbb);
                     var start = new Point(busStart.X + 205, -dy - 10);
                     var end = start.OffsetY(10);
                     busEnd = end;
@@ -2230,7 +2230,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                    breaker = sbb.Breaker;
+                                    breaker = mbb.Breaker;
                                     var blkVm = new ThPDSBlockViewModel();
                                     Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
@@ -2464,7 +2464,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                         Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                        breaker = sbb.Breaker;
+                                        breaker = mbb.Breaker;
                                         var blkVm = new ThPDSBlockViewModel();
                                         Project.Module.Component.ThPDSBreakerModel vm;
                                         void UpdateBreakerViewModel()
@@ -2921,7 +2921,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             void Update()
                             {
                                 SetSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
-                                var vm = new { };
+                                var vm = new PDS.UI.Project.Module.ThPDSMiniBusbarModel(mbb);
                                 UpdatePropertyGrid(vm);
                             }
                             if (e.ChangedButton != MouseButton.Left)
@@ -2954,7 +2954,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     foreach (ThPDSCircuitGraphTreeModel m in w.ctl.SelectedItems)
                                     {
-                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, sbb, edges[m.Id]);
+                                        ThPDSProjectGraphService.AssignCircuit2SmallBusbar(vertice, mbb, edges[m.Id]);
                                     }
                                     UpdateCanvas();
                                 }
@@ -2966,7 +2966,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             mi.Header = "新建分支回路";
                             mi.Command = new RelayCommand(() =>
                             {
-                                ThPDSProjectGraphService.SmallBusbarAddCircuit(graph, vertice, sbb);
+                                ThPDSProjectGraphService.SmallBusbarAddCircuit(graph, vertice, mbb);
                                 UpdateCanvas();
                             });
                         }
@@ -2977,6 +2977,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 foreach (var kv in vertice.Details.SecondaryCircuits)
                 {
                     var sc = kv.Key;
+                    var scVm = new PDS.UI.Project.Module.ThPDSControlCircuitModel(sc);
                     foreach (var edge in ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc))
                     {
                         DrawEdge(edge);
@@ -2985,20 +2986,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var end = start.OffsetY(40);
                     busEnd = end;
                     dy -= end.Y - start.Y;
-                    var pt = new Point(start.X - 205, -start.Y);
+                    var pt = new Point(start.X - 205, start.Y);
                     var cvt1 = new DoubleCollectionConverter();
                     var dashArrBORDERBorder = (DoubleCollection)cvt1.ConvertFrom("12.7, 6.35, 12.7, 6.35, 1, 6.35 ");
                     var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
                     var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
                     var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                     {
-                        var st = new Point(pt.X + 144, -pt.Y + 20);
-                        var ed = st.OffsetY(20);
+                        var st = new Point(pt.X + 144, pt.Y + 10);
+                        var ed = st;
+                        ed.Y = pt.Y + 40;
                         var ln = CreateLine(null, Brushes.Black, st, ed);
                         ln.StrokeDashCap = PenLineCap.Square;
                         ln.StrokeDashArray = currentDashArr;
                         canvas.Children.Add(ln);
                     }
+                    pt.Y = -pt.Y;
                     var item = PDSItemInfo.Create("控制（从属接触器）", pt);
                     {
                         var glyphs = new List<Glyphs>();
@@ -3061,8 +3064,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
                                 if (m != null)
                                 {
-                                    var vm = sc;
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -3070,8 +3072,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
                                 if (m != null)
                                 {
-                                    var vm = sc;
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                     m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                 }
                             }
@@ -3106,7 +3107,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 void Update()
                                 {
                                     SetSel(rect);
-                                    UpdatePropertyGrid(sc);
+                                    UpdatePropertyGrid(scVm);
                                 }
                                 if (e.ChangedButton != MouseButton.Left)
                                 {
