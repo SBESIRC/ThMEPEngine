@@ -103,7 +103,7 @@
     <Compile Include="Project\Module\Component\ThPDSOUVPModel.cs" />
     <Compile Include="Project\Module\ThPDSSecondaryCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
+    <Compile Include="Project\Module\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSTransferSwitchBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSUESandboxParameterModel.cs" />
