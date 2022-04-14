@@ -3,26 +3,66 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.Reinforcement.Model
 {
-    /// <summary>
-    /// 边缘构件
-    /// </summary>
-    public class EdgeComponentExtractInfo
+    public class ColumnExtractInfo
     {
         public Dictionary<string, int> SpecDict { get; set; }=new Dictionary<string, int>();
         /// <summary>
         /// 边构
         /// </summary>
-        public Polyline EdgeComponent { get; set; }
+        public Polyline Column { get; set; }
         /// <summary>
         /// 编号
-        /// eg. GBZ24,GBZ1
         /// </summary>
         public string Number { get; set; } = "";
         /// <summary>
         /// 规格
-        /// eg. 一字型: 1650x200,L型：200x800,200,300
+        /// eg. 矩形型: 1650x200
         /// </summary>
         public string Spec { get; set; } = "";
+        /// <summary>
+        /// 柱的轴压比
+        /// </summary>
+        public double Uc { get; set; }
+        /// <summary>
+        /// 单根角筋的面积
+        /// </summary>
+        public double Asc { get; set; }
+        /// <summary>
+        /// 柱节点域抗剪箍筋面积(暂不考虑)
+        /// </summary>
+        public double Asvj { get; set; }
+        /// <summary>
+        /// B边配筋面积
+        /// </summary>
+        public double Asx { get; set; }
+        /// <summary>
+        /// H边配筋面积
+        /// </summary>
+        public double Asy { get; set; }
+        /// <summary>
+        /// 加密区斜截面抗剪箍筋面积(cm2)
+        /// </summary>
+        public double Asv { get; set; }
+        /// <summary>
+        /// 非加密区斜截面抗剪箍筋面积(cm2)
+        /// </summary>
+        public double Asv0 { get; set; }
+        /// <summary>
+        /// 箍筋标志
+        /// </summary>
+        public string G { get; set; } = "";
+        /// <summary>
+        /// 柱全截面的配筋面积
+        /// As=2*(Asx+Asy)-4*Asc
+        /// </summary>
+        public double As
+        {
+            get
+            {
+                return 2 * (Asx + Asy) - 4 * Asc;
+            }
+        }
+        public string ColumnType { get; set; } = "";
         /// <summary>
         /// 形状
         /// eg. 一形，L形，T形
@@ -42,32 +82,11 @@ namespace ThMEPStructure.Reinforcement.Model
         /// 是否是标准构件
         /// </summary>
         public bool IsStandard { get; set; }
-        /// <summary>
-        /// 类型代号，用于标识标准-A,标准-B,标准Cal-A,标准Cal-B
-        /// 取值为: A 或 B
-        /// </summary>
-        public string TypeCode { get; set; } = "";
-        public string LinkWallPos { get; set; } = "";
+        
         /// <summary>
         /// 是计算书图层
         /// </summary>
-
         public bool IsCalculation { get; set; }
-
-        /// <summary>
-        /// 配筋率
-        /// </summary>
-        public double ReinforceRatio { get; set; }
-        /// <summary>
-        /// 配箍率
-        /// </summary>
-        public double StirrupRatio { get; set; }
-
-        /// <summary>
-        /// 全部纵筋面积
-        /// </summary>
-        public double AllReinforceArea { get; set; }
-
         private string ToString(ShapeCode shapeCode)
         {
             var result = "";
@@ -114,34 +133,6 @@ namespace ThMEPStructure.Reinforcement.Model
             }
         }
         /// <summary>
-        /// 编号前缀用于表达构件类型
-        /// YBZ->边缘性构件，GBZ->构造性构件
-        /// GBZ11->GBZ ,YBZ24->YBZ
-        /// </summary>
-        public ComponentType ComponentType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Number) || Number.Length < 3)
-                {
-                    return ComponentType.Unknown;
-                }
-                var prefix = Number.Substring(0, 3).ToUpper();
-                if (prefix == "GBZ")
-                {
-                    return ComponentType.GBZ;
-                }
-                else if(prefix == "YBZ")
-                {
-                    return ComponentType.YBZ;
-                }
-                else
-                {
-                    return ComponentType.Unknown;
-                }
-            }
-        }
-        /// <summary>
         /// 查询对应的规格
         /// </summary>
         /// <param name="key">关键字</param>
@@ -157,18 +148,15 @@ namespace ThMEPStructure.Reinforcement.Model
             }
             return null;
         }
-    }
-    public enum ShapeCode
-    {
-        L,
-        T,
-        Rect,
-        Unknown
-    }
-    public enum ComponentType
-    {
-        Unknown,
-        YBZ,
-        GBZ
+        /// <summary>
+        /// 是否为角柱
+        /// </summary>
+        public bool IsCornerColumn
+        {
+            get
+            {
+                return ColumnType.Contains("角柱");
+            }
+        }
     }
 }

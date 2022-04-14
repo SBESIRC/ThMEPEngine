@@ -46,10 +46,15 @@
     <Compile Include="Command\MainBeamCmd.cs" />
     <Compile Include="Command\BuildBeamCmd.cs" />
     <Compile Include="Command\SecondaryBeamCmd.cs" />
+    <Compile Include="Reinforcement\ColumnReinforceDrawModel.cs" />
     <Compile Include="Reinforcement\EdgeComponentDrawModel.cs" />
+    <Compile Include="Reinforcement\ColumnReinforceDrawUI.xaml.cs">
+      <DependentUpon>ColumnReinforceDrawUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Reinforcement\EdgeComponentDrawUI.xaml.cs">
       <DependentUpon>EdgeComponentDrawUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Reinforcement\ColumnReinforceDrawVM.cs" />
     <Compile Include="Reinforcement\EdgeComponentDrawVM.cs" />
     <Compile Include="Reinforcement\ColumnReinforceSetModel.cs" />
     <Compile Include="Reinforcement\WallColumnReinforceSetModel.cs" />
@@ -75,6 +80,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reinforcement\ColumnReinforceDrawUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

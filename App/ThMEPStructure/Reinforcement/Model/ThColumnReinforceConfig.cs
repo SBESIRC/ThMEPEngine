@@ -116,7 +116,6 @@ namespace ThMEPStructure.Reinforcement.Model
         public List<string> SortWays { get; private set; }
         public List<string> LeaderTypes { get; private set; }
         public List<string> MarkPositions { get; private set; }
-
         /// <summary>
         /// 引线形式
         /// </summary>
@@ -127,27 +126,10 @@ namespace ThMEPStructure.Reinforcement.Model
         public string MarkPosition { get; set; }
         public string SortWay { get; set; }
         public string DwgSource { get; set; }
-        public int Size { get; set; }
-        /// <summary>
-        /// 配箍率
-        /// </summary>
-        public double StirrupRatio { get; set; }
-        /// <summary>
-        /// 墙层
-        /// </summary>
-        public string WallLayer { get; set; }
-        /// <summary>
-        /// 归并系数->考虑墙体
-        /// </summary>
-        public bool IsConsiderWall { get; set; }
-        /// <summary>
-        /// 配筋率
-        /// </summary>
-        public double ReinforceRatio { get; set; }
+        public int Size { get; set; }     
         /// <summary>
         /// 墙柱图层
         /// </summary>
-
         public string WallColumnLayer { get; set; }
         /// <summary>
         /// 文字图层
@@ -156,20 +138,16 @@ namespace ThMEPStructure.Reinforcement.Model
         private void Init()
         {
             Size = 1;
-            StirrupRatio = 1.0;
             DwgSource = "YJK";
-            WallLayer = "砼墙";
-            ReinforceRatio = 0.06;
-            IsConsiderWall = true;
             LeaderType = "折线引出";
             MarkPosition = "右上";
+            TextLayer = "dsptext_col";
             SortWay = "从左到右，从下到上";
-            WallColumnLayer = "边构";
+            WallColumnLayer = "砼柱、SPRE_SPECCL_JIAO";
             DwgSources = new List<string>() { "YJK" };
             SortWays = new List<string>() { "从左到右，从下到上" };
             LeaderTypes = new List<string>() { "折线引出" };
             MarkPositions = new List<string>() { "右上", "右下", "左上", "左下" };
-            TextLayer = "dsptext_walledge、dsptext_walledgeCal、dsptext_walledgeCX";
         }
         public void Reset()
         {
