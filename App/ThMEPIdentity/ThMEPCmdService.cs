@@ -14,7 +14,7 @@ namespace ThMEPIdentity
         internal ThMEPCmdService() { }
         public static ThMEPCmdService Instance { get { return instance; } }
 
-        private readonly Dictionary<string, string> WHITELIST = new Dictionary<string, string>
+        private readonly Dictionary<string, string> BLACKLIST = new Dictionary<string, string>
         {
             // 数字化设计中心
             {"THAFL", "户型平面"},
@@ -31,6 +31,36 @@ namespace ThMEPIdentity
             // 杂项
             {"THMEPVERSION", "版本查看"},
             {"THMEPPROFILE", "专业配置"},
+        };
+
+        private readonly Dictionary<string, string> WHITELIST = new Dictionary<string, string>
+        {
+            // 云筑
+            {"BASICSALIGN", "基础对柱中"},
+            {"CSLPJYKL", "梁纵筋初始设置"},
+            {"DRAWRAILING", "水平栏杆"},
+            {"FILLFIREZONE", "分区填充"},
+            {"FYDKFH", "楼板洞口"},
+            {"FYDYXT", "墙身配筋"},
+            {"FYJBBX", "降板边线"},
+            {"LPJTOOL", "梁纵筋校改"},
+            {"RAMPWAY2", "坡道剖面"},
+            {"DRIPPING", "滴水绘制"},
+            {"SFSB", "梯板配筋"},
+            {"WND1", "凸窗墙身"},
+            {"WND2", "平窗墙身"},
+            {"WND3", "阳台墙身"},
+            {"WND4", "平台墙身"},
+            {"FINDTEXT2", "相同文字选择"},
+            {"FINDTEXTINCLUDE2", "包含文字选择"},
+            {"TEXTMERGE", "文字合并"},
+            {"TH-TZ", "云线提资"},
+            {"WZJS", "数字批处理"},
+            {"DIMLINE", "标多段线"},
+            {"REDIMLINE", "刷新线长"},
+            {"GOW", "世界坐标系"},
+            {"U2P", "两点坐标系"},
+            {"MEASUREPATH", "距离校核"},
         };
 
         private readonly Dictionary<string, string> USERWHITELIST = new Dictionary<string, string>
@@ -60,9 +90,13 @@ namespace ThMEPIdentity
 
         public bool IsTHCommand(string name)
         {
-            if (WHITELIST.ContainsKey(name))
+            if (BLACKLIST.ContainsKey(name))
             {
                 return false;
+            }
+            if (WHITELIST.ContainsKey(name))
+            {
+                return true;
             }
             return name.StartsWith("TH");
         }
