@@ -156,7 +156,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             {
                 var subNode = rootNode.Children[i];
                 var subPt1 = subPt + hvector * (sumLength + SubSpace * i);
-
                 //插入阀门
                 var endPointNode = subNode.Item.PointNodeList.First().Parent;
                 var pointList = GetPointList(startPointNode, endPointNode);
@@ -185,14 +184,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     InsertValves("0", valves, valvePt, hvector);
                 }
                 //立管
-                var riserPoint = subPt1;               
-                DrawRisePipe(ref pointList,ref riserPoint,ref height,ref vvector,ref hvector,
-                    ref floorIndex,ref mvector,ref mapLineList, rootLine);            
+                var riserPoint = subPt1;
+                DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
+                    ref floorIndex, ref mvector, ref mapLineList, rootLine);
                 sumLength += riserPoint.DistanceTo(subPt1);
                 subPt1 = riserPoint;
-
                 //画子节点
-                var subLength = DrawSubNode(subPt1, subNode, height, floorIndex, ref mapLineList);
+                var subLength = DrawSubNode(subPt1, subNode, height, floorIndex, ref mapLineList, rootLine);
                 sumLength += subLength;
                 //绘制管径
                 //var endPointNode = subNode.Item.PointNodeList.First().Parent;
@@ -213,7 +211,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制主干线
             double rootLength = startLength + endLength + sumLength;//第一段2000，末尾段1000
             rootLength += SubSpace * (rootNode.Children.Count - 1);//子节点的间隔1000
-
             Point3d rootPt1 = basePt;
             Point3d rootPt2 = basePt + hvector * rootLength;
             var hLine1 = DrawLine(rootPt1, rootPt2, "0", 1);
@@ -221,64 +218,20 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             mapLine1.LineType = 0;
             mapLine1.Line = hLine1;
             mapLineList.Add(mapLine1);
-
+            //绘制冲洗点位情况
+            var lastItem = rootNode.Item.PointNodeList.LastOrDefault();
+            if (lastItem.Item.FlushPoint.Valve != null)
+            {
+                var flushPoint = lastItem.Item.FlushPoint;
+                DrawFlushPoint(flushPoint, rootPt2 - hvector * 200, vvector, hvector);
+            }
             //立管
             var _riserPoint = rootPt2;
             var _pointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
                 ref floorIndex, ref mvector, ref mapLineList, rootLine);
             sumLength += _riserPoint.DistanceTo(rootPt2);
-            rootPt2 = _riserPoint;
-
-            //Old: Backup
-            //如果主节点连接的是立管，那么还需要绘制一段向上的线
-            //if (rootNode.Item.PointNodeList.Last().Item.Riser != null)
-            //{
-            //    var vPt1 = rootPt2;
-            //    double vlength = FloorHeight / 2.0 - height - 200.0;
-            //    if (vlength < 400)
-            //    {
-            //        vlength = 400;
-            //    }
-            //    var vPt2 = vPt1 + vvector * vlength;
-            //    if (rootNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Count == 0)
-            //    {
-            //        DrawLine(vPt1, vPt2, "0", 0);
-            //        if (rootNode.Item.PointNodeList.Last().Item.Riser.MarkName != null)
-            //        {
-            //            var vpt3 = vPt1 + vvector * 300.0;
-            //            var hpt3 = vpt3 - hvector * GetMarkLength(rootNode.Item.PointNodeList.Last().Item.Riser.MarkName);
-            //            DrawLine(vpt3, hpt3, "0", 2);
-            //            //绘制立管标注
-            //            DrawText("0", rootNode.Item.PointNodeList.Last().Item.Riser.MarkName, hpt3, 0.0);
-            //        }
-            //    }
-            //    //todo3：不能只考虑最后一个pointNode，要考虑所有的pointNode
-            //    while (rootNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Count != 0)
-            //    {
-            //        var firstPt = rootNode.Item.PointNodeList.Last().Item.Riser.RiserPts.First();
-            //        rootNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Remove(firstPt);
-            //        var otherIndex = GetFloorIndex(firstPt, FloorList);
-            //        if (otherIndex != floorIndex)
-            //        {
-            //            bool isToCurFloor = false;
-            //            DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor, ref mapLineList);
-            //        }
-            //    }
-            //}
-            //else if (rootNode.Item.PointNodeList.Last().Item.Break != null)
-            //{
-            //    //如果是断线，绘制断线标注
-            //    var mPt1 = rootPt2;
-            //    var mPt2 = mPt1 + mvector * 1000.0;
-            //    var mPt3 = mPt2 - hvector * GetMarkLength(rootNode.Item.PointNodeList.Last().Item.Break.BreakName);
-            //    DrawLine(mPt1, mPt2, "0", 1);
-            //    DrawLine(mPt2, mPt3, "0", 1);
-            //    DrawText("0", rootNode.Item.PointNodeList.Last().Item.Break.BreakName, mPt3, 0.0);
-            //}
-
-            //ToDo1:如果有水角阀平面，绘制向下的线
-            //ToDo2:如果有阀门插入阀门
+            rootPt2 = _riserPoint;          
             //绘制管径
             var rootPointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             string dimMark1 = "";
@@ -292,9 +245,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var dimPt1 = rootPt2 - hvector * 1000.0;
             DrawText("0", dimMark1, dimPt1, 0.0);
             return rootLength;
-
         }
-        public double DrawSubNode(Point3d basePt, ThTreeNode<ThPipeModel> subNode, double height, int floorIndex, ref List<ThMapLine> mapLineList)
+        public double DrawSubNode(Point3d basePt, ThTreeNode<ThPipeModel> subNode, double height, int floorIndex, ref List<ThMapLine> mapLineList, Line rootLine)
         {
             Vector3d vvector = new Vector3d(0.0, 1.0, 0.0);
             Vector3d hvector = new Vector3d(1.0, 0.0, 0.0);
@@ -307,7 +259,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Point3d vLinePt1 = basePt;
             Point3d vLinePt2 = basePt + vvector * 400.0;
             DrawLine(vLinePt1, vLinePt2, "0", 1);
-
             Point3d hLinePt1 = vLinePt2;
             //绘制子节点
             double sumLength = 0.0;
@@ -350,8 +301,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     ref floorIndex, ref mvector, ref mapLineList);
                 sumLength += riserPoint.DistanceTo(childPt1);
                 childPt1 = riserPoint;
-
-                var subLength = DrawSubNode(childPt1, childNode, height, floorIndex, ref mapLineList);
+                //绘制子节点
+                var subLength = DrawSubNode(childPt1, childNode, height, floorIndex, ref mapLineList, rootLine);
                 sumLength += subLength;
                 //绘制管径
                 //var endPointNode = childNode.Item.PointNodeList.First().Parent;
@@ -367,7 +318,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 var dimPt = childPt1 - hvector * 1000.0;
                 DrawText("0", dimMark, dimPt, 0.0);
                 startPointNode = endPointNode;
-                //ToDo2:如果有阀门插入阀门
             }
             var cuLength = startLength + sumLength;
             if (subNode.Children.Count == 0)
@@ -385,66 +335,20 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 0;
             mapLine1.Line = hLine1;
-
+            //绘制冲洗点位情况
+            var lastItem = subNode.Item.PointNodeList.LastOrDefault();
+            if (lastItem.Item.FlushPoint.Valve != null)
+            {
+                var flushPoint = lastItem.Item.FlushPoint;
+                DrawFlushPoint(flushPoint, hLinePt2 - hvector * 200, vvector, hvector, rootLine);
+            }
             //立管
             var _riserPoint = hLinePt2;
             var _pointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
                 ref floorIndex, ref mvector, ref mapLineList);
             cuLength += _riserPoint.DistanceTo(hLinePt2);
-            hLinePt2 = _riserPoint;
-            //OldVersion: Backup
-            //如果节点连接的是立管，那么还需要绘制一段向上的线
-            //if (subNode.Item.PointNodeList.Last().Item.Riser != null)
-            //{
-            //    var vPt1 = hLinePt2;
-            //    double vlength = FloorHeight / 2.0 - height - 200.0;
-            //    if (vlength < 400)
-            //    {
-            //        vlength = 400;
-            //    }
-            //    var vPt2 = vPt1 + vvector * vlength;
-            //    if (subNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Count == 0)
-            //    {
-            //        DrawLine(vPt1, vPt2, "0", 1);
-            //        if (subNode.Item.PointNodeList.Last().Item.Riser.MarkName != null)
-            //        {
-            //            //绘制立管标注
-            //            var vpt3 = vPt1 + vvector * 1000.0;
-            //            var hpt3 = vpt3 - hvector * 500.0;
-            //            DrawLine(vpt3, hpt3, "0", 2);
-            //            DrawText("0", subNode.Item.PointNodeList.Last().Item.Riser.MarkName, hpt3, 0.0);
-            //        }
-            //    }
-            //    //todo3：不能只考虑最后一个pointNode，要考虑所有的pointNode
-            //    while (subNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Count != 0)
-            //    {
-            //        var firstPt = subNode.Item.PointNodeList.Last().Item.Riser.RiserPts.First();
-            //        subNode.Item.PointNodeList.Last().Item.Riser.RiserPts.Remove(firstPt);
-            //        var otherIndex = GetFloorIndex(firstPt, FloorList);
-            //        if (otherIndex != floorIndex)
-            //        {
-            //            bool isToCurFloor = false;
-            //            var floorLength = DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor, ref mapLineList);
-            //            if (isToCurFloor)
-            //            {
-            //                cuLength += floorLength;
-            //            }
-            //        }
-            //    }
-            //}
-            //else if (subNode.Item.PointNodeList.Last().Item.Break != null)
-            //{
-            //    //如果是断线，绘制断线标注
-            //    var mPt1 = hLinePt2;
-            //    var mPt2 = mPt1 + mvector * 1000.0;
-            //    var mPt3 = mPt2 - hvector * GetMarkLength(subNode.Item.PointNodeList.Last().Item.Break.BreakName);
-            //    DrawLine(mPt1, mPt2, "0", 2);
-            //    DrawLine(mPt2, mPt3, "0", 2);
-            //    DrawText("0", subNode.Item.PointNodeList.Last().Item.Break.BreakName, mPt3, 0.0);
-            //}
-            //ToDo1:如果有水角阀平面，绘制向下的线
-            //ToDo2:如果有阀门插入阀门
+            hLinePt2 = _riserPoint;        
             //绘制管径
             var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
             string dimMark1 = "";
@@ -458,7 +362,27 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var dimPt1 = hLinePt2 - hvector * 1000.0;
             DrawText("0", dimMark1, dimPt1, 0.0);
             return cuLength;
+        }
 
+        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, Line rootLine = null)
+        {
+            var vertLength = 400.0;
+            if (rootLine != null)
+                vertLength += rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
+            var vDownPt1 = basePt;
+            var vDownPt2 = vDownPt1 - vvector * vertLength;
+            DrawLine(vDownPt1, vDownPt2, "0", 1);
+            var vDownPt3 = vDownPt2 + hvector * 500;
+            DrawLine(vDownPt2, vDownPt3, "0", 1);
+            var vDownPt4 = vDownPt3 - vvector * 1000.0;
+            DrawLine(vDownPt3, vDownPt4, "0", 1);
+            using (var adb = AcadDatabase.Active())
+            {
+                var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
+                    "0", "皮带水嘴系统", vDownPt4, new Scale3d(1), 0);
+                blId.SetDynBlockValue("可见性", "向右真空破坏组合");
+                var br = adb.Element<BlockReference>(blId);
+            }
         }
         public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor, ref List<ThMapLine> mapLineList)
         {
@@ -529,8 +453,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
         }
         public void DrawRisePipe(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
-            ,ref double height,ref Vector3d vvector, ref Vector3d hvector,ref int floorIndex,ref Vector3d mvector
-            , ref List<ThMapLine> mapLineList,Line rootLine=null)
+            , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
+            , ref List<ThMapLine> mapLineList, Line rootLine = null)
         {
             List<Point3d> riserStartPoints = new List<Point3d>();
             for (int j = 0; j < pointList.Count; j++)

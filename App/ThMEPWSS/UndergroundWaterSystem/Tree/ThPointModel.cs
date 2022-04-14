@@ -14,6 +14,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Model
         public Point3d Position { set; get; }//点位置
         public ThRiserInfo Riser { set; get; }//立管
         public List<ThValveModel> Valves = new List<ThValveModel>();//阀门
+        public ThFlushPointModel FlushPoint = new ThFlushPointModel();//皮带水嘴
         public ThBreakModel Break { set; get; }//断线
         public ThDimModel DimMark { set; get; }//管径标注
         public ThPointModel()

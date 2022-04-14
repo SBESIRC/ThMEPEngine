@@ -64,8 +64,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     }
                     basePt = basePt.ToPoint2D().ToPoint3d();
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    //导入必要的模块
+                    ThImportService thImportService = new ThImportService();
+                    thImportService.Import();
                     //提取每个楼层的所需要的元素
-                    if(InfoModel.FloorList.Count == 0)
+                    if (InfoModel.FloorList.Count == 0)
                     {
                         //未读取到楼层数据
                         return;

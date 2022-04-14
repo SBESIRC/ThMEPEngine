@@ -61,8 +61,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             var dimList = floorList[FloorIndex].FloorInfo.DimList;
             //提取到阀门
             var valveList = floorList[FloorIndex].FloorInfo.ValveList;
+            //提取到皮带水嘴
+            var flushpointList = floorList[FloorIndex].FloorInfo.FlushPointList;
             //构建PointTree
-            var pointTree = new ThPointTree(startPt, cleanedLines, riserInfo, markList, dimList,valveList);
+            var pointTree = new ThPointTree(startPt, cleanedLines, riserInfo, markList, dimList,valveList, flushpointList);
             //构建RootNode
             RootNode = CreateRootNode(pointTree);
         }

@@ -315,9 +315,11 @@
     <Compile Include="UndergroundWaterSystem\Model\ThDimModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThFloorInfo.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThFloorModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThFlushPointModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThMarkModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThValveModel.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThDrawSystemMapService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThImportService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThOtherDataExtractionService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThPipeLineHandleService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThBreakExtractionService.cs" />

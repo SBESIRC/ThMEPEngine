@@ -75,7 +75,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             string[] names_a = new string[] { "给水角阀平面", "截止阀", "闸阀", "蝶阀", "电动阀",
                 "止回阀", "防污隔断网", "减压阀", "Y型过滤器", "水表1", "水表井","减压阀组" };
             string[] names_b = new string[] { "防污隔断阀组", "室内水表详图" };
-            string[] names_c = new string[] { "295", "296","301", "315", "316", "333", "752", "743", "018", "021", "502" };
+            string[] names_c = new string[] { "295", "296", "301", "315", "316", "333", "752", "743", "018", "021", "502" };
             double otherCorrespondingPipeLineLength = 1500;
             var bound = new Polyline()
             {
@@ -123,7 +123,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var brs = e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
                     return brs;
                 })
-                .Where(e => e.Count>0)
+                .Where(e => e.Count > 0)
                 .Select(e => e[0])
                 .Where(e =>
                 {
@@ -142,10 +142,68 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     return false;
                 }))
             {
-                ThValveModel thValveModel = new ThValveModel(e);            
+                ThValveModel thValveModel = new ThValveModel(e);
                 result.Add(thValveModel);
             }
-            return result.Where(e => e.Valve!=null).ToList();
+            return result.Where(e => e.Valve != null).ToList();
+        }
+        public List<ThFlushPointModel> GetFlushPointList(Point3dCollection pts)
+        {
+            var result = new List<ThFlushPointModel>();
+            var bound = new Polyline()
+            {
+                Closed = true,
+            };
+            bound.CreatePolyline(pts);
+            //块
+            foreach (var e in Entities.OfType<BlockReference>().Where(e =>
+            {
+                bool cond_a = e.ObjectId.IsValid;
+                bool cond_b = e.GetEffectiveName().Contains("给水角阀平面");
+                bool cond_c = bound.Contains(e.Position);
+                if (cond_a && cond_b && cond_c) return true;
+                else return false;
+            }))
+            {
+                ThFlushPointModel thFlushPoint = new ThFlushPointModel(e);
+                result.Add(thFlushPoint);
+            }
+            //块中块
+    
+            //
+            foreach (var e in Entities.OfType<Entity>()
+               .Where(e => IsTianZhengElement(e))
+               .Where(e =>
+               {
+                   try
+                   {
+                       return e.ExplodeToDBObjectCollection().OfType<BlockReference>().Any();
+                   }
+                   catch { return false; }
+               })
+               .Select(e =>
+               {
+                   var brs = e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
+                   return brs;
+               })
+               .Where(e => e.Count > 0)
+               .Select(e => e[0])
+               .Where(e => e.Name.Contains("给水角阀平面"))
+               .Where(e =>
+               {
+                   if (e.Bounds is Extents3d extent3d)
+                   {
+                       if (bound.Contains(extent3d.CenterPoint())) return true;
+                       else return false;
+                   }
+                   return false;
+               }))
+            {
+                ThFlushPointModel thFlushPoint = new ThFlushPointModel(e);
+                result.Add(thFlushPoint);
+            }
+            //
+            return result;
         }
     }
 }
