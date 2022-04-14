@@ -532,6 +532,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             ,ref double height,ref Vector3d vvector, ref Vector3d hvector,ref int floorIndex,ref Vector3d mvector
             , ref List<ThMapLine> mapLineList,Line rootLine=null)
         {
+            List<Point3d> riserStartPoints = new List<Point3d>();
             for (int j = 0; j < pointList.Count; j++)
             {
                 double curRiserLength = 0;
@@ -541,6 +542,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     hasNode = true;
                     var vPt1 = riserPoint;
+                    riserStartPoints.Add(vPt1);
                     double vlength = FloorHeight / 2.0 - height - 200.0;
                     if (vlength < 400)
                     {
@@ -586,9 +588,26 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     var p = riserPoint;
                     riserPoint += hvector.GetNormal() * (curRiserLength + 1000);
-                    var cond = rootLine != null && rootLine.GetClosestPointTo(riserPoint, true).DistanceTo(riserPoint) < 1;
-                    if (!cond)
-                        DrawLine(p, riserPoint, "0", 1);
+                    //var cond = rootLine != null && rootLine.GetClosestPointTo(riserPoint, true).DistanceTo(riserPoint) < 1;
+                    //if (!cond)
+                    //    DrawLine(p, riserPoint, "0", 1);
+                }
+            }
+            if (riserStartPoints.Count > 1)
+            {
+                for (int i = 0; i < riserStartPoints.Count - 1; i++)
+                {
+                    var cond_a = rootLine == null;
+                    var cond_b = true;
+                    if (!cond_a)
+                    {
+                        cond_b = rootLine.GetClosestPointTo(riserStartPoints[i], true).DistanceTo(riserStartPoints[i]) < 1
+                            && rootLine.GetClosestPointTo(riserStartPoints[i + 1], true).DistanceTo(riserStartPoints[i + 1]) < 1;
+                    }
+                    var cond_c = CreateVector(riserStartPoints[i], riserStartPoints[i + 1]).IsParallelTo(Vector3d.XAxis);
+                    var cond = cond_a && cond_b && cond_c;
+                    if (cond)
+                        DrawLine(riserStartPoints[i], riserStartPoints[i + 1], "0", 1);
                 }
             }
         }

@@ -280,5 +280,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             }
             return distance;
         }
+        public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
+        public static Vector3d CreateVector(Line line)
+        {
+            return CreateVector(line.StartPoint, line.EndPoint);
+        }
     }
 }
