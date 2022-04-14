@@ -53,14 +53,26 @@ namespace ThMEPElectrical.Command
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 var pts = nFrame.Vertices();
 
-                List<Tuple<double, double>> faceSize = new List<Tuple<double, double>> {
-                    new Tuple<double, double>(20000, 20000),
-                    new Tuple<double, double>(24000, 16000),
-                    new Tuple<double, double>(40000, 10000)
-                };
                 //List<Tuple<double, double>> faceSize = new List<Tuple<double, double>> { //测试分割用
                 //    new Tuple<double, double>(5000, 5000)};
-
+                var faceSize = new List<Tuple<double, double>>();
+                var size = ThEarthingGridDataService.Instance.EarthingGridSize;
+                if (size == "10x10或12x8或20x5")
+                {
+                    faceSize = new List<Tuple<double, double>> {
+                        new Tuple<double, double>(10000, 10000),
+                        new Tuple<double, double>(12000, 8000),
+                        new Tuple<double, double>(20000, 5000)
+                    };
+                }
+                else if (size == "20x20或24x16或40x10")
+                {
+                    faceSize = new List<Tuple<double, double>> {
+                        new Tuple<double, double>(20000, 20000),
+                        new Tuple<double, double>(24000, 16000),
+                        new Tuple<double, double>(40000, 10000)
+                    };
+                }
                 //1、Extract data
                 var dataset = new ThEarthingGridDatasetFactory();
                 dataset.Create(acadDb.Database, pts);

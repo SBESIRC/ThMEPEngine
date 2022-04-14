@@ -9,7 +9,7 @@ namespace ThMEPElectrical.EarthingGrid.Service
         public static ThEarthingGridDataService Instance { get { return instance; } }
         internal ThEarthingGridDataService()
         {
-            EarthingGridSize = EarthingGridSizes.Count > 0 ? 
+            EarthingGridSize = EarthingGridSizes.Count > 0 ?
                 EarthingGridSizes.First() : "";
         }
         static ThEarthingGridDataService()
