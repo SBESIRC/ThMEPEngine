@@ -222,24 +222,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         private bool PowerCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
         {
-            var check = true;
-            var vertexUsualPower = vertex.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
-            var vertexFirePower = vertex.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
-            var nodeUsualPower = node.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
-            var nodeFirePower = node.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
-            if (vertexUsualPower.Count == nodeUsualPower.Count && vertexFirePower.Count == nodeFirePower.Count)
-            {
-                if (!LoopCheck(vertexUsualPower, nodeUsualPower) || !LoopCheck(vertexFirePower, nodeFirePower))
-                {
-                    check = false;
-                }
-            }
-            else
-            {
-                check = false;
-            }
-
-            return check;
+            return vertex.Loads[0].InstalledCapacity.EqualsTo(node.Loads[0].InstalledCapacity);
         }
 
         /// <summary>
@@ -253,20 +236,6 @@ namespace TianHua.Electrical.PDS.Engine
             return vertex.Loads[0].LoadTypeCat_1 == node.Loads[0].LoadTypeCat_1
                 && vertex.Loads[0].LoadTypeCat_2 == node.Loads[0].LoadTypeCat_2
                 && vertex.Loads[0].LoadTypeCat_3 == node.Loads[0].LoadTypeCat_3;
-        }
-
-        private bool LoopCheck(List<double> first, List<double> second)
-        {
-            var check = true;
-            for (var i = 0; i < first.Count; i++)
-            {
-                if (first[i] != second[i])
-                {
-                    check = false;
-                    break;
-                }
-            }
-            return check;
         }
     }
 }

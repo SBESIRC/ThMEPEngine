@@ -119,29 +119,15 @@ namespace TianHua.Electrical.PDS.Project
             if(node.Loads.Count > 1)
             {
                 //多负载必定单功率
-                newNode.Details.LowPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.UsualPower.Sum());
+                newNode.Details.HighPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.HighPower);
                 newNode.Details.IsDualPower = false;
             }
             else
             {
                 var load = node.Loads[0];
-                var power = load.InstalledCapacity.UsualPower.Union(load.InstalledCapacity.FirePower).ToList();
-                if(power.Count == 0)
-                {
-                    newNode.Details.LowPower = 0;
-                    newNode.Details.IsDualPower = false;
-                }
-                else if(power.Count == 1)
-                {
-                    newNode.Details.LowPower = power.First();
-                    newNode.Details.IsDualPower = false;
-                }
-                else
-                {
-                    newNode.Details.LowPower = power.Min();
-                    newNode.Details.HighPower = power.Max();
-                    newNode.Details.IsDualPower = true;
-                }
+                newNode.Details.LowPower = load.InstalledCapacity.LowPower;
+                newNode.Details.HighPower = load.InstalledCapacity.HighPower;
+                newNode.Details.IsDualPower = load.InstalledCapacity.IsDualPower;
             }
             newNode.Details.IsOnlyLoad = node.Loads.Count == 1;
             //newNode.nodeDetails = new NodeDetails();

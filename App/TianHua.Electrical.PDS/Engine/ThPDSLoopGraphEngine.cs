@@ -1052,8 +1052,8 @@ namespace TianHua.Electrical.PDS.Engine
                             && e.Target.Loads.Count > 0
                             && e.Target.Loads[0].ID.BlockName == o.Loads[0].AttributesCopy)
                         .ToList();
-                    var targetEdge = edgeList.Where(e => e.Target.Loads[0].InstalledCapacity.UsualPower.Count +
-                        e.Target.Loads[0].InstalledCapacity.FirePower.Count == 0).ToList();
+                    var targetEdge = edgeList.Where(e => e.Target.Loads[0].InstalledCapacity.LowPower == 0)
+                        .ToList();
                     var sourceEdge = edgeList.Except(targetEdge).FirstOrDefault();
                     if (sourceEdge == null)
                     {

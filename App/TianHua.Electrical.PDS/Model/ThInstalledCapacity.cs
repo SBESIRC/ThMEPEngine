@@ -1,23 +1,34 @@
-﻿using System.Collections.Generic;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
     public class ThInstalledCapacity
     {
         public ThInstalledCapacity()
         {
-            UsualPower = new List<double>();
-            FirePower = new List<double>();
+            IsDualPower = false;
+            LowPower = 0;
+            HighPower = 0;
         }
 
         /// <summary>
-        /// 平时功率
+        /// 是否是双功率
         /// </summary>
-        public List<double> UsualPower { get; set; }
+        public bool IsDualPower { get; set; }
 
         /// <summary>
-        /// 消防功率
+        /// 低功率
         /// </summary>
-        public List<double> FirePower { get; set; }
+        public double LowPower { get; set; }
+
+        /// <summary>
+        /// 高功率
+        /// </summary>
+        public double HighPower { get; set; }
+
+        public bool EqualsTo(ThInstalledCapacity other)
+        {
+            return this.IsDualPower == other.IsDualPower
+                && this.LowPower == other.LowPower
+                && this.HighPower == other.HighPower;
+        }
     }
 }

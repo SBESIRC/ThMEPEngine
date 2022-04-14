@@ -87,5 +87,11 @@
         public static readonly string CONTROL_CIRCUIT_BELONG_TO_QAC = "控制（从属接触器）";
         public static readonly string SMALL_BUSBAR = "分支小母排";
         public static readonly string SMALL_BUSBAR_Circuit = "小母排分支";
+        public static readonly string SURGE_PROTECTION = "SPD";
+
+        public static readonly string FIRE_POWER_MONITORING_1 = "E-BPMFE201-1";
+        public static readonly string FIRE_POWER_MONITORING_2 = "E-BPMFE201-2";
+        public static readonly string ELECTRICAL_FIRE_MONITORING_1 = "E-BEFPS201-1";
+        public static readonly string ELECTRICAL_FIRE_MONITORING_2 = "E-BEFPS201-2";
     }
 }

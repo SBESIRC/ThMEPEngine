@@ -102,15 +102,29 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
                         var srcIsolatingSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_ISOLATING_SWITCH).First();
                         var componentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()];
+                            var firstPosition = srcIsolatingSwitch.Position;
                         if (!componentName.Equals(srcIsolatingSwitch.BlockName))
                         {
-                            var firstPosition = srcIsolatingSwitch.Position;
                             var newComponent = insertEngine.Insert1(activeDb, configDb, componentName, firstPosition, 100 * scale);
                             tableObjs.Add(newComponent);
                             srcIsolatingSwitch.Erase();
                         }
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
                         QLText.TextString = circuit.isolatingSwitch.Content();
+
+                        // 电能表
+                        // To do
+
+                        // 消防电源监控
+                        if (node.Details.FirePowerMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_1, firstPosition, scale);
+                        }
+                        // 电气火灾监控
+                        if (node.Details.ElectricalFireMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_1, firstPosition, scale);
+                        }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
                     }
@@ -152,15 +166,27 @@ namespace TianHua.Electrical.PDS.Diagram
                         // 转换开关
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
                         var transferSwitchName = ThPDSComponentMap.ComponentMap[circuit.transferSwitch.ComponentType.GetDescription()];
+                        var thirdPosition = srcTransferSwitch.Position;
                         if (!transferSwitchName.Equals(srcTransferSwitch.BlockName))
                         {
-                            var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, srcTransferSwitch.Position, 100 * scale);
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, thirdPosition, 100 * scale);
                             tableObjs.Add(newComponent);
                             srcTransferSwitch.Erase();
                         }
                         var ATSEText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_ATSE_320A_4P).First();
                         var type = ComponentTypeSelector.GetComponentType(circuit.transferSwitch.ComponentType);
-                        //ATSEText.TextString = type.GetProperty("Content").GetValue(circuit.transferSwitch).ToString();
+                        // ATSEText.TextString = circuit.transferSwitch.ComponentType.content;
+
+                        // 消防电源监控
+                        if (node.Details.FirePowerMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, thirdPosition, scale);
+                        }
+                        // 电气火灾监控
+                        if (node.Details.ElectricalFireMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, thirdPosition, scale);
+                        }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
                     }
@@ -215,9 +241,11 @@ namespace TianHua.Electrical.PDS.Diagram
                         // 转换开关1
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
                         var transferSwitchName = ThPDSComponentMap.ComponentMap[circuit.transferSwitch1.ComponentType.GetDescription()];
+                        var forthPosition = srcTransferSwitch.Position;
                         if (!transferSwitchName.Equals(srcTransferSwitch.BlockName))
                         {
-                            var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, srcTransferSwitch.Position, 100 * scale);
+                            
+                               var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, forthPosition, 100 * scale);
                             tableObjs.Add(newComponent);
                             srcTransferSwitch.Erase();
                         }
@@ -237,6 +265,17 @@ namespace TianHua.Electrical.PDS.Diagram
                         var MTSEText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_MTSE_320A_4P).First();
                         var MTSEtype = ComponentTypeSelector.GetComponentType(circuit.transferSwitch2.ComponentType);
                         //ATSEText.TextString = type.GetProperty("Content").GetValue(circuit.transferSwitch).ToString();
+
+                        // 消防电源监控
+                        if (node.Details.FirePowerMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, forthPosition, scale);
+                        }
+                        // 电气火灾监控
+                        if (node.Details.ElectricalFireMonitoring)
+                        {
+                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, forthPosition, scale);
+                        }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
                     }
@@ -1183,10 +1222,6 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         break;
                     }
-                case CircuitFormOutType.SPD:
-                    {
-                        break;
-                    }
                 default:
                     {
                         throw new NotSupportedException();
@@ -1243,6 +1278,14 @@ namespace TianHua.Electrical.PDS.Diagram
             // 控制回路
             var description = texts.Where(t => t.TextString.Equals(ThPDSCommon.CONTROL_CIRCUIT_DESCRIPTION)).First();
             description.TextString = secondaryCircuit.CircuitDescription;
+        }
+
+        public void SurgeProtectionAssign(AcadDatabase activeDb, BlockReference block, List<Entity> tableObjs, string content)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+
+            objs.OfType<DBText>().First().TextString = content;
         }
 
         private CircuitFormInType FetchDescription(string str)

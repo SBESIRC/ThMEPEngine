@@ -47,8 +47,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         双速电动机_CPSYY = 18,
         [Description("消防应急照明回路（WFEL）")]
         消防应急照明回路WFEL = 19,
-        [Description("SPD")]
-        SPD = 20,
     }
 
     /// <summary>

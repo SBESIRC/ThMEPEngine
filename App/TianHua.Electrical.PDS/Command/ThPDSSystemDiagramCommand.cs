@@ -181,6 +181,14 @@ namespace TianHua.Electrical.PDS.Command
                         });
                     }
 
+                    // 浪涌保护器
+                    if (thisNode.Details.SurgeProtection != SurgeProtectionDeviceType.None)
+                    {
+                        var surgeProtection = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SURGE_PROTECTION, basePoint, scale);
+                        assignment.SurgeProtectionAssign(activeDb, surgeProtection, tableObjs, thisNode.Details.SurgeProtection.ToString());
+                        basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                    }
+
                     if (edgeCount < blankLineCount)
                     {
                         for (var i = 0; i < blankLineCount - edgeCount; i++)
@@ -435,10 +443,6 @@ namespace TianHua.Electrical.PDS.Command
                 case CircuitFormOutType.消防应急照明回路WFEL:
                     {
                         return Tuple.Create(CircuitFormOutType.消防应急照明回路WFEL.GetDescription(), 1000.0);
-                    }
-                case CircuitFormOutType.SPD:
-                    {
-                        return Tuple.Create(CircuitFormOutType.SPD.GetDescription(), 1000.0);
                     }
                 default:
                     {
