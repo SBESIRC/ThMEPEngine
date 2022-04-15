@@ -784,6 +784,26 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_WND4_SMALL",
                     "IDI_THCAD_WND4_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 设置墙身
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("设置墙身",
+                    "天华设置墙身",
+                    "SETWALLXLINE",
+                    "天华设置墙身",
+                    "IDI_THCAD_SETWALLXLINE_SMALL",
+                    "IDI_THCAD_SETWALLXLINE_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 绘制墙身
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("绘制墙身",
+                    "天华绘制墙身",
+                    "DRAWWALLXLINE",
+                    "天华绘制墙身",
+                    "IDI_THCAD_DRAWWALLXLINE_SMALL",
+                    "IDI_THCAD_DRAWWALLXLINE_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
         }
 

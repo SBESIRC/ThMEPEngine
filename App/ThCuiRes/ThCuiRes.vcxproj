@@ -458,6 +458,10 @@
     <Image Include="Images\MEASUREPATH_dark_large.ico" />
     <Image Include="Images\XTZS_dark_small.ico" />
     <Image Include="Images\XTZS_dark_large.ico" />
+    <Image Include="Images\SETWALLXLINE_dark_small.ico" />
+    <Image Include="Images\SETWALLXLINE_dark_large.ico" />
+    <Image Include="Images\DRAWWALLXLINE_dark_small.ico" />
+    <Image Include="Images\DRAWWALLXLINE_dark_large.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

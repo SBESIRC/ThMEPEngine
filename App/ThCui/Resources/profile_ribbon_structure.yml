@@ -287,6 +287,10 @@ panels:
         items:
           - text: "平台墙身"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "设置墙身"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "绘制墙身"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlAMATERIALS"
     name: "AMATERIALS"
