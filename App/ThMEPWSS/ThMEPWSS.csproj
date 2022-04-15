@@ -840,11 +840,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="HydrantLayout\tmp\Engine\" />
-    <Folder Include="HydrantLayout\tmp\Model\" />
-    <Folder Include="HydrantLayout\tmp\Service\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

@@ -101,7 +101,7 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 dataQuery.ProcessArchitechData();
                 dataQuery.ProcessHydrant();
-            
+
                 //转换到原点
                 dataQuery.Transform(transformer);
                 dataQuery.ProjectOntoXYPlane();
@@ -128,10 +128,10 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 //插入过远提示
                 var tooFarList = validHydrant.Where(x => (x.CenterPoint.DistanceTo(x.OriginModel.Center) >= ThHydrantCommon.DistTol)).ToList();
-                InsertBlkService.InsertTooFar(tooFarList, ThHydrantCommon.Layer_Warning, 2000, 1);
+                InsertBlkService.InsertTooFar(tooFarList, ThHydrantCommon.Layer_Warning_TooFar, 2000, 2);
                 //插入没做出来提示
                 var notFoundList = outPutModels.Where(x => x.IfFind == false && (x.Type == 1 || x.Type == 2)).ToList();
-                InsertBlkService.InsertWarning(notFoundList, ThHydrantCommon.Layer_Warning, 2000, 1);
+                InsertBlkService.InsertWarning(notFoundList, ThHydrantCommon.Layer_Warning_NotDo, 2000, 1);
 
                 //删除块
                 validHydrant.ForEach(x => InsertBlkService.CleanEntity(x.OriginModel.Data));
