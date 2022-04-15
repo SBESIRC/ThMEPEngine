@@ -14,23 +14,23 @@ namespace TianHua.Electrical.PDS.Service
     /// </summary>
     public class ThPDSGraphCompareService
     {
-        private Dictionary<string, Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>> idToNodes { get; set; }
-        private Dictionary<string, Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>> idToEdges { get; set; }
+        private Dictionary<string, Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>> IdToNodes { get; set; }
+        private Dictionary<string, Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>> IdToEdges { get; set; }
 
-        public void DoCompare(ref PDSGraph source, PDSGraph target)
+        public void Diff(PDSGraph source, PDSGraph target)
         {
             //1、整理数据
             RecordNodes(source, target);
             RecordEdges(source, target);
 
             //2.1、记录“交换”变化
-            ComapreExChangeForNode(ref source, target);
+            ComapreExChangeForNode(source, target);
             //2.2、记录Node变化
-            ComapreChangeIdForNode(ref source, target);
-            CompareNodes(ref source, target);
+            ComapreChangeIdForNode(source, target);
+            CompareNodes(source, target);
             //2.3 记录Edge变化
             ComapreChangeIdForEdge();
-            CompareEdges(ref source, target);
+            CompareEdges(source, target);
         }
 
         #region RECORD
@@ -44,9 +44,9 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var nodeA in graphA.Vertices)
             {
                 var id = nodeA.Load.ID.LoadID;
-                if (!idToNodes.ContainsKey(id))
+                if (!IdToNodes.ContainsKey(id))
                 {
-                    idToNodes.Add(id, new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(nodeA, null));
+                    IdToNodes.Add(id, new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(nodeA, null));
                 }
                 else
                 {
@@ -56,17 +56,17 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var nodeB in graphB.Vertices)
             {
                 var id = nodeB.Load.ID.LoadID;
-                if (idToNodes.ContainsKey(id))
+                if (IdToNodes.ContainsKey(id))
                 {
-                    if (idToNodes[id].Item2 != null)
+                    if (IdToNodes[id].Item2 != null)
                     {
                         throw new NotImplementedException(); //重复nodeIdB
                     }
-                    idToNodes[id] = new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(idToNodes[id].Item1, nodeB);
+                    IdToNodes[id] = new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(IdToNodes[id].Item1, nodeB);
                 }
                 else
                 {
-                    idToNodes.Add(id, new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(null, nodeB));
+                    IdToNodes.Add(id, new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(null, nodeB));
                 }
             }
         }
@@ -81,9 +81,9 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var edgeA in graphA.Edges)
             {
                 var id = edgeA.Circuit.ID.LoadID;
-                if (!idToEdges.ContainsKey(id))
+                if (!IdToEdges.ContainsKey(id))
                 {
-                    idToEdges.Add(id, new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(edgeA, null));
+                    IdToEdges.Add(id, new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(edgeA, null));
                 }
                 else
                 {
@@ -93,17 +93,17 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var edgeB in graphB.Edges)
             {
                 var id = edgeB.Circuit.ID.LoadID;
-                if (idToEdges.ContainsKey(id))
+                if (IdToEdges.ContainsKey(id))
                 {
-                    if (idToEdges[id].Item2 != null)
+                    if (IdToEdges[id].Item2 != null)
                     {
                         throw new NotImplementedException(); //重复edgeIdB
                     }
-                    idToEdges[id] = new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(idToEdges[id].Item1, edgeB);
+                    IdToEdges[id] = new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(IdToEdges[id].Item1, edgeB);
                 }
                 else
                 {
-                    idToEdges.Add(id, new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(null, edgeB));
+                    IdToEdges.Add(id, new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(null, edgeB));
                 }
             }
         }
@@ -116,10 +116,10 @@ namespace TianHua.Electrical.PDS.Service
         /// </summary>
         /// <param name="graphA"></param>
         /// <param name="graphB"></param>
-        private void ComapreExChangeForNode(ref PDSGraph graphA, PDSGraph graphB)
+        private void ComapreExChangeForNode(PDSGraph graphA, PDSGraph graphB)
         {
             Dictionary<string, bool> nodeIdVisit = new Dictionary<string, bool>();
-            foreach (var idToNode in idToNodes)
+            foreach (var idToNode in IdToNodes)
             {
                 if (idToNode.Value.Item1 != null && idToNode.Value.Item2 != null)
                 {
@@ -140,17 +140,17 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
-                    var nodeA = idToNodes[idA].Item1;
-                    var nodeB = idToNodes[idB].Item1;
+                    var nodeA = IdToNodes[idA].Item1;
+                    var nodeB = IdToNodes[idB].Item1;
                     if (idA == idB)
                     {
                         continue;
                     }
-                    else if (NodesSameEnvironment(idToNodes[idA].Item1, idToNodes[idB].Item2, graphA, graphB) 
-                        && NodesSameEnvironment(idToNodes[idB].Item1, idToNodes[idA].Item2, graphA, graphB))
+                    else if (NodesSameEnvironment(IdToNodes[idA].Item1, IdToNodes[idB].Item2, graphA, graphB)
+                        && NodesSameEnvironment(IdToNodes[idB].Item1, IdToNodes[idA].Item2, graphA, graphB))
                     {
-                        DataChangeForNode(idToNodes[idA].Item1, idToNodes[idB].Item2);
-                        DataChangeForNode(idToNodes[idB].Item1, idToNodes[idA].Item2);
+                        DataChangeForNode(IdToNodes[idA].Item1, IdToNodes[idB].Item2);
+                        DataChangeForNode(IdToNodes[idB].Item1, IdToNodes[idA].Item2);
                         StructureForExchangeNode(nodeA, nodeB);
                     }
                 }
@@ -162,17 +162,17 @@ namespace TianHua.Electrical.PDS.Service
         /// </summary>
         /// <param name="graphA"></param>
         /// <param name="graphB"></param>
-        private void ComapreChangeIdForNode(ref PDSGraph graphA, PDSGraph graphB)
+        private void ComapreChangeIdForNode(PDSGraph graphA, PDSGraph graphB)
         {
             Dictionary<string, bool> nodeIdVisit = new Dictionary<string, bool>();
-            foreach (var idToNode in idToNodes)
+            foreach (var idToNode in IdToNodes)
             {
                 if (idToNode.Value.Item1 != null && idToNode.Value.Item2 == null)
                 {
                     nodeIdVisit.Add(idToNode.Key, false);
                 }
             }
-            foreach (var idToNode in idToNodes)
+            foreach (var idToNode in IdToNodes)
             {
                 if (idToNode.Value.Item1 == null && idToNode.Value.Item2 != null)
                 {
@@ -184,9 +184,9 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             continue;
                         }
-                        if (NodesSameEnvironment(idToNodes[idA].Item1, idToNodes[idB].Item2, graphA, graphB))
+                        if (NodesSameEnvironment(IdToNodes[idA].Item1, IdToNodes[idB].Item2, graphA, graphB))
                         {
-                            StructureForChangeNodeID(idToNodes[idA].Item1, idToNode.Value.Item2);
+                            StructureForChangeNodeID(IdToNodes[idA].Item1, idToNode.Value.Item2);
                         }
                     }
                 }
@@ -250,18 +250,18 @@ namespace TianHua.Electrical.PDS.Service
         private void ComapreChangeIdForEdge()
         {
             var line2lineId = new Dictionary<Tuple<string, string>, string>();
-            foreach(var idToEdge in idToEdges)
+            foreach (var idToEdge in IdToEdges)
             {
                 line2lineId.Add(new Tuple<string, string>(idToEdge.Value.Item1.Source.Load.ID.LoadID, idToEdge.Value.Item1.Target.Load.ID.LoadID), idToEdge.Key);
             }
-            foreach(var idToEdge in idToEdges)
+            foreach (var idToEdge in IdToEdges)
             {
                 var curEdge = idToEdge.Value.Item2;
                 var curId = idToEdge.Key;
                 var tmpLine = new Tuple<string, string>(curEdge.Source.Load.ID.LoadID, curEdge.Target.Load.ID.LoadID);
                 if (line2lineId.ContainsKey(tmpLine) && curId != line2lineId[tmpLine])
                 {
-                    var compareEdge = idToEdges[line2lineId[tmpLine]].Item1;
+                    var compareEdge = IdToEdges[line2lineId[tmpLine]].Item1;
                     if (curEdge.Details == compareEdge.Details) ///////////
                     {
                         StructureForChangeEdgeID(compareEdge, curEdge);
@@ -279,9 +279,9 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="graphA"></param>
         /// <param name="graphB"></param>
         /// <returns></returns>
-        private void CompareNodes(ref PDSGraph graphA, PDSGraph graphB)
+        private void CompareNodes(PDSGraph graphA, PDSGraph graphB)
         {
-            foreach (var idToNode in idToNodes)
+            foreach (var idToNode in IdToNodes)
             {
                 var id = idToNode.Key;
                 var nodeA = idToNode.Value.Item1;
@@ -301,7 +301,7 @@ namespace TianHua.Electrical.PDS.Service
                     else if (NodeStructureMove(nodeA, nodeB, graphA, graphB))
                     {
                         haveDiff = true;
-                        StructureForMoveNode(nodeA, nodeB, ref graphA);
+                        StructureForMoveNode(nodeA, nodeB, graphA);
                     }
                 }
                 else if (nodeA != null && nodeB == null)
@@ -312,7 +312,7 @@ namespace TianHua.Electrical.PDS.Service
                 else if (nodeA == null && nodeB != null)
                 {
                     haveDiff = true;
-                    StructureForAddNode(nodeB, ref graphA);
+                    StructureForAddNode(nodeB, graphA);
                     changeNode = nodeB;
                 }
                 if (!haveDiff)
@@ -328,9 +328,9 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="graphA"></param>
         /// <param name="graphB"></param>
         /// <returns></returns>
-        private void CompareEdges(ref PDSGraph graphA, PDSGraph graphB)
+        private void CompareEdges(PDSGraph graphA, PDSGraph graphB)
         {
-            foreach (var idToEdge in idToEdges)
+            foreach (var idToEdge in IdToEdges)
             {
                 var id = idToEdge.Key;
                 var edgeA = idToEdge.Value.Item1;
@@ -343,11 +343,11 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     else if (edgeA.Target != edgeB.Target)
                     {
-                        StructureForMoveEdge(edgeA, edgeB, ref graphA);
+                        StructureForMoveEdge(edgeA, edgeB, graphA);
                     }
                     else if (edgeA.Target == edgeB.Target)
                     {
-                        if(!DataChangeForEdge(edgeA, edgeB))
+                        if (!DataChangeForEdge(edgeA, edgeB))
                         {
                             NoDiffForEdge(edgeA);
                         }
@@ -359,7 +359,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else if (edgeA == null && edgeB != null)
                 {
-                    StructureForAddEdge(edgeB, ref graphA);
+                    StructureForAddEdge(edgeB, graphA);
                 }
             }
         }
@@ -407,7 +407,7 @@ namespace TianHua.Electrical.PDS.Service
         #endregion
 
         #region NODE_STRUCTURE
-        private void StructureForChangeNodeID(ThPDSProjectGraphNode nodeA, 
+        private void StructureForChangeNodeID(ThPDSProjectGraphNode nodeA,
             ThPDSProjectGraphNode nodeB)
         {
             var idChangeTagA = (ThPDSProjectGraphNodeIdChangeTag)nodeA.Tag;
@@ -430,7 +430,7 @@ namespace TianHua.Electrical.PDS.Service
             exchangeTagB.ExchangeToNode = nodeA;
         }
 
-        private void StructureForMoveNode(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, ref PDSGraph graphA)
+        private void StructureForMoveNode(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
             var moveTagA = (ThPDSProjectGraphNodeMoveTag)nodeA.Tag;
             moveTagA.HaveState = true;
@@ -444,7 +444,7 @@ namespace TianHua.Electrical.PDS.Service
             graphA.AddVertex(nodeB);
         }
 
-        private void StructureForAddNode(ThPDSProjectGraphNode nodeB, ref PDSGraph graphA)
+        private void StructureForAddNode(ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
             var addTagB = (ThPDSProjectGraphNodeAddTag)nodeB.Tag;
             addTagB.HaveState = true;
@@ -467,15 +467,15 @@ namespace TianHua.Electrical.PDS.Service
             idChangeTagA.ChangeToEdge = edgeB;
         }
 
-        private void StructureForMoveEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB, ref PDSGraph graphA)
+        private void StructureForMoveEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
             var moveTagA = (ThPDSProjectGraphEdgeMoveTag)edgeA.Tag;
             moveTagA.HaveState = true;
             moveTagA.MoveFrom = true;
             //moveTagA.MoveTo = false;
 
-            var edgeASourceInGraphA = idToNodes[edgeA.Source.Load.ID.LoadID].Item1;
-            var edgeBtargetInGraphA = idToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
+            var edgeASourceInGraphA = IdToNodes[edgeA.Source.Load.ID.LoadID].Item1;
+            var edgeBtargetInGraphA = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
             var newEdge = new ThPDSProjectGraphEdge(edgeASourceInGraphA, edgeBtargetInGraphA);
             newEdge.Details = edgeB.Details;
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
@@ -487,12 +487,12 @@ namespace TianHua.Electrical.PDS.Service
             graphA.AddEdge(newEdge);
         }
 
-        private void StructureForAddEdge(ThPDSProjectGraphEdge edgeB, ref PDSGraph graphA)
+        private void StructureForAddEdge(ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
             var addTagB = (ThPDSProjectGraphEdgeAddTag)edgeB.Tag;
             addTagB.HaveState = true;
-            var edgeBSourceInGraphA = idToNodes[edgeB.Source.Load.ID.LoadID].Item1;
-            var edgeBTargetInGraphA = idToNodes[edgeB.Target.Load.ID.LoadID].Item1;
+            var edgeBSourceInGraphA = IdToNodes[edgeB.Source.Load.ID.LoadID].Item1;
+            var edgeBTargetInGraphA = IdToNodes[edgeB.Target.Load.ID.LoadID].Item1;
             var newEdge = new ThPDSProjectGraphEdge(edgeBSourceInGraphA, edgeBTargetInGraphA);
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             graphA.AddEdge(newEdge);
@@ -527,7 +527,7 @@ namespace TianHua.Electrical.PDS.Service
                 //dataTagA.SouP = nodeA.Load.InstalledCapacity;
                 dataTagA.TarP = nodeB.Load.InstalledCapacity;
             }
-            if(dataTagA.TagD || dataTagA.TagF || dataTagA.TagP)
+            if (dataTagA.TagD || dataTagA.TagF || dataTagA.TagP)
             {
                 dataTagA.HaveState = true;
             }
