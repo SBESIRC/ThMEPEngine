@@ -300,30 +300,34 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = Table.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    ATSEConfiguration.ATSEComponentInfos.Add(new ATSEComponentInfo()
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
                     {
-                        ModelName = row["型号"].ToString(),
-                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                        FrameSize = row["壳架等级"].ToString(),
-                        MaxKV = row["额定电压"].ToString(),
-                        Poles = row["级数"].ToString(),
-                        Amps = row["额定电流"].ToString(),
-                        ATSECharacteristics = row["ATSE功能特点"].ToString(),
-                        UtilizationCategory = row["使用类别"].ToString(),
-                        ATSEMainContact = row["主触头O位置"].ToString(),
-                        Icu = row["额定极限分断能力"].ToString(),
-                        IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
-                        Icm = row["额定短路接通能力"].ToString(),
-                        Icw = row["额定短时耐受能力"].ToString(),
-                        Tkr = row["短时耐受时间"].ToString(),
-                        TrippingTime = row["瞬时脱扣时间"].ToString(),
-                        TrippingTimeDelay = row["延时脱扣时间"].ToString(),
-                        WiringCapacity = row["接线能力"].ToString(),
-                        InstallMethod = row["安装方式"].ToString(),
-                        Width = row["宽度"].ToString(),
-                        Depth = row["深度"].ToString(),
-                        Height = row["高度"].ToString(),
-                    });
+                        ATSEConfiguration.ATSEComponentInfos.Add(new ATSEComponentInfo()
+                        {
+                            ModelName = row["型号"].ToString(),
+                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            FrameSize = row["壳架等级"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            ATSECharacteristics = row["ATSE功能特点"].ToString(),
+                            UtilizationCategory = row["使用类别"].ToString(),
+                            ATSEMainContact = row["主触头O位置"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
+                            IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
+                            Icm = row["额定短路接通能力"].ToString(),
+                            Icw = row["额定短时耐受能力"].ToString(),
+                            Tkr = row["短时耐受时间"].ToString(),
+                            TrippingTime = row["瞬时脱扣时间"].ToString(),
+                            TrippingTimeDelay = row["延时脱扣时间"].ToString(),
+                            WiringCapacity = row["接线能力"].ToString(),
+                            InstallMethod = row["安装方式"].ToString(),
+                            Width = row["宽度"].ToString(),
+                            Depth = row["深度"].ToString(),
+                            Height = row["高度"].ToString(),
+                        });
+                    }
                 }
             }
         }
@@ -341,30 +345,34 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                 var row = Table.Rows[i];
                 if (!row[0].ToString().IsNullOrWhiteSpace())
                 {
-                    MTSEConfiguration.MTSEComponentInfos.Add(new MTSEComponentInfo()
+                    var currents = row["额定电流"].ToString();
+                    foreach (var current in currents.Split(';'))
                     {
-                        ModelName = row["型号"].ToString(),
-                        Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
-                        FrameSize = row["壳架等级"].ToString(),
-                        MaxKV = row["额定电压"].ToString(),
-                        Poles = row["级数"].ToString(),
-                        Amps = row["额定电流"].ToString(),
-                        MTSECharacteristics = row["MTSE功能特点"].ToString(),
-                        UtilizationCategory = row["使用类别"].ToString(),
-                        MTSEMainContact = row["主触头O位置"].ToString(),
-                        Icu = row["额定极限分断能力"].ToString(),
-                        IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
-                        Icm = row["额定短路接通能力"].ToString(),
-                        Icw = row["额定短时耐受能力"].ToString(),
-                        Tkr = row["短时耐受时间"].ToString(),
-                        TrippingTime = row["瞬时脱扣时间"].ToString(),
-                        TrippingTimeDelay = row["延时脱扣时间"].ToString(),
-                        WiringCapacity = row["接线能力"].ToString(),
-                        InstallMethod = row["安装方式"].ToString(),
-                        Width = row["宽度"].ToString(),
-                        Depth = row["深度"].ToString(),
-                        Height = row["高度"].ToString(),
-                    });
+                        MTSEConfiguration.MTSEComponentInfos.Add(new MTSEComponentInfo()
+                        {
+                            ModelName = row["型号"].ToString(),
+                            Model =System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", ""),
+                            FrameSize = row["壳架等级"].ToString(),
+                            MaxKV = row["额定电压"].ToString(),
+                            Poles = row["级数"].ToString(),
+                            Amps = double.Parse(current),
+                            MTSECharacteristics = row["MTSE功能特点"].ToString(),
+                            UtilizationCategory = row["使用类别"].ToString(),
+                            MTSEMainContact = row["主触头O位置"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
+                            IcuMultiple = row["额定运行短路分断能力倍数"].ToString(),
+                            Icm = row["额定短路接通能力"].ToString(),
+                            Icw = row["额定短时耐受能力"].ToString(),
+                            Tkr = row["短时耐受时间"].ToString(),
+                            TrippingTime = row["瞬时脱扣时间"].ToString(),
+                            TrippingTimeDelay = row["延时脱扣时间"].ToString(),
+                            WiringCapacity = row["接线能力"].ToString(),
+                            InstallMethod = row["安装方式"].ToString(),
+                            Width = row["宽度"].ToString(),
+                            Depth = row["深度"].ToString(),
+                            Height = row["高度"].ToString(),
+                        });
+                    }
                 }
             }
         }

@@ -31,17 +31,23 @@ namespace TianHua.Electrical.PDS.UI.Editors
             if (propertyItem.Value is ThPDSATSEModel atse)
             {
                 //  1. 型号决定了可选的额定电流选项
-                return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
+                //tian->feng
+                throw new NotSupportedException();
+                //return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
             if (propertyItem.Value is ThPDSMTSEModel mtse)
             {
                 //  1. 型号决定了可选的额定电流选项
-                return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
+                //tian->feng
+                throw new NotSupportedException();
+                //return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Amps.Split(';')).Distinct();
             }
             if (propertyItem.Value is ThPDSIsolatingSwitchModel isolator)
             {
                 // 1. 型号决定了可选的额定电流选项
-                return IsolatorConfiguration.isolatorInfos.Where(o => o.Model == isolator.Model).Select(o => o.Amps.ToString()).Distinct();
+                //tian->feng
+                throw new NotSupportedException();
+                //return IsolatorConfiguration.isolatorInfos.Where(o => o.Model == isolator.Model).Select(o => o.Amps.ToString()).Distinct();
             }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {

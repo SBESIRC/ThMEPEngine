@@ -2162,7 +2162,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         DrawEdge(edge);
                     }
                 }
-                foreach (var kv in vertice.Details.SmallBusbars)
+                foreach (var kv in vertice.Details.MiniBusbars)
                 {
                     var mbb = kv.Key;
                     var edges = ThPDSProjectGraphService.GetSmallBusbarCircuit(null, vertice, mbb);

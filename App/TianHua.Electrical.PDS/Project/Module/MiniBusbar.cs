@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
@@ -13,10 +15,13 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class MiniBusbar
     {
-        /// <summary>
-        /// 用来标识小母排的唯一ID
-        /// </summary>
-        //public string SmallBusbarGuid { get; set; }
+        public MiniBusbar()
+        {
+            Phase = ThPDSPhase.三相;
+            PhaseSequence = PhaseSequence.L123;
+            DemandFactor = 0.8;
+            PowerFactor = 0.85;
+        }
 
         /// <summary>
         /// 功率
@@ -24,9 +29,34 @@ namespace TianHua.Electrical.PDS.Project.Module
         public double Power { get; set; }
 
         /// <summary>
+        /// 相序
+        /// </summary>
+        public PhaseSequence PhaseSequence { get; set; }
+
+        /// <summary>
+        /// 相数
+        /// </summary>
+        public ThPDSPhase Phase { get; set; }
+
+        /// <summary>
+        /// 计算电流
+        /// </summary>
+        public double CalculateCurrent { get; set; }
+
+        /// <summary>
         /// 级联电流额定值
         /// </summary>
         public double CascadeCurrent { get; set; }
+
+        /// <summary>
+        /// 需要系数
+        /// </summary>
+        public double DemandFactor { get; set; }
+
+        /// <summary>
+        /// 功率因数
+        /// </summary>
+        public double PowerFactor { get; set; }
 
         /// <summary>
         /// 坑位1：预留

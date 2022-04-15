@@ -118,7 +118,7 @@ namespace TianHua.Electrical.PDS.Command
                     DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
                     edgeCount += ordinaryEdges.Count;
                     // 小母排节下分支
-                    thisNode.Details.SmallBusbars.Keys.ForEach(o =>
+                    thisNode.Details.MiniBusbars.Keys.ForEach(o =>
                     {
                         basePoint = new Point3d(basePoint.X, basePoint.Y - 500.0 * scaleFactor, 0);
                         var smallBusbar = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SMALL_BUSBAR, basePoint, scale);

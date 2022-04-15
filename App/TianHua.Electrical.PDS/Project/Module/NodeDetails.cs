@@ -57,7 +57,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 小母排
         /// </summary>
-        public Dictionary<MiniBusbar,List<ThPDSProjectGraphEdge>> SmallBusbars { get; set;}
+        public Dictionary<MiniBusbar,List<ThPDSProjectGraphEdge>> MiniBusbars { get; set;}
 
         /// <summary>
         /// 控制回路 
@@ -71,7 +71,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             PhaseSequence = PhaseSequence.L123;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
-            SmallBusbars = new Dictionary<MiniBusbar, List<ThPDSProjectGraphEdge>>();
+            MiniBusbars = new Dictionary<MiniBusbar, List<ThPDSProjectGraphEdge>>();
             SecondaryCircuits = new Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>>();
             if (Convert.ToUInt32(BoxSize) > 6)
             {

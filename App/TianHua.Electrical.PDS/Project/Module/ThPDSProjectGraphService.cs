@@ -29,7 +29,10 @@ namespace TianHua.Electrical.PDS.Project.Module
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
             {
                 var edges = graph.Edges.Where(e => e.Source.Equals(node)).ToList();
-                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+                //统计节点级联电流
+                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+                CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
                 switch (type)
                 {
                     case CircuitFormInType.一路进线:
@@ -76,7 +79,6 @@ namespace TianHua.Electrical.PDS.Project.Module
                         }
                 }
                 //统计节点级联电流
-                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
                 node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
             }
         }
@@ -114,7 +116,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void InsertUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.Graph.OutEdges(node).ToList();
-            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+            //统计节点级联电流
+            var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+            CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
                 if (oneWayInCircuit.reservedComponent.IsNull() || oneWayInCircuit.reservedComponent is Meter)
@@ -188,7 +193,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void InsertEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.Graph.OutEdges(node).ToList();
-            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, edges);
+            //统计节点级联电流
+            var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+            CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
                 if (oneWayInCircuit.reservedComponent.IsNull() || oneWayInCircuit.reservedComponent is OUVP)
@@ -261,12 +269,29 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <exception cref="NotImplementedException"></exception>
         public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            graph.UpdateWithNode(node, false);
+            var edges = graph.Graph.InEdges(node);
+            foreach (var edge in edges)
+            {
+                graph.CheckCascadeWithEdge(edge);
+            }
+        }
+
+        public static void UpdateWithMiniBusbar(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, MiniBusbar miniBusbar)
+        {
+            graph.CheckCascadeWithNode(node);
         }
 
         public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
         {
-            graph.UpdateWithEdge(edge, false);
+            var miniBusbar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge));
+            if(miniBusbar.Key.IsNull())
+            {
+                graph.CheckCascadeWithNode(edge.Source);
+            }
+            else
+            {
+                graph.CheckCascadeWithMiniBusbar(edge.Source, miniBusbar.Key);
+            }
         }
 
         /// <summary>
@@ -402,7 +427,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static List<ThPDSProjectGraphEdge> GetOrdinaryCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
             //所有分支 - 小母排所属分支 - 控制回路所属分支
-            return graph.OutEdges(node).Except(node.Details.SmallBusbars.SelectMany(o => o.Value)).Except(node.Details.SecondaryCircuits.SelectMany(o => o.Value)).ToList();
+            return graph.OutEdges(node).Except(node.Details.MiniBusbars.SelectMany(o => o.Value)).Except(node.Details.SecondaryCircuits.SelectMany(o => o.Value)).ToList();
         }
 
         /// <summary>
@@ -410,9 +435,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static List<ThPDSProjectGraphEdge> GetSmallBusbarCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
         {
-            if (node.Details.SmallBusbars.ContainsKey(smallBusbar))
+            if (node.Details.MiniBusbars.ContainsKey(smallBusbar))
             {
-                return node.Details.SmallBusbars[smallBusbar];
+                return node.Details.MiniBusbars[smallBusbar];
             }
             else
             {
@@ -442,7 +467,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void AddSmallBusbar(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
             var smallBusbar = new MiniBusbar();
-            node.Details.SmallBusbars.Add(smallBusbar, new List<ThPDSProjectGraphEdge>());
+            node.Details.MiniBusbars.Add(smallBusbar, new List<ThPDSProjectGraphEdge>());
             var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
             AssignCircuit2SmallBusbar(node, smallBusbar, edge);
 
@@ -458,7 +483,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void SmallBusbarAddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
         {
-            if (node.Details.SmallBusbars.ContainsKey(smallBusbar))
+            if (node.Details.MiniBusbars.ContainsKey(smallBusbar))
             {
                 var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
                 AssignCircuit2SmallBusbar(node, smallBusbar, edge);
@@ -489,9 +514,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void AssignCircuit2SmallBusbar(ThPDSProjectGraphNode node, MiniBusbar smallBusbar,ThPDSProjectGraphEdge edge)
         {
-            if(node.Details.SmallBusbars.ContainsKey(smallBusbar) && edge.Source.Equals(node) && edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规 && !node.Details.SmallBusbars.Any(o => o.Value.Contains(edge)))
+            if(node.Details.MiniBusbars.ContainsKey(smallBusbar) && edge.Source.Equals(node) && edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规 && !node.Details.MiniBusbars.Any(o => o.Value.Contains(edge)))
             {
-                node.Details.SmallBusbars[smallBusbar].Add(edge);
+                node.Details.MiniBusbars[smallBusbar].Add(edge);
             }
         }
 
@@ -625,21 +650,21 @@ namespace TianHua.Electrical.PDS.Project.Module
                 return CircuitFormOutType.热继电器保护;
             else if (circuitName == "计量(上海)")
             {
-                if (edge.Target.Details.LowPower < 100)
+                if (edge.Target.Details.HighPower < 100)
                     return CircuitFormOutType.配电计量_上海直接表;
                 else
                     return CircuitFormOutType.配电计量_上海CT;
             }
             else if (circuitName == "计量(表在前)")
             {
-                if (edge.Target.Details.LowPower < 100)
+                if (edge.Target.Details.HighPower < 100)
                     return CircuitFormOutType.配电计量_直接表在前;
                 else
                     return CircuitFormOutType.配电计量_CT表在前;
             }
             else if (circuitName == "计量(表在后)")
             {
-                if (edge.Target.Details.LowPower < 100)
+                if (edge.Target.Details.HighPower < 100)
                     return CircuitFormOutType.配电计量_直接表在后;
                 else
                     return CircuitFormOutType.配电计量_CT表在后;
@@ -648,7 +673,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
-                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                     {
                         return CircuitFormOutType.电动机_分立元件;
                     }
@@ -659,7 +684,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 }
                 else
                 {
-                    if (edge.Target.Details.LowPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                    if (edge.Target.Details.HighPower <PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
                     {
                         return CircuitFormOutType.电动机_CPS;
                     }

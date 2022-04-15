@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
@@ -18,15 +19,96 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public IsolatingSwitch(double calculateCurrent, string polesNum)
         {
             ComponentType = ComponentType.QL;
-            var isolator = IsolatorConfiguration.isolatorInfos.FirstOrDefault(o => o.Poles == polesNum && o.Amps > calculateCurrent);
-            if (isolator.IsNull())
+
+            var isolators = IsolatorConfiguration.isolatorInfos.Where(o => o.Poles == polesNum && o.Amps > calculateCurrent).ToList();
+            if (isolators.Count == 0)
             {
                 throw new NotSupportedException();
             }
+            var isolator = isolators.First();
             MaxKV = isolator.MaxKV;
             PolesNum = isolator.Poles;
             Model = isolator.Model;
             RatedCurrent = isolator.Amps.ToString();
+            this.Isolators = isolators;
+            AlternativeModels = Isolators.Select(o => o.Model).Distinct().ToList();
+            AlternativePolesNums = Isolators.Select(o => o.Poles).Distinct().ToList();
+            AlternativeRatedCurrents = Isolators.Select(o => o.Amps.ToString()).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 修改型号
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetModel(string model)
+        {
+            if (Isolators.Any(o => o.Model == model
+            && o.Poles == PolesNum
+            && o.Amps.ToString() == RatedCurrent))
+            {
+                this.Model = model;
+            }
+            else
+            {
+                var contactor = Isolators.First(o => o.Model == model);
+                Model = contactor.Model;
+                PolesNum = contactor.Poles;
+                RatedCurrent = contactor.Amps.ToString();
+            }
+        }
+        public List<string> GetModels()
+        {
+            return AlternativeModels;
+        }
+
+        /// <summary>
+        /// 修改级数
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetPolesNum(string polesNum)
+        {
+            if (Isolators.Any(o => o.Poles == polesNum
+            && o.Model == Model
+            && o.Amps.ToString() == RatedCurrent))
+            {
+                this.PolesNum = polesNum;
+            }
+            else
+            {
+                var contactor = Isolators.First(o => o.Poles == polesNum);
+                Model = contactor.Model;
+                PolesNum = contactor.Poles;
+                RatedCurrent = contactor.Amps.ToString();
+            }
+        }
+        public List<string> GetPolesNums()
+        {
+            return AlternativePolesNums;
+        }
+
+        /// <summary>
+        /// 修改额定电流
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetRatedCurrent(string ratedCurrent)
+        {
+            if (Isolators.Any(o => o.Poles == PolesNum
+            && o.Model == Model
+            && o.Amps.ToString() == ratedCurrent))
+            {
+                this.RatedCurrent = ratedCurrent;
+            }
+            else
+            {
+                var contactor = Isolators.First(o => o.Amps.ToString() == ratedCurrent);
+                Model = contactor.Model;
+                PolesNum = contactor.Poles;
+                RatedCurrent = contactor.Amps.ToString();
+            }
+        }
+        public List<string> GetRatedCurrents()
+        {
+            return AlternativeRatedCurrents;
         }
 
         /// <summary>
@@ -43,6 +125,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 额定电流
         /// </summary>
         public string RatedCurrent { get; set; }
+
+        private List<IsolatorConfigurationItem> Isolators { get;}
+        private List<string> AlternativeModels { get; }
+        private List<string> AlternativePolesNums { get; }
+        private List<string> AlternativeRatedCurrents { get; }
 
         /// <summary>
         /// 额定电压

@@ -46,10 +46,27 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             _tripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out _characteristics);//脱扣器类型
         }
 
-        public SelectionComponentFactory(ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> edges)
+        public SelectionComponentFactory(ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
+        {
+            this._edge = node.Details.MiniBusbars[miniBusbar].First();
+            _calculateCurrent = miniBusbar.CalculateCurrent;//计算电流
+            _cascadeCurrent = cascadeCurrent;//额定级联电流
+            _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
+            _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            _specialPolesNum = "3P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
+            if (miniBusbar.Phase == ThPDSPhase.一相)
+            {
+                _polesNum = "1P";
+                _specialPolesNum = "2P";
+            }
+            _characteristics = "";//瞬时脱扣器类型
+            _tripDevice = _edge.Target.Load.LoadTypeCat_1.GetTripDevice(_edge.Target.Load.FireLoad, out _characteristics);//脱扣器类型
+        }
+        
+        public SelectionComponentFactory(ThPDSProjectGraphNode node, double cascadeCurrent)
         {
             _calculateCurrent = node.Load.CalculateCurrent;//计算电流
-            _cascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;//额定级联电流
+            _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
             _specialPolesNum = "4P"; //<新逻辑>极数 仅只针对断路器、隔离开关、漏电断路器
