@@ -8,9 +8,9 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
-    public class DrainageSetViewModel : NotifyPropertyChangedBase
+    public class WaterSupplySetVM : NotifyPropertyChangedBase
     {
-        public DrainageSetViewModel()
+        public WaterSupplySetVM()
         {
             FloorLineSpace = 1800;
             FaucetFloor = "1";
@@ -36,10 +36,18 @@ namespace ThMEPWSS.Diagram.ViewModel
             LayingDynamicRadios = new ObservableCollection<DynamicRadioButton>();
             LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
             LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "埋地", GroupName = "type", IsChecked = false });
+            
+            WaterMeterDynamicRadios = new ObservableCollection<DynamicRadioButton>();
+            WaterMeterDynamicRadios.Add(new DynamicRadioButton() { Content = "同层", GroupName = "type3", IsChecked = false });
+            WaterMeterDynamicRadios.Add(new DynamicRadioButton() { Content = "半平台", GroupName = "type3", IsChecked = true });
+
 
             CleanToolDynamicRadios = new ObservableCollection<DynamicRadioButton>();
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "图纸", GroupName = "type2", IsChecked = true });
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "缺省", GroupName = "type2", IsChecked = false });
+
+
+          
         }
         private double floorLineSpace { get; set; }
         /// <summary>
@@ -54,6 +62,23 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+
+
+        private ObservableCollection<DynamicRadioButton> waterMeterDynamicRadios { get; set; }
+        /// <summary>
+        /// 水表位置数据列表
+        /// </summary>
+        public ObservableCollection<DynamicRadioButton> WaterMeterDynamicRadios
+        {
+            get { return waterMeterDynamicRadios; }
+            set
+            {
+                this.waterMeterDynamicRadios = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+
         private string faucetFloor { get; set; }
         /// <summary>
         /// 冲洗龙头
@@ -163,6 +188,8 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
+        
+
         private ObservableCollection<DynamicRadioButton> cleanToolDynamicRadios { get; set; }
         /// <summary>
         /// 卫生洁具数据选择
@@ -220,9 +247,12 @@ namespace ThMEPWSS.Diagram.ViewModel
             
         }
 
-        public DrainageSetViewModel Clone()
+        public HalfPlatformSetVM halfViewModel { get; set; } = new HalfPlatformSetVM();
+
+
+        public WaterSupplySetVM Clone()
         {
-            var cloned = new DrainageSetViewModel();
+            var cloned = new WaterSupplySetVM();
             cloned.FloorLineSpace = this.floorLineSpace;
             cloned.FaucetFloor = FaucetFloor;
             cloned.NoCheckValve = NoCheckValve;

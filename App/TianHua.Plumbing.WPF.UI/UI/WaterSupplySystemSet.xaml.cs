@@ -11,18 +11,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// <summary>
     /// uiDrainageSystemSet.xaml 的交互逻辑
     /// </summary>
-    public partial class uiDrainageSystemSet : ThCustomWindow
+    public partial class WaterSupplySystemSet : ThCustomWindow
     {
-        public DrainageSetViewModel setViewModel;
+        public WaterSupplySetVM setViewModel;
         //private DrainageSetViewModel orgViewModel;
-        public uiDrainageSystemSet( DrainageSetViewModel viewModel = null)
+        public WaterSupplySystemSet( WaterSupplySetVM viewModel = null)
         {
             InitializeComponent();
             this.Title = "参数设置";
             setViewModel = viewModel;
             //orgViewModel = viewModel;
             if (null == viewModel)
-                setViewModel = new DrainageSetViewModel();
+                setViewModel = new WaterSupplySetVM();
             this.DataContext = setViewModel;
         }
 
@@ -44,6 +44,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.Close();
         }
       
+        /// <summary>
+        /// 楼层线间距
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TextBox_TextChanged_FloorGap(object sender, TextChangedEventArgs e)
         {
             var str = ((TextBox)e.Source).Text.ToString();
@@ -360,9 +365,25 @@ namespace TianHua.Plumbing.WPF.UI.UI
             ((TextBox)e.Source).Text = newStr;
         }
 
+        private void HalfPlatformSet(object sender, RoutedEventArgs e)
+        {
+            var oldViewModel = setViewModel.halfViewModel?.Clone();
+
+            WaterSupplyHalfPlatformSetting systemSet = new WaterSupplyHalfPlatformSetting(setViewModel.halfViewModel);
+            systemSet.Owner = this;
+            var ret = systemSet.ShowDialog();
+            if (ret == false)
+            {
+                //用户取消了操作
+                setViewModel.halfViewModel = oldViewModel;
+                return;
+            }
+        }
+
         private void btnHeights_Click(object sender, RoutedEventArgs e)
         {
             FloorHeightSettingWindow.ShowModelSingletonWindow();
+
         }
     }
 }

@@ -14,22 +14,22 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// <summary>
     /// DrainageSystemUI.xaml 的交互逻辑
     /// </summary>
-    public partial class uiDrainageSystem : ThCustomWindow
+    public partial class WaterSupplySystem : ThCustomWindow
     {
-        static DrainageViewModel viewModel;
-        public uiDrainageSystem()
+        static WaterSupplyVM viewModel;
+        public WaterSupplySystem()
         {
             InitializeComponent();
             //给水系统图相关
             if (null == viewModel)
-                viewModel = new DrainageViewModel();
+                viewModel = new WaterSupplyVM();
             this.DataContext = viewModel;
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
             var oldViewModel = viewModel.SetViewModel?.Clone();
-            uiDrainageSystemSet systemSet = new uiDrainageSystemSet(viewModel.SetViewModel);
+            WaterSupplySystemSet systemSet = new WaterSupplySystemSet(viewModel.SetViewModel);
             systemSet.Owner = this;
             var ret = systemSet.ShowDialog();
             if (ret == false)

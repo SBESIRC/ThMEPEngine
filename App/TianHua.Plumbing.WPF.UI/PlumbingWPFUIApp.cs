@@ -82,7 +82,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (file == null) return;
             var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
             if (!ok) return;
-            var w = new uiDrainageSystem();
+            var w = new WaterSupplySystem();
             w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
             w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
             AcadApp.ShowModelessWindow(w);

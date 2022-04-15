@@ -19,7 +19,7 @@ using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
-    public class DrainageViewModel : NotifyPropertyChangedBase
+    public class WaterSupplyVM : NotifyPropertyChangedBase
     {
         public Point3d InsertPt;//插入点
         public int StartNum;
@@ -27,7 +27,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         public List<List<Point3dCollection>> FloorAreaList;//楼层区域
         public List<List<int>> FloorNumList;//楼层列表
 
-        public DrainageViewModel()
+        public WaterSupplyVM()
         {
             InsertPt = new Point3d();
             StartNum = 1;
@@ -141,7 +141,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        public DrainageSetViewModel SetViewModel { get; set; } = new DrainageSetViewModel();
+        public WaterSupplySetVM SetViewModel { get; set; } = new WaterSupplySetVM();
     }
 
     public class DynamicRadioButton
