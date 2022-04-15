@@ -83,17 +83,13 @@
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
     <Compile Include="Project\Module\Configure\SecondaryCircuitConfiguration.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphCompareService.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphComparingUnit.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdge.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeCompareTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphExtension.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNode.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompareTag.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphStructuralComparingUnit.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphQualitativeComparingUnit.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphQuantitativeComparingUnit.cs" />
     <Compile Include="Project\Module\SecondaryCircuit.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
@@ -156,7 +152,6 @@
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
     <Compile Include="Project\Module\MiniBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Project\PDSProject.cs" />
     <Compile Include="Project\PDSProjectExtend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,6 +159,7 @@
     <Compile Include="Service\ThPDSBufferService.cs" />
     <Compile Include="Service\ThPDSCircuitConfig.cs" />
     <Compile Include="Service\ThPDSCircuitNumberSeacher.cs" />
+    <Compile Include="Service\ThPDSGraphCompareService.cs" />
     <Compile Include="Service\ThPDSGraphService.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />
