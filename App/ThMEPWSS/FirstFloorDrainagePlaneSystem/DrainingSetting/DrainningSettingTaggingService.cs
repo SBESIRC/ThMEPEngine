@@ -12,6 +12,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 {
     public class DrainningSettingTaggingService : DraningSettingService
     {
+        double scale = 1;
         double moveLength = 1000;
         public DrainningSettingTaggingService(List<RouteModel> _pipes)
         {
@@ -20,6 +21,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 
         public override void CreateDraningSetting()
         {
+            if (pipes.Count <= 0)
+            {
+                return;
+            }
             var resPipe = CalTaggingPt();
             Print(resPipe);
         }
@@ -60,6 +65,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 return new KeyValuePair<Point3d, Vector3d>(pt, dir);
             }).ToList();
             InsertBlockService.InsertConnectPipe(pipes.Select(x => x.route).ToList(), ThWSSCommon.DraiLayerName, null);
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
         }
     }

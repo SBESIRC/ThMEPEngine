@@ -16,6 +16,7 @@ using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
@@ -67,21 +68,17 @@ namespace ThMEPWSS.Command
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
                     //处理冷凝水管
-                    HandlePipes(routes);
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        HandlePipes(routes);
                         //foreach (var item in holeWalls)
                         //{
                         //    originTransformer.Reset(item);
                         //    acad.ModelSpace.Add(item);
                         //}
-                        foreach (var item in routes)
-                        {
-                            var line = item.route;
-                            originTransformer.Reset(line);
-                            acad.ModelSpace.Add(line);
-                        }
+                        var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
+                        PrintPipes.Print(otherPipes);
                     }
                 }
             }

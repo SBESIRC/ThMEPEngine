@@ -13,6 +13,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 {
     public class DrainningSettingRainwaterInlet : DraningSettingService
     {
+        double scale = 1;
         double inletWidth = 100;
         double moveLength = 500;
         public DrainningSettingRainwaterInlet(List<RouteModel> _pipes)
@@ -22,6 +23,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 
         public override void CreateDraningSetting()
         {
+            if (pipes.Count <= 0)
+            {
+                return;
+            }
             var line = pipes.First().connecLine;
             foreach (var pipe in pipes)
             {
@@ -68,6 +73,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
         private void Print(List<KeyValuePair<Point3d, Vector3d>> layoutInfo, List<Polyline> routes)
         {
             InsertBlockService.InsertConnectPipe(routes, ThWSSCommon.DraiLayerName, null);
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfo, ThWSSCommon.RainwaterInletLayerName, ThWSSCommon.RainwaterInletBlockName);
         }
     }
