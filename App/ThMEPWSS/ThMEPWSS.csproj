@@ -305,6 +305,7 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
+    <Compile Include="UndergroundWaterSystem\Command\TestCommand.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemUtils.cs" />

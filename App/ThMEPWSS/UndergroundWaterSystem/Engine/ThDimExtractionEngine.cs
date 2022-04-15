@@ -55,6 +55,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public bool IsLayer(string layer)
         {
+            return true;
             if (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS"))
             {
                 return true;
