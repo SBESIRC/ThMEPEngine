@@ -40,7 +40,6 @@ namespace ThMEPWSS.HydrantLayout.Service
         public SearchRangeFrame(Point3d center )
         {
             this.center = center;
-            
         }
 
 

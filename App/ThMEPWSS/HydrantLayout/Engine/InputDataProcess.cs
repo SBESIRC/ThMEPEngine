@@ -217,8 +217,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //遍历每一个模型
             foreach (var model in rawData0.HydrantModel)
             {
+
                 var OutObb = model.Outline;
+                if (model.Outline.Area < 10) continue;
                 OutObb = OutObb.Buffer(400).OfType<Polyline>().First(); 
+
                 var VerticalPipeList = VerticalPipeIndex.SelectCrossingPolygon(OutObb);
                 if (VerticalPipeList.Count != 0) //找到立管 
                 {

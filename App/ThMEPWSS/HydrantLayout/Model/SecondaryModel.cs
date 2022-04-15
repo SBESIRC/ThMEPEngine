@@ -41,7 +41,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         //指标
         public double distance = 100000;
         public double againstWallLength = 0;
-        public int doorGood = 1;
+        public int doorGood = 0;
 
         //绘图属性
         public double ShortSide = Info.ShortSide;
@@ -59,7 +59,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             this.againstWallLength = againstWallLength;
             if (doorGood)
             {
-                this.doorGood = 0;
+                this.doorGood = 1;
             }
         }
 
