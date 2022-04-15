@@ -415,11 +415,22 @@ namespace ThMEPArchitecture.PartitionLayout
             else return new Line[] { CreateLine(line) };
         }
 
-        public static Line[] SplitLine(Line curve, List<Polyline> cutters, double length_filter = 1)
+        public static Line[] SplitLine(Line curve, List<Polyline> cutters, double length_filter = 1,
+            bool allow_split_similar_car = false)
         {
             List<Point3d> points = new List<Point3d>();
             foreach (var cutter in cutters)
                 points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
+            if (allow_split_similar_car)
+            {
+                //在处理车道末端时候，出现一个特殊case，车位与车道之间有10容差距离，以此加强判断。
+                foreach (var cutter in cutters)
+                {
+                    points.AddRange(cutter.Vertices().Cast<Point3d>()
+                        .Where(p => curve.GetClosestPointTo(p, false).DistanceTo(p) < 20)
+                        .Select(p => curve.GetClosestPointTo(p, false)));
+                }
+            }
             points = RemoveDuplicatePts(points, 1);
             SortAlongCurve(points, curve);
             if (points.Count > 0)

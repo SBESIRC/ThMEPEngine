@@ -151,7 +151,7 @@ namespace ThMEPArchitecture.PartitionLayout
             if (splits.Count() > 0) ls = splits.First();
             else return;
             var carcrossded = carspacialindex.SelectCrossingPolygon(buffer).Cast<Polyline>().ToList();
-            ls = SplitLine(ls, carcrossded).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
+            ls = SplitLine(ls, carcrossded, 1, true).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
             var perplanes = lanes.Where(e => IsPerpLine(ls, e)).Where(e => e.GetClosestPointTo(ps, false).DistanceTo(ps) > 10).ToList();
             ls = SplitLine(ls, perplanes)
                 .OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
