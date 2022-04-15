@@ -20,6 +20,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public int LineType { set; get; }//0代表横管线,1代表立管线
         public Line Line { set; get; }
     }
+    public class PreLine
+    {
+        public PreLine(Line line, string layer, int lineType = -1)
+        {
+            Line = line;
+            Layer = layer;
+            LineType = lineType;
+        }
+        public Line Line;
+        public int LineType = -1;//0横管，1立管
+        public string Layer = "0";
+    }
 
     public class ThSystemMapService
     {
@@ -33,6 +45,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public Point3d MapPostion { set; get; }//系统图基点
         public List<ThFloorModel> FloorList { set; get; }//楼层和范围
         public List<ThRiserInfo> RiserList { set; get; }
+        public List<PreLine> PreLines = new List<PreLine>();
         public Matrix3d Mt { set; get; }
         public ThSystemMapService()
         {
@@ -90,39 +103,91 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var mapLineList = new List<ThMapLine>();
             DrawRootNode(startPt, pipeTree.RootNode, pipeTree.FloorIndex, ref mapLineList);
             //打断横管线
-            var vLineList = new List<Line>();
-            var hLineList = new List<Line>();
-            foreach (var mapLine in mapLineList)
+            var horizontalPreLines = PreLines.Where(e => e.LineType == 0).ToList();
+            var verticalLines = PreLines.Where(e => e.LineType == 1).Select(e => e.Line).ToList();
+            PreLines.Where(e => e.LineType != 0).ForEach(e =>
             {
-                if (mapLine.LineType == 0)
-                {
-                    hLineList.Add(mapLine.Line);
-                }
-                else if (mapLine.LineType == 1)
-                {
-                    vLineList.Add(mapLine.Line);
-                }
-            }
-
-            foreach (var vline in vLineList)
+                e.Line.Layer = e.Layer;
+                e.Line.AddToCurrentSpace();
+            });
+            var tmpPreLines = new List<PreLine>();
+            for (int i=0;i< horizontalPreLines.Count;i++)
             {
-                var lineList = new List<Line>();
-                var cloosPts = new List<Point3d>();
-                foreach (var hline in hLineList)
+                var preLine = horizontalPreLines[i];
+                var line = preLine.Line;
+                var cutters = verticalLines.Where(e =>
+                 {
+                     var res = SplitLine(e, line).ToList();
+                     for (int j = 0; j < res.Count; j++)
+                     {
+                         if(res[j].Length<1)
+                         {
+                             res.RemoveAt(j);
+                             j--;
+                         }
+                     }
+                     if (res.Count > 1) return true;
+                     else return false;
+                 }).ToList();
+                var splits = SplitLine(line, cutters).Where(e => e.Length >= 300).ToList();
+                double tol = 150;
+                if (splits.Count > 1)
                 {
-                    Point3d clossPt = new Point3d();
-                    if (IsClossLine(vline, hline, ref clossPt))
+                    for (int j = 0; j < splits.Count; j++)
                     {
-                        lineList.Add(hline);
-                        cloosPts.Add(clossPt);
+                        if (j == 0)
+                            splits[j].EndPoint = splits[j].EndPoint - CreateVector(splits[j]).GetNormal() * tol;
+                        else if (j == splits.Count - 1)
+                            splits[j].StartPoint = splits[j].StartPoint + CreateVector(splits[j]).GetNormal() * tol;
+                        else
+                        {
+                            splits[j].StartPoint = splits[j].StartPoint + CreateVector(splits[j]).GetNormal() * tol;
+                            splits[j].EndPoint = splits[j].EndPoint - CreateVector(splits[j]).GetNormal() * tol;
+                        }
                     }
-                }
-                hLineList = hLineList.Except(lineList).ToList();
-                for (int i = 0; i < lineList.Count; i++)
-                {
-                    hLineList.AddRange(BreakLine(lineList[i], cloosPts[i]));
+                    horizontalPreLines.RemoveAt(i);
+                    i--;
+                    splits.ForEach(e => tmpPreLines.Add(new PreLine(e, preLine.Layer, 0)));
                 }
             }
+            horizontalPreLines.AddRange(tmpPreLines);
+            horizontalPreLines.ForEach(e =>
+            {
+                e.Line.Layer = e.Layer;
+                e.Line.AddToCurrentSpace();
+            });
+            //var vLineList = new List<Line>();
+            //var hLineList = new List<Line>();
+            //foreach (var mapLine in mapLineList)
+            //{
+            //    if (mapLine.LineType == 0)
+            //    {
+            //        hLineList.Add(mapLine.Line);
+            //    }
+            //    else if (mapLine.LineType == 1)
+            //    {
+            //        vLineList.Add(mapLine.Line);
+            //    }
+            //}
+            //foreach (var vline in vLineList)
+            //{
+            //    var lineList = new List<Line>();
+            //    var cloosPts = new List<Point3d>();
+            //    foreach (var hline in hLineList)
+            //    {
+            //        Point3d clossPt = new Point3d();
+            //        if (IsClossLine(vline, hline, ref clossPt))
+            //        {
+            //            lineList.Add(hline);
+            //            cloosPts.Add(clossPt);
+            //        }
+            //    }
+            //    hLineList = hLineList.Except(lineList).ToList();
+            //    for (int i = 0; i < lineList.Count; i++)
+            //    {
+            //        hLineList.AddRange(BreakLine(lineList[i], cloosPts[i]));
+            //    }
+            //}
         }
         public void DrawFloorLines(Point3d basePt, List<ThFloorModel> floorList, double height, double length)
         {
@@ -134,7 +199,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             {
                 Point3d tmpPt1 = basePt + vvector * i * height;
                 Point3d tmpPt2 = tmpPt1 + hvector * length;
-                DrawLine(tmpPt1, tmpPt2, "W-NOTE");
+                //DrawLine(tmpPt1, tmpPt2, "W-NOTE");
+                PreLines.Add(new PreLine(new Line(tmpPt1, tmpPt2), "W-NOTE"));
                 if (i < floorCount)
                 {
                     DrawText("W-NOTE", floorList[i].FloorName, tmpPt1, 0.0);
@@ -232,7 +298,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Point3d rootPt1 = basePt;
             Point3d rootPt2 = basePt + hvector * rootLength;
             var hLine1 = new Line(rootPt1, rootPt2);
-            DrawLine(rootPt1, rootPt2, PipeLayerName);
+            //DrawLine(rootPt1, rootPt2, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 0;
             mapLine1.Line = hLine1;
@@ -287,7 +354,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制垂直线
             Point3d vLinePt1 = basePt;
             Point3d vLinePt2 = basePt + vvector * 400.0;
-            DrawLine(vLinePt1, vLinePt2, PipeLayerName);
+            //DrawLine(vLinePt1, vLinePt2, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(vLinePt1, vLinePt2), PipeLayerName));
             Point3d hLinePt1 = vLinePt2;
             //绘制子节点
             double sumLength = 0.0;
@@ -394,7 +462,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 cuLength += 1000;
             }
             //绘制当前节点干线
-            DrawLine(hLinePt1, hLinePt2, PipeLayerName);
+            //DrawLine(hLinePt1, hLinePt2, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(hLinePt1, hLinePt2), PipeLayerName, 0));
             var hLine1 = new Line(hLinePt1, hLinePt2);
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 0;
@@ -427,21 +496,24 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 vertLength += rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
             var vDownPt1 = basePt;
             var vDownPt2 = vDownPt1 - vvector * vertLength;
-            DrawLine(vDownPt1, vDownPt2, PipeLayerName);
+            //DrawLine(vDownPt1, vDownPt2, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(vDownPt1, vDownPt2), PipeLayerName, 1));
             ThMapLine mapLine1 = new ThMapLine();
             var line1 = new Line(vDownPt1, vDownPt2);
             mapLine1.LineType = 1;
             mapLine1.Line = line1;
             //mapLineList.Add(mapLine1);
             var vDownPt3 = vDownPt2 + hvector * 1000;
-            DrawLine(vDownPt2, vDownPt3, PipeLayerName);
+            //DrawLine(vDownPt2, vDownPt3, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(vDownPt2, vDownPt3), PipeLayerName, 0));
             var line2= new Line(vDownPt2, vDownPt3);
             ThMapLine mapLine2 = new ThMapLine();
             mapLine2.LineType = 0;
             mapLine2.Line = line2;
             //mapLineList.Add(mapLine2);
             var vDownPt4 = vDownPt3 - vvector * 1000.0;
-            DrawLine(vDownPt3, vDownPt4, PipeLayerName);
+            //DrawLine(vDownPt3, vDownPt4, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(vDownPt3, vDownPt4), PipeLayerName, 1));
             var line3= new Line(vDownPt3, vDownPt4);
             ThMapLine mapLine3 = new ThMapLine();
             mapLine3.LineType = 1;
@@ -459,7 +531,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         {
             Point3d otherPt = GetMapStartPoint(MapPostion, FloorList, otherFloorIndex);
             Point3d otherStartPt = new Point3d(basePt.X, otherPt.Y, 0.0);
-            var vLine1 = DrawLine(basePt, otherStartPt, PipeLayerName);
+            var vLine1 = new Line(basePt, otherStartPt);
+            //DrawLine(basePt, otherStartPt, PipeLayerName);
+            PreLines.Add(new PreLine(new Line(basePt, otherStartPt), PipeLayerName, 1));
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 1;
             mapLine1.Line = vLine1;
@@ -547,7 +621,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var vPt2 = vPt1 + vvector * vlength;
                     if (node.Item.Riser.RiserPts.Count == 0)
                     {
-                        DrawLine(vPt1, vPt2, PipeLayerName);
+                        //DrawLine(vPt1, vPt2, PipeLayerName);
+                        PreLines.Add(new PreLine(new Line(vPt1, vPt2), PipeLayerName,1));
                         ThMapLine mapLine = new ThMapLine();
                         mapLine.Line = new Line(vPt1, vPt2);
                         mapLine.LineType = 1;
@@ -556,7 +631,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         {
                             var vpt3 = vPt1 + vvector * 300.0;
                             var hpt3 = vpt3 - hvector * GetMarkLength(node.Item.Riser.MarkName);
-                            DrawLine(vpt3, hpt3, "W-WSUP-DIMS");
+                            //DrawLine(vpt3, hpt3, "W-WSUP-DIMS");
+                            PreLines.Add(new PreLine(new Line(vpt3, hpt3), "W-WSUP-DIMS"));
                             //绘制立管标注
                             DrawText("W-WSUP-DIMS", node.Item.Riser.MarkName, hpt3, 0.0);
                         }
@@ -580,8 +656,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var mPt1 = riserPoint;
                     var mPt2 = mPt1 + mvector * 1000.0;
                     var mPt3 = mPt2 - hvector * GetMarkLength(node.Item.Break.BreakName);
-                    DrawLine(mPt1, mPt2, "W-WSUP-DIMS");
-                    DrawLine(mPt2, mPt3, "W-WSUP-DIMS");
+                    //DrawLine(mPt1, mPt2, "W-WSUP-DIMS");
+                    PreLines.Add(new PreLine(new Line(mPt1, mPt2), "W-WSUP-DIMS"));
+                    //DrawLine(mPt2, mPt3, "W-WSUP-DIMS");
+                    PreLines.Add(new PreLine(new Line(mPt2, mPt3), "W-WSUP-DIMS"));
                     DrawText("W-WSUP-DIMS", node.Item.Break.BreakName, mPt3, 0.0);
                 }
                 if (hasNode)
@@ -608,7 +686,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var cond = cond_a && cond_b && cond_c;
                     if (cond)
                     {
-                        DrawLine(riserStartPoints[i], riserStartPoints[i + 1], PipeLayerName);
+                        //DrawLine(riserStartPoints[i], riserStartPoints[i + 1], PipeLayerName);
+                        PreLines.Add(new PreLine(new Line(riserStartPoints[i], riserStartPoints[i + 1]), PipeLayerName,0));
                         ThMapLine mapLine = new ThMapLine();
                         mapLine.Line = new Line(riserStartPoints[i], riserStartPoints[i + 1]);
                         mapLine.LineType = 0;
