@@ -322,6 +322,7 @@
     <Compile Include="UndergroundWaterSystem\Model\ThValveModel.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThDrawSystemMapService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThImportService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThLayerInitializeService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThOtherDataExtractionService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThPipeLineHandleService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThBreakExtractionService.cs" />

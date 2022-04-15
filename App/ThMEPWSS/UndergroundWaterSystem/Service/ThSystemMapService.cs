@@ -23,6 +23,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 
     public class ThSystemMapService
     {
+        public static string PipeLayerName = null;//管线绘制图层
+        public static string TextStyle = null;//绘制标注样式
+        public static string TextLayer = null;//绘制标注图层
+        public static string ValveLayerName = null;//阀门绘制图层
         public double SubSpace { set; get; }//节点间隔距离
         public double FloorLength { set; get; }//楼层线长度
         public double FloorHeight { set; get; }//楼层高度
@@ -119,7 +123,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     hLineList.AddRange(BreakLine(lineList[i], cloosPts[i]));
                 }
             }
-
         }
         public void DrawFloorLines(Point3d basePt, List<ThFloorModel> floorList, double height, double length)
         {
@@ -131,10 +134,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             {
                 Point3d tmpPt1 = basePt + vvector * i * height;
                 Point3d tmpPt2 = tmpPt1 + hvector * length;
-                DrawLine(tmpPt1, tmpPt2, "0", 1);
+                DrawLine(tmpPt1, tmpPt2, "W-NOTE");
                 if (i < floorCount)
                 {
-                    DrawText("0", floorList[i].FloorName, tmpPt1, 0.0);
+                    DrawText("W-NOTE", floorList[i].FloorName, tmpPt1, 0.0);
                 }
             }
             floorList.Reverse();
@@ -181,7 +184,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     subPt1 = subPt1 + hvector * length;
                     var valvePt = subPt1 - hvector * (1000 * valves.Count);
                     sumLength += length;
-                    InsertValves("0", valves, valvePt, hvector);
+                    InsertValves(ValveLayerName, valves, valvePt, hvector);
                 }
                 //立管
                 var riserPoint = subPt1;
@@ -204,7 +207,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     }
                 }
                 var dimPt = subPt1 - hvector * 1000.0;
-                DrawText("0", dimMark, dimPt, 0.0);
+                DrawText(TextLayer, dimMark, dimPt, 0.0);
                 startPointNode = endPointNode;
                 //ToDo2:如果有阀门插入阀门
             }
@@ -213,7 +216,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             rootLength += SubSpace * (rootNode.Children.Count - 1);//子节点的间隔1000
             Point3d rootPt1 = basePt;
             Point3d rootPt2 = basePt + hvector * rootLength;
-            var hLine1 = DrawLine(rootPt1, rootPt2, "0", 1);
+            var hLine1 = DrawLine(rootPt1, rootPt2, PipeLayerName);
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 0;
             mapLine1.Line = hLine1;
@@ -243,7 +246,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
             }
             var dimPt1 = rootPt2 - hvector * 1000.0;
-            DrawText("0", dimMark1, dimPt1, 0.0);
+            DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
             return rootLength;
         }
         public double DrawSubNode(Point3d basePt, ThTreeNode<ThPipeModel> subNode, double height, int floorIndex, ref List<ThMapLine> mapLineList, Line rootLine)
@@ -258,7 +261,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制垂直线
             Point3d vLinePt1 = basePt;
             Point3d vLinePt2 = basePt + vvector * 400.0;
-            DrawLine(vLinePt1, vLinePt2, "0", 1);
+            DrawLine(vLinePt1, vLinePt2, PipeLayerName);
             Point3d hLinePt1 = vLinePt2;
             //绘制子节点
             double sumLength = 0.0;
@@ -293,7 +296,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     childPt1 = childPt1 + hvector * length;
                     sumLength += length;
                     var valvePt = childPt1 - hvector * (1000.0 * valves.Count);
-                    InsertValves("0", valves, valvePt, hvector);
+                    InsertValves(ValveLayerName, valves, valvePt, hvector);
                 }
                 //立管
                 var riserPoint = childPt1;
@@ -316,7 +319,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     }
                 }
                 var dimPt = childPt1 - hvector * 1000.0;
-                DrawText("0", dimMark, dimPt, 0.0);
+                DrawText(TextLayer, dimMark, dimPt, 0.0);
                 startPointNode = endPointNode;
             }
             var cuLength = startLength + sumLength;
@@ -331,7 +334,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             //绘制当前节点干线
             Point3d hLinePt2 = vLinePt2 + hvector * cuLength;
-            var hLine1 = DrawLine(hLinePt1, hLinePt2, "0", 1);
+            var hLine1 = DrawLine(hLinePt1, hLinePt2, PipeLayerName);
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 0;
             mapLine1.Line = hLine1;
@@ -360,7 +363,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
             }
             var dimPt1 = hLinePt2 - hvector * 1000.0;
-            DrawText("0", dimMark1, dimPt1, 0.0);
+            DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
             return cuLength;
         }
 
@@ -371,15 +374,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 vertLength += rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
             var vDownPt1 = basePt;
             var vDownPt2 = vDownPt1 - vvector * vertLength;
-            DrawLine(vDownPt1, vDownPt2, "0", 1);
+            DrawLine(vDownPt1, vDownPt2, PipeLayerName);
             var vDownPt3 = vDownPt2 + hvector * 500;
-            DrawLine(vDownPt2, vDownPt3, "0", 1);
+            DrawLine(vDownPt2, vDownPt3, PipeLayerName);
             var vDownPt4 = vDownPt3 - vvector * 1000.0;
-            DrawLine(vDownPt3, vDownPt4, "0", 1);
+            DrawLine(vDownPt3, vDownPt4, PipeLayerName);
             using (var adb = AcadDatabase.Active())
             {
                 var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
-                    "0", "皮带水嘴系统", vDownPt4, new Scale3d(1), 0);
+                    ValveLayerName, "皮带水嘴系统", vDownPt4, new Scale3d(1), 0);
                 blId.SetDynBlockValue("可见性", "向右真空破坏组合");
                 var br = adb.Element<BlockReference>(blId);
             }
@@ -388,7 +391,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         {
             Point3d otherPt = GetMapStartPoint(MapPostion, FloorList, otherFloorIndex);
             Point3d otherStartPt = new Point3d(basePt.X, otherPt.Y, 0.0);
-            var vLine1 = DrawLine(basePt, otherStartPt, "0", 1);
+            var vLine1 = DrawLine(basePt, otherStartPt, PipeLayerName);
             var mapLine1 = new ThMapLine();
             mapLine1.LineType = 1;
             mapLine1.Line = vLine1;
@@ -422,13 +425,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
 
         }
-        public Line DrawLine(Point3d startPt, Point3d endPt, string layer, int colorIndex)
+        public Line DrawLine(Point3d startPt, Point3d endPt, string layer, int colorIndex = -1)
         {
             using (var database = AcadDatabase.Active())
             {
                 var line = new Line(startPt, endPt);
                 line.Layer = layer;
-                line.ColorIndex = colorIndex;
+                if (colorIndex != -1)
+                    line.ColorIndex = colorIndex;
                 Draw.AddToCurrentSpace(line);
                 return line;
             }
@@ -475,14 +479,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var vPt2 = vPt1 + vvector * vlength;
                     if (node.Item.Riser.RiserPts.Count == 0)
                     {
-                        DrawLine(vPt1, vPt2, "0", 0);
+                        DrawLine(vPt1, vPt2, PipeLayerName);
                         if (node.Item.Riser.MarkName != null)
                         {
                             var vpt3 = vPt1 + vvector * 300.0;
                             var hpt3 = vpt3 - hvector * GetMarkLength(node.Item.Riser.MarkName);
-                            DrawLine(vpt3, hpt3, "0", 2);
+                            DrawLine(vpt3, hpt3, PipeLayerName);
                             //绘制立管标注
-                            DrawText("0", node.Item.Riser.MarkName, hpt3, 0.0);
+                            DrawText("W-WSUP-DIMS", node.Item.Riser.MarkName, hpt3, 0.0);
                         }
                     }
                     //todo3：不能只考虑最后一个pointNode，要考虑所有的pointNode
@@ -504,9 +508,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var mPt1 = riserPoint;
                     var mPt2 = mPt1 + mvector * 1000.0;
                     var mPt3 = mPt2 - hvector * GetMarkLength(node.Item.Break.BreakName);
-                    DrawLine(mPt1, mPt2, "0", 1);
-                    DrawLine(mPt2, mPt3, "0", 1);
-                    DrawText("0", node.Item.Break.BreakName, mPt3, 0.0);
+                    DrawLine(mPt1, mPt2, PipeLayerName);
+                    DrawLine(mPt2, mPt3, PipeLayerName);
+                    DrawText("W-WSUP-DIMS", node.Item.Break.BreakName, mPt3, 0.0);
                 }
                 if (hasNode)
                 {
@@ -531,7 +535,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     var cond_c = CreateVector(riserStartPoints[i], riserStartPoints[i + 1]).IsParallelTo(Vector3d.XAxis);
                     var cond = cond_a && cond_b && cond_c;
                     if (cond)
-                        DrawLine(riserStartPoints[i], riserStartPoints[i + 1], "0", 1);
+                        DrawLine(riserStartPoints[i], riserStartPoints[i + 1], PipeLayerName);
                 }
             }
         }
@@ -615,8 +619,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var hVector = new Vector3d(1.0, 0.0, 0.0);
             var pt1 = pt - hVector * 150.0;
             var pt2 = pt + hVector * 150.0;
-            var line1 = DrawLine(hline.StartPoint, pt1, "0", 1);
-            var line2 = DrawLine(pt2, hline.EndPoint, "0", 1);
+            var line1 = DrawLine(hline.StartPoint, pt1, PipeLayerName);
+            var line2 = DrawLine(pt2, hline.EndPoint,PipeLayerName);
             retList.Add(line1);
             retList.Add(line2);
             hline.UpgradeOpen();
