@@ -41,5 +41,14 @@ namespace ThMEPHVAC
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THFJXXCK", CommandFlags.NoUndoMarker|CommandFlags.NoHistory)]
+        public void THFanSelectInsertBlock()
+        {
+            using (var cmd = new ThHvacFanTypeSelectCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

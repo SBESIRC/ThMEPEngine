@@ -48,6 +48,19 @@ namespace ThControlLibraryWPF.CustomControl
     public class InputTextBox : TextBoxBaseProperty
     {
         private TextBox _inputText;
+        List<Key> baseKeys = new List<Key>()
+        {
+            Key.Back,
+            Key.Enter,
+            Key.Home,
+            Key.End,
+            Key.NumLock,
+            Key.Left,
+            Key.Right,
+            Key.Insert,
+            Key.Delete,
+            Key.Escape
+        };
         static InputTextBox()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(InputTextBox), new FrameworkPropertyMetadata(typeof(InputTextBox)));
@@ -120,11 +133,7 @@ namespace ThControlLibraryWPF.CustomControl
         }
         private bool _CheckIsBaseInput(KeyEventArgs e)
         {
-            List<Key> baseKeys = new List<Key>()
-            {
-                Key.Back,Key.Enter,Key.Home,Key.End,Key.NumLock,
-                Key.Left,Key.Right,Key.Insert,Key.Delete,Key.Escape
-            };
+            
             if (baseKeys.Any(c=>c == e.Key))
                 return true;
             return false;

@@ -1,7 +1,9 @@
-﻿using TianHua.Hvac.UI.UI;
-using TianHua.Hvac.UI.Command;
-using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
 using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Runtime;
+using TianHua.Hvac.UI.Command;
+using TianHua.Hvac.UI.EQPMFanSelect.EventMonitor;
+using TianHua.Hvac.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI
@@ -11,11 +13,13 @@ namespace TianHua.Hvac.UI
         public void Initialize()
         {
             AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
+            EQPMSelectAddEvents();
         }
 
         public void Terminate()
         {
             AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
+            EQPMSelectRemoveEvents();
         }
         private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
@@ -160,5 +164,37 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
+        [CommandMethod("TIANHUACAD", "THFJXX", CommandFlags.Modal)]
+        public void THFJXX()
+        {
+            EQPMUIServices.Instance.ShowFanSelectUI("");
+        }
+        [CommandMethod("TIANHUACAD", "THFJEDITEX", CommandFlags.Modal)]
+        public void THFJEDIT()
+        {
+            EQPMUIServices.Instance.ShowFanSelectUI("");
+            EQPMUIServices.Instance.SelectFanBlock();
+        }
+
+        #region 风机选型的相关事件
+        private void EQPMSelectAddEvents() 
+        {
+            AcadApp.BeginDoubleClick += EQPMEventMonitor.Application_BeginDoubleClick;
+            AcadApp.DocumentManager.DocumentActivated += EQPMEventMonitor.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentLockModeChanged += EQPMEventMonitor.DocumentManager_DocumentLockModeChanged;
+            AcadApp.DocumentManager.DocumentLockModeChangeVetoed += EQPMEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
+            EQPMEventMonitor.SubscribeToObjectOverrule();
+            EQPMEventMonitor.SubscribeToDocumentEvents(Active.Document);
+        }
+        private void EQPMSelectRemoveEvents() 
+        {
+            AcadApp.BeginDoubleClick -= EQPMEventMonitor.Application_BeginDoubleClick;
+            AcadApp.DocumentManager.DocumentActivated -= EQPMEventMonitor.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentLockModeChanged -= EQPMEventMonitor.DocumentManager_DocumentLockModeChanged;
+            AcadApp.DocumentManager.DocumentLockModeChangeVetoed -= EQPMEventMonitor.DocumentManager_DocumentLockModeChangeVetoed;
+            EQPMEventMonitor.UnSubscribeToObjectOverrule();
+            EQPMEventMonitor.UnSubscribeToDocumentEvents();
+        }
+        #endregion
     }
 }

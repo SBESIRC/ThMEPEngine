@@ -174,6 +174,7 @@
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Center" />
                         <Label Padding="0"  
+                               BorderThickness="0"
                                Margin="5 0 0 0" 
                                Focusable="False"
                                Background="Transparent"
@@ -182,7 +183,10 @@
                                Foreground="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleForeground}"
                                FontSize="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleFontSize}"
                                Content="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=Title}"
-                               VerticalAlignment="Center"/>
+                               VerticalAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               HorizontalAlignment="Left"
+                               HorizontalContentAlignment="Left"/>
                     </StackPanel>
                 </ControlTemplate>
             </Setter.Value>

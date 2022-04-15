@@ -691,6 +691,8 @@
                 <Command Local="THFGDX" Global="THFGDX" />
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
+                <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -714,6 +716,8 @@
                 <Command Local="THFGDX" Global="THFGDX" />
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
+                <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -737,6 +741,8 @@
                 <Command Local="THFGDX" Global="THFGDX" />
                 <Command Local="THSGLY" Global="THSGLY" />
                 <Command Local="THSGDX" Global="THSGDX" />
+                <Command Local="THFJXX" Global="THFJXX" />
+                <Command Local="THFJEDITEX" Global="THFJEDITEX" />
             </Commands>
         </ComponentEntry>
     </Components>

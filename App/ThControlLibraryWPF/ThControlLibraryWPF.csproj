@@ -63,6 +63,7 @@
     <Compile Include="ControlUtils\FindControlUtil.cs" />
     <Compile Include="ControlUtils\FormUtil.cs" />
     <Compile Include="ControlUtils\NotifyPropertyChangedBase.cs" />
+    <Compile Include="ControlUtils\UListCheckItem.cs" />
     <Compile Include="ControlUtils\UListItemData.cs" />
     <Compile Include="ControlUtils\WindowBehaviorHelper.cs" />
     <Compile Include="ConverterUtil.cs" />

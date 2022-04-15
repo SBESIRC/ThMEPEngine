@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.EQPMFanSelect;
 using ThMEPHVAC.Model;
 using TianHua.FanSelection;
 using TianHua.Publics.BaseCode;
@@ -318,6 +319,18 @@ namespace ThMEPHVAC.CAD
                 return "平时送风";
             }
             return scenario;
+        }
+        private string GetFanScenarioEx()
+        {
+            string scenario = "";
+            var identifier = Model.GetModelIdentifier(ThHvacCommon.RegAppName_FanSelectionEx);
+            if (string.IsNullOrEmpty(identifier))
+                return scenario;
+
+            var xData = Model.ReadBlockFanXData(out FanBlockXDataBase xDataBase);
+            if (null == xData || xDataBase == null || string.IsNullOrEmpty(xData.AirCalcValue))
+                return scenario;
+            return xDataBase.ScenarioString;
         }
     }
 }
