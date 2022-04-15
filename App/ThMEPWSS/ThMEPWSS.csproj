@@ -49,6 +49,8 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingRainwaterInlet.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingSealedWellService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingTaggingService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DraningSettingService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\TubeWellModel.cs" />

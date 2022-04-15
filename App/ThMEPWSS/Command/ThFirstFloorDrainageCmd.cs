@@ -13,6 +13,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -65,6 +66,8 @@ namespace ThMEPWSS.Command
 
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
+                    //处理冷凝水管
+                    HandlePipes(routes);
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
@@ -81,6 +84,35 @@ namespace ThMEPWSS.Command
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 冷凝水管间接排水
+        /// </summary>
+        /// <param name="routes"></param>
+        private void HandlePipes(List<RouteModel> routes)
+        {
+            var condensatePipes = routes.Where(x => x.verticalPipeType == VerticalPipeType.CondensatePipe).ToList();
+            DraningSettingService drainningSettingService = null;
+            switch (paramSetting.IndirectDrainageSetting)
+            {
+                case DrainageSettingEnum.Tagging:
+                    drainningSettingService = new DrainningSettingTaggingService(condensatePipes);
+                    break;
+                case DrainageSettingEnum.RainwaterInlet13:
+                    drainningSettingService = new DrainningSettingRainwaterInlet(condensatePipes);
+                    break;
+                case DrainageSettingEnum.OutdoorWell:
+                    drainningSettingService = new DrainningSettingSealedWellService(condensatePipes);
+                    break;
+                case DrainageSettingEnum.NotConsidered:
+                default:
+                    break;
+            }
+            if (drainningSettingService != null)
+            {
+                drainningSettingService.CreateDraningSetting();
             }
         }
 

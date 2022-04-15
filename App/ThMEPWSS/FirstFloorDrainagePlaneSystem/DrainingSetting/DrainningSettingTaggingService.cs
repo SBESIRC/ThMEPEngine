@@ -24,6 +24,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
             Print(resPipe);
         }
 
+        /// <summary>
+        /// 调整连接线
+        /// </summary>
+        /// <returns></returns>
         private List<RouteModel> CalTaggingPt()
         {
             var line = pipes.First().connecLine;
@@ -41,6 +45,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
             return pipes;
         }
 
+        /// <summary>
+        /// 打印结果
+        /// </summary>
+        /// <param name="pipes"></param>
         private void Print(List<RouteModel> pipes)
         {
             var layoutInfos = pipes.Select(x =>
@@ -51,6 +59,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 var dir = (pt - secPt).GetNormal();
                 return new KeyValuePair<Point3d, Vector3d>(pt, dir);
             }).ToList();
+            InsertBlockService.InsertConnectPipe(pipes.Select(x => x.route).ToList(), ThWSSCommon.DraiLayerName, null);
             InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
         }
     }

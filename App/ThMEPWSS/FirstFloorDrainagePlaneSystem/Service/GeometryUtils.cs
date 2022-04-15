@@ -315,8 +315,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// <param name="polyline"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static Polyline ShortenPolyline(Polyline polyline, double length)
+        public static Polyline ShortenPolyline(Polyline polyline, double length, bool shortStart = false)
         {
+            if (shortStart)
+            {
+                polyline.ReverseCurve();
+            }
             var polyNum = polyline.NumberOfVertices;
             var pt1 = polyline.GetPoint3dAt(polyNum - 1);
             var pt2 = polyline.GetPoint3dAt(polyNum - 2);
@@ -328,6 +332,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 resPoly.AddVertexAt(resPoly.NumberOfVertices, polyline.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
             }
             resPoly.AddVertexAt(resPoly.NumberOfVertices, lastPt.ToPoint2D(), 0, 0, 0);
+            if (shortStart)
+            {
+                resPoly.ReverseCurve();
+            }
             return resPoly;
         }
     }

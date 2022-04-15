@@ -26,6 +26,34 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
+        public static void InsertConnectPipe(List<Polyline> polylines, string layerName, string lineType, bool needImport = true)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                if (needImport)
+                {
+                    acadDatabase.Layers.Import(
+                       blockDb.Layers.ElementOrDefault(layerName), false);
+                    if (lineType != null)
+                    {
+                        acadDatabase.Linetypes.Import(
+                        blockDb.Linetypes.ElementOrDefault(lineType), false);
+                    }
+                }
+                foreach (var poly in polylines)
+                {
+                    if (lineType != null)
+                    {
+                        poly.Linetype = lineType;
+                    }
+                    poly.Layer = layerName;
+                    poly.ColorIndex = 256;
+                    acadDatabase.ModelSpace.Add(poly);
+                }
+            }
+        }
+
         public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName)
         {
             double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);
