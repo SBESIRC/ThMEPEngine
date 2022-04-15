@@ -80,6 +80,10 @@ namespace ThMEPWSS.HydrantLayout.Command
                 var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
                 //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
+                //插入图块
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
+                var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
+                InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
                 //提取数据
                 var dataFactory = new ThHydrantLayoutDataFactory()
@@ -120,9 +124,8 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //VerticalPipeOut.ForEach(x => transformer.Reset(x.Outline));
 
                 var validHydrant = outPutModels.Where(x => x.IfFind == true && (x.Type == 1 || x.Type == 2)).ToList();
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
-                var layerList = GetResultLayer(validHydrant);
-                InsertBlkService.PrepareInsert(blkList, layerList);
+
+
                 //插入真实块
                 InsertBlkService.InsertBlock(outPutModels, 1);
 
@@ -142,11 +145,12 @@ namespace ThMEPWSS.HydrantLayout.Command
 
         private List<string> GetResultLayer(List<OutPutModel> validHydrant)
         {
-            var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
+            var layerList = new List<string>();
             var layers = validHydrant.Select(x => (x.OriginModel.Data as BlockReference).Layer);
             layerList.AddRange(layers);
 
             return layerList;
         }
+
     }
 }
