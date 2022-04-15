@@ -23,7 +23,7 @@ namespace ThMEPWSS.HydrantLayout
         public const string BlkVisibility_Att_1_Value = "DN100";
         public const string BlkVisibility_Angle = "角度1";
 
-        public const double DistTol = 1000;
+        public const double DistTol = 1500;
      
     }
 }

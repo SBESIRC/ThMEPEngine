@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.HydrantLayout.Model
 {
@@ -32,7 +33,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         }
         public void ProjectOntoXYPlane()
         {
-            Outline.ProjectOntoXYPlane();
+            Outline =  Outline.ToNTSLineString().ToDbPolyline();
             var cDBP = new DBPoint(Center);
             cDBP.ProjectOntoXYPlane();
             Center = cDBP.Position;
