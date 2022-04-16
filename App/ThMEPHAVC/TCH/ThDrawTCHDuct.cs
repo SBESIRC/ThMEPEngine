@@ -183,7 +183,14 @@ namespace ThMEPHVAC.TCH
             var leaveDuctMat = verticalVec * (ductWidth * 0.5 + 250);
             p = isTextSide ? midP + leaveDuctMat : midP;
         }
+        private double GetScale(string scale)
+        {
+            var nums = scale.Split(':');
+            if (nums.Length != 2)
+                return 0;
+            return Double.Parse(nums[1]);
 
+        }
         private void RecordDuctDimensions(Matrix3d mat, SegInfo seg, ThMEPHVACParam param, bool isTextSide, ref ulong gId)
         {
             var elevation = param.elevation;
@@ -205,7 +212,7 @@ namespace ThMEPHVAC.TCH
                 eleType = 2,
                 textAngle = angle,
                 sysKey = 1,
-                scale = 0
+                scale = GetScale(param.scale)
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.ductDimensions +
                           " VALUES ('" + ductDimensionParam.ID.ToString() + "'," +

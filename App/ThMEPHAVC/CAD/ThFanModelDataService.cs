@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.FanSelection.Service;
 using TianHua.FanSelection.Function;
@@ -10,6 +11,16 @@ namespace ThMEPHVAC.CAD
     public class ThFanModelDataService
     {
         public List<double> CalcAirVolume(ObjectId objId)
+        {
+            return IsNewFan(objId) ? CalcAirVolumeEx(objId) : CalcOrgAirVolume(objId);
+        }
+        public bool IsNewFan(ObjectId objId)
+        {
+            var valueList = objId.GetXData(ThHvacCommon.RegAppName_FanSelectionEx);
+            return valueList != null;
+        }
+        
+        public List<double> CalcOrgAirVolume(ObjectId objId)
         {
             var identifier = objId.GetModelIdentifier();
             if (string.IsNullOrEmpty(identifier))
