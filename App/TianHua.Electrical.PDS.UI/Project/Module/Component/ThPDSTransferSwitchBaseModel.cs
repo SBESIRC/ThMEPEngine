@@ -1,5 +1,6 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -60,10 +61,17 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _transferSwitch.RatedCurrent;
             set
             {
-                _transferSwitch.RatedCurrent = value;
+                _transferSwitch.SetRatedCurrent(value);
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeRatedCurrents
+        {
+            get => _transferSwitch.GetRatedCurrents();
         }
     }
 }

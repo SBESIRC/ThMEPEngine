@@ -1,5 +1,6 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
+using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Editors;
@@ -62,7 +63,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _isolatingSwitch.RatedCurrent;
             set
             {
-                _isolatingSwitch.RatedCurrent = value;
+                _isolatingSwitch.SetRatedCurrent(value);
                 OnPropertyChanged(nameof(RatedCurrent));
                 OnPropertyChanged(nameof(Content));
             }
@@ -77,5 +78,12 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeRatedCurrents
+        {
+            get => _isolatingSwitch.GetRatedCurrents();
+        }
     }
 }
