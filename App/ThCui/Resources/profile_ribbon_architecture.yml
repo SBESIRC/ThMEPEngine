@@ -396,6 +396,12 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "尺寸避让"
             attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "文字合并"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "云线提资"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlGENERALSELECT"
     name: "GENERALSELECT"

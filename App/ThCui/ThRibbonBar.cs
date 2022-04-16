@@ -1413,7 +1413,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 {
                     var splitButton = subRow.AddNewSplitButton("天华快选",
-                        RibbonSplitButtonBehavior.SplitFollow,
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
                         RibbonSplitButtonListStyle.IconText,
                         RibbonButtonStyle.SmallWithText);
 
@@ -1546,7 +1546,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 {
                     var splitButton = subRow.AddNewSplitButton("天华对齐",
-                        RibbonSplitButtonBehavior.SplitFollow,
+                        RibbonSplitButtonBehavior.DropDownNoFollow,
                         RibbonSplitButtonListStyle.IconText,
                         RibbonButtonStyle.SmallWithText);
 
