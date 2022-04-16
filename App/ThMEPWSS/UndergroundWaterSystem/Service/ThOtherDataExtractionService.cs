@@ -159,7 +159,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             foreach (var e in Entities.OfType<BlockReference>().Where(e =>
             {
                 bool cond_a = e.ObjectId.IsValid;
-                bool cond_b = e.GetEffectiveName().Contains("给水角阀平面");
+                bool cond_b = e.Database != null ? e.GetEffectiveName().Contains("给水角阀平面")
+                : e.Name.Contains("给水角阀平面");
                 bool cond_c = bound.Contains(e.Position);
                 if (cond_a && cond_b && cond_c) return true;
                 else return false;
@@ -169,7 +170,25 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 result.Add(thFlushPoint);
             }
             //块中块
-    
+            foreach (var e in Entities.OfType<BlockReference>().Where(e =>
+                {
+                    return e.ExplodeToDBObjectCollection().OfType<BlockReference>().Any();
+                })
+                .Select(e => e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList()))
+            {
+                foreach (var br in e)
+                {
+                    bool cond_a = br.ObjectId.IsValid;
+                    bool cond_b = br.Database != null ? br.GetEffectiveName().Contains("给水角阀平面")
+                    : br.Name.Contains("给水角阀平面");
+                    bool cond_c = bound.Contains(br.Position);
+                    if (cond_a && cond_b && cond_c)
+                    {
+                        ThFlushPointModel thFlushPoint = new ThFlushPointModel(br);
+                        result.Add(thFlushPoint);
+                    }
+                }
+            }
             //
             foreach (var e in Entities.OfType<Entity>()
                .Where(e => IsTianZhengElement(e))
