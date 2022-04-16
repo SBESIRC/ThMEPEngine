@@ -19,24 +19,28 @@ namespace TianHua.Electrical.PDS.Project.Module
 
     public class ThPDSProjectGraphNodeIdChangeTag : ThPDSProjectGraphNodeCompareTag
     {
-        public string ChangeToId { get; set; }
-        public ThPDSProjectGraphNode ChangeToNode { get; set; }
+        public bool ChangeFrom { get; set; }
+        public bool ChangeTo { get; set; }
+        public string ChangeFromID { get; set; }
+        public string ChangeToID { get; set; }
 
         public ThPDSProjectGraphNodeIdChangeTag()
         {
-            ChangeToId = null;
-            ChangeToNode = null;
+            ChangeFrom = false;
+            ChangeTo = false;
+            ChangeFromID = null;
+            ChangeToID = null;
         }
     }
 
     public class ThPDSProjectGraphNodeExchangeTag : ThPDSProjectGraphNodeCompareTag
     {
-        public string ExchangeToId { get; set; }
+        public string ExchangeToID { get; set; }
         public ThPDSProjectGraphNode ExchangeToNode { get; set; }
 
         public ThPDSProjectGraphNodeExchangeTag()
         {
-            ExchangeToId = null;
+            ExchangeToID = null;
             ExchangeToNode = null;
         }
     }

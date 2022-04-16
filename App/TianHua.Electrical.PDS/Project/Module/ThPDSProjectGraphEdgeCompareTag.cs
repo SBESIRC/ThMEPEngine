@@ -17,13 +17,17 @@
 
     public class ThPDSProjectGraphEdgeIdChangeTag : ThPDSProjectGraphEdgeCompareTag
     {
-        public string ChangeToId { get; set; }
-        public ThPDSProjectGraphEdge ChangeToEdge { get; set; }
+        public bool ChangeFrom { get; set; }
+        public bool ChangeTo { get; set; }
+        public string ChangeFromLastCircuitID { get; set; }
+        public string ChangeToLastCircuitID { get; set; }
 
         public ThPDSProjectGraphEdgeIdChangeTag()
         {
-            ChangeToId = null;
-            ChangeToEdge = null;
+            ChangeFrom = false;
+            ChangeTo = false;
+            ChangeFromLastCircuitID = null;
+            ChangeToLastCircuitID = null;
         }
     }
 
@@ -51,11 +55,11 @@
 
     public class ThPDSProjectGraphEdgeDataTag : ThPDSProjectGraphEdgeCompareTag
     {
-        public string ToLastCircuitNumber { get; set; }
+        public string ToLastCircuitID { get; set; }
 
         public ThPDSProjectGraphEdgeDataTag()
         {
-            ToLastCircuitNumber = null;
+            ToLastCircuitID = null;
         }
     }
 }
