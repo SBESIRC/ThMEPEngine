@@ -31,7 +31,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             Meters = meters;
             PolesNum = polesNum;
             var meter = meters.First();
-            MeterSwitchType = meter.parameter;
+            MeterParameter = meter.parameter;
             AlternativeParameters = meters.Select(o => o.parameter).ToList();
         }
 
@@ -43,18 +43,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (Meters.Any(o => o.parameter == parameters))
             {
-                MeterSwitchType = parameters;
+                MeterParameter = parameters;
             }
             else
             {
                 throw new NotSupportedException();
             }
         }
-
-        /// <summary>
-        /// 电能表类型
-        /// </summary>
-        public string MeterSwitchType { get; set; }
 
         /// <summary>
         /// 断路器信息

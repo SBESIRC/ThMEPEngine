@@ -67,5 +67,31 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 坑位2：预留
         /// </summary>
         public PDSBaseComponent ReservedComponent { get; set; }
+
+        /// <summary>
+        /// 修改功率因数
+        /// </summary>
+        /// <param name="powerFactor"></param>
+        public void SetPowerFactor(ThPDSProjectGraphNode node ,double powerFactor)
+        {
+            if (node.Details.MiniBusbars.ContainsKey(this))
+            {
+                this.PowerFactor = powerFactor;
+                PDSProject.Instance.graphData.UpdateWithMiniBusbar(node ,this, false);
+            }
+        }
+
+        /// <summary>
+        /// 修改需要系数
+        /// </summary>
+        /// <param name="powerFactor"></param>
+        public void SetDemandFactor(ThPDSProjectGraphNode node ,double demandFactor)
+        {
+            if (node.Details.MiniBusbars.ContainsKey(this))
+            {
+                this.DemandFactor = demandFactor;
+                PDSProject.Instance.graphData.UpdateWithMiniBusbar(node, this, false);
+            }
+        }
     }
 }

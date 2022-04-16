@@ -13,6 +13,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public string PolesNum { get; set; }
 
         /// <summary>
+        /// 电表参数
+        /// </summary>
+        public string MeterParameter { get; set; }
+
+        /// <summary>
         /// 修改参数
         /// </summary>
         /// <param name="polesNum"></param>

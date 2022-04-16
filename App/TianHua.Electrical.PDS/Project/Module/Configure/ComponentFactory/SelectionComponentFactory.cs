@@ -48,7 +48,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public SelectionComponentFactory(ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
         {
-            this._edge = node.Details.MiniBusbars[miniBusbar].First();
             _calculateCurrent = miniBusbar.CalculateCurrent;//计算电流
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
@@ -60,7 +59,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
                 _specialPolesNum = "2P";
             }
             _characteristics = "";//瞬时脱扣器类型
-            _tripDevice = _edge.Target.Load.LoadTypeCat_1.GetTripDevice(_edge.Target.Load.FireLoad, out _characteristics);//脱扣器类型
+            _tripDevice = ThPDSLoadTypeCat_1.LumpedLoad.GetTripDevice(node.Details.MiniBusbars[miniBusbar].Any(o => o.Target.Load.FireLoad), out _characteristics);//脱扣器类型
         }
         
         public SelectionComponentFactory(ThPDSProjectGraphNode node, double cascadeCurrent)

@@ -19,7 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSMTSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string MTSpecification
         {
-            get => Meter.MeterSwitchType;
+            get => Meter.MeterParameter;
             set
             {
                 Meter.SetParameters(value);

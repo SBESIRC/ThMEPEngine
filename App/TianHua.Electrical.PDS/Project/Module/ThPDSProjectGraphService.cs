@@ -466,16 +466,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void AddSmallBusbar(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
-            var smallBusbar = new MiniBusbar();
-            node.Details.MiniBusbars.Add(smallBusbar, new List<ThPDSProjectGraphEdge>());
+            var miniBusbar = new MiniBusbar();
+            node.Details.MiniBusbars.Add(miniBusbar, new List<ThPDSProjectGraphEdge>());
             var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
-            AssignCircuit2SmallBusbar(node, smallBusbar, edge);
-
-            //这个地方后期要做优化，需再找张皓好好聊一下
-            var edges = GetSmallBusbarCircuit(graph, node, smallBusbar);
-            smallBusbar.Power = edges.Select(o => o.Target).ToList().CalculatePower();
-            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
-            smallBusbar.Breaker = componentFactory.CreatBreaker();
+            AssignCircuit2SmallBusbar(node, miniBusbar, edge);
         }
 
         /// <summary>
@@ -487,13 +481,6 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 var edge = AddCircuit(graph, node, CircuitFormOutType.常规);
                 AssignCircuit2SmallBusbar(node, smallBusbar, edge);
-
-                var edges = GetSmallBusbarCircuit(graph, node, smallBusbar);
-                smallBusbar.Power = edges.Select(o => o.Target).ToList().CalculatePower();
-                //统计节点级联电流
-                var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
-                //额定级联电流
-                smallBusbar.CascadeCurrent = Math.Max(CascadeCurrent, smallBusbar.Breaker.GetCascadeCurrent());
             }
         }
 
@@ -517,6 +504,25 @@ namespace TianHua.Electrical.PDS.Project.Module
             if(node.Details.MiniBusbars.ContainsKey(smallBusbar) && edge.Source.Equals(node) && edge.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规 && !node.Details.MiniBusbars.Any(o => o.Value.Contains(edge)))
             {
                 node.Details.MiniBusbars[smallBusbar].Add(edge);
+
+                if(node.Details.MiniBusbars[smallBusbar].Count == 1)
+                {
+                    smallBusbar.Phase = edge.Target.Load.Phase;
+                    smallBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
+                }
+                else if(smallBusbar.PhaseSequence != edge.Target.Details.PhaseSequence || edge.Target.Details.PhaseSequence == Circuit.PhaseSequence.L123)
+                {
+                    smallBusbar.Phase = ThPDSPhase.三相;
+                    smallBusbar.PhaseSequence = Circuit.PhaseSequence.L123;
+                }
+                else
+                {
+                    smallBusbar.Phase = ThPDSPhase.一相;
+                    smallBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
+                }
+
+                PDSProject.Instance.graphData.CheckWithMiniBusbar(node, smallBusbar);
+                PDSProject.Instance.graphData.CheckWithNode(node);
             }
         }
 

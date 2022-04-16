@@ -66,6 +66,25 @@ namespace TianHua.Electrical.PDS.Project.Module
             PDSProject.Instance.graphData.UpdateWithNode(this, true);
         }
 
+        /// <summary>
+        /// 修改功率因数
+        /// </summary>
+        /// <param name="powerFactor"></param>
+        public void SetPowerFactor(double powerFactor)
+        {
+            Load.PowerFactor = powerFactor;
+            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+        }
+
+        /// <summary>
+        /// 修改需要系数
+        /// </summary>
+        /// <param name="powerFactor"></param>
+        public void SetDemandFactor(double demandFactor)
+        {
+            Load.DemandFactor = demandFactor;
+            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+        }
 
         #region
         public event EventHandler TagChanged;

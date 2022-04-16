@@ -18,13 +18,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         public PDSProjectErrorType ErrorType { get; set; }
 
         /// <summary>
-        /// 是否是双功率
-        /// </summary>
-        public bool IsDualPower { get; set; }
-        /// <summary>
         /// 是否已统计
         /// </summary>
         public bool IsStatistical { get; set; }
+
+
+        /// <summary>
+        /// 是否是双功率
+        /// </summary>
+        public bool IsDualPower { get; set; }
+        
         public double LowPower { get; set; }
         public double HighPower { get; set; }
 
