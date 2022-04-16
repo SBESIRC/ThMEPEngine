@@ -1,12 +1,11 @@
 ﻿using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Project;
-using TianHua.Electrical.PDS.Service;
 
-namespace TianHua.Electrical.PDS.Command
+namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSUpdateToDwgService
     {
-        public void Execute()
+        public void Update()
         {
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();

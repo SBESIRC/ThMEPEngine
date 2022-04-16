@@ -26,9 +26,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
-    <Compile Include="Command\ThPDSUpdateToDwgService.cs" />
+    <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
     <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />
-    <Compile Include="Command\ThPDSSecondaryPushDataService.cs" />
+    <Compile Include="Service\ThPDSSecondaryPushDataService.cs" />
     <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
     <Compile Include="Diagram\ThPDSComponentContentExtension.cs" />

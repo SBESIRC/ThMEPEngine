@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using TianHua.Electrical.PDS.Command;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.UserContorls;
+
 namespace TianHua.Electrical.PDS.UI.Services
 {
     public static class PDSColorBrushes
@@ -23,7 +21,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             panel.btnRefresh.Click += (s, e) =>
             {
                 var cmd = new ThPDSSecondaryPushDataService();
-                cmd.Execute();
+                cmd.Push();
             };
             {
                 var info = new CircuitDiffInfo() { Items = new(), };

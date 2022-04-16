@@ -1,8 +1,8 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.Runtime;
-using System.Linq;
 using System.Windows;
+using Autodesk.AutoCAD.Runtime;
 using TianHua.Electrical.PDS.Command;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -66,7 +66,7 @@ namespace TianHua.Electrical.PDS.UI
 
             // 标注修改
             var modifyCmd = new ThPDSUpdateToDwgService();
-            modifyCmd.Execute();
+            modifyCmd.Update();
 
             Active.Editor.Regen();
         }
