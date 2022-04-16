@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
             panel.btnRefresh.Click += (s, e) =>
             {
-                var cmd = new ThPDSSecondaryPushDataCommand();
+                var cmd = new ThPDSSecondaryPushDataService();
                 cmd.Execute();
             };
             {

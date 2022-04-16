@@ -62,16 +62,17 @@ namespace TianHua.Electrical.PDS.Service
                     // 只要有一个有效负载，则认为整个节点为有效负载
                     noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
-                    objectIds.Add(LoadBlocks[e].ObjId);
                     if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
                         loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
+                        objectIds.Add(LoadBlocks[e].ObjId);
                     }
                     else
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
                         loads.Add(service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy));
+                        objectIds.AddRange(marks.ObjectIds);
                     }
                 }
             }
@@ -126,8 +127,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaCableTray = true;
             }
-            // 可能存在问题
-            if (target.NodeType == PDSNodeType.Load)
+            if (target.NodeType == PDSNodeType.Load || target.NodeType == PDSNodeType.None)
             {
                 edge.Circuit.ViaConduit = true;
             }
