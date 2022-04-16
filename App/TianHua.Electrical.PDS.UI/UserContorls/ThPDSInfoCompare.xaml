@@ -7,32 +7,32 @@
              mc:Ignorable="d" 
              d:DesignHeight="1000" d:DesignWidth="1000">
     <Grid Width="950" Height="700">
-        <Button Style="{x:Null}" Margin="6.04325699745547,2.18978102189781,889.567430025445,666.423357664234">读取</Button>
+        <Button x:Name="btnRefresh" Style="{x:Null}" Margin="6.04325699745547,2.18978102189781,889.567430025445,666.423357664234">刷新</Button>
         <Button Style="{x:Null}" Margin="145.038167938931,0.72992700729927,751.781170483461,669.343065693431">筛选</Button>
-        <TextBox Style="{x:Null}" Margin="202.449109414758,1.45985401459854,582.569974554707,669.343065693431"></TextBox>
-        <Button Style="{x:Null}" Margin="371.055979643766,0.72992700729927,552.35368956743,668.613138686131">查找</Button>
+        <TextBox x:Name="tbx1" Style="{x:Null}" Margin="202.449109414758,1.45985401459854,582.569974554707,669.343065693431"></TextBox>
+        <Button x:Name="btn1" Style="{x:Null}" Margin="371.055979643766,0.72992700729927,552.35368956743,668.613138686131">查找</Button>
         <Button Style="{x:Null}" Margin="551.749363867684,2.18978102189781,344.465648854962,670.07299270073">筛选</Button>
-        <TextBox Style="{x:Null}" Margin="607.95165394402,2.91970802919708,179.484732824427,668.613138686131"></TextBox>
-        <Button Style="{x:Null}" Margin="773.5368956743,2.18978102189781,146.851145038168,669.343065693431">查找</Button>
+        <TextBox x:Name="tbx2" Style="{x:Null}" Margin="607.95165394402,2.91970802919708,179.484732824427,668.613138686131"></TextBox>
+        <Button x:Name="btn2" Style="{x:Null}" Margin="773.5368956743,2.18978102189781,146.851145038168,669.343065693431">查找</Button>
         <ListBox Style="{x:Null}" Margin="6.04325699745547,37.2262773722628,818.256997455471,59.8540145985401"></ListBox>
-        <DataGrid Style="{x:Null}" Margin="146.851145038168,33.5766423357664,407.919847328244,59.1240875912409" IsEnabled="{Binding ExistsSpecialFloor}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
+        <DataGrid x:Name="dg1" Style="{x:Null}" Margin="146.851145038168,33.5766423357664,407.919847328244,59.1240875912409" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
                       ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="回路编号" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="回路类型" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="上级配电箱" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="回路编号" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding CircuitId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="回路类型" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding CircuitType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="上级配电箱" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding ParentBox,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid Style="{x:Null}" Margin="551.749363867684,33.5766423357664,2.41730279898219,60.5839416058394" IsEnabled="{Binding ExistsSpecialFloor}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
+        <DataGrid x:Name="dg2" Style="{x:Null}" Margin="551.749363867684,33.5766423357664,2.41730279898219,60.5839416058394" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
                       ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="负载编号" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="负载类型" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="负载功率" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="负载编号" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding LoadId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="负载类型" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding LoadType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="负载功率" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding LoadPower,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" CanUserSort="False" CanUserResize="False" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
         <Button Style="{x:Null}" Margin="407.315521628499,665.693430656934,418.193384223919,2.91970802919708">全部采用平面数据</Button>

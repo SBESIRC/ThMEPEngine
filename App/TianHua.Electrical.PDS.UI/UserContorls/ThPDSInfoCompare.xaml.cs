@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TianHua.Electrical.PDS.UI.Services;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -23,6 +24,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public ThPDSInfoCompare()
         {
             InitializeComponent();
+            new ThPDSInfoCompareService().Init(this);
         }
     }
 }
