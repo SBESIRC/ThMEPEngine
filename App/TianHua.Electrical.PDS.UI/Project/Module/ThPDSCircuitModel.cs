@@ -38,15 +38,42 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _edge.Target.Load.CircuitType;
         }
 
+        [Browsable(true)]
         [DisplayName("功率")]
         [Category("配电回路参数")]
         public double Power
         {
+            get => _edge.Target.Details.HighPower;
+            set
+            {
+                _edge.Target.SetNodeHighPower(value);
+                OnPropertyChanged(nameof(Power));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("低速功率")]
+        [Category("配电回路参数")]
+        public double LowPower
+        {
             get => _edge.Target.Details.LowPower;
             set
             {
-                _edge.Target.Details.LowPower = value;
-                OnPropertyChanged(nameof(Power));
+                _edge.Target.SetNodeLowPower(value);
+                OnPropertyChanged(nameof(LowPower));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("高速功率")]
+        [Category("配电回路参数")]
+        public double HighPower
+        {
+            get => _edge.Target.Details.HighPower;
+            set
+            {
+                _edge.Target.SetNodeHighPower(value);
+                OnPropertyChanged(nameof(HighPower));
             }
         }
 
@@ -58,7 +85,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _edge.Target.Details.PhaseSequence;
             set
             {
-                _edge.Target.Details.PhaseSequence = value;
+                _edge.Target.SetNodePhaseSequence(value);
                 OnPropertyChanged(nameof(PhaseSequence));
             }
         }
@@ -105,7 +132,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _edge.Target.Load.DemandFactor;
             set
             {
-                _edge.Target.Load.DemandFactor = value;
+                _edge.Target.SetDemandFactor(value);
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
@@ -118,7 +145,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _edge.Target.Load.PowerFactor;
             set
             {
-                _edge.Target.Load.PowerFactor = value;
+                _edge.Target.SetPowerFactor(value);
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }
@@ -141,5 +168,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertyChanged(nameof(CircuitLock));
             }
         }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsDualPower => _edge.Target.Details.IsDualPower;
     }
 }

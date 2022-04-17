@@ -459,6 +459,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", false);
                     }
                 }
+                if (vm is Project.Module.Component.ThPDSCircuitModel circuit)
+                {
+                    if (circuit.IsDualPower)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("Power", false);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("LowPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
+                    }
+
+                }
                 if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
                 {
                     pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
@@ -2005,16 +2018,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(低)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = boxVM, Path = new PropertyPath(nameof(boxVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = boxVM, Path = new PropertyPath(nameof(boxVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
                             {
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(高)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = boxVM, Path = new PropertyPath(nameof(boxVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = boxVM, Path = new PropertyPath(nameof(boxVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
                             {
@@ -2827,16 +2840,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(低)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = boxVM, Path = new PropertyPath(nameof(boxVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = boxVM, Path = new PropertyPath(nameof(boxVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.LowPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
                             {
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "功率(高)");
                                 if (m != null)
                                 {
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = boxVM, Path = new PropertyPath(nameof(boxVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
-                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = boxVM, Path = new PropertyPath(nameof(boxVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                    m.SetBinding(UIElement.VisibilityProperty, new Binding() { Converter = new NormalValueConverter(v => Convert.ToDouble(v) == 0 ? Visibility.Collapsed : Visibility.Visible), Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.HighPower)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                                 }
                             }
                         }

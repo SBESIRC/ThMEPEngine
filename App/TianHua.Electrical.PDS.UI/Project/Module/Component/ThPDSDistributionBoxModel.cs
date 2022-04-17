@@ -59,7 +59,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _node.Load.DemandFactor;
             set
             {
-                _node.Load.DemandFactor = value;
+                _node.SetDemandFactor(value);
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
@@ -72,7 +72,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _node.Load.PowerFactor;
             set
             {
-                _node.Load.PowerFactor = value;
+                _node.SetPowerFactor(value);
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }
