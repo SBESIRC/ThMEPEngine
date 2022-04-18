@@ -38,13 +38,11 @@ namespace TianHua.Electrical.PDS.UI.Editors
             }
             if (propertyItem.Value is ThPDSATSEModel atse)
             {
-                //  1. 型号决定了可选的极数选项
-                return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
+                return atse.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSMTSEModel mtse)
             {
-                //  1. 型号决定了可选的极数选项
-                return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
+                return mtse.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {

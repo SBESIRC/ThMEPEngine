@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _transferSwitch.Model;
             set
             {
-                _transferSwitch.Model = value;
+                _transferSwitch.SetModel(value);
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }
@@ -48,8 +48,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _transferSwitch.PolesNum;
             set
             {
-                _transferSwitch.PolesNum = value;
+                _transferSwitch.SetPolesNum(value);
                 OnPropertyChanged(nameof(PolesNum));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
@@ -62,8 +63,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _transferSwitch.SetRatedCurrent(value);
-                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
@@ -72,6 +73,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<string> AlternativeRatedCurrents
         {
             get => _transferSwitch.GetRatedCurrents();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _transferSwitch.GetPolesNums();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _transferSwitch.GetModels();
         }
     }
 }
