@@ -237,7 +237,7 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "应急照明连线"
             attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": false, "IsEnabled": false }
+    attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlELIGHTNING"
     name: "ELIGHTNING"
     title: "防雷接地"
