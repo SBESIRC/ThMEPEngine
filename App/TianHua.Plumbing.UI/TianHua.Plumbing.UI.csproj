@@ -179,9 +179,9 @@
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-      <Name>DotNetARX</Name>
+      <Name>ThDotNetARX</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
       <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
