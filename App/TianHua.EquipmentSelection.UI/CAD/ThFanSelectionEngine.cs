@@ -145,7 +145,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .Where(o => o.ObjectId.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                     .ToList();
 
                 // 创建新模型
@@ -195,7 +195,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .Where(o => o.ObjectId.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                     .ToList();
 
                 // 更新模型
@@ -217,7 +217,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .Where(o => o.ObjectId.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                     .ToList();
 
                 // 更新模型
@@ -240,7 +240,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .Where(o => o.ObjectId.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                     .ToList();
 
                 // 获取数据
@@ -262,7 +262,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelection))
                     .ToList();
 
                 // 更新模型
@@ -293,7 +293,7 @@ namespace TianHua.FanSelection.UI.CAD
                 acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelection))
                     .ForEach(o => o.ObjectId.ModifyModelAttributes(dataModel.Attributes()));
             }
         }
@@ -305,7 +305,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelection))
                     .OrderBy(o => o.ObjectId.GetModelNumber()).ToList();
                 var numbers = dataModel.ListVentQuan.OrderBy(o => o).ToList();
                 for (int i = 0; i < models.Count; i++)
@@ -331,7 +331,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID));
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelection));
                 foreach (var model in models.Select((value, i) => new { i, value }))
                 {
                     // 更新风机型号
@@ -381,7 +381,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var blockReferences = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID));
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelection));
                 if (blockReferences.Any())
                 {
                     Active.Editor.ZoomToObjects(blockReferences.ToArray(), 2.0);

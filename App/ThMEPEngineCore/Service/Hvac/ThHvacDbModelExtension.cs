@@ -124,13 +124,13 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             return !string.IsNullOrEmpty(dBObject.GetModelIdentifier());
         }
-        public static bool IsModel(this ObjectId obj, string regAppName = ThHvacCommon.RegAppName_FanSelectionEx)
+        public static bool IsModel(this ObjectId obj, string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);
             return !string.IsNullOrEmpty(model.GetModelIdentifier(regAppName));
         }
 
-        public static bool IsModel(this ObjectId obj, string identifier, string regAppName = ThHvacCommon.RegAppName_FanSelectionEx)
+        public static bool IsModel(this ObjectId obj, string identifier, string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);
             return model.GetModelIdentifier(regAppName) == identifier;

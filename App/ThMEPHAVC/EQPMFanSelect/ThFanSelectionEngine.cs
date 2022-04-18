@@ -168,39 +168,6 @@ namespace ThMEPHVAC.EQPMFanSelect
             // 返回数据
             return states;
         }
-
-        public static void EditModelsInplace(FanDataModel dataModel)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                // 获取原模型对象
-                var models = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
-                    .ToList();
-
-                // 更新模型
-                foreach (var model in models)
-                {
-                    var number = model.ObjectId.GetModelNumber();
-                    if (dataModel.ListVentQuan.Contains(number))
-                    {
-                        // 写入修改后的属性
-                        model.ObjectId.ModifyModelAttributes(dataModel.Attributes());
-                        SetModelNumber(model.ObjectId, dataModel.InstallFloor, number);
-
-                        // 更新规格和型号
-                        UpdateModelName(model.ObjectId, dataModel);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-                }
-            }
-        }
-
         public static void ModifyModels(List<BlockReference> blockReferences, Dictionary<string, string> Attributes)
         {
             blockReferences.ForEach(o => o.ObjectId.ModifyModelAttributes(Attributes));
@@ -213,7 +180,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => !o.BlockTableRecord.IsNull)
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID, ThHvacCommon.RegAppName_FanSelectionEx))
                     .OrderBy(o => o.ObjectId.GetModelNumber()).ToList();
                 var numbers = dataModel.ListVentQuan.OrderBy(o => o).ToList();
                 for (int i = 0; i < models.Count; i++)
@@ -245,16 +212,6 @@ namespace ThMEPHVAC.EQPMFanSelect
             {
                 var typeName = dataModel.FanModelTypeCalcModel.FanModelNum;
                 model.SetModelName(EQPMFanCommon.HTFCModelName(strType, strIntakeForm, typeName));
-            }
-        }
-        public static void ZoomToModels(List<BlockReference> targetBlocks)
-        {
-            if (null == targetBlocks || targetBlocks.Count < 1)
-                return;
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                Active.Editor.ZoomToObjects(targetBlocks.ToArray(), 2.0);
-                Active.Editor.PickFirstObjects(targetBlocks.Select(o => o.ObjectId).ToArray());
             }
         }
     }
