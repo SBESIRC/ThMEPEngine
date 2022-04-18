@@ -229,7 +229,7 @@ namespace TianHua.AutoCAD.ThCui
             CreateEMaterials(tab);
             CreateElectronicPanel(tab);
             CreateELightingPanel(tab);
-            CreateElightningPanel(tab);
+            //CreateElightningPanel(tab);
         }
 
         private static void CreateEMaterials(RibbonTabSource tab)
