@@ -59,6 +59,15 @@ namespace TianHua.AutoCAD.ThCui
             //AcadApp.DocumentManager.DocumentLockModeChanged += DocCollEvent_DocumentLockModeChanged_Handler;
             ////注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged += SystemVariableChangedHandler;
+
+            // Redirecting Assembly Loads at Runtime
+            // https://blog.slaks.net/2013-12-25/redirecting-assembly-loads-at-runtime/
+            RedirectAssemblies();
+        }
+
+        private void RedirectAssemblies()
+        {
+            ThCuiAssemblyService.RedirectAssembly("System.Buffers", new Version(4, 0, 3, 0));
         }
 
         public void Terminate()

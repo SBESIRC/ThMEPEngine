@@ -48,6 +48,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="ThCuiAssemblyService.cs" />
     <Compile Include="ThFeedBackDlg.cs">
       <SubType>Form</SubType>
     </Compile>
