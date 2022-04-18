@@ -289,5 +289,27 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
         {
             return CreateVector(line.StartPoint, line.EndPoint);
         }
+        public static Line[] SplitLine(Line curve, List<Line> cutters, double length_filter = 1)
+        {
+            List<Point3d> points = new List<Point3d>();
+            foreach (var cutter in cutters)
+                points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
+            points = RemoveDuplicatePts(points, 1);
+            SortAlongCurve(points, curve);
+            if (points.Count > 0)
+                return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
+            else
+                return new Line[] { new Line(curve.StartPoint, curve.EndPoint) };
+        }
+        public static Line[] SplitLine(Line line, Curve cutter, double length_filter = 1)
+        {
+            List<Point3d> points = new List<Point3d>();
+            points.AddRange(line.Intersect(cutter, Intersect.OnBothOperands));
+            points = RemoveDuplicatePts(points, 1);
+            SortAlongCurve(points, line);
+            if (points.Count > 0)
+                return SplitLine(line, points).Where(e => e.Length > length_filter).ToArray();
+            else return new Line[] { new Line(line.StartPoint, line.EndPoint) };
+        }
     }
 }

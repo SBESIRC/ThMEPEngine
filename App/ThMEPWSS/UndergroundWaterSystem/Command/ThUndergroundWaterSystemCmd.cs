@@ -78,6 +78,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     {
                         InfoModel.FloorList[i].FloorInfo = floorInfoExtractionService.GetFloorInfo(InfoModel.FloorList[i], i);
                     }
+                    //初始化提取的数据中与管线、阀门等绘图相关的图层信息
+                    ThLayerInitializeService layerInitializeService = new ThLayerInitializeService();
+                    layerInitializeService.Initialize(InfoModel);
                     //处理楼层立管数据
                     var floorHandleService = new ThFloorHandleService();
                     floorHandleService.MatchRiserMark(InfoModel.FloorList);
