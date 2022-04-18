@@ -28,7 +28,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 var entities = database.ModelSpace.OfType<Entity>();
                 foreach (var ent in entities)
                 {
-                    if(IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
+                    if (IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         retLines.Add(TianZhengLine(ent));
                     }
@@ -57,13 +57,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 {
                     dbObjs = entities.ToCollection();
                 }
-                foreach(var obj in dbObjs)
+                foreach (var obj in dbObjs)
                 {
                     var ent = obj as Entity;
                     if (IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         var line = TianZhengLine(ent);
-                        if(line.Length >1.0)
+                        line.Layer = ent.Layer;
+                        if (line.Length > 1.0)
                         {
                             retLines.Add(line);
                         }
@@ -74,7 +75,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public bool IsLayer(string layer)
         {
-            if ((layer.ToUpper().Contains("W-WSUP") && layer.ToUpper().Contains("COOL-PIPE"))|| layer.ToUpper().Contains("PIPE-给水"))
+            if ((layer.ToUpper().Contains("W-WSUP") && layer.ToUpper().Contains("COOL-PIPE")) || layer.ToUpper().Contains("PIPE-给水"))
             {
                 return true;
             }

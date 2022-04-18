@@ -130,12 +130,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             }
             return false;
         }
-        public List<ThMarkModel> CombMarkList(List<DBText> texts,List<Line> lines)
+        public List<ThMarkModel> CombMarkList(List<DBText> texts, List<Line> lines)
         {
             var retList = new List<ThMarkModel>();
-            foreach(var t in texts)
+            foreach (var t in texts)
             {
-                var mark = CombMark(t,ref lines);
+                var mark = CombMark(t, ref lines);
+                mark.Layer = t.Layer;
+                mark.TextStyle = t.TextStyleName;
                 retList.Add(mark);
             }
             return retList;
