@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.EQPMFanSelect;
 using ThMEPHVAC.Model;
 using TianHua.FanSelection;
 using TianHua.Publics.BaseCode;
@@ -29,7 +30,6 @@ namespace ThMEPHVAC.CAD
         public double airVolume;
         public double fanInWidth;
         public double fanOutWidth;
-        public double lowAirVolume;
         public Point3d FanBasePoint;
         public Point3d FanInletBasePoint;
         public Point3d FanOutletBasePoint;
@@ -47,7 +47,6 @@ namespace ThMEPHVAC.CAD
                 airVolume = GetFanVolume();
                 if (airVolume < 0)
                     return;
-                lowAirVolume = GetLowFanVolume();
                 var obj = FanObjectId.GetDBObject();
                 if (obj is BlockReference reference)
                     Name = reference.GetEffectiveName();
@@ -312,12 +311,29 @@ namespace ThMEPHVAC.CAD
 
         private string GetFanScenario()
         {
+            var service = new ThFanModelDataService();
+            return service.IsNewFan(Data.ObjId) ? GetFanScenarioEx() : GetFanOrgScenario();
+        }
+        private string GetFanOrgScenario()
+        {
             var scenario = Model.GetModelScenario();
             if (string.IsNullOrEmpty(scenario))
             {
                 return "平时送风";
             }
             return scenario;
+        }
+        private string GetFanScenarioEx()
+        {
+            string scenario = "";
+            var identifier = Model.GetModelIdentifier(ThHvacCommon.RegAppName_FanSelectionEx);
+            if (string.IsNullOrEmpty(identifier))
+                return scenario;
+
+            var xData = Model.ReadBlockFanXData(out FanBlockXDataBase xDataBase);
+            if (null == xData || xDataBase == null || string.IsNullOrEmpty(xData.AirCalcValue))
+                return scenario;
+            return xDataBase.ScenarioString;
         }
     }
 }

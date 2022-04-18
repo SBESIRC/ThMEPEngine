@@ -41,7 +41,7 @@ namespace ThMEPHVAC.Model
             tchDrawService.ductService.DrawDuct(anayRes.mainLinesInfos.Values.ToList(), orgDisMat, false, portParam.param, ref gId);
             tchDrawService.reducingService.Draw(anayRes.reducings, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
             tchDrawService.DrawSpecialShape(anayRes.shrinkService.connectors, orgDisMat, portParam.param.mainHeight, portParam.param.elevation, ref gId);
-
+            
             DrawEndlines(anayRes, ref gId);
 
             if (portParam.param.scenario == "消防排烟" || portParam.param.scenario == "消防补风" || portParam.param.scenario == "消防加压送风")
@@ -99,6 +99,7 @@ namespace ThMEPHVAC.Model
                 DrawPort(anayRes.endLinesInfos, ref gId);
                 // 画Dimension需要插入风口，所以必须先画风口再画Dimension
                 service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
+                //tchDrawService.dimensionService.DrawDimension(anayRes.endLinesInfos, portParam, ref gId);
             }
         }
 

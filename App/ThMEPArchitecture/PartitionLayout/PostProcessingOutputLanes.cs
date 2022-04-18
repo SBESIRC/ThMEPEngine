@@ -146,8 +146,11 @@ namespace ThMEPArchitecture.PartitionLayout
                 lane_b.TransformBy(Matrix3d.Displacement(vec_b * dis));
                 var pla = CreatPolyFromLines(lanes[i], lane_a);
                 var plb = CreatPolyFromLines(lanes[i], lane_b);
-                var ptsa = obsvertice.Where(p => pla.Contains(p)).OrderBy(p => lane.GetClosestPointTo(p, false).DistanceTo(p)).First();
-                var ptsb = obsvertice.Where(p => plb.Contains(p)).OrderBy(p => lane.GetClosestPointTo(p, false).DistanceTo(p)).First();
+                var ptsas = obsvertice.Where(p => pla.Contains(p)).OrderBy(p => lane.GetClosestPointTo(p, false).DistanceTo(p));
+                var ptsbs = obsvertice.Where(p => plb.Contains(p)).OrderBy(p => lane.GetClosestPointTo(p, false).DistanceTo(p));
+                if (ptsas.Count() == 0 || ptsbs.Count() == 0) continue;
+                var ptsa = ptsas.First();
+                var ptsb = ptsbs.First();
                 double disa = lanes[i].GetClosestPointTo(ptsa, false).DistanceTo(ptsa);
                 double disb = lanes[i].GetClosestPointTo(ptsb, false).DistanceTo(ptsb);
                 var d = (disa - disb) / 2;

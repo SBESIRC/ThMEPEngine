@@ -40,7 +40,6 @@ namespace ThMEPWSS.HydrantLayout.Service
         public SearchRangeFrame(Point3d center )
         {
             this.center = center;
-            
         }
 
 
@@ -49,8 +48,15 @@ namespace ThMEPWSS.HydrantLayout.Service
             FindFeasibleArea();
         }
 
-       
-        //寻找可行面
+
+        //寻找可安放区域
+        /*
+        逻辑如下：
+        【1】如果圈内有房间。
+        【1.1】如果设备在圈内的某一个房间内，则走正常流程。
+        【1.2】如果设备不在这些房间内，把圆当成房间，把其他房间和实体挖除。
+        【2】如果圈内没有房间，把圆当成房间，把其他实体挖除。
+        */
         public void FindFeasibleArea()
         {
             //画圆
@@ -200,8 +206,6 @@ namespace ThMEPWSS.HydrantLayout.Service
                 }
             }
             //overlapArea.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1overlap", 2));
-           
-
         }
 
         public MPolygon output()

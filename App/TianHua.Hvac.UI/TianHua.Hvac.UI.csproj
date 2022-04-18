@@ -57,6 +57,33 @@
     <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Command\ThWaterPipeRouteCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
+    <Compile Include="EQPMFanSelect\EnumEQPMShowType.cs" />
+    <Compile Include="EQPMFanSelect\EQPMExportExcel.cs" />
+    <Compile Include="EQPMFanSelect\EQPMFanDataService.cs" />
+    <Compile Include="EQPMFanSelect\EQPMFanDataUtils.cs" />
+    <Compile Include="EQPMFanSelect\EventMonitor\EQPMEventMonitor.cs" />
+    <Compile Include="EQPMFanSelect\EventMonitor\ThFanModelObjectOverrule.cs" />
+    <Compile Include="EQPMFanSelect\EventMonitor\ThFanModelOverruleManager.cs" />
+    <Compile Include="EQPMFanSelect\EventMonitor\ThFanSelectionDbUndoHandler.cs" />
+    <Compile Include="EQPMFanSelect\EventMonitor\ThFanSelectionDocumentEventHandler.cs" />
+    <Compile Include="EQPMFanSelect\ExportFanParaModel.cs" />
+    <Compile Include="EQPMFanSelect\FanModelSelectCheck.cs" />
+    <Compile Include="EQPMFanSelect\UIDragCalc.xaml.cs">
+      <DependentUpon>UIDragCalc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EQPMFanSelect\UIExportTypeSelect.xaml.cs">
+      <DependentUpon>UIExportTypeSelect.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EQPMFanSelect\UIFanModel.xaml.cs">
+      <DependentUpon>UIFanModel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EQPMFanSelect\UIFanRemark.xaml.cs">
+      <DependentUpon>UIFanRemark.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EQPMFanSelect\UIFanVolumeCalc.xaml.cs">
+      <DependentUpon>UIFanVolumeCalc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EQPMUIServices.cs" />
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,6 +145,9 @@
     <Compile Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml.cs">
       <DependentUpon>uiWaterPipeConnectWidget.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\FanEQPMSelection.xaml.cs">
+      <DependentUpon>FanEQPMSelection.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\IndoorFan\RadioButtonItem.cs" />
     <Compile Include="UI\IndoorFan\ReadFanData.cs" />
     <Compile Include="UI\IndoorFan\TabRadioButton.cs" />
@@ -162,7 +192,13 @@
     <Compile Include="UI\uiIndoorFan.xaml.cs">
       <DependentUpon>uiIndoorFan.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\DragCalcViewModel.cs" />
+    <Compile Include="ViewModels\EQPMExportViewModel.cs" />
+    <Compile Include="ViewModels\EQPMFanSelectViewModel.cs" />
     <Compile Include="ViewModels\FanDataShowViewModel.cs" />
+    <Compile Include="ViewModels\FanDataViewModel.cs" />
+    <Compile Include="ViewModels\FanModelSelectViewModel.cs" />
+    <Compile Include="ViewModels\FanVolumeViewModel.cs" />
     <Compile Include="ViewModels\IndoorFanCheckViewModel.cs" />
     <Compile Include="ViewModels\IndoorFanViewModel.cs" />
   </ItemGroup>
@@ -253,6 +289,26 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="EQPMFanSelect\UIDragCalc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EQPMFanSelect\UIExportTypeSelect.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EQPMFanSelect\UIFanModel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EQPMFanSelect\UIFanRemark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EQPMFanSelect\UIFanVolumeCalc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LoadCalculation\UI\ExtractRoomFunction.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -302,6 +358,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\FanEQPMSelection.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -363,9 +423,25 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.1.2</Version>
+    </PackageReference>
     <PackageReference Include="sqlite-net-pcl">
       <Version>1.8.116</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\删除.png" />
+    <Resource Include="Images\刷新.png" />
+    <Resource Include="Images\单双速切换.png" />
+    <Resource Include="Images\备注.png" />
+    <Resource Include="Images\导出风机材料表.png" />
+    <Resource Include="Images\导出风机计算表.png" />
+    <Resource Include="Images\插入.png" />
+    <Resource Include="Images\检查.png" />
+    <Resource Include="Images\计算输入.png" />
+    <Resource Include="Images\选择.png" />
+    <Resource Include="Images\风机型号.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

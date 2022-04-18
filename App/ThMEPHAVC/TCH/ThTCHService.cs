@@ -35,7 +35,7 @@ namespace ThMEPHVAC.TCH
         {
             return $@"{{""X"":{Math.Round(p.X, 6)},""Y"":{Math.Round(p.Y, 6)},""Z"":{Math.Round(p.Z, 6)}}}";
         }
-        private static string CovertVector(Vector3d v)
+        public static string CovertVector(Vector3d v)
         {
             return $@"{{""X"":{Math.Round(v.X, 4)},""Y"":{Math.Round(v.Y, 4)},""Z"":{Math.Round(v.Z, 4)}}}";
         }

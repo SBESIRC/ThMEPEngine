@@ -30,8 +30,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //提取管径
             var dimExtractionService = new ThDimExtractionService();
             retInfo.DimList = dimExtractionService.GetDimModelList(input);
-            //ToDo1:提取给水角阀平面
             //ToDo2:提取阀门
+            var valveExtractionService = new ThOtherDataExtractionService();
+            retInfo.ValveList = valveExtractionService.GetValveModelList(input);
+            //ToDo1:提取皮带水嘴
+            retInfo.FlushPointList = valveExtractionService.GetFlushPointList(input);
             return retInfo;
         }
         public void DrawText(string layer, string strText, Point3d position, double angle)

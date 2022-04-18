@@ -15,6 +15,64 @@ namespace ThMEPEngineCore.IO.ExcelService
         {
             saveExcelPath = excelPath;
         }
+        public void CopySheetFromIndex(List<string> sheetNames,int copyFromIndex) 
+        {
+            IWorkbook workbook = null;
+            try
+            {
+                workbook = ReadExcelToMemory(saveExcelPath, true);
+                int count = sheetNames.Count;
+                for (int i = 0; i < count; i++) 
+                {
+                    var addSheetName = sheetNames[i];
+                    var addSheet = workbook.CloneSheet(copyFromIndex);
+                    var getIndex = workbook.GetSheetIndex(addSheet);
+                    workbook.SetSheetName(getIndex, addSheetName);
+                }
+                using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
+                {
+                    workbook.Write(filess);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //防止解析报错内存资源没有释放
+                if (null != workbook)
+                    workbook.Close();
+            }
+        }
+        public void AddSheets(List<string> sheetNames)
+        {
+            IWorkbook workbook = null;
+            try
+            {
+                workbook = ReadExcelToMemory(saveExcelPath, true);
+                int count = sheetNames.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var addSheetName = sheetNames[i];
+                    var addSheet = workbook.CreateSheet(addSheetName);
+                }
+                using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
+                {
+                    workbook.Write(filess);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //防止解析报错内存资源没有释放
+                if (null != workbook)
+                    workbook.Close();
+            }
+        }
         public void DeleteExcelSheet(List<string> sheetNames,bool isDelete) 
         {
             IWorkbook workbook = null;
@@ -35,6 +93,38 @@ namespace ThMEPEngineCore.IO.ExcelService
                 for (int i = 0; i < delSheetIndex.Count; i++)
                 {
                     workbook.RemoveSheetAt(delSheetIndex[i]);
+                }
+                using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
+                {
+                    workbook.Write(filess);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //防止解析报错内存资源没有释放
+                if (null != workbook)
+                    workbook.Close();
+            }
+        }
+        public void DeleteExcelSheet(List<int> deleteSheetIndexs)
+        {
+            IWorkbook workbook = null;
+            try
+            {
+                workbook = ReadExcelToMemory(saveExcelPath, true);
+
+                //删除sheet后，其它sheet会跟着进行移动位置，这里从位置最大的开始删除
+                deleteSheetIndexs = deleteSheetIndexs.OrderByDescending(c => c).ToList();
+                for (int i = 0; i < deleteSheetIndexs.Count; i++)
+                {
+                    var sheet = workbook.GetSheetAt(deleteSheetIndexs[i]);
+                    if (null == sheet)
+                        continue;
+                    workbook.RemoveSheetAt(deleteSheetIndexs[i]);
                 }
                 using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
                 {

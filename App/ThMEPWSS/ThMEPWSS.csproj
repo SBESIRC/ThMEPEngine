@@ -49,8 +49,16 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingRainwaterInlet.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingSealedWellService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingTaggingService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DraningSettingService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\TubeWellModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreatePipePlugService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateTubeWellService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\HandleConfluenceService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Print\InsertBlockService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Print\PrintPipes.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\RoomPolyService.cs" />
     <Compile Include="DrainageADPrivate\Data\ThVerticalPipeExtractService.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDrainageADEngine.cs" />
@@ -310,7 +318,13 @@
     <Compile Include="UndergroundWaterSystem\Model\ThDimModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThFloorInfo.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThFloorModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThFlushPointModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThMarkModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Model\ThValveModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThDrawSystemMapService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThImportService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThOtherDataExtractionService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThPipeLineHandleService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThBreakExtractionService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThDimExtractionService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThFloorInfoExtractionService.cs" />
@@ -327,6 +341,7 @@
     <Compile Include="UndergroundWaterSystem\Service\ThRiserExtracionService.cs" />
     <Compile Include="UndergroundWaterSystem\Tree\ThTreeNode.cs" />
     <Compile Include="UndergroundWaterSystem\Tree\ThPointTree.cs" />
+    <Compile Include="UndergroundWaterSystem\Utilities\GeoUtils.cs" />
     <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemInfoModel.cs" />
     <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemInfoViewModel.cs" />
     <Compile Include="UndergroundWaterSystem\ViewModel\ThWaterSystemParamViewModel.cs" />
@@ -352,6 +367,27 @@
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithMainLoopAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Test\DisplayTool.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\SysIn.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\SysProcess.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case1.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseChoose.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfBranchPipe.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case10.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case11.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case12.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case13.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case14.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case2.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case3.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case4.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case5.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case6.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case7.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case8.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case9.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfFloor.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Method\Tool.cs" />
+    <Compile Include="WaterSupplyPipeSystem\ViewModel\HalfPlatformSetVM.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
@@ -779,8 +815,8 @@
     <Compile Include="WaterSupplyPipeSystem\model\ThWSuplySystemDiagram.cs" />
     <Compile Include="WaterSupplyPipeSystem\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\tool\PipeCompute.cs" />
-    <Compile Include="WaterSupplyPipeSystem\ViewModel\DrainageSetViewModel.cs" />
-    <Compile Include="WaterSupplyPipeSystem\ViewModel\DrainageViewModel.cs" />
+    <Compile Include="WaterSupplyPipeSystem\ViewModel\WaterSupplySetVM.cs" />
+    <Compile Include="WaterSupplyPipeSystem\ViewModel\WaterSupplyVM.cs" />
     <Compile Include="WaterSupplyPipeSystem\WaterSuply.cs" />
     <Compile Include="WaterWellPumpLayout\Engine\ThWWallExtractionVisitor.cs" />
     <Compile Include="WaterWellPumpLayout\Engine\ThWWallRecognitionEngine.cs" />
@@ -828,12 +864,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FirstFloorDrainagePlaneSystem\Print\" />
-    <Folder Include="HydrantLayout\tmp\Engine\" />
-    <Folder Include="HydrantLayout\tmp\Model\" />
-    <Folder Include="HydrantLayout\tmp\Service\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

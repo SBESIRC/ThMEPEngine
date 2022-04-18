@@ -1,0 +1,191 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.EQPMFanSelect.UIFanModel"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:local="clr-namespace:TianHua.Hvac.UI.EQPMFanSelect"
+                    xmlns:cusLocal="clr-namespace:ThControlLibraryWPF;assembly=ThControlLibraryWPF"
+                    mc:Ignorable="d" 
+                    BorderThickness="1"
+                    WindowStartupLocation="CenterOwner"
+                    BorderBrush="#787878"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    Title="风机选型-风机型号计算">
+    <Window.Resources>
+        <ResourceDictionary>
+            <cusLocal:EnumToVisibilty x:Key="enumToVisibility"/>
+            <cusLocal:BoolToVisibilty x:Key="boolToVisibility"/>
+            <cusLocal:EnumIntToBoolConverter x:Key="enumRadioBtnChecked"/>
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+            </Style>
+            <Style TargetType="{x:Type RadioButton}">
+                <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Width="450" Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <GroupBox Header="基本信息">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="型号:"></Label>
+                <Label Grid.Row="0" Grid.Column="1" Content="{Binding FanModelNum,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></Label>
+                <Label Grid.Row="0" Grid.Column="2" Content="CCCF规格:"></Label>
+                <ComboBox Grid.Row="0" Grid.Column="3" Height="22"
+                          ItemsSource="{Binding AllCCCFTypeItmes,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding CCCFSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="风量(m³/h):"></Label>
+                <Label Grid.Row="1" Grid.Column="1" Content="{Binding ShowVolume,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"></Label>
+                <Label Grid.Row="1" Grid.Column="2" Content="全压(Pa):"></Label>
+                <Label Grid.Row="1" Grid.Column="3" Content="{Binding ShowPa,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"></Label>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="风机转速(r/min):"></Label>
+                <Label Grid.Row="2" Grid.Column="1" Content="{Binding FanModelFanSpeed,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"></Label>
+                <Label Grid.Row="2" Grid.Column="2" Content="噪音(db(A)):"></Label>
+                <Label Grid.Row="2" Grid.Column="3" Content="{Binding FanModelNoise,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"></Label>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="单位功耗(W/m³h):"></Label>
+                <StackPanel Orientation="Horizontal"  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2">
+                    <Label Content="{Binding FanModelHeightPower,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=20}">
+                        <Label Content="/"></Label>
+                        <Label Content="{Binding FanModelLowPower,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="电机功率(kW):"></Label>
+                <RadioButton Grid.Row="4" Grid.Column="1" Content="计算值" VerticalContentAlignment="Center"
+                             IsChecked="{Binding ValueSource,Mode=TwoWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=10}"
+                             ></RadioButton>
+                <StackPanel Orientation="Horizontal"  Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2">
+                    <Label Content="{Binding FanModelMotorHeightPower,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=20}">
+                        <Label Content="/"></Label>
+                        <Label Content="{Binding FanModelMotorLowPower,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                    </StackPanel>
+                </StackPanel>
+                <RadioButton Grid.Row="5" Grid.Column="1" Content="输入值" VerticalContentAlignment="Center"
+                             x:Name="radioBtnInputValue"
+                             IsChecked="{Binding ValueSource,Mode=TwoWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=20}"></RadioButton>
+                <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" 
+                            IsEnabled="{Binding ElementName=radioBtnInputValue,Path=IsChecked}">
+                    <cus:InputTextBox Width="50" TextBoxInputType="InputDouble" NumCanMinus="False" Height="22"
+                                      Text="{Binding FanModelInputMotorHeightPower,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></cus:InputTextBox>
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=20}">
+                        <Label Content="/"></Label>
+                        <cus:InputTextBox Width="50" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"
+                                          Text="{Binding FanModelInputMotorLowPower,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></cus:InputTextBox>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header="尺寸数据">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="长(mm):"></Label>
+                <Label Grid.Row="0" Grid.Column="1" Content="{Binding FanModelLength,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"></Label>
+                <Label Grid.Row="0" Grid.Column="2" Content="宽(mm):" 
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="0" Grid.Column="3" Content="{Binding FanModelWidth,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="0" Grid.Column="2" Content="重量(kg):"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="0" Grid.Column="3" Content="{Binding FanModelWeight,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="直径(mm):" Visibility="{Binding IsAxisFan,Mode=OneWay,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="1" Grid.Column="1" Content="{Binding FanModelDIA,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="1" Grid.Column="0" Content="高(mm):"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="1" Grid.Column="1" Content="{Binding FanModelHeight,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="1" Grid.Column="2" Content="重量(kg):"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+                <Label Grid.Row="1" Grid.Column="3" Content="{Binding FanModelWeight,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                       Visibility="{Binding IsAxisFan,Mode=OneWay,ConverterParameter=1,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibility}}"></Label>
+
+                
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Header="电气属性">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="风机频率:" IsEnabled="False"></Label>
+                <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" IsEnabled="False">
+                    <RadioButton Content="单速" VerticalContentAlignment="Center"
+                                 IsChecked="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=10}"/>
+                    <RadioButton Content="双速" VerticalContentAlignment="Center" Margin="20,0,0,0"
+                                 IsChecked="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=20}"/>
+                    <RadioButton Content="变频" VerticalContentAlignment="Center" Margin="20,0,0,0"
+                                 IsChecked="{Binding FanControlType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=30}"/>
+                </StackPanel>
+                <Label Grid.Row="1" Grid.Column="0" Content="电源:"  IsEnabled="False"></Label>
+                <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" IsEnabled="False">
+                    <RadioButton Content="普通" VerticalContentAlignment="Center"
+                                 IsChecked="{Binding FanPowerType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=10}"/>
+                    <RadioButton Content="消防" VerticalContentAlignment="Center" Margin="20,0,0,0"
+                                 IsChecked="{Binding FanPowerType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=20}"/>
+                    <RadioButton Content="事故" VerticalContentAlignment="Center" Margin="20,0,0,0"
+                                 IsChecked="{Binding FanPowerType,Mode=OneWay,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=30}"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4">
+            <Label Content="{Binding ErrorMsg,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"
+                   Foreground="{Binding MsgLabelForegroundColor,UpdateSourceTrigger=PropertyChanged,Mode=OneWay,NotifyOnSourceUpdated=True}"></Label>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="4" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <cus:ImageButton Content="确定" Height="22" Width="50" Name="btnOk" Click="btnOk_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Height="22" Width="50" Margin="10,0,0,0" Name="btnUndo" Click="btnUndo_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

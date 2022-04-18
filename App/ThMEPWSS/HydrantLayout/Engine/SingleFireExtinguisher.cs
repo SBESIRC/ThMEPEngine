@@ -107,9 +107,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
 
-
         //寻找第一优先级定位点并测试摆放
-        public void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -119,6 +118,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
             {
                 FireExtinguisher fireExtinguisher0 = new FireExtinguisher(basePointList[i], dirList[i], ShortSide, LongSide, Info.Mode);
                 List<Polyline> fireObbList = fireExtinguisher0.GetFireObbList();
+                Polyline AgainstTest = searchPoint0.LeanWallList[i];
+
                 if (i == 0)
                 {
                     fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
@@ -144,8 +145,10 @@ namespace ThMEPWSS.HydrantLayout.Engine
                         if(true)
                         {
                             double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
+                            Line tmpLine = new Line(CenterPoint, fireExtinguisher0.TFireCenterPointList[j]);
+                            if (tmpLine.IsIntersects(LeanWall.Shell())) distance = distance + 1000;
 
-                            double againstWallLength = (int)(indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell())/100);
+                            double againstWallLength = (int)(indexCompute0.CalculateWallLength(fireObbList[j], AgainstTest)/100);
                 
                             Point3d fireCenter = new Point3d();
                             Vector3d fireDir = new Vector3d();
@@ -176,7 +179,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第二优先级定位点并测试摆放
-        public void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -222,6 +225,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                             Vector3d fireDir = new Vector3d();
                             fireExtinguisher0.SetModel(j, out fireCenter, out fireDir);
                             bool doorGood = FeasibilityCheck.IsBoundaryOK(doorArea, LeanWall.Shell(),ProcessedData.ParkingIndex);
+                            if (doorGood) againstWallLength = againstWallLength + 2;
                             FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, -1, distance, againstWallLength, j, doorGood);
                             fireCompareModels0.Add(fireCompareModeltmp);                        
                         }
@@ -247,7 +251,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第三优先级定位点并测试摆放
-        public void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -257,6 +261,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             {
                 FireExtinguisher fireExtinguisher0 = new FireExtinguisher(basePointList[i], dirList[i], ShortSide, LongSide , Info.Mode);
                 List<Polyline> fireObbList = fireExtinguisher0.GetFireObbList();
+                Polyline AgainstTest = searchPoint0.LeanWallList[i];
                 //if (i == 0)
                 //{
                 //    fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
@@ -280,8 +285,10 @@ namespace ThMEPWSS.HydrantLayout.Engine
                         if (true)
                         {
                             double distance = fireExtinguisher0.TFireCenterPointList[j].DistanceTo(CenterPoint);
+                            Line tmpLine = new Line(CenterPoint, fireExtinguisher0.TFireCenterPointList[j]);
+                            if (tmpLine.IsIntersects(LeanWall.Shell())) distance = distance + 1000;
 
-                            double againstWallLength0 = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
+                            double againstWallLength0 = indexCompute0.CalculateWallLength(fireObbList[j], AgainstTest);
                             int againstWallLength = (int)(againstWallLength0) / 100;
 
                             Point3d fireCenter = new Point3d();

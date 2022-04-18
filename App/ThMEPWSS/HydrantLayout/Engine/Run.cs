@@ -53,9 +53,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
         public void Pipeline() 
         {
+            //数据处理
             InputDataProcess inputDataProcess0 = new InputDataProcess(rawData);
             inputDataProcess0.Pipeline();
 
+            //提取处理后的数据
             ProcessedData processedData0 = inputDataProcess0.Output();
             VerticalPipeOut = processedData0.VerticalPipeOut;
 
@@ -72,6 +74,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 }
             }
 
+            //修正每一个灭火器
             if (Info.Type != 0)
             {
                 for (int i = 0; i < processedData0.FireExtinguisher.Count; i++)

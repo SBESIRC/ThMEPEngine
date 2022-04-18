@@ -93,5 +93,16 @@
         //室外主管图层
         public static string OutdoorSewagePipeLayerName = "AI-室外污水主管";
         public static string OutdoorRainPipeLayerName = "AI-室外雨水主管";
+        //其他管线图层
+        public static string DraiSewageLayerName = "W-DRAI-SEWA-PIPE";      //污水管
+        public static string DraiWasteLayerName = "W-DRAI-WAST-PIPE";       //废水管
+        public static string DraiLayerName = "W-RAIN-PIPE";                 //雨水、冷凝水管
+        //处理冷凝水管
+        public static string DisconnectionLayerName = "W-WSUP-EQPM";
+        public static string DisconnectionBlockName = "断线";
+        public static string RainwaterInletLayerName = "W-RAIN-EQPM";
+        public static string RainwaterInletBlockName = "13#雨水口";
+        public static string SealedWellLayerName = "W-RAIN-EQPM";
+        public static string SealedWellBlockName = "13#雨水口";
     }
 }

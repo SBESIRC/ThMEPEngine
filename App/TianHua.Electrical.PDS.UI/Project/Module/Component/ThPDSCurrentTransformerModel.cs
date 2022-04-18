@@ -33,7 +33,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSCTSpecificationPropertyEditor), typeof(PropertyEditorBase))]
         public string CTSpecification
         {
-            get => Meter.CurrentTransformerSwitchType;
+            get => Meter.MeterParameter;
             set
             {
                 Meter.SetParameters(value);

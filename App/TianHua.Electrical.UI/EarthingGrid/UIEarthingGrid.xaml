@@ -1,0 +1,38 @@
+﻿<Window x:Class="TianHua.Electrical.UI.EarthingGrid.UIEarthingGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Electrical.UI.FireAlarm"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+             SizeToContent="Height"
+             ResizeMode="NoResize"
+             mc:Ignorable="d"
+             Title="接地平面"
+             Width="180" Height="160" Closed="Window_Closed">
+    <Grid Margin="5,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.6*"/>
+            <ColumnDefinition Width="0.4*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="选择接地网尺寸(m)："/>
+        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,3" Name="cbEarthSizes" ItemsSource="{Binding EarthGridSizes,Mode=OneWay}"
+                      Text="{Binding EarthGridSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+        </ComboBox>
+        <Label Grid.Row="2" Grid.Column="0" Content="接地内轮廓线"/>
+        <Button Grid.Row="2" Grid.Column="1" Margin="0,3" HorizontalAlignment="Right" Name="btnEarthInnerOutline" Content="绘  制" Width="60"
+                    Click="btnEarthInnerOutline_Click"></Button>
+        <Label Grid.Row="3" Grid.Column="0" Content="接地外轮廓线"/>
+        <Button Grid.Row="3" Grid.Column="1" Margin="0,3" HorizontalAlignment="Right" Name="btnEarthOutterOutline" Content="绘  制" Width="60"
+                    Click="btnEarthOutterOutline_Click"></Button>
+        <Button Grid.Row="4" Grid.Column="1"  Margin="0,3" Name="btnDrawEarthingGrid" Content="绘制接地网" 
+                    Click="btnDrawEarthingGrid_Click"></Button>
+    </Grid>
+</Window>

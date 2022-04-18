@@ -89,14 +89,22 @@ namespace ThMEPHVAC.TCH
                 startFaceID = gId++,
                 endFaceID = gId++,
                 subSystemID = subSysId,
-                materialID = 0
+                materialID = 0,
+                offest = Point3d.Origin.GetAsVector(),
+                computeType = 2,// 1->自动计算 2->角度法 3->长度法
+                angle = 0,
+                length = 100,
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.reducingTableName +
                           " VALUES ('" + reducingParam.ID.ToString() + "'," +
                                   "'" +  reducingParam.startFaceID.ToString() + "'," +
                                   "'" +  reducingParam.endFaceID.ToString() + "'," +
                                   "'" +  reducingParam.subSystemID.ToString() + "'," +
-                                  "'" +  reducingParam.materialID.ToString() + "')";
+                                  "'" +  reducingParam.materialID.ToString() + "'," +
+                                  "'" + ThTCHService.CovertVector(reducingParam.offest) + "'," +
+                                  "'" + reducingParam.computeType.ToString() + "'," +
+                                  "'" + reducingParam.angle.ToString() + "'," +
+                                  "'" + reducingParam.length.ToString() + "')";
             sqliteHelper.Query<TCHReducingParam>(recordDuct);
         }
     }

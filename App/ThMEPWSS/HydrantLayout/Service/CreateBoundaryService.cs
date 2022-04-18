@@ -22,6 +22,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 {
     class CreateBoundaryService
     {
+        //读取矩形长边短边
         public static void FindLineOfRectangle(Polyline rec ,ref double shortside,ref double longside)
         {
             var tol = new Tolerance(10, 10);
@@ -44,6 +45,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             }
         }
 
+        //创建矩形框线
         public static Polyline CreateBoundary(Point3d center, double shortSide, double longSide, Vector3d dir)
         {
             var tol = new Tolerance(10, 10);
@@ -85,7 +87,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             return boundary;
         }
 
-
+        //创建消火栓的开门框线（一个梯形）
         public static Polyline CreateDoor(Point3d center, double shortSide, double longSide, Vector3d dir,int openDir)
         {
             var tol = new Tolerance(10, 10);

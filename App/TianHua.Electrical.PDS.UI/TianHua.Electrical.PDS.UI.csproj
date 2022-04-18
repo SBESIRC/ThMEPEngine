@@ -101,11 +101,13 @@
     <Compile Include="Project\Module\Component\ThPDSMeterBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSMeterTransformerModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSOUVPModel.cs" />
+    <Compile Include="Project\Module\ThPDSSecondaryCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSThermalRelayModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSCircuitModel.cs" />
+    <Compile Include="Project\Module\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSTransferSwitchBaseModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSUESandboxParameterModel.cs" />
+    <Compile Include="Project\Module\ThPDSMiniBusbarModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -115,9 +117,13 @@
     <Compile Include="Services\ThPDSComponentBlockInfoService.cs" />
     <Compile Include="Services\ThPDSDistributionPanelConfig.cs" />
     <Compile Include="Services\ThPDSDistributionPanelService.cs" />
+    <Compile Include="Services\ThPDSInfoCompareService.cs" />
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml.cs">
+      <DependentUpon>ThPDSAssignCircuit2SmallBusbar.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserContorls\ThPDSBatchGenerate.xaml.cs">
       <DependentUpon>ThPDSBatchGenerate.xaml</DependentUpon>
@@ -183,6 +189,10 @@
     <Page Include="UI\ElecSandboxUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserContorls\ThPDSBatchGenerate.xaml">
       <SubType>Designer</SubType>

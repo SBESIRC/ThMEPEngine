@@ -113,7 +113,8 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var lineFrame = ThPDSBufferService.Buffer(l);
                 var filter = LineIndex.SelectCrossingPolygon(lineFrame).OfType<Line>().ToList();
-                var obliqueLines = filter.Where(o => o.Length < 1000.0)
+                var obliqueLines = filter.Except(new List<Line> { l })
+                    .Where(o => o.Length < 1000.0)
                     .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1)
                     .ToList();
                 if (obliqueLines.Count > 1)

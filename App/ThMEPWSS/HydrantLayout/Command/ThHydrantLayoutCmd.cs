@@ -80,6 +80,10 @@ namespace ThMEPWSS.HydrantLayout.Command
                 var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
                 //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
+                //插入图块
+                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
+                var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
+                InsertBlkService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
                 //提取数据
                 var dataFactory = new ThHydrantLayoutDataFactory()
@@ -101,7 +105,7 @@ namespace ThMEPWSS.HydrantLayout.Command
 
                 dataQuery.ProcessArchitechData();
                 dataQuery.ProcessHydrant();
-            
+
                 //转换到原点
                 dataQuery.Transform(transformer);
                 dataQuery.ProjectOntoXYPlane();
@@ -120,18 +124,17 @@ namespace ThMEPWSS.HydrantLayout.Command
                 //VerticalPipeOut.ForEach(x => transformer.Reset(x.Outline));
 
                 var validHydrant = outPutModels.Where(x => x.IfFind == true && (x.Type == 1 || x.Type == 2)).ToList();
-                var blkList = new List<string> { ThHydrantCommon.BlkName_Hydrant, ThHydrantCommon.BlkName_Hydrant_Extinguisher, ThHydrantCommon.BlkName_Vertical };
-                var layerList = GetResultLayer(validHydrant);
-                InsertBlkService.PrepareInsert(blkList, layerList);
+
+
                 //插入真实块
                 InsertBlkService.InsertBlock(outPutModels, 1);
 
                 //插入过远提示
                 var tooFarList = validHydrant.Where(x => (x.CenterPoint.DistanceTo(x.OriginModel.Center) >= ThHydrantCommon.DistTol)).ToList();
-                InsertBlkService.InsertTooFar(tooFarList, ThHydrantCommon.Layer_Warning, 2000, 1);
+                InsertBlkService.InsertTooFar(tooFarList, ThHydrantCommon.Layer_Warning_TooFar, 2000, 2);
                 //插入没做出来提示
                 var notFoundList = outPutModels.Where(x => x.IfFind == false && (x.Type == 1 || x.Type == 2)).ToList();
-                InsertBlkService.InsertWarning(notFoundList, ThHydrantCommon.Layer_Warning, 2000, 1);
+                InsertBlkService.InsertWarning(notFoundList, ThHydrantCommon.Layer_Warning_NotDo, 2000, 1);
 
                 //删除块
                 validHydrant.ForEach(x => InsertBlkService.CleanEntity(x.OriginModel.Data));
@@ -142,11 +145,12 @@ namespace ThMEPWSS.HydrantLayout.Command
 
         private List<string> GetResultLayer(List<OutPutModel> validHydrant)
         {
-            var layerList = new List<string> { ThHydrantCommon.Layer_Vertical };
+            var layerList = new List<string>();
             var layers = validHydrant.Select(x => (x.OriginModel.Data as BlockReference).Layer);
             layerList.AddRange(layers);
 
             return layerList;
         }
+
     }
 }

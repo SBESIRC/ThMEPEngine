@@ -27,7 +27,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public int Mode = Info.Mode;
         //外部输入
         ThHydrantModel model;
-        Point3d CenterPoint;
+        Point3d CenterPoint;    //中心点
         //形状信息
         double LongSide = 0;
         double ShortSide = 0;
@@ -35,9 +35,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //double DoorSs = LongSide;
         //double DoorLs = LongSide*1.5;
 
-
         //是否找到合适的摆放位置
-        bool Done = false;
+        bool Done = false;       
         FireCompareModel BestLayOut;
 
         //使用的类
@@ -47,7 +46,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //可倚靠区域
         MPolygon LeanWall;
 
-        //选优
+        //混排(二、三优先级混排)情况下，可摆放的情况的列表
         List<FireCompareModel> fireCompareModelsMix = new List<FireCompareModel>();
 
         public SingleFireHydrant(ThHydrantModel model)
@@ -59,7 +58,6 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //读取边长
             CreateBoundaryService.FindLineOfRectangle(model.Outline, ref ShortSide, ref LongSide);
         }
-
 
         public void Pipeline() 
         {
@@ -116,7 +114,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第一优先级定位点并测试摆放
-        public void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void FirstPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -127,6 +125,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], ShortSide, LongSide, Info.Mode);
                 Polyline vpPl = fireHydrant0.GetRiserObb();
                 List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
+                Polyline AgainstTest = searchPoint0.LeanWallList[i];
+
                 if (i == 0)
                 {
                     fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
@@ -163,10 +163,13 @@ namespace ThMEPWSS.HydrantLayout.Engine
 
                             if (FeasibilityCheck.IsDoorFeasible(doorAreaList[k], LeanWall.Shell())) //如果门没有被阻挡,找到一个可以摆放的模型
                             {
-                                double distance = basePointList[i].DistanceTo(CenterPoint);
+                                //double distance = basePointList[i].DistanceTo(CenterPoint);
+                                double distance = fireHydrant0.TFireCenterPointList[j].DistanceTo(CenterPoint);
+                                Line tmpLine = new Line(CenterPoint, fireHydrant0.TFireCenterPointList[j]);
+                                if (tmpLine.IsIntersects(LeanWall.Shell())) distance = distance + 1000;
 
-                                double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, LeanWall.Shell());
-                                double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
+                                double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, AgainstTest);
+                                double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], AgainstTest);
                                 int againstWallLength = (int)(againstWallLength0 + againstWallLength1)/100;
                                 //againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight/2);
 
@@ -201,7 +204,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第二优先级定位点并测试摆放
-        public void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void SecondPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
@@ -262,6 +265,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 Vector3d fireDir = new Vector3d();
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
                                 bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(),ProcessedData.ParkingIndex);
+                                if (doorGood) againstWallLength = againstWallLength + 2;
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
                                 fireCompareModelsMix.Add(fireCompareModeltmp);
                             }
@@ -286,17 +290,19 @@ namespace ThMEPWSS.HydrantLayout.Engine
         }
 
         //寻找第三优先级定位点并测试摆放
-        public void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
+        private void ThirdPriorityTest(List<Point3d> basePointList, List<Vector3d> dirList)
         {
             //可行解存放处
             List<FireCompareModel> fireCompareModels0 = new List<FireCompareModel>();
-
+            
             //开始循环
             for (int i = 0; i < basePointList.Count; i++)
             {
                 var fireHydrant0 = new FireHydrant(basePointList[i], dirList[i], ShortSide, LongSide, Info.Mode);
                 Polyline vpPl = fireHydrant0.GetRiserObb();
                 List<Polyline> fireObbList = fireHydrant0.GetFireObbList();
+                Polyline AgainstTest = searchPoint0.LeanWallList[i];
+
                 if (i == 0)
                 {
                     fireObbList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1fireobblist", 10));
@@ -330,9 +336,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
                             if (FeasibilityCheck.IsDoorFeasible(doorAreaList[k], LeanWall.Shell())) //如果门没有被阻挡,找到一个可以摆放的模型
                             {
                                 double distance = basePointList[i].DistanceTo(CenterPoint);
+                                Line tmpLine = new Line(CenterPoint, fireHydrant0.TFireCenterPointList[j]);
+                                if (tmpLine.IsIntersects(LeanWall.Shell())) distance = distance + 1000;
 
-                                double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, LeanWall.Shell());
-                                double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], LeanWall.Shell());
+                                double againstWallLength0 = indexCompute0.CalculateWallLength(vpPl, AgainstTest);
+                                double againstWallLength1 = indexCompute0.CalculateWallLength(fireObbList[j], AgainstTest);
                                 int againstWallLength = (int)(againstWallLength0 + againstWallLength1) / 100;
 
                                 againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight);
@@ -366,10 +374,11 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //}
         }
 
-        void FindBest() 
+        //混排(二、三优先级混排)情况下，选取最优摆放方式
+        private void FindBest() 
         {
-            fireCompareModelsMix = fireCompareModelsMix.OrderBy(x => x.doorGood).ThenByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
-
+            //fireCompareModelsMix = fireCompareModelsMix.OrderBy(x => x.doorGood).ThenByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+            fireCompareModelsMix = fireCompareModelsMix.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
             if (fireCompareModelsMix.Count > 0)
             {
                 Done = true;

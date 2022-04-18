@@ -81,7 +81,7 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var objs = new ObjectIdCollection();
             Geometries.Cast<ObjectId>()
-                .Where(o => o.IsModel(identifier))
+                .Where(o => o.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                 .ForEach(o => objs.Add(o));
             return objs;
         }
@@ -95,7 +95,7 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var numbers = new List<int>();
             Geometries.Cast<ObjectId>()
-                .Where(o => o.IsModel(identifier))
+                .Where(o => o.IsModel(identifier, ThHvacCommon.RegAppName_FanSelection))
                 .ForEach(o => numbers.Add(o.GetModelNumber()));
             return numbers;
         }

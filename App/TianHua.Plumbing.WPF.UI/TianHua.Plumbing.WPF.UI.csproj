@@ -146,8 +146,8 @@
     <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\uiDrainageSystem.xaml.cs">
-      <DependentUpon>uiDrainageSystem.xaml</DependentUpon>
+    <Compile Include="UI\WaterSupplySystem.xaml.cs">
+      <DependentUpon>WaterSupplySystem.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
@@ -173,8 +173,8 @@
     <Compile Include="UI\uiUNDPDrainageSystemSet.xaml.cs">
       <DependentUpon>uiUNDPDrainageSystemSet.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
-      <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
+    <Compile Include="UI\WaterSupplySystemSet.xaml.cs">
+      <DependentUpon>WaterSupplySystemSet.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiFireControlSystem.xaml.cs">
       <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
@@ -217,6 +217,9 @@
     </Compile>
     <Compile Include="UI\uiWaterWellPumpInfo.xaml.cs">
       <DependentUpon>uiWaterWellPumpInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\WaterSupplyHalfPlatformSetting.xaml.cs">
+      <DependentUpon>WaterSupplyHalfPlatformSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Validations\AboveBeamRule.cs" />
     <Compile Include="Validations\AreaDensityRule.cs" />
@@ -322,7 +325,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\uiDrainageSystem.xaml">
+    <Page Include="UI\WaterSupplySystem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -358,7 +361,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\uiDrainageSystemSet.xaml">
+    <Page Include="UI\WaterSupplySystemSet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -411,6 +414,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiWaterWellPumpInfo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\WaterSupplyHalfPlatformSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

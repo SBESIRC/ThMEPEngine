@@ -78,7 +78,7 @@ namespace ThMEPHVAC.TCH
                     normalVector = new Vector3d(0, 0, 1),
                     heighVector = dirVec,
                     centerPoint = sp.TransformBy(mat) + seg.l.StartPoint.Z * Vector3d.ZAxis
-            };
+                };
                 centerEleDisVec = ThMEPHVACService.GetEleDis(mmElevation, mainHeight, seg.l.Length) + seg.l.EndPoint.Z * Vector3d.ZAxis;
                 var eEndParam = new TCHInterfaceParam()
                 {
@@ -183,7 +183,14 @@ namespace ThMEPHVAC.TCH
             var leaveDuctMat = verticalVec * (ductWidth * 0.5 + 250);
             p = isTextSide ? midP + leaveDuctMat : midP;
         }
+        private double GetScale(string scale)
+        {
+            var nums = scale.Split(':');
+            if (nums.Length != 2)
+                return 0;
+            return Double.Parse(nums[1]);
 
+        }
         private void RecordDuctDimensions(Matrix3d mat, SegInfo seg, ThMEPHVACParam param, bool isTextSide, ref ulong gId)
         {
             var elevation = param.elevation;
@@ -205,6 +212,7 @@ namespace ThMEPHVAC.TCH
                 eleType = 2,
                 textAngle = angle,
                 sysKey = 1,
+                scale = GetScale(param.scale)
             };
             string recordDuct = $"INSERT INTO " + ThTCHCommonTables.ductDimensions +
                           " VALUES ('" + ductDimensionParam.ID.ToString() + "'," +
@@ -214,10 +222,11 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductDimensionParam.text.ToString() + "'," +
                                   "'" + ThTCHService.CovertPoint(ductDimensionParam.basePoint) + "'," +
                                   "'" + ThTCHService.CovertPoint(ductDimensionParam.leadPoint) + "'," +
+                                  "'" + ductDimensionParam.sysKey.ToString() + "'," +
                                   "'" + ductDimensionParam.type.ToString() + "'," +
                                   "'" + ductDimensionParam.eleType.ToString() + "'," +
                                   "'" + ductDimensionParam.textAngle.ToString() + "'," +
-                                  "'" + ductDimensionParam.sysKey.ToString() + "')";
+                                  "'" + ductDimensionParam.scale.ToString() + "')";
             sqliteHelper.Query<TCHDuctDimensionsParam>(recordDuct);
         }
 
@@ -232,6 +241,7 @@ namespace ThMEPHVAC.TCH
                 materialID = 0,
                 sectionType = 0,
                 ductType = 1,
+                alignType = 4,
                 Soft = 0,
                 Bulge = 0.0,
                 AirLoad = airVolume
@@ -244,6 +254,7 @@ namespace ThMEPHVAC.TCH
                                   "'" + ductParam.materialID.ToString() + "'," +
                                   "'" + ductParam.sectionType.ToString() + "'," +
                                   "'" + ductParam.ductType.ToString() + "'," +
+                                  "'" + ductParam.alignType.ToString() + "'," +
                                   "'" + ductParam.Soft.ToString() + "'," +
                                   "'" + ductParam.Bulge.ToString() + "'," +
                                   "'" + ductParam.AirLoad.ToString() + "')";

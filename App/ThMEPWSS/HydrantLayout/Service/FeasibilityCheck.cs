@@ -34,7 +34,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             //LeanWall = leanWall;
         }
 
-        //校验外框是否可行
+        //校验外框是否可行，一般是用于消火栓和灭火器的实体部分
         public static bool IsFireFeasible(Polyline fireArea, Polyline shell) 
         {
             bool flag = false;
@@ -68,22 +68,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             return flag;
         }
 
-
-        //校验外框遮挡
-        public static bool IsFireBlocked(Polyline fireArea)
-        {
-            bool flag = false;
-            var bufferArea= fireArea.Buffer(-10);
-            var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-            var objs1 = ProcessedData.ForbiddenIndex.SelectCrossingPolygon(pl);
-            var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl); //?
-            if (objs1.Count == 0 && objs2.Count == 0)
-            {
-                flag = true;
-            }
-            return flag;
-        }
-
+        //判断“某种框线”是否能通过“某种判断”，本质上是上面几种判断的灵活通用版本
         public static bool IsBoundaryOK(Polyline area, Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
         {
             bool flag = false;
@@ -106,6 +91,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             return flag;
         }
 
+        //因为空间索引无法进行小搜大，因此要判断整个框线是否都在车位里面
         public static bool NotInPaking(Polyline area, Polyline shell) 
         {
             bool flag = true;
@@ -118,6 +104,23 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 {
                     flag = false;
                 }
+            }
+            return flag;
+        }
+
+
+
+        //此函数已经废弃，留在此处当模板
+        public static bool IsFireBlocked(Polyline fireArea)
+        {
+            bool flag = false;
+            var bufferArea = fireArea.Buffer(-10);
+            var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+            var objs1 = ProcessedData.ForbiddenIndex.SelectCrossingPolygon(pl);
+            var objs2 = ProcessedData.ParkingIndex.SelectCrossingPolygon(pl); //?
+            if (objs1.Count == 0 && objs2.Count == 0)
+            {
+                flag = true;
             }
             return flag;
         }

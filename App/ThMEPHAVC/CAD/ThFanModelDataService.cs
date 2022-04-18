@@ -1,14 +1,26 @@
 ﻿using System.Collections.Generic;
+using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.FanSelection.Service;
 using TianHua.FanSelection.Function;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.EQPMFanSelect;
 
 namespace ThMEPHVAC.CAD
 {
     public class ThFanModelDataService
     {
         public List<double> CalcAirVolume(ObjectId objId)
+        {
+            return IsNewFan(objId) ? CalcAirVolumeEx(objId) : CalcOrgAirVolume(objId);
+        }
+        public bool IsNewFan(ObjectId objId)
+        {
+            var valueList = objId.GetXData(ThHvacCommon.RegAppName_FanSelectionEx);
+            return valueList != null;
+        }
+        
+        public List<double> CalcOrgAirVolume(ObjectId objId)
         {
             var identifier = objId.GetModelIdentifier();
             if (string.IsNullOrEmpty(identifier))
@@ -42,6 +54,26 @@ namespace ThMEPHVAC.CAD
             }
 
             return new List<double>();
+        }
+        public List<double> CalcAirVolumeEx(ObjectId objId)
+        {
+            var resList = new List<double>();
+            var identifier = objId.GetModelIdentifier(ThHvacCommon.RegAppName_FanSelectionEx);
+            if (string.IsNullOrEmpty(identifier))
+                return resList;
+
+            var xData = objId.ReadBlockFanXData(out FanBlockXDataBase xDataBase);
+            if (null == xData || xDataBase == null || string.IsNullOrEmpty(xData.AirCalcValue))
+                return resList;
+            var spliteAirCalcValue = xData.AirCalcValue.Split('/');
+            double.TryParse(spliteAirCalcValue[0], out double heightValue);
+            resList.Add(heightValue);
+            if (spliteAirCalcValue.Length>1)
+            {
+                double.TryParse(spliteAirCalcValue[1], out double lowValue);
+                resList.Add(lowValue);
+            }
+            return resList;
         }
     }
 }

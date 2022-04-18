@@ -40,6 +40,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativePolesNums = cPSPicks.Select(o => o.Poles).Distinct().ToList();
             AlternativeRatedCurrents = cPSPicks.Select(o => o.Amps).Distinct().ToList();
             AlternativeCombinations = CPS.CPSCombination.Split(';').ToList();
+            AlternativeCombinations.Insert(0, "-");
             AlternativeResidualCurrents = CPS.ResidualCurrent.Split(';').ToList();
             AlternativeResidualCurrents.Insert(0, "-");
             Combination = AlternativeCombinations.First();
@@ -57,12 +58,18 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             //CPSJ32-M2.5/3P
             string[] configs = cpsConfig.Split('-');
             string[] detaileds = configs[1].Split('/');
-            var cpsModel = Regex.Replace(configs[0], @"\d", "");
+            var cpsconfig = Regex.Replace(configs[0], @"\d", "");
+            var cpsModel = cpsconfig.Substring(0 ,3);
+            var combination = "-";
+            if(cpsconfig.Length > 3)
+            {
+                combination = cpsconfig.Substring(3,1);
+            }
             var frameSpecification = Regex.Replace(configs[0], @"\D", "");
             var polesNum = detaileds[1];
             int numIndex = detaileds[0].IndexOfAny(ProjectSystemConfiguration.NumberArray);
-            var ratedCurrent = detaileds[0].Skip(numIndex).ToString();
-            var codeLevel = detaileds[0].Take(numIndex).ToString();
+            var ratedCurrent = detaileds[0].Substring(numIndex);
+            var codeLevel = detaileds[0].Substring(0, numIndex);
 
             if (IsDomesticWaterPump)
                 DefaultResidualCurrent = "300";
@@ -71,7 +78,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == frameSpecification
             && o.Poles == polesNum
             && o.Model == cpsModel
-            && o.CPSCharacteristics.Contains(codeLevel)).Take(1).ToList();
+            && o.CPSCharacteristics.Contains(codeLevel)
+            && (combination == "-" || o.CPSCombination.Contains(combination))).Take(1).ToList();
             if (cPSPicks.Count == 0)
             {
                 throw new NotSupportedException();
@@ -83,18 +91,18 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             PolesNum = CPS.Poles;
             RatedCurrent = CPS.Amps;
             ResidualCurrent = DefaultResidualCurrent;
+            Combination = combination;
+            CodeLevel = codeLevel;
 
             AlternativeModels = new List<string>() { cpsModel };
             AlternativeFrameSpecifications = cPSPicks.Select(o => o.FrameSize).Distinct().ToList();
             AlternativePolesNums = cPSPicks.Select(o => o.Poles).Distinct().ToList();
             AlternativeRatedCurrents = cPSPicks.Select(o => o.Amps).Distinct().ToList();
             //AlternativeCombinations = CPS.CPSCombination.Split(';').ToList();
-            AlternativeCombinations = new List<string>() { "D" };//待定，等张皓确认
+            AlternativeCombinations = new List<string>() { combination };//待定，等张皓确认
             AlternativeResidualCurrents = new List<string>() { DefaultResidualCurrent };
-            Combination = AlternativeCombinations.First();
             //AlternativeCodeLevels = CPS.CPSCharacteristics.Split(';').ToList();
             AlternativeCodeLevels = new List<string>() { codeLevel };
-            CodeLevel = AlternativeCodeLevels.First();
         }
 
         /// <summary>

@@ -91,7 +91,8 @@ namespace ThMEPWSS.HydrantLayout.Data
             var bReturn = false;
             if (e is BlockReference blk)
             {
-                if (BlkNames.Contains(blk.GetEffectiveName()))
+                var blkname = blk.GetEffectiveName();
+                if (BlkNames.Contains(blkname))
                 {
                     bReturn = true;
                 }

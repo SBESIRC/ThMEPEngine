@@ -1,0 +1,36 @@
+﻿<Window x:Class="TianHua.Electrical.PDS.UI.UserContorls.ThPDSAssignCircuit2SmallBusbar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
+             mc:Ignorable="d" Title="添加已有回路"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+            <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button Width="100" Click="btnOkClick">确定</Button>
+            <Button Width="100" Click="btnCancelClick">取消</Button>
+        </StackPanel>
+        <hc:TransitioningContentControl>
+            <hc:Transfer ItemsSource="{Binding DataList}" x:Name="ctl" Margin="32" Height="300">
+                <hc:Transfer.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </hc:Transfer.ItemTemplate>
+            </hc:Transfer>
+        </hc:TransitioningContentControl>
+    </DockPanel>
+</Window>

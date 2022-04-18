@@ -4,7 +4,7 @@ using System.IO;
 using ThMEPIdentity;
 using ThCADExtension;
 using System.Reflection;
-using System.Diagnostics;
+using System.Configuration;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -59,6 +59,15 @@ namespace TianHua.AutoCAD.ThCui
             AcadApp.DocumentManager.DocumentLockModeChanged += DocCollEvent_DocumentLockModeChanged_Handler;
             ////注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged += SystemVariableChangedHandler;
+
+            // Redirecting Assembly Loads at Runtime
+            // https://blog.slaks.net/2013-12-25/redirecting-assembly-loads-at-runtime/
+            RedirectAssemblies();
+        }
+
+        private void RedirectAssemblies()
+        {
+            ThCuiAssemblyService.RedirectAssembly("System.Buffers", new Version(4, 0, 3, 0));
         }
 
         public void Terminate()
@@ -103,12 +112,14 @@ namespace TianHua.AutoCAD.ThCui
             CreatePartialCui();
         }
 #endif
+
         [CommandMethod("TIANHUACAD", "THMEPVERSION", CommandFlags.Modal)]
         public void ThMEPVersion()
         {
             var asm = Assembly.GetExecutingAssembly();
-            Active.Editor.Write("当前版本号:" + asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version + "\n");
+            Active.Editor.WriteLine("当前版本号：" + asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
         }
+
         [CommandMethod("TIANHUACAD", "THMEPPROFILE", CommandFlags.Modal)]
         public void ThMEPProfile()
         {
@@ -161,10 +172,16 @@ namespace TianHua.AutoCAD.ThCui
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THMEPHELP", CommandFlags.Modal)]
-        public void ThMEPHelp()
+        [CommandMethod("TIANHUACAD", "THMEPUSERCONFIG", CommandFlags.Modal)]
+        public void ThMEPUserConfig()
         {
-            Process.Start(ThCADCommon.OnlineHelpUrl);
+            Active.Editor.WriteLine(string.Format("配置文件路径：{0}", UserConfigPath()));
+        }
+
+        private string UserConfigPath()
+        {
+            // https://stackoverflow.com/questions/982354/where-are-the-properties-settings-default-stored
+            return ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
         }
 
         private void LoadPartialCui(bool bLoad = true)
@@ -194,6 +211,14 @@ namespace TianHua.AutoCAD.ThCui
 
         private void Application_OnIdle_Ribbon(object sender, EventArgs e)
         {
+            // 若是新版本，则主动运行RIBBON命令显示RIBBON
+            var version = GetCurrentVersion();
+            if (version > ReadVersion())
+            {
+                SaveVersion(version);
+                Active.Document.SendStringToExecute("_.RIBBON ", true, false, false);
+            }
+
             // 使用AutoCAD Windows runtime API来配置自定义Tab中的Panels
             // 需要保证Ribbon自定义Tab是存在的，并且自定义Tab中的Panels也是存在的。
             if (ThRibbonUtils.Tab != null && ThRibbonUtils.Tab.Panels.Count != 0)
@@ -206,9 +231,33 @@ namespace TianHua.AutoCAD.ThCui
             }
         }
 
+        private void SaveVersion(Version version)
+        {
+            Properties.Settings.Default.Version = version.ToString();
+            Properties.Settings.Default.Save();
+        }
+
+        private Version ReadVersion()
+        {
+            if (string.IsNullOrEmpty(Properties.Settings.Default.Version))
+            {
+                return new Version();
+            }
+            else
+            {
+                return new Version(Properties.Settings.Default.Version);
+            }
+        }
+
+        private Version GetCurrentVersion()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            return new Version(asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        }
+
         //private void Application_OnIdle_Menubar(object sender, EventArgs e)
         //{
-        //    if (ThMenuBarUtils.PopupMenu != null)
+        //    if (ThMenuBarUtils.PopupMenu != null
         //    {
         //        // 配置完成后就不需要Idle事件
         //        AcadApp.Idle -= Application_OnIdle_Menubar;
@@ -240,7 +289,7 @@ namespace TianHua.AutoCAD.ThCui
             {
                 // 根据登录用户的专业自动配置Panels
                 var major = ThAcsSystemService.Instance.MajorCode;
-                switch(major)
+                switch (major)
                 {
                     case "A":
                         ThRibbonUtils.ConfigPanelsWithProfile("A");

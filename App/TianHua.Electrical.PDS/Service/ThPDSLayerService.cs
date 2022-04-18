@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore;
@@ -56,6 +57,15 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         /// <summary>
+        /// 控制回路
+        /// </summary>
+        /// <returns></returns>
+        public static string ControlCircuitLayer()
+        {
+            return "E-CTRL-WIRE";
+        }
+
+        /// <summary>
         /// 配电箱框线图层
         /// </summary>
         /// <returns></returns>
@@ -71,6 +81,19 @@ namespace TianHua.Electrical.PDS.Service
         public static string TableFrameLayer()
         {
             return "E-UNIV-DIAG";
+        }
+
+        /// <summary>
+        /// 照明桥架图层
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> LightingCableTrayLayer()
+        {
+            return new List<string>
+            {
+                "E-LITE-CMTB",
+                "E-UNIV-EL2",
+            };
         }
 
         public static void SelectCircuitType(ThPDSCircuit circuit, ThPDSLoad load, string layer, bool needAssign)
@@ -99,13 +122,13 @@ namespace TianHua.Electrical.PDS.Service
                     load.CircuitType = ThPDSCircuitType.None;
                     break;
             }
-            if(needAssign)
+            if (needAssign)
             {
-                Assign(circuit, load);
+                Assign(load);
             }
         }
 
-        public static void Assign(ThPDSCircuit circuit, ThPDSLoad load)
+        public static void Assign(ThPDSLoad load)
         {
             if (load.CircuitType != ThPDSCircuitType.None)
             {

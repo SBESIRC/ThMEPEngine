@@ -18,13 +18,16 @@ namespace TianHua.Electrical.PDS.Project.Module
         public PDSProjectErrorType ErrorType { get; set; }
 
         /// <summary>
-        /// 是否是双功率
-        /// </summary>
-        public bool IsDualPower { get; set; }
-        /// <summary>
         /// 是否已统计
         /// </summary>
         public bool IsStatistical { get; set; }
+
+
+        /// <summary>
+        /// 是否是双功率
+        /// </summary>
+        public bool IsDualPower { get; set; }
+        
         public double LowPower { get; set; }
         public double HighPower { get; set; }
 
@@ -57,21 +60,22 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 小母排
         /// </summary>
-        public List<SmallBusbar> SmallBusbars { get; set; }
+        public Dictionary<MiniBusbar,List<ThPDSProjectGraphEdge>> MiniBusbars { get; set;}
 
         /// <summary>
         /// 控制回路 
         /// </summary>
-        public List<SecondaryCircuit> SecondaryCircuits { get; set; }
+        public Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>> SecondaryCircuits { get; set; }
 
         public NodeDetails()
         {
             CircuitFormType = new OneWayInCircuit();
             CascadeCurrent = 0;
+            PhaseSequence = PhaseSequence.L123;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
-            SmallBusbars = new List<SmallBusbar>();
-            SecondaryCircuits = new List<SecondaryCircuit>();
+            MiniBusbars = new Dictionary<MiniBusbar, List<ThPDSProjectGraphEdge>>();
+            SecondaryCircuits = new Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>>();
             if (Convert.ToUInt32(BoxSize) > 6)
             {
                 BoxInstallationType = BoxInstallationType.落地安装;

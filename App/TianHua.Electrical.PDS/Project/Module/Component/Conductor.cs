@@ -16,6 +16,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
+            if(!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             Phase = phase;
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(calculateCurrent);
@@ -30,6 +34,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.ComponentType = ComponentType.Conductor;
             this.IsMotor = true;
             this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             //3x2.5+E2.5
             ChooseMaterial(loadType, FireLoad, calculateCurrent);
             ChooseCrossSectionalArea(conductorConfig);
@@ -45,6 +53,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.IsMotor = true;
             this.IsControlCircuit = true;
             this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
             ChooseMaterial(conductorType);
             ChooseCrossSectionalArea(conductorConfig);
             ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
@@ -413,7 +425,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                     default:
                         {
-                            throw new NotSupportedException();
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
                         }
                 }
             }
@@ -476,7 +489,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
         //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
         //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
-        public string Content { get { return $"{(IsBAControl ? "" : ConductorUse.Content+"-"+ConductorInfo+"-")}{LayingTyle}"; } }
+        public string Content { 
+            get 
+            {
+                string val = $"{(IsBAControl ? "" : ConductorUse.Content+"-"+ConductorInfo+"-")}{LayingTyle}";
+                if (NumberOfPhaseWire != 1)
+                {
+                    val = $"{NumberOfPhaseWire}×({val})";
+                }
+                return val;
+            } 
+        }
 
         /// <summary>
         /// 燃烧特性代号
@@ -511,7 +534,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 穿管敷设方式
         /// </summary>
-        public Pipelaying Pipelaying { get; set; }
+        public Pipelaying Pipelaying { get; set; } = Pipelaying.None;
 
         /// <summary>
         /// 穿管直径
@@ -605,10 +628,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                             val = $"4×{ConductorCrossSectionalArea}{(HasPELine ? "+E"+PECrossSectionalArea : "")}";
                         }
                     }
-                    if (NumberOfPhaseWire != 1)
-                    {
-                        val = $"{NumberOfPhaseWire}×({val})";
-                    }
                     return val;
                 }
             }
@@ -642,7 +661,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 穿管管材
         /// </summary>
-        public PipeMaterial PipeMaterial { get; set; }
+        public PipeMaterial PipeMaterial { get; set; } = PipeMaterial.None;
 
         /// <summary>
         /// 穿管
@@ -662,7 +681,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 桥架敷设方式
         /// </summary>
-        public BridgeLaying BridgeLaying { get; set; }
+        public BridgeLaying BridgeLaying { get; set; } = BridgeLaying.None;
 
         /// <summary>
         /// 是否是电线回路 Y(电线)/F(电缆)

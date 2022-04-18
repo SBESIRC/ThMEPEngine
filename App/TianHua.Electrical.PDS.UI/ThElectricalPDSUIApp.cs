@@ -1,8 +1,8 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.Runtime;
-using System.Linq;
 using System.Windows;
+using Autodesk.AutoCAD.Runtime;
 using TianHua.Electrical.PDS.Command;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -55,18 +55,18 @@ namespace TianHua.Electrical.PDS.UI
             cmd.Execute();
 
             // 系统图绘制
-            var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-            if (graph == null)
-            {
-                return;
-            }
-            var vertices = graph.Vertices.ToList();
-            var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
-            drawCmd.Execute();
+            //var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            //if (graph == null)
+            //{
+            //    return;
+            //}
+            //var vertices = graph.Vertices.ToList();
+            //var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
+            //drawCmd.Execute();
 
             // 标注修改
-            //var modifyCmd = new ThPDSInfoModifyCommand(cmd.GetNodeMapList(), cmd.GetEdgeMapList());
-            //modifyCmd.Execute();
+            var modifyCmd = new ThPDSUpdateToDwgService();
+            modifyCmd.Update();
 
             Active.Editor.Regen();
         }

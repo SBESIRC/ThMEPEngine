@@ -31,7 +31,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             CurrentTransformers = meters;
             PolesNum = polesNum;
             var meter = meters.First();
-            CurrentTransformerSwitchType = meter.parameter;
+            MeterParameter = meter.parameter;
             AlternativeParameters = meters.Select(o => o.parameter).ToList();
         }
 
@@ -43,7 +43,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             if (CurrentTransformers.Any(o => o.parameter == parameters))
             {
-                CurrentTransformerSwitchType = parameters;
+                MeterParameter = parameters;
             }
             else
             {
@@ -55,11 +55,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 直接表类型
         /// </summary>
         public string MeterSwitchType = "1.5(6)";
-
-        /// <summary>
-        /// 间接表类型
-        /// </summary>
-        public string CurrentTransformerSwitchType { get; set; }
 
         /// <summary>
         /// 断路器信息

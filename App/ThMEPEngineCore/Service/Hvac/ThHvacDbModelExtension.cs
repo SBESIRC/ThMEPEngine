@@ -46,7 +46,10 @@ namespace ThMEPEngineCore.Service.Hvac
             };
             obj.AddXData(ThHvacCommon.RegAppName_FanSelection, valueList);
         }
-
+        public static void SetModelIdentifier(this ObjectId obj, TypedValueList valueList, string regAppName = ThHvacCommon.RegAppName_FanSelection)
+        {
+            obj.AddXData(regAppName, valueList);
+        }
         public static void UpdateModelNumber(this ObjectId obj, int number)
         {
             var oldValue = obj.GetModelNumber();
@@ -83,15 +86,15 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
-        public static string GetModelIdentifier(this ObjectId obj)
+        public static string GetModelIdentifier(this ObjectId obj, string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);
-            return model.GetModelIdentifier();
+            return model.GetModelIdentifier(regAppName);
         }
 
-        public static string GetModelIdentifier(this DBObject dBObject)
+        public static string GetModelIdentifier(this DBObject dBObject,string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
-            var valueList = dBObject.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            var valueList = dBObject.GetXData(regAppName);
             if (valueList == null)
             {
                 return string.Empty;
@@ -111,21 +114,26 @@ namespace ThMEPEngineCore.Service.Hvac
             return dBObject.GetXDataForApplication(regAppName);
         }
 
-        public static void SetModelXDataFrom(this ObjectId obj, ObjectId other)
+        public static void SetModelXDataFrom(this ObjectId obj, ObjectId other, string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
-            var xdata = other.GetXData(ThHvacCommon.RegAppName_FanSelection);
-            obj.AddXData(ThHvacCommon.RegAppName_FanSelection, xdata);
+            var xdata = other.GetXData(regAppName);
+            obj.AddXData(regAppName, xdata);
         }
 
         public static bool IsModel(this DBObject dBObject)
         {
             return !string.IsNullOrEmpty(dBObject.GetModelIdentifier());
         }
-
-        public static bool IsModel(this ObjectId obj, string identifier)
+        public static bool IsModel(this ObjectId obj, string regAppName = ThHvacCommon.RegAppName_FanSelection)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);
-            return model.GetModelIdentifier() == identifier;
+            return !string.IsNullOrEmpty(model.GetModelIdentifier(regAppName));
+        }
+
+        public static bool IsModel(this ObjectId obj, string identifier, string regAppName = ThHvacCommon.RegAppName_FanSelection)
+        {
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelIdentifier(regAppName) == identifier;
         }
 
         public static void EraseModel(this ObjectId obj, bool erasing = true)

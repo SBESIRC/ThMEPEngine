@@ -26,7 +26,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
-    <Compile Include="Command\ThPDSInfoModifyCommand.cs" />
+    <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
+    <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />
+    <Compile Include="Service\ThPDSSecondaryPushDataService.cs" />
     <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
     <Compile Include="Diagram\ThPDSComponentContentExtension.cs" />
@@ -41,6 +43,7 @@
     <Compile Include="Engine\ThCabletraySegmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThCircuitMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircuitMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThPDSCreateGraphEngine.cs" />
     <Compile Include="Engine\ThPDSDistBoxFrameExtraction.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
@@ -81,17 +84,13 @@
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfiguration.cs" />
     <Compile Include="Project\Module\Configure\PDSBaseComponentConfigurationItem.cs" />
     <Compile Include="Project\Module\Configure\SecondaryCircuitConfiguration.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphCompareService.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphComparingUnit.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdge.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeCompareTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphExtension.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNode.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompareTag.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphStructuralComparingUnit.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphQualitativeComparingUnit.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphQuantitativeComparingUnit.cs" />
     <Compile Include="Project\Module\SecondaryCircuit.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Service\ThPDSCircuitConfigItem.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
@@ -152,9 +151,8 @@
     <Compile Include="Project\Module\PDSProjectModule.cs" />
     <Compile Include="Project\Module\ProjectConfigure\ProjectGlobalConfiguration.cs" />
     <Compile Include="Project\Module\ProjectEnumCollection.cs" />
-    <Compile Include="Project\Module\SmallBusbar.cs" />
+    <Compile Include="Project\Module\MiniBusbar.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraph.cs" />
-    <Compile Include="Project\Module\ThPDSProjectGraphService.cs" />
     <Compile Include="Project\PDSProject.cs" />
     <Compile Include="Project\PDSProjectExtend.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -162,6 +160,7 @@
     <Compile Include="Service\ThPDSBufferService.cs" />
     <Compile Include="Service\ThPDSCircuitConfig.cs" />
     <Compile Include="Service\ThPDSCircuitNumberSeacher.cs" />
+    <Compile Include="Service\ThPDSGraphCompareService.cs" />
     <Compile Include="Service\ThPDSGraphService.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />

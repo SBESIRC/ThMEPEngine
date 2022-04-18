@@ -326,9 +326,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             return Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
         }
 
-        public static void CreateRectAndLabel(Point3d Left,Point3d Right,int num,int size,List<Polyline>polylist,List<DBText>txtlist,double dist1,double dist2,int type,double width)
+        public static void CreateRectAndLabel(Point3d Left, Point3d Right, int num, int size, List<Polyline> polylist, List<DBText> txtlist, double dist1, double dist2, int type, double width)
         {
-
+            //生成线框加文本
             //线框
             Polyline Rect = new Polyline();
             var pts = new Point3dCollection
@@ -341,15 +341,15 @@ namespace ThMEPStructure.Reinforcement.Draw
             };
             Rect = pts.CreatePolyline();
             Rect.LayerId = DbHelper.GetLayerId("LABEL");
-            
-           
+            Rect.LinetypeId = DbHelper.GetLinetypeId("DASH");
+
 
             //引线
             Point3d L = Rect.GetPoint3dAt(0);
             Point3d R = Rect.GetPoint3dAt(2);
             Polyline label = new Polyline();
             label.LayerId = DbHelper.GetLayerId("LAEBL");
-            
+
             if (type == 1)
             {
                 //折线方向：上左
@@ -368,7 +368,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 //折线方向：左上
                 label.AddVertexAt(0, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
-                label.AddVertexAt(1, new Point3d(L.X, (L.Y+R.Y)/2, 0).ToPoint2D() + new Vector2d(-dist1, 0), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(-dist1, 0), 0, 0, 0);
                 label.AddVertexAt(2, new Point3d(L.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(-dist1, dist2), 0, 0, 0);
             }
             else if (type == 4)
@@ -381,9 +381,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             else if (type == 5)
             {
                 //折线方向：下左
-                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() , 0, 0, 0);
-                label.AddVertexAt(1, new Point3d((L.X+R.X)/2, R.Y, 0).ToPoint2D() + new Vector2d(0, -dist1), 0, 0, 0);
-                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(-dist2,-dist1), 0, 0, 0);
+                label.AddVertexAt(0, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D(), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(0, -dist1), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d((L.X + R.X) / 2, R.Y, 0).ToPoint2D() + new Vector2d(-dist2, -dist1), 0, 0, 0);
             }
             else if (type == 6)
             {
@@ -396,8 +396,8 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 //折线方向：右上
                 label.AddVertexAt(0, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D(), 0, 0, 0);
-                label.AddVertexAt(1, new Point3d(R.X,(L.Y+ R.Y)/2, 0).ToPoint2D() + new Vector2d(dist1, 0), 0, 0, 0);
-                label.AddVertexAt(2, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1,dist2), 0, 0, 0);
+                label.AddVertexAt(1, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1, 0), 0, 0, 0);
+                label.AddVertexAt(2, new Point3d(R.X, (L.Y + R.Y) / 2, 0).ToPoint2D() + new Vector2d(dist1, dist2), 0, 0, 0);
             }
             else if (type == 8)
             {
@@ -410,7 +410,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             //文字
             DBText txt = new DBText();
             txt.Height = 300;
-            txt.TextString = num + "C" + size;
+            txt.TextString = num + "%%132" + size;
             txt.LayerId = DbHelper.GetLayerId("LABEL");
             txt.TextStyleId = DbHelper.GetTextStyleId("TSSD_REIN");
             txt.WidthFactor = 0.7;

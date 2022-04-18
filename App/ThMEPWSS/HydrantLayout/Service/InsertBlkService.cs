@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.Colors;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
+using Dreambuild.AutoCAD;
 
 using ThCADExtension;
 
@@ -20,21 +21,37 @@ namespace ThMEPWSS.HydrantLayout.Service
 {
     internal class InsertBlkService
     {
-        public static void PrepareInsert(List<string> blkName, List<string> layerName)
+        public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
         {
-            using (var db = AcadDatabase.Active())
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            {
+                //解锁0图层，后面块有用0图层的
+                DbHelper.EnsureLayerOn("0");
+            }
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                blkName.ForEach(x =>
+                foreach (var item in blockNames)
                 {
-                    db.Blocks.Import(blockDb.Blocks.ElementOrDefault(x), true);
-                });
-                layerName.ForEach(x =>
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var block = blockDb.Blocks.ElementOrDefault(item);
+                    if (null == block)
+                        continue;
+                    currentDb.Blocks.Import(block, true);
+                }
+                foreach (var item in layerNames)
                 {
-                    db.Layers.Import(blockDb.Layers.ElementOrDefault(x), true);
-                });
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var layer = blockDb.Layers.ElementOrDefault(item);
+                    if (null == layer)
+                        continue;
+                    currentDb.Layers.Import(layer, true);
+                }
             }
         }
+        
         public static void InsertWarning(List<OutPutModel> insertBlkInfo, string layerName, double radius, int colorIndex)
         {
             if (insertBlkInfo == null || insertBlkInfo.Count == 0)
@@ -141,7 +158,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         {
                             var blk = ptInfo.OriginModel.Data as BlockReference;
                             var visibleAtt = blk.Id.GetDynProperties();
-                            var propValue = (ptInfo.DoorOpenDir % 2) == 0 ? (short)1 : (short)0;
+                            var propValue = (ptInfo.DoorOpenDir % 2) == 0 ? (short)1 : (short)0; //0左  1右
                             foreach (DynamicBlockReferenceProperty prop in visibleAtt)
                             {
                                 if (prop.PropertyName.Contains(ThHydrantCommon.BlkVisibility_Turn))

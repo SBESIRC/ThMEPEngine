@@ -531,5 +531,9 @@ namespace ThMEPHVAC.Model
         {
             return new Vector3d(0, 0, mmElevation + (mainHeight - height) + height * 0.5);
         }
+        public static double Radian2Angle(double radian)
+        {
+            return radian * 180 / Math.PI;
+        }
     }
 }

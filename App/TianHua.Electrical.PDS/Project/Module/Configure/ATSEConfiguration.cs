@@ -46,7 +46,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// <summary>
         /// 额定电流
         /// </summary>
-        public string Amps { get; set; }
+        public double Amps { get; set; }
 
         /// <summary>
         /// MTSE功能特点

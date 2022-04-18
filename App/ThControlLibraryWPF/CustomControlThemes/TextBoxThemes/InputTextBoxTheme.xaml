@@ -26,6 +26,8 @@
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=_tbInput}"/>
         <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="MinLines" Value="1"/>
+        <Setter Property="MaxLines" Value="1"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:InputTextBox}">
@@ -49,6 +51,8 @@
                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                                      IsHitTestVisible="True"
                                      AcceptsTab="False"
+                                     MinLines="{TemplateBinding MinLines}"
+                                     MaxLines="{TemplateBinding MaxLines}"
                                      TabIndex="{Binding Path=TabIndex, RelativeSource={RelativeSource AncestorType={x:Type local:InputTextBox}}}"
                                      Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                                      ContextMenu="{x:Null}"

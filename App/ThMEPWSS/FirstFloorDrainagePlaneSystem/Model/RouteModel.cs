@@ -24,5 +24,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         public Polyline route { get; set; }
 
         public VerticalPipeType verticalPipeType { get; set; }
+
+        public Line connecLine { get; set; }
     }
 }

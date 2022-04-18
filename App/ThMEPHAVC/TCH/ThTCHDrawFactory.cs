@@ -25,10 +25,11 @@ namespace ThMEPHVAC.TCH
         public string text;
         public Point3d basePoint;
         public Point3d leadPoint;
+        public Int32 sysKey;
         public Int32 type;
         public Int32 eleType;
         public double textAngle;
-        public Int32 sysKey;
+        public double scale;
     }
     public struct TCHDuctParam
     {
@@ -40,6 +41,7 @@ namespace ThMEPHVAC.TCH
         public ulong materialID;
         public Int32 sectionType;
         public Int32 ductType;
+        public Int32 alignType;
         public Int32 Soft;
         public double Bulge;
         public double AirLoad;
@@ -52,6 +54,10 @@ namespace ThMEPHVAC.TCH
         public ulong startFaceID;
         public ulong subSystemID;
         public ulong materialID;
+        public Vector3d offest; // 偏移向量
+        public Int32 computeType;
+        public double angle;
+        public double length;
     }
     public struct TCHElbowParam
     {
@@ -127,6 +133,24 @@ namespace ThMEPHVAC.TCH
         public Vector3d heighVector;
         public Point3d centerPoint;
     }
+    public struct TCHDimensionParam
+    {
+        // Dimension 表
+        public ulong ID;
+        public ulong segmentID;
+        public string dimStyle ;
+        public Point3d location;
+        public double rotation;
+        public double dist2DimLine;
+        public double scale;
+    }
+    public struct TCHDimSegmentParam
+    {
+        // DimSegment 表
+        public ulong ID;
+        public Int64 nextSegmentID;
+        public double dimLength;
+    }
     public class ThTCHDrawFactory
     {
         public ThDrawTCHTee teeService;
@@ -135,6 +159,7 @@ namespace ThMEPHVAC.TCH
         public ThDrawTCHCross crossService;
         public ThDrawTCHReducing reducingService;
         public ThDrawTCHMaterials materialsService;
+        public ThDrawTCHDimension dimensionService;
         public ThDrawTCHSubSystemTypes subSystemService;
         public ThSQLiteHelper sqliteHelper;
         public ThTCHDrawFactory(string databasePath)
@@ -154,6 +179,7 @@ namespace ThMEPHVAC.TCH
             teeService = new ThDrawTCHTee(sqliteHelper, subSysId);
             crossService = new ThDrawTCHCross(sqliteHelper, subSysId);
             reducingService = new ThDrawTCHReducing(sqliteHelper, subSysId);
+            dimensionService = new ThDrawTCHDimension(sqliteHelper);
         }
 
         private ulong GetSubSystemId(string scenario)

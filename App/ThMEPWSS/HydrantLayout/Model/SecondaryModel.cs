@@ -27,6 +27,7 @@ namespace ThMEPWSS.HydrantLayout.Model
 
     }
 
+    //比较模型，用于比较可摆放的模型中哪一种最优
     class FireCompareModel
     {
         //基本属性
@@ -40,7 +41,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         //指标
         public double distance = 100000;
         public double againstWallLength = 0;
-        public int doorGood = 1;
+        public int doorGood = 0;
 
         //绘图属性
         public double ShortSide = Info.ShortSide;
@@ -58,10 +59,11 @@ namespace ThMEPWSS.HydrantLayout.Model
             this.againstWallLength = againstWallLength;
             if (doorGood)
             {
-                this.doorGood = 0;
+                this.doorGood = 1;
             }
         }
 
+        //画消火栓
         public void Draw(double shortside,double longside)
         {
             double vp = Info.VPSide;
@@ -93,6 +95,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             objs.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1result", 2));
         }
 
+        //画灭火器
         public void Draw2(double shortside, double longside) 
         {
             DBObjectCollection objs = new DBObjectCollection();

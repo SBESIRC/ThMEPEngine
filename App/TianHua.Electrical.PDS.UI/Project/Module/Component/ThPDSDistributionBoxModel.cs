@@ -17,6 +17,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             _node = graphNode;
         }
+        [Browsable(false)]
+        public double LowPower => _node.Details.LowPower;
+        [Browsable(false)]
+        public double HighPower => _node.Details.HighPower;
 
         [ReadOnly(true)]
         [Category("配电箱参数")]
@@ -55,7 +59,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _node.Load.DemandFactor;
             set
             {
-                _node.Load.DemandFactor = value;
+                _node.SetDemandFactor(value);
                 OnPropertyChanged(nameof(DemandFactor));
             }
         }
@@ -68,7 +72,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _node.Load.PowerFactor;
             set
             {
-                _node.Load.PowerFactor = value;
+                _node.SetPowerFactor(value);
                 OnPropertyChanged(nameof(PowerFactor));
             }
         }

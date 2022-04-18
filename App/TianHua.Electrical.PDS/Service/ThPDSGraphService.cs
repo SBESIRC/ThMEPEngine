@@ -62,16 +62,17 @@ namespace TianHua.Electrical.PDS.Service
                     // 只要有一个有效负载，则认为整个节点为有效负载
                     noneLoad = false;
                     var service = new ThPDSMarkAnalysisService();
-                    objectIds.Add(LoadBlocks[e].ObjId);
                     if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
                         loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
+                        objectIds.Add(LoadBlocks[e].ObjId);
                     }
                     else
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
                         loads.Add(service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy));
+                        objectIds.AddRange(marks.ObjectIds);
                     }
                 }
             }
@@ -93,6 +94,28 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
+        public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
+            List<string> distBoxKey, List<ObjectId> objectIds, ref string attributesCopy)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            var loads = new List<ThPDSLoad>();
+            
+            if(LoadBlocks[entity].EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
+            {
+                var service = new ThPDSMarkAnalysisService();
+                objectIds.Add(LoadBlocks[entity].ObjId);
+                var frame = ThPDSBufferService.Buffer(entity, database);
+                var marks = markService.GetMarks(frame);
+                var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[entity], ref attributesCopy);
+                load.SetOnLightingCableTray(true);
+                loads.Add(load);
+            }
+            
+            node.Loads = loads;
+            node.NodeType = PDSNodeType.Load;
+            return node;
+        }
+
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
         {
@@ -104,8 +127,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaCableTray = true;
             }
-            // 可能存在问题
-            if (target.NodeType == PDSNodeType.Load)
+            if (target.NodeType == PDSNodeType.Load || target.NodeType == PDSNodeType.None)
             {
                 edge.Circuit.ViaConduit = true;
             }
@@ -146,7 +168,7 @@ namespace TianHua.Electrical.PDS.Service
 
             if (target.NodeType == PDSNodeType.None)
             {
-                ThPDSLayerService.Assign(edge.Circuit, target.Loads[0]);
+                ThPDSLayerService.Assign(target.Loads[0]);
             }
             return edge;
         }

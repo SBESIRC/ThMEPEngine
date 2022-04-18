@@ -19,8 +19,8 @@ namespace TianHua.Electrical.PDS.Engine
             EdgeMapList = edgeMapList;
         }
 
-        public AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
-            List<AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
+        public BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> GraphUnion(
+            List<BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>> graphList,
             ThPDSCircuitGraphNode cableTrayNode)
         {
             var cabletrayEdgeList = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
@@ -86,7 +86,7 @@ namespace TianHua.Electrical.PDS.Engine
                 }
             }
 
-            var unionGraph = new AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            var unionGraph = new BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             cabletrayEdgeList.ForEach(edge =>
             {
                 if (!IsContains(unionGraph, edge.Target, out var originalNode))
@@ -140,7 +140,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="node"></param>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        private bool IsContains(AdjacencyGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
+        private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
             if (node.NodeType != PDSNodeType.None)
@@ -222,24 +222,7 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         private bool PowerCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
         {
-            var check = true;
-            var vertexUsualPower = vertex.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
-            var vertexFirePower = vertex.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
-            var nodeUsualPower = node.Loads[0].InstalledCapacity.UsualPower.OrderBy(o => o).ToList();
-            var nodeFirePower = node.Loads[0].InstalledCapacity.FirePower.OrderBy(o => o).ToList();
-            if (vertexUsualPower.Count == nodeUsualPower.Count && vertexFirePower.Count == nodeFirePower.Count)
-            {
-                if (!LoopCheck(vertexUsualPower, nodeUsualPower) || !LoopCheck(vertexFirePower, nodeFirePower))
-                {
-                    check = false;
-                }
-            }
-            else
-            {
-                check = false;
-            }
-
-            return check;
+            return vertex.Loads[0].InstalledCapacity.EqualsTo(node.Loads[0].InstalledCapacity);
         }
 
         /// <summary>
@@ -253,20 +236,6 @@ namespace TianHua.Electrical.PDS.Engine
             return vertex.Loads[0].LoadTypeCat_1 == node.Loads[0].LoadTypeCat_1
                 && vertex.Loads[0].LoadTypeCat_2 == node.Loads[0].LoadTypeCat_2
                 && vertex.Loads[0].LoadTypeCat_3 == node.Loads[0].LoadTypeCat_3;
-        }
-
-        private bool LoopCheck(List<double> first, List<double> second)
-        {
-            var check = true;
-            for (var i = 0; i < first.Count; i++)
-            {
-                if (first[i] != second[i])
-                {
-                    check = false;
-                    break;
-                }
-            }
-            return check;
         }
     }
 }

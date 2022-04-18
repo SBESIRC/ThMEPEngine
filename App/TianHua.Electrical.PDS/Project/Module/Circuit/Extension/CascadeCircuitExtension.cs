@@ -22,11 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     if (oValue.IsNull())
                         continue;
                     PDSBaseComponent component = (PDSBaseComponent)oValue;
-                    if (component.IsCascadeComponent())
-                    {
-                        var value = component.GetCascadeRatedCurrent();
-                        resultValue =System.Math.Max(resultValue, value);
-                    }
+                    resultValue =System.Math.Max(resultValue, component.GetCascadeCurrent());
                 }
             }
             return resultValue;
@@ -46,14 +42,43 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     if (oValue.IsNull())
                         continue;
                     PDSBaseComponent component = (PDSBaseComponent)oValue;
-                    if (component.IsCascadeComponent())
-                    {
-                        var value = component.GetCascadeRatedCurrent();
-                        resultValue =System.Math.Max(resultValue, value);
-                    }
+                    resultValue =System.Math.Max(resultValue, component.GetCascadeCurrent());
                 }
             }
             return resultValue;
+        }
+
+        public static double GetCascadeCurrent(this MiniBusbar miniBusbar)
+        {
+            double resultValue = 0;
+            if (miniBusbar.IsNull())
+                return resultValue;
+            Type type = miniBusbar.GetType();
+            foreach (PropertyInfo prop in type.GetProperties())
+            {
+                if (prop.PropertyType == typeof(PDSBaseComponent) ||prop.PropertyType.IsSubclassOf(typeof(PDSBaseComponent)))
+                {
+                    object oValue = prop.GetValue(miniBusbar);
+                    if (oValue.IsNull())
+                        continue;
+                    PDSBaseComponent component = (PDSBaseComponent)oValue;
+                    resultValue =System.Math.Max(resultValue, component.GetCascadeCurrent());
+                }
+            }
+            return resultValue;
+        }
+
+        public static double GetCascadeCurrent(this PDSBaseComponent component)
+        {
+            if (component.IsCascadeComponent())
+            {
+                var value = component.GetCascadeRatedCurrent();
+                return value;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

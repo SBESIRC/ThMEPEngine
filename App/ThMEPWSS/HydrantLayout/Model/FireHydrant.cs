@@ -84,7 +84,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             clockwise270 = new Vector3d(-dir.Y, dir.X, dir.Z).GetNormal();
 
 
-            //数据更新
+            //计算一些衍生数据
             SideDataGeneration();
 
             //构建模型
@@ -101,7 +101,7 @@ namespace ThMEPWSS.HydrantLayout.Model
              doorOffset = LongSide*0.25;
         }
 
-        //计算消火栓外包框线
+        //搭建模型，为计算消火栓外包框线做准备
         private void GetFireAttribute()
         {
             Point3d tmppt0;
@@ -235,7 +235,7 @@ namespace ThMEPWSS.HydrantLayout.Model
             return plList;
         }
 
-        //固定此消防栓
+        //读取消火栓的参数，之后要放入输出模型中
         public void SetModel(int tIndex,int dtIndex, out Point3d fireCenterPoint,out Vector3d fireDir)
         {
             fireCenterPoint = TFireCenterPointList[tIndex];

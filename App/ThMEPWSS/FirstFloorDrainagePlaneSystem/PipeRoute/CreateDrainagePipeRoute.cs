@@ -91,8 +91,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 
                 resRoutes.AddRange(routing);
             }
+            resRoutes.AddRange(RoutingOutPipe(handleConfluenceService.otherOutPoly, resRoutes));
 
-           
             return resRoutes;
         }
 
@@ -146,7 +146,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             foreach (var pipe in connectPipes)
             {
                 var allLines = sewageLines;
-                if (pipe.PipeType == VerticalPipeType.rainPipe)
+                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
                 {
                     //allLines = rainLines;
                 }
@@ -162,17 +162,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
-                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
-                using (acad.Database.GetDocument().LockDocument())
-                {
-                    foreach (var item in weightHoles)
-                    {
-                        foreach (var s in item.Key)
-                        {
-                           //acad.ModelSpace.Add(s);
-                        }
-                    }
-                }
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
@@ -180,6 +169,52 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         route.printCircle = pipe.PipeCircle;
                     }
+                    route.connecLine = closetLine.Key;
+                    resRoutes.Add(route);
+                }
+            }
+
+            return resRoutes;
+        }
+
+        /// <summary>
+        /// 连接主管（连接房间外的各种管线）
+        /// </summary>
+        /// <param name="mainPipes"></param>
+        /// <returns></returns>
+        private List<RouteModel> RoutingOutPipe(List<VerticalPipeModel> outPipes, List<RouteModel> routes)
+        {
+            var resRoutes = new List<RouteModel>();
+            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var holeConnectLines = routes.Select(x => x.route).ToList();
+            foreach (var pipe in outPipes)
+            {
+                var allLines = sewageLines;
+                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
+                {
+                    //allLines = rainLines;
+                }
+                if (allLines.Count <= 0)
+                {
+                    continue;
+                }
+                var closetLine = GetClosetLane(allLines, pipe.Position, frame);
+                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, new Dictionary<Vector3d, List<Line>>());
+                Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
+                weightHoles.Add(wallPolys, double.MaxValue);
+                weightHoles.Add(CreateOtherPipeHoles(outPipes, pipe, closetLine.Key), double.MaxValue);
+                weightHoles.Add(holeConnectLines, lineWieght);
+                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
+                holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
+                foreach (var line in connectLine)
+                {
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
+                    if (pipe.IsEuiqmentPipe)
+                    {
+                        route.printCircle = pipe.PipeCircle;
+                    }
+                    route.connecLine = closetLine.Key;
                     resRoutes.Add(route);
                 }
             }
@@ -236,8 +271,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (closePoly != null)
                 {
                     var dir = StructGeoService.GetPolylineDir(closePoly);
-                    var matrix = GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
-                    var classifyMatrix = GetMatrix(dir);
+                    var matrix = GeometryUtils.GetMatrix((longLine.EndPoint - longLine.StartPoint).GetNormal());
+                    var classifyMatrix = GeometryUtils.GetMatrix(dir);
                     var polyPts = closePoly.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(classifyMatrix.Inverse())).ToList();
                     double minX = polyPts.OrderBy(x => x.X).First().X;
                     double maxX = polyPts.OrderByDescending(x => x.X).First().X;
@@ -300,25 +335,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 else
                     return pipes.OrderBy(x => Math.Floor(x.Value.Y)).ThenByDescending(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
             }
-        }
-
-        /// <summary>
-        /// 根据某个方向排序点
-        /// </summary>
-        /// <param name="pts"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        public Matrix3d GetMatrix(Vector3d dir)
-        {
-            var xDir = dir;
-            var yDir = Vector3d.ZAxis.CrossProduct(xDir);
-            var zDir = Vector3d.ZAxis;
-            Matrix3d matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
-                    0.0, 0.0, 0.0, 1.0});
-            return matrix;
         }
 
         /// <summary>

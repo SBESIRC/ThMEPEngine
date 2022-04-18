@@ -16,6 +16,8 @@
         public const string ductDimContents = "DuctDimContents";
         public const string ductDimensions = "DuctDimensions";
         public const string ductOffsets = "DuctOffsets";
+        public const string dimSegments = "DimSegments";
+        public const string dimPt2Pts = "DimPt2Pts";
         public static string[] subSystems = { "消防加压",
                                               "消防排烟",
                                               "消防补风",

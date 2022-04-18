@@ -15,15 +15,20 @@ namespace TianHua.Electrical.PDS.Diagram
 {
     public class ThPDSBlockInsertEngine
     {
-        public BlockReference Insert1(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale)
+        public ObjectId Insert(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale)
         {
             activeDb.Blocks.Import(configDb.Blocks.ElementOrDefault(blockName), false);
-            var tableTitleId = activeDb.ModelSpace.ObjectId.InsertBlockReference(
+            return activeDb.ModelSpace.ObjectId.InsertBlockReference(
                 "0",
                 blockName,
                 basePoint,
                 scale,
                 0.0);
+        }
+
+        public BlockReference Insert1(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale)
+        {
+            var tableTitleId = Insert(activeDb, configDb, blockName, basePoint, scale);
             return activeDb.Element<BlockReference>(tableTitleId, true);
         }
 
