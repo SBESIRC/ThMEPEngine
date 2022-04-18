@@ -12,6 +12,9 @@ using ThMEPWSS.CADExtensionsNs;
 using DotNetARX;
 using ThCADCore.NTS;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
+using NFox.Cad;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
@@ -149,80 +152,45 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         }
         public List<ThFlushPointModel> GetFlushPointList(Point3dCollection pts)
         {
-            var result = new List<ThFlushPointModel>();
-            var bound = new Polyline()
+
+            using (AcadDatabase adb = AcadDatabase.Active())
             {
-                Closed = true,
-            };
-            bound.CreatePolyline(pts);
-            //块
-            foreach (var e in Entities.OfType<BlockReference>().Where(e =>
-            {
-                bool cond_a = e.ObjectId.IsValid;
-                bool cond_b = e.Database != null ? e.GetEffectiveName().Contains("给水角阀平面")
-                : e.Name.Contains("给水角阀平面");
-                bool cond_c = bound.Contains(e.Position);
-                if (cond_a && cond_b && cond_c) return true;
-                else return false;
-            }))
-            {
-                ThFlushPointModel thFlushPoint = new ThFlushPointModel(e);
-                result.Add(thFlushPoint);
-            }
-            //块中块
-            foreach (var e in Entities.OfType<BlockReference>().Where(e =>
+                var result = new List<ThFlushPointModel>();
+                var bound = new Polyline()
                 {
-                    return e.ExplodeToDBObjectCollection().OfType<BlockReference>().Any();
-                })
-                .Select(e => e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList()))
-            {
-                foreach (var br in e)
+                    Closed = true,
+                };
+                bound.CreatePolyline(pts);
+                var blks = ExtractBlocks(adb.Database, "给水角阀平面").Cast<BlockReference>().ToList();
+                blks = blks.Where(br => bound.Contains(br.Position)).ToList();
+                foreach (var br in blks)
                 {
-                    bool cond_a = br.ObjectId.IsValid;
-                    bool cond_b = br.Database != null ? br.GetEffectiveName().Contains("给水角阀平面")
-                    : br.Name.Contains("给水角阀平面");
-                    bool cond_c = bound.Contains(br.Position);
-                    if (cond_a && cond_b && cond_c)
-                    {
-                        ThFlushPointModel thFlushPoint = new ThFlushPointModel(br);
-                        result.Add(thFlushPoint);
-                    }
+                    ThFlushPointModel thFlushPoint = new ThFlushPointModel(br);
+                    result.Add(thFlushPoint);
                 }
+                return result;
             }
-            //
-            foreach (var e in Entities.OfType<Entity>()
-               .Where(e => IsTianZhengElement(e))
-               .Where(e =>
-               {
-                   try
-                   {
-                       return e.ExplodeToDBObjectCollection().OfType<BlockReference>().Any();
-                   }
-                   catch { return false; }
-               })
-               .Select(e =>
-               {
-                   var brs = e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
-                   return brs;
-               })
-               .Where(e => e.Count > 0)
-               .Select(e => e[0])
-               .Where(e => e.Name.Contains("给水角阀平面"))
-               .Where(e =>
-               {
-                   if (e.Bounds is Extents3d extent3d)
-                   {
-                       if (bound.Contains(extent3d.CenterPoint())) return true;
-                       else return false;
-                   }
-                   return false;
-               }))
+        }
+        private DBObjectCollection ExtractBlocks(Database db, string blockName)
+        {
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
             {
-                ThFlushPointModel thFlushPoint = new ThFlushPointModel(e);
-                result.Add(thFlushPoint);
-            }
-            //
-            return result;
+                if (e is BlockReference br)
+                {
+                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                }
+                return false;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.Extract(db); // 提取块中块(包括外参)
+            extractor.ExtractFromMS(db); // 提取本地块
+
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
     }
 }

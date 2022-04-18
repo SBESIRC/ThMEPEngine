@@ -229,12 +229,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     subPt1 += hvector * 1000;
                     sumLength += 1000;
                 }
-                //立管
-                var riserPoint = subPt1;
-                DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector, rootLine);
-                sumLength += riserPoint.DistanceTo(subPt1);
-                subPt1 = riserPoint;
                 //绘制管径              
                 string sdimMark = "";
                 foreach (var pointNode in pointList)
@@ -246,6 +240,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
                 var sdimPt = subPt1 - hvector * 1000.0;
                 DrawText("W-WSUP-DIMS", sdimMark, sdimPt, 0.0);
+                //立管
+                var riserPoint = subPt1;
+                DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
+                    ref floorIndex, ref mvector, rootLine);
+                sumLength += riserPoint.DistanceTo(subPt1);
+                subPt1 = riserPoint;
                 //画子节点
                 var subLength = DrawSubNode(subPt1, subNode, height, floorIndex, rootLine);
                 sumLength += subLength;
@@ -277,12 +277,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 rootPt2 += hvector * 1000;
                 sumLength += 1000;
             }
-            //立管
-            var _riserPoint = rootPt2;
-            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector, rootLine);
-            sumLength += _riserPoint.DistanceTo(rootPt2);
-            rootPt2 = _riserPoint;
             //绘制管径
             var rootPointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             string dimMark1 = "";
@@ -295,6 +289,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             var dimPt1 = rootPt2 - hvector * 1000.0;
             DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
+            //立管
+            var _riserPoint = rootPt2;
+            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
+                ref floorIndex, ref mvector, rootLine);
+            sumLength += _riserPoint.DistanceTo(rootPt2);
+            rootPt2 = _riserPoint;
+
             return rootLength;
         }
         public double DrawSubNode(Point3d basePt, ThTreeNode<ThPipeModel> subNode, double height, int floorIndex, Line rootLine)
@@ -363,12 +364,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     childPt1 += hvector * 1000;
                     sumLength += 1000;
                 }
-                //立管
-                var riserPoint = childPt1;
-                DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector);
-                sumLength += riserPoint.DistanceTo(childPt1);
-                childPt1 = riserPoint;
                 //绘制管径              
                 string sdimMark = "";
                 foreach (var pointNode in pointList)
@@ -380,6 +375,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
                 var sdimPt = childPt1 - hvector * 1000.0;
                 DrawText("W-WSUP-DIMS", sdimMark, sdimPt, 0.0);
+                //立管
+                var riserPoint = childPt1;
+                DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
+                    ref floorIndex, ref mvector);
+                sumLength += riserPoint.DistanceTo(childPt1);
+                childPt1 = riserPoint;      
                 //绘制子节点
                 var subLength = DrawSubNode(childPt1, childNode, height, floorIndex, rootLine);
                 sumLength += subLength;
@@ -418,12 +419,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制当前节点干线
             PreLines.Add(new PreLine(new Line(hLinePt1, hLinePt2), PipeLayerName, 0));
             var hLine1 = new Line(hLinePt1, hLinePt2);
-            //立管
-            var _riserPoint = hLinePt2;
-            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector);
-            cuLength += _riserPoint.DistanceTo(hLinePt2);
-            hLinePt2 = _riserPoint;
             //绘制管径
             var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
             string dimMark1 = "";
@@ -436,6 +431,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             var dimPt1 = hLinePt2 - hvector * 1000.0;
             DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
+            //立管
+            var _riserPoint = hLinePt2;
+            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
+                ref floorIndex, ref mvector);
+            cuLength += _riserPoint.DistanceTo(hLinePt2);
+            hLinePt2 = _riserPoint;
             return cuLength;
         }
 
