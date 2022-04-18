@@ -56,7 +56,6 @@
       <DependentUpon>ThFeedBackDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="ThCuiApp.cs" />
-    <Compile Include="ThCuiCmdHandler.cs" />
     <Compile Include="ThCuiCommon.cs" />
     <Compile Include="ThCuiProfileYamlParser.cs" />
     <Compile Include="ThPartialCui.cs" />
