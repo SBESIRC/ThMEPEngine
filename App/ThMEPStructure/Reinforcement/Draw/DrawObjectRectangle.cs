@@ -118,10 +118,7 @@ namespace ThMEPStructure.Reinforcement.Draw
 
 
         }
-        void CalReinforceCPosition(int pointNum, int pointCNum)
-        {
-
-        }
+        
 
         protected void R_FindCJin(List<Point3d> points, StrToReinforce strToRein, List<ZongjinPoint> ZongjinPoint_list)
         {

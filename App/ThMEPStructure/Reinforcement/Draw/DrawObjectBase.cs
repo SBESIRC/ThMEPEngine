@@ -25,7 +25,7 @@ namespace ThMEPStructure.Reinforcement.Draw
         public List<int> LinksFlag = new List<int>();        //标记不同LINK的类型
         public List<Point3d> points;    //纵筋位置
         //记录添加的纵筋点能组成哪种拉筋，1是link1箍筋轮廓，2是link2是拉筋水平，3是link3竖向，4是link4 >=300增加的点
-        protected List<int> pointsFlag = new List<int>();
+        public List<int> pointsFlag = new List<int>();
         public DBObjectCollection objectCollection = new DBObjectCollection();
         public double FirstRowHeight = 0;
         public double FirstRowWidth = 0;
