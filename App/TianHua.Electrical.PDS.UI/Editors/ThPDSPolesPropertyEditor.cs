@@ -28,13 +28,13 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Poles).Distinct();
             }
-            if (propertyItem.Value is ThPDSContactorModel)
+            if (propertyItem.Value is ThPDSContactorModel contactor)
             {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Poles).Distinct();
+                return contactor.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSIsolatingSwitchModel switchModel)
             {
-                return IsolatorConfiguration.isolatorInfos.Where(o => o.MaxKV == switchModel.MaxKV).Select(o => o.Poles).Distinct();
+                return switchModel.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSATSEModel atse)
             {

@@ -35,7 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _isolatingSwitch.Model;
             set
             {
-                _isolatingSwitch.Model = value;
+                _isolatingSwitch.SetModel(value);
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }
@@ -49,7 +49,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _isolatingSwitch.PolesNum;
             set
             {
-                _isolatingSwitch.PolesNum = value;
+                _isolatingSwitch.SetPolesNum(value);
                 OnPropertyChanged(nameof(PolesNum));
                 OnPropertyChanged(nameof(Content));
             }
@@ -84,6 +84,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<string> AlternativeRatedCurrents
         {
             get => _isolatingSwitch.GetRatedCurrents();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _isolatingSwitch.GetModels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _isolatingSwitch.GetPolesNums();
         }
     }
 }
