@@ -55,7 +55,9 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 // 得到的是标准的构件
                 var edgeComponents = GetEdgeComponents();
+                // 绘制配筋表
                 Draw(edgeComponents.Select(o => o.Item2).ToList(), basePt);
+                // 绘制轮廓、标注
                 Draw(edgeComponents.Select(o => o.Item1).ToList());
             }
         }
@@ -288,7 +290,7 @@ namespace ThMEPStructure.Reinforcement.Command
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
                             if(edgeComponent!=null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o);
+                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
                                 results.Add(Tuple.Create(o,edgeComponent));
                             }                            
                         }
@@ -299,7 +301,7 @@ namespace ThMEPStructure.Reinforcement.Command
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade);
                             if (edgeComponent != null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o);
+                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
                                 results.Add(Tuple.Create(o, edgeComponent));
                             }                            
                         }
@@ -309,9 +311,10 @@ namespace ThMEPStructure.Reinforcement.Command
             }            
         }
         private void SetValueToEdgeComponent(ThEdgeComponent edgeComponent,
-            EdgeComponentExtractInfo info)
+            EdgeComponentExtractInfo info,bool isFind)
         {
-            if(edgeComponent ==null || info == null)
+            // isFind 根据Cad计算书中的箍筋体积配箍率，在内置表中确实找到符合条件的列
+            if (edgeComponent ==null || info == null)
             {
                 return;
             }
@@ -357,11 +360,41 @@ namespace ThMEPStructure.Reinforcement.Command
             edgeComponent.StirrupLineWeight = ThWallColumnReinforceConfig.Instance.StirrupLineWeight;
             if(info.IsCalculation)
             {
+                // 放大纵筋
                 edgeComponent.EnhancedReinforce = GetEnhancedReinforce(
                     edgeComponent.Reinforce, info.AllReinforceArea);
+                // 放大箍筋
+                if(!isFind)
+                {
+                    GetEnhancedStirrupAndLinks(edgeComponent, info.StirrupRatio);
+                }
             }            
         }
         
+        private void GetEnhancedStirrupAndLinks(ThEdgeComponent edgeComponent,double stirrupRatio)
+        {
+            ThEdgeComponentStirrupEnhanceService enhanceService = null;
+            if(edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
+            {
+                enhanceService = new ThRectEdgeComponentStirrupEnhanceService(
+                    rectEdgeComponent, stirrupRatio);
+            }
+            else if(edgeComponent is ThLTypeEdgeComponent lTypeEdgeComponent)
+            {
+                enhanceService = new ThLTypeEdgeComponentStirrupEnhanceService(
+                    lTypeEdgeComponent, stirrupRatio);
+            }
+            else if(edgeComponent is ThTTypeEdgeComponent tTypeEdgeComponent)
+            {
+                enhanceService = new ThTTypeEdgeComponentStirrupEnhanceService(
+                    tTypeEdgeComponent, stirrupRatio);
+            }
+            if(enhanceService!=null)
+            {
+                enhanceService.Enhance();
+            }
+        }
+
         private string GetEnhancedReinforce(string reinforce,double calculationReinforceArea)
         {
             var enhance = new ThReinforceEnhanceService(reinforce, calculationReinforceArea);

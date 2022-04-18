@@ -1,18 +1,18 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using NFox.Cad;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
@@ -272,6 +272,49 @@ namespace ThMEPStructure.Reinforcement.Service
             transformer.Reset(polys);
             transformer.Reset(results);
             return results;
+        }
+        public static bool IsValidStirrup(string stirrup)
+        {
+            //Z8@120,C8@120
+            var newStirrup = stirrup.Trim().ToUpper();
+            string pattern = @"^[ZC]{1}[\s]*\d+[\s]*[@]{1}[\s]*\d+$";
+            return Regex.IsMatch(newStirrup,pattern);
+        }
+        public static List<int> GetStirrupDatas(string stirrup)
+        {
+            return IsValidStirrup(stirrup) ? GetIntegers(stirrup) : new List<int>();
+        }
+        public static bool IsValidLink(string link)
+        {
+            //1 Z 8@120,1 C 8@120
+            var newLink = link.Trim().ToUpper();
+            string pattern = @"^\d+[\s]*[ZC]{1}[\s]*\d+[\s]*[@]{1}[\s]*\d+$";
+            return Regex.IsMatch(newLink,pattern);
+        }
+        public static List<int> GetLinkDatas(string link)
+        {
+            return IsValidLink(link) ? GetIntegers(link) : new List<int>();
+        }
+        public static List<int> GetIntegers(string content)
+        {
+            var datas = new List<int>();
+            string pattern = @"\d+";
+            foreach (Match item in Regex.Matches(content, pattern))
+            {
+                datas.Add(int.Parse(item.Value));
+            }
+            return datas;
+        }
+        /// <summary>
+        /// 判断value1是否大于value2,
+        /// 或value1四舍五入后是否大于value2
+        /// </summary>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <returns></returns>
+        public static bool IsBiggerThan(double value1, double value2,int value1Digits)
+        {
+            return value1 >= value2 || Math.Round(value1, value1Digits) >= value2;
         }
     }
 }

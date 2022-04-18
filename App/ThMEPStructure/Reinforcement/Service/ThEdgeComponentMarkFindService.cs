@@ -296,23 +296,37 @@ namespace ThMEPStructure.Reinforcement.Service
                 return  results;
             }
             var preStr = reinforceText.Substring(0, firstIndex);
-            var nextStr = reinforceText.Substring(firstIndex + 1);
-
             var pattern1 = @"\d+[.]{0,1}(\d+){0,}[(|（]\d+\.{0,1}\d+[%]{1,}[)|）]{1}";
-            var pattern2 = @"\d+[.]{0,1}\d+[%]{1,}";
             var rg1 = new Regex(pattern1);
-            var rg2 = new Regex(pattern2);
-            if(rg1.IsMatch(preStr) && rg2.IsMatch(nextStr))
+            if (rg1.IsMatch(preStr))
             {
-                var pattern3 = @"\d+[.]{0,1}\d+";
-                var rg3 = new Regex(pattern3);
-                foreach (Match match in rg3.Matches(preStr))
+                var nextStr = reinforceText.Substring(firstIndex + 1);
+                var pattern2A = @"\d+[.]{0,1}\d+[%]{1,}";
+                var pattern2B = @"\d+\s*([%]{2}|[%]{4})(132)\s*\d+";
+                var rg2A = new Regex(pattern2A);
+                var rg2B = new Regex(pattern2B);
+                if(rg2A.IsMatch(nextStr))
                 {
-                    results.Add(double.Parse(match.Value));
+                    var pattern3 = @"\d+[.]{0,1}\d+";
+                    var rg3 = new Regex(pattern3);
+                    foreach (Match match in rg3.Matches(preStr))
+                    {
+                        results.Add(double.Parse(match.Value));
+                    }
+                    foreach (Match match in rg3.Matches(nextStr))
+                    {
+                        results.Add(double.Parse(match.Value));
+                    }
                 }
-                foreach (Match match in rg3.Matches(nextStr))
+                else if(rg2B.IsMatch(nextStr))
                 {
-                    results.Add(double.Parse(match.Value));
+                    var pattern3 = @"\d+[.]{0,1}\d+";
+                    var rg3 = new Regex(pattern3);
+                    foreach (Match match in rg3.Matches(preStr))
+                    {
+                        results.Add(double.Parse(match.Value));
+                    }
+                    results.Add(0.0);
                 }
             }
             return results;

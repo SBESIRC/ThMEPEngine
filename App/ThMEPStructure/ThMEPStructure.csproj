@@ -109,6 +109,8 @@
     <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
     <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
+    <Compile Include="Reinforcement\Service\ThSteelDataManager.cs" />
+    <Compile Include="Reinforcement\Service\ThStirrupEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThTTypeSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThLTypeSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThRectangleSpecAnalysisService.cs" />
