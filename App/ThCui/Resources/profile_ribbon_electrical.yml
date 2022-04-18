@@ -357,7 +357,7 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "电气连线"
+          - text: "地库连线"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:

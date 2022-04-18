@@ -1272,12 +1272,12 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 电气连线
+                // 地库连线
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("电气连线",
-                    "天华电气连线",
+                subRow.AddNewButton("地库连线",
+                    "天华地库连线",
                     "THLX",
-                    "天华电气连线",
+                    "天华地库连线",
                     "IDI_THCAD_THLX_SMALL",
                     "IDI_THCAD_THLX_LARGE",
                     RibbonButtonStyle.LargeWithText);
