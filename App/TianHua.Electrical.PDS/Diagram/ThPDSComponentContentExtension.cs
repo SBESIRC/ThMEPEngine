@@ -47,5 +47,10 @@ namespace TianHua.Electrical.PDS.Diagram
                 throw new NotSupportedException();
             }
         }
+
+        public static string Content(this TransferSwitch transferSwitch)
+        {
+            return $"{transferSwitch.Model} {transferSwitch.RatedCurrent}A {transferSwitch.PolesNum}";
+        }
     }
 }

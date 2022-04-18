@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
@@ -19,6 +20,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         private void btnSaveSetting(object sender, RoutedEventArgs e)
         {
+            ThPDSProjectGraphService.MotorChoiseChange();
         }
         private void btnExportSetting(object sender, RoutedEventArgs e)
         {

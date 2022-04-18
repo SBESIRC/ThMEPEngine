@@ -25,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             var ProjectGraph = new ThPDSProjectGraph(graph);
             ProjectGraph.CalculateProjectInfo();
-            ProjectGraph.CalculateSecondaryCircuit();
+            //ProjectGraph.CalculateSecondaryCircuit();
             return ProjectGraph;
         }
 
@@ -57,14 +57,12 @@ namespace TianHua.Electrical.PDS.Project
                 PDSProjectGraph.CalculateProjectInfo(e.Target);
                 e.ComponentSelection();
             });
-            if (node.Details.HighPower <= 0)
-            {
-                edges.BalancedPhaseSequence();
-                node.Details.HighPower = edges.Select(e => e.Target).ToList().CalculatePower();
-            }
+            edges.BalancedPhaseSequence();
+            node.Details.HighPower =Math.Max(node.Load.InstalledCapacity.HighPower, edges.Select(e => e.Target).ToList().CalculatePower());
             node.CalculateCurrent();
             PDSProjectGraph.CalculateCircuitFormInType(node);
             node.ComponentSelection(edges);
+            PDSProjectGraph.CalculateSecondaryCircuit(edges);
             node.Details.IsStatistical = true;
             return;
         }
@@ -419,7 +417,7 @@ namespace TianHua.Electrical.PDS.Project
                 //漏电
                 edge.Details.CircuitForm = new LeakageCircuit()
                 {
-                    breaker= componentFactory.CreatBreaker(),
+                    breaker= componentFactory.CreatResidualCurrentBreaker(),
                     Conductor = componentFactory.CreatConductor(),
                 };
             }
@@ -495,16 +493,37 @@ namespace TianHua.Electrical.PDS.Project
             {
                 if(edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
                 {
-                    var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitInfos[edge.Target.Load.LoadTypeCat_3.ToString()];
+                    var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitConfigs[edge.Target.Load.LoadTypeCat_3.ToString()];
                     foreach (SecondaryCircuitInfo item in secondaryCircuitInfos)
                     {
-                        int index = edge.Source.Details.SecondaryCircuits.Count+ 1;
-                        var secondaryCircuit = new SecondaryCircuit(index);
-                        secondaryCircuit.CircuitDescription = item.Description;
-                        secondaryCircuit.conductor = new Conductor(item.Conductor,item.ConductorCategory , edge.Target.Load.Phase, edge.Target.Load.CircuitType,  edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber);
-                        edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>() { });
+                        ThPDSProjectGraphService.AddControlCircuit(projectGraph ,edge, item);
+                    }
+                }
+            }
+        }
 
-                        ThPDSProjectGraphService.AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, edge);
+        /// <summary>
+        /// 计算控制回路
+        /// </summary>
+        public static void CalculateSecondaryCircuit(this ThPDSProjectGraph PDSProjectGraph, List<ThPDSProjectGraphEdge> edges)
+        {
+            var projectGraph = PDSProjectGraph.Graph;
+            var SubmersiblePumps = edges.Where(o => o.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.SubmersiblePump);
+            if (SubmersiblePumps.Count() > 0)
+            {
+                var edge = SubmersiblePumps.First();
+                var secondaryCircuitInfo = SecondaryCircuitConfiguration.SecondaryCircuitConfigs["SubmersiblePump"].First();
+                var secondaryCircuit = ThPDSProjectGraphService.AddControlCircuit(projectGraph, edge, secondaryCircuitInfo);
+                SubmersiblePumps.Skip(1).ForEach(e => ThPDSProjectGraphService.AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, e));
+            }
+            foreach (ThPDSProjectGraphEdge edge in edges.Except(SubmersiblePumps))
+            {
+                if (edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
+                {
+                    var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitConfigs[edge.Target.Load.LoadTypeCat_3.ToString()];
+                    foreach (SecondaryCircuitInfo item in secondaryCircuitInfos)
+                    {
+                        ThPDSProjectGraphService.AddControlCircuit(projectGraph, edge, item);
                     }
                 }
             }
@@ -907,7 +926,6 @@ namespace TianHua.Electrical.PDS.Project
             }
             return result;
         }
-
 
         /// <summary>
         /// 兼容图

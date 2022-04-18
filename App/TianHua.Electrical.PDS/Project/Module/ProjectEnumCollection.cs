@@ -181,6 +181,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         KYJY,
         [Description("RYJ")]
         RYJ,
+        [Description("BTTZ")]
+        BTTZ,
+        [Description("BTTRZ")]
+        BTTRZ,
+        [Description("RTTZ")]
+        RTTZ,
         [Description("NG-A(BTLY)")]
         NG_A_BTLY,
     }

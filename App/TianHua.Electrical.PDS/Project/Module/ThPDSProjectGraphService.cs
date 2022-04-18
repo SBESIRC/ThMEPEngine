@@ -160,7 +160,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 if (oneWayInCircuit.reservedComponent is OUVP)
                 {
-                    oneWayInCircuit.reservedComponent = null ;
+                    oneWayInCircuit.reservedComponent = null;
                 }
             }
             else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
@@ -284,7 +284,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
         {
             var miniBusbar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge));
-            if(miniBusbar.Key.IsNull())
+            if (miniBusbar.Key.IsNull())
             {
                 graph.CheckCascadeWithNode(edge.Source);
             }
@@ -335,7 +335,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             return new CircuitFormOutSwitcher(edge);
         }
-        
+
         /// <summary>
         /// 获取进线回路转换器
         /// </summary>
@@ -344,6 +344,23 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static CircuitFormInSwitcher GetCircuitFormInSwitcher(ThPDSProjectGraphNode node)
         {
             return new CircuitFormInSwitcher(node);
+        }
+
+        /// <summary>
+        /// MoterUI Config改变
+        /// </summary>
+        public static void MotorChoiseChange()
+        {
+            var MotorSelection = PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise;
+            var edges = PDSProject.Instance.graphData.Graph.Edges;
+            var type = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS : CircuitFormOutType.电动机_分立元件;
+            foreach (var edge in edges)
+            {
+                if (edge.Details.CircuitForm.CircuitFormType == type)
+                {
+                    SwitchFormOutType(edge, "电动机配电回路");
+                }
+            }
         }
 
         /// <summary>
@@ -369,6 +386,44 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             var CircuitFormOutType = Switch(edge, type);
             SwitchFormOutType(edge, CircuitFormOutType);
+        }
+
+        /// <summary>
+        /// 平衡相序
+        /// </summary>
+        public static void BalancedPhaseSequence(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        {
+            var edges = graph.OutEdges(node).ToList();
+            edges.BalancedPhaseSequence();
+        }
+
+        /// <summary>
+        /// 获取未分配负载
+        /// </summary>
+        /// <param name="FilterEdged">是否过滤已分配回路的负载</param>
+        /// <returns></returns>
+        public static List<ThPDSProjectGraphNode> GetUndistributeLoad(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, bool FilterEdged = false)
+        {
+            //分配负载 就是拿到所有的 未知负载
+            return graph.Vertices
+                .Where(node => node.Type == PDSNodeType.None || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//未知负载/未分配负载
+                .Where(node => !FilterEdged || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//已分配回路负载
+                .ToList();
+        }
+
+        /// <summary>
+        /// 分配负载
+        /// </summary>
+        public static void DistributeLoad(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        {
+            //本身在别的边的负载还不知道怎么处理
+            if (graph.InDegree(target) == 0 && graph.OutDegree(target) == 0)
+            {
+                var newEdge = new ThPDSProjectGraphEdge(source, target) { Circuit = new ThPDSCircuit() };
+                newEdge.ComponentSelection();
+                graph.AddEdge(newEdge);
+                PDSProject.Instance.graphData.CheckWithNode(source);
+            }
         }
 
         /// <summary>
@@ -527,19 +582,28 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 添加控制回路
-        /// 预留，暂时不要调用，等张皓逻辑
+        /// 获取可选择二次回路
         /// </summary>
-        [Obsolete]
-        public static void AddControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphEdge edge)
+        public static List<SecondaryCircuitInfo> GetSecondaryCircuitInfos(ThPDSProjectGraphEdge edge)
         {
-            //var maxIndex = edge.Target.Details.SecondaryCircuits.Max(o => o.Key.Index) + 1;
-            //var secondaryCircuit = new SecondaryCircuit(maxIndex);
-            //secondaryCircuit.CircuitDescription = item.Description;
-            //secondaryCircuit.conductor = new Conductor(item.Conductor, item.ConductorCategory, edge.Target.Load.Phase, edge.Target.Load.CircuitType, edge.Target.Load.FireLoad, edge.Circuit.ViaConduit, edge.Circuit.ViaCableTray, edge.Target.Load.Location.FloorNumber);
-            //edge.Target.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>() { edge });
+            return edge.Target.Load.FireLoad ? SecondaryCircuitConfiguration.FireSecondaryCircuitInfos : SecondaryCircuitConfiguration.NonFireSecondaryCircuitInfos;
         }
 
+        /// <summary>
+        /// 添加控制回路
+        /// </summary>
+        public static SecondaryCircuit AddControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphEdge edge, SecondaryCircuitInfo secondaryCircuitInfo)
+        {
+            int index = edge.Source.Details.SecondaryCircuits.Count > 0 ? edge.Source.Details.SecondaryCircuits.Sum(o => o.Value.Count) + 1 : 1;
+            var secondaryCircuit = new SecondaryCircuit(index);
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+            secondaryCircuit.CircuitDescription = secondaryCircuitInfo.Description;
+            secondaryCircuit.conductor = componentFactory.GetSecondaryCircuitConductor(secondaryCircuitInfo);
+            edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>());
+            AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, edge);
+            return secondaryCircuit;
+        }
+        
         /// <summary>
         /// 指定回路至控制回路
         /// </summary>
