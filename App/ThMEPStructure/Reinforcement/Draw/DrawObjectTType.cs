@@ -869,7 +869,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     }
                 }
 
-                if (thTTypeEdgeComponent.IsCalculation == true)
+                if (thTTypeEdgeComponent.IsCalculation == true && !thTTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     //先判断是第几次迭代
                     //这里的Reinforce默认有两种以上的纵筋规格
@@ -1175,7 +1175,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int enhanceStep = 0; //enhance=0,为非step5或6，enhance=1，则step=5，enhance=2，则step=6
                 bool isCal = false;
                 int Step = 0;
-                if (thTTypeEdgeComponent.IsCalculation == true)
+                if (thTTypeEdgeComponent.IsCalculation == true && !thTTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
@@ -1512,7 +1512,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int enhanceStep = 0; //enhance=0,为非step5或6，enhance=1，则step=5，enhance=2，则step=6
                 bool isCal = false;
                 int Step = 0;
-                if (thTTypeEdgeComponent.IsCalculation == true)
+                if (thTTypeEdgeComponent.IsCalculation == true && !thTTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
@@ -1568,7 +1568,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                     {
                         enhanceStep = 2;
                     }
-                }
+                }//修改
                 if (thTTypeEdgeComponent.Type == "A")
                 {
 

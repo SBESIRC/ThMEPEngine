@@ -350,6 +350,10 @@ namespace ThMEPStructure.Reinforcement.Draw
                 objectCollection.Add(tmp);
                 label.AddVertexAt(i, pts[i], 0, 0, 0);
             }
+            if (pts.Count == 0)
+            {
+                return;//修改
+            }
             Point2d pt = pts[pts.Count - 1];
             if (flag)
             {

@@ -844,7 +844,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 }
 
 
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true && !thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     //先判断是第几次迭代
                     //这里的Reinforce默认有两种以上的纵筋规格
@@ -1147,7 +1147,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true&&!thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
@@ -1387,7 +1387,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true && !thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())//修改
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();

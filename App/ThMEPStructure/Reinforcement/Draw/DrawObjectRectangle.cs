@@ -195,7 +195,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                         ZongjinPoint_list[CIndexList[i]].size = dim;
                     }
                 }
-                    if (thRectangleEdgeComponent.IsCalculation == true)
+                    if (thRectangleEdgeComponent.IsCalculation == true&&!thRectangleEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                     {
                         StrToReinforce CalStrToRein = new StrToReinforce();
                         CalStrToRein = Helper.StrToRein(thRectangleEdgeComponent.EnhancedReinforce);
@@ -396,7 +396,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = RReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thRectangleEdgeComponent.IsCalculation == true)
+                if (thRectangleEdgeComponent.IsCalculation == true && !thRectangleEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
@@ -438,10 +438,10 @@ namespace ThMEPStructure.Reinforcement.Draw
                             Step = 6;
                         }
                     }
-                }
+                }//修改
 
-                    //Rect型不分A B型
-                    if (Cnum == 2)
+                //Rect型不分A B型
+                if (Cnum == 2)
                     {
                        
                        Helper.CreateRectAndLabel(points[0], points[1], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
@@ -488,7 +488,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = RReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thRectangleEdgeComponent.IsCalculation == true)
+                if (thRectangleEdgeComponent.IsCalculation == true && !thRectangleEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
