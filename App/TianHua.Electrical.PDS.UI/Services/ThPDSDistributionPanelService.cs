@@ -17,6 +17,7 @@ using TianHua.Electrical.PDS.UI.Helpers;
 using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
+using ThCADExtension;
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public struct GArc
@@ -470,7 +471,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("LowPower", false);
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
                     }
-
                 }
                 if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
                 {
@@ -2168,9 +2168,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                     }
                 }
+                var circuitIDSortNames = "WPE、WP、WLE、WL、WS、WFEL".Split('、').ToList();
+                IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
+                {
+                    return from edge in edges
+                           where edge.Source == vertice
+                           let circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge)
+                           let id = circuitVM.CircuitID ?? ""
+                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                           select edge;
+                }
                 {
                     var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
-                    foreach (var edge in edges)
+                    foreach (var edge in GetSortedEdges(edges))
                     {
                         DrawEdge(edge);
                     }
@@ -2178,7 +2188,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 foreach (var kv in vertice.Details.MiniBusbars)
                 {
                     var mbb = kv.Key;
-                    var edges = ThPDSProjectGraphService.GetSmallBusbarCircuit(null, vertice, mbb);
+                    var edges = GetSortedEdges(ThPDSProjectGraphService.GetSmallBusbarCircuit(graph, vertice, mbb));
                     var start = new Point(busStart.X + 205, -dy - 10);
                     var end = start.OffsetY(10);
                     busEnd = end;
@@ -2991,7 +3001,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     var sc = kv.Key;
                     var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(sc);
-                    foreach (var edge in ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc))
+                    var edges = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc);
+                    foreach (var edge in GetSortedEdges(edges))
                     {
                         DrawEdge(edge);
                     }
@@ -3005,8 +3016,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
                     var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
                     var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
+                    var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
                     {
-                        var st = new Point(pt.X + 144, pt.Y + 10);
+                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10);
                         var ed = st;
                         ed.Y = pt.Y + 40;
                         var ln = CreateLine(null, Brushes.Black, st, ed);
@@ -3015,7 +3027,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         canvas.Children.Add(ln);
                     }
                     pt.Y = -pt.Y;
-                    var item = PDSItemInfo.Create("控制（从属接触器）", pt);
+                    var item = PDSItemInfo.Create(hasCPS ? "控制（从属CPS）" : "控制（从属接触器）", pt);
                     {
                         var glyphs = new List<Glyphs>();
                         foreach (var fe in CreateDrawingObjects(trans, item, false))
