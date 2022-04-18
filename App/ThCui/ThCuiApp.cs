@@ -111,6 +111,58 @@ namespace TianHua.AutoCAD.ThCui
             Active.Editor.WriteLine("当前版本号：" + asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
         }
 
+        [CommandMethod("TIANHUACAD", "THMEPPROFILE", CommandFlags.Modal)]
+        public void ThMEPProfile()
+        {
+            // 指定专业
+            PromptKeywordOptions keywordOptions = new PromptKeywordOptions("\n请指定专业：")
+            {
+                AllowNone = true
+            };
+            keywordOptions.Keywords.Add("ARCHITECTURE", "ARCHITECTURE", "建筑(A)");
+            keywordOptions.Keywords.Add("STRUCTURE", "STRUCTURE", "结构(S)");
+            keywordOptions.Keywords.Add("HAVC", "HAVC", "暖通(H)");
+            keywordOptions.Keywords.Add("ELECTRICAL", "ELECTRICAL", "电气(E)");
+            keywordOptions.Keywords.Add("WSS", "WSS", "给排水(W)");
+            keywordOptions.Keywords.Default = "ARCHITECTURE";
+            PromptResult result = Active.Editor.GetKeywords(keywordOptions);
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
+
+            switch (result.StringResult)
+            {
+                case "ARCHITECTURE":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("A");
+                    }
+                    break;
+                case "HAVC":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("H");
+                    }
+                    break;
+                case "ELECTRICAL":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("E");
+                    }
+                    break;
+                case "WSS":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("W");
+                    }
+                    break;
+                case "STRUCTURE":
+                    {
+                        ThRibbonUtils.ConfigPanelsWithProfile("S");
+                    }
+                    break;
+                default:
+                    return;
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THMEPUSERCONFIG", CommandFlags.Modal)]
         public void ThMEPUserConfig()
         {
