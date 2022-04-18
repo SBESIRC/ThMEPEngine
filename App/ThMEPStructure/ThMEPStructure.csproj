@@ -95,11 +95,14 @@
     <Compile Include="Reinforcement\Draw\GangJinStirrup.cs" />
     <Compile Include="Reinforcement\Draw\Helper.cs" />
     <Compile Include="Reinforcement\Draw\Test.cs" />
+    <Compile Include="Reinforcement\Draw\ThColumnReinforceTableBuilder.cs" />
     <Compile Include="Reinforcement\Draw\ThReinforceTableBuilder.cs" />
     <Compile Include="Reinforcement\Model\ColumnExtractInfo.cs" />
     <Compile Include="Reinforcement\Model\EdgeComponentExtractInfo.cs" />
+    <Compile Include="Reinforcement\Model\ThColumnComponent.cs" />
     <Compile Include="Reinforcement\Model\ThEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThLTypeEdgeComponent.cs" />
+    <Compile Include="Reinforcement\Model\ThRectangleColumnComponent.cs" />
     <Compile Include="Reinforcement\Model\ThRectangleEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThTTypeEdgeComponent.cs" />
     <Compile Include="Reinforcement\Model\ThColumnReinforceConfig.cs" />
