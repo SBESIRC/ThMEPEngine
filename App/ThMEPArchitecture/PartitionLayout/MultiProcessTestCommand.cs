@@ -128,16 +128,16 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static void write_test(MParkingPartitionPro mParkingPartitionPro)
         {
-            //foreach (var e in mParkingPartitionPro.IniLanes)
-            //{
-            //    var line = new Line(new Point3d(e.Line.P0.X, e.Line.P0.Y, 0),
-            //        new Point3d(e.Line.P1.X, e.Line.P1.Y, 0));
-            //    line.AddToCurrentSpace();
-            //}
-            List<Polyline>cars=new List<Polyline>();
-            foreach (var car in mParkingPartitionPro.CarSpots)
+            foreach (var e in mParkingPartitionPro.OutputLanes)
             {
-                var pl = GeoUtilities.CreatePolyFromPoints(car.Coordinates.Select(e =>
+                var line = new Line(new Point3d(e.P0.X, e.P0.Y, 0),
+                    new Point3d(e.P1.X, e.P1.Y, 0));
+                line.AddToCurrentSpace();
+            }
+            List<Polyline>cars=new List<Polyline>();
+            foreach (var car in mParkingPartitionPro.Cars)
+            {
+                var pl = GeoUtilities.CreatePolyFromPoints(car.Polyline.Coordinates.Select(e =>
                   new Point3d(e.X, e.Y, 0)).ToArray());
                 cars.Add(pl);
             }

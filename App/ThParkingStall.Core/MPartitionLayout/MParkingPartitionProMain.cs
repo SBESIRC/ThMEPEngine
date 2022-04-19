@@ -1,5 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -124,10 +125,23 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
         }
+        public int Process(ref BlockingCollection<InfoCar> cars,ref BlockingCollection<Polygon> pillars,ref BlockingCollection<LineSegment> lanes,ref BlockingCollection<Polygon> inipillars)
+        {
+            GenerateParkingSpaces();
+            for (int i = 0; i < Cars.Count; i++)
+                cars.Add(Cars[i]);
+            for (int i = 0; i < Pillars.Count; i++)
+                pillars.Add(Pillars[i]);
+            for (int i = 0; i < IniPillar.Count; i++)
+                inipillars.Add(IniPillar[i]);
+            for (int i = 0; i < IniLanes.Count; i++)
+                lanes.Add(new LineSegment(IniLanes[i].Line));
+            return CarSpots.Count;
+        }
         public void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
-            var lanes = GeneratePerpModuleLanes(mindistance, DisModulus);
+            var lanes = GeneratePerpModuleLanes(mindistance, DisModulus, true, null, true);
             GeneratePerpModuleBoxes(lanes);
         }
         public void GenerateCarsInModules()
@@ -154,22 +168,22 @@ namespace ThParkingStall.Core.MPartitionLayout
                 //    if (lines.Count() > 0) line = lines.First();
                 //    else continue;
                 //}
-                line=line.Translation(lanes[i].Vec.Normalize() * DisLaneWidth / 2);
-                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback);
+                line = line.Translation(lanes[i].Vec.Normalize() * DisLaneWidth / 2);
+                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback,true);
             }
         }
         public void GenerateCarsOnRestLanes()
         {
             UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
+            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false,null,true);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
-                line=line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
-                    , true, false, false, false, true, true, false);
+                    , true, false, false, false, true, true, false,false,true,false,false,false,true);
             }
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
             foreach (var k in vertlanes)
@@ -177,7 +191,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var vl = k.Line;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = new LineSegment(vl);
-                line=line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
+                line = line.Translation(k.Vec.Normalize() * DisLaneWidth / 2);
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
                     , true, false, false, false, true, true, false);
             }
@@ -592,12 +606,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (isStart)
             {
                 pt = lane.Line.P0;
-                ps = pt.Translation(Vector(lane.Line).Normalize() * DisCarAndHalfLane);
+                ps = pt.Translation(Vector(lane.Line).Normalize() * (DisCarAndHalfLane+CollisionD));
             }
             else
             {
                 pt = lane.Line.P1;
-                ps = pt.Translation(-Vector(lane.Line).Normalize() * DisCarAndHalfLane);
+                ps = pt.Translation(-Vector(lane.Line).Normalize() * (DisCarAndHalfLane+ CollisionD));
             }
             var line = LineSegmentSDL(ps, lane.Vec, MaxLength);
             var tmpline = SplitLine(line, Boundary).Where(e => e.Length > 1).First();
@@ -606,7 +620,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             else return generate_lane_length;
             var gvec = Vector(line).GetPerpendicularVector().Normalize();
             var ptestvec = ps.Translation(gvec);
-            if (ptestvec.Distance(pt) < DisCarAndHalfLane) gvec = -gvec;
+            if (ptestvec.Distance(pt) < (DisCarAndHalfLane + CollisionD - CollisionTOP)) gvec = -gvec;
             var distnearbuilding = IsEssentialToCloseToBuilding(line, gvec);
             if (distnearbuilding != -1)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,10 @@ namespace ThParkingStall.Core.InterProcess
             Ramps = ramps;
             BoundingBoxes = boundingBoxes;
         }
-        public void UpdateParkingCnts(bool Calculate = false)
+        public void UpdateParkingCnts(bool Calculate, ref BlockingCollection<LineString> Walls,
+            ref BlockingCollection<InfoCar> Cars, ref BlockingCollection<Polygon> Pillars,
+            ref BlockingCollection<Polygon> IniPillars, ref BlockingCollection<Coordinate> ObsVertices,
+            ref BlockingCollection<LineSegment> Lanes)
         {
             if (SubAreaParkingCnt.Contains(this) && !Calculate)
             {
@@ -38,6 +42,10 @@ namespace ThParkingStall.Core.InterProcess
             else
             {
                 mParkingPartitionPro = this.ConvertSubAreaToMParkingPartitionPro();
+                for (int i = 0; i < mParkingPartitionPro.Walls.Count; i++) 
+                    Walls.Add(mParkingPartitionPro.Walls[i]);
+                for (int i = 0; i < mParkingPartitionPro.ObstacleVertexes.Count; i++)
+                    ObsVertices.Add(mParkingPartitionPro.ObstacleVertexes[i]);
                 try
                 {
 #if DEBUG
@@ -49,7 +57,8 @@ namespace ThParkingStall.Core.InterProcess
                     sw.Close();
                     fs.Close();
 #endif
-                    mParkingPartitionPro.GenerateParkingSpaces();
+                    //mParkingPartitionPro.GenerateParkingSpaces();
+                    mParkingPartitionPro.Process(ref Cars, ref Pillars, ref Lanes, ref IniPillars);
                 }
                 catch (Exception ex)
                 {

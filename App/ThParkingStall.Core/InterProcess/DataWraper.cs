@@ -77,7 +77,8 @@ namespace ThParkingStall.Core.InterProcess
                 var chromosome = Chromosomes[j];
                 var subAreas = InterParameter.GetSubAreas(chromosome);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros);
+                MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
                 StrResult += ParkingCount.ToString() + ' ';
             }
             return StrResult;

@@ -49,6 +49,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             var b = removals.Cast<Geometry>().ToList();
             Update(a, b);
         }
+        public List<Geometry> SelectAll()
+        {
+            return Geometries.ToList();
+        }
         public void Dispose()
         {
             Geometries.Clear();

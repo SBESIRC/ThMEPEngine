@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Mathematics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,25 +15,57 @@ namespace ThParkingStall.Core.MPartitionLayout
     public static class MCompute
     {
         public static Serilog.Core.Logger Logger;
-        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, bool display = false)
+        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros,ref MParkingPartitionPro mParkingPartition, bool display = false)
         {
             if (subAreas.Count == 0)
             {
                 return 0;
             }
             if (!IsValidatedSolutions(subAreas)) return -2;
-            
+
+            var Walls = new BlockingCollection<LineString>();
+            var Cars = new BlockingCollection<InfoCar>();
+            var Pillars = new BlockingCollection<Polygon>();
+            var IniPillars = new BlockingCollection<Polygon>();
+            var ObsVertices = new BlockingCollection<Coordinate>();
+            var Lanes = new BlockingCollection<LineSegment>();
+            var Boundary = new Polygon(subAreas[0].Area.Shell);
+            Boundary = Boundary.Simplify();
+            var obs = new List<Polygon>();
+            foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
+            var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
+
             if (InterParameter.MultiThread)
             {
-                Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display));
+                Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display,
+                     ref Walls, ref Cars, ref Pillars, ref IniPillars, ref ObsVertices, ref Lanes));
             }
             else
             {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display));
+                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display,
+                     ref Walls, ref Cars, ref Pillars, ref IniPillars, ref ObsVertices, ref Lanes));
             }
-            if(display)
-                mParkingPartitionPros.AddRange(subAreas.Select(subarea => subarea.mParkingPartitionPro));
-            return subAreas.Sum(sa => sa.Count);
+
+            var walls = Walls.ToList();
+            var cars = Cars.ToList();
+            var pillars = Pillars.ToList();
+            var iniPillars = IniPillars.ToList();
+            var obsVertices = ObsVertices.ToList();
+            var lanes = Lanes.ToList();
+            RemoveDuplicatedLines(lanes);
+            MLayoutPostProcessing.DealWithCarsOntheEndofLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+            MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
+            mParkingPartition = new MParkingPartitionPro();
+            if (display)
+            {           
+                mParkingPartition.Cars = cars;
+                mParkingPartition.Pillars=pillars;
+                mParkingPartition.OutputLanes = lanes;
+            }
+            return cars.Count;
+            //if (display)
+            //    mParkingPartitionPros.AddRange(subAreas.Select(subarea => subarea.mParkingPartitionPro));
+            //return subAreas.Sum(sa => sa.Count);
         }
         public static MParkingPartitionPro ConvertSubAreaToMParkingPartitionPro(this SubArea subArea)
         {         

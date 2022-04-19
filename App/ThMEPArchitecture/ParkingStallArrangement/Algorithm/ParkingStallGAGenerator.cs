@@ -622,7 +622,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var chrom = chromosomeCollection.Chromosomes[i];
                 var subAreas = InterParameter.GetSubAreas(chrom);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros);
+                MParkingPartitionPro mParkingPartition=new MParkingPartitionPro();
+                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
             }
         }
         private List<List<Chromosome>> CreateNextGeneration2(List<Chromosome> solutions)

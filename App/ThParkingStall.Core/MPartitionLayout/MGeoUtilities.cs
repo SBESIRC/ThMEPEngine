@@ -126,7 +126,30 @@ namespace ThParkingStall.Core.MPartitionLayout
             var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates));
             return linestring.Select(e => new LineSegment(e.StartPoint.Coordinate, e.EndPoint.Coordinate)).ToList();
         }
-        public static LineSegment[] SplitLine(LineSegment curve, List<Polygon> cutters, double length_filter = 1)
+        public static LineSegment[] SplitLine(LineSegment curve, List<Polygon> cutters, double length_filter = 1,
+            bool allow_split_similar_car = false)
+        {
+            List<Coordinate> points = new List<Coordinate>();
+            foreach (var cutter in cutters)
+                points.AddRange(curve.IntersectPoint(cutter));
+            if (allow_split_similar_car)
+            {
+                //在处理车道末端时候，出现一个特殊case，车位与车道之间有10容差距离，以此加强判断。
+                foreach (var cutter in cutters)
+                {
+                    points.AddRange(cutter.Coordinates
+                        .Where(p => curve.ClosestPoint(p, false).Distance(p) < 20)
+                        .Select(p => curve.ClosestPoint(p, false)));
+                }
+            }
+            points = RemoveDuplicatePts(points, 1);
+            SortAlongCurve(points, curve);
+            if (points.Count > 0)
+                return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
+            else
+                return new LineSegment[] { new LineSegment(curve) };
+        }
+        public static LineSegment[] SplitLine(LineSegment curve, List<LineSegment> cutters, double length_filter = 1)
         {
             List<Coordinate> points = new List<Coordinate>();
             foreach (var cutter in cutters)
@@ -136,7 +159,72 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (points.Count > 0)
                 return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
             else
-                return new LineSegment[] { new LineSegment(curve) };
+                return new LineSegment[] { new LineSegment(curve.P0, curve.P1) };
+        }
+        public static List<LineSegment> GetLinesByInterruptingIntersections(List<LineSegment> lines)
+        {
+            if (lines.Count < 2) return lines;
+            var points = new List<Coordinate>();
+            var res = new List<LineSegment>();
+            for (int i = 0; i < lines.Count - 1; i++)
+                for (int j = i + 1; j < lines.Count; j++)
+                    points.AddRange(lines[i].IntersectPoint(lines[j]));
+            points = points.Distinct().ToList();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var pts = points.Where(p => lines[i].ClosestPoint(p, false).Distance(p) < 0.001).ToList();
+                res.AddRange(SplitLine(lines[i], pts));
+            }
+            return res;
+        }
+        public static bool IsSubLine(LineSegment a, LineSegment b)
+        {
+            if (b.ClosestPoint(a.P0, false).Distance(a.P0) < 0.001
+                && b.ClosestPoint(a.P1, false).Distance(a.P1) < 0.001)
+                return true;
+            return false;
+        }
+        public static void JoinLines(List<LineSegment> lines)
+        {
+            double tol = 0.001;
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (IsParallelLine(lines[i], lines[j]) && !IsSubLine(lines[i], lines[j]))
+                    {
+                        if (lines[i].P0.Distance(lines[j].P0) < tol)
+                        {
+                            lines[j] = new LineSegment(lines[i].P1, lines[j].P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].P0.Distance(lines[j].P1) < tol)
+                        {
+                            lines[j] = new LineSegment(lines[i].P1, lines[j].P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].P1.Distance(lines[j].P0) < tol)
+                        {
+                            lines[j] = new LineSegment(lines[i].P0, lines[j].P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].P1.Distance(lines[j].P1) < tol)
+                        {
+                            lines[j] = new LineSegment(lines[i].P0, lines[j].P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+            }
         }
         private static List<Coordinate> removeDuplicatePts(List<Coordinate> points, double tol = 0, bool preserve_order = true)
         {

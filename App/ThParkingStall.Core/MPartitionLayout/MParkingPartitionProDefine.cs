@@ -47,6 +47,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             GeneratePillars = gpillars;
             Walls = walls;
             Obstacles = obstacles;
+            foreach (var ob in Obstacles)
+            {
+                ObstacleVertexes.AddRange(ob.Coordinates);
+            }
             Boundary = boundary;
             BoundingBox = (Polygon)boundary.Envelope;
             MaxLength = BoundingBox.Length / 2;
@@ -61,6 +65,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<LineSegment> OriginalLanes = new List<LineSegment>();
         public Polygon Boundary;
         public Polygon OutBoundary;
+        public List<LineSegment> OutputLanes;
         private Polygon BoundingBox;
         private double MaxLength;
         public MNTSSpatialIndex ObstaclesSpatialIndex;
@@ -72,13 +77,15 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Polygon> CarSpots = new List<Polygon>();
         public List<Polygon> Pillars = new List<Polygon>();
         private List<Polygon> CarBoxes = new List<Polygon>();
+        public List<InfoCar> Cars = new List<InfoCar>();
         private List<Polygon> IniLaneBoxes = new List<Polygon>();
         private List<CarBoxPlus> CarBoxesPlus = new List<CarBoxPlus>();
         private List<Polygon> LaneBoxes = new List<Polygon>();
         private List<CarModule> CarModules = new List<CarModule>();
-        private List<Coordinate> ObstacleVertexes = new List<Coordinate>();
+        public List<Coordinate> ObstacleVertexes = new List<Coordinate>();
         public List<Polygon> BuildingBoxes = new List<Polygon>();
         public List<Ramp> RampList = new List<Ramp>();
+        public List<Polygon> IniPillar = new List<Polygon>();
 
         const double ScareFactorForCollisionCheck = 0.99;
         public static bool GeneratePillars = true;
@@ -94,6 +101,10 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double DisParallelCarLength = 6000;
         public static double DisParallelCarWidth = 2400;
         public static double DisLaneWidth = 5500;
+        public static double CollisionD = 300;
+        public static double CollisionTOP = 100;
+        public static double CollisionCT = 1400;
+        public static double CollisionCM = 1500;
         public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
         public static double DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
         public static int CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);

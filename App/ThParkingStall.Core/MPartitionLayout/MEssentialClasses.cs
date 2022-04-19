@@ -69,4 +69,22 @@ namespace ThParkingStall.Core.MPartitionLayout
         public Vector2D Vec;
         public List<Polygon> Bounds;
     }
+    public class InfoCar
+    {
+        public InfoCar(Polygon car, Coordinate point, Vector2D vector)
+        {
+            Polyline = car;
+            Point = point;
+            Vector = vector;
+        }
+        public int CarLayoutMode = 0;
+        public Vector2D Vector;
+        public Coordinate Point;
+        public Polygon Polyline;
+    }
+    public enum CarLayoutMode : int
+    {
+        VERT = 0,
+        PARALLEL = 1,
+    }
 }

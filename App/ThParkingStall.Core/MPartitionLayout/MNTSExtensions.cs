@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Utilities;
 using NetTopologySuite.Mathematics;
+using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
@@ -307,6 +308,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             points.Add(points[0]);
             return new Polygon(new LinearRing(points.ToArray()));
+        }
+        public static Geometry BufferPL(this Polygon polyline, double distance)
+        {
+            var buffer = new BufferOp(new LineString(polyline.Coordinates), new BufferParameters()
+            {
+                JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre,
+                EndCapStyle = EndCapStyle.Square,
+            });
+            return buffer.GetResultGeometry(distance);
         }
     }
 }

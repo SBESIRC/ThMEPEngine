@@ -88,7 +88,8 @@ namespace ThParkingStall.Core
                     //Logger?.Information($"区域分割用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                     //t_pre = stopWatch.Elapsed.TotalSeconds;
                     List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                    var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros);
+                    MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                    var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
                     //Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                     //t_pre = stopWatch.Elapsed.TotalSeconds;
                     ParkingCnts.Add(ParkingCount);
