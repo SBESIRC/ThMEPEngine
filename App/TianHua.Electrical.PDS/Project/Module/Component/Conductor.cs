@@ -517,6 +517,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public int NumberOfPhaseWire { get; set; }
 
         /// <summary>
+        /// 导体根数
+        /// </summary>
+        public int ConductorCount { get; set; }
+
+        /// <summary>
         /// 相导体截面
         /// </summary>
         public double ConductorCrossSectionalArea { get; set; }
@@ -708,10 +713,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         private bool IsBAControl { get; set; } = false;
 
-        /// <summary>
-        /// 导体根数
-        /// </summary>
-        private int ConductorCount { get; set; }
         #endregion
     }
 }

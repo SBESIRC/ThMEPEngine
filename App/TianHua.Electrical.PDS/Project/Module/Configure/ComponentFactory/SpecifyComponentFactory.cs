@@ -176,8 +176,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             CircuitForm.cps2 = CreatCPS();
             _conductorConfig = highConfig.Conductor2;
             CircuitForm.conductor2 = CreatConductor();
-            _contactorConfig = highConfig.QAC;
-            CircuitForm.contactor = CreatContactor();
             return CircuitForm;
         }
 
@@ -204,6 +202,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             CircuitForm.cps2 = CreatCPS();
             _conductorConfig = highConfig.Conductor2;
             CircuitForm.conductor2 = CreatConductor();
+            _contactorConfig = highConfig.QAC;
+            CircuitForm.contactor = CreatContactor();
             return CircuitForm;
         }
 
