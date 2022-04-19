@@ -472,6 +472,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
                     }
                 }
+                if (vm is Project.Module.Component.ThPDSConductorModel conductor)
+                {
+                    if (conductor.ComponentType == ComponentType.Conductor)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCount", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                    }
+                    else if (conductor.ComponentType == ComponentType.ControlConductor)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("NumberOfPhaseWire", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCrossSectionalArea", false);
+                    }
+                }
                 if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
                 {
                     pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
