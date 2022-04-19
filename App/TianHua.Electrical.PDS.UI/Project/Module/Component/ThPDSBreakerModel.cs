@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                         {
                             if (_breaker.Appendix == AppendixType.ST)
                             {
-                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix}";
+                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{(Appendix == AppendixType.无 ? "" : Appendix)}";
                             }
                             else
                             {
