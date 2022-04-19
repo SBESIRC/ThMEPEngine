@@ -311,5 +311,39 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 return SplitLine(line, points).Where(e => e.Length > length_filter).ToArray();
             else return new Line[] { new Line(line.StartPoint, line.EndPoint) };
         }
+        public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
+        {
+            if (pls.Count == 0) return false;
+            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
+            if (!allowOnEdge)
+            {
+                foreach (var p in ps)
+                {
+                    if (p.Vertices().Count == 5)
+                        if (p.GeometricExtents.IsPointIn(pt) && p.GetClosePoint(pt).DistanceTo(pt) > 10) return true;
+                    if (p.Contains(pt) && p.GetClosestPointTo(pt, false).DistanceTo(pt) > 10) return true;
+                }
+            }
+            else
+            {
+                foreach (var p in ps)
+                {
+                    if (p.Vertices().Count == 5)
+                        if (p.GeometricExtents.IsPointIn(pt)) return true;
+                    if (p.Contains(pt)) return true;
+                }
+            }
+            return false;
+        }
+        public static Polyline CreatePolyFromPoints(Point3d[] points, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            for (int i = 0; i < points.Length; i++)
+            {
+                p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
+            }
+            p.Closed = closed;
+            return p;
+        }
     }
 }

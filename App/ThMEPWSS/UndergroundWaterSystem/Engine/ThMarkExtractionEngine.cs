@@ -124,7 +124,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         public bool IsLayer(string layer)
         {
             if ((layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS")) 
-                || (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-NOTE")))
+                || (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-NOTE"))
+                || layer.ToUpper().Contains("W-"))
             {
                 return true;
             }

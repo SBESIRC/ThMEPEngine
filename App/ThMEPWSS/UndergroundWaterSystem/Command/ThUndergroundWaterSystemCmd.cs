@@ -9,10 +9,12 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
+using ThMEPWSS.Common;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Service;
 using ThMEPWSS.UndergroundWaterSystem.Tree;
 using ThMEPWSS.UndergroundWaterSystem.ViewModel;
+using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Command
 {
@@ -73,8 +75,19 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         //未读取到楼层数据
                         return;
                     }
+                    //楼层框定定位点
+                    var StoryFrameBasePoint = new List<Point3d>();
+                    var frames = FramedReadUtil.ReadAllFloorFramed();
+                    foreach (var frame in frames)
+                        StoryFrameBasePoint.Add(new Point3d(frame.datumPoint.X, frame.datumPoint.Y, 0));
+                    var tmps = new List<Point3d>();
+                    foreach (var pl in InfoModel.FloorList.Select(e => e.FloorArea))
+                        foreach (var p in StoryFrameBasePoint)
+                            if (pl.Contains(p)) { tmps.Add(p); break; }
+                    StoryFrameBasePoint = tmps;
+                    //读取楼层信息
                     var floorInfoExtractionService = new ThFloorInfoExtractionService();
-                    for(int i = 0; i < InfoModel.FloorList.Count;i++)
+                    for (int i = 0; i < InfoModel.FloorList.Count;i++)
                     {
                         InfoModel.FloorList[i].FloorInfo = floorInfoExtractionService.GetFloorInfo(InfoModel.FloorList[i], i);
                     }
@@ -84,7 +97,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     //处理楼层立管数据
                     var floorHandleService = new ThFloorHandleService();
                     floorHandleService.MatchRiserMark(InfoModel.FloorList);
-                    var risers = floorHandleService.MergeRiser(InfoModel.FloorList);
+                    var risers = floorHandleService.MergeRiser(InfoModel.FloorList, StoryFrameBasePoint);
                     //处理横管
                     var riserpoints = new List<Point3d>();
                     foreach (var riser in risers)
