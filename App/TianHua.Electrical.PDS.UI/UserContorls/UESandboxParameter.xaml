@@ -60,7 +60,7 @@
                     <Label Content="默认导体材料"></Label>
                     <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
                     <Label>，消防配电干线及分支干线采用</Label>
-                    <ComboBox Height="22" ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
+                    <ComboBox Height="22" ItemsSource="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource,Mode=OneTime}"  SelectedItem="{Binding FirePowerDistributionTrunkLineAndBranchTrunkLine}"></ComboBox>
                     <Label>矿物绝缘电力电缆</Label>
                 </StackPanel>
                 <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>

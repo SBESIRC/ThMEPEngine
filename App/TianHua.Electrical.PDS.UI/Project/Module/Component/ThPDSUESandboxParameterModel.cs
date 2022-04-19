@@ -144,15 +144,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
+        public List<MaterialStructure> FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunkOuterSheathMaterials;
         public MaterialStructure FirePowerDistributionTrunkLineAndBranchTrunkLine
         {
-            get =>FireDistributionTrunk.OuterSheathMaterial;
+            get => FireDistributionTrunk.OuterSheathMaterial;
             set
             {
                 if (value != FirePowerDistributionTrunkLineAndBranchTrunkLine)
                 {
-                    FireDistributionTrunk.OuterSheathMaterial= value;
+                    FireDistributionTrunk.OuterSheathMaterial = value;
                     OnPropertyChanged(nameof(FirePowerDistributionTrunkLineAndBranchTrunkLine));
                 }
             }
