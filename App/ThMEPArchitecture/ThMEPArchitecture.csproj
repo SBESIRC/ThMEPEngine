@@ -31,8 +31,6 @@
     <Compile Include="MultiProcess\Converter.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GAData.cs" />
-    <Compile Include="MultiProcess\MPCommand.cs" />
-    <Compile Include="MultiProcess\Converter.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\MultiProcessGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
