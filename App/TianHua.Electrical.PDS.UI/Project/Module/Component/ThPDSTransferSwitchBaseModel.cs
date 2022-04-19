@@ -5,6 +5,7 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using TianHua.Electrical.PDS.Diagram;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -19,7 +20,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => $"{Model} {RatedCurrent}A {PolesNum}";
+        public string Content => _transferSwitch.Content();
 
         [ReadOnly(true)]
         [Category("元器件参数")]

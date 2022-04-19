@@ -3034,7 +3034,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                     var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
                     {
-                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10);
+                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - 38 * (edges.Count - 1));
                         var ed = st;
                         ed.Y = pt.Y + 40;
                         var ln = CreateLine(null, Brushes.Black, st, ed);
