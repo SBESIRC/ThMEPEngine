@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
+using ThCADExtension;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.UserContorls;
-
 namespace TianHua.Electrical.PDS.UI.Services
 {
     public static class PDSColorBrushes
@@ -20,37 +20,35 @@ namespace TianHua.Electrical.PDS.UI.Services
             var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
             panel.btnRefresh.Click += (s, e) =>
             {
-                var cmd = new ThPDSSecondaryPushDataService();
-                cmd.Push();
+                {
+                    var info = new CircuitDiffInfo() { Items = new(), };
+                    foreach (var edge in g.Edges)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                        });
+                    }
+                    panel.dg1.DataContext = info;
+                }
+                {
+                    var info = new LoadDiffInfo() { Items = new(), };
+                    foreach (var node in g.Vertices)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                        });
+                    }
+                    panel.dg2.DataContext = info;
+                }
             };
-            {
-                var info = new CircuitDiffInfo() { Items = new(), };
-                foreach (var edge in g.Edges)
-                {
-                    info.Items.Add(new()
-                    {
-                        CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                        CircuitType = edge.Details.CircuitForm.CircuitFormType.ToString(),
-                        ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                        Dwg = edge.Circuit.Location?.ReferenceDWG,
-                    });
-                }
-                panel.dg1.DataContext = info;
-            }
-            {
-                var info = new LoadDiffInfo() { Items = new(), };
-                foreach (var node in g.Vertices)
-                {
-                    info.Items.Add(new()
-                    {
-                        LoadId = node.Load.ID.LoadID,
-                        LoadType = node.Load.LoadTypeCat_1.ToString(),
-                        LoadPower = node.Details.LowPower.ToString(),
-                        Dwg = node.Load.Location?.ReferenceDWG,
-                    });
-                }
-                panel.dg2.DataContext = info;
-            }
         }
     }
     public class CircuitDiffInfo
