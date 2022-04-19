@@ -84,17 +84,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// 分配负载
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="edge"></param>
-        public static void DistributeLoad(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
-            ThPDSProjectGraphEdge edge)
-        {
-            //
-        }
-
-        /// <summary>
         /// 删除回路
         /// </summary>
         /// <param name="graph"></param>
@@ -402,7 +391,9 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="FilterEdged">是否过滤已分配回路的负载</param>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphNode> GetUndistributeLoad(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, bool FilterEdged = false)
+        public static List<ThPDSProjectGraphNode> GetUndistributeLoad(
+            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, 
+            bool FilterEdged = false)
         {
             //分配负载 就是拿到所有的 未知负载
             return graph.Vertices
@@ -414,7 +405,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 分配负载
         /// </summary>
-        public static void DistributeLoad(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode source, ThPDSProjectGraphNode target)
+        public static void DistributeLoad(
+            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, 
+            ThPDSProjectGraphNode source, 
+            ThPDSProjectGraphNode target)
         {
             //本身在别的边的负载还不知道怎么处理
             if (graph.InDegree(target) == 0 && graph.OutDegree(target) == 0)
