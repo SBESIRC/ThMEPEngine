@@ -1350,6 +1350,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
                                         if (_info != null)
                                         {
+                                            void AddSecondaryCircuitMenus(ContextMenu cm)
+                                            {
+                                                foreach (var scinfo in ThPDSProjectGraphService.GetSecondaryCircuitInfos(edge))
+                                                {
+                                                    cm.Items.Add(new MenuItem()
+                                                    {
+                                                        Header = "新建控制回路" + scinfo.SecondaryCircuitCode,
+                                                        Command = new RelayCommand(() =>
+                                                        {
+                                                            ThPDSProjectGraphService.AddControlCircuit(graph, edge, scinfo);
+                                                            UpdateCanvas();
+                                                        }),
+                                                    });
+                                                }
+                                            }
                                             var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
                                             {
                                                 var tr = new TranslateTransform(r.X, -r.Y - r.Height);
@@ -1508,8 +1523,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else
                                                         {
-                                                            cb += () => UpdatePropertyGrid(null);
+                                                            throw new ArgumentNullException();
                                                         }
+                                                        var cm = new ContextMenu();
+                                                        cvs.ContextMenu = cm;
+                                                        AddSecondaryCircuitMenus(cm);
                                                     }
                                                     else if (info.IsThermalRelay())
                                                     {
@@ -1732,6 +1750,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         {
                                                             throw new ArgumentNullException();
                                                         }
+                                                        var cm = new ContextMenu();
+                                                        cvs.ContextMenu = cm;
+                                                        AddSecondaryCircuitMenus(cm);
                                                     }
                                                     else if (info.IsMeter())
                                                     {
