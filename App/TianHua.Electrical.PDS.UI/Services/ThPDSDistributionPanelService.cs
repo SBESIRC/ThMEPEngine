@@ -415,6 +415,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
+            {
+                var menu = new MenuItem()
+                {
+                    Header = "平衡相序",
+                    Command = new RelayCommand(() =>
+                    {
+                        ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                    }),
+                };
+                treeCMenu.Items.Add(menu);
+            }
             tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
@@ -425,7 +436,28 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is not null)
                 {
-                    tv.ContextMenu = treeCMenu;
+                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                    {
+                        var cm = new ContextMenu();
+                        tv.ContextMenu = cm;
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "平衡相序",
+                            Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                            }),
+                        });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "批量生成",
+                            Command = batchGenCmd,
+                        });
+                    }
+                    else
+                    {
+                        tv.ContextMenu = treeCMenu;
+                    }
                     var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
@@ -727,6 +759,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             Action cb = null;
                             IEnumerable<MenuItem> getInputMenus()
                             {
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                    yield break;
+                                }
                                 if (GetInputOUVP() == null && GetInputMeter() == null)
                                 {
                                     yield return new MenuItem()
@@ -1917,7 +1953,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor = fireEmergencyLighting.Conductor;
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                 {
@@ -2213,6 +2249,43 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         DrawEdge(edge);
                     }
+                }
+                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                {
+                    var cvs = new Canvas() { Width = 100, Height = 320, Background = Brushes.Transparent, };
+                    Canvas.SetLeft(cvs, 98);
+                    canvas.Children.Add(cvs);
+                    hoverDict[cvs] = cvs;
+                    var cm = new ContextMenu();
+                    var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
+                    if (edges.Count < 8)
+                    {
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "增加消防应急照明回路（WFEL）",
+                            Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.AddCircuit(graph, vertice, "消防应急照明回路（WFEL）");
+                                UpdateCanvas();
+                            }),
+                        });
+                    }
+                    cvs.ContextMenu = cm;
+                    cvs.MouseUp += (s, e) =>
+                    {
+                        void Update()
+                        {
+                            SetSel(new Rect(98, 0, cvs.Width, cvs.Height));
+                            UpdatePropertyGrid(null);
+                        }
+                        if (e.ChangedButton != MouseButton.Left)
+                        {
+                            if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                            return;
+                        }
+                        Update();
+                        e.Handled = true;
+                    };
                 }
                 foreach (var kv in vertice.Details.MiniBusbars)
                 {

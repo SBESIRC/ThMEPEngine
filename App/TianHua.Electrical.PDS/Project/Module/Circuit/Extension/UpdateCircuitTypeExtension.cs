@@ -129,6 +129,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                     {
                         return typeof(TwoSpeedMotor_CPSDYYCircuit);
                     }
+                case CircuitFormOutType.消防应急照明回路WFEL:
+                    {
+                        return typeof(FireEmergencyLighting);
+                    }
                 default:
                     {
                         //暂时只测试以上回路
