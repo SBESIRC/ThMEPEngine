@@ -3123,300 +3123,343 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         canvas.Children.Add(cvs);
                     }
                 }
+                var visitedSecondaryCircuits = new HashSet<SecondaryCircuit>();
+                var visitedEdges = new HashSet<ThPDSProjectGraphEdge>();
                 foreach (var kv in vertice.Details.SecondaryCircuits)
                 {
-                    var sc = kv.Key;
-                    var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(sc);
-                    var edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc)).ToList();
-                    if (edges.Count == 0) continue;
+                    var _sc = kv.Key;
+                    if (visitedSecondaryCircuits.Contains(_sc)) continue;
+                    visitedSecondaryCircuits.Add(_sc);
+                    var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(_sc);
+                    var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
+                    if (_edges.Count == 0) continue;
+                    var scs = new HashSet<SecondaryCircuit>() { _sc };
+                    foreach (var k in vertice.Details.SecondaryCircuits.Keys)
+                    {
+                        if (k == _sc) continue;
+                        var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
+                        foreach (var edge in egs)
+                        {
+                            if (_edges.Contains(edge))
+                            {
+                                scs.Add(k);
+                                foreach (var eg in egs)
+                                {
+                                    _edges.Add(eg);
+                                }
+                            }
+                        }
+                    }
+                    foreach (var sc in scs)
+                    {
+                        visitedSecondaryCircuits.Add(sc);
+                    }
+                    foreach (var edge in _edges)
+                    {
+                        visitedEdges.Add(edge);
+                    }
+                    var edges = GetSortedEdges(_edges).ToList();
                     foreach (var edge in edges)
                     {
                         DrawEdge(edge);
                     }
-                    var start = new Point(busStart.X + 205, -dy - 10);
-                    var end = start.OffsetY(40);
-                    busEnd = end;
-                    dy -= end.Y - start.Y;
-                    var pt = new Point(start.X - 205, start.Y);
-                    var cvt1 = new DoubleCollectionConverter();
-                    var dashArrBORDERBorder = (DoubleCollection)cvt1.ConvertFrom("12.7, 6.35, 12.7, 6.35, 1, 6.35 ");
-                    var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
-                    var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
-                    var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
-                    var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
+                    if (scs.Count > 0)
                     {
-                        var h = 38.0 * (edges.Count - 1);
-                        switch (edges.Last().Details.CircuitForm.CircuitFormType)
+                        var pts = new List<Point>();
+                        var cvt1 = new DoubleCollectionConverter();
+                        var dashArrBORDERBorder = (DoubleCollection)cvt1.ConvertFrom("12.7, 6.35, 12.7, 6.35, 1, 6.35 ");
+                        var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
+                        var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
+                        var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
+                        var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
+                        foreach (var sc in scs)
                         {
-                            case CircuitFormOutType.None:
-                                break;
-                            case CircuitFormOutType.常规:
-                                break;
-                            case CircuitFormOutType.漏电:
-                                break;
-                            case CircuitFormOutType.接触器控制:
-                                break;
-                            case CircuitFormOutType.热继电器保护:
-                                break;
-                            case CircuitFormOutType.配电计量_上海CT:
-                                break;
-                            case CircuitFormOutType.配电计量_上海直接表:
-                                break;
-                            case CircuitFormOutType.配电计量_CT表在前:
-                                break;
-                            case CircuitFormOutType.配电计量_直接表在前:
-                                break;
-                            case CircuitFormOutType.配电计量_CT表在后:
-                                break;
-                            case CircuitFormOutType.配电计量_直接表在后:
-                                break;
-                            case CircuitFormOutType.电动机_分立元件:
-                                break;
-                            case CircuitFormOutType.电动机_CPS:
-                                break;
-                            case CircuitFormOutType.电动机_分立元件星三角启动:
-                                break;
-                            case CircuitFormOutType.电动机_CPS星三角启动:
-                                break;
-                            case CircuitFormOutType.双速电动机_分立元件detailYY:
-                                h += 100;
-                                break;
-                            case CircuitFormOutType.双速电动机_分立元件YY:
-                                h += 60;
-                                break;
-                            case CircuitFormOutType.双速电动机_CPSdetailYY:
-                                h += 100;
-                                break;
-                            case CircuitFormOutType.双速电动机_CPSYY:
-                                h += 60;
-                                break;
-                            case CircuitFormOutType.消防应急照明回路WFEL:
-                                break;
-                            default:
-                                break;
-                        }
-                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
-                        var ed = st;
-                        ed.Y = pt.Y + 40;
-                        var ln = CreateLine(null, Brushes.Black, st, ed);
-                        ln.StrokeDashCap = PenLineCap.Square;
-                        ln.StrokeDashArray = currentDashArr;
-                        canvas.Children.Add(ln);
-                    }
-                    pt.Y = -pt.Y;
-                    var item = PDSItemInfo.Create(hasCPS ? "控制（从属CPS）" : "控制（从属接触器）", pt);
-                    {
-                        var glyphs = new List<Glyphs>();
-                        foreach (var fe in CreateDrawingObjects(trans, item, false))
-                        {
-                            if (fe is Glyphs g) glyphs.Add(g);
-                            canvas.Children.Add(fe);
-                        }
-                        {
-                            var w = 200.0;
-                            void reg(Rect r, object vm)
+                            var start = new Point(busStart.X + 205, -dy - 10);
+                            var end = start.OffsetY(40);
+                            busEnd = end;
+                            dy -= end.Y - start.Y;
+                            var pt = new Point(start.X - 205, start.Y);
                             {
-                                GRect gr = new GRect(r.TopLeft, r.BottomRight);
-                                gr = gr.Expand(5);
-                                var cvs = new Canvas
+                                var h = 38.0 * (_edges.Count - 1);
+                                switch (edges.Last().Details.CircuitForm.CircuitFormType)
                                 {
-                                    Width = gr.Width,
-                                    Height = gr.Height,
-                                    Background = Brushes.Transparent,
-                                };
-                                Canvas.SetLeft(cvs, gr.MinX);
-                                Canvas.SetTop(cvs, gr.MinY);
-                                canvas.Children.Add(cvs);
-                                cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
-                                cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
-                                cvs.Cursor = Cursors.Hand;
-                                cvs.MouseUp += (s, e) =>
-                                {
-                                    void Update()
-                                    {
-                                        UpdatePropertyGrid(vm);
-                                        SetSel(gr.ToWpfRect());
-                                    }
-                                    if (e.ChangedButton != MouseButton.Left)
-                                    {
-                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
-                                        return;
-                                    }
-                                    Update();
-                                    e.Handled = true;
-                                };
-                                cvs.ContextMenu = new();
-                            }
-                            {
-                                Conductor conductor = sc.Conductor;
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
-                                if (m != null)
-                                {
-                                    if (conductor != null)
-                                    {
-                                        var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
-                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                        m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                        var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
-                                        reg(r, vm);
-                                    }
+                                    case CircuitFormOutType.None:
+                                        break;
+                                    case CircuitFormOutType.常规:
+                                        break;
+                                    case CircuitFormOutType.漏电:
+                                        break;
+                                    case CircuitFormOutType.接触器控制:
+                                        break;
+                                    case CircuitFormOutType.热继电器保护:
+                                        break;
+                                    case CircuitFormOutType.配电计量_上海CT:
+                                        break;
+                                    case CircuitFormOutType.配电计量_上海直接表:
+                                        break;
+                                    case CircuitFormOutType.配电计量_CT表在前:
+                                        break;
+                                    case CircuitFormOutType.配电计量_直接表在前:
+                                        break;
+                                    case CircuitFormOutType.配电计量_CT表在后:
+                                        break;
+                                    case CircuitFormOutType.配电计量_直接表在后:
+                                        break;
+                                    case CircuitFormOutType.电动机_分立元件:
+                                        break;
+                                    case CircuitFormOutType.电动机_CPS:
+                                        break;
+                                    case CircuitFormOutType.电动机_分立元件星三角启动:
+                                        break;
+                                    case CircuitFormOutType.电动机_CPS星三角启动:
+                                        break;
+                                    case CircuitFormOutType.双速电动机_分立元件detailYY:
+                                        h += 100;
+                                        break;
+                                    case CircuitFormOutType.双速电动机_分立元件YY:
+                                        h += 60;
+                                        break;
+                                    case CircuitFormOutType.双速电动机_CPSdetailYY:
+                                        h += 100;
+                                        break;
+                                    case CircuitFormOutType.双速电动机_CPSYY:
+                                        h += 60;
+                                        break;
+                                    case CircuitFormOutType.消防应急照明回路WFEL:
+                                        break;
+                                    default:
+                                        break;
                                 }
+                                var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
+                                var ed = st;
+                                ed.Y = pt.Y + 40;
+                                pts.Add(st);
+                                pts.Add(ed);
                             }
-                            {
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
-                                if (m != null)
-                                {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                }
-                            }
-                            {
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
-                                if (m != null)
-                                {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                }
-                            }
-                        }
-                        {
-                            var w1 = 485.0;
-                            var w2 = 500.0;
-                            var h = 40.0;
-                            var cvs = new Canvas
-                            {
-                                Width = w2,
-                                Height = h,
-                                Background = Brushes.Transparent,
-                            };
                             pt.Y = -pt.Y;
-                            var offsetY = -20.0;
-                            Canvas.SetLeft(cvs, pt.X + w1);
-                            Canvas.SetTop(cvs, pt.Y - offsetY);
-                            var cvs2 = new Canvas
+                            var item = PDSItemInfo.Create(hasCPS ? "控制（从属CPS）" : "控制（从属接触器）", pt);
                             {
-                                Width = w1 + w2,
-                                Height = h,
-                                IsHitTestVisible = false,
-                            };
-                            Canvas.SetLeft(cvs2, pt.X);
-                            Canvas.SetTop(cvs2, pt.Y - offsetY);
-                            cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
-                            cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
-                            var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
-                            cvs.MouseUp += (s, e) =>
-                            {
-                                void Update()
+                                var glyphs = new List<Glyphs>();
+                                foreach (var fe in CreateDrawingObjects(trans, item, false))
                                 {
-                                    SetSel(rect);
-                                    UpdatePropertyGrid(scVm);
+                                    if (fe is Glyphs g) glyphs.Add(g);
+                                    canvas.Children.Add(fe);
                                 }
-                                if (e.ChangedButton != MouseButton.Left)
                                 {
-                                    if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
-                                    return;
-                                }
-                                Update();
-                                e.Handled = true;
-                            };
-                            cvs.Cursor = Cursors.Hand;
-                            canvas.Children.Add(cvs);
-                            canvas.Children.Add(cvs2);
-                        }
-                        IEnumerable<FrameworkElement> CreateDrawingObjects(Transform trans, PDSItemInfo item, bool isBlock, Brush strockBrush = null)
-                        {
-                            strockBrush ??= Brushes.Black;
-                            foreach (var info in item.lineInfos)
-                            {
-                                var st = info.Line.StartPoint;
-                                var ed = info.Line.EndPoint;
-                                var ln = CreateLine(trans, strockBrush, st, ed);
-                                if (!isBlock) ln.StrokeDashArray = currentDashArr;
-                                yield return ln;
-                            }
-                            {
-                                var path = new Path();
-                                var geo = new PathGeometry();
-                                path.Stroke = strockBrush;
-                                path.Data = geo;
-                                path.RenderTransform = trans;
-                                foreach (var info in item.arcInfos)
-                                {
-                                    var figure = new PathFigure();
-                                    figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
-                                    var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
-                                      new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
-                                    figure.Segments.Add(arcSeg);
-                                    geo.Figures.Add(figure);
-                                }
-                                yield return path;
-                            }
-                            foreach (var info in item.circleInfos)
-                            {
-                                var path = new Path();
-                                var geo = new EllipseGeometry(info.Circle.Center, info.Circle.Radius, info.Circle.Radius);
-                                path.Stroke = strockBrush;
-                                path.Data = geo;
-                                path.RenderTransform = trans;
-                                yield return path;
-                            }
-                            foreach (var info in item.textInfos)
-                            {
-                                var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
-                                if (info.Height > 0)
-                                {
-                                    glyph.FontRenderingEmSize = info.Height;
-                                }
-                                Canvas.SetLeft(glyph, info.BasePoint.X);
-                                Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
-                                yield return glyph;
-                            }
-                            foreach (var info in item.brInfos)
-                            {
-                                {
-                                    foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), true, Brushes.Red))
+                                    var w = 200.0;
+                                    void reg(Rect r, object vm)
                                     {
-                                        yield return el;
-                                    }
-                                    if (info.IsMotor()) continue;
-                                    {
-                                        var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
-                                        if (_info != null)
+                                        GRect gr = new GRect(r.TopLeft, r.BottomRight);
+                                        gr = gr.Expand(5);
+                                        var cvs = new Canvas
                                         {
-                                            var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                            Width = gr.Width,
+                                            Height = gr.Height,
+                                            Background = Brushes.Transparent,
+                                        };
+                                        Canvas.SetLeft(cvs, gr.MinX);
+                                        Canvas.SetTop(cvs, gr.MinY);
+                                        canvas.Children.Add(cvs);
+                                        cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
+                                        cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
+                                        cvs.Cursor = Cursors.Hand;
+                                        cvs.MouseUp += (s, e) =>
+                                        {
+                                            void Update()
                                             {
-                                                var tr = new TranslateTransform(r.X, -r.Y - r.Height);
-                                                var cvs = new Canvas
+                                                UpdatePropertyGrid(vm);
+                                                SetSel(gr.ToWpfRect());
+                                            }
+                                            if (e.ChangedButton != MouseButton.Left)
+                                            {
+                                                if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                return;
+                                            }
+                                            Update();
+                                            e.Handled = true;
+                                        };
+                                        cvs.ContextMenu = new();
+                                    }
+                                    {
+                                        Conductor conductor = sc.Conductor;
+                                        var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                        if (m != null)
+                                        {
+                                            if (conductor != null)
+                                            {
+                                                var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
+                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
+                                                reg(r, vm);
+                                            }
+                                        }
+                                    }
+                                    {
+                                        var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
+                                        if (m != null)
+                                        {
+                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                        }
+                                    }
+                                    {
+                                        var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
+                                        if (m != null)
+                                        {
+                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                            m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                        }
+                                    }
+                                }
+                                {
+                                    var w1 = 485.0;
+                                    var w2 = 500.0;
+                                    var h = 40.0;
+                                    var cvs = new Canvas
+                                    {
+                                        Width = w2,
+                                        Height = h,
+                                        Background = Brushes.Transparent,
+                                    };
+                                    pt.Y = -pt.Y;
+                                    var offsetY = -20.0;
+                                    Canvas.SetLeft(cvs, pt.X + w1);
+                                    Canvas.SetTop(cvs, pt.Y - offsetY);
+                                    var cvs2 = new Canvas
+                                    {
+                                        Width = w1 + w2,
+                                        Height = h,
+                                        IsHitTestVisible = false,
+                                    };
+                                    Canvas.SetLeft(cvs2, pt.X);
+                                    Canvas.SetTop(cvs2, pt.Y - offsetY);
+                                    cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
+                                    cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
+                                    var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
+                                    cvs.MouseUp += (s, e) =>
+                                    {
+                                        void Update()
+                                        {
+                                            SetSel(rect);
+                                            UpdatePropertyGrid(scVm);
+                                        }
+                                        if (e.ChangedButton != MouseButton.Left)
+                                        {
+                                            if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                            return;
+                                        }
+                                        Update();
+                                        e.Handled = true;
+                                    };
+                                    cvs.Cursor = Cursors.Hand;
+                                    canvas.Children.Add(cvs);
+                                    canvas.Children.Add(cvs2);
+                                }
+                                IEnumerable<FrameworkElement> CreateDrawingObjects(Transform trans, PDSItemInfo item, bool isBlock, Brush strockBrush = null)
+                                {
+                                    strockBrush ??= Brushes.Black;
+                                    foreach (var info in item.lineInfos)
+                                    {
+                                        var st = info.Line.StartPoint;
+                                        var ed = info.Line.EndPoint;
+                                        var ln = CreateLine(trans, strockBrush, st, ed);
+                                        if (!isBlock) ln.StrokeDashArray = currentDashArr;
+                                        yield return ln;
+                                    }
+                                    {
+                                        var path = new Path();
+                                        var geo = new PathGeometry();
+                                        path.Stroke = strockBrush;
+                                        path.Data = geo;
+                                        path.RenderTransform = trans;
+                                        foreach (var info in item.arcInfos)
+                                        {
+                                            var figure = new PathFigure();
+                                            figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
+                                            var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
+                                              new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
+                                            figure.Segments.Add(arcSeg);
+                                            geo.Figures.Add(figure);
+                                        }
+                                        yield return path;
+                                    }
+                                    foreach (var info in item.circleInfos)
+                                    {
+                                        var path = new Path();
+                                        var geo = new EllipseGeometry(info.Circle.Center, info.Circle.Radius, info.Circle.Radius);
+                                        path.Stroke = strockBrush;
+                                        path.Data = geo;
+                                        path.RenderTransform = trans;
+                                        yield return path;
+                                    }
+                                    foreach (var info in item.textInfos)
+                                    {
+                                        var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                                        if (info.Height > 0)
+                                        {
+                                            glyph.FontRenderingEmSize = info.Height;
+                                        }
+                                        Canvas.SetLeft(glyph, info.BasePoint.X);
+                                        Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
+                                        yield return glyph;
+                                    }
+                                    foreach (var info in item.brInfos)
+                                    {
+                                        {
+                                            foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), true, Brushes.Red))
+                                            {
+                                                yield return el;
+                                            }
+                                            if (info.IsMotor()) continue;
+                                            {
+                                                var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
+                                                if (_info != null)
                                                 {
-                                                    Width = r.Width,
-                                                    Height = r.Height,
-                                                    Background = Brushes.Transparent,
-                                                    RenderTransform = tr
-                                                };
-                                                cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
-                                                cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
-                                                cvs.MouseUp += (s, e) =>
-                                                {
-                                                    void Update()
+                                                    var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
                                                     {
-                                                        SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                        var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                                                        var cvs = new Canvas
+                                                        {
+                                                            Width = r.Width,
+                                                            Height = r.Height,
+                                                            Background = Brushes.Transparent,
+                                                            RenderTransform = tr
+                                                        };
+                                                        cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
+                                                        cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
+                                                        cvs.MouseUp += (s, e) =>
+                                                        {
+                                                            void Update()
+                                                            {
+                                                                SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                            }
+                                                            if (e.ChangedButton != MouseButton.Left)
+                                                            {
+                                                                if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                                return;
+                                                            }
+                                                            Update();
+                                                            e.Handled = true;
+                                                        };
+                                                        cvs.ContextMenu ??= new();
+                                                        cvs.Cursor = Cursors.Hand;
+                                                        canvas.Children.Add(cvs);
                                                     }
-                                                    if (e.ChangedButton != MouseButton.Left)
-                                                    {
-                                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
-                                                        return;
-                                                    }
-                                                    Update();
-                                                    e.Handled = true;
-                                                };
-                                                cvs.ContextMenu ??= new();
-                                                cvs.Cursor = Cursors.Hand;
-                                                canvas.Children.Add(cvs);
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
+                        {
+                            var st = new Point(pts[0].X, pts.Select(x => x.Y).Min());
+                            var ed = new Point(pts[0].X, pts.Select(x => x.Y).Max());
+                            var ln = CreateLine(null, Brushes.Black, st, ed);
+                            ln.StrokeDashCap = PenLineCap.Square;
+                            ln.StrokeDashArray = currentDashArr;
+                            canvas.Children.Add(ln);
                         }
                     }
                 }
