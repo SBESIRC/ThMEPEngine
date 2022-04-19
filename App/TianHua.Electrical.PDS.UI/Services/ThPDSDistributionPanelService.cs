@@ -3143,10 +3143,55 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                     var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
                     {
-                        var h = 38 * (edges.Count - 1);
-                        if (edges.Last().Details.CircuitForm.CircuitFormType.GetDescription().Contains("双速"))
+                        var h = 38.0 * (edges.Count - 1);
+                        switch (edges.Last().Details.CircuitForm.CircuitFormType)
                         {
-                            h += 40;
+                            case CircuitFormOutType.None:
+                                break;
+                            case CircuitFormOutType.常规:
+                                break;
+                            case CircuitFormOutType.漏电:
+                                break;
+                            case CircuitFormOutType.接触器控制:
+                                break;
+                            case CircuitFormOutType.热继电器保护:
+                                break;
+                            case CircuitFormOutType.配电计量_上海CT:
+                                break;
+                            case CircuitFormOutType.配电计量_上海直接表:
+                                break;
+                            case CircuitFormOutType.配电计量_CT表在前:
+                                break;
+                            case CircuitFormOutType.配电计量_直接表在前:
+                                break;
+                            case CircuitFormOutType.配电计量_CT表在后:
+                                break;
+                            case CircuitFormOutType.配电计量_直接表在后:
+                                break;
+                            case CircuitFormOutType.电动机_分立元件:
+                                break;
+                            case CircuitFormOutType.电动机_CPS:
+                                break;
+                            case CircuitFormOutType.电动机_分立元件星三角启动:
+                                break;
+                            case CircuitFormOutType.电动机_CPS星三角启动:
+                                break;
+                            case CircuitFormOutType.双速电动机_分立元件detailYY:
+                                h += 100;
+                                break;
+                            case CircuitFormOutType.双速电动机_分立元件YY:
+                                h += 60;
+                                break;
+                            case CircuitFormOutType.双速电动机_CPSdetailYY:
+                                h += 100;
+                                break;
+                            case CircuitFormOutType.双速电动机_CPSYY:
+                                h += 60;
+                                break;
+                            case CircuitFormOutType.消防应急照明回路WFEL:
+                                break;
+                            default:
+                                break;
                         }
                         var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
                         var ed = st;
