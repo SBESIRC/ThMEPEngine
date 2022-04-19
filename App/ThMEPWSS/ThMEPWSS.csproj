@@ -49,6 +49,7 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\PipeDiameterMarkingService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingRainwaterInlet.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingSealedWellService.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="DrainageADPrivate\Engine\ThDrainageADEngine.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageADPDataPass.cs" />
     <Compile Include="DrainageADPrivate\Service\TransformTopToADService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\ViewModel\FirstFloorPlaneViewModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\ViewModel\ParamSettingViewModel.cs" />
     <Compile Include="Common\ThMEPWSSUtils.cs" />
     <Compile Include="Common\ThSelectFrameUtil.cs" />

@@ -19,6 +19,7 @@ using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS;
 using ThMEPWSS.Command;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 using TianHua.Plumbing.WPF.UI.UI;
 
 namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
@@ -28,8 +29,10 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
     /// </summary>
     public partial class FirstFloorDrainagePlaneUI : ThCustomWindow
     {
+        FirstFloorPlaneViewModel firstFloorPlaneViewModel = new FirstFloorPlaneViewModel();
         public FirstFloorDrainagePlaneUI()
         {
+            this.DataContext = firstFloorPlaneViewModel;
             InitializeComponent();
         }
 
