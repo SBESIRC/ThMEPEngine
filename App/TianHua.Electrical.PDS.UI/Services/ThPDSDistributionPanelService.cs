@@ -1352,11 +1352,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             void AddSecondaryCircuitMenus(ContextMenu cm)
                                             {
+                                                var m = new MenuItem() { Header = "新建控制回路", };
+                                                cm.Items.Add(m);
                                                 foreach (var scinfo in ThPDSProjectGraphService.GetSecondaryCircuitInfos(edge))
                                                 {
-                                                    cm.Items.Add(new MenuItem()
+                                                    m.Items.Add(new MenuItem()
                                                     {
-                                                        Header = "新建控制回路" + scinfo.SecondaryCircuitCode,
+                                                        Header = scinfo.SecondaryCircuitCode,
                                                         Command = new RelayCommand(() =>
                                                         {
                                                             ThPDSProjectGraphService.AddControlCircuit(graph, edge, scinfo);
