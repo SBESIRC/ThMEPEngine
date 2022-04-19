@@ -786,6 +786,10 @@ namespace TianHua.Electrical.PDS.Project.Module
                     return CircuitFormOutType.双速电动机_CPSYY;
                 }
             }
+            else if (circuitName == "消防应急照明回路（WFEL）")
+            {
+                return CircuitFormOutType.消防应急照明回路WFEL;
+            }
             else
             {
                 //其他目前暂不支持
