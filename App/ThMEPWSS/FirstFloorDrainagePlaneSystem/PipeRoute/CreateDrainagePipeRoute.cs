@@ -164,7 +164,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
-                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
                     if (pipe.IsEuiqmentPipe)
                     {
                         route.printCircle = pipe.PipeCircle;
@@ -209,7 +209,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
-                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position);
+                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
                     if (pipe.IsEuiqmentPipe)
                     {
                         route.printCircle = pipe.PipeCircle;

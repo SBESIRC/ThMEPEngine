@@ -10,11 +10,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 {
     public class RouteModel
     {
-        public RouteModel(Polyline _route, VerticalPipeType _type, Point3d point)
+        public RouteModel(Polyline _route, VerticalPipeType _type, Point3d point, bool _isEquipment)
         {
             route = _route;
             verticalPipeType = _type;
             startPosition = point;
+            IsEquimentPipe = _isEquipment;
         }
 
         public Point3d startPosition { get; set; }
@@ -26,5 +27,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         public VerticalPipeType verticalPipeType { get; set; }
 
         public Line connecLine { get; set; }
+
+        /// <summary>
+        /// 是否是洁具点位
+        /// </summary>
+        public bool IsEquimentPipe = false;
     }
 }
