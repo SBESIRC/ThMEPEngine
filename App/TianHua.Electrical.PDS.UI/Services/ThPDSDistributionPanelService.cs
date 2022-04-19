@@ -3125,8 +3125,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     var sc = kv.Key;
                     var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(sc);
-                    var edges = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc);
-                    foreach (var edge in GetSortedEdges(edges))
+                    var edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc)).ToList();
+                    if (edges.Count == 0) continue;
+                    foreach (var edge in edges)
                     {
                         DrawEdge(edge);
                     }
@@ -3142,7 +3143,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                     var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
                     {
-                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - 38 * (edges.Count - 1));
+                        var h = 38 * (edges.Count - 1);
+                        if (edges.Last().Details.CircuitForm.CircuitFormType.GetDescription().Contains("双速"))
+                        {
+                            h += 40;
+                        }
+                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
                         var ed = st;
                         ed.Y = pt.Y + 40;
                         var ln = CreateLine(null, Brushes.Black, st, ed);
@@ -3576,6 +3582,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     cvs.Cursor = Cursors.Hand;
                     canvas.Children.Add(cvs);
+                }
+                if (busEnd.Y > canvas.Height)
+                {
+                    canvas.Height = busEnd.Y + 300;
                 }
                 {
                     void f(object sender, MouseButtonEventArgs e)
