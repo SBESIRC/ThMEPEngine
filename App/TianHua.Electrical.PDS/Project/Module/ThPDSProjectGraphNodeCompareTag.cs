@@ -4,32 +4,24 @@ namespace TianHua.Electrical.PDS.Project.Module
 {
     public abstract class ThPDSProjectGraphNodeCompareTag
     {
-        public bool HaveState { get; set; }
-
-        public ThPDSProjectGraphNodeCompareTag()
-        {
-            HaveState = false;
-        }
+        //
     }
 
-    public class ThPDSProjectGraphNodeNoDifferenceTag : ThPDSProjectGraphNodeCompareTag
+    public class ThPDSProjectGraphNodeCompositeTag : ThPDSProjectGraphNodeCompareTag
     {
-        //
+        public ThPDSProjectGraphNodeCompareTag Tag { get; set; }
+        public ThPDSProjectGraphNodeDataTag DataTag { get; set; }
     }
 
     public class ThPDSProjectGraphNodeIdChangeTag : ThPDSProjectGraphNodeCompareTag
     {
         public bool ChangeFrom { get; set; }
-        public bool ChangeTo { get; set; }
-        public string ChangeFromID { get; set; }
-        public string ChangeToID { get; set; }
+        public string ChangedID { get; set; }
 
         public ThPDSProjectGraphNodeIdChangeTag()
         {
             ChangeFrom = false;
-            ChangeTo = false;
-            ChangeFromID = null;
-            ChangeToID = null;
+            ChangedID = null;
         }
     }
 

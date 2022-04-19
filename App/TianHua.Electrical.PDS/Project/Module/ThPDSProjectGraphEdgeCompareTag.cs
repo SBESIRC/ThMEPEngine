@@ -2,44 +2,34 @@
 {
     public abstract class ThPDSProjectGraphEdgeCompareTag
     {
-        public bool HaveState { get; set; }
-
-        public ThPDSProjectGraphEdgeCompareTag()
-        {
-            HaveState = false;
-        }
+        //
     }
 
-    public class ThPDSProjectGraphEdgeNoDifferenceTag : ThPDSProjectGraphEdgeCompareTag
+    public class ThPDSProjectGraphEdgeCompositeTag : ThPDSProjectGraphEdgeCompareTag
     {
-        //
+        public ThPDSProjectGraphEdgeCompareTag Tag { get; set; }
+        public ThPDSProjectGraphEdgeDataTag DataTag { get; set; }
     }
 
     public class ThPDSProjectGraphEdgeIdChangeTag : ThPDSProjectGraphEdgeCompareTag
     {
         public bool ChangeFrom { get; set; }
-        public bool ChangeTo { get; set; }
-        public string ChangeFromLastCircuitID { get; set; }
-        public string ChangeToLastCircuitID { get; set; }
+        public string ChangedLastCircuitID { get; set; }
 
         public ThPDSProjectGraphEdgeIdChangeTag()
         {
             ChangeFrom = false;
-            ChangeTo = false;
-            ChangeFromLastCircuitID = null;
-            ChangeToLastCircuitID = null;
+            ChangedLastCircuitID = null;
         }
     }
 
     public class ThPDSProjectGraphEdgeMoveTag : ThPDSProjectGraphEdgeCompareTag
     {
         public bool MoveFrom { get; set; }
-        public bool MoveTo { get; set; }
 
         public ThPDSProjectGraphEdgeMoveTag()
         {
             MoveFrom = false;
-            MoveTo = false;
         }
     }
 

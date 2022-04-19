@@ -23,9 +23,9 @@ namespace TianHua.Electrical.PDS.Service
             RecordNodes(source, target);
             RecordEdges(source, target);
 
-            //2.1、记录“交换”变化
+            //2.1、记录Node“交换”变化
             ComapreExChangeForNode(source, target);
-            //2.2、记录Node变化
+            //2.2、记录Node其他变化
             ComapreChangeIdForNode(source, target);
             CompareNodes(source, target);
             //2.3 记录Edge变化
@@ -155,7 +155,6 @@ namespace TianHua.Electrical.PDS.Service
             var nodeIdList = nodeIdVisit.Keys.ToList();
             foreach (var idA in nodeIdList)
             {
-                //疑问：交换可能是多对多（双胞胎上下文一样）并非一对一的交换，如何处理？a可能和b、c或d之一交换？
                 if (nodeIdVisit[idA] == true)
                 {
                     continue;
@@ -290,7 +289,7 @@ namespace TianHua.Electrical.PDS.Service
                 if (line2lineId.ContainsKey(tmpLine) && curId != line2lineId[tmpLine])
                 {
                     var compareEdge = IdToEdges[line2lineId[tmpLine]].Item1;
-                    if (curEdge.Details == compareEdge.Details) ///////////
+                    if (curEdge.Circuit.ID.CircuitID.Last() == compareEdge.Circuit.ID.CircuitID.Last())
                     {
                         StructureForChangeEdgeID(compareEdge, curEdge, graphA);
                     }
@@ -302,7 +301,6 @@ namespace TianHua.Electrical.PDS.Service
         #region MOVE_ADD_DEL
         /// <summary>
         /// 比较结点的变化
-        /// （结点移动定义：某一结点的所处的位置变了（父母（入）和孩子（出）和原图比没一个相同的），但并没有从原图中删除）
         /// </summary>
         /// <param name="graphA"></param>
         /// <param name="graphB"></param>
@@ -311,48 +309,38 @@ namespace TianHua.Electrical.PDS.Service
         {
             foreach (var idToNode in IdToNodes)
             {
-                var id = idToNode.Key;
                 var nodeA = idToNode.Value.Item1;
                 var nodeB = idToNode.Value.Item2;
-                bool haveDiff = false;
-                var changeNode = nodeA;
                 if (nodeA != null && nodeB != null)
                 {
-                    haveDiff = DataChangeForNode(nodeA, nodeB);
-                    bool exChang = false;
-                    bool idChang = false;
-                    if (nodeA.Tag is ThPDSProjectGraphNodeExchangeTag exTag)
-                    {
-                        exChang = exTag.HaveState;
-                    }
-                    if (nodeA.Tag is ThPDSProjectGraphNodeIdChangeTag idTag)
-                    {
-                        idChang = idTag.HaveState;
-                    }
-                    if (exChang || idChang)
+                    if (nodeA.Tag is ThPDSProjectGraphNodeExchangeTag)
                     {
                         continue;
                     }
-                    else if (NodeStructureMove(nodeA, nodeB, graphA, graphB))
+                    if(nodeA.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
                     {
-                        haveDiff = true;
+                        if(compositeTag.Tag is ThPDSProjectGraphNodeExchangeTag)
+                        {
+                            continue;
+                        }
+                    }
+                    if (nodeA.Tag is ThPDSProjectGraphNodeIdChangeTag)
+                    {
+                        continue;
+                    }
+                    DataChangeForNode(nodeA, nodeB);
+                    if (NodeStructureMove(nodeA, nodeB, graphA, graphB))
+                    {
                         StructureForMoveNode(nodeA, nodeB, graphA);
                     }
                 }
                 else if (nodeA != null && nodeB == null)
                 {
-                    haveDiff = true;
                     StructureForDeleteNode(nodeA);
                 }
                 else if (nodeA == null && nodeB != null)
                 {
-                    haveDiff = true;
                     StructureForAddNode(nodeB, graphA);
-                    changeNode = nodeB;
-                }
-                if (!haveDiff)
-                {
-                    NoDiffForNode(changeNode);
                 }
             }
         }
@@ -371,20 +359,18 @@ namespace TianHua.Electrical.PDS.Service
                 var edgeB = idToEdge.Value.Item2;
                 if (edgeA != null && edgeB != null)
                 {
+                    if (edgeA.Tag is ThPDSProjectGraphEdgeIdChangeTag)
+                    {
+                        continue;
+                    }
                     if (edgeA.Source != edgeB.Source)
                     {
                         throw new NotImplementedException(); //两条边同一个id不同起点
                     }
-                    else if (edgeA.Target != edgeB.Target)
+                    DataChangeForEdge(edgeA, edgeB);
+                    if (edgeA.Target != edgeB.Target)
                     {
                         StructureForMoveEdge(edgeA, edgeB, graphA);
-                    }
-                    else if (edgeA.Target == edgeB.Target)
-                    {
-                        if (!DataChangeForEdge(edgeA, edgeB))
-                        {
-                            NoDiffForEdge(edgeA);
-                        }
                     }
                 }
                 else if (edgeA != null && edgeB == null)
@@ -445,71 +431,107 @@ namespace TianHua.Electrical.PDS.Service
         {
             nodeA.Tag = new ThPDSProjectGraphNodeIdChangeTag
             {
-                HaveState = true,
                 ChangeFrom = true,
-                ChangeTo = false,
-                ChangeFromID = nodeA.Load.ID.LoadID,
-                ChangeToID = nodeB.Load.ID.LoadID,
+                ChangedID = nodeB.Load.ID.LoadID,
             };
             nodeB.Tag = new ThPDSProjectGraphNodeIdChangeTag
             {
-                HaveState = true,
                 ChangeFrom = false,
-                ChangeTo = true,
-                ChangeFromID = nodeA.Load.ID.LoadID,
-                ChangeToID = nodeB.Load.ID.LoadID,
+                ChangedID = nodeA.Load.ID.LoadID,
             };
             graphA.AddVertex(nodeB);
         }
 
         private void StructureForExchangeNode(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB)
         {
-            nodeA.Tag = new ThPDSProjectGraphNodeExchangeTag
+            var exTagA = new ThPDSProjectGraphNodeExchangeTag
             {
-                HaveState = true,
                 ExchangeToID = nodeB.Load.ID.LoadID,
                 ExchangeToNode = nodeB
             };
-            nodeB.Tag = new ThPDSProjectGraphNodeExchangeTag
+            if (nodeA.Tag is ThPDSProjectGraphNodeDataTag dataTagA)
             {
-                HaveState = true,
+                var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    Tag = exTagA,
+                    DataTag = dataTagA
+                };
+                nodeA.Tag = compositeTagA;
+            }
+            else
+            {
+                nodeA.Tag = exTagA;
+            }
+            var exTagB = new ThPDSProjectGraphNodeExchangeTag
+            {
                 ExchangeToID = nodeA.Load.ID.LoadID,
                 ExchangeToNode = nodeA
             };
+            if (nodeB.Tag is ThPDSProjectGraphNodeDataTag dataTagB)
+            {
+                var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    Tag = exTagB,
+                    DataTag = dataTagB
+                };
+                nodeB.Tag = compositeTagB;
+            }
+            else
+            {
+                nodeB.Tag = exTagB;
+            }
         }
 
         private void StructureForMoveNode(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
-            nodeA.Tag = new ThPDSProjectGraphNodeMoveTag
+            var moveTagA = new ThPDSProjectGraphNodeMoveTag
             {
-                HaveState = true,
                 MoveFrom = true,
                 MoveTo = false
             };
-            nodeB.Tag = new ThPDSProjectGraphNodeMoveTag
+            if (nodeA.Tag is ThPDSProjectGraphNodeDataTag dataTagA)
             {
-                HaveState = true,
+                var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    Tag = moveTagA,
+                    DataTag = dataTagA
+                };
+                nodeA.Tag = compositeTagA;
+            }
+            else
+            {
+                nodeA.Tag = moveTagA;
+            }
+            var moveTagB = new ThPDSProjectGraphNodeMoveTag
+            {
                 MoveFrom = false,
                 MoveTo = true
             };
+            if (nodeB.Tag is ThPDSProjectGraphNodeDataTag dataTagB)
+            {
+                var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    Tag = moveTagB,
+                    DataTag = dataTagB
+                };
+                nodeB.Tag = compositeTagB;
+            }
+            else
+            {
+                nodeB.Tag = moveTagB;
+            }
             graphA.AddVertex(nodeB);
         }
 
         private void StructureForAddNode(ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
-            nodeB.Tag = new ThPDSProjectGraphNodeDeleteTag
-            {
-                HaveState = true,
-            };
+            nodeB.Tag = new ThPDSProjectGraphNodeAddTag();
             graphA.AddVertex(nodeB);
         }
 
         private void StructureForDeleteNode(ThPDSProjectGraphNode nodeA)
         {
-            nodeA.Tag = new ThPDSProjectGraphNodeDeleteTag
-            {
-                HaveState = true,
-            };
+            nodeA.Tag = new ThPDSProjectGraphNodeDeleteTag();
         }
         #endregion
 
@@ -523,31 +545,36 @@ namespace TianHua.Electrical.PDS.Service
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             edgeA.Tag = new ThPDSProjectGraphEdgeIdChangeTag
             {
-                HaveState = true,
                 ChangeFrom = true,
-                ChangeTo = false,
-                ChangeFromLastCircuitID = edgeA.Circuit.ID.CircuitNumber.Last(),
-                ChangeToLastCircuitID = newEdge.Circuit.ID.CircuitNumber.Last(),
+                ChangedLastCircuitID = newEdge.Circuit.ID.CircuitNumber.Last(),
             };
             newEdge.Tag = new ThPDSProjectGraphEdgeIdChangeTag
             {
-                HaveState = true,
                 ChangeFrom = false,
-                ChangeTo = true,
-                ChangeFromLastCircuitID = edgeA.Circuit.ID.CircuitNumber.Last(),
-                ChangeToLastCircuitID = newEdge.Circuit.ID.CircuitNumber.Last(),
+                ChangedLastCircuitID = edgeA.Circuit.ID.CircuitNumber.Last(),
             };
             graphA.AddEdge(newEdge);
         }
 
         private void StructureForMoveEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            edgeA.Tag = new ThPDSProjectGraphEdgeMoveTag
+            var moveTagA = new ThPDSProjectGraphEdgeMoveTag
             {
-                HaveState = true,
                 MoveFrom = true,
-                //MoveTo = false
             };
+            if (edgeA.Tag is ThPDSProjectGraphEdgeDataTag dataTagA)
+            {
+                var compositeTagA = new ThPDSProjectGraphEdgeCompositeTag
+                {
+                    Tag = moveTagA,
+                    DataTag = dataTagA
+                };
+                edgeA.Tag = compositeTagA;
+            }
+            else
+            {
+                edgeA.Tag = moveTagA;
+            }
             var edgeASourceInGraphA = IdToNodes[edgeA.Source.Load.ID.LoadID].Item1;
             var edgeBtargetInGraphA = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
             var newEdge = new ThPDSProjectGraphEdge(edgeASourceInGraphA, edgeBtargetInGraphA);
@@ -555,9 +582,7 @@ namespace TianHua.Electrical.PDS.Service
             newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
             newEdge.Tag = new ThPDSProjectGraphEdgeMoveTag
             {
-                HaveState = true,
-                //MoveFrom = false,
-                MoveTo = true
+                MoveFrom = false,
             };
             graphA.AddEdge(newEdge);
         }
@@ -569,19 +594,13 @@ namespace TianHua.Electrical.PDS.Service
             var newEdge = new ThPDSProjectGraphEdge(edgeBSourceInGraphA, edgeBTargetInGraphA);
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
-            newEdge.Tag = new ThPDSProjectGraphEdgeAddTag
-            {
-                HaveState = true,
-            };
+            newEdge.Tag = new ThPDSProjectGraphEdgeAddTag();
             graphA.AddEdge(newEdge);
         }
 
         private void StructureForDeleteEdge(ThPDSProjectGraphEdge edgeA)
         {
-            edgeA.Tag = new ThPDSProjectGraphEdgeDeleteTag
-            {
-                HaveState = true,
-            };
+            edgeA.Tag = new ThPDSProjectGraphEdgeDeleteTag();
         }
         #endregion
 
@@ -607,12 +626,12 @@ namespace TianHua.Electrical.PDS.Service
                 //dataTagA.SouP = nodeA.Load.InstalledCapacity;
                 dataTagA.TarP = nodeB.Load.InstalledCapacity;
             }
+            nodeA.Tag = dataTagA;
             if (dataTagA.TagD || dataTagA.TagF || dataTagA.TagP)
             {
-                dataTagA.HaveState = true;
+                return true;
             }
-            nodeA.Tag = dataTagA;
-            return dataTagA.HaveState;
+            return false;
         }
 
         private bool DataChangeForEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB)
@@ -620,29 +639,11 @@ namespace TianHua.Electrical.PDS.Service
             var dataTagA = new ThPDSProjectGraphEdgeDataTag();
             if (edgeA.Circuit.ID.CircuitID.Last() != edgeB.Circuit.ID.CircuitID.Last())
             {
-                dataTagA.HaveState = true;
                 dataTagA.ToLastCircuitID = edgeB.Circuit.ID.CircuitID.Last();
+                edgeA.Tag = dataTagA;
+                return true;
             }
-            edgeA.Tag = dataTagA;
-            return dataTagA.HaveState;
-        }
-        #endregion
-
-        #region NO_DIFF
-        private void NoDiffForNode(ThPDSProjectGraphNode nodeA)
-        {
-            nodeA.Tag = new ThPDSProjectGraphNodeDataTag
-            {
-                HaveState = true
-            };
-        }
-
-        private void NoDiffForEdge(ThPDSProjectGraphEdge edgeA)
-        {
-            edgeA.Tag = new ThPDSProjectGraphEdgeNoDifferenceTag
-            {
-                HaveState = true
-            };
+            return false;
         }
         #endregion
     }
