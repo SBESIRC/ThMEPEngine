@@ -27,8 +27,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateAllSeglinesCmd.cs" />
+    <Compile Include="MultiProcess\MPCommand.cs" />
+    <Compile Include="MultiProcess\Converter.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GAData.cs" />
+    <Compile Include="MultiProcess\MPCommand.cs" />
+    <Compile Include="MultiProcess\Converter.cs" />
+    <Compile Include="ParkingStallArrangement\Algorithm\MultiProcessGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\SegBreak.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\CommandPreprocess.cs" />
@@ -71,6 +76,7 @@
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
     <Compile Include="PartitionLayout\LayoutOutput.cs" />
     <Compile Include="PartitionLayout\PostProcessingEndLanes.cs" />
+    <Compile Include="PartitionLayout\MultiProcessTestCommand.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProMain.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionProSucceed.cs" />
     <Compile Include="PartitionLayout\PartitionFast.cs" />
@@ -108,6 +114,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThParkingStall.Core\ThParkingStall.Core.csproj">
+      <Project>{0B67DA69-EE95-472C-8A4D-326BCB220621}</Project>
+      <Name>ThParkingStall.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

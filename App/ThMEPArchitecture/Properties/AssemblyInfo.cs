@@ -44,3 +44,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPArchitecture.CreateAllSeglinesCmd))]//生成所有分割线
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.ThBreakSegLinesCmd))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.ThParkingStallPreprocessCmd))]//预处理
+[assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.MultiProcessTestCommand))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.MultiProcess.ThMPArrangementCmd))] 

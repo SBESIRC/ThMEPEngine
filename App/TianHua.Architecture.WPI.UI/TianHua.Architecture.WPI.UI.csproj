@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TianHua.Architecture.WPI.UI</RootNamespace>
     <AssemblyName>TianHua.Architecture.WPI.UI</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
@@ -106,6 +107,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThParkingStall.Core\ThParkingStall.Core.csproj">
+      <Project>{0B67DA69-EE95-472C-8A4D-326BCB220621}</Project>
+      <Name>ThParkingStall.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

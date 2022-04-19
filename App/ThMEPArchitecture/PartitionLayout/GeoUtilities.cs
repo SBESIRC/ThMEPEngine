@@ -720,7 +720,6 @@ namespace ThMEPArchitecture.PartitionLayout
             DBObjectCollection add = new DBObjectCollection();
             add.Add(e);
             spatialIndex.Update(add, new DBObjectCollection());
-
             return;
         }
 

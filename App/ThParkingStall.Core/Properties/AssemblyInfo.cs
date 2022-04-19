@@ -1,17 +1,16 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("TianHua.Architecture.WPI.UI")]
+[assembly: AssemblyTitle("ThParkingStall.Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TianHua.Architecture.WPI.UI")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyProduct("ThParkingStall.Core")]
+[assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("cf10b087-ace3-4a1d-b125-e0ea4b0e2f29")]
+[assembly: Guid("0b67da69-ee95-472c-8a4d-326bcb220621")]
 
 // 程序集的版本信息由下列四个值组成: 
 //
@@ -30,8 +29,8 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-// 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
+//可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.18.0")]
-[assembly: AssemblyFileVersion("1.9.18.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

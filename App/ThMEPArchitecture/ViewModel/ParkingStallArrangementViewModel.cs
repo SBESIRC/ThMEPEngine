@@ -38,6 +38,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("IsComputationParaSetupEnabled");
             }
         }
+        private bool _UseMultiProcess = true;
+
+        public bool UseMultiProcess
+        {
+            get { return _UseMultiProcess; }
+            set
+            {
+                _UseMultiProcess = value;
+                RaisePropertyChanged("UseMultiProcess");
+            }
+        }
 
         //只生成分割线
         private bool _JustCreateSplittersChecked = true;

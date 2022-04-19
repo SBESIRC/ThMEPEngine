@@ -17,8 +17,10 @@ using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
+using ThMEPArchitecture.MultiProcess;
 using Autodesk.AutoCAD.Geometry;
-
+using ThParkingStall.Core.InterProcess;
+using Chromosome = ThMEPArchitecture.ParkingStallArrangement.Algorithm.Chromosome;
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -94,7 +96,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
 
             var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
-
+            var dataWraper = Converter.GetDataWraper(outerBrder, ParameterViewModel);
             if (!getouterBorderFlag) return;
             var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
             if(!dataPreprocessingFlag)
@@ -143,8 +145,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             bool recordprevious = false;
 
             //rst = geneAlgorithm.Run(histories, recordprevious);
-            rst = geneAlgorithm.Run2(histories, recordprevious);
+            try
+            {
+                rst = geneAlgorithm.Run2(histories, recordprevious);
 
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
 
             Chromosome solution = rst.First();
 

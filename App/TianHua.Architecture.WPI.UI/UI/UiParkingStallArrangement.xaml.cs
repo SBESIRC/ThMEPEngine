@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ParkingStallArrangement;
 using ThMEPArchitecture.ViewModel;
 
@@ -40,16 +41,36 @@ namespace TianHua.Architecture.WPI.UI.UI
 
             if (_ViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
             {
-                using (var cmd = new GenerateParkingStallDirectlyCmd(_ViewModel))
+                if (_ViewModel.UseMultiProcess)
                 {
-                    cmd.Execute();
+                    using (var cmd = new ThMPArrangementCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
+                }
+                else
+                {
+                    using (var cmd = new GenerateParkingStallDirectlyCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
                 }
             }
             else if(_ViewModel.CommandType == CommandTypeEnum.RunWithIteration)
             {
-                using (var cmd = new ThParkingStallArrangementCmd(_ViewModel))
+                if (_ViewModel.UseMultiProcess)
                 {
-                    cmd.Execute();
+                    using (var cmd = new ThMPArrangementCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
+                }
+                else
+                {
+                    using (var cmd = new ThParkingStallArrangementCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
                 }
             }
             else
