@@ -1,5 +1,6 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -36,7 +37,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _thermalRelay.Model;
             set
             {
-                _thermalRelay.Model = value;
+                _thermalRelay.SetModel(value);
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }
@@ -50,7 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _thermalRelay.PolesNum;
             set
             {
-                _thermalRelay.PolesNum = value;
+                _thermalRelay.SetPolesNum(value);
                 OnPropertyChanged(nameof(PolesNum));
             }
         }
@@ -67,6 +68,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _thermalRelay.GetModels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _thermalRelay.GetPolesNums();
         }
     }
 }

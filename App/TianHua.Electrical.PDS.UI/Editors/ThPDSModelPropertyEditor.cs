@@ -32,9 +32,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
             {
                 return isolatingSwitch.AlternativeModels;
             }
-            if (propertyItem.Value is ThPDSThermalRelayModel)
+            if (propertyItem.Value is ThPDSThermalRelayModel thermalRelay)
             {
-                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Model).Distinct();
+                return thermalRelay.AlternativeModels;
             }
             if (propertyItem.Value is ThPDSATSEModel atse)
             {

@@ -24,9 +24,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSThermalRelayModel)
+            if (propertyItem.Value is ThPDSThermalRelayModel thermalRelay)
             {
-                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Poles).Distinct();
+                return thermalRelay.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSContactorModel contactor)
             {
