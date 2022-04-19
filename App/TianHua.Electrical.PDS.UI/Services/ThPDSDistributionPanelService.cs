@@ -2130,6 +2130,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 var menu = new ContextMenu();
                                 cvs.ContextMenu = menu;
+                                if (vertice.Details.CircuitFormType is not PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit)
                                 {
                                     var mi = new MenuItem();
                                     menu.Items.Add(mi);
