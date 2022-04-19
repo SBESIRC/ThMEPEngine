@@ -1421,7 +1421,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            contactor = twoSpeedMotor_CPSDYYCircuit.contactor;
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                                         {
@@ -1575,7 +1575,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     }
                                                     else if (info.IsCPS())
                                                     {
-                                                        CPS cps = null;
+                                                        var cpss = item.brInfos.Where(x => x.IsCPS()).ToList();
+                                                        CPS cps = null, cps1 = null, cps2 = null, cps3 = null;
                                                         if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
                                                         {
                                                             throw new NotSupportedException();
@@ -1646,28 +1647,41 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            cps1 = twoSpeedMotor_CPSDYYCircuit.cps1;
+                                                            cps2 = twoSpeedMotor_CPSDYYCircuit.cps2;
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            cps1 = twoSpeedMotor_CPSYYCircuit.cps1;
+                                                            cps2 = twoSpeedMotor_CPSYYCircuit.cps2;
                                                         }
-                                                        if (cps != null)
+                                                        void reg(CPS cps, string templateStr)
                                                         {
                                                             var vm = new Project.Module.Component.ThPDSCPSModel(cps);
-                                                            cb += () => UpdatePropertyGrid(vm);
+                                                            var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
+                                                            if (m != null && vm != null)
                                                             {
-                                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "CPS");
-                                                                if (m != null)
-                                                                {
-                                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                                                }
+                                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                             }
+                                                            cb += () => { UpdatePropertyGrid(vm); };
+                                                        }
+                                                        if (cpss.Count > 1)
+                                                        {
+                                                            var idx = cpss.IndexOf(info);
+                                                            cps = idx == 0 ? cps1 : (idx == 1 ? cps2 : cps3);
+                                                            if (cps != null)
+                                                            {
+                                                                reg(cps, "CPS" + (idx + 1));
+                                                            }
+                                                        }
+                                                        else if (cps != null)
+                                                        {
+                                                            reg(cps, "CPS");
                                                         }
                                                         else
                                                         {
-                                                            cb += () => UpdatePropertyGrid(null);
+                                                            throw new ArgumentNullException();
                                                         }
                                                     }
                                                     else if (info.IsMeter())
@@ -1915,11 +1929,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor1 = twoSpeedMotor_CPSDYYCircuit.conductor1;
+                                    conductor2 = twoSpeedMotor_CPSDYYCircuit.conductor2;
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor1 = twoSpeedMotor_CPSYYCircuit.conductor1;
+                                    conductor2 = twoSpeedMotor_CPSYYCircuit.conductor2;
                                 }
                                 var w = 200.0;
                                 void reg(Rect r, object vm)
