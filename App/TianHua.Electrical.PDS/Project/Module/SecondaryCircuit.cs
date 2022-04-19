@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -12,7 +7,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class SecondaryCircuit
     {
-        public int Index;
+        private int Index { get; set; }
         public SecondaryCircuit(int index)
         {
             Index = index;
@@ -21,11 +16,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 回路ID
         /// </summary>
-        public string CircuitID { 
-            get 
-            { 
-                return $"WC{Index.ToString("00")}"; 
-            } 
+        public string CircuitID
+        {
+            get
+            {
+                return $"WC{Index.ToString("00")}";
+            }
         }
 
         /// <summary>
@@ -36,6 +32,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor conductor { get; set; }
+        public Conductor Conductor { get; set; }
     }
 }

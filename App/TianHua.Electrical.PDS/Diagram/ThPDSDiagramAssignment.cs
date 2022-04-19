@@ -1269,7 +1269,7 @@ namespace TianHua.Electrical.PDS.Diagram
             var texts = objs.OfType<DBText>().ToList();
             // Conductor
             var conductor = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CONDUCTOR)).First();
-            conductor.TextString = secondaryCircuit.conductor.Content;
+            conductor.TextString = secondaryCircuit.Conductor.Content;
 
             // 回路编号
             var circuitId = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CIRCUIT_NUMBER)).First();

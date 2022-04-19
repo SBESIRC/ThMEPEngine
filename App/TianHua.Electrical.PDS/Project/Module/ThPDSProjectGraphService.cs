@@ -598,7 +598,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             var secondaryCircuit = new SecondaryCircuit(index);
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
             secondaryCircuit.CircuitDescription = secondaryCircuitInfo.Description;
-            secondaryCircuit.conductor = componentFactory.GetSecondaryCircuitConductor(secondaryCircuitInfo);
+            secondaryCircuit.Conductor = componentFactory.GetSecondaryCircuitConductor(secondaryCircuitInfo);
             edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>());
             AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, edge);
             return secondaryCircuit;

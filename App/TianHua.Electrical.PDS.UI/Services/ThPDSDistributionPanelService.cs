@@ -3173,7 +3173,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 cvs.ContextMenu = new();
                             }
                             {
-                                Conductor conductor = sc.conductor;
+                                Conductor conductor = sc.Conductor;
                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
                                 if (m != null)
                                 {
