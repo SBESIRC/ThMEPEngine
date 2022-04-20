@@ -779,6 +779,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private void ReDefinePillarDimensions()
         {
+            IniPillar.AddRange(Pillars.Select(e => e.Clone()));
             if (HasImpactOnDepthForPillarConstruct)
             {
                 Pillars = Pillars.Select(e =>

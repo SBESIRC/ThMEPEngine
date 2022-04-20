@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 using ThParkingStall.Core.InterProcess;
+using System.Collections.Concurrent;
+
 namespace ThParkingStall.Core.MPartitionLayout
 {
     public partial class MParkingPartitionPro
@@ -124,7 +126,19 @@ namespace ThParkingStall.Core.MPartitionLayout
             HORIZONTAL = 1,
             VERTICAL = 2
         }
-
+        public int Process(ref BlockingCollection<InfoCar> cars, ref BlockingCollection<Polygon> pillars, ref BlockingCollection<LineSegment> lanes, ref BlockingCollection<Polygon> inipillars)
+        {
+            GenerateParkingSpaces();
+            for (int i = 0; i < Cars.Count; i++)
+                cars.Add(Cars[i]);
+            for (int i = 0; i < Pillars.Count; i++)
+                pillars.Add(Pillars[i]);
+            for (int i = 0; i < IniPillar.Count; i++)
+                inipillars.Add(IniPillar[i]);
+            for (int i = 0; i < IniLanes.Count; i++)
+                lanes.Add(new LineSegment(IniLanes[i].Line));
+            return CarSpots.Count;
+        }
         public void GenerateParkingSpaces()
         {
             PreProcess();

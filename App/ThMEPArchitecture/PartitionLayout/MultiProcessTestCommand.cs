@@ -118,12 +118,30 @@ namespace ThMEPArchitecture.PartitionLayout
             return;
         }
 
-        public static void DisplayMParkingPartitionPros(List<MParkingPartitionPro> mParkingPartitionPros)
+        public static void DisplayMParkingPartitionPros(MParkingPartitionPro mParkingPartitionPro,
+            string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", string laneLayerName = "AI-车道中心线", int carindex = 30, int columncolor = -1, int lanecolor = 20)
         {
-            foreach (var mParkingPartitionPro in mParkingPartitionPros)
+            var cars = new List<InfoCar>();
+            foreach (var mcar in mParkingPartitionPro.Cars)
             {
-                write_test(mParkingPartitionPro);
+                InfoCar infoCar = new InfoCar(mcar.Polyline.ToDbPolylines()[0],
+                    new Point3d(mcar.Point.X, mcar.Point.Y, 0), new Vector3d(mcar.Vector.X, mcar.Vector.Y, 0));
+                infoCar.CarLayoutMode = mcar.CarLayoutMode;
+                cars.Add(infoCar);
             }
+            LayoutOutput.CarLayerName = carLayerName;
+            LayoutOutput.ColumnLayerName = columnLayerName;
+            LayoutOutput.LaneLayerName = laneLayerName;
+            LayoutOutput.LaneDisplayColorIndex = lanecolor;
+            LayoutOutput.InitializeLayer();
+            var vertcar = LayoutOutput.VCar;
+            var pcar = LayoutOutput.PCar;
+            LayoutOutput layout = new LayoutOutput(cars,
+                mParkingPartitionPro.Pillars.Select(e => e.ToDbPolylines()[0]).ToList(),
+                mParkingPartitionPro.OutputLanes.Select(e => e.ToDbLine()).ToList());
+            layout.DisplayColumns();
+            layout.DisplayCars();
+            layout.DisplayLanes();
         }
 
         public static void write_test(MParkingPartitionPro mParkingPartitionPro)
@@ -134,7 +152,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     new Point3d(e.P1.X, e.P1.Y, 0));
                 line.AddToCurrentSpace();
             }
-            List<Polyline>cars=new List<Polyline>();
+            List<Polyline> cars = new List<Polyline>();
             foreach (var car in mParkingPartitionPro.Cars)
             {
                 var pl = GeoUtilities.CreatePolyFromPoints(car.Polyline.Coordinates.Select(e =>

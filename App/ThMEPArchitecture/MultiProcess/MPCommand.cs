@@ -139,7 +139,7 @@ namespace ThMEPArchitecture.MultiProcess
             List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
             MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
             CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-            MultiProcessTestCommand.DisplayMParkingPartitionPros(new List<MParkingPartitionPro>() { mParkingPartition});
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
         }
         public void Run(AcadDatabase acadDatabase)
         {
@@ -183,7 +183,7 @@ namespace ThMEPArchitecture.MultiProcess
                     List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                     MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
                     CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition, true);
-                    MultiProcessTestCommand.DisplayMParkingPartitionPros(new List<MParkingPartitionPro>() { mParkingPartition});
+                    MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
                     SubAreaParkingCnt.Clear();
                 }
                 catch (Exception ex)
