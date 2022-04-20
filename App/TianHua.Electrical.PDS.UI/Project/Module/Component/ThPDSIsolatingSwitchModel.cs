@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Editors;
 using HandyControl.Controls;
@@ -77,7 +78,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
+        public string Content => _isolatingSwitch.Content();
 
         [ReadOnly(true)]
         [Browsable(false)]
