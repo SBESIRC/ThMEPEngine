@@ -53,14 +53,7 @@ namespace TianHua.Electrical.PDS.Diagram
                     }
                 case ComponentType.组合式RCD:
                     {
-                        if (breaker.Appendix == Project.Module.AppendixType.无)
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}";
-                        }
-                        else
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}/{breaker.Appendix}";
-                        }
+                        return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix} {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
                     }
                 default:
                     throw new NotSupportedException();
