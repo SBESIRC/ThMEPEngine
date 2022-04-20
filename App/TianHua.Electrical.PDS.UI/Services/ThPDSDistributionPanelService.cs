@@ -770,7 +770,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加过欠电压保护",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -779,7 +779,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加电能表",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.InsertEnergyMeter(graph, vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -791,8 +791,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "还原为标准样式",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.RemoveUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
-                                            ThPDSProjectGraphService.RemoveEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.RemoveUndervoltageProtector(vertice);
+                                            ThPDSProjectGraphService.RemoveEnergyMeter(vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -2158,7 +2158,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var mi = new MenuItem();
                                     menu.Items.Add(mi);
                                     mi.Header = "切换回路样式";
-                                    var sw = new CircuitFormOutSwitcher(edge);
+                                    var sw = ThPDSProjectGraphService.GetCircuitFormOutSwitcher(edge);
                                     var outTypes = sw.AvailableTypes();
                                     foreach (var outType in outTypes)
                                     {
@@ -3655,7 +3655,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "切换进线形式";
-                            var sw = new CircuitFormInSwitcher(vertice);
+                            var sw = ThPDSProjectGraphService.GetCircuitFormInSwitcher(vertice);
                             var inTypes = sw.AvailableTypes();
                             foreach (var inType in inTypes)
                             {

@@ -102,9 +102,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static void InsertUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void InsertUndervoltageProtector(
+            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.Graph.OutEdges(node).ToList();
+            var edges = graph.OutEdges(node).ToList();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
@@ -143,7 +144,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static void RemoveUndervoltageProtector(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void RemoveUndervoltageProtector(ThPDSProjectGraphNode node)
         {
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
@@ -179,9 +180,10 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static void InsertEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void InsertEnergyMeter(
+            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.Graph.OutEdges(node).ToList();
+            var edges = graph.OutEdges(node).ToList();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
@@ -220,7 +222,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static void RemoveEnergyMeter(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void RemoveEnergyMeter(ThPDSProjectGraphNode node)
         {
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
@@ -250,12 +252,6 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
         }
 
-        /// <summary>
-        /// 更新图
-        /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
         public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.Graph.InEdges(node);
@@ -264,12 +260,10 @@ namespace TianHua.Electrical.PDS.Project.Module
                 graph.CheckCascadeWithEdge(edge);
             }
         }
-
-        public static void UpdateWithMiniBusbar(ThPDSProjectGraph graph, ThPDSProjectGraphNode node, MiniBusbar miniBusbar)
+        public static void UpdateWithMiniBusbar(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
         {
             graph.CheckCascadeWithNode(node);
         }
-
         public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
         {
             var miniBusbar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge));
