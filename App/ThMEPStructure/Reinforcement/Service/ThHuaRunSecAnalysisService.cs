@@ -47,11 +47,9 @@ namespace ThMEPStructure.Reinforcement.Service
             var l1Ep = newEdgeEp + perpendVec.MultiplyBy(2.0);
             var l2Sp = newEdgeSp - perpendVec.MultiplyBy(2.0);
             var l2Ep = newEdgeEp - perpendVec.MultiplyBy(2.0);
-            var l1Outline = ThDrawTool.ToOutline(l1Sp, l1Ep, 1.0);
-            var l2Outline = ThDrawTool.ToOutline(l2Sp, l2Ep, 1.0);
+            var l1Outline = ThDrawTool.ToOutline(l1Sp, l1Ep, 5.0);
+            var l2Outline = ThDrawTool.ToOutline(l2Sp, l2Ep, 5.0);
             bool isLink = Query(l1Outline).Count > 0 && Query(l2Outline).Count > 0;
-            var aa = WallSpatialIndex.SelectAll().OfType<Polyline>()
-                .Select(p => p.StartPoint).ToList();
             l1Outline.Dispose();
             l2Outline.Dispose();
             return isLink;

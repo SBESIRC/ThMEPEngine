@@ -305,6 +305,16 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             return datas;
         }
+        public static List<double> GetDoubles(string content)
+        {
+            var datas = new List<double>();
+            string pattern = @"\d+([.]\d+)?";
+            foreach (Match item in Regex.Matches(content, pattern))
+            {
+                datas.Add(double.Parse(item.Value));
+            }
+            return datas;
+        }
         /// <summary>
         /// 判断value1是否大于value2,
         /// 或value1四舍五入后是否大于value2

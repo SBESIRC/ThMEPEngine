@@ -288,46 +288,62 @@ namespace ThMEPStructure.Reinforcement.Service
 
         private List<double> Parse(string reinforceText)
         {
+            // 格式1:2000.0(1.00%)-0.92%
+            // 格式2:4C12(0.57%)-G(6@200)
             var results = new List<double>();
-            var firstIndex = reinforceText.IndexOf('-');
-            var lastIndex = reinforceText.LastIndexOf('-');
+            var newReinforce = reinforceText.Replace("（", "(");
+            newReinforce = newReinforce.Replace("）", ")");
+            newReinforce = newReinforce.Trim();
+            var firstIndex = newReinforce.IndexOf('-');
+            var lastIndex = newReinforce.LastIndexOf('-');
             if(firstIndex==-1 || firstIndex != lastIndex)
             {
                 return  results;
             }
-            var preStr = reinforceText.Substring(0, firstIndex);
-            var pattern1 = @"\d+[.]{0,1}(\d+){0,}[(|（]\d+\.{0,1}\d+[%]{1,}[)|）]{1}";
-            var rg1 = new Regex(pattern1);
-            if (rg1.IsMatch(preStr))
+            var preStr = newReinforce.Substring(0, firstIndex).Trim();
+            var prePattern1 = @"^\S+\s*[(]{1}\s*\d+([.]{1}\d+)?\s*[%]+\s*[)]{1}$";
+            if(!Regex.IsMatch(preStr, prePattern1))
             {
-                var nextStr = reinforceText.Substring(firstIndex + 1);
-                var pattern2A = @"\d+[.]{0,1}\d+[%]{1,}";
-                var pattern2B = @"\d+\s*([%]{2}|[%]{4})(132)\s*\d+";
-                var rg2A = new Regex(pattern2A);
-                var rg2B = new Regex(pattern2B);
-                if(rg2A.IsMatch(nextStr))
+                return results;
+            }
+            var preIndex = preStr.IndexOf('(');
+            var preStrA = preStr.Substring(0, preIndex).Trim();
+            var preStrB = preStr.Substring(preIndex).Trim();
+            var prePattern2 = @"^\d+(.\d+)?$";
+            // 全部纵筋面积As = ?
+            if (Regex.IsMatch(preStrA, prePattern2))
+            {
+                results.Add(double.Parse(preStrA));
+            }
+            else
+            {
+                results.Add(0.0);
+            }
+            // 配筋率            
+            var reinforceRatios = ThReinforcementUtils.GetDoubles(preStrB);
+            if(reinforceRatios.Count==1)
+            {
+                results.Add(reinforceRatios.First());
+            }
+            else
+            {
+                return results;
+            }
+            // 配箍率
+            var nextStr = newReinforce.Substring(firstIndex + 1).Trim();
+            var nextPattern1 = @"^\d+(.\d+)?\s*[%]{1}$";
+            var nextPattern2 = @"\d+\s*[@]{1}\s*\d+";
+            if (Regex.IsMatch(nextStr, nextPattern1))
+            {
+                var stirupRatios = ThReinforcementUtils.GetDoubles(nextStr);
+                if(stirupRatios.Count==1)
                 {
-                    var pattern3 = @"\d+[.]{0,1}\d+";
-                    var rg3 = new Regex(pattern3);
-                    foreach (Match match in rg3.Matches(preStr))
-                    {
-                        results.Add(double.Parse(match.Value));
-                    }
-                    foreach (Match match in rg3.Matches(nextStr))
-                    {
-                        results.Add(double.Parse(match.Value));
-                    }
-                }
-                else if(rg2B.IsMatch(nextStr))
-                {
-                    var pattern3 = @"\d+[.]{0,1}\d+";
-                    var rg3 = new Regex(pattern3);
-                    foreach (Match match in rg3.Matches(preStr))
-                    {
-                        results.Add(double.Parse(match.Value));
-                    }
-                    results.Add(0.0);
-                }
+                    results.Add(stirupRatios.First());
+                }                
+            }   
+            else if(Regex.IsMatch(nextStr, nextPattern2))
+            {
+                results.Add(0.0);
             }
             return results;
         }
