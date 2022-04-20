@@ -32,7 +32,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                         {
                             if (_breaker.Appendix == AppendixType.ST)
                             {
-                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{(Appendix == AppendixType.无 ? "" : Appendix)}";
+                                if (Appendix == AppendixType.无)
+                                {
+                                    return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}";
+                                }
+                                else
+                                {
+                                    return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix}";
+                                }
                             }
                             else
                             {
@@ -41,7 +48,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                         }
                     case ComponentType.组合式RCD:
                         {
-                            return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix} {RCDType}{ResidualCurrent.GetDescription()}";
+                            if (Appendix == AppendixType.无)
+                            {
+                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{RCDType}{ResidualCurrent.GetDescription()}";
+                            }
+                            else
+                            {
+                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix} {RCDType}{ResidualCurrent.GetDescription()}";
+                            }
                         }
                     default:
                         throw new NotSupportedException();
