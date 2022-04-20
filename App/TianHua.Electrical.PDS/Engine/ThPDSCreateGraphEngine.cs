@@ -199,7 +199,8 @@ namespace TianHua.Electrical.PDS.Engine
             }
 
             var unionEngine = new ThPDSGraphUnionEngine(EdgeMapList);
-            return unionEngine.GraphUnion(graphList, cableTrayNode);
+            var circuitGraph = unionEngine.GraphUnion(graphList, cableTrayNode);
+            return circuitGraph;
         }
 
         private void EntitiesTransform(ThMEPOriginTransformer transformer, DBObjectCollection collection)

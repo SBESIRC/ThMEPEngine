@@ -96,7 +96,7 @@ namespace TianHua.Electrical.PDS.Service
             };
         }
 
-        public static void SelectCircuitType(ThPDSCircuit circuit, ThPDSLoad load, string layer, bool needAssign)
+        public static void SelectCircuitType(ThPDSLoad load, string layer, bool needAssign)
         {
             switch (layer)
             {

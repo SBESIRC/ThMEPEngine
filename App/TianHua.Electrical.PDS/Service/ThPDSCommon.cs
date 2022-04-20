@@ -9,8 +9,8 @@
         public static readonly string DESCRIPTION = "负载用途";
         public static readonly string ELECTRICITY = "电量";
         public static readonly string POWER_CATEGORY = "电源类别";
-        public static readonly string FIRE_POWER_SUPPLY = "消防电源";
-        public static readonly string NON_FIRE_POWER_SUPPLY = "非消防电源";
+        public static readonly string PROPERTY_VALUE_FIRE_POWER = "消防电源";
+        public static readonly string NON_PROPERTY_VALUE_FIRE_POWER = "非消防电源";
         public static readonly string FREQUENCY_CONVERSION = "变频";
 
         public static readonly string DISTRIBUTION_BOX_ID = "配电箱编号";

@@ -52,23 +52,23 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
         public ThPDSLoad LoadMarkAnalysis(List<string> marks, List<string> distBoxKey,
-            ThPDSBlockReferenceData distBoxData, ref string attributesCopy)
+            ThPDSBlockReferenceData loadData, ref string attributesCopy)
         {
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
             {
-                ID = CreateLoadID(marks, distBoxKey, distBoxData.EffectiveName, searchedString),
+                ID = CreateLoadID(marks, distBoxKey, loadData.EffectiveName, searchedString),
                 InstalledCapacity = AnalysisPower(marks, out var needCopy, out var frequencyConversion),
-                LoadTypeCat_1 = distBoxData.Cat_1,
-                LoadTypeCat_2 = distBoxData.Cat_2,
-                CircuitType = distBoxData.DefaultCircuitType,
-                Phase = distBoxData.Phase,
-                DemandFactor = distBoxData.DemandFactor,
-                PowerFactor = distBoxData.PowerFactor,
+                LoadTypeCat_1 = loadData.Cat_1,
+                LoadTypeCat_2 = loadData.Cat_2,
+                CircuitType = loadData.DefaultCircuitType,
+                Phase = loadData.Phase,
+                DemandFactor = loadData.DemandFactor,
+                PowerFactor = loadData.PowerFactor,
                 Location = new ThPDSLocation
                 {
-                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = distBoxData.Position,
+                    ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                    BasePoint = loadData.Position,
                 },
                 FrequencyConversion = frequencyConversion,
             };
@@ -76,7 +76,7 @@ namespace TianHua.Electrical.PDS.Service
             var fireLoad = false;
             marks.ForEach(str =>
             {
-                if (str.Contains(ThPDSCommon.FIRE_POWER_SUPPLY))
+                if (str.Contains(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER))
                 {
                     fireLoad = true;
                 }
@@ -85,7 +85,7 @@ namespace TianHua.Electrical.PDS.Service
 
             if (needCopy)
             {
-                attributesCopy = distBoxData.EffectiveName;
+                attributesCopy = loadData.EffectiveName;
             }
 
             var markStrings = new List<string>();
@@ -102,7 +102,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (r.Match(str).Success)
                 {
-                    if (distBoxData.EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
+                    if (loadData.EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
                     {
                         thPDSLoad.ID.CircuitID.Add(str);
                     }
@@ -149,7 +149,7 @@ namespace TianHua.Electrical.PDS.Service
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                         ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
                 FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
-                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.FIRE_POWER_SUPPLY) : false,
+                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER) : false,
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
@@ -375,7 +375,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy,
             out bool frequencyConversion)
         {
-            var results = new ThInstalledCapacity();
+            var powers =new List<double>();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;
@@ -385,6 +385,7 @@ namespace TianHua.Electrical.PDS.Service
                 var m = r.Match(infos[i]);
                 while (m.Success)
                 {
+                    infos[i] = infos[i].Replace("/", "");
                     infos[i] = infos[i].Replace(m.Value, "");
                     frequencyConversion = infos[i].Contains(ThPDSCommon.FREQUENCY_CONVERSION);
                     var result = m.Value.Replace("k", "");
@@ -393,11 +394,11 @@ namespace TianHua.Electrical.PDS.Service
                     result = result.Replace("W", "");
                     if (!m.Value.Contains("k") && !m.Value.Contains("K"))
                     {
-                        results.HighPower = double.Parse(result) / 1000.0;
+                        powers.Add(double.Parse(result) / 1000.0);
                     }
                     else
                     {
-                        results.HighPower = double.Parse(result);
+                        powers.Add(double.Parse(result));
                     }
                     var numRegex = new Regex(@"[1-9][xX]");
                     var numMatch = numRegex.Match(infos[i]);
@@ -412,6 +413,19 @@ namespace TianHua.Electrical.PDS.Service
 
                     m = m.NextMatch();
                 }
+            }
+
+            powers = powers.OrderBy(o => o).ToList();
+            var results = new ThInstalledCapacity();
+            if (powers.Count == 2)
+            {
+                results.IsDualPower = true;
+                results.LowPower = powers[0];
+                results.HighPower = powers[1];
+            }
+            else if (powers.Count == 1)
+            {
+                results.HighPower = powers[0];
             }
 
             return results;
