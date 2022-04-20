@@ -2,6 +2,7 @@
 using System.Linq;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
@@ -540,7 +541,10 @@ namespace TianHua.Electrical.PDS.Service
         {
             var edgeBSource = IdToNodes[edgeB.Source.Load.ID.LoadID].Item2;
             var edgeBtarget = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
-            var newEdge = new ThPDSProjectGraphEdge(edgeBSource, edgeBtarget);
+            var newEdge = new ThPDSProjectGraphEdge(edgeBSource, edgeBtarget)
+            {
+                Circuit = new ThPDSCircuit()
+            };
             newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             edgeA.Tag = new ThPDSProjectGraphEdgeIdChangeTag
@@ -577,7 +581,10 @@ namespace TianHua.Electrical.PDS.Service
             }
             var edgeASourceInGraphA = IdToNodes[edgeA.Source.Load.ID.LoadID].Item1;
             var edgeBtargetInGraphA = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
-            var newEdge = new ThPDSProjectGraphEdge(edgeASourceInGraphA, edgeBtargetInGraphA);
+            var newEdge = new ThPDSProjectGraphEdge(edgeASourceInGraphA, edgeBtargetInGraphA)
+            {
+                Circuit = new ThPDSCircuit()
+            };
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
             newEdge.Tag = new ThPDSProjectGraphEdgeMoveTag
@@ -591,7 +598,10 @@ namespace TianHua.Electrical.PDS.Service
         {
             var edgeBSourceInGraphA = IdToNodes[edgeB.Source.Load.ID.CircuitNumber.Last()].Item1;
             var edgeBTargetInGraphA = IdToNodes[edgeB.Target.Load.ID.CircuitNumber.Last()].Item1;
-            var newEdge = new ThPDSProjectGraphEdge(edgeBSourceInGraphA, edgeBTargetInGraphA);
+            var newEdge = new ThPDSProjectGraphEdge(edgeBSourceInGraphA, edgeBTargetInGraphA)
+            {
+                Circuit = new ThPDSCircuit()
+            };
             newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
             newEdge.Tag = new ThPDSProjectGraphEdgeAddTag();
