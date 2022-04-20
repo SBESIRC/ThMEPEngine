@@ -90,7 +90,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             
             var mark = markEngine.Extract(acadDatabase.Database, selectArea);
-            var markAngleDic = new Dictionary<Point3d, double>();
+            var markAngleDic = new Dictionary<Point3dEx, double>();
             var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
             MarkLine.GetPipeMark(ref fireHydrantSysIn, pipeMarkSite, startPt);
             var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);

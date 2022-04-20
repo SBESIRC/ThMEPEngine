@@ -28,12 +28,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
         public static bool GetMarkLineList(this FireHydrantSystemIn fireHydrantSysIn, 
-            List<Line> lineList, Dictionary<Point3d, double> markAngleDic)
+            List<Line> lineList, Dictionary<Point3dEx, double> markAngleDic)
         {
             var spt = fireHydrantSysIn.StartEndPts[0];
             var ept = fireHydrantSysIn.StartEndPts[1];
-            var sPt = PointCompute.PointOnLine(spt._pt, lineList, markAngleDic[spt._pt], 30);
-            var ePt = PointCompute.PointOnLine(ept._pt, lineList, markAngleDic[ept._pt], 30);
+            var sPt = PointCompute.PointOnLine(spt._pt, lineList, markAngleDic[spt], 30);
+            var ePt = PointCompute.PointOnLine(ept._pt, lineList, markAngleDic[ept], 30);
             if(sPt.Equals(new Point3dEx()) || ePt.Equals(new Point3dEx()))
             {
                 return false;
