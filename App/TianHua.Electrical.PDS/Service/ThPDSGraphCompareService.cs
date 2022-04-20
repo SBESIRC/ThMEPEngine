@@ -14,8 +14,8 @@ namespace TianHua.Electrical.PDS.Service
     /// </summary>
     public class ThPDSGraphCompareService
     {
-        private Dictionary<string, Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>> IdToNodes { get; set; }
-        private Dictionary<string, Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>> IdToEdges { get; set; }
+        private Dictionary<string, Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>> IdToNodes = new Dictionary<string, Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>>();
+        private Dictionary<string, Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>> IdToEdges = new Dictionary<string, Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>>();
 
         public void Diff(PDSGraph source, PDSGraph target)
         {
@@ -70,7 +70,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         throw new NotImplementedException(); //重复nodeIdB
                     }
-                    if(IdToNodes[id].Item1 != null)
+                    if (IdToNodes[id].Item1 != null)
                     {
                         IdToNodes[id] = new Tuple<ThPDSProjectGraphNode, ThPDSProjectGraphNode>(IdToNodes[id].Item1, nodeB);
                     }
@@ -92,7 +92,7 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var edgeA in graphA.Edges)
             {
                 var id = edgeA.Circuit.ID.CircuitNumber.Last();
-                if(id == "")
+                if (id == "")
                 {
                     continue;
                 }
@@ -112,7 +112,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     continue;
                 }
-                if(edgeB == null)
+                if (edgeB == null)
                 {
                     throw new NotImplementedException();
                 }
@@ -122,7 +122,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         throw new NotImplementedException(); //重复edgeIdB
                     }
-                    if(IdToEdges[id].Item1 != null)
+                    if (IdToEdges[id].Item1 != null)
                     {
                         IdToEdges[id] = new Tuple<ThPDSProjectGraphEdge, ThPDSProjectGraphEdge>(IdToEdges[id].Item1, edgeB);
                     }
@@ -317,9 +317,9 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
-                    if(nodeA.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                    if (nodeA.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
                     {
-                        if(compositeTag.Tag is ThPDSProjectGraphNodeExchangeTag)
+                        if (compositeTag.Tag is ThPDSProjectGraphNodeExchangeTag)
                         {
                             continue;
                         }
@@ -363,12 +363,12 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
-                    if (edgeA.Source != edgeB.Source)
+                    if (edgeA.Source.Load.ID.LoadID != edgeB.Source.Load.ID.LoadID)
                     {
                         throw new NotImplementedException(); //两条边同一个id不同起点
                     }
                     DataChangeForEdge(edgeA, edgeB);
-                    if (edgeA.Target != edgeB.Target)
+                    if (edgeA.Target.Load.ID.LoadID != edgeB.Target.Load.ID.LoadID)
                     {
                         StructureForMoveEdge(edgeA, edgeB, graphA);
                     }
@@ -620,7 +620,7 @@ namespace TianHua.Electrical.PDS.Service
                 //dataTagA.SouF = nodeA.Load.FireLoad;
                 dataTagA.TarF = nodeB.Load.FireLoad;
             }
-            if (nodeA.Load.InstalledCapacity != nodeB.Load.InstalledCapacity)
+            if (!nodeA.Load.InstalledCapacity.EqualsTo(nodeB.Load.InstalledCapacity))
             {
                 dataTagA.TagP = true;
                 //dataTagA.SouP = nodeA.Load.InstalledCapacity;

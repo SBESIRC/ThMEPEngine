@@ -9,7 +9,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         public CircuitDetails Details { get; set; }
         public ThPDSProjectGraphEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target) : base(source, target, null)
         {
-            //
+            Circuit = new ThPDSCircuit();
+            Details = new CircuitDetails();
         }
 
         #region
