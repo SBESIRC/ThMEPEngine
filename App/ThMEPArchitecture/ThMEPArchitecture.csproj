@@ -49,6 +49,7 @@
     <Compile Include="ParkingStallArrangement\General\Utils.cs" />
     <Compile Include="ParkingStallArrangement\IO\ThParkingStallDataSetFactory.cs" />
     <Compile Include="ParkingStallArrangement\Method\AngleTools.cs" />
+    <Compile Include="ParkingStallArrangement\Method\BlockTools.cs" />
     <Compile Include="ParkingStallArrangement\Method\Dfs.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="ParkingStallArrangement\Model\Ramps.cs" />
     <Compile Include="ParkingStallArrangement\Model\SegLineEx.cs" />
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
+    <Compile Include="ParkingStallArrangement\PostProcess\ArrangementInfo.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallDirectGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />

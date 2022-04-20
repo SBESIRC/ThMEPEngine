@@ -10,7 +10,6 @@ using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.InterProcess
 {
-    [Serializable]
     public class SubArea
     {
         public Polygon OutBound { get { return InterParameter.TotalArea; } }//原始边界
