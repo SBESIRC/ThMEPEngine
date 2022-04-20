@@ -2190,13 +2190,41 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var w = new Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                         var ctrl = new UserContorls.ThPDSLoadDistribution();
+                                        var tree = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
+                                        void Update(bool filt)
+                                        {
+                                            tree.DataList.Clear();
+                                            foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
+                                            {
+                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.Load.ID.LoadID, Tag = node });
+                                            }
+                                            ctrl.treeView.DataContext = tree;
+                                        }
+                                        ctrl.cbxFilt.Checked += (s, e) =>
+                                        {
+                                            Update(true);
+                                        };
+                                        ctrl.cbxFilt.Unchecked += (s, e) =>
+                                        {
+                                            Update(false);
+                                        };
+                                        Update(ctrl.cbxFilt.IsChecked.Value);
+                                        var ok = false;
                                         ctrl.btnYes.Command = new RelayCommand(() =>
                                         {
+                                            ok = true;
                                             w.Close();
                                         });
                                         w.Content = ctrl;
                                         w.ShowDialog();
-                                        UpdateCanvas();
+                                        if (ok)
+                                        {
+                                            foreach (var node in tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<ThPDSProjectGraphNode>())
+                                            {
+                                                ThPDSProjectGraphService.DistributeLoad(graph, node, vertice);
+                                            }
+                                            UpdateCanvas();
+                                        }
                                     });
                                 }
                                 {
@@ -3147,6 +3175,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 {
                                     _edges.Add(eg);
                                 }
+                                break;
                             }
                         }
                     }
