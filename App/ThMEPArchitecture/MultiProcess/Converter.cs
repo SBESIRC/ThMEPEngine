@@ -37,32 +37,41 @@ namespace ThMEPArchitecture.MultiProcess
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
-            dataWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon();
-            dataWraper.TotalArea.RemoveHoles();
+            dataWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
             dataWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
                 Select(l => l.ToNTSLineSegment()).ToList();
             var entities = outerBrder.BuildingObjs.ExplodeBlocks();
-            var buildingBounds = new List<LinearRing>();
+            //var buildingBounds = new List<LinearRing>();
+            //foreach (var ent in entities)
+            //{
+            //    if (ent is Polyline pline && pline.Closed)
+            //    {
+            //        var bound = pline.ToNTSLineString();
+            //        if(bound is LinearRing ring)
+            //        {
+            //            buildingBounds.Add(ring);
+            //        }
+            //    }
+            //}
+            //dataWraper.Buildings = buildingBounds.Select(lr => new Polygon(lr)).ToList();
+            var buildingBounds = new List<LineString>();
             foreach (var ent in entities)
             {
-                if (ent is Polyline pline && pline.Closed)
+                if (ent is Polyline pline)
                 {
                     var bound = pline.ToNTSLineString();
-                    if(bound is LinearRing ring)
-                    {
-                        buildingBounds.Add(ring);
-                    }
+                    buildingBounds.Add(bound);
+
                 }
             }
-            dataWraper.Buildings = buildingBounds.Select(lr => new Polygon(lr)).ToList();
-            //dataWraper.Buildings = buildingBounds.GetPolygons();
-            //dataWraper.Buildings.ForEach(build => build.RemoveHoles());
+            dataWraper.Buildings = buildingBounds.GetPolygons();
+            dataWraper.Buildings = dataWraper.Buildings.Select(build => build.RemoveHoles()).ToList();
             dataWraper.BoundingBoxes = new List<Polygon>();
             foreach (BlockReference blk in outerBrder.BuildingWithoutRampObjs)
             {
                 dataWraper.BoundingBoxes.Add(blk.GetRect().ToNTSPolygon());
             }
-            dataWraper.BoundingBoxes.ForEach(box => box.RemoveHoles());
+            dataWraper.BoundingBoxes = dataWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
             dataWraper.Ramps = outerBrder.GetRamps();
             dataWraper.SegLineIntsecDic = outerBrder.SegLines.GetSegLineIntsecDic();
             dataWraper.LowerUpperBound = dataWraper.SegLines.GetLowerUpperBound(dataWraper);
@@ -109,7 +118,7 @@ namespace ThMEPArchitecture.MultiProcess
             // 注意：目前坡道用的还是外包框，还未更改
             var ramps = new List<Ramp>();
             outerBrder.RampLists.ForEach(r => ramps.Add(new Ramp(r.InsertPt.ToNTSPoint(), r.Ramp.ToNTSPolygon())));
-            ramps.ForEach(ramp => ramp.Area.RemoveHoles());
+            //ramps.ForEach(ramp => ramp.Area.RemoveHoles());
             return ramps;
         }
         public static ChromosomeCollection GetChromosomeCollection(this List<Chromosome> population)

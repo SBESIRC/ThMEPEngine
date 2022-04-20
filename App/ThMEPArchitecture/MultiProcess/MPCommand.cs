@@ -34,6 +34,9 @@ using NetTopologySuite.Geometries;
 using ThParkingStall.Core.Tools;
 using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
 using MPGene = ThParkingStall.Core.InterProcess.Gene;
+using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
+
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThMPArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -131,15 +134,15 @@ namespace ThMEPArchitecture.MultiProcess
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
-                var blockName = PreprocssEx.GetBlockName(acadDatabase.Database, "MPDebug");
                 var subArea = subAreas[i];
-                subArea.Display(blockName);
+                subArea.Display("MPDebug");
             }
 #endif
             List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
             MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
             CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+            subAreas.ForEach(area => area.ShowText());
         }
         public void Run(AcadDatabase acadDatabase)
         {
@@ -175,15 +178,15 @@ namespace ThMEPArchitecture.MultiProcess
 #if DEBUG
                     for (int i = 0; i < subAreas.Count; i++)
                     {
-                        var blockName = PreprocssEx.GetBlockName(acadDatabase.Database, "MPDebug");
                         var subArea = subAreas[i];
-                        subArea.Display(blockName);
+                        subArea.Display("MPDebug");
                     }
 #endif
                     List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                     MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
                     CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition, true);
                     MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+                    subAreas.ForEach(area => area.ShowText());
                     SubAreaParkingCnt.Clear();
                 }
                 catch (Exception ex)
@@ -218,27 +221,26 @@ namespace ThMEPArchitecture.MultiProcess
             var entities = new List<Entity>();
             entities.Add(subArea.Area.ToDbMPolygon());
             entities[0].Layer = layer;
-            entities.AddRange(subArea.SegLines.Select(l => l.ToDbLine()).Change(1, layer));
-            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon()).Change(2, layer));
-            entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon()).Change(3, layer));
-            entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon()).Change(4, layer));
-            entities.ShowAsBlock(blockName, layer);
+            entities.AddRange(subArea.SegLines.Select(l => l.ToDbLine(2,layer)));
+            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(0, layer)));
+            entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon(3, layer)));
+            entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon(4, layer)));
+            entities.ShowBlock(blockName, layer);
         }
-        public static void Show(this Entity entity,string layer,int coloridx )
+        private static Line ToDbLine(this LineSegment segment, int coloridx, string layer)
         {
-            entity.Layer = layer;
-            entity.ColorIndex = coloridx;
-            entity.AddToCurrentSpace();
+            var line = segment.ToDbLine();
+            line.Layer = layer;
+            line.ColorIndex = coloridx;
+            return line;
         }
-        public static IEnumerable<Entity> Change(this IEnumerable<Entity> entities, int coloridx, string layer)
+        public static MPolygon ToDbMPolygon(this Polygon polygon, int coloridx, string layer)
         {
-            foreach (Entity entity in entities)
-            {
-                entity.Layer = layer;
-                entity.ColorIndex = coloridx;
-            }
+            var mpolygon = polygon.ToDbMPolygon();
+            mpolygon.Layer = layer;
+            mpolygon.ColorIndex = coloridx;
+            return mpolygon;
 
-            return entities;
         }
         public static void ShowLowerUpperBound(this List<LineSegment> SegLines, string layer = "最大最小值")
         {

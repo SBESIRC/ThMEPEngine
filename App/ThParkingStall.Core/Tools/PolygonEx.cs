@@ -8,12 +8,13 @@ namespace ThParkingStall.Core.Tools
 {
     public static class PolygonEx
     {
-        public static void RemoveHoles(this Polygon polygon)
+        public static Polygon RemoveHoles(this Polygon polygon)
         {
             if(polygon.NumInteriorRings > 0)
             {
                 polygon = new Polygon(polygon.Shell);
             }
+            return polygon;
         } 
         public static List<Polygon> GetPolygons(this List<Polygon> polygons)
         {
