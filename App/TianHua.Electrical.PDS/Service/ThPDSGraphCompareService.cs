@@ -539,14 +539,8 @@ namespace TianHua.Electrical.PDS.Service
         #region EDGE_STRUCTURE
         private void StructureForChangeEdgeID(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            var edgeBSource = IdToNodes[edgeB.Source.Load.ID.LoadID].Item2;
-            var edgeBtarget = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
-            var newEdge = new ThPDSProjectGraphEdge(edgeBSource, edgeBtarget)
-            {
-                Circuit = new ThPDSCircuit()
-            };
-            newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
-            newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
+            var newEdge = CreatEdge(IdToNodes[edgeB.Source.Load.ID.LoadID].Item2, IdToNodes[edgeB.Target.Load.ID.LoadID].Item2,
+                edgeB.Circuit.ID.CircuitID, edgeB.Circuit.ID.CircuitNumber.Last());
             edgeA.Tag = new ThPDSProjectGraphEdgeIdChangeTag
             {
                 ChangeFrom = true,
@@ -579,14 +573,8 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edgeA.Tag = moveTagA;
             }
-            var edgeASourceInGraphA = IdToNodes[edgeA.Source.Load.ID.LoadID].Item1;
-            var edgeBtargetInGraphA = IdToNodes[edgeB.Target.Load.ID.LoadID].Item2; //Item2若没有则说明还没有添加入edgeA,但好像并不影响
-            var newEdge = new ThPDSProjectGraphEdge(edgeASourceInGraphA, edgeBtargetInGraphA)
-            {
-                Circuit = new ThPDSCircuit()
-            };
-            newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
-            newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
+            var newEdge = CreatEdge(IdToNodes[edgeA.Source.Load.ID.LoadID].Item1, IdToNodes[edgeB.Target.Load.ID.LoadID].Item2,
+                edgeB.Circuit.ID.CircuitID, edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Tag = new ThPDSProjectGraphEdgeMoveTag
             {
                 MoveFrom = false,
@@ -596,14 +584,8 @@ namespace TianHua.Electrical.PDS.Service
 
         private void StructureForAddEdge(ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            var edgeBSourceInGraphA = IdToNodes[edgeB.Source.Load.ID.CircuitNumber.Last()].Item1;
-            var edgeBTargetInGraphA = IdToNodes[edgeB.Target.Load.ID.CircuitNumber.Last()].Item1;
-            var newEdge = new ThPDSProjectGraphEdge(edgeBSourceInGraphA, edgeBTargetInGraphA)
-            {
-                Circuit = new ThPDSCircuit()
-            };
-            newEdge.Circuit.ID.CircuitNumber.Add(edgeB.Circuit.ID.CircuitNumber.Last());
-            newEdge.Circuit.ID.CircuitID = edgeB.Circuit.ID.CircuitID;
+            var newEdge = CreatEdge(IdToNodes[edgeB.Source.Load.ID.CircuitNumber.Last()].Item1, IdToNodes[edgeB.Target.Load.ID.CircuitNumber.Last()].Item1,
+                edgeB.Circuit.ID.CircuitID, edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Tag = new ThPDSProjectGraphEdgeAddTag();
             graphA.AddEdge(newEdge);
         }
@@ -656,5 +638,17 @@ namespace TianHua.Electrical.PDS.Service
             return false;
         }
         #endregion
+
+        private ThPDSProjectGraphEdge CreatEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target, List<string> circuitId, string circuitNumber)
+        {
+            var newEdge = new ThPDSProjectGraphEdge(source, target)
+            {
+                Circuit = new ThPDSCircuit(),
+                Details = new CircuitDetails()
+            };
+            newEdge.Circuit.ID.CircuitID = circuitId;
+            newEdge.Circuit.ID.CircuitNumber.Add(circuitNumber);
+            return newEdge;
+        }
     }
 }
