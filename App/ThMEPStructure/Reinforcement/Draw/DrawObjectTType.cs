@@ -288,9 +288,9 @@ namespace ThMEPStructure.Reinforcement.Draw
             //把一对对点的位置计算出来，计算竖直方向上的位置,0，9号点每次向下偏移deltaY,水平方向2，3号点每次向右偏移deltaX1,  5,8号点向右侧偏移deltaX2
             for (int i = 0; i < resultY; i++)
             {
-                Point3d tmpPoint1 = new Point3d(points[0].X, points[0].Y - deltaY, 0);
+                Point3d tmpPoint1 = new Point3d(points[0].X, points[0].Y - deltaY * (i + 1), 0);
                 points.Add(tmpPoint1);
-                Point3d tmpPoint2 = new Point3d(points[9].X, points[9].Y - deltaY, 0);
+                Point3d tmpPoint2 = new Point3d(points[9].X, points[9].Y - deltaY * (i + 1), 0);
                 points.Add(tmpPoint2);
                 pointsFlag.Add(2);
                 pointsFlag.Add(2);
@@ -300,18 +300,18 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 for (int i = 0; i < resultX1; i++)
                 {
-                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1, points[2].Y, 0);
+                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1 * (i + 1), points[2].Y, 0);
                     points.Add(tmpPoint1);
-                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
+                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1 * (i + 1), points[3].Y, 0);
                     points.Add(tmpPoint2);
                     pointsFlag.Add(3);
                     pointsFlag.Add(3);
                 }
                 for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
                 {
-                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2, points[5].Y, 0);
+                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2 * (i + 1), points[5].Y, 0);
                     points.Add(tmpPoint1);
-                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
+                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2 * (i + 1), points[8].Y, 0);
                     points.Add(tmpPoint2);
                     pointsFlag.Add(3);
                     pointsFlag.Add(3);
@@ -321,18 +321,18 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 for (int i = 0; i < pointsPair - resultX1 - resultY; i++)
                 {
-                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2, points[5].Y, 0);
+                    Point3d tmpPoint1 = new Point3d(points[5].X + deltaX2 * (i + 1), points[5].Y, 0);
                     points.Add(tmpPoint1);
-                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2, points[8].Y, 0);
+                    Point3d tmpPoint2 = new Point3d(points[8].X + deltaX2 * (i + 1), points[8].Y, 0);
                     points.Add(tmpPoint2);
                     pointsFlag.Add(3);
                     pointsFlag.Add(3);
                 }
                 for (int i = 0; i < resultX1; i++)
                 {
-                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1, points[2].Y, 0);
+                    Point3d tmpPoint1 = new Point3d(points[2].X + deltaX1 * (i + 1), points[2].Y, 0);
                     points.Add(tmpPoint1);
-                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1, points[3].Y, 0);
+                    Point3d tmpPoint2 = new Point3d(points[3].X + deltaX1 * (i + 1), points[3].Y, 0);
                     points.Add(tmpPoint2);
                     pointsFlag.Add(3);
                     pointsFlag.Add(3);
