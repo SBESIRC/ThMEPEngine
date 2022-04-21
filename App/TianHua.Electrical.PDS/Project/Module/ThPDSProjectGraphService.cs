@@ -449,6 +449,12 @@ namespace TianHua.Electrical.PDS.Project.Module
             //Step 5:添加到Graph
             graph.AddEdge(newEdge);
 
+            if(type.Contains("消防应急照明回路"))
+            {
+                target.Load.Phase = ThPDSPhase.一相;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                newEdge.Circuit.ID.Description = "疏散照明/指示灯";
+            }
             return newEdge;
         }
 
@@ -583,10 +589,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static SecondaryCircuit AddControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphEdge edge, SecondaryCircuitInfo secondaryCircuitInfo)
         {
             int index = edge.Source.Details.SecondaryCircuits.Count > 0 ? edge.Source.Details.SecondaryCircuits.Sum(o => o.Value.Count) + 1 : 1;
-            var secondaryCircuit = new SecondaryCircuit(index);
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
-            secondaryCircuit.CircuitDescription = secondaryCircuitInfo.Description;
+
+            var secondaryCircuit = new SecondaryCircuit(index, secondaryCircuitInfo);
             secondaryCircuit.Conductor = componentFactory.GetSecondaryCircuitConductor(secondaryCircuitInfo);
+
             edge.Source.Details.SecondaryCircuits.Add(secondaryCircuit, new List<ThPDSProjectGraphEdge>());
             AssignCircuit2ControlCircuit(edge.Source, secondaryCircuit, edge);
             return secondaryCircuit;
