@@ -230,21 +230,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             void UpdateCanvas()
             {
-                try
-                {
-                    {
-                        foreach (var v in graph.Vertices)
-                        {
-                            ThPDSProjectGraphService.UpdateWithNode(new ThPDSProjectGraph(graph), v);
-                            ThPDSProjectGraphService.UpdateWithMiniBusbar(new ThPDSProjectGraph(graph), v);
-                        }
-                        foreach (var e in graph.Edges)
-                        {
-                            ThPDSProjectGraphService.UpdateWithEdge(new ThPDSProjectGraph(graph), e);
-                        }
-                    }
-                }
-                catch { }
+                //try
+                //{
+                //    {
+                //        foreach (var v in graph.Vertices)
+                //        {
+                //            ThPDSProjectGraphService.UpdateWithNode(new ThPDSProjectGraph(graph), v);
+                //            ThPDSProjectGraphService.UpdateWithMiniBusbar(new ThPDSProjectGraph(graph), v);
+                //        }
+                //        foreach (var e in graph.Edges)
+                //        {
+                //            ThPDSProjectGraphService.UpdateWithEdge(new ThPDSProjectGraph(graph), e);
+                //        }
+                //    }
+                //}
+                //catch { }
                 canvas.Children.Clear();
                 clear?.Invoke();
                 dccbs = null;
@@ -3487,10 +3487,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 clear += () => { clear = null; };
             }
-            WeakReferenceMessenger.Default.Register<RatedCurrentChangedMessage>(this, (r, m) =>
-            {
-                UpdateCanvas();
-            });
+            //WeakReferenceMessenger.Default.Register<RatedCurrentChangedMessage>(this, (r, m) =>
+            //{
+            //    UpdateCanvas();
+            //});
             UpdateCanvas();
         }
         private static Path CreateLine(Transform trans, Brush strockBrush, Point st, Point ed)

@@ -77,7 +77,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _cps.SetRatedCurrent(value);
                 OnPropertiesChanged();
-                WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
+                //WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
             }
         }
 
