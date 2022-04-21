@@ -1,4 +1,6 @@
-﻿namespace TianHua.Electrical.PDS.Service
+﻿using System;
+
+namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSCommon
     {
@@ -93,5 +95,9 @@
         public static readonly string FIRE_POWER_MONITORING_2 = "E-BPMFE201-2";
         public static readonly string ELECTRICAL_FIRE_MONITORING_1 = "E-BEFPS201-1";
         public static readonly string ELECTRICAL_FIRE_MONITORING_2 = "E-BEFPS201-2";
+
+        public static readonly Tuple<string, short> AI_POWR_AUXL1 = Tuple.Create("AI-POWR-AUXL1", (short)2); 
+        public static readonly Tuple<string, short> AI_POWR_AUXL2 = Tuple.Create("AI-POWR-AUXL2", (short)1); 
+        public static readonly Tuple<string, short> AI_POWR_AUXL3 = Tuple.Create("AI-POWR-AUXL3", (short)3); 
     }
 }

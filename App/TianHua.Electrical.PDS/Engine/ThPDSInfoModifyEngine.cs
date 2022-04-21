@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using AcHelper;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -10,6 +10,7 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
@@ -23,22 +24,44 @@ namespace TianHua.Electrical.PDS.Service
     public class ThPDSInfoModifyEngine
     {
         private List<ThPDSNodeMap> NodeMapList;
-
         private List<ThPDSEdgeMap> EdgeMapList;
-
         private ProjectGraph ProjectGraph;
+        private DBObjectCollection Revclouds;
+        private List<ThPDSProjectGraphNode> NodeList;
+        private List<ThPDSProjectGraphEdge> EdgeList;
 
         public ThPDSInfoModifyEngine(List<ThPDSNodeMap> nodeMapList, List<ThPDSEdgeMap> edgeMapList, ProjectGraph projectGraph)
         {
             NodeMapList = nodeMapList;
             EdgeMapList = edgeMapList;
             ProjectGraph = projectGraph;
+            NodeList = ProjectGraph.Vertices.ToList();
+            EdgeList = ProjectGraph.Edges.ToList();
         }
 
-        public void Execute()
+        public ThPDSInfoModifyEngine(List<ThPDSNodeMap> nodeMapList, List<ThPDSEdgeMap> edgeMapList, ProjectGraph projectGraph,
+            ThPDSProjectGraphNode node)
         {
-            var dm = Application.DocumentManager;
-            foreach (Document doc in dm)
+            NodeMapList = nodeMapList;
+            EdgeMapList = edgeMapList;
+            ProjectGraph = projectGraph;
+            NodeList = new List<ThPDSProjectGraphNode> { node };
+            EdgeList = new List<ThPDSProjectGraphEdge>();
+        }
+
+        public ThPDSInfoModifyEngine(List<ThPDSNodeMap> nodeMapList, List<ThPDSEdgeMap> edgeMapList, ProjectGraph projectGraph,
+           ThPDSProjectGraphEdge edge)
+        {
+            NodeMapList = nodeMapList;
+            EdgeMapList = edgeMapList;
+            ProjectGraph = projectGraph;
+            NodeList = new List<ThPDSProjectGraphNode>();
+            EdgeList = new List<ThPDSProjectGraphEdge> { edge };
+        }
+
+        public void InfoModify()
+        {
+            foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();
                 //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
@@ -47,20 +70,23 @@ namespace TianHua.Electrical.PDS.Service
                 //}
 
                 using (var docLock = doc.LockDocument())
-                using (var acad = AcadDatabase.Use(doc.Database))
+                using (var activeDb = AcadDatabase.Use(doc.Database))
                 {
+                    //Application.DocumentManager.MdiActiveDocument = doc;
+
                     var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
                     var nodeMap = NodeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
                     var edgeMap = EdgeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
                     if (nodeMap.IsNull() || ProjectGraph.IsNull())
                     {
-                        return;
+                        continue;
                     }
+                    Revclouds = new DBObjectCollection();
 
-                    ProjectGraph.Vertices.ForEach(o =>
+                    NodeList.ForEach(o =>
                     {
                         // 节点负载编号更新
-                        if (o.Type == PDSNodeType.Load)
+                        if (o.Type == PDSNodeType.Load && referenceDWG.Equals("测试42.dwg"))
                         {
                             o.Tag = new ThPDSProjectGraphNodeDataTag
                             {
@@ -91,7 +117,7 @@ namespace TianHua.Electrical.PDS.Service
                                 var sourceLoadID = sourceNode[0].Key.Loads[0].ID.LoadID;
                                 sourceNode[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(acad, id, sourceLoadID, idTag.ChangedID);
+                                    InfoModify(activeDb, id, sourceLoadID, idTag.ChangedID);
                                 });
                             }
                         }
@@ -113,7 +139,7 @@ namespace TianHua.Electrical.PDS.Service
                             {
                                 sourceNode[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(acad, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString());
+                                    InfoModify(activeDb, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString());
                                 });
                             }
 
@@ -122,7 +148,7 @@ namespace TianHua.Electrical.PDS.Service
                             {
                                 sourceNode[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(acad, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString());
+                                    InfoModify(activeDb, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString());
                                 });
                             }
                         }
@@ -131,14 +157,14 @@ namespace TianHua.Electrical.PDS.Service
                             var sourceDescription = sourceNode[0].Key.Loads[0].ID.Description;
                             sourceNode[0].Value.ForEach(id =>
                             {
-                                InfoModify(acad, id, sourceDescription, dataTag.TarD);
+                                InfoModify(activeDb, id, sourceDescription, dataTag.TarD);
                             });
                         }
                         if (dataTag.TagF)
                         {
                             sourceNode[0].Value.ForEach(id =>
                             {
-                                var entity = acad.Element<Entity>(id, true);
+                                var entity = activeDb.Element<Entity>(id, true);
                                 if (entity is BlockReference block)
                                 {
                                     if (block.Name.Contains(ThPDSCommon.LOAD_LABELS))
@@ -154,17 +180,19 @@ namespace TianHua.Electrical.PDS.Service
                                     }
                                 }
                             });
-
                         }
                     });
 
-                    ProjectGraph.Edges.ForEach(o =>
+                    EdgeList.ForEach(o =>
                     {
-                        o.Tag = new ThPDSProjectGraphEdgeIdChangeTag
+                        if (referenceDWG.Equals("测试42.dwg"))
                         {
-                            ChangeFrom = true,
-                            ChangedLastCircuitID = "1B-B3ACq02",
-                        };
+                            o.Tag = new ThPDSProjectGraphEdgeIdChangeTag
+                            {
+                                ChangeFrom = true,
+                                ChangedLastCircuitID = "1B-B4ACq2-WPE03",
+                            };
+                        }
                         if (o.Tag is ThPDSProjectGraphEdgeIdChangeTag sourcePanelTag)
                         {
                             var sourceEdge = edgeMap.EdgeMap
@@ -179,27 +207,36 @@ namespace TianHua.Electrical.PDS.Service
                                 var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber.Last();
                                 sourceEdge[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(acad, id, sourceCircuitNumber, sourcePanelTag.ChangedLastCircuitID);
+                                    InfoModify(activeDb, id, sourceCircuitNumber, sourcePanelTag.ChangedLastCircuitID);
                                 });
                             }
                         }
                     });
+
+                    //if (Revclouds.Count > 0)
+                    //{
+                    //    Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
+                    //    ThPDSInsertRevcloudService.InsertRevcloud(activeDb.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
+                    //}
+
+                    doc.Editor.Regen();
                 }
             }
         }
 
-        private void InfoModify(AcadDatabase acad, ObjectId id, string sourceInfo, string targetInfo)
+        private void InfoModify(AcadDatabase activeDb, ObjectId id, string sourceInfo, string targetInfo)
         {
             if (sourceInfo.Equals(targetInfo))
             {
                 return;
             }
-            var entity = acad.Element<Entity>(id, true);
+            var entity = activeDb.Element<Entity>(id, true);
             if (entity is DBText text)
             {
                 if (text.TextString.Contains(sourceInfo))
                 {
                     text.TextString = StringReplace(text.TextString, sourceInfo, targetInfo);
+                    Revclouds.Add(text.GeometricExtents.ToRectangle());
                 }
             }
             else if (entity is MText mText)
@@ -207,17 +244,18 @@ namespace TianHua.Electrical.PDS.Service
                 var results = new List<Entity>();
                 if (MTextInfoModify(mText, sourceInfo, targetInfo, results))
                 {
+                    Revclouds.Add(mText.GeometricExtents.ToRectangle());
                     mText.Erase();
-                    results.OfType<Entity>().ForEach(o => acad.ModelSpace.Add(o));
+                    results.OfType<Entity>().ForEach(o => activeDb.ModelSpace.Add(o));
                 }
             }
             else if (entity is MLeader mLeader)
             {
-                MutiEntityInfoModify(acad, mLeader, sourceInfo, targetInfo);
+                MutiEntityInfoModify(activeDb, mLeader, sourceInfo, targetInfo);
             }
             else if (entity is Table table)
             {
-                MutiEntityInfoModify(acad, table, sourceInfo, targetInfo);
+                MutiEntityInfoModify(activeDb, table, sourceInfo, targetInfo);
             }
             else if (ThMEPTCHService.IsTCHWireDim2(entity))
             {
@@ -241,20 +279,24 @@ namespace TianHua.Electrical.PDS.Service
                 });
                 if (contains)
                 {
+                    Revclouds.Add(entity.GeometricExtents.ToRectangle());
                     entity.Erase();
-                    results.OfType<Entity>().ForEach(o => acad.ModelSpace.Add(o));
+                    results.OfType<Entity>().ForEach(o => activeDb.ModelSpace.Add(o));
                 }
             }
             else if (entity is BlockReference block)
             {
-                if (block.Name.Contains(ThPDSCommon.LOAD_LABELS))
+                var blockName = block.GetBlockName();
+                if (blockName.Contains(ThPDSCommon.LOAD_LABELS))
                 {
                     var attributes = id.GetAttributesInBlockReference();
                     var dictionary = new Dictionary<string, string>();
+                    var contains = false;
                     attributes.ForEach(o =>
                     {
                         if (o.Value.Contains(sourceInfo))
                         {
+                            contains = true;
                             dictionary.Add(o.Key, StringReplace(o.Value, sourceInfo, targetInfo));
                         }
                         else
@@ -262,7 +304,11 @@ namespace TianHua.Electrical.PDS.Service
                             dictionary.Add(o.Key, o.Value);
                         }
                     });
-                    id.UpdateAttributesInBlock(dictionary);
+                    if (contains)
+                    {
+                        Revclouds.Add(block.GeometricExtents.ToRectangle());
+                        id.UpdateAttributesInBlock(dictionary);
+                    }
                 }
             }
         }
@@ -311,7 +357,7 @@ namespace TianHua.Electrical.PDS.Service
             return contains;
         }
 
-        private void MutiEntityInfoModify(AcadDatabase acad, Entity entity, string sourceInfo, string targetInfo)
+        private void MutiEntityInfoModify(AcadDatabase activeDb, Entity entity, string sourceInfo, string targetInfo)
         {
             var contains = false;
             var results = new List<Entity>();
@@ -349,8 +395,9 @@ namespace TianHua.Electrical.PDS.Service
             }
             if (contains)
             {
+                Revclouds.Add(entity.GeometricExtents.ToRectangle());
                 entity.Erase();
-                results.OfType<Entity>().ForEach(o => acad.ModelSpace.Add(o));
+                results.OfType<Entity>().ForEach(o => activeDb.ModelSpace.Add(o));
             }
         }
 

@@ -68,7 +68,11 @@ namespace TianHua.Electrical.PDS.UI
             var modifyCmd = new ThPDSUpdateToDwgService();
             modifyCmd.Update();
 
-            Active.Editor.Regen();
+            // 标注定位
+            //var zoomService = new ThPDSUpdateToDwgService();
+            //zoomService.Zoom();
+
+            
         }
     }
 }

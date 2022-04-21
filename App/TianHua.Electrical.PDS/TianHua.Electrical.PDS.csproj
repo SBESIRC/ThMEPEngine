@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
+    <Compile Include="Engine\ThPDSZoomEngine.cs" />
+    <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
     <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />
     <Compile Include="Service\ThPDSSecondaryPushDataService.cs" />
