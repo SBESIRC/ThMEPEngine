@@ -17,17 +17,17 @@
                     <DockPanel LastChildFill="True">
                         <TextBlock DockPanel.Dock="Left">地址:</TextBlock>
                         <Button DockPanel.Dock="Right" Click="btnBrowseClick">浏览...</Button>
-                        <TextBox></TextBox>
+                        <TextBox Text="{Binding Path}"></TextBox>
                     </DockPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock>自动保存时间间隔</TextBlock>
-                        <TextBox Width="100"></TextBox>
+                        <TextBox Text="{Binding Interval}" Width="100"></TextBox>
                         <TextBlock>分钟</TextBlock>
                     </StackPanel>
-                    <CheckBox>为每个项目建立单独的文件夹</CheckBox>
+                    <CheckBox IsChecked="{Binding Individual}">为每个项目建立单独的文件夹</CheckBox>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock>绘图比例</TextBlock>
-                        <ComboBox Width="100"></ComboBox>
+                        <ComboBox SelectedItem="{Binding DwgRatio}" ItemsSource="{Binding DwgRatioItemsSouce}" Width="100"></ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Click="btnSaveClick">保存</Button>
