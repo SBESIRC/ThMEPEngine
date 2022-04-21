@@ -24,10 +24,10 @@
     <Grid Background="White">
         <StackPanel Orientation="Vertical">
             <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
-            <Label Content="供配电系统" FontSize="16" FontWeight="Black"  Padding="0" VerticalContentAlignment="Center"></Label>
+            <Label Visibility="Collapsed" Content="供配电系统" FontSize="16" FontWeight="Black"  Padding="0" VerticalContentAlignment="Center"></Label>
             <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
             <StackPanel Orientation="Vertical"  >
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Visibility="Collapsed"  Orientation="Horizontal" VerticalAlignment="Center">
                     <Label Content="市政电源线路默认长度" Width="190"></Label>
                     <cus:InputTextBox Text="{Binding DefaultLengthOfMunicipalPowerLine}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
                     <Label Content="m"></Label>
@@ -40,7 +40,7 @@
                     <ComboBox SelectedItem="{Binding ElseFeeder}"></ComboBox>
                     <Label Content="馈线。"></Label>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal"  VerticalAlignment="Center">
+                <StackPanel Visibility="Collapsed"  Orientation="Horizontal"  VerticalAlignment="Center">
                     <Label Content="至第一级配电箱线路的默认长度" Width="190"></Label>
                     <cus:InputTextBox Text="{Binding DefaultLengthOfCircuitToTheFirstLevelDistributionBox}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
                     <Label Content="m"></Label>
@@ -48,7 +48,7 @@
                     <cus:InputTextBox Text="{Binding LoopSettingCurrent}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False" Height="22"></cus:InputTextBox>
                     <Label Content="A时，默认采用密集型母线槽馈线。"></Label>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal"  VerticalAlignment="Center">
+                <StackPanel Visibility="Collapsed"  Orientation="Horizontal"  VerticalAlignment="Center">
                     <Label Content="后续线路的默认长度" Width="190"></Label>
                     <cus:InputTextBox Text="{Binding DefaultLengthOfSubsequentLines}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
                     <Label Content="m"></Label>

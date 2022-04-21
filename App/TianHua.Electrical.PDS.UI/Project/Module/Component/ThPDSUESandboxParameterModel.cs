@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
@@ -144,15 +145,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-        public List<MaterialStructure> FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunkOuterSheathMaterials;
-        public MaterialStructure FirePowerDistributionTrunkLineAndBranchTrunkLine
+        public List<string> FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunkOuterSheathMaterials.Select(x=>x.GetEnumDescription()).ToList();
+        public string FirePowerDistributionTrunkLineAndBranchTrunkLine
         {
-            get => FireDistributionTrunk.OuterSheathMaterial;
+            get => FireDistributionTrunk.OuterSheathMaterial.GetEnumDescription();
             set
             {
                 if (value != FirePowerDistributionTrunkLineAndBranchTrunkLine)
                 {
-                    FireDistributionTrunk.OuterSheathMaterial = value;
+                    FireDistributionTrunk.OuterSheathMaterial = value.GetEnumName<MaterialStructure>();
                     OnPropertyChanged(nameof(FirePowerDistributionTrunkLineAndBranchTrunkLine));
                 }
             }

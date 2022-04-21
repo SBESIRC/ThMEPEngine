@@ -106,6 +106,7 @@ namespace TianHua.Electrical.PDS.UI.UI
         }
         private void btnSetting_Click(object sender, RoutedEventArgs e)
         {
+            new ThPDSSetting() { Width = 400, Height = 200 }.ShowDialog();
         }
         private void btnImportProject_Click(object sender, RoutedEventArgs e)
         {

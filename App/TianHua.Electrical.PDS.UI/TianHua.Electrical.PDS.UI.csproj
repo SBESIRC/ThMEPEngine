@@ -23,6 +23,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -146,6 +147,9 @@
     <Compile Include="UserContorls\UESandboxParameter.xaml.cs">
       <DependentUpon>UESandboxParameter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSSetting.xaml.cs">
+      <DependentUpon>ThPDSSetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\GlobalParameterViewModel.cs" />
     <Compile Include="ViewModels\SandBoxTableItemViewModel.cs" />
     <Compile Include="ViewModels\InformationMatchViewModel.cs" />
@@ -227,6 +231,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserContorls\UESandboxParameter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
