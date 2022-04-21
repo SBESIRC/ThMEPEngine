@@ -72,7 +72,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 Entities = entities;
             }
         }
-        public List<ThValveModel> GetValveModelList(Point3dCollection pts)
+        public List<ThValveModel> GetValveModelList(Point3dCollection pts=null)
         {
             var result = new List<ThValveModel>();
             string[] names_a = new string[] { "给水角阀平面", "截止阀", "闸阀", "蝶阀", "电动阀",
@@ -84,7 +84,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             {
                 Closed = true,
             };
-            bound.CreatePolyline(pts);
+            if (pts != null)
+                bound.CreatePolyline(pts);
             foreach (var e in Entities.OfType<BlockReference>().Where(e =>
             {
                 bool cond_a = e.ObjectId.IsValid;
@@ -97,8 +98,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 foreach (var name in names_b)
                     if (e.GetEffectiveName().Contains(name))
                         cond_c = true;
-                if (cond_a && (cond_b || cond_c))
+                if (cond_a && (cond_b || cond_c) && pts != null)
                     cond_d = bound.Contains(e.Position);
+                else cond_d = true;
                 if (cond_a && (cond_b || cond_c) && cond_d) return true;
                 else return false;
             }))
@@ -139,6 +141,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     if (e.Bounds is Extents3d extent3d)
                     {
+                        if (pts == null) return true;
                         if (bound.Contains(extent3d.CenterPoint())) return true;
                         else return false;
                     }
@@ -150,7 +153,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             return result.Where(e => e.Valve != null).ToList();
         }
-        public List<ThFlushPointModel> GetFlushPointList(Point3dCollection pts)
+        public List<ThFlushPointModel> GetFlushPointList(Point3dCollection pts=null)
         {
 
             using (AcadDatabase adb = AcadDatabase.Active())
@@ -160,9 +163,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     Closed = true,
                 };
-                bound.CreatePolyline(pts);
+                if(pts!=null)
+                    bound.CreatePolyline(pts);
                 var blks = ExtractBlocks(adb.Database, "给水角阀平面").Cast<BlockReference>().ToList();
-                blks = blks.Where(br => bound.Contains(br.Position)).ToList();
+                if(pts!=null)
+                    blks = blks.Where(br => bound.Contains(br.Position)).ToList();
                 foreach (var br in blks)
                 {
                     ThFlushPointModel thFlushPoint = new ThFlushPointModel(br);

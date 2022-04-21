@@ -6,19 +6,121 @@ using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundWaterSystem.Command;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Service;
+using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Engine
 {
 
     public class ThMarkExtractionEngine
     {
-        public List<ThMarkModel> GetMarkList(Point3dCollection pts)
+        public List<ThMarkModel> GetMarkListOptimized(Point3dCollection pts = null)
+        {
+            using (var adb = AcadDatabase.Active())
+            {
+                var results = new List<ThMarkModel>();
+                var entities = adb.ModelSpace.OfType<Entity>();
+                DBObjectCollection dbObjs = null;
+                if (pts != null)
+                {
+                    //var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
+                    var pline = new Polyline()
+                    {
+                        Closed = true,
+                    };
+                    pline.CreatePolyline(pts);
+                    dbObjs = entities.Where(e =>
+                    {
+                        var ex = e.Bounds;
+                        if (ex == null) return true;
+                        else return pline.Contains(((Extents3d)ex).CenterPoint());
+                    }).ToCollection();
+                }
+                else
+                {
+                    dbObjs = entities.ToCollection();
+                }
+                var textList = new List<DBText>();
+                var textLines = new List<Line>();
+                foreach (var _object in dbObjs)
+                {
+                    var entity = _object as Entity;
+                    if (!(entity.Layer.Contains("W-") && entity.Layer.Contains("-DIMS"))) continue;
+                    if (IsTianZhengElement(entity))
+                    {
+                        var texts = new List<DBText>();
+                        var lines = new List<Line>();
+                        var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(entity);
+                        foreach (var obj in explodeResult)
+                        {
+                            var ent = obj as Entity;
+                            if (ent is DBText t) texts.Add(t);
+                            else if (ent is Line l)
+                            {
+                                var tmpPt1 = new Point3d(l.StartPoint.X, l.StartPoint.Y, 0.0);
+                                var tmpPt2 = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
+                                var tmpline = new Line(tmpPt1, tmpPt2);
+                                lines.Add(tmpline);
+                            }
+                            else if (ent is Polyline pl)
+                            {
+                                foreach (var o in pl.ToLines())
+                                {
+                                    var tmpPt1 = new Point3d(o.StartPoint.X, o.StartPoint.Y, 0.0);
+                                    var tmpPt2 = new Point3d(o.EndPoint.X, o.EndPoint.Y, 0.0);
+                                    var tmpline = new Line(tmpPt1, tmpPt2);
+                                    lines.Add(tmpline);
+                                }
+                            }
+                        }
+                        results.AddRange(CombMarkList(texts, lines));
+                    }
+                    else
+                    {
+                        if (entity is DBText t)
+                        {
+                            textList.Add(t);
+                            if (t.TextString.Equals("S-JGL-1"))
+                            {
+                                string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                                FileStream fs = new FileStream(dir + "\\WaterDebug.txt", FileMode.Append);
+                                StreamWriter sw = new StreamWriter(fs);
+                                sw.WriteLine(t.Position.X);
+                                sw.WriteLine(t.Position.Y);
+                                sw.Close();
+                                fs.Close();
+                            }
+                        }
+                        else if (entity is Line l)
+                        {
+                            var tmpPt1 = new Point3d(l.StartPoint.X, l.StartPoint.Y, 0.0);
+                            var tmpPt2 = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
+                            var tmpline = new Line(tmpPt1, tmpPt2);
+                            textLines.Add(tmpline);
+                        }
+                        else if (entity is Polyline pl)
+                        {
+                            foreach (var o in pl.ToLines())
+                            {
+                                var tmpPt1 = new Point3d(o.StartPoint.X, o.StartPoint.Y, 0.0);
+                                var tmpPt2 = new Point3d(o.EndPoint.X, o.EndPoint.Y, 0.0);
+                                var tmpline = new Line(tmpPt1, tmpPt2);
+                                textLines.Add(tmpline);
+                            }
+                        }
+                    }
+                }
+                results.AddRange(CombMarkList(textList, textLines));
+                return results;
+            }
+        }
+        public List<ThMarkModel> GetMarkList(Point3dCollection pts = null)
         {
             using (var database = AcadDatabase.Active())
             {
@@ -26,7 +128,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 var entities = database.ModelSpace.OfType<Entity>();
 
                 DBObjectCollection dbObjs = null;
-                if (pts.Count > 0)
+                if (pts!=null)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
                     var pline = new Polyline()
@@ -49,7 +151,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     {
                         var outTexts = new List<DBText>();
                         var outLines = new List<Line>();
-                        if(TianZhengTextAndLine(ent,ref outTexts,ref outLines))
+                        if(GetTianZhengTextAndLine(ent,ref outTexts,ref outLines))
                         {
                             textList.AddRange(outTexts);
                             textLines.AddRange(outLines);
@@ -62,6 +164,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                             if(ent is DBText t)
                             {
                                 textList.Add(t);
+                                if (t.TextString.Equals("S-JGL-1"))
+                                {
+                                    string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                                    FileStream fs = new FileStream(dir + "\\WaterDebug.txt", FileMode.Append);
+                                    StreamWriter sw = new StreamWriter(fs);
+                                    sw.WriteLine(t.Position.X);
+                                    sw.WriteLine(t.Position.Y);
+                                    sw.Close();
+                                    fs.Close();
+                                }
                             }
                             else if(ent is Line l)
                             {
@@ -87,10 +199,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 return retLines;
             }
         }
-        public bool TianZhengTextAndLine(Entity ent,ref List<DBText> texts,ref List<Line> lines)
+        public bool GetTianZhengTextAndLine(Entity ent,ref List<DBText> texts,ref List<Line> lines)
         {
-            var explodeResult = new DBObjectCollection();
-            ent.Explode(explodeResult);
+            var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(ent);
             foreach(var obj in explodeResult)
             {
                 var entity = obj as Entity;
@@ -136,14 +247,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             var retList = new List<ThMarkModel>();
             foreach (var t in texts)
             {
-                var mark = CombMark(t, ref lines);
+                var tplines = lines.OrderBy(e => e.GetCenter().DistanceTo(t.Position)).Take(20).ToList();
+                var mark = CombMark(t, tplines);
                 mark.Layer = t.Layer;
                 mark.TextStyle = t.TextStyleName;
                 retList.Add(mark);
             }
             return retList;
         }
-        public ThMarkModel CombMark(DBText text,ref List<Line> lines)
+        public ThMarkModel CombMark(DBText text,List<Line> lines)
         {
             var retMark = new ThMarkModel();
             var textPt = new Point3d(text.Position.X, text.Position.Y,0.0);

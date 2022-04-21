@@ -4,6 +4,7 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
     {
         public ThFloorInfo GetFloorInfo(ThFloorModel floor,int index)
         {
+            //弃置文件
             var retInfo = new ThFloorInfo();
             var input = floor.FloorArea.Vertices();
             //提取横管
@@ -26,7 +28,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             retInfo.MarkList = markExtractionService.GetMarkModelList(input);
             //提取立管
             var riserExtractionService = new ThRiserExtracionService();
-            retInfo.RiserList = riserExtractionService.GetRiserModelList(input, index);
+            retInfo.RiserList = riserExtractionService.GetRiserModelList(retInfo.PipeLines,input, index);
             //提取管径
             var dimExtractionService = new ThDimExtractionService();
             retInfo.DimList = dimExtractionService.GetDimModelList(input);

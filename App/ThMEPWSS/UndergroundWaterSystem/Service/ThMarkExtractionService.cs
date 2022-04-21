@@ -11,10 +11,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
     public class ThMarkExtractionService
     {
-        public List<ThMarkModel> GetMarkModelList(Point3dCollection pts)
+        public List<ThMarkModel> GetMarkModelList(Point3dCollection pts=null)
         {
             var markEngine = new ThMarkExtractionEngine();
-            var retList = markEngine.GetMarkList(pts);
+            var retList = markEngine.GetMarkListOptimized(pts);
             return retList;
         }
     }
