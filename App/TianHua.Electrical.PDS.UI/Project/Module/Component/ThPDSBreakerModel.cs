@@ -8,6 +8,8 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using TianHua.Electrical.PDS.UI.Models;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -78,6 +80,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _breaker.SetRatedCurrent(value);
                 OnPropertyChanged();
+                WeakReferenceMessenger.Default.Send(new CurrentChangedMessage(value));
             }
         }
 

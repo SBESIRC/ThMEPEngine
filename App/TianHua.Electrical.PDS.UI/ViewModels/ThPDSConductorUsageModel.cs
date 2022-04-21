@@ -53,5 +53,59 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         public bool IsSpecialConductorType => _conductorUse.IsSpecialConductorType;
 
         public string Content => _conductorUse.Content;
+        public bool HalogenFree
+        {
+            get => _conductorUse.HalogenFree;
+            set
+            {
+                _conductorUse.HalogenFree = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool LowSmoke
+        {
+            get => _conductorUse.LowSmoke;
+            set
+            {
+                _conductorUse.LowSmoke = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool LowToxicity
+        {
+            get => _conductorUse.LowToxicity;
+            set
+            {
+                _conductorUse.LowToxicity = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool FlameRetardant
+        {
+            get => _conductorUse.FlameRetardant;
+            set
+            {
+                _conductorUse.FlameRetardant = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool Refractory
+        {
+            get => _conductorUse.Refractory;
+            set
+            {
+                _conductorUse.Refractory = value;
+                OnPropertyChanged();
+            }
+        }
+        public Level Level
+        {
+            get => _conductorUse.Level;
+            set
+            {
+                _conductorUse.Level = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

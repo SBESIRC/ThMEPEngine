@@ -71,18 +71,60 @@
                             <DataGridTemplateColumn Header="导体用途" Width="160" CanUserSort="False"  IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding ConductorType,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding ConductorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                                        <ComboBox IsEnabled="False" HorizontalAlignment="Stretch" ItemsSource="{Binding ConductorType,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding ConductorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False">
+                            <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding ConductorMaterial}"></TextBlock>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="导体标注样式预览" Width="100" CanUserSort="False">
+                            <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding HalogenFree}"></CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="低烟" Width="40" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowSmoke}"></CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="低毒" Width="40" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowToxicity}"></CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="阻燃" Width="40" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding FlameRetardant}"></CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="耐火" Width="40" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding Refractory}"></CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="级别" Width="50" CanUserSort="False"  IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Level,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding Level,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="导体标注样式预览" Width="100" CanUserSort="False" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content}"></TextBlock>

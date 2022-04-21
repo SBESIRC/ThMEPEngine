@@ -129,14 +129,26 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 
         public bool IsSpecialConductorType { get; set; }
 
-        public string Content { 
-            get 
-            { 
-                if(IsSpecialConductorType)
-                    return OuterSheathMaterial.GetDescription(); 
+        public string Content
+        {
+            get
+            {
+                if (IsSpecialConductorType)
+                    return OuterSheathMaterial.GetDescription();
                 else
                     return ConductorMaterial + "-" + OuterSheathMaterial.GetDescription();
-            } 
+            }
         }
+
+        public bool Refractory { get; set; }
+        public bool FlameRetardant { get; set; }
+        public bool LowToxicity { get; set; }
+        public bool LowSmoke { get; set; }
+        public bool HalogenFree { get; set; }
+        public Level Level { get; set; }
+    }
+    public enum Level
+    {
+        A, B, C, D,
     }
 }
