@@ -1,5 +1,8 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using TianHua.Electrical.PDS.Project.Module.Component;
+using TianHua.Electrical.PDS.Project.Module.Configure;
 namespace TianHua.Electrical.PDS.Project.Module
 {
     /// <summary>
@@ -7,10 +10,20 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public class SecondaryCircuit
     {
-        private int Index { get; set; }
-        public SecondaryCircuit(int index)
+        public int Index;
+        public SecondaryCircuit(int index, SecondaryCircuitInfo secondaryCircuitInfo)
         {
             Index = index;
+            CircuitDescription = secondaryCircuitInfo.Description;
+
+            if (SecondaryCircuitConfiguration.FireSecondaryCircuitInfos.Contains(secondaryCircuitInfo))
+            {
+                AlternativeSecondaryCircuitInfos = SecondaryCircuitConfiguration.FireSecondaryCircuitInfos;
+            }
+            else
+            {
+                AlternativeSecondaryCircuitInfos = SecondaryCircuitConfiguration.NonFireSecondaryCircuitInfos;
+            }
         }
 
         /// <summary>
@@ -33,5 +46,39 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 导体
         /// </summary>
         public Conductor Conductor { get; set; }
+
+        public List<string> GetDescriptions()
+        {
+            return AlternativeSecondaryCircuitInfos.Select(o => o.Description).ToList();
+        }
+
+        public void SetDescription(string description)
+        {
+            var secondaryCircuitInfo = AlternativeSecondaryCircuitInfos.FirstOrDefault(o => o.Description.Equals(description));
+            if (secondaryCircuitInfo.IsNull())
+            {
+                CircuitDescription = description;
+                Conductor.IsCustom = true;
+            }
+            else
+            {
+                CircuitDescription = secondaryCircuitInfo.Description;
+                Conductor.IsCustom = false;
+                var conductorInfo = secondaryCircuitInfo.Conductor;
+                if (conductorInfo.Contains('-'))
+                {
+                    Conductor.SetBAControl();
+                }
+                else
+                {
+                    Conductor.SetControlCircuitConfig(conductorInfo);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 备选控制回路
+        /// </summary>
+        private List<SecondaryCircuitInfo> AlternativeSecondaryCircuitInfos { get; set; }
     }
 }

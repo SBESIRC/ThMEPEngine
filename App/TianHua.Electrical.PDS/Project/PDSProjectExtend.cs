@@ -928,16 +928,6 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
-        /// 兼容图
-        /// </summary>
-        /// <param name="Graph"></param>
-        /// <param name="NewGraph"></param>
-        public static void Compatible(this ThPDSProjectGraph Graph, BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> NewGraph)
-        {
-            //暂时不考虑
-        }
-
-        /// <summary>
         /// 修改节点
         /// </summary>
         /// <param name="graph">图</param>
@@ -1059,7 +1049,7 @@ namespace TianHua.Electrical.PDS.Project
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
 
-            node.ComponentCheck(CascadeCurrent);
+            node.ComponentCheckCascade(CascadeCurrent);
 
             node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
             edges = graph.Graph.InEdges(node).ToList();
@@ -1080,7 +1070,7 @@ namespace TianHua.Electrical.PDS.Project
 
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
-            node.ComponentCheck(miniBusbar, CascadeCurrent);
+            node.ComponentCheckCascade(miniBusbar, CascadeCurrent);
 
             miniBusbar.CascadeCurrent = Math.Max(CascadeCurrent, miniBusbar.GetCascadeCurrent());
         }
@@ -1092,7 +1082,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="edge"></param>
         public static void CheckCascadeWithEdge(this ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
         {
-            edge.ComponentCheck();
+            edge.ComponentCheckCascade();
             //统计回路级联电流
             edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
 
@@ -1188,9 +1178,100 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
+        /// Node元器件级联检查
+        /// </summary>
+        public static void ComponentCheckCascade(this ThPDSProjectGraphNode node, double cascadeCurrent)
+        {
+            if (node.Type == PDSNodeType.DistributionBox)
+            {
+                SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, cascadeCurrent);
+                if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
+                {
+                    var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    oneWayInCircuit.isolatingSwitch = oneWayInCircuit.isolatingSwitch.ComponentChange(isolatingSwitch);
+                }
+                else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+                {
+                    var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.isolatingSwitch1 =twoWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+
+                    var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.isolatingSwitch2 =twoWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+
+                    TransferSwitch transferSwitch;
+                    if (twoWayInCircuit.transferSwitch is ManualTransferSwitch MTSE)
+                    {
+                        transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
+                    }
+                    else
+                    {
+                        transferSwitch = componentFactory.CreatManualTransferSwitch();
+                    }
+                    twoWayInCircuit.transferSwitch =twoWayInCircuit.transferSwitch.ComponentChange(transferSwitch);
+                }
+                else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+                {
+                    var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+
+                    var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+
+                    var isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3.ComponentChange(isolatingSwitch3);
+
+                    TransferSwitch transferSwitch1;
+                    if (threeWayInCircuit.transferSwitch1 is ManualTransferSwitch)
+                    {
+                        transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
+                    }
+                    else
+                    {
+                        transferSwitch1 = componentFactory.CreatManualTransferSwitch();
+                    }
+                    threeWayInCircuit.transferSwitch1 =threeWayInCircuit.transferSwitch1.ComponentChange(transferSwitch1);
+
+                    TransferSwitch transferSwitch2;
+                    if (threeWayInCircuit.transferSwitch2 is ManualTransferSwitch)
+                    {
+                        transferSwitch2 = componentFactory.CreatAutomaticTransferSwitch();
+                    }
+                    else
+                    {
+                        transferSwitch2 = componentFactory.CreatManualTransferSwitch();
+                    }
+                    threeWayInCircuit.transferSwitch2 =threeWayInCircuit.transferSwitch2.ComponentChange(transferSwitch2);
+                }
+                else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
+                {
+                    var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    centralized.isolatingSwitch = centralized.isolatingSwitch.ComponentChange(isolatingSwitch);
+                }
+                else
+                {
+                    //暂未定义，后续补充
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
+        /// <summary>
         /// 小母排元器件选型检查
         /// </summary>
         public static void ComponentCheck(this ThPDSProjectGraphNode node , MiniBusbar miniBusbar, double cascadeCurrent)
+        {
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, miniBusbar, cascadeCurrent);
+            var breaker = componentFactory.CreatBreaker();
+            if (miniBusbar.Breaker.IsNull())
+                miniBusbar.Breaker = breaker;
+            else
+                miniBusbar.Breaker = miniBusbar.Breaker.ComponentChange(breaker);
+        }
+
+        /// <summary>
+        /// 小母排元器件级联检查
+        /// </summary>
+        public static void ComponentCheckCascade(this ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
         {
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, miniBusbar, cascadeCurrent);
             var breaker = componentFactory.CreatBreaker();
@@ -1447,6 +1528,110 @@ namespace TianHua.Electrical.PDS.Project
             else
             {
                 //框架已搭好，后续补充完成
+                throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// 回路元器件级联检查
+        /// </summary>
+        public static void ComponentCheckCascade(this ThPDSProjectGraphEdge edge)
+        {
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+            SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
+            if (edge.Details.CircuitForm is RegularCircuit regularCircuit)
+            {
+                var breaker = componentFactory.CreatBreaker();
+                regularCircuit.breaker = regularCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is LeakageCircuit leakageCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                leakageCircuit.breaker = leakageCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is ContactorControlCircuit contactorControlCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                contactorControlCircuit.breaker = contactorControlCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is ThermalRelayProtectionCircuit thermalRelayCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                thermalRelayCircuit.breaker = thermalRelayCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
+            {
+                var breaker1 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+
+                var breaker2 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
+            {
+                var breaker1 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+
+                var breaker2 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_CTInFrontCircuit CTInFrontCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                CTInFrontCircuit.breaker = CTInFrontCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_MTInFrontCircuit MTInFrontCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                MTInFrontCircuit.breaker = MTInFrontCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_CTInBehindCircuit CTInBehindCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                CTInBehindCircuit.breaker = CTInBehindCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_MTInBehindCircuit MTInBehindCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                MTInBehindCircuit.breaker = MTInBehindCircuit.breaker.ComponentChange(breaker);
+            }
+            else if (edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
+            {
+            }
+            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+            }
+            else if (edge.Details.CircuitForm is Motor_CPSCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+            }
+            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsStarTriangleStartCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+            }
+            else if (edge.Details.CircuitForm is Motor_CPSStarTriangleStartCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsDYYCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsDYYCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_CPSDYYCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSDYYCircuit();
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_CPSYYCircuit)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
+            }
+            else
+            {
                 throw new NotSupportedException();
             }
         }

@@ -16,7 +16,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
-            if(!ViaConduit && !ViaCableTray)
+            if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
             }
@@ -29,7 +29,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(string conductorConfig , double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
+        public Conductor(string conductorConfig, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.Conductor;
             this.IsMotor = true;
@@ -47,11 +47,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 导体
         /// </summary>
-        public Conductor(string conductorConfig , string conductorType , ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
+        public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
         {
             this.ComponentType = ComponentType.ControlConductor;
             this.IsMotor = true;
             this.IsControlCircuit = true;
+            this.IsCustom = false;
             this.Phase = phase;
             if (!ViaConduit && !ViaCableTray)
             {
@@ -65,11 +66,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private void ChooseMaterial(string conductorType)
         {
             var config = PDSProject.Instance.projectGlobalConfiguration;
-            if(string.IsNullOrWhiteSpace(conductorType))
+            if (string.IsNullOrWhiteSpace(conductorType))
             {
                 IsBAControl = true;
             }
-            else if(conductorType == "消防配电控制电缆")
+            else if (conductorType == "消防配电控制电缆")
             {
                 this.ConductorUse = config.FireDistributionControlCable;
                 IsWire =false;
@@ -334,6 +335,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     this.ConductorCrossSectionalArea = double.Parse(conductorInfos[1]);
                     AlternativeNumberOfPhaseWire = new List<int>() { NumberOfPhaseWire };
                     AlternativeConductorCrossSectionalAreas = new List<double>() { ConductorCrossSectionalArea };
+                    AlternativeConductorCount = new List<int>() { ConductorCount };
                     CalculateCrossSectionalArea(ConductorCrossSectionalArea);
                 }
             }
@@ -489,8 +491,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         //public string Content { get { return "WDZAN-YJY-4x25+E16-CT/SC50-E"; } }
         //外护套材质-导体材质-导体根数x每根导体截面积-桥架敷设方式/穿管直径-穿管敷设方式
         //public string Content { get { return $"{OuterSheathMaterial}-{ConductorMaterial}-{ConductorInfo}-{BridgeLaying}/{PipeDiameter}-{Pipelaying}"; } }
-        public string Content { 
-            get 
+        public string Content
+        {
+            get
             {
                 string val = $"{(IsBAControl ? "" : ConductorUse.Content+"-"+ConductorInfo+"-")}{LayingTyle}";
                 if (NumberOfPhaseWire != 1)
@@ -498,7 +501,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     val = $"{NumberOfPhaseWire}×({val})";
                 }
                 return val;
-            } 
+            }
         }
 
         /// <summary>
@@ -525,6 +528,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 相导体截面
         /// </summary>
         public double ConductorCrossSectionalArea { get; set; }
+
+        /// <summary>
+        /// 是否允许用户自定义
+        /// 仅针对控制回路
+        /// </summary>
+        public bool IsCustom { get; set; }
 
         /// <summary>
         /// 中性线导体截面
@@ -561,6 +570,27 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
+        /// 获取导体根数
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetConductorCounts()
+        {
+            return AlternativeConductorCount;
+        }
+
+        public void SetConductorCount(int conductorCount)
+        {
+            if (this.IsControlCircuit)
+            {
+                this.ConductorCount = conductorCount;
+            }
+            else
+            {
+                //do not
+            }
+        }
+
+        /// <summary>
         /// 获取全部相导体截面
         /// </summary>
         /// <returns></returns>
@@ -571,8 +601,33 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
 
         public void SetConductorCrossSectionalArea(double conductorCrossSectionalArea)
         {
-            this.ConductorCrossSectionalArea = conductorCrossSectionalArea;
-            CalculateCrossSectionalArea(conductorCrossSectionalArea);
+            if (this.IsControlCircuit && !AlternativeConductorCrossSectionalAreas.Contains(conductorCrossSectionalArea))
+            {
+                //用户自定义
+                this.ConductorCrossSectionalArea = conductorCrossSectionalArea;
+            }
+            else
+            {
+                this.ConductorCrossSectionalArea = conductorCrossSectionalArea;
+                CalculateCrossSectionalArea(conductorCrossSectionalArea);
+            }
+        }
+
+        public void SetBAControl()
+        {
+            this.IsBAControl = true;
+            IsCustom = false;
+        }
+
+        public void SetControlCircuitConfig(string config)
+        {
+            var infos = config.Split('x');
+            ConductorCount = int.Parse(infos[0]);
+            AlternativeConductorCount = new List<int> { ConductorCount };
+            ConductorCrossSectionalArea = double.Parse(infos[1]);
+            AlternativeConductorCrossSectionalAreas = new List<double> { ConductorCrossSectionalArea };
+            IsBAControl = false;
+            IsCustom = false;
         }
 
         #region Private Property
@@ -644,6 +699,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private List<int> AlternativeNumberOfPhaseWire { get; set; }
 
         /// <summary>
+        /// 备选导体根数
+        /// </summary>
+        private List<int> AlternativeConductorCount { get; set; }
+
+        /// <summary>
         /// 备选相导体截面
         /// </summary>
         private List<double> AlternativeConductorCrossSectionalAreas { get; set; }
@@ -712,7 +772,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 是否是BA控制
         /// </summary>
         private bool IsBAControl { get; set; } = false;
-
         #endregion
     }
 }

@@ -22,9 +22,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private string _ouvpPolesNum;//OUVP元器件级数
         private string _characteristics;//瞬时脱扣器类型
         private List<string> _tripDevice;//脱扣器类型
+        private bool _isLeakageProtection;//是否是生活水泵
         public SelectionComponentFactory(ThPDSProjectGraphEdge edge)
         {
             this._edge = edge;
+            _isLeakageProtection = _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump;
             _calculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
             _cascadeCurrent = edge.Target.Details.CascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
@@ -48,6 +50,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public SelectionComponentFactory(ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
         {
+            _isLeakageProtection = node.Details.MiniBusbars[miniBusbar].Any(o => o.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump);
             _calculateCurrent = miniBusbar.CalculateCurrent;//计算电流
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
@@ -61,7 +64,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             _characteristics = "";//瞬时脱扣器类型
             _tripDevice = ThPDSLoadTypeCat_1.LumpedLoad.GetTripDevice(node.Details.MiniBusbars[miniBusbar].Any(o => o.Target.Load.FireLoad), out _characteristics);//脱扣器类型
         }
-        
+
         public SelectionComponentFactory(ThPDSProjectGraphNode node, double cascadeCurrent)
         {
             _calculateCurrent = node.Load.CalculateCurrent;//计算电流
@@ -96,7 +99,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatBreaker()
         {
-            return new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump, false);
+            return new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
         }
 
         public override Conductor CreatConductor()
@@ -116,11 +119,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override CPS CreatCPS()
         {
-            return new CPS(_calculateCurrent, _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump);
+            return new CPS(_calculateCurrent, _isLeakageProtection);
         }
         public override Meter CreatMeterTransformer()
         {
-            if(_calculateCurrent < 100)
+            if (_calculateCurrent < 100)
             {
                 return new MeterTransformer(_calculateCurrent, _polesNum);
             }
@@ -152,7 +155,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatResidualCurrentBreaker()
         {
-            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump, true);
+            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _isLeakageProtection, true);
         }
 
         public override ThermalRelay CreatThermalRelay()
