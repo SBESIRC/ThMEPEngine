@@ -78,21 +78,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             MergedRootList = ThDrainageADTreeService.MergeCoolHotTree(OriRootList);
 
             //冷热成对洁具
-            ThDrainageADTreeService.SetTerminalPair(MergedRootList, TerminalPairDict);
-
-            MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
-            {
-                if (l.Terminal != null)
-                {
-                    DrawUtils.ShowGeometry(l.Node, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
-                }
-                if (l.TerminalPair != null)
-                {
-                    DrawUtils.ShowGeometry(new Line(l.Node, l.TerminalPair.Node), "l0leafterminalPair", 3);
-                }
-            });
-
-            MergedRootList.ForEach(x => ThDrainageADTreeService.PrintTree(x, String.Format("l0tree{0}", MergedRootList.IndexOf(x))));
+            ThDrainageADTreeService.SetTerminalPairSingleTree(MergedRootList, TerminalPairDict);
 
         }
 

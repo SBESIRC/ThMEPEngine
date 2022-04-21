@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 
+using ThMEPWSS.DrainageSystemDiagram.Model;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDAngleValvesEngine
@@ -20,11 +22,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     t.SupplyCoolOnWall.ForEach(pt =>
                     {
                         var valve = new ThDrainageSDADBlkOutput(pt);
-                        valve.dir = t.Dir;
-                        valve.name = ThDrainageSDCommon.Blk_AngleValves;
-                        valve.visibility.Add(ThDrainageSDCommon.Visibility_AngleValves_key, ThDrainageSDCommon.Visibility_AngleValves_Value);
-                        valve.scale = ThDrainageSDCommon.Blk_scale_AngleValves;
-                        valve.blkSize = ThDrainageSDCommon.Blk_size_AngleValves;
+                        valve.Dir = t.Dir;
+                        valve.Name = ThDrainageSDCommon.Blk_AngleValves;
+                        valve.Visibility.Add(ThDrainageSDCommon.Visibility_AngleValves_key, ThDrainageSDCommon.Visibility_AngleValves_Value);
+                        valve.Scale = ThDrainageSDCommon.Blk_scale_AngleValves;
+                        valve.BlkSize = ThDrainageSDCommon.Blk_size_AngleValves;
                         angleValves.Add(valve);
                     });
                 });

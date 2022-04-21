@@ -195,15 +195,14 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             for (int i = rootList.Count - 1; i >= 0; i--)
             {
                 var root = rootList[i];
-                if (root.IsCool == false)
+
+                var pt = root.Pt;
+                var otherTreeLeaf = rootList.Where(x => x != root).SelectMany(x => x.GetLeaf()).Select(x => x.Pt).ToList();
+                if (otherTreeLeaf.Contains(pt))
                 {
-                    var pt = root.Node;
-                    var otherTreeLeaf = rootList.Where(x => x.IsCool == false && x != root).SelectMany(x => x.GetLeaf()).Select(x => x.Node).ToList();
-                    if (otherTreeLeaf.Contains(pt))
-                    {
-                        rootList.RemoveAt(i);
-                    }
+                    rootList.RemoveAt(i);
                 }
+
             }
 
             return rootList;
@@ -214,7 +213,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         {
             var allNode = mergedRootList.SelectMany(x => x.GetDescendant()).ToList();
             allNode.AddRange(mergedRootList);
-            var ptDimDict = allNode.GroupBy(x => x.Node).ToDictionary(x => x.Key, x => x.OrderByDescending(o => o.Dim).ToList());
+            var ptDimDict = allNode.GroupBy(x => x.Pt).ToDictionary(x => x.Key, x => x.OrderByDescending(o => o.Dim).ToList());
 
             foreach (var root in rootList)
             {
@@ -224,8 +223,11 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static void FindMaxDimNode(ThDrainageTreeNode node, Dictionary<Point3d, List<ThDrainageTreeNode>> ptDimDict)
         {
-            var dim = ptDimDict[node.Node].First().Dim;
-            node.Dim = dim;
+            if (ptDimDict.TryGetValue(node.Pt, out var dimValues))
+            {
+                var dim = dimValues.First().Dim;
+                node.Dim = dim;
+            }
 
             foreach (var c in node.Child)
             {

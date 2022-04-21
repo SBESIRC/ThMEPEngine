@@ -44,9 +44,9 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public List<ThIfcVirticalPipe> VerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcFlowSegment> TCHPipe { get; set; } = new List<ThIfcFlowSegment>();
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<ThIfcDistributionFlowElement> AngleValveWaterHeater { get; set; } = new List<ThIfcDistributionFlowElement>();
+        public List<ThIfcDistributionFlowElement> ValveWaterHeater { get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<Entity> TchValve { get; set; } = new List<Entity>();
-        public List<Entity> StartPt { get; set; } = new List<Entity>();
+        public List<Entity> OpeningSign { get; set; } = new List<Entity>();
 
         public ThDrainageADPrivateDataFactory()
         { }
@@ -121,7 +121,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         }
 
         /// <summary>
-        /// 热水器 角阀
+        /// 热水器 角阀 截止阀 闸阀 止回阀 防污隔断阀 套管
         /// </summary>
         /// <param name="database"></param>
         /// <param name="framePts"></param>
@@ -133,7 +133,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             };
 
             extractor.Recognize(database, framePts);
-            AngleValveWaterHeater.AddRange(extractor.Elements);
+            ValveWaterHeater.AddRange(extractor.Elements);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         }
 
         /// <summary>
-        /// 天正起点
+        /// 天正断管阀
         /// </summary>
         /// <param name="database"></param>
         /// <param name="framePts"></param>
@@ -185,21 +185,11 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 // 天正阀
                 dbObjs.OfType<Entity>()
                     .Where(e => e.IsTCHEquipment())
-                    .ForEach(e => StartPt.Add(e));
+                    .ForEach(e => OpeningSign.Add(e));
 
             }
         }
-        private bool IsTchBlkValve(Entity e)
-        {
-            var bIsVP = true;
-            //var pipeParameters = ThOPMTools.GetOPMProperties(e.Id);
-
-            //if (pipeParameters.ContainsKey("起点标高") && pipeParameters.ContainsKey("终点标高") && pipeParameters.ContainsKey("管长"))
-            //{
-            //    bIsVP = BlockNameTchValve.Contains(pipeParameters["起点标高"]);
-            //}
-            return bIsVP;
-        }
+       
         private bool CheckLayerFilter(string layerName, List<string> LayerFilter)
         {
             var bReturn = false;

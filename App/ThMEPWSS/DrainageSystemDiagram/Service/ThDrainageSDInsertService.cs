@@ -10,6 +10,8 @@ using Autodesk.AutoCAD.Geometry;
 
 using ThCADExtension;
 
+using ThMEPWSS.DrainageSystemDiagram.Model;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDInsertService
@@ -68,25 +70,25 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 acadDatabase.Database.ImportLayer(layer);
 
-                var allBlkName = convertedValve.Select(x => x.name).Distinct().ToList();
+                var allBlkName = convertedValve.Select(x => x.Name).Distinct().ToList();
                 allBlkName.ForEach(x => acadDatabase.Database.ImportBlock(x));
 
                 for (int i = 0; i < convertedValve.Count(); i++)
                 {
                     var valve = convertedValve[i];
-                    var pt = valve.position;
-                    double rotateAngle = Vector3d.XAxis.GetAngleTo(valve.dir, Vector3d.ZAxis);
-                    double scale = valve.scale;
+                    var pt = valve.Position;
+                    double rotateAngle = Vector3d.XAxis.GetAngleTo(valve.Dir, Vector3d.ZAxis);
+                    double scale = valve.Scale;
                 
                     var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                            layer,
-                           valve.name,
+                           valve.Name,
                            pt,
                            new Scale3d(scale),
                            rotateAngle,
                           new Dictionary<string, string>()
                        );
-                    foreach (var dynamic in valve.visibility)
+                    foreach (var dynamic in valve.Visibility)
                     {
                         id.SetDynBlockValue(dynamic.Key, dynamic.Value);
                     }

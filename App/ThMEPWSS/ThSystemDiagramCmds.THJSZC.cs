@@ -15,6 +15,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.GeojsonExtractor;
 
 using ThMEPWSS.DrainageSystemDiagram;
+using ThMEPWSS.DrainageSystemDiagram.Service;
 
 namespace ThMEPWSS
 {

@@ -6,7 +6,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Diagnostics;
 
-namespace ThMEPWSS.DrainageSystemDiagram
+using ThMEPWSS.DrainageSystemDiagram.Model;
+
+namespace ThMEPWSS.DrainageSystemDiagram.Service
 {
     public class ThDrainageADDiameterDim
     {
@@ -168,17 +170,17 @@ namespace ThMEPWSS.DrainageSystemDiagram
                         dir = (e - s).GetNormal();
                     }
 
-                    var dimPtsTemp = possiblePosition(s, e);
-                    var dimOutlineList = dimPtsTemp.Select(x => toDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
-                    var dimOutline = ThDrainageSDDimService.getDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
+                    var dimPtsTemp = PossiblePosition(s, e);
+                    var dimOutlineList = dimPtsTemp.Select(x => ToDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
+                    var dimOutline = ThDrainageSDDimService.GetDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
                     alreadyDimArea.Add(dimOutline);
                     var dimPt = dimOutline.StartPoint;
 
                     var thModel = new ThDrainageSDADBlkOutput(dimPt);
-                    thModel.name = blk_name;
-                    thModel.dir = dir;
-                    thModel.visibility.Add(visiPropertyName, sDN + node.Value.ToString());
-                    thModel.scale = ThDrainageADCommon.blk_scale_end;
+                    thModel.Name = blk_name;
+                    thModel.Dir = dir;
+                    thModel.Visibility.Add(visiPropertyName, sDN + node.Value.ToString());
+                    thModel.Scale = ThDrainageADCommon.blk_scale_end;
 
                     output.Add(thModel);
                 }
@@ -214,18 +216,18 @@ namespace ThMEPWSS.DrainageSystemDiagram
 
                 var dir = (e - s).GetNormal();
 
-                var dimPtsTemp = possiblePosition(s, e);
-                var dimOutlineList = dimPtsTemp.Select(x => toDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
+                var dimPtsTemp = PossiblePosition(s, e);
+                var dimOutlineList = dimPtsTemp.Select(x => ToDimOutline(x, dir, dimBlkX, dimBlkY)).ToList();
                 DrawUtils.ShowGeometry(dimOutlineList, "l0dimOutline", 95);
-                var dimOutline = ThDrainageSDDimService.getDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
+                var dimOutline = ThDrainageSDDimService.GetDimOptimalArea(dimOutlineList, allIsolateLine, alreadyDimArea);
                 alreadyDimArea.Add(dimOutline);
                 var dimPt = dimOutline.StartPoint;
 
                 var thModel = new ThDrainageSDADBlkOutput(dimPt);
-                thModel.name = blk_name;
-                thModel.dir = dir;
-                thModel.visibility.Add(visiPropertyName, sDN + allNodeDiaDict[end.Key].ToString());
-                thModel.scale = ThDrainageADCommon.blk_scale_end;
+                thModel.Name = blk_name;
+                thModel.Dir = dir;
+                thModel.Visibility.Add(visiPropertyName, sDN + allNodeDiaDict[end.Key].ToString());
+                thModel.Scale = ThDrainageADCommon.blk_scale_end;
 
                 output.Add(thModel);
             }
@@ -298,7 +300,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return dimPt;
         }
 
-        private static Polyline toDimOutline(Point3d pt, Vector3d dir, double x, double y)
+        public static Polyline ToDimOutline(Point3d pt, Vector3d dir, double x, double y)
         {
             var outline = new Polyline();
             var pt0 = pt;
@@ -315,7 +317,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return outline;
         }
 
-        private static List<Point3d> possiblePosition(Point3d baseLineS, Point3d baseLineE)
+        private static List<Point3d> PossiblePosition(Point3d baseLineS, Point3d baseLineE)
         {
             var dimPts = new List<Point3d>();
 

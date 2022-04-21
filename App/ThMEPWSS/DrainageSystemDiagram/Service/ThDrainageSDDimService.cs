@@ -10,7 +10,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 
-namespace ThMEPWSS.DrainageSystemDiagram
+namespace ThMEPWSS.DrainageSystemDiagram.Service
 {
     public class ThDrainageSDDimService
     {
@@ -224,7 +224,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             return dist;
         }
 
-        public static Polyline getDimOptimalArea(List<Polyline> dimAreaList, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
+        public static Polyline GetDimOptimalArea(List<Polyline> dimAreaList, List<Line> allIsolateLine, List<Polyline> alreadyDimArea)
         {
             var alreadyDimAreaLine = new List<Line>();
 

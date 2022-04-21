@@ -19,6 +19,7 @@ using ThMEPEngineCore.Diagnostics;
 using ThCADExtension;
 
 using ThMEPWSS.DrainageSystemDiagram;
+using ThMEPWSS.DrainageSystemDiagram.Service;
 
 namespace ThMEPWSS
 {
@@ -138,13 +139,13 @@ namespace ThMEPWSS
                 allStack.ForEach(x => DrawUtils.ShowGeometry(x, "l10stack", 30, 25, 25));
 
                 var allAngleValves = ThDrainageSDAngleValvesEngine.getAngleValves(dataSet.TerminalList);
-                allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l20Valves", 11, 25, 100));
+                allAngleValves.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l20Valves", 11, 25, 100));
 
                 ThDrainageSDTreeService.buildPipeTree(dataSet);
                 ThDrainageSDTreeService.printTree(dataSet.PipeTreeRoot, "l063tree");
 
                 var allShutValve = ThDrainageSDShutValveEngine.getShutValvePoint(dataSet);
-                allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l31ShutValves", 50, 35, 200));
+                allShutValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l31ShutValves", 50, 35, 200));
 
                 var allDims = ThDrainageSDDimEngine.getDim(dataSet);
                 allDims.ForEach(x => DrawUtils.ShowGeometry(x, "l41Dim", 223));

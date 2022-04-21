@@ -9,6 +9,8 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Model;
 
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDRoomService

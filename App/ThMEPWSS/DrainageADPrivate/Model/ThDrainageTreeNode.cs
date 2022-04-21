@@ -11,7 +11,7 @@ namespace ThMEPWSS.DrainageADPrivate.Model
 {
     internal class ThDrainageTreeNode
     {
-        public Point3d Node { get; set; }
+        public Point3d Pt { get; set; }
         public ThDrainageTreeNode Parent { get; set; }
         public List<ThDrainageTreeNode> Child { get; set; }
         public ThSaniterayTerminal Terminal { get; set; } //如果是末端node，末端
@@ -20,9 +20,11 @@ namespace ThMEPWSS.DrainageADPrivate.Model
 
         public int Dim { get; set; }
 
+        public Point3d TransPt { get; set; }
+
         public ThDrainageTreeNode(Point3d pt)
         {
-            Node = pt;
+            Pt = pt;
             Child = new List<ThDrainageTreeNode>();
         }
 

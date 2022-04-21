@@ -277,12 +277,8 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         private static void FindNextLeaf(ThDrainageTreeNode thisNode, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Line, int> traversed)
         {
             var tol = new Tolerance(1, 1);
-            var thisNodePt = thisNode.Node;
-            //var linkPt = IsInDict(thisNodePt, ptDict);
+            var thisNodePt = thisNode.Pt;
 
-            //if (linkPt != Point3d.Origin)
-            //{
-            //var toLine = ptDict[linkPt].Where(x => traversed[x] == 0).ToList();
             var toLine = ptDict[thisNodePt].Where(x => traversed[x] == 0).ToList();
             foreach (var l in toLine)
             {
@@ -290,10 +286,10 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 var theOtherEnd = l.EndPoint;
                 if (theOtherEnd.IsEqualTo(thisNodePt, tol))
                 {
-                    var startPt = l.StartPoint;
-                    l.StartPoint = thisNodePt;
-                    l.EndPoint = startPt;
-                    theOtherEnd = l.EndPoint;
+                    //var startPt = l.StartPoint;
+                    //l.StartPoint = thisNodePt;
+                    //l.EndPoint = startPt;
+                    theOtherEnd = l.StartPoint;
                 }
                 var otherKey = IsInDict(theOtherEnd, ptDict);
                 if (otherKey != Point3d.Origin)
@@ -317,7 +313,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         {
             foreach (var tree in rootList)
             {
-                if (ptCoolHotDict.TryGetValue(tree.Node, out var isCool))
+                if (ptCoolHotDict.TryGetValue(tree.Pt, out var isCool))
                 {
                     tree.IsCool = isCool;
                 }
@@ -337,7 +333,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 var leaf = tree.GetLeaf();
                 foreach (var l in leaf)
                 {
-                    if (ptTerminal.TryGetValue(l.Node, out var t))
+                    if (ptTerminal.TryGetValue(l.Pt, out var t))
                     {
                         l.Terminal = t;
                     }
@@ -345,14 +341,12 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 if (tree.IsCool == false)
                 {
                     //热水起点 热水器
-                    if (ptTerminal.TryGetValue(tree.Node, out var t))
+                    if (ptTerminal.TryGetValue(tree.Pt, out var t))
                     {
                         tree.Terminal = t;
                     }
                 }
             }
-
-
         }
 
         public static List<ThDrainageTreeNode> MergeCoolHotTree(List<ThDrainageTreeNode> rootList)
@@ -382,7 +376,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             //插入没加入的树
             foreach (var tree in rootListHasTerminal)
             {
-                var added = rootListMerged.Where(x => x.Node.IsEqualTo(tree.Node));
+                var added = rootListMerged.Where(x => x.Pt.IsEqualTo(tree.Pt));
                 if (added.Count() == 0)
                 {
                     rootListMerged.Add(tree);
@@ -394,7 +388,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static ThDrainageTreeNode CloneTree(ThDrainageTreeNode node)
         {
-            var cloneNode = new ThDrainageTreeNode(node.Node);
+            var cloneNode = new ThDrainageTreeNode(node.Pt);
             cloneNode.Terminal = node.Terminal;
             cloneNode.IsCool = node.IsCool;
 
@@ -407,7 +401,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         {
             foreach (var oriChild in oriNode.Child)
             {
-                var cloneChildNode = new ThDrainageTreeNode(oriChild.Node);
+                var cloneChildNode = new ThDrainageTreeNode(oriChild.Pt);
                 cloneChildNode.Terminal = oriChild.Terminal;
                 cloneChildNode.IsCool = oriChild.IsCool;
 
@@ -418,16 +412,16 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             }
         }
 
-        public static void SetTerminalPair(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, Point3d> terminalPairDict)
+        public static void SetTerminalPairSingleTree(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, Point3d> terminalPairDict)
         {
             foreach (var tree in rootList)
             {
                 var leafs = tree.GetLeaf();
                 foreach (var l in leafs)
                 {
-                    if (terminalPairDict.TryGetValue(l.Node, out var pairPt))
+                    if (terminalPairDict.TryGetValue(l.Pt, out var pairPt))
                     {
-                        var pairNode = leafs.Where(x => x.Node.IsEqualTo(pairPt));
+                        var pairNode = leafs.Where(x => x.Pt.IsEqualTo(pairPt));
                         if (pairNode.Count() > 0)
                         {
                             pairNode.First().TerminalPair = l;
@@ -438,22 +432,24 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             }
         }
 
-        public static void PrintTree(ThDrainageTreeNode root, string layer)
+        public static void SetTerminalPairMultipleTree(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, Point3d> terminalPairDict)
         {
-            int cs = root.GetLeafCount();
-            int dp = root.GetDepth();
-            DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("{0}_{1}_{2}", dp, cs, root.IsCool), layer, (short)(dp % 7), 25, 50);
+            var allLeafs = rootList.SelectMany(x => x.GetLeaf()).ToList();
 
-            root.Child.ForEach(x => PrintTree(x, layer));
+            foreach (var l in allLeafs)
+            {
+                if (terminalPairDict.TryGetValue(l.Pt, out var pairPt))
+                {
+                    var pairNode = allLeafs.Where(x => x.Pt.IsEqualTo(pairPt));
+                    if (pairNode.Count() > 0)
+                    {
+                        pairNode.First().TerminalPair = l;
+                        l.TerminalPair = pairNode.First();
+                    }
+                }
+            }
+
         }
-
-        public static void PrintDiam(ThDrainageTreeNode root, string layer)
-        {
-            DrawUtils.ShowGeometry(new Point3d(root.Node.X + 20, root.Node.Y, 0), string.Format("dim:{0}", root.Dim), layer, 3, 25, 50);
-
-            root.Child.ForEach(x => PrintDiam(x, layer));
-        }
-
 
     }
 }

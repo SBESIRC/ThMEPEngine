@@ -4,6 +4,8 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDDimEngine
@@ -56,7 +58,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                     var possibleDimArea = ThDrainageSDDimService.getPossibleDimArea(baseLineDict, group.Key, group.Value);
 
                     var possibleDimAreaList = possibleDimArea.Select(x => x.Key).ToList();
-                    var dimArea = ThDrainageSDDimService.getDimOptimalArea(possibleDimAreaList, allIsolateLine, alreadyDimArea);
+                    var dimArea = ThDrainageSDDimService.GetDimOptimalArea(possibleDimAreaList, allIsolateLine, alreadyDimArea);
 
                     toDimInfo(dimArea, possibleDimArea, out var dir, out var dist);
 

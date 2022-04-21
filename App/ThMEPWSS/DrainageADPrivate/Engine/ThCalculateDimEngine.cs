@@ -39,17 +39,10 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             foreach (var root in mergedRootList)
             {
                 ThCalculateDimService.CalculateDimTree(root, alpha);
-
-                ThDrainageADTreeService.PrintDiam(root, String.Format("l0dimTree{0}", mergedRootList.IndexOf(root)));
             }
 
-            var rootList = ThCalculateDimService.RemoveDuplicateHotTree(oriRootList);
-            ThCalculateDimService.SelectMaxDim(mergedRootList, rootList);
-
-            foreach (var root in rootList)
-            {
-                ThDrainageADTreeService.PrintDiam(root, String.Format("l0dimMaxTree{0}", rootList.IndexOf(root)));
-            }
+            RootList = ThCalculateDimService.RemoveDuplicateHotTree(oriRootList);
+            ThCalculateDimService.SelectMaxDim(mergedRootList, RootList);
 
         }
 

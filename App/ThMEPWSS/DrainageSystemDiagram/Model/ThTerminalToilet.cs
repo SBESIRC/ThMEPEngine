@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADExtension;
+using ThMEPWSS.DrainageSystemDiagram.Service;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

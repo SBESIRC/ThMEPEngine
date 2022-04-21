@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using ThMEPWSS.DrainageADPrivate;
-using ThMEPWSS.DrainageADPrivate.Service;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.DrainageADPrivate.Model
 {
-    internal class ThSaniterayTerminal
+    class ThValve
     {
         public Polyline Boundary { get; set; }
-        public BlockReference Data { get; set; }
+        public Point3d CenterPt { get; set; }
+        public Point3d InsertPt { get; set; }
         public string Name { get; set; }
-        public ThDrainageADCommon.TerminalType Type { get; set; }
+        public Vector3d Dir { get; set; } //原始dir
+        public Point3d TransInsertPt { get; set; }
 
-        public Vector3d Dir { get; set; }
-
+        public ThDrainageTreeNode ConnectNode { get; set; } //与node => node.parent共线
     }
 }
