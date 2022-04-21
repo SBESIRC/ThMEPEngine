@@ -1,0 +1,45 @@
+{
+  "ObjConfig": {
+    "path": "C:/Users/liuguangsheng/Desktop/0407.ifc",
+    "current_floor": null,
+    "high_floor": null
+  },
+  "BoxConfig": {
+    "x_min": null,
+    "x_max": null,
+    "y_min": null,
+    "y_max": null,
+    "z_min": null,
+    "z_max": null,
+    "angle": null
+  },
+  "GlConfig": {
+    "gl_size": 16384,
+    "use_cuda": false
+  },
+  "ClipConfig": {},
+  "MergeConfig": {
+    "apporx_merge_mode": false,
+    "merge_mode": null
+  },
+  "SvgConfig": {
+    "image_size": null,
+    "save_path": "C:\\Users\\liuguangsheng\\AppData\\Local\\Temp\\"
+  },
+  "GlobalConfig": {
+    "eye_dir": {
+      "x": 0,
+      "y": 0,
+      "z": -1
+    },
+    "up": {
+      "x": 0,
+      "y": 1,
+      "z": 0
+    },
+    "scale_size": 34359738368
+  },
+  "DebugConfig": {
+    "print_time": true
+  }
+}

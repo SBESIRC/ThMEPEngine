@@ -262,7 +262,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static Point3dCollection IntersectWith(Entity firstEntity, Entity secondEntity)
         {
             Point3dCollection pts = new Point3dCollection();
-            Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+            var plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
             firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
             plane.Dispose();
             return pts;

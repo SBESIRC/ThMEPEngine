@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
 using ThMEPStructure.Reinforcement.Command;
+using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure
 {
@@ -139,7 +140,49 @@ namespace ThMEPStructure
                 cmd.Execute();
             }
         }
-        
+
         #endregion
+
+        /// <summary>
+        ///  读取SvgFile
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THReadSvg", CommandFlags.Modal)]
+        public void THReadSvg()
+        {
+            var pofo = new PromptOpenFileOptions("\n选择要解析的Svg文件");
+            pofo.Filter = "Svg files (*.svg)|*.svg";
+            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
+            if (pfnr.Status == PromptStatus.OK)
+            {
+                // 解析
+                var svg = new ThMEPEngineCore.IO.SVG.ThSVGReader();
+                var svgData = svg.ReadFromFile(pfnr.StringResult);
+
+                //// 沿着X轴镜像
+                //var mt = Matrix3d.Rotation(System.Math.PI, Vector3d.XAxis, Point3d.Origin);
+                //geometries.ForEach(o => o.Boundary.TransformBy(mt));
+
+                // Print                    
+                var prinService = new ThSvgEntityPrintService(svgData.Item1, svgData.Item2);
+                prinService.Print(Active.Database);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THMUTSC", CommandFlags.Modal)]
+        public void THMUTSC()
+        {
+            var pofo = new PromptOpenFileOptions("\n选择要成图的Ifc文件");
+            pofo.Filter = "Ifc files (*.Ifc)|*.Ifc";
+            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
+            if (pfnr.Status == PromptStatus.OK)
+            {
+                var config = new ThStructurePlaneConfig()
+                {
+                    IfcFilePath = pfnr.StringResult,
+                    SavePath = "",
+                };
+                var generator = new ThStructurePlaneGenerator(config);
+                generator.Generate();
+            }
+        }
     }
 }

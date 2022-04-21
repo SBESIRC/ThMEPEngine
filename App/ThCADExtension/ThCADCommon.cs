@@ -104,6 +104,10 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "结构图层图块.dwg");
         }
+        public static string StructPlanePath()
+        {
+            return Path.Combine(SupportPath(), "结构平面图.dwg");
+        }
 
         // 消防喷淋块
         public static string SprinklerDwgPath()
@@ -256,7 +260,7 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "配筋模板.dwg");
         }
-
+        
         // 运行时根目录
         private static string RootPath()
         {

@@ -221,6 +221,7 @@
     <Compile Include="IO\ExcelService\NPOIExcelBase.cs" />
     <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
+    <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
     <Compile Include="IO\SVG\ThSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
@@ -769,6 +770,9 @@
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="NPOI">
       <Version>2.5.5</Version>
+    </PackageReference>
+    <PackageReference Include="Svg">
+      <Version>3.4.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
