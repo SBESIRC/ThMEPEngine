@@ -1,10 +1,279 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
+    public struct GArc
+    {
+        public double X;
+        public double Y;
+        public Point Center => new(X, Y);
+        public double Radius;
+        public double StartAngle;
+        public double EndAngle;
+        public bool IsClockWise;
+        public GArc(Point center, double radius, double startAngle, double endAngle, bool isClockWise) : this(center.X, center.Y, radius, startAngle, endAngle, isClockWise) { }
+        public GArc(double x, double y, double radius, double startAngle, double endAngle, bool isClockWise)
+        {
+            X = x;
+            Y = y;
+            Radius = radius;
+            StartAngle = startAngle;
+            EndAngle = endAngle;
+            IsClockWise = isClockWise;
+        }
+        public GCircle ToGCircle() => new(X, Y, Radius);
+    }
+    public struct GRect
+    {
+        public class EqualityComparer : IEqualityComparer<GRect>
+        {
+            double tol;
+            public EqualityComparer(double tollerence)
+            {
+                this.tol = tollerence;
+            }
+            public bool Equals(GRect x, GRect y)
+            {
+                return x.EqualsTo(y, tol);
+            }
+            public int GetHashCode(GRect obj)
+            {
+                return 0;
+            }
+        }
+        public bool IsNull => Equals(this, default(GRect));
+        public bool IsValid => Width > 0 && Height > 0;
+        public double MinX { get; }
+        public double MinY { get; }
+        public double MaxX { get; }
+        public double MaxY { get; }
+        public Point LeftTop => new Point(MinX, MaxY);
+        public Point LeftButtom => new Point(MinX, MinY);
+        public Point RightButtom => new Point(MaxX, MinY);
+        public Point RightTop => new Point(MaxX, MaxY);
+        public Point Center => new Point(CenterX, CenterY);
+        public GRect(double x1, double y1, double x2, double y2)
+        {
+            MinX = Math.Min(x1, x2);
+            MinY = Math.Min(y1, y2);
+            MaxX = Math.Max(x1, x2);
+            MaxY = Math.Max(y1, y2);
+        }
+        public GRect OffsetXY(Vector v)
+        {
+            return this.OffsetXY(v.X, v.Y);
+        }
+        public GRect OffsetXY(double deltaX, double deltaY)
+        {
+            return new GRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
+        }
+        public static GRect Create(double widht, double height)
+        {
+            return new GRect(0, 0, widht, height);
+        }
+        public static GRect Create(Point pt, double extX, double extY)
+        {
+            return new GRect(pt.X - extX, pt.Y - extY, pt.X + extX, pt.Y + extY);
+        }
+        public static GRect Create(Point pt, double ext)
+        {
+            return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
+        }
+        public GRect(Point leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
+        {
+        }
+        public GRect(Point p1, Point p2) : this(p1.X, p1.Y, p2.X, p2.Y)
+        {
+        }
+        public double Radius => Math.Sqrt(Math.Pow(Width / 2, 2) + Math.Pow(Height / 2, 2));
+        public double Width => MaxX - MinX;
+        public double Height => MaxY - MinY;
+        public double CenterX => (MinX + MaxX) / 2;
+        public double CenterY => (MinY + MaxY) / 2;
+        public double OuterRadius => (new Point(MinX, MinY)).GetDistanceTo(new Point(CenterX, CenterY));
+        public double MiddleRadius => Math.Max(Width, Height) / 2;
+        public double InnerRadius => Math.Min(Width, Height) / 2;
+        public GRect Expand(double thickness)
+        {
+            return new GRect(this.MinX - thickness, this.MinY - thickness, this.MaxX + thickness, this.MaxY + thickness);
+        }
+        public GRect Expand(double dx, double dy)
+        {
+            return new GRect(this.MinX - dx, this.MinY - dy, this.MaxX + dx, this.MaxY + dy);
+        }
+        public bool ContainsRect(GRect rect)
+        {
+            return rect.MinX > this.MinX && rect.MinY > this.MinY && rect.MaxX < this.MaxX && rect.MaxY < this.MaxY;
+        }
+        public bool ContainsPoint(Point point)
+        {
+            return MinX <= point.X && point.X <= MaxX && MinY <= point.Y && point.Y <= MaxY;
+        }
+        public bool EqualsTo(GRect other, double tollerance)
+        {
+            return Math.Abs(this.MinX - other.MinX) < tollerance && Math.Abs(this.MinY - other.MinY) < tollerance
+                && Math.Abs(this.MaxX - other.MaxX) < tollerance && Math.Abs(this.MaxY - other.MaxY) < tollerance;
+        }
+        public static GRect Combine(IEnumerable<GRect> rs)
+        {
+            double minX = double.MaxValue, minY = double.MaxValue;
+            double maxX = double.MinValue, maxY = double.MinValue;
+            var ok = false;
+            foreach (var r in rs)
+            {
+                if (r.MinX < minX) minX = r.MinX;
+                if (r.MinY < minY) minY = r.MinY;
+                if (r.MaxX > maxX) maxX = r.MaxX;
+                if (r.MaxY > maxY) maxY = r.MaxY;
+                ok = true;
+            }
+            if (ok) return new GRect(minX, minY, maxX, maxY);
+            return default;
+        }
+    }
+    public struct GLineSegment
+    {
+        public GLineSegment(Point startPoint, Point endPoint)
+        {
+            StartPoint = startPoint;
+            EndPoint = endPoint;
+        }
+        public Point StartPoint { get; }
+        public Point EndPoint { get; }
+        public bool IsNull => Equals(this, default(GLineSegment));
+        public bool IsValid => StartPoint != EndPoint;
+        public double Length => StartPoint.GetDistanceTo(EndPoint);
+        public GLineSegment Offset(Vector v)
+        {
+            return new GLineSegment(StartPoint + v, EndPoint + v);
+        }
+        public GLineSegment Extend(double ext)
+        {
+            var vec = EndPoint - StartPoint;
+            var len = vec.Length;
+            if (len == 0) return this;
+            var k = ext / len;
+            var ep = EndPoint + vec * k;
+            var sp = StartPoint + vec * (-k);
+            return new GLineSegment(sp, ep);
+        }
+    }
+    public struct GCircle
+    {
+        public double X;
+        public double Y;
+        public double Radius;
+        public bool IsValid => Radius > 0 && !double.IsNaN(X) && !double.IsNaN(Y);
+        public GCircle(double x, double y, double radius)
+        {
+            X = x;
+            Y = y;
+            this.Radius = radius;
+        }
+        public GCircle(Point center, double radius) : this(center.X, center.Y, radius)
+        {
+        }
+        public Point Center => new Point(X, Y);
+        public GCircle OffsetXY(double dx, double dy)
+        {
+            return new GCircle(X + dx, Y + dy, Radius);
+        }
+    }
+    public class LineInfo
+    {
+        public GLineSegment Line;
+        public string LayerName;
+        public double Thickness;
+        public LineInfo(GLineSegment line, string layerName)
+        {
+            this.Line = line;
+            this.LayerName = layerName;
+        }
+    }
+    public class ArcInfo
+    {
+        public GArc Arc;
+        public string LayerName;
+        public ArcInfo(GArc arc, string layerName)
+        {
+            this.Arc = arc;
+            this.LayerName = layerName;
+        }
+    }
+    public class HatchInfo
+    {
+        public IList<Point> Points;
+        public string LayerName;
+        public HatchInfo(IList<Point> points, string layerName)
+        {
+            Points = points;
+            LayerName = layerName;
+        }
+    }
+    public class CircleInfo
+    {
+        public GCircle Circle;
+        public string LayerName;
+        public CircleInfo(Point center, double radius, string layerName) : this(new GCircle(center, radius), layerName)
+        {
+        }
+        public CircleInfo(GCircle circle, string layerName)
+        {
+            this.Circle = circle;
+            this.LayerName = layerName;
+        }
+    }
+    public class BlockDefInfo
+    {
+        public string BlockName;
+        public GRect Bounds;
+        public BlockDefInfo(string blockName, GRect bounds)
+        {
+            BlockName = blockName;
+            Bounds = bounds;
+        }
+    }
+    public class BlockInfo
+    {
+        public string LayerName;
+        public string BlockName;
+        public Point BasePoint;
+        public double Rotate;
+        public double Scale;
+        public Dictionary<string, string> PropDict;
+        public Dictionary<string, object> DynaDict;
+        public BlockInfo(string blockName, string layerName, Point basePoint)
+        {
+            this.LayerName = layerName;
+            this.BlockName = blockName;
+            this.BasePoint = basePoint;
+            this.PropDict = new Dictionary<string, string>();
+            this.DynaDict = new Dictionary<string, object>();
+            this.Rotate = 0;
+            this.Scale = 1;
+        }
+    }
+    public class DBTextInfo
+    {
+        public string LayerName;
+        public string TextStyle;
+        public Point BasePoint;
+        public string Text;
+        public double Rotation;
+        public double Height;
+        public DBTextInfo(Point point, string text, string layerName, string textStyle)
+        {
+            text ??= "";
+            this.LayerName = layerName;
+            this.TextStyle = textStyle;
+            this.BasePoint = point;
+            this.Text = text;
+        }
+    }
+
     public class PDSItemInfo
     {
         public Guid Guid = Guid.NewGuid();

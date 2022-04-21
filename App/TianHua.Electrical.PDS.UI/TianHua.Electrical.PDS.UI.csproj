@@ -90,6 +90,7 @@
     <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Converters\RadioUiValueConverter.cs" />
+    <Compile Include="Services\GeoExtensions.cs" />
     <Compile Include="Services\PDSItemInfo.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
