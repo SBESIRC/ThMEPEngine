@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -75,6 +76,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         //未读取到楼层数据
                         return;
                     }
+                    ////
+                    //string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                    //FileStream fs = new FileStream(dir + "\\WaterDebug.txt", FileMode.Create);
+                    //StreamWriter sw = new StreamWriter(fs);
+                    //sw.WriteLine("计算开始" + DateTime.Now.ToString());
+                    //sw.Close();
+                    //fs.Close();
                     //楼层框定定位点
                     var StoryFrameBasePoint = new List<Point3d>();
                     var frames = FramedReadUtil.ReadAllFloorFramed();
@@ -85,12 +93,26 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         foreach (var p in StoryFrameBasePoint)
                             if (pl.Contains(p)) { tmps.Add(p); break; }
                     StoryFrameBasePoint = tmps;
-                    //读取楼层信息
-                    var floorInfoExtractionService = new ThFloorInfoExtractionService();
-                    for (int i = 0; i < InfoModel.FloorList.Count;i++)
+                    //读取楼层信息_速度优化              
+                    Extents3d ext = new Extents3d();
+                    for (int i = 0; i < InfoModel.FloorList.Count; i++)
                     {
-                        InfoModel.FloorList[i].FloorInfo = floorInfoExtractionService.GetFloorInfo(InfoModel.FloorList[i], i);
+                        var pl = CreatePolyFromPoints(
+                            InfoModel.FloorList[i].FloorArea.Vertices().Cast<Point3d>().ToArray());
+                        ext.AddExtents(pl.GeometricExtents);
                     }
+                    OptimizedDataReader dataReader = new OptimizedDataReader(ext);
+                    for (int i = 0; i < InfoModel.FloorList.Count; i++)
+                    {
+                        InfoModel.FloorList[i].FloorInfo = dataReader.GetDatas(CreatePolyFromPoints(
+                            InfoModel.FloorList[i].FloorArea.Vertices().Cast<Point3d>().ToArray()),i);
+                    }
+                    //读取楼层信息
+                    //var floorInfoExtractionService = new ThFloorInfoExtractionService();
+                    //for (int i = 0; i < InfoModel.FloorList.Count; i++)
+                    //{
+                    //    InfoModel.FloorList[i].FloorInfo = floorInfoExtractionService.GetFloorInfo(InfoModel.FloorList[i], i);
+                    //}
                     //初始化提取的数据中与管线、阀门等绘图相关的图层信息
                     ThLayerInitializeService layerInitializeService = new ThLayerInitializeService();
                     layerInitializeService.Initialize(InfoModel);

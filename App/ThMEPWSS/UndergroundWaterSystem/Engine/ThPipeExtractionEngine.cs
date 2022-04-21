@@ -36,14 +36,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 return retLines;
             }
         }
-        public List<Line> GetPipeLines(Point3dCollection pts)
+        public List<Line> GetPipeLines(Point3dCollection pts=null)
         {
             using (var database = AcadDatabase.Active())
             {
                 var retLines = new List<Line>();
                 var entities = database.ModelSpace.OfType<Entity>();
                 DBObjectCollection dbObjs = null;
-                if (pts.Count > 0)
+                if (pts!=null)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
                     var pline = new Polyline()

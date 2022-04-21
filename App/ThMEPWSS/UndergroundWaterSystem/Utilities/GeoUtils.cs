@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.CADExtensionsNs;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Utilities
 {
@@ -344,6 +345,43 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             }
             p.Closed = closed;
             return p;
+        }
+        public static List<Entity> GetAllEntitiesByExplodingTianZhengElementThoroughly(Entity entity)
+        {
+            if (!IsTianZhengElement(entity)) return new List<Entity>() { entity };
+            List<Entity> results = new List<Entity>();
+            List<Entity> containers = new List<Entity>() { entity };
+            while (true)
+            {
+                var elements = new List<Entity>();
+                foreach (var ent in containers)
+                {
+                    if (IsTianZhengElement(ent))
+                    {
+                        var res = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+                        foreach (var r in res)
+                        {
+                            if (IsTianZhengElement(r)) elements.Add(r);
+                            else results.Add(r);
+                        }
+                    }
+                }
+                containers = elements;
+                if (containers.Count == 0) break;
+            }
+            return results;
+        }
+        public static bool IsConnectedToLines(List<Line> lines, Point3d point, double tol = 1)
+        {
+            foreach (var line in lines)
+                if (IsConnectedToLine(line, point, tol)) return true;
+            return false;
+        }
+        public static bool IsConnectedToLine(Line line, Point3d point, double tol = 1)
+        {
+            if (line.StartPoint.DistanceTo(point) <= tol || line.EndPoint.DistanceTo(point) <= tol)
+                return true;
+            return false;
         }
     }
 }

@@ -15,14 +15,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
 {
     public class ThDimExtractionEngine
     {
-        public List<ThDimModel> GetDimList(Point3dCollection pts)
+        public List<ThDimModel> GetDimList(Point3dCollection pts=null)
         {
             using (var database = AcadDatabase.Active())
             {
                 var retList = new List<ThDimModel>();
                 var entities = database.ModelSpace.OfType<Entity>();
                 DBObjectCollection dbObjs = null;
-                if (pts.Count > 0)
+                if (pts!=null)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
                     var pline = new Polyline()
