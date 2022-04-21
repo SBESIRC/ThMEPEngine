@@ -80,7 +80,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _breaker.SetRatedCurrent(value);
                 OnPropertyChanged();
-                WeakReferenceMessenger.Default.Send(new CurrentChangedMessage(value));
+                WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
             }
         }
 

@@ -3794,7 +3794,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 clear += () => { clear = null; };
             }
-            WeakReferenceMessenger.Default.Register<CurrentChangedMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<RatedCurrentChangedMessage>(this, (r, m) =>
             {
                 UpdateCanvas();
             });

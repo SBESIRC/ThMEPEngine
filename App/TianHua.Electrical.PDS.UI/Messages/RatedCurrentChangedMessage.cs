@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace TianHua.Electrical.PDS.UI.Models
 {
-    internal class CurrentChangedMessage : ValueChangedMessage<object>
+    internal class RatedCurrentChangedMessage : ValueChangedMessage<object>
     {
-        public CurrentChangedMessage(object value) : base(value)
+        public RatedCurrentChangedMessage(object value) : base(value)
         {
         }
     }

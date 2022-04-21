@@ -6,6 +6,8 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using Microsoft.Toolkit.Mvvm.Messaging;
+using TianHua.Electrical.PDS.UI.Models;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -75,6 +77,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _cps.SetRatedCurrent(value);
                 OnPropertiesChanged();
+                WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
             }
         }
 

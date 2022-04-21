@@ -61,7 +61,7 @@
     <Compile Include="Editors\ThPDSRatedCurrentRangePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSResidualCurrentPropertyEditor.cs" />
     <Compile Include="Helpers\ThPDSPropertyDescriptorHelper.cs" />
-    <Compile Include="Models\CurrentChangedMessage.cs" />
+    <Compile Include="Messages\RatedCurrentChangedMessage.cs" />
     <Compile Include="Models\DrawUtils.cs" />
     <Compile Include="Models\ThPDSCircuitGraphTreeModel.cs" />
     <Compile Include="Models\TreeBuilder.cs" />
