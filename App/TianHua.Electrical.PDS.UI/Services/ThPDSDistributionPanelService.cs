@@ -2828,7 +2828,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             mi.Command = new RelayCommand(() =>
                             {
                                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
-                                var edges = ThPDSProjectGraphService.GetCircuit(graph, vertice).Where(x => x.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规).ToList();
+                                var edges = ThPDSProjectGraphService.GetSuitableSmallBusbarCircuit(graph, vertice);
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
