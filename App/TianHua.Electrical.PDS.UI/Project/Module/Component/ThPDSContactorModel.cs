@@ -1,7 +1,6 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
-using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -23,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => _contactor.Content();
+        public string Content => $"{RatedCurrent}/{PolesNum}";
 
         [ReadOnly(true)]
         [Category("元器件参数")]
