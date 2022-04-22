@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Collections;
 using HandyControl.Controls;
+using TianHua.Electrical.PDS.UI.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.Editors
 {
@@ -19,6 +20,10 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
+            if (propertyItem.Value is ThPDSSecondaryCircuitModel sc)
+            {
+                return sc.Descriptions;
+            }
             throw new NotSupportedException();
         }
     }

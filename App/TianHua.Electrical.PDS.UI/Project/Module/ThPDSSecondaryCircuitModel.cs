@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel;
-using ThControlLibraryWPF.ControlUtils;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module;
+using HandyControl.Controls;
+using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.UI.Editors;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module
 {
@@ -22,6 +25,22 @@ namespace TianHua.Electrical.PDS.UI.Project.Module
 
         [Category("控制回路参数")]
         [DisplayName("功能描述")]
-        public string CircuitDescription => _sc.CircuitDescription;
+        [Editor(typeof(ThPDSSecondaryCircuitDescriptionEditPropertyEditor), typeof(PropertyEditorBase))]
+        public string CircuitDescription
+        {
+            get
+            {
+                return _sc.CircuitDescription;
+            }
+            set
+            {
+                _sc.SetDescription(value);
+                OnPropertyChanged(nameof(CircuitDescription));
+            }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> Descriptions => _sc.GetDescriptions();
     }
 }
