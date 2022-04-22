@@ -50,13 +50,20 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
+
         [Browsable(true)]
         [DisplayName("控制线芯数")]
         [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
         public int ConductorCount
         {
             get => _conductor.ConductorCount;
+            set
+            {
+                _conductor.SetConductorCount(value);
+                OnPropertyChanged(nameof(ConductorCount));
+                OnPropertyChanged(nameof(Content));
+            }
         }
 
         [Browsable(true)]
@@ -128,6 +135,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get => _conductor.GetNumberOfPhaseWires();
         }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<int> ConductorCounts => _conductor.GetConductorCounts();
 
         [ReadOnly(true)]
         [Browsable(false)]

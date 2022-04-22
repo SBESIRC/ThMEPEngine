@@ -586,7 +586,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             else
             {
-                //do not
+                throw new InvalidOperationException();
             }
         }
 
