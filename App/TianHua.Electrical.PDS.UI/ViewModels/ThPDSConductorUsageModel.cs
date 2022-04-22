@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == ConductorType) return;
                 _conductorUse.ConductorType = value;
-                OnPropertyChanged(null);
+                OnPropertyChanged();
             }
         }
 
@@ -41,14 +41,23 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == OuterSheathMaterial) return;
                 _conductorUse.OuterSheathMaterial = value;
-                OnPropertyChanged(null);
+                OnPropertyChanged();
             }
         }
 
         /// <summary>
         /// 燃烧特性代号
         /// </summary>
-        public string ConductorMaterial => _conductorUse.ConductorMaterial;
+        public string ConductorMaterial
+        {
+            get=>_conductorUse.ConductorMaterial;
+            set
+            {
+                if (value == ConductorMaterial) return;
+                _conductorUse.ConductorMaterial = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool IsSpecialConductorType => _conductorUse.IsSpecialConductorType;
 

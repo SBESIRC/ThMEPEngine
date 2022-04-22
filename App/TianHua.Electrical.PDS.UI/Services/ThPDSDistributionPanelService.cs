@@ -19,7 +19,6 @@ using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
-
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class ThPDSVertex
@@ -230,21 +229,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             void UpdateCanvas()
             {
-                //try
-                //{
-                //    {
-                //        foreach (var v in graph.Vertices)
-                //        {
-                //            ThPDSProjectGraphService.UpdateWithNode(new ThPDSProjectGraph(graph), v);
-                //            ThPDSProjectGraphService.UpdateWithMiniBusbar(new ThPDSProjectGraph(graph), v);
-                //        }
-                //        foreach (var e in graph.Edges)
-                //        {
-                //            ThPDSProjectGraphService.UpdateWithEdge(new ThPDSProjectGraph(graph), e);
-                //        }
-                //    }
-                //}
-                //catch { }
                 canvas.Children.Clear();
                 clear?.Invoke();
                 dccbs = null;
@@ -2841,7 +2825,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var edge = edges[i];
                                     node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID.LastOrDefault(), });
                                 }
-                                var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar();
+                                var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
                                 var r = w.ShowDialog();
                                 if (r == true)
@@ -3494,10 +3478,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 clear += () => { clear = null; };
             }
-            //WeakReferenceMessenger.Default.Register<RatedCurrentChangedMessage>(this, (r, m) =>
-            //{
-            //    UpdateCanvas();
-            //});
             UpdateCanvas();
         }
         private static Path CreateLine(Transform trans, Brush strockBrush, Point st, Point ed)

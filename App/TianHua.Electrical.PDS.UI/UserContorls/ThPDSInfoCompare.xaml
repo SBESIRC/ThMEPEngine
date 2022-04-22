@@ -10,23 +10,23 @@
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Vertical">
-                <Button Width="100" x:Name="btnRefresh" Style="{x:Null}" >刷新</Button>
-                <ListBox Width="100" Height="500" Style="{x:Null}" ></ListBox>
+                <Button Width="150" x:Name="btnRefresh" Style="{x:Null}" >刷新</Button>
+                <ListBox Width="150" Height="500" Style="{x:Null}" ></ListBox>
             </StackPanel>
-            <StackPanel Orientation="Vertical" Width="400">
+            <StackPanel Orientation="Vertical" Width="450">
                 <StackPanel Orientation="Horizontal">
                     <Button Style="{x:Null}">筛选</Button>
                     <TextBox Width="200" x:Name="tbx1" Style="{x:Null}" ></TextBox>
                     <Button x:Name="btn1" Style="{x:Null}" >查找</Button>
                 </StackPanel>
-                <DataGrid Width="400" Height="500" x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
+                <DataGrid Width="450" Height="500" x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
           CanUserSortColumns="True"   CanUserReorderColumns="False"    CanUserResizeColumns="True"     ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="回路编号" Width="100" IsReadOnly="True" Binding="{Binding CircuitId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                         <DataGridTextColumn Header="回路类型" Width="100" IsReadOnly="True" Binding="{Binding CircuitType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                         <DataGridTextColumn Header="上级配电箱" Width="100" IsReadOnly="True" Binding="{Binding ParentBox,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                         <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="注" Width="20" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
@@ -43,16 +43,15 @@
                         <DataGridTextColumn Header="负载类型" Width="100" IsReadOnly="True" Binding="{Binding LoadType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                         <DataGridTextColumn Header="负载功率" Width="70" IsReadOnly="True" Binding="{Binding LoadPower,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                         <DataGridTextColumn Header="参照图纸" Width="80" IsReadOnly="True" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="注" Width="70" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="注" Width="20" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{x:Null}" Click="btnUseFlatDataClick">全部采用平面数据</Button>
-            <Button Style="{x:Null}" Click="btnUseSystemDataClick">全部采用系统数据</Button>
+            <Button Style="{x:Null}" Click="btnUseFlatDataClick">更新修改到平面</Button>
+            <Button Style="{x:Null}" Click="btnUseSystemDataClick">创建非平面负载</Button>
             <Button Style="{x:Null}" Click="btnReloadClick">重新抓取平面数据</Button>
-            <Button Style="{x:Null}" Click="btnSaveClick">保存修改</Button>
         </StackPanel>
     </StackPanel>
 </UserControl>
