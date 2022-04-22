@@ -36,10 +36,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 line.TransformBy(mt.Inverse());
                 retLines.Add(line);
             }
-            foreach (var l in lines)
-            {
-                l.Dispose();
-            }
+            foreach (var l in lines) l.Dispose();
             return retLines;
         }
         /// <summary>
@@ -66,7 +63,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             retLines.AddRange(conLines);
             foreach (var line in conLines)
             {
-                retLines.AddRange(FindSeriesLine(line, ref allLines));
+                var tlines = FindSeriesLine(line, ref allLines);
+                retLines.AddRange(tlines);
             }
             return retLines;
         }

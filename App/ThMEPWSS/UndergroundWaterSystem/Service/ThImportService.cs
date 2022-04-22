@@ -27,8 +27,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         if (!adb.Blocks.Contains(brname)) adb.Blocks.Import(Db.Blocks.ElementOrDefault(brname));
                     }
                     //导入不存在的图层并确认图层unlocked
-                    List<string> layerNames = new() { "W-NOTE", "W-WSUP-EQPM", "W-WSUP-DIMS" };
-                    List<short> layerColorIndex = new() { 9, 0, 0 };
+                    List<string> layerNames = new() { "W-NOTE", "W-WSUP-EQPM", "W-WSUP-DIMS", "AI-辅助" };
+                    List<short> layerColorIndex = new() { 9, 0, 0, 30 };
                     for (int i = 0; i < layerNames.Count; i++)
                     {
                         if (!adb.Layers.Contains(layerNames[i]))

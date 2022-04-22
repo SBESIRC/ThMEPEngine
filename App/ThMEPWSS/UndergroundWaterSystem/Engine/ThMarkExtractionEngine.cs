@@ -86,16 +86,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                         if (entity is DBText t)
                         {
                             textList.Add(t);
-                            if (t.TextString.Equals("S-JGL-1"))
-                            {
-                                string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                                FileStream fs = new FileStream(dir + "\\WaterDebug.txt", FileMode.Append);
-                                StreamWriter sw = new StreamWriter(fs);
-                                sw.WriteLine(t.Position.X);
-                                sw.WriteLine(t.Position.Y);
-                                sw.Close();
-                                fs.Close();
-                            }
                         }
                         else if (entity is Line l)
                         {

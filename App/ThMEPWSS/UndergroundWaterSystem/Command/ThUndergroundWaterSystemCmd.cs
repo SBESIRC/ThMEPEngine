@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
@@ -65,6 +66,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     {
                         return;
                     }
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
                     basePt = basePt.ToPoint2D().ToPoint3d();
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     //导入必要的模块
@@ -101,7 +104,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                             InfoModel.FloorList[i].FloorArea.Vertices().Cast<Point3d>().ToArray());
                         ext.AddExtents(pl.GeometricExtents);
                     }
-                    OptimizedDataReader dataReader = new OptimizedDataReader(ext);
+                    OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt);
                     for (int i = 0; i < InfoModel.FloorList.Count; i++)
                     {
                         InfoModel.FloorList[i].FloorInfo = dataReader.GetDatas(CreatePolyFromPoints(
@@ -144,6 +147,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     systemMapeService.RiserList = risers;
                     systemMapeService.Mt = mt;
                     systemMapeService.DrawMap(basePt,pipeTree);
+                    sw.Stop();
+                    Active.Editor.WriteLine("系统图绘制完成，用时" + sw.Elapsed.TotalSeconds + "秒。");
                     return;
                 }
             }

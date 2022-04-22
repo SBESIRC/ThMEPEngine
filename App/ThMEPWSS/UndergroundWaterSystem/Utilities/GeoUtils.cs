@@ -57,6 +57,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptStart, ptmp1);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -72,6 +73,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptStart, ptmp2);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -96,6 +98,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptEnd, ptmp1);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -111,6 +114,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptEnd, ptmp2);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -343,7 +347,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             {
                 p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
             }
-            p.Closed = closed;
+            if (closed) p.Closed = true;
             return p;
         }
         public static List<Entity> GetAllEntitiesByExplodingTianZhengElementThoroughly(Entity entity)
@@ -382,6 +386,46 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             if (line.StartPoint.DistanceTo(point) <= tol || line.EndPoint.DistanceTo(point) <= tol)
                 return true;
             return false;
+        }
+        public static void RemoveDuplicatedLines(List<Line> lines)
+        {
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if ((lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < 1)
+                        || (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < 1))
+                    {
+                        lines.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
+        }
+        public static string AnalysisLineList(List<Line> a)
+        {
+            string s = "";
+            foreach (var e in a)
+            {
+                s += AnalysisLine(e);
+            }
+            return s;
+        }
+        public static string AnalysisLine(Line a)
+        {
+            string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
+                a.EndPoint.X.ToString() + "," + a.EndPoint.Y.ToString() + ",";
+            return s;
+        }
+        public static string AnalysisPointList(List<Point3d> points)
+        {
+            string s = "";
+            foreach (var pt in points)
+            {
+                s += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            return s;
         }
     }
 }

@@ -21,17 +21,19 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
     public class OptimizedDataReader
     {
-        public OptimizedDataReader(Extents3d outBound)
+        public OptimizedDataReader(Extents3d outBound, Point3d start)
         {
             OutBoundVertices = outBound.ToRectangle().Vertices();
+            StartPoint = start;
             Initialize();
         }
+        public Point3d StartPoint;
         public Point3dCollection OutBoundVertices = new Point3dCollection();
         private List<Line> PipeLines = new List<Line>();//横管
         private List<ThMarkModel> Marks = new List<ThMarkModel>();//标注
         private List<ThRiserModel> Riser = new List<ThRiserModel>();//立管
         private List<ThDimModel> Dims = new List<ThDimModel>();//管径
-        private List<ThValveModel> Valves = new List<ThValveModel>();//阀门
+        public List<ThValveModel> Valves = new List<ThValveModel>();//阀门
         private List<ThFlushPointModel> FlushPoints = new List<ThFlushPointModel>();//冲洗点位
         public ThFloorInfo GetDatas(Polyline Bound,int index)
         {
@@ -50,22 +52,24 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //提取横管
             var pipeExtractionService = new ThPipeExtractionService();
             PipeLines = pipeExtractionService.GetPipeLines();
+            var originalLine = ThUndergroundWaterSystemUtils.FindStartLine(StartPoint, PipeLines);
+            PipeLines = PipeLines.Where(e => e.ColorIndex.Equals(originalLine.ColorIndex)).ToList();
             //提取立管
             var riserExtractionService = new ThRiserExtracionService();
-            Riser = riserExtractionService.GetRiserModelList(PipeLines,OutBoundVertices);
+            Riser = riserExtractionService.GetRiserModelList(PipeLines, OutBoundVertices);
             //提取标记
             var markExtractionService = new ThMarkExtractionService();
             Marks = markExtractionService.GetMarkModelList(OutBoundVertices);
             //提取管径
             var dimExtractionService = new ThDimExtractionService();
-            Dims = dimExtractionService.GetDimModelList();
+            Dims = dimExtractionService.GetDimModelList(OutBoundVertices);
             //提取阀门&&冲洗点位
             var valveExtractionService = new ThOtherDataExtractionService();
-            Valves = valveExtractionService.GetValveModelList();
-            FlushPoints = valveExtractionService.GetFlushPointList();
+            Valves = valveExtractionService.GetValveModelList(OutBoundVertices);
+            FlushPoints = valveExtractionService.GetFlushPointList(OutBoundVertices);
             GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.WaitForFullGCComplete();
+            //GC.WaitForPendingFinalizers();
+            //GC.WaitForFullGCComplete();
         }
     }
 }
