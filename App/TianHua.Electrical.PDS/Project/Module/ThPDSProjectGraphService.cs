@@ -252,28 +252,28 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
         }
 
-        public static void UpdateWithNode(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void UpdateWithNode(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.Graph.InEdges(node);
+            var edges = graph.InEdges(node);
             foreach (var edge in edges)
             {
-                graph.CheckCascadeWithEdge(edge);
+                edge.CheckCascadeWithEdge();
             }
         }
-        public static void UpdateWithMiniBusbar(ThPDSProjectGraph graph, ThPDSProjectGraphNode node)
+        public static void UpdateWithMiniBusbar(ThPDSProjectGraphNode node)
         {
-            graph.CheckCascadeWithNode(node);
+            node.CheckCascadeWithNode();
         }
-        public static void UpdateWithEdge(ThPDSProjectGraph graph, ThPDSProjectGraphEdge edge)
+        public static void UpdateWithEdge(ThPDSProjectGraphEdge edge)
         {
             var miniBusbar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge));
             if (miniBusbar.Key.IsNull())
             {
-                graph.CheckCascadeWithNode(edge.Source);
+                edge.Source.CheckCascadeWithNode();
             }
             else
             {
-                graph.CheckCascadeWithMiniBusbar(edge.Source, miniBusbar.Key);
+               edge.Source.CheckCascadeWithMiniBusbar(miniBusbar.Key);
             }
         }
 
@@ -410,7 +410,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var newEdge = new ThPDSProjectGraphEdge(source, target) { Circuit = new ThPDSCircuit() };
                 newEdge.ComponentSelection();
                 graph.AddEdge(newEdge);
-                PDSProject.Instance.graphData.CheckWithNode(source);
+                source.CheckWithNode();
             }
         }
 
@@ -581,8 +581,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                     smallBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
                 }
 
-                PDSProject.Instance.graphData.CheckWithMiniBusbar(node, smallBusbar);
-                PDSProject.Instance.graphData.CheckWithNode(node);
+                node.CheckWithMiniBusbar(smallBusbar);
+                node.CheckWithNode();
             }
         }
 

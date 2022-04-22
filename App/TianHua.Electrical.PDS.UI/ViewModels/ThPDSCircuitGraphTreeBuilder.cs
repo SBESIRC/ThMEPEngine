@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             }
             {
                 var vertices = graph.Vertices.ToList();
-                var roots = graph.Vertices.Where(x => x.IsStartVertexOfGraph).Select(x => idDict[x]).ToList();
+                var roots = graph.Vertices.Where(x => graph.InDegree(x) == 0).Select(x => idDict[x]).ToList();
                 var tb = new TreeBuilder();
                 foreach (var eg in graph.Edges)
                 {

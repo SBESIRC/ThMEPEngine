@@ -53,6 +53,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 //Creat New Project
                 this.graphData = new ProjectGraph().CreatPDSProjectGraph();
+                PDSProjectExtend.CalculateProjectInfo();
                 this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
                 if (!instance.DataChanged.IsNull())
                 {
@@ -81,6 +82,7 @@ namespace TianHua.Electrical.PDS.Project
                 new ThPDSProjectGraphEdge(VertexDir[o.Source], VertexDir[o.Target]) { Circuit = o.Circuit }
                 ));
             this.graphData = ProjectGraph.CreatPDSProjectGraph();
+            PDSProjectExtend.CalculateProjectInfo();
             if (!instance.DataChanged.IsNull())
             {
                 instance.DataChanged();//推送消息告知VM刷新
@@ -154,7 +156,6 @@ namespace TianHua.Electrical.PDS.Project
         {
             var newNode = new ThPDSProjectGraphNode();
             newNode.Type = node.NodeType;
-            newNode.IsStartVertexOfGraph = node.IsStartVertexOfGraph;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
             if(node.Loads.Count > 1)
             {
