@@ -4,11 +4,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
                     WindowStartupLocation="CenterOwner"
                     Title="参数设置-住户分组1"
                     SizeToContent="Height"
                     Width="215"
              mc:Ignorable="d" >
+
+
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:FloorTypeToBoolConverter x:Key="RadioValueConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid Margin="6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -19,54 +28,37 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        
+
         <!--层高设置-->
         <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,5,0,5">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                 <Label Content="楼层线间距" ></Label>
                 <Button x:Name="btnHeights" Click="btnHeights_Click" Width="80" Margin="50,0,0,0">层高设置</Button>
             </StackPanel>
-       
-        <StackPanel Orientation="Horizontal">
-            <TextBox Width="80" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" SpellCheck.IsEnabled="True"/>
-            <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
-        </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBox Width="80" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" SpellCheck.IsEnabled="True"/>
+                <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
+            </StackPanel>
         </StackPanel>
         <!--层高设置结束-->
 
         <!--半平台设置-->
-
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
-            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
-
-            <Label Content="水表位置："></Label>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
-
-                <ItemsControl x:Name="testList2" ItemsSource="{Binding WaterMeterDynamicRadios}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"></WrapPanel>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+            <Label >命令模式：</Label>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding MeterType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">同层</RadioButton>
+                <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding MeterType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">半平台</RadioButton>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,5,0,5" IsEnabled="{Binding MeterType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <Button x:Name="HalfSet" Click="HalfPlatformSet" Width="80" Margin="0,0,0,0">半平台设置</Button>
+                </StackPanel>
             </StackPanel>
 
-        </StackPanel>
 
 
-        <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,5,0,5">
-            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                <Button x:Name="HalfSet" Click="HalfPlatformSet" Width="80" Margin="0,0,0,0">半平台设置</Button>
-            </StackPanel>
         </StackPanel>
-        
-        
-        
         <!--半平台设置结束-->
 
         <!--分区设置-->
@@ -98,6 +90,23 @@
                 <TextBox Width="100" Text="{Binding NoCheckValve,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}" KeyDown = "NoCheckValve_KeyPress" TextChanged="TextBox_TextChanged_NoCheckValve"></TextBox>
                 <Label Content="层"></Label>
             </StackPanel>
+            <Label Content="支管减压阀样式："></Label>
+
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <ItemsControl x:Name="testList2" ItemsSource="{Binding PRValveStyleDynamicRadios}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Height="24" Margin="5,0,5,0" Padding="0" Content="{Binding Content}" GroupName="{Binding GroupName}" IsChecked="{Binding IsChecked}"></RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"></WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+            
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="敷设方式："></Label>
                 <ItemsControl x:Name="testList" ItemsSource="{Binding LayingDynamicRadios}">
@@ -112,7 +121,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
-                
+
             </StackPanel>
 
         </StackPanel>
@@ -120,7 +129,7 @@
 
         <!--管径计算设置-->
         <StackPanel Orientation="Vertical" Grid.Row="4" Margin="0,5,0,5">
-            
+
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" Margin="-5,0,-5,0"  SnapsToDevicePixels="True"/>
             <Label Content="管径计算"/>
             <Grid>
@@ -174,9 +183,5 @@
             <cus:ImageButton ImageTextLocation="TextOnly" Content="确认" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly" Content="取消" Width="50" Height="24" Margin="30,0,0,0" Name="Cancle" Click="Cancle_Click"></cus:ImageButton>
         </StackPanel>
-        
-        
-        
-        
     </Grid>
 </cus:ThCustomWindow>

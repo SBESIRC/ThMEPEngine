@@ -84,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Converter\BeamRecognizeSourceBooleanConverter.cs" />
     <Compile Include="Converter\DrainSettingConverter.cs" />
+    <Compile Include="Converter\FloorTypeToBoolConverter.cs" />
     <Compile Include="Converter\SewageWasteWaterConvert.cs" />
     <Compile Include="Converter\SingleRowSettingConverter.cs" />
     <Compile Include="Converter\SprinklerRangeBooleanConverter.cs" />

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.WaterSupplyPipeSystem.Data;
+using ThMEPWSS.WaterSupplyPipeSystem.tool;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem.model
 {
@@ -22,6 +23,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         private int[] Households { get; set; }//住户数
         public Point3d PressureReducingValveSite { get; set; } //减压阀位置
         private List<Point3d> CheckValveSite { get; set; } //截止阀位置
+        public List<Point3d> PRValveSite { get; set; }//减压阀位置
         private List<Point3d> WaterMeterSite { get; set; } //水表位置
         private List<Point3d> WaterPipeInterrupted { get; set; } //水管中断位置
         private Point3d AutoExhaustValveSite { get; set; } //自动排气阀位置
@@ -40,8 +42,119 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         private int MaxHouse { get; set; } //最大住户数
         private double Dist { get; set; } //管间距
         private int Flag { get; set; } //距离1,2
-        
-        public ThWSSDBranchPipe(int index, string dn, SysIn sysIn, SysProcess sysProcess )
+        private double MinDist { get; set; }//
+        private bool PRValveStyle { get; set; }//
+
+        //public ThWSSDBranchPipe(int index, string dn, SysIn sysIn, SysProcess sysProcess )
+        //{
+        //    ThWSSDStorey storey = sysProcess.StoreyList[index];
+        //    double indexStartY = sysIn.InsertPt.Y;
+        //    double pipeOffsetX = sysProcess.PipeOffsetX[index];
+        //    List<double[]> blockSize = sysIn.BlockSize;
+        //    int layingMethod = sysIn.LayingMethod;
+        //    int areaIndex = sysIn.AreaIndex;
+        //    int maxHouse = sysProcess.MaxHouseholds;
+
+        //    DN = dn;//管径号
+        //    FloorNumber = storey.GetFloorNumber();//楼层号
+        //    HasFlushFaucet = storey.GetFlushFaucet();//有冲洗龙头
+        //    NoValve = storey.GetPRValve();//无减压阀
+        //    FloorHeight = storey.GetFloorHeight();//楼层高
+        //    Households = storey.GetHouseholds();//住户数
+        //    PipeOffsetX = pipeOffsetX;//立管的 X 偏移量
+        //    IndexStartY = indexStartY;//起始 Y 偏移量
+        //    BlockSize = blockSize;//模型尺寸
+        //    LayingMethod = layingMethod;//敷设方式
+        //    AreaIndex = areaIndex;
+        //    MaxHouse = maxHouse;
+        //    bool chaochu = false;
+
+        //    var ratio = new double[] { 1.0, 0.7, 0.6 };
+        //    var maxGap = new double[] { 350, 250, 200 };
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        var r = ratio[i];
+        //        var mGap = maxGap[i];
+        //        var gapYDown1 = 30 + 150 * r;
+        //        var gapYDown2 = 180;
+        //        double gapY = 300 * r;//水表间距 * 缩放因子 为 最小间距
+        //        var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+        //        var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - gapYDown2 - 100 * layingMethod) / (MaxHouse - 1);//较小值
+        //        if (r == 1.0 || r == 0.7)
+        //        {
+        //            if (dist1 > gapY || dist2 > gapY)
+        //            {
+        //                AutoValveRatio = r - 0.1;
+        //                BlockRatio = r;
+        //                if (dist2 > mGap)
+        //                {
+        //                    Dist = mGap;
+        //                    Flag = 2;
+        //                }
+        //                else
+        //                {
+        //                    Dist = Math.Min(mGap, dist1);
+        //                    Flag = 1;
+        //                }
+        //                break;
+        //            }
+        //            else
+        //            {
+        //                chaochu = true;
+        //                dist1 = (FloorHeight + 100 - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
+        //                Flag = 1;
+        //                if (dist1 > gapY)
+        //                {
+        //                    AutoValveRatio = r - 0.1;
+        //                    BlockRatio = r;
+        //                    Dist = dist1;
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //        if (r == 0.6)
+        //        {
+        //            if (dist1 < gapY)
+        //            {
+        //                chaochu = true;
+        //                AutoValveRatio = 0.5;
+        //                BlockRatio = 0.6;
+        //                Dist = 180;
+        //                Flag = 1;
+        //                break;
+        //            }
+        //            AutoValveRatio = 0.5;
+        //            BlockRatio = 0.6;
+        //            if (dist1 > mGap)
+        //            {
+        //                Dist = mGap;
+        //                Flag = 1;
+        //            }
+        //            else
+        //            {
+        //                Dist = dist1;
+        //                Flag = 1;
+        //            }
+        //            break;
+        //        }
+        //    }
+        //    if (layingMethod == 0)
+        //    {
+        //        if (Households[AreaIndex] != 0 || HasFlushFaucet)
+        //        {
+        //            InitChuanLiang(1.0 / 15, 0.1, chaochu);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (Households[AreaIndex] != 0 || HasFlushFaucet)
+        //        {
+        //            InitMaiDi(chaochu);
+        //        }
+        //    }
+        //}
+
+        public ThWSSDBranchPipe(int index, string dn, SysIn sysIn, SysProcess sysProcess, bool prValveStyle)
         {
             ThWSSDStorey storey = sysProcess.StoreyList[index];
             double indexStartY = sysIn.InsertPt.Y;
@@ -51,7 +164,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             int areaIndex = sysIn.AreaIndex;
             int maxHouse = sysProcess.MaxHouseholds;
 
-
+            PRValveStyle = prValveStyle;
             DN = dn;//管径号
             FloorNumber = storey.GetFloorNumber();//楼层号
             HasFlushFaucet = storey.GetFlushFaucet();//有冲洗龙头
@@ -66,80 +179,28 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             MaxHouse = maxHouse;
             bool chaochu = false;
 
-            var ratio = new double[] { 1.0, 0.7, 0.6 };
-            var maxGap = new double[] { 350, 250, 200 };
-            for (int i = 0; i < 3; i++)
+            AutoValveRatio = 0.6;
+            BlockRatio = 0.7;
+            if (MaxHouse > 5)
             {
-                var r = ratio[i];
-                var mGap = maxGap[i];
-                var gapYDown1 = 30 + 150 * r;
-                var gapYDown2 = 180;
-                double gapY = 300 * r;//水表间距 * 缩放因子 为 最小间距
-                var dist1 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
-                var dist2 = (FloorHeight - 731 * (r - 0.1) - 300 * r - 200 - gapYDown2 - 100 * layingMethod) / (MaxHouse - 1);//较小值
-                if (r == 1.0 || r == 0.7)
-                {
-                    if (dist1 > gapY || dist2 > gapY)
-                    {
-                        AutoValveRatio = r - 0.1;
-                        BlockRatio = r;
-                        if (dist2 > mGap)
-                        {
-                            Dist = mGap;
-                            Flag = 2;
-                        }
-                        else
-                        {
-                            Dist = Math.Min(mGap, dist1);
-                            Flag = 1;
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        chaochu = true;
-                        dist1 = (FloorHeight + 100 - 731 * (r - 0.1) - 300 * r - 100 - gapYDown1 - 100 * layingMethod) / (MaxHouse - 1);//较大值
-                        Flag = 1;
-                        if (dist1 > gapY)
-                        {
-                            AutoValveRatio = r - 0.1;
-                            BlockRatio = r;
-                            Dist = dist1;
-                            break;
-                        }
-                    }
-                }
-                if (r == 0.6)
-                {
-                    if (dist1 < gapY)
-                    {
-                        chaochu = true;
-                        AutoValveRatio = 0.5;
-                        BlockRatio = 0.6;
-                        Dist = 180;
-                        Flag = 1;
-                        break;
-                    }
-                    AutoValveRatio = 0.5;
-                    BlockRatio = 0.6;
-                    if (dist1 > mGap)
-                    {
-                        Dist = mGap;
-                        Flag = 1;
-                    }
-                    else
-                    {
-                        Dist = dist1;
-                        Flag = 1;
-                    }
-                    break;
-                }
+                MinDist = 10;
             }
+            else if(MaxHouse > 3)
+            {
+                MinDist = 20;
+            }
+            else
+            {
+                MinDist = 30;
+            }
+            Dist = BlockRatio * BlockSize[2][0] + MinDist;
+            Flag = 1;
+
             if (layingMethod == 0)
             {
                 if (Households[AreaIndex] != 0 || HasFlushFaucet)
                 {
-                    InitChuanLiang(1.0 / 15, 0.1, chaochu);
+                    InitChuanLiang(1.0 / 15, 0.1);
                 }
             }
             else
@@ -151,33 +212,17 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             }
         }
 
-        public void InitChuanLiang(double gap2, double gapY2, bool chaochu)
+
+        public void InitChuanLiang(double gap2, double gapY2)
         {
-            var pt1Y = IndexStartY + FloorNumber * FloorHeight - AutoValveRatio * 731;
-            if (chaochu)
-            {
-                pt1Y += 80;
-            }
+            var pt1Y = IndexStartY + FloorNumber * FloorHeight - 512 - MinDist;
+
             var pt1 = new Point3d(PipeOffsetX, pt1Y, 0);
             var pt2 = pt1.OffsetX(400);
-            double offsetY = -100;
-
-            if (Flag == 1)
-            {
-                offsetY = -50;
-            }
-            var pt231 = pt2.OffsetY(offsetY);
-            Point3d pt232;
-            if (NoValve)
-            {
-                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[1][0]);
-            }
-            else
-            {
-                pt232 = pt231.OffsetY(-BlockRatio * BlockSize[0][0]);
-            }
-
-            double gapDown = 30 + 150 * BlockRatio;
+            var pt231 = pt2.OffsetY(-50);
+            var pt232 = pt231.OffsetY(-210);
+           
+            double gapDown = MinDist + 105;
 
             var h = (Households[AreaIndex] - 1) * Dist + gapDown + FloorHeight * (FloorNumber - 1) + IndexStartY;
             if (HasFlushFaucet)
@@ -185,19 +230,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 h += Dist;
             }
             var pt3 = new Point3d(pt2.X, h, 0);
-            TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
-            var pt371 = pt3.OffsetX(400);
-            var pt372 = pt371.OffsetX(BlockRatio * BlockSize[1][0]);
-            var pt373 = pt372.OffsetX(75);
-            var pt374 = pt373.OffsetX(BlockRatio * BlockSize[2][0]);
-            Point3d pt7;
-            Point3d pt11;
-            BranchPipes = new List<Line>();//支管列表
-            PRValveDetailSite = new Point3d(pt1.X - 5000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
-            WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
-            CheckValveSite = new List<Point3d>();//截止阀位置列表
-            WaterMeterSite = new List<Point3d>();//水表位置列表
-
             if (NoValve)
             {
                 PressureReducingValveSite = new Point3d(pt2.X, (pt231.Y + pt232.Y) / 2, 0);//无减压阀的截止阀位置
@@ -206,54 +238,62 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 PressureReducingValveSite = pt231;//减压阀位置
             }
+            TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
+
+            BranchPipes = new List<Line>();//支管列表
+            BranchPipes.Add(new Line(pt1, pt2));
+            
+            if(!PRValveStyle)
+            {
+                BranchPipes.Add(new Line(pt2, pt231));
+                BranchPipes.Add(new Line(pt232, pt3));
+            }
+
+            Point3d pt7;
+            Point3d pt11;
+            PRValveDetailSite = new Point3d(PipeOffsetX - 5000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
+            WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
+            CheckValveSite = new List<Point3d>();//截止阀位置列表
+            PRValveSite = new List<Point3d>();
+            WaterMeterSite = new List<Point3d>();//水表位置列表
 
             AutoExhaustValveSite = pt1;
-
-            BranchPipes.Add(new Line(pt1, pt2));
-            BranchPipes.Add(new Line(pt1, pt1.OffsetY(-200)));
-            BranchPipes.Add(new Line(pt2, pt231));
-            BranchPipes.Add(new Line(pt232, pt3));
+            
             if (Households[AreaIndex] != 0)
             {
+                var pt374 = BranchPts.Get(pt3, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
+
                 pt7 = pt374.OffsetX(300);
                 pt11 = new Point3d(pt7.X, IndexStartY + (FloorNumber - gapY2) * FloorHeight, 0);
                 var pt15 = pt11.OffsetX((Households[AreaIndex] - 1) * Dist + 300);
-                BranchPipes.Add(new Line(pt11, pt15));
-                WaterPipeInterrupted.Add(pt15);//第1个水管截断位置
 
-                BranchPipes.Add(new Line(pt3, pt371));
-                BranchPipes.Add(new Line(pt372, pt373));
                 BranchPipes.Add(new Line(pt374, pt7));
                 BranchPipes.Add(new Line(pt7, pt11));
-                CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置                      
-                WaterMeterSite.Add(new Point3d((pt373.X + pt374.X) / 2, pt3.Y, 0));//第一个水表位置
+                BranchPipes.Add(new Line(pt11, pt15));
+                WaterPipeInterrupted.Add(pt15);//第1个水管截断位置
 
                 for (int i = 1; i < Households[AreaIndex]; i++)
                 {
                     var pt4 = new Point3d(pt2.X, pt3.Y - i * Dist, 0);
-                    var pt481 = new Point3d(pt371.X, pt4.Y, 0);
-                    var pt482 = new Point3d(pt372.X, pt4.Y, 0);
-                    var pt483 = new Point3d(pt373.X, pt4.Y, 0);
-                    var pt484 = new Point3d(pt374.X, pt4.Y, 0);
-                    BranchPipes.Add(new Line(pt4, pt481));
-                    BranchPipes.Add(new Line(pt482, pt483));
-
-                    CheckValveSite.Add(new Point3d((pt481.X + pt482.X) / 2, pt4.Y, 0));//第i个截止阀位置
-                    WaterMeterSite.Add(new Point3d((pt483.X + pt484.X) / 2, pt4.Y, 0));//第i个水表位置
-
+                    var pt484 = BranchPts.Get(pt4, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
                     var pt8 = new Point3d(pt7.X + Dist * i, pt4.Y, 0);
                     var pt12 = new Point3d(pt8.X, pt11.Y - i * Dist, 0);
                     var pt16 = new Point3d(pt11.X + (Households[AreaIndex] - 1) * Dist + 300, pt12.Y, 0);
                     BranchPipes.Add(new Line(pt12, pt16));
                     WaterPipeInterrupted.Add(pt16);//第i个水管截断位置
 
-                    BranchPipes.Add(new Line(pt4, pt481));
-                    BranchPipes.Add(new Line(pt482, pt483));
                     BranchPipes.Add(new Line(pt484, pt8));
                     BranchPipes.Add(new Line(pt8, pt12));
                     if (i == Households[AreaIndex] - 1)
                     {
-                        BranchPipes.Add(new Line(pt3, pt4));
+                        if(PRValveStyle)
+                        {
+                            BranchPipes.Add(new Line(pt2, pt4));
+                        }
+                        else
+                        {
+                            BranchPipes.Add(new Line(pt3, pt4));
+                        }
                     }
                 }
             }
@@ -263,12 +303,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 double pt19Y = IndexStartY + (FloorNumber - 1) * FloorHeight + gapDown;
 
                 var pt19 = new Point3d(pt3.X, pt19Y, 0);
-                var pt19201 = new Point3d(pt371.X, pt19.Y, 0);
-                var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
-                var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
-                var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-
-                var pt20 = new Point3d(pt374.X + Dist * (Households[AreaIndex] - 1) + 900, pt19.Y, 0);
+                var pt19204 = BranchPts.Get(pt19, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
+                var pt20 = new Point3d(pt19204.X + Dist * (Households[AreaIndex] - 1) + 900, pt19.Y, 0);
 
                 double waterGap = 150;
                 if (BlockRatio == 0.6)
@@ -283,13 +319,11 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 var pt21 = new Point3d(pt20.X, pt21Y, 0);
 
                 BranchPipes.Add(new Line(pt3, pt19));
-                BranchPipes.Add(new Line(pt19, pt19201));
-                BranchPipes.Add(new Line(pt19202, pt19203));
+                
                 BranchPipes.Add(new Line(pt19204, pt20));
                 BranchPipes.Add(new Line(pt20, pt21));
 
-                CheckValveSite.Add(new Point3d((pt19201.X + pt19202.X) / 2, pt19201.Y, 0));//第五个截止阀位置
-                WaterMeterSite.Add(new Point3d((pt19203.X + pt19204.X) / 2, pt19203.Y, 0));//第五个水表位置
+                
                 VacuumBreakerSite = pt21;//真空破坏器位置
                 WaterTapSite = new Point3d(pt21.X, pt21.Y - waterGap, 0);//水龙头位置
             }
@@ -297,11 +331,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
 
         public void InitMaiDi(bool chaochu)
         {
-            var pt1Y = IndexStartY + FloorNumber * FloorHeight - AutoValveRatio * 731;
-            if (chaochu)
-            {
-                pt1Y += 80;
-            }
+            var pt1Y = IndexStartY + FloorNumber * FloorHeight - AutoValveRatio * 731 - MinDist;
+
             var pt1 = new Point3d(PipeOffsetX, pt1Y, 0);
             var pt2 = pt1.OffsetX(400);
             double offsetY = -100;
@@ -310,7 +341,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             {
                 offsetY = -50;
             }
-            var pt231 = pt2.OffsetY(offsetY);
+            var pt231 = pt2.OffsetY(-50);
             Point3d pt232;
             if (NoValve)
             {
@@ -327,10 +358,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             }
             var pt3 = new Point3d(pt2.X, h, 0);
             TextSite = new Point3d(pt3.X - BlockSize[0][1] / 2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight / 3, 0);//文字标注
-            var pt371 = pt3.OffsetX(400);
-            var pt372 = pt371.OffsetX(BlockRatio * BlockSize[1][0]);
-            var pt373 = pt372.OffsetX(75);
-            var pt374 = pt373.OffsetX(BlockRatio * BlockSize[2][0]);
             Point3d pt7;
             Point3d pt11;
             BranchPipes = new List<Line>();//支管列表
@@ -350,70 +377,59 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             AutoExhaustValveSite = pt1;
             BranchPipes.Add(new Line(pt1, pt1.OffsetY(-0.12 * FloorHeight)));
             BranchPipes.Add(new Line(pt1, pt2));
-            BranchPipes.Add(new Line(pt2, pt231));
+            if (!PRValveStyle)
+            {
+                BranchPipes.Add(new Line(pt2, pt231));
+                BranchPipes.Add(new Line(pt232, pt3));
+            }
 
             if (Households[AreaIndex] != 0)
             {
+                var pt374 = BranchPts.Get(pt3, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
 
                 pt7 = pt374.OffsetX(Dist * (Households[AreaIndex] - 1) + 300);
                 pt11 = new Point3d(pt7.X, IndexStartY + FloorHeight * (FloorNumber - 1) + 100, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
                 BranchPipes.Add(new Line(pt232, pt3));
-                BranchPipes.Add(new Line(pt3, pt371));
-                BranchPipes.Add(new Line(pt372, pt373));
                 BranchPipes.Add(new Line(pt374, pt7));
                 BranchPipes.Add(new Line(pt7, pt11));
-                CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置                      
-                WaterMeterSite.Add(new Point3d((pt373.X + pt374.X) / 2, pt3.Y, 0));//第一个水表位置
 
                 for (int i = 1; i < Households[AreaIndex]; i++)
                 {
                     var pt4 = new Point3d(pt2.X, pt3.Y - i * Dist, 0);
-                    var pt481 = new Point3d(pt371.X, pt4.Y, 0);
-                    var pt482 = new Point3d(pt372.X, pt4.Y, 0);
-                    var pt483 = new Point3d(pt373.X, pt4.Y, 0);
-                    var pt484 = new Point3d(pt374.X, pt4.Y, 0);
+                    var pt484 = BranchPts.Get(pt4, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
                     Point3d pt8;
                     Point3d pt12;
-                    BranchPipes.Add(new Line(pt4, pt481));
-                    BranchPipes.Add(new Line(pt482, pt483));
 
-                    CheckValveSite.Add(new Point3d((pt481.X + pt482.X) / 2, pt4.Y, 0));//第i个截止阀位置
-                    WaterMeterSite.Add(new Point3d((pt483.X + pt484.X) / 2, pt4.Y, 0));//第i个水表位置
 
                     pt8 = new Point3d(pt7.X - i * Dist, pt4.Y, 0);
                     pt12 = new Point3d(pt8.X, pt11.Y, 0);
                     WaterPipeInterrupted.Add(pt12);//第i个水管截断位置
-
-                    BranchPipes.Add(new Line(pt4, pt481));
-
-                    BranchPipes.Add(new Line(pt482, pt483));
 
                     BranchPipes.Add(new Line(pt484, pt8));
 
                     BranchPipes.Add(new Line(pt8, pt12));
                     if (i == Households[AreaIndex] - 1)
                     {
-                        BranchPipes.Add(new Line(pt3, pt4));
+                        if (PRValveStyle)
+                        {
+                            BranchPipes.Add(new Line(pt2, pt4));
+                        }
+                        else
+                        {
+                            BranchPipes.Add(new Line(pt3, pt4));
+                        }
                     }
                 }
             }
 
             if (HasFlushFaucet) //有冲洗龙头
             {
-
                 double pt19Y = pt3.Y + Dist;
 
                 var pt19 = new Point3d(pt3.X, pt19Y, 0);
-                var pt19201 = new Point3d(pt371.X, pt19.Y, 0);
-                var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
-                var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
-                var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-                Point3d pt20;
-
-
-                pt20 = new Point3d(pt19204.X + Dist * Households[AreaIndex] + 300, pt19.Y, 0);
-
+                var pt19204 = BranchPts.Get(pt19, BranchPipes, PRValveStyle, CheckValveSite, PRValveSite, WaterMeterSite);
+                var pt20 = new Point3d(pt19204.X + Dist * Households[AreaIndex] + 300, pt19.Y, 0);
                 var pt22 = pt20.OffsetY(100);
 
                 double pt21Y = pt20.Y - Convert.ToInt32(Households[AreaIndex] / 2) * Dist;
@@ -424,13 +440,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
                 var pt21 = new Point3d(pt20.X, pt21Y, 0);
 
                 BranchPipes.Add(new Line(pt232, pt19));
-                BranchPipes.Add(new Line(pt19, pt19201));
-                BranchPipes.Add(new Line(pt19202, pt19203));
                 BranchPipes.Add(new Line(pt19204, pt20));
                 BranchPipes.Add(new Line(pt22, pt21));
 
-                CheckValveSite.Add(new Point3d((pt19201.X + pt19202.X) / 2, pt19201.Y, 0));//第五个截止阀位置
-                WaterMeterSite.Add(new Point3d((pt19203.X + pt19204.X) / 2, pt19203.Y, 0));//第五个水表位置
                 VacuumBreakerSite = pt22;//真空破坏器位置
                 WaterTapSite = pt21;//水龙头位置
             }

@@ -23,6 +23,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
         public int[] Households { get; set; }//住户数
         public Point3d PressureReducingValveSite { get; set; } //减压阀位置
         public List<Point3d> CheckValveSite { get; set; } //截止阀位置
+        public List<Point3d> PRValveSite { get; set; } //减压阀位置
         public List<Point3d> WaterMeterSite { get; set; } //水表位置
         public List<Point3d> WaterPipeInterrupted { get; set; } //水管中断位置
         public Point3d AutoExhaustValveSite { get; set; } //自动排气阀位置
@@ -43,8 +44,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
         public double Dist { get; set; } //管间距
         public int Flag { get; set; } //距离1,2
         public int CaseType { get; set; } //半平台类型
+        public List<Point3d> FloorPts { get; set; }//沿楼板线敷设标注点
+        public bool PRValveStyle { get; set; }
 
-        public HalfBranchPipe(int index, string dn, SysIn sysIn, SysProcess sysProcess,int caseType)
+        public HalfBranchPipe(int index, string dn, SysIn sysIn, SysProcess sysProcess,int caseType, bool prValveStyle)
         {
             var storey = sysProcess.StoreyList[index];
             double indexStartY = sysIn.InsertPt.Y;
@@ -54,6 +57,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             int areaIndex = sysIn.AreaIndex;
             int maxHouse = sysProcess.MaxHouseholds;
             CaseType = caseType;
+            PRValveStyle = prValveStyle;
 
             DN = dn;//管径号
             FloorNumber = storey.GetFloorNumber();//楼层号
@@ -69,6 +73,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             AreaIndex = areaIndex;
             MaxHouse = maxHouse;
             BlockRatio = 0.7;
+            FloorPts = new List<Point3d>();
+
+            BranchPipes = new List<Line>();//支管列表
+            WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
+            CheckValveSite = new List<Point3d>();//截止阀位置列表
+            PRValveSite = new List<Point3d>();
+            WaterMeterSite = new List<Point3d>();//水表位置列表
         }
 
         public void DrawBranchPipe()
@@ -117,8 +128,12 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
 
         public void DrawLayMethodNote()
         {
-
-            if (LayingMethod == 0)
+            var layMethod = "穿梁敷设，接至户内给水管";
+            if(LayingMethod == 1)
+            {
+                layMethod = "埋地敷设，接至户内给水管";
+            }
+            if (CaseType != 3 && CaseType != 4)
             {
                 using var acadDatabase = AcadDatabase.Active();
                 for (int j = 0; j < WaterPipeInterrupted.Count; j++)
@@ -128,7 +143,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                     InsertLine(acadDatabase, pti1, pti2);
                 }
                 var pt1 = new Point3d(WaterPipeInterrupted[0].X - 150, WaterPipeInterrupted[WaterPipeInterrupted.Count - 1].Y, 0);
-                var pt2 = new Point3d(pt1.X, IndexStartY + FloorHeight * FloorNumber + 500, 0);
+                var pt2 = new Point3d(pt1.X, IndexStartY + FloorHeight * FloorNumber + 1100, 0);
                 var pt3 = new Point3d(pt2.X + 4100, pt2.Y, 0);
                 if (HasFlushFaucet)
                 {
@@ -145,7 +160,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                 var text1 = ThText.NoteText(pt2.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
 
-                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -400), "穿梁敷设，接至户内给水管");
+                var text2 = ThText.NoteText(pt2.OffsetXY(textX, -400), layMethod);
                 acadDatabase.CurrentSpace.Add(text2);
             }
             else
@@ -178,11 +193,36 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                 }
                 var text1 = ThText.NoteText(pt4.OffsetXY(textX, 50), "DNXX×X+DNXX×X (余同)");
                 acadDatabase.CurrentSpace.Add(text1);
-                var text2 = ThText.NoteText(pt4.OffsetXY(textX, -400), "埋地敷设，接至户内给水管");
+                var text2 = ThText.NoteText(pt4.OffsetXY(textX, -400), layMethod);
                 acadDatabase.CurrentSpace.Add(text2);
             }
         }
 
+        public void DrawStairCallout()
+        {
+            var stairs = new List<int>() { 1,2,3,4,9,10,11,12,13,14};
+            if (stairs.Contains(CaseType))
+            {
+                using (var acadDatabase = AcadDatabase.Active())
+                {
+                    var pt1 = FloorPts.First();
+                    var pt2 = FloorPts.Last();
+                    InsertLine(acadDatabase,pt1.OffsetXY(53, -53), pt1.OffsetXY(-53, 53));
+                    InsertLine(acadDatabase,pt2.OffsetXY(53, -53), pt2.OffsetXY(-53, 53));
+                    var pt3 = new Point3d(pt2.X, IndexStartY + FloorNumber * FloorHeight + 800, 0);
+                    InsertLine(acadDatabase,pt2, pt3);
+                    InsertLine(acadDatabase,pt3, pt3.OffsetX(3850));
+
+                    var text1 = ThText.NoteText(pt3.OffsetXY(50, 50), "DN25*2 墙体开槽/明敷(余同)");
+                    acadDatabase.CurrentSpace.Add(text1);
+
+                    var text2 = ThText.NoteText(pt3.OffsetXY(50, -350), "沿楼板斜线敷设");
+                    acadDatabase.CurrentSpace.Add(text2);
+                }
+                    
+
+            }
+        }
         public static void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2)
         {
             var line12 = new Line(pt1, pt2);
@@ -190,11 +230,16 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             line12.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(line12);
         }
-        public static void Draw(SysIn sysIn, SysProcess sysProcess)
+        public static void InsertLine(Point3d pt1, Point3d pt2)
         {
-            ;
-            
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var line12 = new Line(pt1, pt2);
+                line12.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+                line12.ColorIndex = (int)ColorIndex.BYLAYER;
+                acadDatabase.CurrentSpace.Add(line12);
+            }
+       
         }
-
     }
 }

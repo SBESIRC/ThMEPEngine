@@ -48,30 +48,14 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
         }
 
         //绘制楼层线
-        public List<Line> CreateLine(Point3d insertPt, double floorLength, List<int> highestStorey, Double[] PipeOffsetX)
+        public Line CreateLine(Point3d insertPt, double floorLength)
         {
             var pt1 = insertPt.OffsetY((FloorNumber - 1) * FloorHeight);
             var pt2 = insertPt.OffsetXY(floorLength, (FloorNumber - 1) * FloorHeight);
-            if (highestStorey.Contains(FloorNumber - 1))
-            {
-                var pt11 = new Point3d(PipeOffsetX[FloorNumber - 2] - 150, pt1.Y, 0);
-                var pt22 = new Point3d(PipeOffsetX[FloorNumber - 2] + 150, pt1.Y, 0);
-                var pt12 = pt11.OffsetY(100);
-                var pt21 = pt22.OffsetY(100);
-                var ls = new List<Line>();
-                ls.Add(new Line(pt1, pt11));
-                ls.Add(new Line(pt11, pt12));
-                ls.Add(new Line(pt12, pt21));
-                ls.Add(new Line(pt21, pt22));
-                ls.Add(new Line(pt22, pt2));
-
-                return ls;
-            }
-            else
-            {
-                var line1 = new Line(pt1, pt2);
-                return new List<Line>() { line1 };
-            }
+            var line = new Line(pt1, pt2);
+            line.LayerId = DbHelper.GetLayerId("W-NOTE");
+            line.ColorIndex = (int)ColorIndex.BYLAYER;
+            return line;
         }
 
         public List<Line> CreateHalfFloorLine(int floorNums, Point3d insertPt, double floorLength, List<int> highestStorey, Double[] PipeOffsetX)
@@ -82,68 +66,48 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var pt25 = pt2.OffsetY(FloorHeight * 0.5);//半楼层右边点
             var ls = new List<Line>();
 
-            //if (highestStorey.Contains(FloorNumber - 1))
-            //{
-            //    var pt11 = new Point3d(PipeOffsetX[FloorNumber - 2] - 150, pt1.Y, 0);
-            //    var pt22 = new Point3d(PipeOffsetX[FloorNumber - 2] + 150, pt1.Y, 0);
-                
-            //    var pt12 = pt11.OffsetY(100);
-            //    var pt21 = pt22.OffsetY(100);
-            //    ls.Add(new Line(pt1, pt11));
-            //    ls.Add(new Line(pt11, pt12));
-            //    ls.Add(new Line(pt12, pt21));
-            //    ls.Add(new Line(pt21, pt22));
-            //    ls.Add(new Line(pt22, pt2));
-            //}
-            //else
-            //{
-                ls.Add(new Line(pt1, pt2));
-            //}
-            if(FloorNumber <= floorNums)
+            ls.Add(new Line(pt1.OffsetX(15000), pt1.OffsetX(17400)));
+
+            if (FloorNumber <= floorNums)
             {
                 ls.Add(new Line(pt15, pt25));
             }
             return ls;
         }
 
-
-        public void DrawStorey(int i, SysIn sysIn, SysProcess sysProcess)
+        public void DrawStorey(int i, SysIn sysIn)
         {
             var insertPt = sysIn.InsertPt;
             var floorLength = sysIn.FloorLength;
-            var highestStorey = sysIn.HighestStorey;
-            var PipeOffsetX = sysProcess.PipeOffsetX;
             var floorNums = sysIn.FloorNumbers;
             var floorHeightDic = sysIn.FloorHeightDic;
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
-            var lines = CreateLine(insertPt, floorLength, highestStorey, PipeOffsetX);
-            foreach (var line1 in lines)
             {
-                line1.LayerId = DbHelper.GetLayerId("W-NOTE");
-                line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                acadDatabase.CurrentSpace.Add(line1);
-            }
+                var line = CreateLine(insertPt, floorLength);
+                acadDatabase.CurrentSpace.Add(line);
 
-            var textFirst = new DBText();
-            if (i < floorNums)
-            {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), Convert.ToString(i + 1) + "F");
-            }
-            else
-            {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), "RF");
-            }
-            textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
-            acadDatabase.CurrentSpace.Add(textFirst);
-            string height = "X.XX";
-            if (floorHeightDic.ContainsKey(Convert.ToString(i + 1)))
-            {
-                height = floorHeightDic[Convert.ToString(i + 1)];
-            }
+                var textFirst = new DBText();
+                if (i < floorNums)
+                {
+                    textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), Convert.ToString(i + 1) + "F");
+                }
+                else
+                {
+                    textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), "RF");
+                }
+                textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
+                acadDatabase.CurrentSpace.Add(textFirst);
+                string height = "X.XX";
+                if (floorHeightDic.ContainsKey(Convert.ToString(i + 1)))
+                {
+                    height = floorHeightDic[Convert.ToString(i + 1)];
+                }
 
-            var attNameValues = new Dictionary<string, string>() { { "标高", height } };
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                insertPt.OffsetY(i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
+                var attNameValues = new Dictionary<string, string>() { { "标高", height } };
+                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
+                    insertPt.OffsetY(i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
+            }
+            
         }
 
         public void DrawHalfFloorStorey(int i, SysIn sysIn, SysProcess sysProcess)
@@ -166,56 +130,45 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             var textFirst = new DBText();
             if (i < floorNums)
             {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), Convert.ToString(i + 1) + "F");
+                textFirst = ThText.NoteText(insertPt.OffsetXY(16500, i * FloorHeight + 100), Convert.ToString(i + 1) + "F");
             }
             else
             {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), "RF");
+                textFirst = ThText.NoteText(insertPt.OffsetXY(16500, i * FloorHeight + 100), "RF");
             }
             textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
             acadDatabase.CurrentSpace.Add(textFirst);
             string height = "X.XX";
+            string height2 = "X.XX";
+            double heightInt = 0.0;
             if (floorHeightDic.ContainsKey(Convert.ToString(i + 1)))
             {
                 height = floorHeightDic[Convert.ToString(i + 1)];
+                if (i == 0)
+                {
+                    heightInt = 0;
+                }
+                else
+                {
+                    heightInt = Convert.ToDouble(height);
+                }
+            }
+            if (floorHeightDic.ContainsKey(Convert.ToString(i + 2)))
+            {
+                height2 = floorHeightDic[Convert.ToString(i + 2)];
+                var height2Int = Convert.ToDouble(height2);
+                height2 = Convert.ToString((height2Int + heightInt) / 2.0);
             }
 
             var attNameValues = new Dictionary<string, string>() { { "标高", height } };
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                insertPt.OffsetY(i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
-        }
-        public void DrawStorey(int i, int floorNums, Point3d insertPt, double floorLength, List<int> highestStorey,
-            Double[] PipeOffsetX, Dictionary<string , string> floorHeightDic)
-        {
-            using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
-            var lines = CreateLine(insertPt, floorLength, highestStorey, PipeOffsetX);
-            foreach(var line1 in lines)
+                insertPt.OffsetXY(15000, i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
+            if (i < floorNums)
             {
-                line1.LayerId = DbHelper.GetLayerId("W-NOTE");
-                line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                acadDatabase.CurrentSpace.Add(line1);
+                var attNameValues2 = new Dictionary<string, string>() { { "标高", height2 } };
+                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
+                    insertPt.OffsetY((i + 0.5) * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues2);
             }
-            
-            var textFirst = new DBText();
-            if(i < floorNums)
-            {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), Convert.ToString(i + 1) + "F");
-            }
-            else
-            {
-                textFirst = ThText.NoteText(insertPt.OffsetXY(1500, i * FloorHeight + 100), "RF");
-            }
-            textFirst.ColorIndex = (int)ColorIndex.BYLAYER;
-            acadDatabase.CurrentSpace.Add(textFirst);
-            string height = "X.XX";
-            if(floorHeightDic.ContainsKey(Convert.ToString(i+1)))
-            {
-                height = floorHeightDic[Convert.ToString(i+1)];
-            }
-            
-            var attNameValues = new Dictionary<string, string>() { { "标高", height } };
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                insertPt.OffsetY(i * FloorHeight), new Scale3d(1, 1, 1), 0, attNameValues);
         }
     }
 }

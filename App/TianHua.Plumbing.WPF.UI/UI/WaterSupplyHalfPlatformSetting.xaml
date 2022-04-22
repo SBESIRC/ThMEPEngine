@@ -4,13 +4,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    Title="半平台参数设置"
-                    Width="200"
+                    Title="半平台参数设置" SizeToContent="Manual" Height="400"
+                    Width="200" MaxWidth="1000" MaxHeight="500" WindowStartupLocation="CenterScreen"
              mc:Ignorable="d" >
     <Grid Margin="2">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="310"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
 
         <!--半平台参数设置-->

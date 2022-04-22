@@ -8,8 +8,12 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.Diagram.ViewModel
 {
+    public enum WaterMeterLocation { SameFloor, HalfFloor }
+    public enum CommandTypeEnum { RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically }//directly, with splitters, without splitters
+
     public class WaterSupplySetVM : NotifyPropertyChangedBase
     {
+
         public WaterSupplySetVM()
         {
             FloorLineSpace = 1800;
@@ -18,14 +22,16 @@ namespace ThMEPWSS.Diagram.ViewModel
             MaxDayQuota = 250;
             MaxDayHourCoefficient = 2.5;
             NumberOfHouseholds = 3.5;
+            _MeterType = WaterMeterLocation.HalfFloor;
+            MeterType = WaterMeterLocation.HalfFloor;
 
             PartitionDatas = new ObservableCollection<PartitionData>();
-            var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1"};
-            foreach(var number in pipeNumber)
+            var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1" };
+            foreach (var number in pipeNumber)
             {
                 var partitionData = new PartitionData();
                 partitionData.RiserNumber = number;
-                if(number == "JGL")
+                if (number == "JGL")
                 {
                     partitionData.MinimumFloorNumber = "1";
                     partitionData.HighestFloorNumber = "1";
@@ -33,22 +39,53 @@ namespace ThMEPWSS.Diagram.ViewModel
                 PartitionDatas.Add(partitionData);
             }
 
+            PRValveStyleDynamicRadios = new ObservableCollection<DynamicRadioButton>();
+            PRValveStyleDynamicRadios.Add(new DynamicRadioButton() { Content = "一层一阀", GroupName = "type3", IsChecked = true });
+            PRValveStyleDynamicRadios.Add(new DynamicRadioButton() { Content = "一户一阀", GroupName = "type3", IsChecked = false });
+
             LayingDynamicRadios = new ObservableCollection<DynamicRadioButton>();
             LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
             LayingDynamicRadios.Add(new DynamicRadioButton() { Content = "埋地", GroupName = "type", IsChecked = false });
-            
-            WaterMeterDynamicRadios = new ObservableCollection<DynamicRadioButton>();
-            WaterMeterDynamicRadios.Add(new DynamicRadioButton() { Content = "同层", GroupName = "type3", IsChecked = false });
-            WaterMeterDynamicRadios.Add(new DynamicRadioButton() { Content = "半平台", GroupName = "type3", IsChecked = true });
 
 
             CleanToolDynamicRadios = new ObservableCollection<DynamicRadioButton>();
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "图纸", GroupName = "type2", IsChecked = true });
             CleanToolDynamicRadios.Add(new DynamicRadioButton() { Content = "缺省", GroupName = "type2", IsChecked = false });
 
-
-          
         }
+        private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
+        public CommandTypeEnum CommandType
+        {
+            get
+            { return _CommandType; }
+            set
+            {
+                _CommandType = value;
+                RaisePropertyChanged("CommandType");
+                RaisePropertyChanged("IsComputationParaSetupEnabled");
+            }
+        }
+
+        private WaterMeterLocation _MeterType = WaterMeterLocation.HalfFloor;
+        public WaterMeterLocation MeterType
+        {
+            get
+            { return _MeterType; }
+            set
+            {
+                _MeterType = value;
+                RaisePropertyChanged("MeterType");
+                RaisePropertyChanged("IsHalfFloor");
+            }
+        }
+        public bool IsHalfFloor
+        {
+            get
+            {
+                return MeterType == WaterMeterLocation.HalfFloor;
+            }
+        }
+
         private double floorLineSpace { get; set; }
         /// <summary>
         /// 楼层线间距
@@ -59,21 +96,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             set
             {
                 floorLineSpace = value;
-                this.RaisePropertyChanged();
-            }
-        }
-
-
-        private ObservableCollection<DynamicRadioButton> waterMeterDynamicRadios { get; set; }
-        /// <summary>
-        /// 水表位置数据列表
-        /// </summary>
-        public ObservableCollection<DynamicRadioButton> WaterMeterDynamicRadios
-        {
-            get { return waterMeterDynamicRadios; }
-            set
-            {
-                this.waterMeterDynamicRadios = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -174,6 +196,20 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        private ObservableCollection<DynamicRadioButton> pRValveStyleDynamicRadios { get; set; }
+        /// <summary>
+        /// 敷设方式数据列表
+        /// </summary>
+        public ObservableCollection<DynamicRadioButton> PRValveStyleDynamicRadios
+        {
+            get { return pRValveStyleDynamicRadios; }
+            set
+            {
+                this.pRValveStyleDynamicRadios = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         private ObservableCollection<DynamicRadioButton> layingDynamicRadios { get; set; }
         /// <summary>
         /// 敷设方式数据列表
@@ -259,8 +295,13 @@ namespace ThMEPWSS.Diagram.ViewModel
             cloned.MaxDayQuota = MaxDayQuota;
             cloned.MaxDayHourCoefficient = MaxDayHourCoefficient;
             cloned.NumberOfHouseholds = NumberOfHouseholds;
+            cloned.MeterType = MeterType;
 
-            cloned.PartitionDatas.Clear();
+            cloned.PartitionDatas?.Clear();
+            if(PartitionDatas is null)
+            {
+                return cloned;
+            }
             foreach(var pd in PartitionDatas)
             {
                 cloned.PartitionDatas.Add(pd.Clone());

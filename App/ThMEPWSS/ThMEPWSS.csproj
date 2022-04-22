@@ -379,7 +379,9 @@
     <Compile Include="WaterSupplyPipeSystem\Data\SysIn.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysProcess.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case1.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseAll.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseChoose.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CasePara.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfBranchPipe.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case10.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case11.cs" />
@@ -396,6 +398,8 @@
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case9.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfFloor.cs" />
     <Compile Include="WaterSupplyPipeSystem\Method\Tool.cs" />
+    <Compile Include="WaterSupplyPipeSystem\tool\BranchPipeDeal.cs" />
+    <Compile Include="WaterSupplyPipeSystem\tool\BranchPts.cs" />
     <Compile Include="WaterSupplyPipeSystem\ViewModel\HalfPlatformSetVM.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWithdrawalFormCmd.cs" />

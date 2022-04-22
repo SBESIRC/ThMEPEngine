@@ -353,7 +353,8 @@ namespace ThMEPWSS.Command
                 MessageBox.Show("不存在有效分组，请重新读取");
                 return;
             }
-            var isHalfFloor = tmpUiConfigs.SetViewModel.WaterMeterDynamicRadios[1].IsChecked;//布置方式
+            var isHalfFloor = tmpUiConfigs.SetViewModel.MeterType.Equals(WaterMeterLocation.HalfFloor);//布置方式
+            var prValveStyle = tmpUiConfigs.SetViewModel.PRValveStyleDynamicRadios[1].IsChecked;//true表示一户一阀
             using (Active.Document.LockDocument())//非模态框不能直接操作CAD，需要加锁
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -387,7 +388,7 @@ namespace ThMEPWSS.Command
                         sysProcess.StoreyList[i].DrawHalfFloorStorey(i, sysIn, sysProcess);
                     }
 
-                    halfFloor.Draw(sysIn, sysProcess);
+                    halfFloor.Draw(sysIn, sysProcess, prValveStyle);
                 }
                 else//绘制同层布置
                 {
@@ -405,7 +406,7 @@ namespace ThMEPWSS.Command
                     //楼层线绘制
                     for (int i = 0; i < sysIn.FloorNumbers + 1; i++)
                     {
-                        sysProcess.StoreyList[i].DrawStorey(i, sysIn, sysProcess);
+                        sysProcess.StoreyList[i].DrawStorey(i, sysIn);
                     }
 
                     //创建支管对象
@@ -419,7 +420,7 @@ namespace ThMEPWSS.Command
 
                         var DN = Tool.GetDN(U0i, Ngi, HouseholdNum);
 
-                        BranchPipe.Add(new ThWSSDBranchPipe(i, DN, sysIn, sysProcess));
+                        BranchPipe.Add(new ThWSSDBranchPipe(i, DN, sysIn, sysProcess, prValveStyle));
                     }
                     //支管绘制
                     for (int i = 0; i < BranchPipe.Count; i++)
@@ -436,7 +437,7 @@ namespace ThMEPWSS.Command
                     {
                         if (sysIn.PipeFloorList.Contains(i + 1))
                         {
-                            Details.Add(i, acadDatabase, BranchPipe, ref layFlag, ref elevateFlag, sysIn, sysProcess);
+                            Details.Add(i, acadDatabase, BranchPipe, ref layFlag, ref elevateFlag, sysIn, sysProcess, prValveStyle);
                         }
                     }
                 }

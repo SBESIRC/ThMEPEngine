@@ -73,7 +73,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             return ValidCodeDic.ContainsKey(CaseCode);
 
         }
-        public void Draw(SysIn sysIn, SysProcess sysProcess)
+        public void Draw(SysIn sysIn, SysProcess sysProcess, bool prValveStyle)
         {
             int halfType = ValidCodeDic[CaseCode];
             //创建支管对象
@@ -87,7 +87,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
 
                 var DN = Tool.GetDN(U0i, Ngi, HouseholdNum);
 
-                var halfBranchPipe = new HalfBranchPipe(i, DN, sysIn, sysProcess, halfType);
+                var halfBranchPipe = new HalfBranchPipe(i, DN, sysIn, sysProcess, halfType, prValveStyle);
                 if(i <= 1)//前两层
                 {
                     var firstFloor = (i==0);//第一层
@@ -121,13 +121,9 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
             {
                 if (sysIn.PipeFloorList.Contains(i + 1))
                 {
-                    Details.Add(i, BranchPipe, ref layFlag, ref elevateFlag, sysIn, sysProcess);
+                    Details.Add(i, halfType, BranchPipe, ref layFlag, ref elevateFlag, sysIn, sysProcess, prValveStyle);
                 }
             }
-
-
-            HalfBranchPipe.Draw(sysIn, sysProcess);
-            return;
         }
     }
 }
