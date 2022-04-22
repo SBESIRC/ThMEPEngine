@@ -2351,7 +2351,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                         Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                        breaker = mbb.Breaker;
+                                        if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
+                                        {
+                                            breaker = regularCircuit.breaker;
+                                        }
+                                        else
+                                        {
+                                            throw new NotSupportedException();
+                                        }
                                         var blkVm = new ThPDSBlockViewModel();
                                         Project.Module.Component.ThPDSBreakerModel vm;
                                         void UpdateBreakerViewModel()
