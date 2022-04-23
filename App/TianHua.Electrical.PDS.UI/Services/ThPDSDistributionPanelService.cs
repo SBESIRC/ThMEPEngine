@@ -17,8 +17,10 @@ using TianHua.Electrical.PDS.UI.Helpers;
 using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
+using TianHua.Electrical.PDS.UI.Project.Module;
+using TianHua.Electrical.PDS.UI.Project.Module.Component;
 using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
     public class ThPDSVertex
@@ -2859,7 +2861,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var _sc = kv.Key;
                     if (visitedSecondaryCircuits.Contains(_sc)) continue;
                     visitedSecondaryCircuits.Add(_sc);
-                    var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(_sc);
+                    var scVm = new Project.Module.ThPDSSecondaryCircuitModel(_sc);
+                    scVm.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
+                        {
+                            if (!scVm.ConductorModel.IsCustom)
+                            {
+                                scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
+                            }
+                        }
+                    };
                     var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
                     if (_edges.Count == 0) continue;
                     var scs = new HashSet<SecondaryCircuit>() { _sc };
@@ -3017,7 +3029,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             if (conductor != null)
                                             {
-                                                var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
+                                                var vm = scVm.ConductorModel;
                                                 var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                                 m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                 var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);

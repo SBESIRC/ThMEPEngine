@@ -4,6 +4,7 @@ using TianHua.Electrical.PDS.Project.Module;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
+using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module
 {
@@ -13,9 +14,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module
     public class ThPDSSecondaryCircuitModel : NotifyPropertyChangedBase
     {
         private readonly SecondaryCircuit _sc;
+        private readonly ThPDSConductorModel _conductorModel;
         public ThPDSSecondaryCircuitModel(SecondaryCircuit sc)
         {
             _sc = sc;
+            _conductorModel = new ThPDSConductorModel(_sc.Conductor);
         }
 
         [ReadOnly(true)]
@@ -42,5 +45,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module
         [ReadOnly(true)]
         [Browsable(false)]
         public List<string> Descriptions => _sc.GetDescriptions();
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public ThPDSConductorModel ConductorModel => _conductorModel;
     }
 }

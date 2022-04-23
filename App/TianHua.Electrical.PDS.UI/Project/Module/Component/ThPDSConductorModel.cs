@@ -150,5 +150,9 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         public ComponentType ComponentType => _conductor.ComponentType;
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsCustom => _conductor.IsCustom;
     }
 }
