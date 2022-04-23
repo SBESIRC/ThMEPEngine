@@ -41,12 +41,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             foreach (var route in cRoutes)
             {
                 var routeLine = route.route;
-                var lastPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 1);
-                var secPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 2);
+                var lastPt = routeLine.GetPoint3dAt(0);
+                var secPt = routeLine.GetPoint3dAt(1);
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
-                var sPt = lastPt + dir * startDis + moveDir * moveDis;
-                layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -dir));
+                var sPt = lastPt + dir * startDis;// + moveDir * moveDis;
+                layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -moveDir));
             }
 
             return layoutInfo;

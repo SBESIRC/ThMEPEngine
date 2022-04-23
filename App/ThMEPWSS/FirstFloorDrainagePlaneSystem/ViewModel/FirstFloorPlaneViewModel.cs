@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,18 +30,42 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
         /// <summary>
         /// 污废水(合流\分流)
         /// </summary>
-        DirvepipeDimensionTypeEnum _dirvepipeDimensionType;
-        public DirvepipeDimensionTypeEnum DirvepipeDimensionType
+        private UListItemData _dirvepipeDimensionType { get; set; }
+        public UListItemData DirvepipeDimensionType
         {
-            get
-            {
-                return _dirvepipeDimensionType;
-            }
+            get { return _dirvepipeDimensionType; }
             set
             {
                 _dirvepipeDimensionType = value;
-                OnPropertyChanged(nameof(DirvepipeDimensionType));
+                this.RaisePropertyChanged();
             }
+        }
+
+        private ObservableCollection<UListItemData> _dirvepipeDimensionList = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> DrvepipeDimensionList
+        {
+            get { return _dirvepipeDimensionList; }
+            set
+            {
+                _dirvepipeDimensionList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public FirstFloorPlaneViewModel()
+        {
+            SetDirvepipeDimensionType();
+        }
+
+        private void SetDirvepipeDimensionType()
+        {
+            DrvepipeDimensionList.Add(new UListItemData("普通钢套管", 0, DirvepipeDimensionTypeEnum.OrdinarySteel));
+            DrvepipeDimensionList.Add(new UListItemData("B型钢防水套管", 1, DirvepipeDimensionTypeEnum.BSteelWaterproof));
+            DrvepipeDimensionList.Add(new UListItemData("A型柔性防水套管", 2, DirvepipeDimensionTypeEnum.AFlexibleWaterproof));
+            DrvepipeDimensionList.Add(new UListItemData("A型防护密闭套管", 3, DirvepipeDimensionTypeEnum.AProtectiveSealing));
+            DrvepipeDimensionList.Add(new UListItemData("C型防护密闭套管", 4, DirvepipeDimensionTypeEnum.CProtectiveSealing));
+            DrvepipeDimensionList.Add(new UListItemData("E型防护密闭套管", 5, DirvepipeDimensionTypeEnum.EProtectiveSealing));
+            DirvepipeDimensionType = DrvepipeDimensionList[0];
         }
     }
 

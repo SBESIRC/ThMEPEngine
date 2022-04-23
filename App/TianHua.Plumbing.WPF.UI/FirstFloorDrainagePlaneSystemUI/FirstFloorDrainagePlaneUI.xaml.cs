@@ -39,7 +39,7 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
         private void btnPipeLine_Click(object sender, RoutedEventArgs e)
         {
             var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config, ParameterSetUI.paramSetting); 
+            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config, ParameterSetUI.paramSetting, firstFloorPlaneViewModel); 
             drainageCmd.Execute();
         }
 

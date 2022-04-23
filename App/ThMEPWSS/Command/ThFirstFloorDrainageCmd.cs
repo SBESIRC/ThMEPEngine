@@ -27,11 +27,12 @@ namespace ThMEPWSS.Command
     {
         Dictionary<string, List<string>> config;
         ParamSettingViewModel paramSetting = null;
-
-        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting)
+        FirstFloorPlaneViewModel firstFloorPlane = null;
+        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting, FirstFloorPlaneViewModel _firstFloorPlane)
         {
             config = dic;
             paramSetting = _paramSetting;
+            firstFloorPlane = _firstFloorPlane;
         }
 
         public void Execute()
@@ -77,6 +78,10 @@ namespace ThMEPWSS.Command
                         //标注管径
                         PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes);
                         pipeDiameterMarkingService.CreateDim();
+
+                        //套管标注
+                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane);
+                        drivepipeDimensionService.CreateDim();
 
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
                         PrintPipes.Print(otherPipes);

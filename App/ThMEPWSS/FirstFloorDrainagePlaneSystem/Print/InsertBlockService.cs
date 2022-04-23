@@ -13,7 +13,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
 {
     public static class InsertBlockService
     {
-        public static double scaleNum = 100;
+        public static double scaleNum = 1;
         public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPts, string layerName, string blockName)
         {
             using (var db = AcadDatabase.Active())
@@ -62,6 +62,34 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                     poly.Layer = layerName;
                     poly.ColorIndex = 256;
                     acadDatabase.ModelSpace.Add(poly);
+                }
+            }
+        }
+
+        public static void InsertText(List<DBText> txts, string layerName, string lineType, bool needImport = true)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                if (needImport)
+                {
+                    acadDatabase.Layers.Import(
+                       blockDb.Layers.ElementOrDefault(layerName), false);
+                    if (lineType != null)
+                    {
+                        acadDatabase.Linetypes.Import(
+                        blockDb.Linetypes.ElementOrDefault(lineType), false);
+                    }
+                }
+                foreach (var txt in txts)
+                {
+                    if (lineType != null)
+                    {
+                        txt.Linetype = lineType;
+                    }
+                    txt.Layer = layerName;
+                    txt.ColorIndex = 256;
+                    acadDatabase.ModelSpace.Add(txt);
                 }
             }
         }
