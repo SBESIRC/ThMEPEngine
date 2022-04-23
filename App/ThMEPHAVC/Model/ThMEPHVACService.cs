@@ -37,6 +37,10 @@ namespace ThMEPHVAC.Model
         }
         public static void GetWidthAndHeight(string size, out double width, out double height)
         {
+            width = 0;
+            height = 0;
+            if (String.IsNullOrEmpty(size))
+                return;
             string[] s = size.Split('x');
             if (s.Length != 2)
                 throw new NotImplementedException("Duct size info doesn't contain width or height");

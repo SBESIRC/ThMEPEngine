@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Linq2Acad;
+using DotNetARX;
 using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
@@ -18,9 +19,9 @@ namespace TianHua.Hvac.UI.Command
         private ThDuctPortsDrawService service;
         private Dictionary<Polyline, ObjectId> allFansDic;
         public ThHvacDuctPortsCmd() { }
-        public ThHvacDuctPortsCmd(string curDbPath, PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic, ThDuctPortsDrawService service)
+        public ThHvacDuctPortsCmd(string curDbPath, PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic)
         {
-            this.service = service;
+            service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             this.curDbPath = curDbPath;
             this.portParam = portParam;
             this.allFansDic = allFansDic;
@@ -30,14 +31,14 @@ namespace TianHua.Hvac.UI.Command
         {
 
         }
-        public void Execute(ref ulong gId)
+        public void Execute(ref ulong gId, ObjectIdList brokenLineIds)
         {
             if (portParam.centerLines.Count == 0)
             {
                 ThMEPHVACService.PromptMsg("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点!!!");
                 return;
             }
-            var excludeLines = GetExcludeLine();
+            var excludeLines = GetExcludeLine(brokenLineIds);
             var anayRes = new ThDuctPortsAnalysis(portParam, excludeLines, allFansDic);
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);
             anayRes.CreatePortDuctGeo();// 获得风口位置后再调用(同时获得管段间变径)
@@ -45,11 +46,13 @@ namespace TianHua.Hvac.UI.Command
             var painter = new ThDuctPortsDraw(portParam, curDbPath, service);
             painter.Draw(anayRes, ref gId);
         }
-        private DBObjectCollection GetExcludeLine()
+        private DBObjectCollection GetExcludeLine(ObjectIdList brokenLineIds)
         {
             if (portParam.genStyle == GenerationStyle.Auto)
             {
-                GetExcludeLine("请选择不布置风口的线", out DBObjectCollection excludeLines);
+                var excludeIds = new HashSet<ObjectId>();
+                brokenLineIds.ForEach(id => excludeIds.Add(id));
+                GetExcludeLine("请选择不布置风口的线", excludeIds, out DBObjectCollection excludeLines);
                 if (excludeLines.Count >= portParam.centerLines.Count)
                 {
                     ThMEPHVACService.PromptMsg("没有选择要布置风口的管段");
@@ -60,7 +63,7 @@ namespace TianHua.Hvac.UI.Command
             }
             return new DBObjectCollection();
         }
-        private void GetExcludeLine(string prompt, out DBObjectCollection excludeLine)
+        private void GetExcludeLine(string prompt, HashSet<ObjectId> excludeIds, out DBObjectCollection excludeLine)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -75,7 +78,9 @@ namespace TianHua.Hvac.UI.Command
                 if (result.Status == PromptStatus.OK)
                 {
                     var objIds = result.Value.GetObjectIds();
-                    excludeLine = objIds.Cast<ObjectId>().Select(o => o.GetDBObject().Clone() as Line).Where(o => o != null).ToCollection();
+                    excludeLine = objIds.Cast<ObjectId>().Where(o => excludeIds.Contains(o))
+                                                         .Select(o => o.GetDBObject().Clone() as Line)
+                                                         .Where(o => o != null).ToCollection();
                 }
             }
         }
