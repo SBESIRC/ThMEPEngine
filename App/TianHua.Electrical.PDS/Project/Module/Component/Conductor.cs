@@ -65,12 +65,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
 
         private void ChooseMaterial(string conductorType)
         {
-            var config = PDSProject.Instance.projectGlobalConfiguration;
             if (string.IsNullOrWhiteSpace(conductorType))
             {
                 IsBAControl = true;
+                return;
             }
-            else if (conductorType == "消防配电控制电缆")
+            var config = PDSProject.Instance.projectGlobalConfiguration;
+            if (conductorType == "消防配电控制电缆")
             {
                 this.ConductorUse = config.FireDistributionControlCable;
                 IsWire =false;
@@ -434,7 +435,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             if (viaConduit)
             {
-                if (ConductorUse.IsSpecialConductorType)
+                if (!ConductorUse.IsNull() && ConductorUse.IsSpecialConductorType)
                 {
                     this.PipeDiameter = 0;
                     Pipelaying = Pipelaying.E;
