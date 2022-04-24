@@ -65,6 +65,7 @@ namespace ThParkingStall.Core.InterProcess
                     MCompute.Logger?.Information("----------------------------------");
                     MCompute.Logger?.Information(ex.StackTrace);
                     MCompute.Logger?.Information("##################################");
+                    MPGAData.Save();
                 }
                 Count= mParkingPartitionPro.CarSpots.Count;
                 SubAreaParkingCnt.UpdateParkingNumber(this, Count);

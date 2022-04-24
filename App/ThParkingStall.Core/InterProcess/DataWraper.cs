@@ -59,6 +59,7 @@ namespace ThParkingStall.Core.InterProcess
         public int IterationCount = -1;
 
         #endregion
+        public Chromosome chromosome;
     }
 
     public class ProgramDebug

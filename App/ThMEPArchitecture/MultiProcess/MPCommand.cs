@@ -49,7 +49,7 @@ namespace ThMEPArchitecture.MultiProcess
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
-        public ThMPArrangementCmd()
+        public ThMPArrangementCmd()//debug 读取基因直排
         {
             CommandName = "-THDJCCWBZ";
             ActionName = "生成";
@@ -74,26 +74,39 @@ namespace ThMEPArchitecture.MultiProcess
             Utils.SetSeed();
             try
             {
-                if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
+                if(_CommandMode == CommandMode.WithoutUI)
                 {
                     Logger?.Information($"############################################");
-                    Logger?.Information($"无迭代速排");
-                    Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                    Logger?.Information($"DEbug速排");
                     using (var docLock = Active.Document.LockDocument())
                     using (AcadDatabase currentDb = AcadDatabase.Active())
                     {
-                        RunDirect(currentDb);
+                        RunDebug(currentDb);
                     }
                 }
                 else
                 {
-                    Logger?.Information($"############################################");
-                    Logger?.Information($"多线程迭代");
-                    Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                    using (var docLock = Active.Document.LockDocument())
-                    using (AcadDatabase currentDb = AcadDatabase.Active())
+                    if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                     {
-                        Run(currentDb);
+                        Logger?.Information($"############################################");
+                        Logger?.Information($"无迭代速排");
+                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                        using (var docLock = Active.Document.LockDocument())
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        {
+                            RunDirect(currentDb);
+                        }
+                    }
+                    else
+                    {
+                        Logger?.Information($"############################################");
+                        Logger?.Information($"多线程迭代");
+                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                        using (var docLock = Active.Document.LockDocument())
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        {
+                            Run(currentDb);
+                        }
                     }
                 }
             }
@@ -112,6 +125,26 @@ namespace ThMEPArchitecture.MultiProcess
             Active.Editor.WriteMessage($"总运行时间: {_stopwatch.Elapsed.TotalSeconds}秒 \n");
             Logger?.Information($"总运行时间: {_stopwatch.Elapsed.TotalSeconds}秒 \n");
             base.AfterExecute();
+        }
+
+        public void RunDebug(AcadDatabase acadDatabase)
+        {
+            MPGAData.Load();
+            var dataWraper = MPGAData.dataWraper;
+            var chromosome = MPGAData.dataWraper.chromosome;
+            VMStock.Init(dataWraper);
+            InterParameter.Init(dataWraper);
+            InterParameter.MultiThread = false;
+            var subAreas = InterParameter.GetSubAreas(chromosome);
+            for (int i = 0; i < subAreas.Count; i++)
+            {
+                var subArea = subAreas[i];
+                subArea.Display("MPDebug");
+            }
+            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+            CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
         }
         public void RunDirect(AcadDatabase acadDatabase)
         {

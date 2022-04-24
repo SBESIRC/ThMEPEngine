@@ -31,6 +31,7 @@ namespace ThParkingStall.Core
                 MCompute.Logger?.Information("----------------------------------");
                 MCompute.Logger?.Information(ex.StackTrace);
                 MCompute.Logger?.Information("##################################");
+                MPGAData.Save();
             }
         }
         static void Run(string[] ProcessInfo)
@@ -38,18 +39,18 @@ namespace ThParkingStall.Core
             var ProcessCount = Int32.Parse(ProcessInfo[0]);
             var ProcessIndex = Int32.Parse(ProcessInfo[1]);
             var IterationCount = Int32.Parse(ProcessInfo[2]);
-            var UseLogger = ProcessInfo[3] == "1";//是否输出logger文件
+            var LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
             var MultiThread = ProcessInfo[4] == "1";// 是否使用进程内多线程
             InterParameter.MultiThread = MultiThread;
-            if (UseLogger)
+            string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
+            MCompute.Logger = new Serilog.LoggerConfiguration().WriteTo
+                                .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+            if (LogAllInfo)
             {
-                string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
-                MCompute.Logger = new Serilog.LoggerConfiguration().WriteTo
-                                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                MCompute.Logger?.Information("#####################################");
+                MCompute.Logger?.Information("子进程启动");
+                MCompute.Logger?.Information("使用多线程：" + MultiThread.ToString());
             }
-            MCompute.Logger?.Information("#####################################");
-            MCompute.Logger?.Information("子进程启动");
-            MCompute.Logger?.Information("使用多线程：" + MultiThread.ToString());
             using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("DataWraper"))
             {
                 using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
@@ -58,14 +59,15 @@ namespace ThParkingStall.Core
                     var dataWraper = (DataWraper)formatter.Deserialize(stream);
                     VMStock.Init(dataWraper);
                     InterParameter.Init(dataWraper);
+                    MPGAData.dataWraper = dataWraper;
                 }
             }
-            MCompute.Logger?.Information("初始化完成\n");
+            if (LogAllInfo) MCompute.Logger?.Information("初始化完成\n");
             for (int iter = 0; iter < IterationCount; iter++)
             {
                 var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
                 StartSignal.WaitOne();
-                MCompute.Logger?.Information("第" + (iter+1).ToString() + "代开始：");
+                if (LogAllInfo) MCompute.Logger?.Information("第" + (iter+1).ToString() + "代开始：");
                 ChromosomeCollection chromosomeCollection;
                 using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("ChromosomeCollection"))//读取
                 {
@@ -76,7 +78,7 @@ namespace ThParkingStall.Core
                         SubAreaParkingCnt.Update(chromosomeCollection);
                     }
                 }
-                MCompute.Logger?.Information("读取完成");
+                if (LogAllInfo) MCompute.Logger?.Information("读取完成");
                 var ParkingCnts = new List<int>();
                 var Chromosomes = chromosomeCollection.Chromosomes;
                 for (int i = 0; i < Chromosomes.Count / ProcessCount; i++)//计算
@@ -84,6 +86,7 @@ namespace ThParkingStall.Core
                     int j = i * ProcessCount + ProcessIndex;
                     if (j >= Chromosomes.Count) break;
                     var chromosome = Chromosomes[j];
+                    MPGAData.Set( chromosome);
                     var subAreas = InterParameter.GetSubAreas(chromosome);
                     //Logger?.Information($"区域分割用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                     //t_pre = stopWatch.Elapsed.TotalSeconds;
@@ -94,7 +97,7 @@ namespace ThParkingStall.Core
                     //t_pre = stopWatch.Elapsed.TotalSeconds;
                     ParkingCnts.Add(ParkingCount);
                 }
-                MCompute.Logger?.Information("计算完成");
+                if (LogAllInfo) MCompute.Logger?.Information("计算完成");
                 using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("CachedPartitionCnt" + ProcessIndex.ToString()))
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
@@ -104,12 +107,12 @@ namespace ThParkingStall.Core
                         formatter.Serialize(stream, (ParkingCnts, newCatched.Item1, newCatched.Item2));
                     }
                 }
-                MCompute.Logger?.Information("输出完成\n");
+                if (LogAllInfo) MCompute.Logger?.Information("输出完成\n");
                 SubAreaParkingCnt.ClearNewAdded();
                 
                 StartSignal.ReleaseMutex();//发出信号确认完成
             }
-            MCompute.Logger?.Information("子进程退出");
+            if (LogAllInfo) MCompute.Logger?.Information("子进程退出");
         }
         static int YMain(string[] parameter)
         {

@@ -450,13 +450,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
             }
         }
-        private Process CreateSubProcess(int idx,string ShowLogger = "1", string UseMultiThread = "0")
+        private Process CreateSubProcess(int idx,string LogAllInfo = "0", string UseMultiThread = "0")
         {
             var proc = new Process();
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             proc.StartInfo.FileName = System.IO.Path.Combine(currentDllPath, "ThParkingStall.Core.exe");
             proc.StartInfo.Arguments =  ProcessCount.ToString() +' '+ idx.ToString() + ' '+
-                IterationCount.ToString() + ' ' + ShowLogger + ' '+ UseMultiThread;
+                IterationCount.ToString() + ' ' + LogAllInfo + ' '+ UseMultiThread;
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.UseShellExecute = false;
             //proc.StartInfo.RedirectStandardOutput = true;

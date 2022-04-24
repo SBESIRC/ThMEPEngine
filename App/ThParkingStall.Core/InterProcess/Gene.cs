@@ -5,6 +5,12 @@ using System.Diagnostics;
 using NetTopologySuite.Geometries;
 using System.Globalization;
 using ThParkingStall.Core.Tools;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using ThParkingStall.Core.MPartitionLayout;
+using System.Runtime.Serialization;
+using System.Reflection;
+
 namespace ThParkingStall.Core.InterProcess
 {
     [Serializable]
@@ -259,4 +265,75 @@ namespace ThParkingStall.Core.InterProcess
             _newcachedPartitionCnt.Clear();
         }
     }
+
+    public static class MPGAData
+    {
+        public static DataWraper dataWraper;
+        public static void Set(Chromosome chromosome)
+        {
+            dataWraper.chromosome = chromosome;
+        }
+        public static void Save(string fileName = "MPGAData.dat")
+        {
+            var path = Path.Combine(System.IO.Path.GetTempPath(), fileName);
+            // Gain code access to the file that we are going
+            // to write to
+            try
+            {
+                // Create a FileStream that will write data to file.
+                using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream,  dataWraper);
+                }
+            }
+            catch (Exception ex)
+            {
+                MCompute.Logger?.Information(ex.Message);
+                MCompute.Logger?.Information("----------------------------------");
+                MCompute.Logger?.Information(ex.StackTrace);
+                MCompute.Logger?.Information("##################################");
+            }
+        }
+        public static void Load(string fileName = "MPGAData.dat")
+        {
+            // Check if we had previously Save information of our friends
+            // previously
+            var path = Path.Combine(System.IO.Path.GetTempPath(), fileName);
+
+            // Create a FileStream will gain read access to the
+            // data file.
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            {
+                var formatter = new BinaryFormatter
+                {
+                    Binder = new AllowAllAssemblyVersionsDeserializationBinder()
+                };
+                dataWraper = ( DataWraper)formatter.Deserialize(stream);
+            }
+
+        }
+    }
+
+    sealed class AllowAllAssemblyVersionsDeserializationBinder : SerializationBinder
+    {
+        public override Type BindToType(string assemblyName, string typeName)
+        {
+            if (assemblyName.Contains("ThParkingStall.Core"))
+            {
+                String currentAssembly = System.Reflection.Assembly.GetExecutingAssembly().FullName;
+
+                // In this case we are always using the current assembly
+                assemblyName = currentAssembly;
+            }
+            Type typeToDeserialize = null;
+
+            // Get the type using the typeName and assemblyName
+            typeToDeserialize = Type.GetType(String.Format("{0}, {1}",
+                typeName, assemblyName));
+
+            return typeToDeserialize;
+        }
+    }
 }
+
