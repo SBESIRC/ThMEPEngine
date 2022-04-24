@@ -1428,7 +1428,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         void reg(CPS cps, string templateStr)
                                                         {
-                                                            var vm = new Project.Module.Component.ThPDSCPSModel(cps);
+                                                            var vm = new ThPDSCPSModel(cps);
+                                                            vm.PropertyChanged += (s, e) =>
+                                                            {
+                                                                if (e.PropertyName == nameof(ThPDSCPSModel.RatedCurrent))
+                                                                {
+                                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                                }
+                                                            };
                                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                             if (m != null && vm != null)
                                                             {
