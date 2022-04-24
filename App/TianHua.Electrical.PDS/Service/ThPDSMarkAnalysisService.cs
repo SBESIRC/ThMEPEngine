@@ -235,7 +235,6 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        searchedString.Add(str);
                         var check = "";
                         if (str.Contains("-W"))
                         {
@@ -254,6 +253,7 @@ namespace TianHua.Electrical.PDS.Service
                         var m = r.Match(str);
                         if (m.Success)
                         {
+                            searchedString.Add(str);
                             panelIDs.Add(str.Replace(m.Value, ""));
                             circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
                         }
@@ -375,7 +375,7 @@ namespace TianHua.Electrical.PDS.Service
         private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy,
             out bool frequencyConversion)
         {
-            var powers =new List<double>();
+            var powers = new List<double>();
             var check = "[0-9]+[.]?[0-9]{0,}[kK]?[wW]{1}";
             var r = new Regex(@check);
             needCopy = false;

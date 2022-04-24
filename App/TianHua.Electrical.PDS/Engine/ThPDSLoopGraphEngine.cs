@@ -423,7 +423,14 @@ namespace TianHua.Electrical.PDS.Engine
                             // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
                             var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { x }, DistBoxKey);
                             PDSGraph.Graph.AddEdge(newEdge);
-                            EdgeMap.Add(newEdge, objectIds);
+                            if(!EdgeMap.ContainsKey(newEdge))
+                            {
+                                EdgeMap.Add(newEdge, objectIds);
+                            }
+                            else
+                            {
+                                EdgeMap[newEdge].AddRange(objectIds);
+                            }
                         });
 
                         FindGraph(startingEntity, distBox);
