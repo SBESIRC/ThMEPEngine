@@ -2801,7 +2801,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             void Update()
                             {
                                 SetSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
-                                var vm = new PDS.UI.Project.Module.ThPDSMiniBusbarModel(mbb);
+                                var vm = new ThPDSMiniBusbarModel(vertice, mbb);
                                 UpdatePropertyGrid(vm);
                             }
                             if (e.ChangedButton != MouseButton.Left)
