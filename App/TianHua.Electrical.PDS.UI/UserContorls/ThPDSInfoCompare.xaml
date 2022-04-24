@@ -4,14 +4,36 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
+             xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" 
              FontSize="14"
+             Background="White"
              d:DesignHeight="1000" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+            <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Vertical">
                 <Button Width="150" x:Name="btnRefresh" Style="{x:Null}" >刷新</Button>
-                <ListBox Width="150" Height="500" Style="{x:Null}" ></ListBox>
+                <ListBox x:Name="lbx" Width="150" Height="500" Style="{x:Null}" ItemsSource="{Binding DataList}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
+                                <TextBlock Text="{Binding Name}"></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
             <StackPanel Orientation="Vertical" Width="450">
                 <StackPanel Orientation="Horizontal">
@@ -22,11 +44,46 @@
                 <DataGrid Width="450" Height="500" x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
           CanUserSortColumns="True"   CanUserReorderColumns="False"    CanUserResizeColumns="True"     ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="回路编号" Width="100" IsReadOnly="True" Binding="{Binding CircuitId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="回路类型" Width="100" IsReadOnly="True" Binding="{Binding CircuitType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="上级配电箱" Width="100" IsReadOnly="True" Binding="{Binding ParentBox,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="参照图纸" Width="70" IsReadOnly="True" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="注" Width="20" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                        <DataGridTemplateColumn Header="回路编号" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitId}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="回路类型" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitType}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="上级配电箱" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch"  Height="20" Text="{Binding ParentBox}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="参照图纸" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="注" Width="20">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<TextBlock  Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Hint}"></TextBlock>-->
+                                    <Grid Background="{Binding Background}" >
+                                        <Image ToolTip="{Binding Hint}"  Source="{Binding Img}">
+                                        </Image>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
@@ -39,11 +96,45 @@
                 <DataGrid Width="400" Height="500" x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
      CanUserSortColumns="True"     CanUserReorderColumns="False"    CanUserResizeColumns="True"        ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="负载编号" Width="100" IsReadOnly="True" Binding="{Binding LoadId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="负载类型" Width="100" IsReadOnly="True" Binding="{Binding LoadType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="负载功率" Width="70" IsReadOnly="True" Binding="{Binding LoadPower,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="参照图纸" Width="80" IsReadOnly="True" Binding="{Binding Dwg,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="注" Width="20" IsReadOnly="True" Binding="{Binding Note,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                        <DataGridTemplateColumn Header="负载编号" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch"  Height="20" Text="{Binding LoadId}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="负载类型" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadType}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="负载功率" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock  Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadPower}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="参照图纸" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock  Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="注" Width="20">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<TextBlock  Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Hint}"></TextBlock>-->
+                                    <Grid Background="{Binding Background}" >
+                                        <Image ToolTip="{Binding Hint}"  Source="{Binding Img}">
+                                        </Image>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.UI.Models
         {
             if (value == _IsChecked) return;
             _IsChecked = value;
-            if (updateChildren && _IsChecked.HasValue)
+            if (updateChildren && _IsChecked.HasValue && DataList != null)
             {
                 foreach (var o in DataList)
                 {

@@ -119,5 +119,11 @@
     <Resource Include="Images\export_white.png" />
     <Resource Include="Images\Import_white.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Mild.ico" />
+    <Resource Include="Images\Moderate.ico" />
+    <Resource Include="Images\Safe.ico" />
+    <Resource Include="Images\Servere.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
