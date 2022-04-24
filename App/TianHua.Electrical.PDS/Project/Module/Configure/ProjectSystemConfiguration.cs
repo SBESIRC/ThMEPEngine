@@ -45,7 +45,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         };
 
         public static List<string> Group3Switcher = new List<string>() {
-            "双速电机D-YY",
             "双速电机Y-Y",
             "双速电机D-YY",
         };
