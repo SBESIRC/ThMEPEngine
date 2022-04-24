@@ -18,7 +18,7 @@ namespace ThParkingStall.Core.InterProcess
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
         public readonly List<Ramp> Ramps;//该区域全部的坡道
         public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box
-        public int Count = -1;//车位总数
+        public int Count = -3;//车位总数
         public MParkingPartitionPro mParkingPartitionPro;
         public SubArea(Polygon area, List<LineSegment> segLines,
             List<Polygon> buildings, List<Ramp> ramps, List<Polygon> boundingBoxes)

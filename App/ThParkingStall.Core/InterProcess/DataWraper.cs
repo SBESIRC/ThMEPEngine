@@ -64,14 +64,14 @@ namespace ThParkingStall.Core.InterProcess
 
     public class ProgramDebug
     {
-        public static string TestMain(string[] ProcessInfo, ChromosomeCollection chromosomeCollection)
+        public static List<int> TestMain(string[] ProcessInfo, ChromosomeCollection chromosomeCollection)
         {
 
             var ProcessCount = Int32.Parse(ProcessInfo[0]);
             var ProcessIndex = Int32.Parse(ProcessInfo[1]);
-            var StrResult = "";
+            var Result = new List<int>();
             var Chromosomes = chromosomeCollection.Chromosomes;
-            for (int i = 0; i < Chromosomes.Count / ProcessCount; i++)
+            for (int i = 0; i <= Chromosomes.Count / ProcessCount; i++)
             {
                 int j = i * ProcessCount + ProcessIndex;
                 if (j >= Chromosomes.Count) break;
@@ -80,9 +80,9 @@ namespace ThParkingStall.Core.InterProcess
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                 MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
                 var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
-                StrResult += ParkingCount.ToString() + ' ';
+                Result.Add(ParkingCount);
             }
-            return StrResult;
+            return Result;
         }
     }
 }

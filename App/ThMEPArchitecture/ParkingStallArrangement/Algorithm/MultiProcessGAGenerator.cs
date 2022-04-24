@@ -384,13 +384,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 info[0] = ProcessCount.ToString();
                 info[1] = idx.ToString();
 
-                var strResult = ProgramDebug.TestMain(info, chromosomeCollection).Split(' ');
+                var Result = ProgramDebug.TestMain(info, chromosomeCollection);
                 int j = 0;
-                for (int i = 0; i < inputSolution.Count / ProcessCount; i++)
+                for (int i = 0; i <= inputSolution.Count / ProcessCount; i++)
                 {
-                    inputSolution[i * ProcessCount + idx].ParkingStallCount = Int32.Parse(strResult[j]);
+                    inputSolution[i * ProcessCount + idx].ParkingStallCount = Result[j];
                     j++;
-                    if (j >= strResult.Count()) break;
+                    if (j >= Result.Count) break;
                 }
             }
             

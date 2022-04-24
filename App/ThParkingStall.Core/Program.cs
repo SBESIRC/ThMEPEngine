@@ -81,7 +81,7 @@ namespace ThParkingStall.Core
                 if (LogAllInfo) MCompute.Logger?.Information("读取完成");
                 var ParkingCnts = new List<int>();
                 var Chromosomes = chromosomeCollection.Chromosomes;
-                for (int i = 0; i < Chromosomes.Count / ProcessCount; i++)//计算
+                for (int i = 0; i <= Chromosomes.Count / ProcessCount; i++)//计算
                 {
                     int j = i * ProcessCount + ProcessIndex;
                     if (j >= Chromosomes.Count) break;
