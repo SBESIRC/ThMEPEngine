@@ -135,7 +135,7 @@ namespace TianHua.Electrical.PDS.Service
 
         public ThPDSLoad LoadMarkAnalysis(ThPDSBlockReferenceData distBoxData)
         {
-            return new ThPDSLoad
+            var thPDSLoad = new ThPDSLoad
             {
                 ID = new ThPDSID
                 {
@@ -164,6 +164,18 @@ namespace TianHua.Electrical.PDS.Service
                 FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
             };
+
+            thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+            if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+            }
+            if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+            {
+                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+            }
+
+            return thPDSLoad;
         }
 
         private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
