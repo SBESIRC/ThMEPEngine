@@ -146,6 +146,7 @@ namespace TianHua.Electrical.PDS.Engine
                             return;
                         }
 
+                        var distBoxKeyList = new List<string>();
                         var distBoxKey = "";
                         ThPDSGraphService.DistBoxBlocks[distBox].Attributes.ForEach(attri =>
                         {
@@ -155,10 +156,13 @@ namespace TianHua.Electrical.PDS.Engine
                                 {
                                     distBoxKey = attri.Value;
                                 }
+                                else if(attri.Value.Contains("K") || attri.Value.Contains("INT"))
+                                {
+                                    distBoxKeyList.Add(key);
+                                }
                             });
                         });
 
-                        var distBoxKeyList = new List<string>();
                         distBoxKey = distBoxKey.Replace("~", "/");
                         if (distBoxKey.Contains("/"))
                         {
