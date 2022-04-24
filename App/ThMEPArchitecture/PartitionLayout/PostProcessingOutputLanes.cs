@@ -192,9 +192,17 @@ namespace ThMEPArchitecture.PartitionLayout
                     var lane = CreateLine(lanes[i]);
                     lane.Scale(lane.GetCenter(), (lane.Length - 2) / lane.Length);
                     var buffer = lane.Buffer(dis);
-                    var ps = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.GetClosestPointTo(p, false).DistanceTo(l.EndPoint)).First();
-                    ps = l.GetClosestPointTo(ps, false);
-                    lanes[i].StartPoint = ps;
+                    var pts = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.GetClosestPointTo(p, false).DistanceTo(l.EndPoint));
+                    if (pts.Count() > 0)
+                    {
+                        var ps = pts.First();
+                        ps = l.GetClosestPointTo(ps, false);
+                        lanes[i].StartPoint = ps;
+                    }
+                    else
+                    {
+                        //暂不处理
+                    }
                 }
                 else if (Eindexes[i] == -1)
                 {
@@ -202,9 +210,17 @@ namespace ThMEPArchitecture.PartitionLayout
                     var lane = CreateLine(lanes[i]);
                     lane.Scale(lane.GetCenter(), (lane.Length - 2) / lane.Length);
                     var buffer = lane.Buffer(dis);
-                    var pe = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.GetClosestPointTo(p, false).DistanceTo(l.StartPoint)).First();
-                    pe = l.GetClosestPointTo(pe, false);
-                    lanes[i].EndPoint = pe;
+                    var pts = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.GetClosestPointTo(p, false).DistanceTo(l.StartPoint));
+                    if (pts.Count() > 0)
+                    {
+                        var pe = pts.First();
+                        pe = l.GetClosestPointTo(pe, false);
+                        lanes[i].EndPoint = pe;
+                    }
+                    else
+                    {
+                        //暂不处理
+                    }
                 }
             }
         }

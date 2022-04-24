@@ -187,9 +187,17 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var lane = new LineSegment(lanes[i]);
                     lane=lane.Scale((lane.Length - 2) / lane.Length);
                     var buffer = lane.Buffer(dis);
-                    var ps = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P1)).First();
-                    ps = l.ClosestPoint(ps, false);
-                    lanes[i].P0 = ps;
+                    var pts = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P1));
+                    if (pts.Count() > 0)
+                    {
+                        var ps = pts.First();
+                        ps = l.ClosestPoint(ps, false);
+                        lanes[i].P0 = ps;
+                    }
+                    else
+                    {
+                        //暂不处理
+                    }
                 }
                 else if (Eindexes[i] == -1)
                 {
@@ -197,9 +205,17 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var lane = new LineSegment(lanes[i]);
                     lane=lane.Scale((lane.Length - 2) / lane.Length);
                     var buffer = lane.Buffer(dis);
-                    var pe = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P0)).First();
-                    pe = l.ClosestPoint(pe, false);
-                    lanes[i].P1 = pe;
+                    var pts = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P0));
+                    if (pts.Count() > 0)
+                    {
+                        var pe = pts.First();
+                        pe = l.ClosestPoint(pe, false);
+                        lanes[i].P1 = pe;
+                    }
+                    else
+                    {
+                        //暂不处理
+                    }
                 }
             }
         }
