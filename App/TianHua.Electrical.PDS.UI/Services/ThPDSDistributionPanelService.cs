@@ -2875,6 +2875,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 UpdateCanvas();
                             });
                         }
+                        {
+                            var mi = new MenuItem();
+                            menu.Items.Add(mi);
+                            mi.Header = "删除";
+                            mi.Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.DeleteSmallBusbar(vertice, mbb);
+                                UpdateCanvas();
+                            });
+                        }
                         cvs.Cursor = Cursors.Hand;
                         canvas.Children.Add(cvs);
                     }
