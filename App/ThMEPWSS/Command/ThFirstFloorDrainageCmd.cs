@@ -70,6 +70,10 @@ namespace ThMEPWSS.Command
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
+                    //进行路由倒角
+                    ChamferService chamferService = new ChamferService(routes);
+                    routes = chamferService.Chamfer();
+
                     using (acad.Database.GetDocument().LockDocument())
                     {
                         //处理冷凝水管
