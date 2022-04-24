@@ -35,6 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
             panel.btnRefresh.Click += (s, e) =>
             {
+                new ThPDSSecondaryPushDataService().Push();
                 {
                     var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
                     foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
