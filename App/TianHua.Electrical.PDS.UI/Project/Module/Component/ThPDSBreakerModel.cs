@@ -1,5 +1,4 @@
-﻿using System;
-using ThCADExtension;
+﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Diagram;
@@ -8,8 +7,6 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
-using TianHua.Electrical.PDS.UI.Models;
-using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -80,7 +77,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _breaker.SetRatedCurrent(value);
                 OnPropertyChanged();
-                //WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
             }
         }
 
@@ -107,7 +103,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.Appendix = value;
-                OnPropertyChanged(nameof(Appendix));
+                OnPropertyChanged();
             }
         }
 
@@ -198,17 +194,5 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         public ComponentType ComponentType => _breaker.ComponentType;
-
-        protected virtual void OnPropertyChanged()
-        {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(Content));
-            OnPropertyChanged(nameof(RCDType));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(RatedCurrent));
-            OnPropertyChanged(nameof(TripUnitType));
-            OnPropertyChanged(nameof(ResidualCurrent));
-            OnPropertyChanged(nameof(FrameSpecification));
-        }
     }
 }

@@ -6,8 +6,6 @@ using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
-using Microsoft.Toolkit.Mvvm.Messaging;
-using TianHua.Electrical.PDS.UI.Models;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
@@ -37,7 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetModel(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -50,7 +48,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetFrameSpecification(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -63,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetPolesNum(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -76,8 +74,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetRatedCurrent(value);
-                OnPropertiesChanged();
-                //WeakReferenceMessenger.Default.Send(new RatedCurrentChangedMessage(value));
+                OnPropertyChanged();
             }
         }
 
@@ -90,7 +87,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCombination(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -103,17 +100,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCodeLevel(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
-        }
-
-        private void OnPropertiesChanged()
-        {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(CodeLevel));
-            OnPropertyChanged(nameof(Combination));
-            OnPropertyChanged(nameof(FrameSpecification));
         }
 
         [ReadOnly(true)]
