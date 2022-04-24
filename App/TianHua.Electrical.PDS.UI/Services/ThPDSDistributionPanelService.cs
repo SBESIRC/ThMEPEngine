@@ -840,12 +840,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                     var blkVm = new ThPDSBlockViewModel();
-                                    Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
                                     {
                                         void reg(Breaker breaker, string templateStr)
                                         {
-                                            vm = new(breaker);
+                                            var vm = new ThPDSBreakerModel(breaker);
+                                            vm.PropertyChanged += (s, e) =>
+                                            {
+                                                if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                {
+                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                }
+                                            };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
@@ -2105,12 +2111,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                     breaker = mbb.Breaker;
                                     var blkVm = new ThPDSBlockViewModel();
-                                    Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
                                     {
                                         void reg(Breaker breaker, string templateStr)
                                         {
-                                            vm = new(breaker);
+                                            var vm = new ThPDSBreakerModel(breaker);
+                                            vm.PropertyChanged += (s, e) =>
+                                            {
+                                                if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                {
+                                                    ThPDSProjectGraphService.UpdateWithMiniBusbar(vertice);
+                                                }
+                                            };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
@@ -2346,12 +2358,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             throw new NotSupportedException();
                                         }
                                         var blkVm = new ThPDSBlockViewModel();
-                                        Project.Module.Component.ThPDSBreakerModel vm;
                                         void UpdateBreakerViewModel()
                                         {
                                             void reg(Breaker breaker, string templateStr)
                                             {
-                                                vm = new(breaker);
+                                                var vm = new ThPDSBreakerModel(breaker);
+                                                vm.PropertyChanged += (s, e) =>
+                                                {
+                                                    if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                    {
+                                                        ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                    }
+                                                };
                                                 blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                 if (m != null && vm != null)
