@@ -40,23 +40,24 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         public ThPDSInfoModifyEngine(List<ThPDSNodeMap> nodeMapList, List<ThPDSEdgeMap> edgeMapList, ProjectGraph projectGraph,
-            ThPDSProjectGraphNode node)
+            ThPDSProjectGraphNode projectNode)
         {
             NodeMapList = nodeMapList;
             EdgeMapList = edgeMapList;
             ProjectGraph = projectGraph;
-            NodeList = new List<ThPDSProjectGraphNode> { node };
+            NodeList = ProjectGraph.Vertices.Where(o => o.Load.ID.LoadID.Equals(projectNode.Load.ID.LoadID)).ToList();
             EdgeList = new List<ThPDSProjectGraphEdge>();
         }
 
         public ThPDSInfoModifyEngine(List<ThPDSNodeMap> nodeMapList, List<ThPDSEdgeMap> edgeMapList, ProjectGraph projectGraph,
-           ThPDSProjectGraphEdge edge)
+           ThPDSProjectGraphEdge projectEdge)
         {
             NodeMapList = nodeMapList;
             EdgeMapList = edgeMapList;
             ProjectGraph = projectGraph;
             NodeList = new List<ThPDSProjectGraphNode>();
-            EdgeList = new List<ThPDSProjectGraphEdge> { edge };
+            // 若在ui中修改回路编号，那么应如何确定其原来对应的边
+            EdgeList = ProjectGraph.Edges.Where(e => e.Equals(projectEdge)).ToList();
         }
 
         public void InfoModify()
@@ -85,22 +86,22 @@ namespace TianHua.Electrical.PDS.Service
 
                     NodeList.ForEach(o =>
                     {
-                        // 节点负载编号更新
-                        if (o.Type == PDSNodeType.Load && referenceDWG.Equals("测试42.dwg"))
-                        {
-                            o.Tag = new ThPDSProjectGraphNodeDataTag
-                            {
-                                TagD = true,
-                                TarD = "_潜水泵",
-                                TagP = true,
-                                TarP = new ThInstalledCapacity
-                                {
-                                    IsDualPower = false,
-                                    LowPower = 0,
-                                    HighPower = 15.5,
-                                },
-                            };
-                        }
+                        // 测试使用，节点负载编号更新
+                        //if (o.Type == PDSNodeType.Load )
+                        //{
+                        //    o.Tag = new ThPDSProjectGraphNodeDataTag
+                        //    {
+                        //        TagD = true,
+                        //        TarD = "_潜水泵",
+                        //        TagP = true,
+                        //        TarP = new ThInstalledCapacity
+                        //        {
+                        //            IsDualPower = false,
+                        //            LowPower = 0,
+                        //            HighPower = 15.5,
+                        //        },
+                        //    };
+                        //}
 
                         var sourceNode = nodeMap.NodeMap
                             .Where(node => node.Key.Loads[0].LoadUID.Equals(o.Load.LoadUID))
@@ -120,7 +121,9 @@ namespace TianHua.Electrical.PDS.Service
                                     InfoModify(activeDb, id, sourceLoadID, idTag.ChangedID);
                                 });
                             }
+                            return;
                         }
+
                         // 节点负载数据更新
                         var dataTag = new ThPDSProjectGraphNodeDataTag();
                         if (o.Tag is ThPDSProjectGraphNodeDataTag tag)
@@ -185,23 +188,23 @@ namespace TianHua.Electrical.PDS.Service
 
                     EdgeList.ForEach(o =>
                     {
-                        if (referenceDWG.Equals("测试42.dwg"))
-                        {
-                            o.Tag = new ThPDSProjectGraphEdgeIdChangeTag
-                            {
-                                ChangeFrom = true,
-                                ChangedLastCircuitID = "1B-B4ACq2-WPE03",
-                            };
-                        }
-                        if (o.Tag is ThPDSProjectGraphEdgeIdChangeTag sourcePanelTag)
-                        {
-                            var sourceEdge = edgeMap.EdgeMap
+                        // 测试使用
+                        //o.Tag = new ThPDSProjectGraphEdgeIdChangeTag
+                        //{
+                        //    ChangeFrom = true,
+                        //    ChangedLastCircuitID = "1B-B4ACq2-WPE03",
+                        //};
+
+                        var sourceEdge = edgeMap.EdgeMap
                                 .Where(edge => edge.Key.Circuit.CircuitUID.Equals(o.Circuit.CircuitUID))
                                 .ToList();
-                            if (sourceEdge.Count != 1)
-                            {
-                                return;
-                            }
+                        if (sourceEdge.Count != 1)
+                        {
+                            return;
+                        }
+
+                        if (o.Tag is ThPDSProjectGraphEdgeIdChangeTag sourcePanelTag)
+                        {
                             if (sourcePanelTag.ChangeFrom)
                             {
                                 var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber.Last();
@@ -213,11 +216,11 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     });
 
-                    //if (Revclouds.Count > 0)
-                    //{
-                    //    Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
-                    //    ThPDSInsertRevcloudService.InsertRevcloud(activeDb.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
-                    //}
+                    if (Revclouds.Count > 0)
+                    {
+                        Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
+                        ThPDSInsertRevcloudService.InsertRevcloud(activeDb.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
+                    }
 
                     doc.Editor.Regen();
                 }

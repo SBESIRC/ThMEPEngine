@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.Command
             using (var activeDb = AcadDatabase.Active())
             using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                if (!TrySelectPoint(out var selectPoint))
+                if (!ThPDSSelectPointService.TrySelectPoint(out var selectPoint, "\n选择图纸基点"))
                 {
                     return;
                 }
@@ -449,19 +449,6 @@ namespace TianHua.Electrical.PDS.Command
                         throw new NotSupportedException();
                     }
             }
-        }
-
-        private static bool TrySelectPoint(out Point3d basePt)
-        {
-            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
-            var result = Active.Editor.GetPoint(basePtOptions);
-            if (result.Status != PromptStatus.OK)
-            {
-                basePt = default;
-                return false;
-            }
-            basePt = result.Value.TransformBy(Active.Editor.UCS2WCS());
-            return true;
         }
 
         private static Point3d PointClone(Point3d srcPoint)

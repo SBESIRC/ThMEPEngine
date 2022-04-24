@@ -64,15 +64,15 @@ namespace TianHua.Electrical.PDS.UI
             //var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
             //drawCmd.Execute();
 
-            // 标注修改
             var modifyCmd = new ThPDSUpdateToDwgService();
-            modifyCmd.Update();
+            // 标注修改
+            //modifyCmd.Update();
 
             // 标注定位
-            //var zoomService = new ThPDSUpdateToDwgService();
-            //zoomService.Zoom();
+            //modifyCmd.Zoom();
 
-            
+            // 创建标注
+            modifyCmd.AddLoadDimension();
         }
     }
 }
