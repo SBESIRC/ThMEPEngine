@@ -49,7 +49,14 @@ namespace TianHua.Electrical.PDS.Diagram
                     }
                 case ComponentType.一体式RCD:
                     {
-                        return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}/{breaker.Appendix}";
+                        if (breaker.Appendix == Project.Module.AppendixType.无)
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}";
+                        }
+                        else
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}/{breaker.Appendix}";
+                        }
                     }
                 case ComponentType.组合式RCD:
                     {
