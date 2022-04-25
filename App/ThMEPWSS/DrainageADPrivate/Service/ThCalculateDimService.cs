@@ -63,13 +63,10 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         /// <param name="NG"></param>
         /// <param name="dataPass"></param>
         /// <returns></returns>
-        public static double CalculateMaxFlowProbability(double NG, ThDrainageADPDataPass dataPass)
+        public static double CalculateMaxFlowProbability(double NG, double qL, double m, double Kh)
         {
             double U0 = 0;
 
-            var qL = dataPass.qL;
-            var m = dataPass.m;
-            var Kh = dataPass.Kh;
             var Th = ThDrainageADCommon.Th;
 
             U0 = 100 * qL * m * Kh / (0.2 * NG * Th * 3600);
@@ -162,7 +159,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             double Ng = 0.0;
             foreach (var l in leaf)
             {
-                if (pair.Contains(l) == false)
+                if (pair.Contains(l) == false && l.Terminal != null)
                 {
                     double value = 0.0;
                     if (l.IsCool == true)
@@ -180,8 +177,11 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             foreach (var l in pair)
             {
                 double value = 0.0;
-                value = ThDrainageADCommon.TerminalFixtureUnitCoolHot[(int)l.Terminal.Type];
-                NgPair = NgPair + value;
+                if (l.Terminal !=null)
+                {
+                    value = ThDrainageADCommon.TerminalFixtureUnitCoolHot[(int)l.Terminal.Type];
+                    NgPair = NgPair + value;
+                }
             }
             Ng = Ng + NgPair / 2;
 

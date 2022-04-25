@@ -25,6 +25,7 @@ using ThMEPWSS.Common;
 using ThMEPWSS.DrainageADPrivate.Data;
 using ThMEPWSS.DrainageADPrivate.Model;
 using ThMEPWSS.DrainageADPrivate.Engine;
+using ThMEPWSS.DrainageADPrivate.Service;
 
 namespace ThMEPWSS.DrainageADPrivate.Cmd
 {
@@ -85,22 +86,37 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 var selectPts = new Point3dCollection();
                 selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
 
+                //插入图层
+                var blkNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
+                                                        ThDrainageADCommon.BlkName_ShutoffValve, ThDrainageADCommon.BlkName_GateValve,
+                                                        ThDrainageADCommon.BlkName_CheckValve, ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
+                                                        ThDrainageADCommon.BlkName_Casing,
+                                                        };
+                var angleValve = ThDrainageADCommon.Terminal_end_name.Select(x => x.Value).ToList();
+                var blkNameOutputList = new List<string>
+                {
+                    ThDrainageADCommon.BlkName_Dim, ThDrainageADCommon.BlkName_OpeningSign, ThDrainageADCommon.BlkName_Casing_AD,
+                };
+                blkNameOutputList.AddRange(angleValve);
+                blkNameOutputList.AddRange(blkNameValve);
+
+                var layerNameOutputList = new List<string>();
+                ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameOutputList, layerNameOutputList);
 
                 //转换器
                 //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
                 var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
-
 
                 //提取数据
                 var dataFactory = new ThDrainageADPrivateDataFactory()
                 {
                     Transformer = transformer,
                     BlockNameDict = _BlockNameDict,
-                    BlockNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
-                                                        ThDrainageADCommon.BlkName_ShutoffValve,  ThDrainageADCommon.BlkName_GateValve,
-                                                        ThDrainageADCommon.BlkName_CheckValve,ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
-                                                        ThDrainageADCommon.BlkName_Casing    },
-
+                    BlockNameValve = blkNameValve,
+                    BlockNameTchValve = new List<string> { ThDrainageADCommon.BlkName_ShutoffValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_GateValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_CheckValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_AntifoulingCutoffValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_OpeningSign_TchTag.ToUpper(),ThDrainageADCommon .BlkName_WaterMeteValve_TchTag.ToUpper(),
+                                                        },
                 };
 
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
@@ -116,7 +132,8 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                     SanitaryTerminal = dataFactory.SanitaryTerminal,
                     ValveWaterHeater = dataFactory.ValveWaterHeater,
                     TchValve = dataFactory.TchValve,
-                    OpeningSignData = dataFactory.OpeningSign,
+                    TchOpeningSign = dataFactory.TchOpeningSign,
+                    OpeningSign = dataFactory.OpeningSign,
                 };
 
                 //dataQuery.Transform(transformer);
@@ -129,13 +146,13 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
 
 
                 var dataPass = new ThDrainageADPDataPass();
-                dataPass.CoolPipeTopView = dataQuery.CoolPipeTopView;
-                dataPass.HotPipeTopView = dataQuery.HotPipeTopView;
-                dataPass.VerticalPipe = dataQuery.VerticalPipe;
-                dataPass.Terminal = dataQuery.Terminal;
-                dataPass.Valve = dataQuery.Valve;
-                dataPass.OpeningSign = dataQuery.OpeningSign;
-                dataPass.Casing = dataQuery.Casing;
+                dataPass.CoolPipeTopView.AddRange(dataQuery.CoolPipeTopView);
+                dataPass.HotPipeTopView.AddRange(dataQuery.HotPipeTopView);
+                dataPass.VerticalPipe.AddRange(dataQuery.VerticalPipe);
+                dataPass.Terminal.AddRange(dataQuery.Terminal);
+                dataPass.Valve.AddRange(dataQuery.Valve);
+                dataPass.AngleValve.AddRange(dataQuery.AngleValve);
+                dataPass.Casing.AddRange(dataQuery.Casing);
                 dataPass.qL = _qL;
                 dataPass.m = _m;
                 dataPass.Kh = _Kh;
@@ -144,13 +161,13 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 //转换引擎
                 ThDrainageADEngine.DrainageTransADEngine(dataPass);
 
-
-
-
                 //转换到原位置
                 //dataQuery.Transform(transformer);
 
                 //插入
+                ThInsertOutputService.InsertBlk(dataPass.OutputDim);
+                ThInsertOutputService.InsertBlk(dataPass.OutputAngleValve);
+                ThInsertOutputService.InsertBlk(dataPass.OutputValve);
 
 
             }

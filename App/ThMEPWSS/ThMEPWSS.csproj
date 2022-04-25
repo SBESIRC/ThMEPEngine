@@ -46,13 +46,16 @@
     <Compile Include="DrainageADPrivate\Engine\ThDrainageTransformEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDraingeTreeEngine.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageADSetting.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageBlkOutput.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
     <Compile Include="DrainageADPrivate\Model\ThValve.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThInsertOutputService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThLayoutAngleValveService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThLayoutDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThPipePreProcessService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\PipeDiameterMarkingService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThLayoutValveService.cs" />

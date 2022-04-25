@@ -12,7 +12,6 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 
-using ThMEPWSS.DrainageSystemDiagram.Model;
 using ThMEPWSS.DrainageSystemDiagram.Service;
 
 using ThMEPWSS.DrainageADPrivate.Data;
@@ -23,13 +22,13 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThLayoutDimService
     {
-        public static List<ThDrainageSDADBlkOutput> LayoutDim(List<ThDrainageTreeNode> rootList)
+        public static List<ThDrainageBlkOutput> LayoutDim(List<ThDrainageTreeNode> rootList)
         {
             var allNode = rootList.SelectMany(x => x.GetDescendant()).ToList();
             var allLine = ThLayoutDimService.TurnNodeToTransLine(allNode);
             var allIsolateLine = new List<Line>();
             allIsolateLine.AddRange(allLine);
-            //之后要加上阀门
+            //之后要加上阀门???
 
             var nodeDiaDimOutput = ThLayoutDimService.CalculatePositionDim(allNode, allIsolateLine);
 
@@ -52,7 +51,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return allLine;
         }
 
-        private static List<ThDrainageSDADBlkOutput> CalculatePositionDim(List<ThDrainageTreeNode> allNode, List<Line> allIsolateLine)
+        private static List<ThDrainageBlkOutput> CalculatePositionDim(List<ThDrainageTreeNode> allNode, List<Line> allIsolateLine)
         {
             var sDN = ThDrainageADCommon.DiameterDN_visi_pre;
             var dimBlkX = ThDrainageADCommon.DiameterDim_blk_x;
@@ -61,7 +60,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             var visiPropertyName = ThDrainageADCommon.VisiName_valve;
 
             var alreadyDimArea = new List<Polyline>();
-            var output = new List<ThDrainageSDADBlkOutput>();
+            var output = new List<ThDrainageBlkOutput>();
 
             foreach (var node in allNode)
             {
@@ -69,6 +68,14 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 {
                     var s = node.TransPt;
                     var e = node.Parent.TransPt;
+                    var length = (e - s).Length;
+
+                    if (length < dimBlkX * 1.5)
+                    {
+                        //太短的线跳过。一定要比bimBlkX+moveX要长否则终点位会变起点位再往前,但要小于1000（立管是1000左右）
+                        //DrawUtils.ShowGeometry(s, "l0tooShorLine", colorIndex: 2, lineWeightNum: 30, r: 50);
+                        continue;
+                    }
 
                     var dir = (e - s).GetNormal();
                     var angle = dir.GetAngleTo(Vector3d.XAxis, -Vector3d.ZAxis);
@@ -85,11 +92,18 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     alreadyDimArea.Add(dimOutline);
                     var dimPt = dimOutline.StartPoint;
 
-                    var thModel = new ThDrainageSDADBlkOutput(dimPt);
+                    var visiValue = sDN + node.Dim.ToString();
+                    if (node.Dim == 0)
+                    {
+                        visiValue = sDN + "15";
+                    }
+
+                    var thModel = new ThDrainageBlkOutput(dimPt);
                     thModel.Name = blk_name;
                     thModel.Dir = dir;
-                    thModel.Visibility.Add(visiPropertyName, sDN + node.Dim.ToString());
+                    thModel.Visibility.Add(visiPropertyName, visiValue);
                     thModel.Scale = ThDrainageADCommon.Blk_scale_end;
+                    thModel.Layer = ThDrainageADCommon.Layer_DIMS;
 
                     output.Add(thModel);
                 }

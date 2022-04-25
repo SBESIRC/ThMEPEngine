@@ -12,9 +12,6 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Diagnostics;
 
-using ThMEPWSS.DrainageSystemDiagram.Model;
-using ThMEPWSS.DrainageSystemDiagram.Service;
-
 using ThMEPWSS.DrainageADPrivate.Data;
 using ThMEPWSS.DrainageADPrivate.Service;
 using ThMEPWSS.DrainageADPrivate.Model;
@@ -23,25 +20,21 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThLayoutValveService
     {
-        public static List<ThDrainageSDADBlkOutput> LayoutValve(ThDrainageADPDataPass dataPass, List<ThDrainageTreeNode> rootList)
+        public static List<ThDrainageBlkOutput> LayoutValve(ThDrainageADPDataPass dataPass, List<ThDrainageTreeNode> rootList)
         {
             var valveList = new List<ThValve>();
             var valves = new List<ThValve>();
-            var openingSign = new List<ThValve>();
             var casing = new List<ThValve>();
 
             valves.AddRange(dataPass.Valve);
-            openingSign.AddRange(dataPass.OpeningSign);
             casing.AddRange(dataPass.Casing);
 
             valveList.AddRange(valves);
-            valveList.AddRange(openingSign);
             valveList.AddRange(casing);
 
             CalculateValveTransPt(ref valveList, rootList);
-            var valveOuput = new List<ThDrainageSDADBlkOutput>();
+            var valveOuput = new List<ThDrainageBlkOutput>();
             valveOuput.AddRange(CreateValveOutputModel(valves));
-            valveOuput.AddRange(CreateValveOutputModel(openingSign));
             valveOuput.AddRange(CreateCasingOutputModel(casing));
 
             return valveOuput;
@@ -66,35 +59,23 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         private static void FindCloseLine(ThValve valve, Dictionary<ThDrainageTreeNode, Line> allLineDict, out KeyValuePair<ThDrainageTreeNode, Line> connectLineDict)
         {
-            var tol = new Tolerance(10, 10);
             var projValveInsertPt = new Point3d(valve.InsertPt.X, valve.InsertPt.Y, 0);
             var orderLines = allLineDict.OrderBy(x => x.Value.GetDistToPoint(projValveInsertPt, false)).ToList();
             connectLineDict = new KeyValuePair<ThDrainageTreeNode, Line>();
-            
+
             foreach (var lineDict in orderLines)
             {
-                if (lineDict.Value.StartPoint.IsEqualTo(lineDict.Value.EndPoint, tol))
+                //if (lineDict.Value.StartPoint.IsEqualTo(lineDict.Value.EndPoint, tol))
+                if (ThDrainageADTreeService.IsVertical(lineDict.Value) == true)
                 {
                     //忽略立管
                     continue;
                 }
                 var line = lineDict.Value;
                 var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                var diamDir = valve.Dir.GetNormal();
+                var angle = valve.Dir.GetAngleTo(lineDir, Vector3d.ZAxis);
 
-                if (valve.Name == ThDrainageADCommon.BlkName_ShutoffValve ||
-                    valve.Name == ThDrainageADCommon.BlkName_GateValve ||
-                    valve.Name == ThDrainageADCommon.BlkName_CheckValve ||
-                    valve.Name == ThDrainageADCommon.BlkName_AntifoulingCutoffValve 
-                    )
-                {
-                    //本身和线路有90度角
-                    diamDir = valve.Dir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis);
-                }
-
-                var angle = diamDir.GetAngleTo(lineDir, Vector3d.ZAxis);
-
-                if (Math.Abs(Math.Cos(angle)) >= Math.Cos(1 * Math.PI / 180))
+                if (Math.Abs(Math.Cos(angle)) >= Math.Cos(5 * Math.PI / 180))
                 {
                     connectLineDict = lineDict;
                     break;
@@ -108,7 +89,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             if (connectLine != null)
             {
                 var sameDir = 1;
-                
+
                 var projValveInsertPt = new Point3d(valve.InsertPt.X, valve.InsertPt.Y, 0);
                 var vs = projValveInsertPt - connectLine.StartPoint;
                 var es = connectLine.EndPoint - connectLine.StartPoint;
@@ -149,9 +130,9 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return allLineDict;
         }
 
-        private static List<ThDrainageSDADBlkOutput> CreateValveOutputModel(List<ThValve> valveList)
+        private static List<ThDrainageBlkOutput> CreateValveOutputModel(List<ThValve> valveList)
         {
-            var output = new List<ThDrainageSDADBlkOutput>();
+            var output = new List<ThDrainageBlkOutput>();
             foreach (var valve in valveList)
             {
                 var oriNodeDir = (valve.ConnectNode.Pt - valve.ConnectNode.Parent.Pt).GetNormal();
@@ -159,53 +140,52 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 var rotateAngle = oriNodeDir.GetAngleTo(transNodeDir, Vector3d.ZAxis);
                 var printDir = valve.Dir.RotateBy(rotateAngle, Vector3d.ZAxis);
 
-                var thModel = new ThDrainageSDADBlkOutput(valve.TransInsertPt);
+                if (valve.Name == ThDrainageADCommon.BlkName_OpeningSign)
+                {
+                    //样条曲线
+                    printDir = printDir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis);
+                }
+                var scale = valve.Scale;
+                if (valve.Name != ThDrainageADCommon.BlkName_OpeningSign || valve.Name != ThDrainageADCommon.BlkName_OpeningSign_TchTag)
+                {
+                    scale = scale * ThDrainageADCommon.TransEnlargeScale;//???
+                }
+                var thModel = new ThDrainageBlkOutput(valve.TransInsertPt);
                 thModel.Name = valve.Name;
                 thModel.Dir = printDir;
-                thModel.Scale = ThDrainageADCommon.Blk_scale_end;
+                thModel.Scale = scale;
+                thModel.Layer = ThDrainageADCommon.Layer_EQPM;
 
                 output.Add(thModel);
             }
             return output;
         }
 
-        //public static void CreateOpeningOutputModel(List<ThValve> valveList)
-        //{
-        //    var output = new List<ThDrainageSDADBlkOutput>();
-        //    foreach (var valve in valveList)
-        //    {
-        //        var oriNodeDir = (valve.ConnectNode.Pt - valve.ConnectNode.Parent.Pt).GetNormal();
-        //        var transNodeDir = (valve.ConnectNode.TransPt - valve.ConnectNode.Parent.TransPt).GetNormal();
-        //        var rotateAngle = oriNodeDir.GetAngleTo(transNodeDir, Vector3d.ZAxis);
-        //        var printDir = valve.Dir.RotateBy(rotateAngle, Vector3d.ZAxis);
 
-        //        var thModel = new ThDrainageSDADBlkOutput(valve.TransInsertPt);
-        //        thModel.Name = valve.Name;
-        //        thModel.Dir = printDir;
-        //        thModel.Scale = ThDrainageADCommon.Blk_scale_end;
 
-        //        output.Add(thModel);
-        //    }
-        //    return output;
-        //}
-
-        private static List<ThDrainageSDADBlkOutput> CreateCasingOutputModel(List<ThValve> valveList)
+        private static List<ThDrainageBlkOutput> CreateCasingOutputModel(List<ThValve> valveList)
         {
-            var output = new List<ThDrainageSDADBlkOutput>();
+            var output = new List<ThDrainageBlkOutput>();
             foreach (var valve in valveList)
             {
-
                 var transNodeDir = (valve.ConnectNode.TransPt - valve.ConnectNode.Parent.TransPt).GetNormal();
                 var visiDir = ThLayoutAngleValveService.CalculateVisibilityDir(transNodeDir, ThDrainageADCommon.BlkName_Casing_AD);
-                
+
                 var oriNodeDir = (valve.ConnectNode.Pt - valve.ConnectNode.Parent.Pt).GetNormal();
                 var rotateAngle = oriNodeDir.GetAngleTo(transNodeDir, Vector3d.ZAxis);
                 var printDir = valve.Dir.RotateBy(rotateAngle, Vector3d.ZAxis);
 
-                var thModel = new ThDrainageSDADBlkOutput(valve.TransInsertPt);
+                if (visiDir.Contains(ThDrainageADCommon.EndValve_dir_name[ThDrainageADCommon.BlkName_Casing_AD][1]))
+                {
+                    //向前向后，角度减45
+                    printDir = printDir.RotateBy(45 * Math.PI / 180, -Vector3d.ZAxis);
+                }
+
+                var thModel = new ThDrainageBlkOutput(valve.TransInsertPt);
                 thModel.Name = ThDrainageADCommon.BlkName_Casing_AD;
                 thModel.Dir = printDir;
                 thModel.Scale = ThDrainageADCommon.Blk_scale_end;
+                thModel.Layer = ThDrainageADCommon.Layer_Bush;
                 thModel.Visibility.Add(ThDrainageADCommon.VisiName_valve, visiDir);
 
                 output.Add(thModel);

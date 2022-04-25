@@ -32,8 +32,14 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
     {
         public static void DrainageTransADEngine(ThDrainageADPDataPass dataPass)
         {
-            //树
-            var treeEngine = new ThDraingeTreeEngine(dataPass);
+            //--管道延长到立管--
+            ThPipePreProcessService.ConnectPipeToNearVerticalPipe(dataPass, out var ptDict, out var ptCoolHotDict);
+            //ptDict.ForEach(x => DrawUtils.ShowGeometry(x.Value, "l0finalline"));
+            //ptCoolHotDict.ForEach(x => DrawUtils.ShowGeometry(x.Key, "l0coolhot", (x.Value == true ? 140 : 210), 30, 50));
+
+
+            //--树--
+            var treeEngine = new ThDraingeTreeEngine(dataPass, ptDict, ptCoolHotDict);
             treeEngine.BuildDraingeTree();
 
             if (treeEngine.MergedRootList.Count() == 0)
@@ -53,61 +59,55 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //        DrawUtils.ShowGeometry(new Line(l.Pt, l.TerminalPair.Pt), "l0leafterminalPair", 3);
             //    }
             //});
-            //treeEngine.MergedRootList.ForEach(x => PrintTree(x, String.Format("l0tree{0}", treeEngine.MergedRootList.IndexOf(x))));
+            // treeEngine.MergedRootList.ForEach(x => PrintTree(x, String.Format("l0tree{0}", treeEngine.MergedRootList.IndexOf(x))));
             ///////////
 
             //--管径计算--
-            //rootList 没有setTerminalPair
             var dimEngine = new ThCalculateDimEngine(dataPass, treeEngine);
             dimEngine.CalculateDim();
-            ThDrainageADTreeService.SetTerminalPairMultipleTree(dimEngine.RootList, treeEngine.TerminalPairDict);
 
             if (dimEngine.RootList.Count() == 0)
             {
                 return;
             }
+            /////////////
             //treeEngine.MergedRootList.ForEach(x => PrintDiam(x, String.Format("l0dimTree{0}", treeEngine.MergedRootList.IndexOf(x))));
             //dimEngine.RootList.ForEach(x => PrintDiam(x, String.Format("l0dimMaxTree{0}", dimEngine.RootList.IndexOf(x))));
-            //------
+            /////////////
 
             //--转换--
             ThDrainageTransformEngine.TransformTopToAD(dimEngine.RootList);
             ThDrainageTransformEngine.TransTreeListToSelect(dimEngine.RootList, dataPass.PrintBasePt);
-            //dimEngine.RootList.ForEach(x => PrintZ(x, string.Format("l0Zvalue{0}", dimEngine.RootList.IndexOf(x))));
             dimEngine.RootList.ForEach(x => PrintAD(x, string.Format("l1TransAD{0}", dimEngine.RootList.IndexOf(x))));
+
+            //--摆放其他阀门--比管径先做，避让用
+            var valveOutput = ThLayoutValveService.LayoutValve(dataPass, dimEngine.RootList);
+            //valveOutput.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1otherValve", 201, lineWeightNum: 30, l: 150));
+            //valveOutput.ForEach(x =>
+            //{
+            //    if (x.Visibility.Count() > 0)
+            //    {
+            //        DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1otherValveVisi", 201, hight: 180);
+            //    }
+            //});
+
 
             //--摆放管径--
             var dim = ThLayoutDimService.LayoutDim(dimEngine.RootList);
-            dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1Dim", 191, l: 100));
-            dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1Dim", 191, hight: 180));
+            //dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1Dim", 191, lineWeightNum: 30, l: 150));
+            //dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1DimText", 191, hight: 180));
 
             //--摆放终端阀门--
             var endValve = ThLayoutAngleValveService.LayoutAngleValve(dimEngine.RootList, treeEngine.PtTerminal);
-            endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1EndValve", 40, l: 100));
-            endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1EndValve", 40, hight: 180));
-
-
-            //--摆放其他阀门--
-            var valveOutput = ThLayoutValveService.LayoutValve(dataPass, dimEngine.RootList);
-            valveOutput.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1otherValve", 201, l: 100));
-            valveOutput.ForEach(x =>
-            {
-                if (x.Visibility.Count() > 0)
-                {
-                    DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1otherValve", 201, hight: 180);
-                }
-            });
-
-
-            //-摆放热水器
-
-
-
-
+            //endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1EndValve", 40, lineWeightNum: 30, l: 150));
+            //endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1EndValveVisi", 40, hight: 180));
 
             //--断线--
 
 
+            dataPass.OutputDim.AddRange(dim);
+            dataPass.OutputValve.AddRange(valveOutput);
+            dataPass.OutputAngleValve.AddRange(endValve);
 
 
 
@@ -131,9 +131,9 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             root.Child.ForEach(x => PrintDiam(x, layer));
         }
 
-        private static void PrintZ(ThDrainageTreeNode root, string layer)
+        public static void PrintZ(ThDrainageTreeNode root, string layer)
         {
-            DrawUtils.ShowGeometry(new Point3d(root.Pt.X + 20, root.Pt.Y, 0), string.Format("transZ:{0}", root.TransPt.Z), layer, 3, 25, 50);
+            DrawUtils.ShowGeometry(new Point3d(root.Pt.X + 20, root.Pt.Y, 0), string.Format("z:{0}", root.TransPt.Z), layer, 3, 25, 50);
 
             root.Child.ForEach(x => PrintZ(x, layer));
         }
@@ -143,7 +143,8 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             if (root.Parent != null)
             {
                 var line = new Line(root.Parent.TransPt, root.TransPt);
-                DrawUtils.ShowGeometry(line, layer, 151);
+                var color = root.IsCool ? 140 : 221;
+                DrawUtils.ShowGeometry(line, layer, color);
             }
             root.Child.ForEach(x => PrintAD(x, layer));
         }

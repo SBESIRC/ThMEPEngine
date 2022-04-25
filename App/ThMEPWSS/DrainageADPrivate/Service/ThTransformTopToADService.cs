@@ -85,7 +85,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         }
         private Matrix<double> IdentityEnlargeMatrix()
         {
-            var enlargeScale = 1.5;
+            var enlargeScale = ThDrainageADCommon.TransEnlargeScale;
             var enlargeArray = new double[,]
                                {
                                         {enlargeScale,0,0,0 },
@@ -142,13 +142,13 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             TransPtNormalZNode(node);
             node.Child.ForEach(x => TransPtNormalZ(x));
         }
+
         private static void TransPtNormalZNode(ThDrainageTreeNode node)
         {
             if (node.Parent != null)
             {
-                node.TransPt = node.Pt;
                 double deltaZ = node.Parent.Pt.Z - node.Pt.Z;
-                if (Math.Abs(deltaZ) >= 10)//立管
+                if (Math.Abs(deltaZ) >= 1)//立管
                 {
                     double newZ = node.Parent.TransPt.Z - deltaZ / Math.Abs(deltaZ) * 1000;
                     node.TransPt = new Point3d(node.TransPt.X, node.TransPt.Y, newZ);

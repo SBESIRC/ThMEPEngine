@@ -36,8 +36,9 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public Point3dCollection SelectPtsAD { private get; set; }
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { private get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<ThIfcDistributionFlowElement> ValveWaterHeater { private get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<Entity> TchValve { private get; set; } = new List<Entity>(); //天正阀
-        public List<Entity> OpeningSignData { private get; set; } = new List<Entity>(); //断管符号
+        public List<BlockReference> TchValve { private get; set; } = new List<BlockReference>(); //天正阀
+        public List<BlockReference> TchOpeningSign { get; set; } = new List<BlockReference>();
+        public List<Spline> OpeningSign { private get; set; } = new List<Spline>(); //断管符号
         public Dictionary<string, List<string>> BlockNameDict { private get; set; } = new Dictionary<string, List<string>>();
 
         //----output
@@ -46,10 +47,10 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public List<Line> HotPipeAD { get; private set; }
         public List<Line> CoolPipeAD { get; private set; }
         public List<Line> VerticalPipe { get; private set; }//立管
-        public List<ThSaniterayTerminal> Terminal { get; private set; }//末端 热水器
-        public List<ThValve> Valve { get; private set; } //给水角阀平面,截止阀,闸阀,止回阀,防污隔断阀,,天正截止阀
-        public List<ThValve> OpeningSign { get; private set; }//断管,样条曲线
+        public List<ThSaniterayTerminal> Terminal { get; private set; }//末端洁具 热水器
+        public List<ThValve> Valve { get; private set; } //截止阀,闸阀,止回阀,防污隔断阀,天正阀，天正断管,样条曲线
         public List<ThValve> Casing { get; private set; }//套管系统
+        public List<ThValve> AngleValve { get; private set; }//给水角阀平面
 
         public ThDrainageADDataProcessService()
         {
@@ -61,8 +62,8 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             VerticalPipe = new List<Line>();
             Terminal = new List<ThSaniterayTerminal>();
             Valve = new List<ThValve>();
-            OpeningSign = new List<ThValve>();
             Casing = new List<ThValve>();
+            AngleValve = new List<ThValve>();
         }
 
         public void SaperateTopViewAD()
@@ -155,13 +156,17 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             VerticalPipe.ForEach(x => DrawUtils.ShowGeometry(x.StartPoint, "l0VerticalPipe", 140, r: 25));
 
             Terminal.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0terminal", 30));
-            Terminal.ForEach(x => DrawUtils.ShowGeometry(x.Boundary.GetCenter(), x.Type.ToString(), "l0terminal", 30, hight: 50));
+            Terminal.ForEach(x => DrawUtils.ShowGeometry(x.Boundary.GetCenter(), x.Type.ToString(), "l0terminalType", 30, hight: 50));
 
             Valve.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Valve", 210));
-            Valve.ForEach(x => DrawUtils.ShowGeometry(x.Boundary.GetCenter(), x.Name, "l0Valve", 210, hight: 50));
+            Valve.ForEach(x => DrawUtils.ShowGeometry(x.InsertPt, x.Dir, "l0Valve", 210, lineWeightNum: 30, l: 150));
+            Valve.ForEach(x => DrawUtils.ShowGeometry(x.InsertPt, x.Name, "l0ValveName", 210, hight: 50));
 
-            OpeningSign.ForEach(x => DrawUtils.ShowGeometry(x.CenterPt, "l0OpeningSign", 40, r: 30));
+            AngleValve.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0AngleValve", 210));
+            AngleValve.ForEach(x => DrawUtils.ShowGeometry(x.InsertPt, x.Dir, "l0AngleValve", 210, lineWeightNum: 30, l: 150));
+
             Casing.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Casing", 201));
+            Casing.ForEach(x => DrawUtils.ShowGeometry(x.InsertPt, x.Dir, "l0Casing", 210, lineWeightNum: 30, l: 150));
 
         }
 
@@ -178,7 +183,12 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
                 var type = ThDrainageADTermianlService.GetTerminalType(name, BlockNameDict);
 
-                if (type != ThDrainageADCommon.TerminalType.Unknow)
+                if (type == ThDrainageADCommon.TerminalType.WaterHeater)
+                {
+                    pl = CreateWaterHeater(blk);
+
+                }
+                if (type != ThDrainageADCommon.TerminalType.Unknow && pl.NumberOfVertices > 0)
                 {
                     var terminal = new ThSaniterayTerminal()
                     {
@@ -192,41 +202,75 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             }
         }
 
+        private static Polyline CreateWaterHeater(BlockReference blk)
+        {
+            var pl = new Polyline();
+            pl.Closed = true;
+            var tol = new Tolerance(1, 1);
+            var obj = new DBObjectCollection();
+            blk.Explode(obj);
+
+            var hatch = obj.OfType<Hatch>().OrderByDescending(x => x.Area).First();
+
+            var scale = blk.ScaleFactors.X;
+            var r = 50 * scale;
+            var lines = obj.OfType<Line>().ToList();
+            var ptHatch = hatch.GeometricExtents.GetCenter();
+            var connectLs = lines.Where(x => x.StartPoint.IsEqualTo(ptHatch, tol)).ToList();
+
+            if (connectLs.Count() > 0)
+            {
+                var l = connectLs.First();
+                var ldir = (l.EndPoint - l.StartPoint).GetNormal();
+                var ldirP = ldir.RotateBy(90 * Math.PI / 180, Vector3d.ZAxis);
+
+                var pt0 = l.StartPoint - ldir * r + ldirP * r;
+                var pt1 = pt0 + ldir * r + ldir * l.Length;
+                var pt2 = pt1 - ldirP * r * 2;
+                var pt3 = pt2 - ldir * l.Length - ldir * r;
+
+                pl.AddVertexAt(0, pt0.ToPoint2D(), 0, 0, 0);
+                pl.AddVertexAt(1, pt1.ToPoint2D(), 0, 0, 0);
+                pl.AddVertexAt(2, pt2.ToPoint2D(), 0, 0, 0);
+                pl.AddVertexAt(3, pt3.ToPoint2D(), 0, 0, 0);
+            }
+            return pl;
+        }
+
         public void BuildValve()
         {
-            //给水角阀平面,截止阀,闸阀,止回阀,防污隔断阀 //分开阀和套管
+            //valve:截止阀,闸阀,止回阀,防污隔断阀 天正阀，天正断管，样条曲线断管 angleVavle:给水角阀平面 casing套管
             foreach (var valve in ValveWaterHeater)
             {
-                if (valve.Name == ThDrainageADCommon.BlkName_WaterHeater ||
-                    valve.Name == ThDrainageADCommon.BlkName_AngleValve)
+                if (valve.Name == ThDrainageADCommon.BlkName_WaterHeater)
                 {
                     continue;
                 }
 
                 var blk = valve.Outline as BlockReference;
-                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
-                var dir = new Vector3d();
+                var dir = new Vector3d(1, 0, 0);
                 if (valve.Name == ThDrainageADCommon.BlkName_Casing)
                 {
                     dir = new Vector3d(0, -1, 0);
                 }
-                else
-                {
-                    dir = new Vector3d(0, 1, 0);
-                }
-                dir = dir.RotateBy(blk.Rotation, Vector3d.ZAxis).GetNormal();
-
+                dir = dir.TransformBy(blk.BlockTransform).GetNormal();
+                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
+                var scale = Math.Abs(blk.ScaleFactors.X);
                 var valveModel = new ThValve()
                 {
                     InsertPt = blk.Position,
-                    Boundary = pl,
                     Dir = dir,
                     Name = valve.Name,
-                    CenterPt = pl.GetCenter(),
+                    Boundary = pl,
+                    Scale = scale,
                 };
                 if (valve.Name == ThDrainageADCommon.BlkName_Casing)
                 {
                     Casing.Add(valveModel);
+                }
+                else if (valve.Name == ThDrainageADCommon.BlkName_AngleValve)
+                {
+                    AngleValve.Add(valveModel);
                 }
                 else
                 {
@@ -235,30 +279,34 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
             }
 
-            //天正阀
-            foreach (var valve in TchValve)
+            //天正阀 天正断管
+            var tch = new List<BlockReference>();
+            tch.AddRange(TchValve);
+            tch.AddRange(TchOpeningSign);
+            foreach (var blk in tch)
             {
-                var pl = valve.GeometricExtents.ToRectangle();
-                var name = ThDrainageADCommon.BlkName_ShutoffValve;
-                var dir = GetValveDir(pl, false);
+                var dir = new Vector3d(1, 0, 0);
+                dir = dir.TransformBy(blk.BlockTransform).GetNormal();
+                var pl = ThDrainageADTermianlService.GetVisibleOBB(blk);
+                var scale = Math.Abs(blk.ScaleFactors.X);
+
                 var valveModel = new ThValve()
                 {
-                    Boundary = pl,
-                    Name = name,
+                    InsertPt = blk.Position,
                     Dir = dir,
-                    InsertPt = pl.GetCenter(),
-                    CenterPt = pl.GetCenter(),
+                    Name = blk.Name,
+                    Boundary = pl,
+                    Scale = scale,
                 };
                 Valve.Add(valveModel);
             }
 
-            //天正断管,样条断管？？
-            foreach (var valve in OpeningSignData)
+            //样条断管
+            foreach (var item in OpeningSign)
             {
-                var pl = valve.GeometricExtents.ToRectangle();
+                //以天正方向为准（计算方便）注意这个和最终print差了90度
+                var pl = item.GeometricExtents.ToRectangle();
                 var name = ThDrainageADCommon.BlkName_OpeningSign;
-                //var dir = new Vector3d(1,0,0);
-                //dir = dir.RotateBy(valve.Rotation, Vector3d.ZAxis).GetNormal();
                 var dir = GetValveDir(pl, false);
                 var valveModel = new ThValve()
                 {
@@ -266,9 +314,9 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                     Name = name,
                     Dir = dir,
                     InsertPt = pl.GetCenter(),
-                    CenterPt = pl.GetCenter(),
+                    Scale = 1,
                 };
-                OpeningSign.Add(valveModel);
+                Valve.Add(valveModel);
             }
         }
 

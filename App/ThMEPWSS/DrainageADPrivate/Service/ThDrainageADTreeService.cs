@@ -68,7 +68,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             foreach (var endPt in endPtList)
             {
-                var vertical = IfVertical(endPt.Value[0]);
+                var vertical = IsVertical(endPt.Value[0]);
                 if (vertical == false)
                 {
                     ptStart.Add(endPt.Key);
@@ -86,14 +86,20 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 }
             }
         }
-        private static bool IfVertical(Line l)
+
+        /// <summary>
+        /// 是否立管。管线长度小于1的水平管也会被判定为true
+        /// </summary>
+        /// <param name="l"></param>
+        /// <returns></returns>
+        public static bool IsVertical(Line l)
         {
             var bReturn = false;
-
+            var tol = 1;
             var zDelta = Math.Abs(l.StartPoint.Z - l.EndPoint.Z);
             var vertical = Math.Abs(zDelta - l.Length);
 
-            if (vertical <= 0.1)
+            if (vertical <= tol)
             {
                 bReturn = true;
             }
@@ -178,7 +184,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
         }
 
-        private static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
+        public static Point3d IsInDict(Point3d pt, Dictionary<Point3d, List<Line>> ptDict)
         {
             var key = new Point3d();
             var tol = new Tolerance(1, 1);
@@ -195,74 +201,110 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         /// </summary>
         /// <param name="ptStart"></param>
         /// <param name="ptTerminal"></param>
-        /// <param name="ptDict"></param>
-        /// <param name="datapass"></param>
+        /// <param name="PtCoolHotDict"></param>
         /// <returns></returns>
-        public static Dictionary<Point3d, bool> CheckCoolHotStartPt(List<Point3d> ptStart, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
+        public static Dictionary<Point3d, bool> CheckCoolHotStartPt(List<Point3d> ptStart, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, bool> PtCoolHotDict)
         {
             var ptCoolHotDict = new Dictionary<Point3d, bool>();
 
             foreach (var pt in ptStart)
             {
-                var isCool = CheckCoolHotPt(pt, ptDict, datapass);
-                ptCoolHotDict.Add(pt, isCool);
+                if (PtCoolHotDict.TryGetValue(pt, out var isCool))
+                {
+                    ptCoolHotDict.Add(pt, isCool);
+                }
             }
             foreach (var pt in ptTerminal)
             {
                 if (pt.Value.Type == ThDrainageADCommon.TerminalType.WaterHeater)
                 {
-                    var isCool = CheckCoolHotPt(pt.Key, ptDict, datapass);
-                    if (isCool == false)
+                    if (PtCoolHotDict.TryGetValue(pt.Key, out var isCool))
                     {
-                        ptCoolHotDict.Add(pt.Key, isCool);
+                        if (isCool == false)
+                        {
+                            ptCoolHotDict.Add(pt.Key, isCool);
+                        }
                     }
                 }
             }
 
             return ptCoolHotDict;
         }
-        private static bool CheckCoolHotPt(Point3d pt, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
-        {
-            var isCool = false;
-            var tol = new Tolerance(1, 1);
-            ptDict.TryGetValue(pt, out var lines);
 
-            if (lines != null && lines.Count > 0)
-            {
-                if (lines.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
-                {
-                    isCool = true;
-                }
-                else if (lines.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
-                {
-                    isCool = false;
-                }
-                else if (lines.Where(x => datapass.VerticalPipe.Contains(x)).Any())
-                {
-                    var ptOther = lines[0].EndPoint;
-                    if (pt.IsEqualTo(ptOther, tol))
-                    {
-                        ptOther = lines[0].StartPoint;
-                    }
-                    var ptKey = IsInDict(ptOther, ptDict);
-                    if (ptKey != Point3d.Origin)
-                    {
-                        var connLine = ptDict[ptKey];
-                        if (connLine.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
-                        {
-                            isCool = true;
-                        }
-                        else if (connLine.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
-                        {
-                            isCool = false;
-                        }
-                    }
-                }
-            }
+        ///// <summary>
+        ///// 返回冷热起点
+        ///// </summary>
+        ///// <param name="ptStart"></param>
+        ///// <param name="ptTerminal"></param>
+        ///// <param name="ptDict"></param>
+        ///// <param name="datapass"></param>
+        ///// <returns></returns>
+        //public static Dictionary<Point3d, bool> CheckCoolHotStartPt(List<Point3d> ptStart, Dictionary<Point3d, ThSaniterayTerminal> ptTerminal, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
+        //{
+        //    var ptCoolHotDict = new Dictionary<Point3d, bool>();
 
-            return isCool;
+        //    foreach (var pt in ptStart)
+        //    {
+        //        var isCool = CheckCoolHotPt(pt, ptDict, datapass);
+        //        ptCoolHotDict.Add(pt, isCool);
+        //    }
+        //    foreach (var pt in ptTerminal)
+        //    {
+        //        if (pt.Value.Type == ThDrainageADCommon.TerminalType.WaterHeater)
+        //        {
+        //            var isCool = CheckCoolHotPt(pt.Key, ptDict, datapass);
+        //            if (isCool == false)
+        //            {
+        //                ptCoolHotDict.Add(pt.Key, isCool);
+        //            }
+        //        }
+        //    }
 
-        }
+        //    return ptCoolHotDict;
+        //}
+
+        //private static bool CheckCoolHotPt(Point3d pt, Dictionary<Point3d, List<Line>> ptDict, ThDrainageADPDataPass datapass)
+        //{
+        //    var isCool = false;
+        //    var tol = new Tolerance(1, 1);
+        //    ptDict.TryGetValue(pt, out var lines);
+
+        //    if (lines != null && lines.Count > 0)
+        //    {
+        //        if (lines.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
+        //        {
+        //            isCool = true;
+        //        }
+        //        else if (lines.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
+        //        {
+        //            isCool = false;
+        //        }
+        //        else if (lines.Where(x => datapass.VerticalPipe.Contains(x)).Any())
+        //        {
+        //            var ptOther = lines[0].EndPoint;
+        //            if (pt.IsEqualTo(ptOther, tol))
+        //            {
+        //                ptOther = lines[0].StartPoint;
+        //            }
+        //            var ptKey = IsInDict(ptOther, ptDict);
+        //            if (ptKey != Point3d.Origin)
+        //            {
+        //                var connLine = ptDict[ptKey];
+        //                if (connLine.Where(x => datapass.CoolPipeTopView.Contains(x)).Any())
+        //                {
+        //                    isCool = true;
+        //                }
+        //                else if (connLine.Where(x => datapass.HotPipeTopView.Contains(x)).Any())
+        //                {
+        //                    isCool = false;
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return isCool;
+
+        //}
 
         public static ThDrainageTreeNode BuildTree(Point3d startPt, Dictionary<Point3d, List<Line>> ptDict)
         {
@@ -286,9 +328,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 var theOtherEnd = l.EndPoint;
                 if (theOtherEnd.IsEqualTo(thisNodePt, tol))
                 {
-                    //var startPt = l.StartPoint;
-                    //l.StartPoint = thisNodePt;
-                    //l.EndPoint = startPt;
                     theOtherEnd = l.StartPoint;
                 }
                 var otherKey = IsInDict(theOtherEnd, ptDict);
@@ -299,9 +338,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     child.Parent = thisNode;
                     FindNextLeaf(child, ptDict, traversed);
                 }
-
             }
-            //}
         }
 
         /// <summary>
@@ -361,7 +398,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             {
                 var hotTree = hotRoot[i];
 
-                var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == hotTree.Terminal).Any());
+                var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == hotTree.Terminal && o.Terminal != null && o.Terminal.Type == ThDrainageADCommon.TerminalType.WaterHeater).Any());
                 if (pairCool.Count() > 0)
                 {
                     var coolClone = CloneTree(pairCool.First().Key);
@@ -435,6 +472,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         public static void SetTerminalPairMultipleTree(List<ThDrainageTreeNode> rootList, Dictionary<Point3d, Point3d> terminalPairDict)
         {
             var allLeafs = rootList.SelectMany(x => x.GetLeaf()).ToList();
+            allLeafs.AddRange(rootList);
 
             foreach (var l in allLeafs)
             {

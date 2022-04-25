@@ -109,8 +109,14 @@ namespace ThMEPWSS
                     BlockNameDict = BlockNameDict,
                     BlockNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
                                                         ThDrainageADCommon.BlkName_ShutoffValve,  ThDrainageADCommon.BlkName_GateValve,
-                                                        ThDrainageADCommon.BlkName_CheckValve,ThDrainageADCommon.BlkName_AntifoulingCutoffValve,},
+                                                        ThDrainageADCommon.BlkName_CheckValve,ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
+                                                        ThDrainageADCommon.BlkName_Casing,
+                                                      },
 
+                    BlockNameTchValve = new List<string> { ThDrainageADCommon.BlkName_ShutoffValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_GateValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_CheckValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_AntifoulingCutoffValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_OpeningSign_TchTag.ToUpper(),ThDrainageADCommon .BlkName_WaterMeteValve_TchTag.ToUpper(),
+                                                        },
                 };
 
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
@@ -125,7 +131,8 @@ namespace ThMEPWSS
                     SanitaryTerminal = dataFactory.SanitaryTerminal,
                     ValveWaterHeater = dataFactory.ValveWaterHeater,
                     TchValve = dataFactory.TchValve,
-                    OpeningSignData = dataFactory.OpeningSign,
+                    TchOpeningSign = dataFactory.TchOpeningSign,
+                    OpeningSign = dataFactory.OpeningSign,
                 };
 
                 //dataQuery.Transform(transformer);
@@ -135,9 +142,6 @@ namespace ThMEPWSS
                 dataQuery.BuildValve();
                 dataQuery.Print();
                 //dataQuery.Reset(transformer);
-
-
-
 
             }
         }
@@ -207,9 +211,20 @@ namespace ThMEPWSS
             return sprayLines;
         }
 
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThLoadBlkTemplate", CommandFlags.Modal)]
+        public void ThLoadBlkTemplate()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
 
+                var blkNameList = new List<string> { "热水器标注" };
+                var layerNameList = new List<string> { "" };
 
-
+                ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameList, layerNameList);
+            }
+        }
 
     }
 }

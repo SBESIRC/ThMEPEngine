@@ -17,14 +17,12 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public ThSaniterayTerminal Terminal { get; set; } //如果是末端node，末端
         public ThDrainageTreeNode TerminalPair { get; set; } //如果是末端node，对应热/冷水口
         public bool IsCool { get; set; }
-
         public int Dim { get; set; }
-
         public Point3d TransPt { get; set; }
-
         public ThDrainageTreeNode(Point3d pt)
         {
             Pt = pt;
+            TransPt = pt;
             Child = new List<ThDrainageTreeNode>();
         }
 

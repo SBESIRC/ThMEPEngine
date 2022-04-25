@@ -12,36 +12,45 @@ namespace ThMEPWSS.DrainageADPrivate
         public static string Layer_EQPM = "W-WSUP-EQPM";
         public static string Layer_DIMS_D = "W-DRAI-DIMS";
         public static string Layer_DIMS = "W-WSUP-DIMS";
+        public static string Layer_Bush = "W-BUSH";
         public static string Layer_HotPipe = "W-WSUP-HOT-PIPE";
         public static string Layer_CoolPipe = "W-WSUP-COOL-PIPE";
         public static string Layer_HotIPipe = "W-WSUP-HOTI-PIPE";
         public static string Layer_HotRPipe = "W-WSUP-HOTR-PIPE";
 
         public static string BlkName_WaterHeater = "热水器标注";
+        public static string BlkName_WaterHeater_AD = "燃气热水器";
         public static string BlkName_AngleValve = "给水角阀平面";
         public static string BlkName_AngleValve_AD = "给水角阀";
+
         public static string BlkName_ShutoffValve = "截止阀";
+        public static string BlkName_ShutoffValve_TchTag = "$VALVE$00000295";
         public static string BlkName_GateValve = "闸阀";
+        public static string BlkName_GateValve_TchTag = "$VALVE$00000296";
         public static string BlkName_CheckValve = "止回阀";
+        public static string BlkName_CheckValve_TchTag = "$VALVE$00000315";
         public static string BlkName_AntifoulingCutoffValve = "防污隔断阀";
+        public static string BlkName_AntifoulingCutoffValve_TchTag = "$VALVE$00000656";
+        public static string BlkName_WaterMeteValve_TchTag = "$VALVE$00000742";
         public static string BlkName_OpeningSign = "断线";
+        public static string BlkName_OpeningSign_TchTag = "$TwtSys$00000132";
         public static string BlkName_Casing = "套管";
         public static string BlkName_Casing_AD = "套管系统";
 
         public static string BlkName_Dim = "给水管径50";
-
         public static string DiameterDN_visi_pre = "DN";
         public static int DiameterDim_move_x = 25;
         public static int DiameterDim_move_y = 30;
         public static int DiameterDim_blk_x = 440;
         public static int DiameterDim_blk_y = 180;
 
-        public static int Blk_scale_end = 1;
+        public static double Blk_scale_end = 1.0;
 
         public static string VisiName_valve = "可见性";
         public static string VisiName1_valve = "可见性1";
 
         public static double Th = 24.0; //用水时数（h） 等于24
+        public static double TransEnlargeScale = 1.5;
         public enum TerminalType
         {
             Toilet,  //坐便器
