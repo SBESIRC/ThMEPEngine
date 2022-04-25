@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThMEPLighting.ParkingStall.Geometry;
 using ThMEPLighting.ParkingStall.Model;
 
@@ -94,7 +95,7 @@ namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
         {
             foreach (var lineSegment in polylineNode.LineSegments)
             {
-                if (IsInLineSegment(line, lineSegment, 1e-4))
+                if (IsInLineSegment(line, lineSegment, 1e-3))
                     return lineSegment;
             }
 
@@ -107,7 +108,7 @@ namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
             var srcPtE = line.EndPoint;
 
             var segmentLine = lineSegment.SegmentLine;
-            if (GeomUtils.IsPointOnLine(srcPtS, segmentLine, tolerance) && GeomUtils.IsPointOnLine(srcPtE, segmentLine, tolerance))
+            if (srcPtS.PointInLineSegment(segmentLine,tolerance,tolerance) && srcPtE.PointInLineSegment(segmentLine, tolerance, tolerance))
                 return true;
 
             return false;
