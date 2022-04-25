@@ -249,9 +249,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //绘制管径
                 DrawPipeDims(pointList, hvector, subPt1);
                 //立管
+                var _hascrossedpipe = false;
                 var riserPoint = subPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector,_hasFlushPoint,_markLoc, rootLine);
+                    ref floorIndex, ref mvector,_hasFlushPoint,_markLoc,ref _hascrossedpipe, rootLine);
                 sumLength += riserPoint.DistanceTo(subPt1);
                 subPt1 = riserPoint;
                 //画子节点
@@ -259,16 +260,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 sumLength += subLength;
                 startPointNode = endPointNode;
             }
-            //绘制主干线
+            //
             double rootLength = startLength + endLength + sumLength;//第一段2000，末尾段1000
             rootLength += SubSpace * (rootNode.Children.Count - 1);//子节点的间隔1000
             Point3d rootPt1 = basePt;
-            Point3d rootPt2 = basePt + hvector * rootLength;
-            var hLine1 = new Line(rootPt1, rootPt2);
-            if (rootNode.Children.Count > 0)
-                PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
-            else
-                DrawBreakDot(rootPt1);
+            Point3d rootPt2 = basePt + hvector * rootLength;         
             //插入阀门
             var _pointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             DrawValves(_pointList, ref rootPt2, ref sumLength, hvector);
@@ -280,10 +276,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var rootPointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             DrawPipeDims(rootPointList, hvector, rootPt2);
             //立管
+            var hascrossedpipe = false;
             var _riserPoint = rootPt2;
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector,hasFlushPoint,markLoc, rootLine);
+                ref floorIndex, ref mvector,hasFlushPoint,markLoc,ref hascrossedpipe, rootLine);
             sumLength += _riserPoint.DistanceTo(rootPt2);
+            //绘制主干线
+            if (rootNode.Children.Count > 0)
+                PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
+            else
+                DrawBreakDot(rootPt1);
             rootPt2 = _riserPoint;
             return rootLength;
         }
@@ -330,9 +332,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //绘制管径
                 DrawPipeDims(pointList, hvector, childPt1);
                 //立管
+                var _hascrossedpipe = false;
                 var riserPoint = childPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector,_hasFlushPoint, _markLoc);
+                    ref floorIndex, ref mvector,_hasFlushPoint, _markLoc,ref _hascrossedpipe);
                 sumLength += riserPoint.DistanceTo(childPt1);
                 childPt1 = riserPoint;      
                 //绘制子节点
@@ -357,18 +360,23 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制冲洗点位情况
             bool hasFlushPoint = false;
             Point3d markLoc = new Point3d();
-            DrawFlushPointEntry(_pointList, ref cuLength, ref hLinePt2, vvector, hvector, rootLine,ref hasFlushPoint,ref markLoc);
-            //绘制当前节点干线
-            PreLines.Add(new PreLine(new Line(hLinePt1, hLinePt2), PipeLayerName, 0));
-            DrawBreakDot(hLinePt2, Math.PI / 2);
+            DrawFlushPointEntry(_pointList, ref cuLength, ref hLinePt2, vvector, hvector, rootLine, ref hasFlushPoint, ref markLoc);     
             //绘制管径
             var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
             DrawPipeDims(rootPointList, hvector, hLinePt2);
             //立管
+            var hascrossedpipe = false;
             var _riserPoint = hLinePt2;
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector, hasFlushPoint, markLoc);
+                ref floorIndex, ref mvector, hasFlushPoint, markLoc, ref hascrossedpipe);
             cuLength += _riserPoint.DistanceTo(hLinePt2);
+            //绘制当前节点干线
+            var line = new Line(hLinePt1, hLinePt2);
+            if (hasFlushPoint)
+                line = new Line(hLinePt1, hLinePt2 - hvector * 1000);
+            else if (!hascrossedpipe)
+                DrawBreakDot(hLinePt2, Math.PI / 2);
+            PreLines.Add(new PreLine(line, PipeLayerName, 0));
             hLinePt2 = _riserPoint;
             return cuLength;
         }
@@ -517,7 +525,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         }
         public void DrawRisePipe(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
             , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
-            ,bool hasFlushPoint,Point3d markloc, Line rootLine = null)
+            ,bool hasFlushPoint,Point3d markloc,ref bool hascrossedpipe, Line rootLine = null)
         {
             List<Point3d> riserStartPoints = new List<Point3d>();
             for (int j = 0; j < pointList.Count; j++)
@@ -561,6 +569,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         var otherIndex = GetFloorIndex(firstPt, FloorList);
                         if (otherIndex != floorIndex)
                         {
+                            hascrossedpipe = true;
                             bool isToCurFloor = false;
                             HelpLines.Add(new Line(vPt1, firstPt));
                             var compare_ini_lines = PreLines.Select(e => e.Line).ToList();
