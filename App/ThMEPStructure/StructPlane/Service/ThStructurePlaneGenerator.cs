@@ -1,24 +1,14 @@
 ﻿using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using AcHelper;
-using System.Linq;
 
 namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThStructurePlaneGenerator
     {
         private ThStructurePlaneConfig Config { get; set; }
-        private string ExeFilePath
-        {
-            get
-            {
-                // exe路径要和当前Dll路径在一个地方     
-                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                return Path.Combine(currentDllPath, "elevation-generator.exe");
-            }            
-        }
         public ThStructurePlaneGenerator(ThStructurePlaneConfig config)
         {
             Config = config;
@@ -26,7 +16,10 @@ namespace ThMEPStructure.StructPlane.Service
         public void Generate()
         {
             // 先配置
-            Config.Configure();
+            if(!Config.Configure())
+            {
+                return;
+            }
 
             // 清除
             Clear();
@@ -49,12 +42,7 @@ namespace ThMEPStructure.StructPlane.Service
             using (var proc = new Process())
             {
                 object output = null;                           
-                proc.StartInfo.FileName = ExeFilePath;
-                var fileInfo = new FileInfo(proc.StartInfo.FileName);
-                if(!fileInfo.Exists)
-                {
-                    return;
-                }
+                proc.StartInfo.FileName = Config.ExeFilePath;                
                 // 是否使用操作系统Shell启动
                 proc.StartInfo.UseShellExecute = false;
                 // 不显示程序窗口
@@ -65,8 +53,10 @@ namespace ThMEPStructure.StructPlane.Service
                 proc.StartInfo.RedirectStandardInput = true;
                 // 重定向标准错误输出
                 proc.StartInfo.RedirectStandardError = true;
-                proc.StartInfo.Arguments ="--config_path " + Config.SvgConfigFilePath;
 
+                // elevation-generator.exe--config_path config_path --input_path input_path --output_path output_path --log_path log_path
+                proc.StartInfo.Arguments = Config.Arguments;
+                    
                 proc.Start();
                 proc.WaitForExit();
                 if (proc.ExitCode == 0)
@@ -119,7 +109,7 @@ namespace ThMEPStructure.StructPlane.Service
             var results = new List<string>();
             //文件名，不含后缀
             var ifcFileName = Config.IfcFileName.ToUpper();
-            var di = new DirectoryInfo(Config.SavePath);
+            var di = new DirectoryInfo(Config.SvgSavePath);
             foreach(var fileInfo in di.GetFiles())
             {
                 if(fileInfo.Extension.ToUpper()==".SVG" &&

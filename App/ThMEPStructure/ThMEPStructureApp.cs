@@ -156,14 +156,15 @@ namespace ThMEPStructure
             {
                 // 解析
                 var svg = new ThMEPEngineCore.IO.SVG.ThSVGReader();
-                var svgData = svg.ReadFromFile(pfnr.StringResult);
+                svg.ReadFromFile(pfnr.StringResult);
 
                 //// 沿着X轴镜像
                 //var mt = Matrix3d.Rotation(System.Math.PI, Vector3d.XAxis, Point3d.Origin);
                 //geometries.ForEach(o => o.Boundary.TransformBy(mt));
 
                 // Print                    
-                var prinService = new ThSvgEntityPrintService(svgData.Item1, svgData.Item2);
+                var prinService = new ThSvgEntityPrintService(svg.Geos,
+                    svg.FloorInfos,svg.DocProperties);
                 prinService.Print(Active.Database);
             }
         }
@@ -178,7 +179,7 @@ namespace ThMEPStructure
                 var config = new ThStructurePlaneConfig()
                 {
                     IfcFilePath = pfnr.StringResult,
-                    SavePath = "",
+                    SvgSavePath = "",
                 };
                 var generator = new ThStructurePlaneGenerator(config);
                 generator.Generate();

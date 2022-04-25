@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADExtension;
@@ -9,7 +10,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.StructPlane.Print;
-using System.Text.RegularExpressions;
+using ThMEPEngineCore.IO.SVG;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -24,15 +25,20 @@ namespace ThMEPStructure.StructPlane.Service
                 return FlrElevation - FlrBottomEle;
             }
         }
+        public List<ThFloorInfo> FloorInfos { get; set; }
         /// <summary>
         /// 收集所有当前图纸打印的物体
         /// </summary>
         public ObjectIdCollection ObjIds { get; private set; }
         private List<ThGeometry> Geos { get; set; } = new List<ThGeometry>();
         private Dictionary<string, string> DocProperties {get;set;} = new Dictionary<string, string>(); 
-        public ThSvgEntityPrintService(List<ThGeometry> geos,Dictionary<string,string> docProperties)
+        public ThSvgEntityPrintService(
+            List<ThGeometry> geos,
+            List<ThFloorInfo> floorInfos,
+            Dictionary<string,string> docProperties)
         {
-            Geos = geos;            
+            Geos = geos;
+            FloorInfos = floorInfos;
             DocProperties = docProperties;
             ObjIds = new ObjectIdCollection();
             FlrElevation = DocProperties.GetFloorElevation();
@@ -55,20 +61,36 @@ namespace ThMEPStructure.StructPlane.Service
             var beamLines = ToDBObjectCollection(db, res.Item1);
             var beamTexts = ToDBObjectCollection(db, res.Item2);
             var removedTexts = FilterBeamMarks(beamLines, beamTexts);
-            //SetColor(db, removedTexts, 1);
-            //removedTexts.OfType<DBText>()
-            //    .Select(o => new Circle(o.Position, Vector3d.ZAxis, 500))
-            //    .ToCollection()
-            //    .Print(db);
-            Erase(db, removedTexts);
+
+            // 将带有标高的文字，换成两行
+            var adjustService = new ThAdjustBeamMarkService(beamLines,
+                beamTexts.Difference(removedTexts));
+            var results = adjustService.Adjust();
+            results.ForEach(x => removedTexts.Add(x.Item1));
+
+            // 将生成的文字打印出来
+            var config = ThAnnotationPrinter.GetAnnotationConfig();
+            var printer = new ThAnnotationPrinter(config);
+            results.ForEach(x =>
+            {
+                ObjIds.Remove(x.Item1.ObjectId);
+                var specAnnotions = printer.Print(db, x.Item2);
+                var bgAnnotions = printer.Print(db, x.Item3);
+                Append(specAnnotions);
+                Append(bgAnnotions);
+            });
             
+            // 删除不要的文字
+            Erase(db, removedTexts);
+
             // 打印柱表
             var maxX= Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                 .MaxPoint.X).OrderByDescending(o => o).FirstOrDefault();
             var minY = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                  .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
             var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
-            //PrintElevationTable(db,elevationTblBasePt, 0.0);
+            var elevationInfos = GetElevationInfos();
+            PrintElevationTable(db, elevationTblBasePt, elevationInfos);
 
             // 打印楼板填充
             // 表右上基点
@@ -87,6 +109,11 @@ namespace ThMEPStructure.StructPlane.Service
                     .OfType<ObjectId>()
                     .Select(o => acadDb.Element<Entity>(o)).ToCollection();
             }
+        }
+        private void AjustBeamMarks(DBObjectCollection beamLines,
+            DBObjectCollection beamTexts)
+        {
+
         }
         private DBObjectCollection FilterBeamMarks(
             DBObjectCollection beamLines,DBObjectCollection beamTexts)
@@ -142,26 +169,42 @@ namespace ThMEPStructure.StructPlane.Service
             var results = builder.Build();
             Append(results.OfType<Entity>().Select(o => o.ObjectId).ToCollection());
         }
-        private void PrintElevationTable(Database db, Point3d basePt,double rotateRad)
+        private void PrintElevationTable(Database db, Point3d basePt,List<ElevationInfo> infos)
         {
-            var elevationInfos= new List<ElevationInfo>();
-            var flrBottomElevation = FlrBottomEle/1000.0;
-            var flrElevation = FlrElevation / 1000.0;
-            elevationInfos.Add(new ElevationInfo()
-            {
-                FloorNo = "1",
-                Elevation = flrBottomElevation.ToString("0.000"),
-                FloorHeight = (flrElevation - flrBottomElevation).ToString("0.000"),
-                WallColumnGrade="",
-                BeamBoardGrade="",
-            }) ;            
-            var tblBuilder = new ThElevationTableBuilder(elevationInfos);
+            var tblBuilder = new ThElevationTableBuilder(infos);
             var objs = tblBuilder.Build();
-            var mt1 = Matrix3d.Rotation(rotateRad, Vector3d.ZAxis, Point3d.Origin);
-            var mt2 = Matrix3d.Displacement(basePt-Point3d.Origin);
-            objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt1.PreMultiplyBy(mt2)));
+            var mt = Matrix3d.Displacement(basePt-Point3d.Origin);
+            objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
             Append(objs.Print(db));
         }
+
+        private List<ElevationInfo> GetElevationInfos()
+        {
+            var results =new List<ElevationInfo>();
+            FloorInfos.ForEach(o =>
+            {
+                double flrBottomElevation = 0.0;
+                if (double.TryParse(o.Bottom_elevation, out flrBottomElevation))
+                {
+                    flrBottomElevation /= 1000.0;
+                }
+                double flrElevation = 0.0;
+                if (double.TryParse(o.Elevation, out flrElevation))
+                {
+                    flrElevation /= 1000.0;
+                }
+                results.Add(new ElevationInfo()
+                {
+                    FloorNo = o.FloorNo,
+                    Elevation = flrBottomElevation.ToString("0.000"),
+                    FloorHeight = (flrElevation - flrBottomElevation).ToString("0.000"),
+                    WallColumnGrade = "",
+                    BeamBoardGrade = "",
+                });
+            });
+            return results;
+        }
+
         private Tuple<ObjectIdCollection, ObjectIdCollection> PrintGeos(
             Database db, List<ThGeometry> geos, 
             Dictionary<string, HatchPrintConfig> slabHatchConfigs)
@@ -194,10 +237,10 @@ namespace ThMEPStructure.StructPlane.Service
                             {
                                 // update to BG 
                                 dbText.TextString = UpdateBGElevation(dbText.TextString);
-                            }
+                            } 
                             var config = ThAnnotationPrinter.GetAnnotationConfig();
                             var printer = new ThAnnotationPrinter(config);
-                            var beamAnnotions =printer.Print(db, dbText);
+                            var beamAnnotions = printer.Print(db, dbText);
                             Append(beamAnnotions);
                             beamAnnotions.OfType<ObjectId>().ForEach(e => beamTexts.Add(e));
                         }
@@ -255,7 +298,7 @@ namespace ThMEPStructure.StructPlane.Service
 
                 return Tuple.Create(beamLines, beamTexts);
             }   
-        }
+        }      
         private string UpdateBGElevation(string elevation)
         {
             // 200x530(BG+5.670) 

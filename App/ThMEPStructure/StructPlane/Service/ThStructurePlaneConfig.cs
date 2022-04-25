@@ -13,9 +13,13 @@ namespace ThMEPStructure.StructPlane.Service
         /// </summary>
         public string IfcFilePath { get; set; }
         /// <summary>
-        /// 输出的Svg文件名
+        /// 输出的Svg文件保存路径
         /// </summary>
-        public string SavePath { get; set; }
+        public string SvgSavePath { get; set; }
+        /// <summary>
+        /// Log文件保存路径
+        /// </summary>
+        public string LogSavePath { get; set; }
         /// <summary>
         /// 当前层名
         /// </summary>
@@ -35,6 +39,29 @@ namespace ThMEPStructure.StructPlane.Service
             }
         }
         /// <summary>
+        /// elevation-generator.exe的完整路径
+        /// </summary>
+        public string ExeFilePath
+        {
+            get
+            {
+                // exe路径要和当前Dll路径在一个地方     
+                var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                return Path.Combine(currentDllPath, "elevation-generator.exe");
+            }
+        }
+        public string Arguments
+        {
+            get
+            {
+                return 
+                    "--config_path " + ModifyPath(SvgConfigFilePath) +
+                    " --input_path " + ModifyPath(IfcFilePath) +
+                    " --output_path " + ModifyPath(SvgSavePath) +
+                    " --log_path " + ModifyPath(Path.Combine(LogSavePath + "log.txt"));
+            }
+        }
+        /// <summary>
         /// 生成的Svg文件存放的目录
         /// </summary>
         public string SvgDefaultSavePath
@@ -42,6 +69,13 @@ namespace ThMEPStructure.StructPlane.Service
             get
             {
                 return GetSvgDefaultSavePath();
+            }
+        }
+        public string LogDefaultSavePath
+        {
+            get
+            {
+                return GetLogDefaultSavePath();
             }
         }
         public string IfcFileName
@@ -62,22 +96,25 @@ namespace ThMEPStructure.StructPlane.Service
         public ThStructurePlaneConfig()
         {
             IfcFilePath = "";
-            SavePath = "";
+            SvgSavePath = "";
+            LogSavePath = "";
         }
-        public void Configure()
+        public bool Configure()
         {
             if (!CheckValid())
             {
-                return;
+                return false;
             }
-            SelfSetSavePath();            
-            var svgConfig = ReadJson(SvgConfigFilePath);
-            if(svgConfig==null)
-            {
-                return;
-            }
-            SetValues(svgConfig);
-            WriteJson(SvgConfigFilePath, svgConfig);
+            SetSavePath();
+            return true;
+            //考虑写入权限的问题，暂不写入配置
+            //var svgConfig = ReadJson(SvgConfigFilePath);
+            //if(svgConfig==null)
+            //{
+            //    return;
+            //}
+            //SetValues(svgConfig);
+            //WriteJson(SvgConfigFilePath, svgConfig);
         }
 
         private string GetSvgConfgFilePath()
@@ -92,18 +129,37 @@ namespace ThMEPStructure.StructPlane.Service
             //return Path.Combine(Environment.GetEnvironmentVariable("windir"),"TEMP");
         }
 
-        private void SelfSetSavePath()
+        private string GetLogDefaultSavePath()
         {
-            if (string.IsNullOrEmpty(SavePath))
+            return Path.GetTempPath();
+            //return Path.Combine(Environment.GetEnvironmentVariable("windir"),"TEMP");
+        }
+
+        private void SetSavePath()
+        {
+            if (string.IsNullOrEmpty(SvgSavePath))
             {
-                SavePath = SvgDefaultSavePath;
+                SvgSavePath = SvgDefaultSavePath;
             }
             else
             {
-                var dirInfo = new DirectoryInfo(SavePath);
+                var dirInfo = new DirectoryInfo(SvgSavePath);
                 if (!dirInfo.Exists)
                 {
-                    SavePath = SvgDefaultSavePath;
+                    SvgSavePath = SvgDefaultSavePath;
+                }
+            }
+
+            if (string.IsNullOrEmpty(LogSavePath))
+            {
+                LogSavePath = LogDefaultSavePath;
+            }
+            else
+            {
+                var dirInfo = new DirectoryInfo(LogSavePath);
+                if (!dirInfo.Exists)
+                {
+                    LogSavePath = LogDefaultSavePath;
                 }
             }
         }
@@ -114,11 +170,11 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 if(!string.IsNullOrEmpty(IfcFilePath))
                 {
-                    jObject["ObjConfig"]["path"] = ModifyIfcSavePath(IfcFilePath);
+                    jObject["ObjConfig"]["path"] = ModifyPath(IfcFilePath);
                 }
-                if (!string.IsNullOrEmpty(SavePath))
+                if (!string.IsNullOrEmpty(SvgSavePath))
                 {
-                    jObject["SvgConfig"]["save_path"] = SavePath;
+                    jObject["SvgConfig"]["save_path"] = SvgSavePath;
                 }
                 if (!string.IsNullOrEmpty(CurrentFloor))
                 {
@@ -134,19 +190,25 @@ namespace ThMEPStructure.StructPlane.Service
             }
         }
 
-        private string ModifyIfcSavePath(string ifcSavePath)
+        public string ModifyPath(string path)
         {
-            return ifcSavePath.Replace("\\","/");
+            return path.Replace("\\","/");
         }
 
         private bool CheckValid()
         {
-            if (string.IsNullOrEmpty(IfcFilePath))
+            if (string.IsNullOrEmpty(IfcFilePath) ||
+                string.IsNullOrEmpty(ExeFilePath))
             {
                 return false;
             }
             var fileInfo1 = new FileInfo(IfcFilePath);
             if(!fileInfo1.Exists)
+            {
+                return false;
+            }
+            var fileinfo2 = new FileInfo(ExeFilePath);
+            if (!fileinfo2.Exists)
             {
                 return false;
             }

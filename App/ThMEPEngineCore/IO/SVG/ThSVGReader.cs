@@ -15,34 +15,47 @@ namespace ThMEPEngineCore.IO.SVG
 {
     public class ThSVGReader
     {
-        public Tuple<List<ThGeometry>, Dictionary<string, string>> ReadFromContent(string content)
+        public List<ThGeometry> Geos { get; set; }
+        public List<ThFloorInfo> FloorInfos { get; set; }
+        public Dictionary<string, string> DocProperties { get; set; }
+        public ThSVGReader()
+        {
+            Geos = new List<ThGeometry>();
+            FloorInfos = new List<ThFloorInfo>();
+            DocProperties = new Dictionary<string, string>();
+        }
+        public void ReadFromContent(string content)
         {
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(content);
             var doc = SvgDocument.Open(xmlDoc);
-            var results = Parse(doc);
-            return results;
+            Parse(doc);
         }
 
-        public Tuple<List<ThGeometry>, Dictionary<string, string>> ReadFromFile(string filePath)
+        public void ReadFromFile(string filePath)
         {
             var doc = SvgDocument.Open(filePath);
-            var results = Parse(doc);
-            return results;
+            Parse(doc);
         }
 
-        private Tuple<List<ThGeometry>,Dictionary<string,string>> Parse(SvgDocument doc)
+        private void Parse(SvgDocument doc)
         {
             var results = new List<ThGeometry>();
-            var docProperties = new Dictionary<string, string>();
+            var floorInfos = new List<ThFloorInfo>();
+            var docProperties = new Dictionary<string, string>();           
             foreach (var attribute in doc.CustomAttributes)
             {
                 docProperties.Add(attribute.Key, attribute.Value);
             }
             foreach (var children in doc.Children)
             {
-                if (children is SvgUnknownElement)
+                if (children is SvgUnknownElement svgUnknownElement)
                 {
+                    var floorInfo = ParseFloorInfo(svgUnknownElement.CustomAttributes);
+                    if(floorInfo!=null)
+                    {
+                        floorInfos.Add(floorInfo);
+                    }
                     continue;
                 }
                 var properties = new Dictionary<string, object>();
@@ -59,7 +72,7 @@ namespace ThMEPEngineCore.IO.SVG
                     //properties.Add(ThSvgPropertyNameManager.FillColorIndexPropertyName, acadFillColor.ColorIndex);
                     properties.Add(ThSvgPropertyNameManager.FillColorPropertyName, children.Fill.ToString());
                 }
-                if(children.StrokeDashArray!=null && children.StrokeDashArray.Count>0)
+                if (children.StrokeDashArray != null && children.StrokeDashArray.Count > 0)
                 {
                     properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "DASH");
                 }
@@ -67,11 +80,11 @@ namespace ThMEPEngineCore.IO.SVG
                 {
                     properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "CONTINUOUS");
                 }
-                if(children.CustomAttributes!=null)
+                if (children.CustomAttributes != null)
                 {
-                    foreach(var attribute in children.CustomAttributes)
+                    foreach (var attribute in children.CustomAttributes)
                     {
-                        if(attribute.Key.GetType()==typeof(string))
+                        if (attribute.Key.GetType() == typeof(string))
                         {
                             properties.Add(attribute.Key, attribute.Value);
                         }
@@ -109,16 +122,16 @@ namespace ThMEPEngineCore.IO.SVG
                 }
                 else if (children is SvgPolygon svgPolygon)
                 {
-                    var polygon = CreatePolygon(svgPolygon);                   
+                    var polygon = CreatePolygon(svgPolygon);
                     if (polygon.Length > 0.0)
-                    {                        
+                    {
                         results.Add(CreateThGeometry(polygon, properties));
                     }
                 }
                 else if (children is SvgPolyline svgPolyline)
                 {
                     var poly = CreatePolyline(svgPolyline);
-                    if (poly.Length>0.0)
+                    if (poly.Length > 0.0)
                     {
                         results.Add(CreateThGeometry(poly, properties));
                     }
@@ -132,13 +145,16 @@ namespace ThMEPEngineCore.IO.SVG
                     }
                     var dbText = CreateDBText(svgText);
                     results.Add(CreateThGeometry(dbText, properties));
-                }
+                }                
                 else
                 {
                     throw new NotSupportedException();
                 }
             }
-            return Tuple.Create(results, docProperties);
+            // 收集结果
+            Geos = results;
+            FloorInfos = floorInfos;
+            DocProperties = docProperties;
         }
 
         private Line CreateLine(SvgLine svgLine)
@@ -163,7 +179,7 @@ namespace ThMEPEngineCore.IO.SVG
             }
             if (points.Count > 1)
             {
-                return ThDrawTool.CreatePolyline(points, false);                
+                return ThDrawTool.CreatePolyline(points, false);
             }
             else
             {
@@ -186,13 +202,13 @@ namespace ThMEPEngineCore.IO.SVG
             }
             else
             {
-                return new Polyline() { Closed=true};
+                return new Polyline() { Closed = true };
             }
         }
 
         private Ellipse CreateEllipse(SvgEllipse sgvEllipse)
         {
-            if(sgvEllipse.Transforms == null || sgvEllipse.Transforms.Count == 0)
+            if (sgvEllipse.Transforms == null || sgvEllipse.Transforms.Count == 0)
             {
                 var center = new Point3d(sgvEllipse.CenterX.Value, sgvEllipse.CenterY.Value, 0.0);
                 var xRadius = sgvEllipse.RadiusX.Value;
@@ -201,11 +217,11 @@ namespace ThMEPEngineCore.IO.SVG
                 return new Ellipse(center, Vector3d.ZAxis, new Vector3d(xRadius, 0, 0), radiusRatio, 0.0, 2 * Math.PI);
             }
             else
-            {             
+            {
                 var xRadius = sgvEllipse.RadiusX.Value;
                 var yRadius = sgvEllipse.RadiusY.Value;
                 var radiusRatio = yRadius / xRadius;
-                var ellipse = new Ellipse(Point3d.Origin, Vector3d.ZAxis, 
+                var ellipse = new Ellipse(Point3d.Origin, Vector3d.ZAxis,
                     new Vector3d(xRadius, 0, 0), radiusRatio, 0.0, 2 * Math.PI);
                 var mt = ToMatrix3d(sgvEllipse.Transforms);
                 ellipse.TransformBy(mt);
@@ -215,7 +231,7 @@ namespace ThMEPEngineCore.IO.SVG
 
         private Polyline CreateRectangle(SvgRectangle svgRect)
         {
-            if(svgRect.Transforms==null || svgRect.Transforms.Count==0)
+            if (svgRect.Transforms == null || svgRect.Transforms.Count == 0)
             {
                 var pt1 = new Point2d(svgRect.Bounds.Left, svgRect.Bounds.Top);
                 var pt2 = new Point2d(svgRect.Bounds.Right, svgRect.Bounds.Top);
@@ -250,7 +266,7 @@ namespace ThMEPEngineCore.IO.SVG
                 dbText.TextString = svgText.Text;
                 dbText.Height = 5;
                 dbText.WidthFactor = 1.0;
-                dbText.Position = Point3d.Origin;                
+                dbText.Position = Point3d.Origin;
                 dbText.HorizontalMode = TextHorizontalMode.TextMid;
                 dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
                 dbText.AlignmentPoint = dbText.Position;
@@ -258,7 +274,7 @@ namespace ThMEPEngineCore.IO.SVG
                 return dbText;
             }
             else
-            {   
+            {
                 var mt1 = ToMatrix3dWithoutDisplacement(svgText.Transforms);
                 var position = new Point3d(svgText.X[0].Value, svgText.Y[0].Value, 0);
                 var mt2 = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(position));
@@ -267,7 +283,7 @@ namespace ThMEPEngineCore.IO.SVG
                 dbText.TextString = svgText.Text;
                 dbText.Height = 5;
                 dbText.WidthFactor = 1.0;
-                dbText.Position = Point3d.Origin;                
+                dbText.Position = Point3d.Origin;
                 dbText.HorizontalMode = TextHorizontalMode.TextMid;
                 dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
                 dbText.AlignmentPoint = dbText.Position;
@@ -304,7 +320,7 @@ namespace ThMEPEngineCore.IO.SVG
         }
         private Matrix3d ToMatrix3d(Matrix matrix)
         {
-            var xVec = new Vector3d(matrix.Elements[0], matrix.Elements[1],0);
+            var xVec = new Vector3d(matrix.Elements[0], matrix.Elements[1], 0);
             var rotatAng = xVec.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis.Negate());
             var datas = new double[]
             {
@@ -316,7 +332,7 @@ namespace ThMEPEngineCore.IO.SVG
             var mt1 = new Matrix3d(datas);
             //var mt2 = Matrix3d.Rotation(Math.PI, Vector3d.XAxis, Point3d.Origin);
             var position = new Point3d(matrix.Elements[4], matrix.Elements[5], 0);
-            var mt2 = Matrix3d.Displacement(position -Point3d.Origin);
+            var mt2 = Matrix3d.Displacement(position - Point3d.Origin);
             return mt1.PreMultiplyBy(mt2);
         }
         private Matrix3d ToMatrix3dWithoutDisplacement(SvgTransformCollection svgTransforms)
@@ -339,7 +355,7 @@ namespace ThMEPEngineCore.IO.SVG
 
         private Matrix Multiply(List<Matrix> matrixs)
         {
-            if(matrixs.Count>0)
+            if (matrixs.Count > 0)
             {
                 var first = matrixs[0];
                 for (int i = 1; i < matrixs.Count; i++)
@@ -350,7 +366,7 @@ namespace ThMEPEngineCore.IO.SVG
             }
             else
             {
-                return new Matrix(1,0,0,1,0,0);
+                return new Matrix(1, 0, 0, 1, 0, 0);
             }
         }
 
@@ -368,24 +384,24 @@ namespace ThMEPEngineCore.IO.SVG
             //https://www.jianshu.com/p/c819ae16d29b
             //注：大写的字母是绝对坐标，小写的字母是相对坐标
             var curves = new List<Curve>();
-            for(int i=0;i< svgPath.PathData.Count;i++)
+            for (int i = 0; i < svgPath.PathData.Count; i++)
             {
                 var currentSegment = svgPath.PathData[i];
                 var currentString = currentSegment.ToString();
-                if(currentString[0]=='M' || currentString[0] == 'm') // 一段曲线的起点
+                if (currentString[0] == 'M' || currentString[0] == 'm') // 一段曲线的起点
                 {
                     Polyline polyline = new Polyline() { Closed = false };
                     int index = 0;
-                    if(currentString[0] == 'M')
+                    if (currentString[0] == 'M')
                     {
                         polyline.AddVertexAt(index++, ToPoint2d(currentSegment.End), 0, 0, 0);
                     }
                     else
                     {
-                        if(curves.Count>0)
+                        if (curves.Count > 0)
                         {
                             var preStartPt = curves[curves.Count - 1].StartPoint;
-                            var currentStart = new Point2d(preStartPt.X+currentSegment.End.X, preStartPt.Y + currentSegment.End.Y);
+                            var currentStart = new Point2d(preStartPt.X + currentSegment.End.X, preStartPt.Y + currentSegment.End.Y);
                             polyline.AddVertexAt(index++, currentStart, 0, 0, 0);
                         }
                         else
@@ -394,7 +410,7 @@ namespace ThMEPEngineCore.IO.SVG
                         }
                     }
                     var j = i + 1;
-                    for(;j< svgPath.PathData.Count;j++)
+                    for (; j < svgPath.PathData.Count; j++)
                     {
                         var nextSegment = svgPath.PathData[j];
                         var nextString = nextSegment.ToString();
@@ -419,7 +435,7 @@ namespace ThMEPEngineCore.IO.SVG
                             //直线
                             polyline.AddVertexAt(index++, ToPoint2d(nextSegment.End), 0, 0, 0);
                         }
-                        else if(nextString[0] == 'l')
+                        else if (nextString[0] == 'l')
                         {
                             var lastPt = polyline.EndPoint.ToPoint2D();
                             var newPt = new Point2d(lastPt.X + nextSegment.End.X, lastPt.Y + nextSegment.End.Y);
@@ -471,7 +487,7 @@ namespace ThMEPEngineCore.IO.SVG
                         }
                     }
                     i = j - 1;
-                    if(polyline.NumberOfVertices>1)
+                    if (polyline.NumberOfVertices > 1)
                     {
                         curves.Add(polyline);
                     }
@@ -482,6 +498,50 @@ namespace ThMEPEngineCore.IO.SVG
         private Point2d ToPoint2d(PointF pointF)
         {
             return new Point2d(pointF.X, pointF.Y);
+        }
+        private ThFloorInfo ParseFloorInfo(SvgCustomAttributeCollection svgCustomAttributes)
+        {
+            if(svgCustomAttributes == null || svgCustomAttributes.Count==0)
+            {
+                return null;
+            }
+            var floorInfo = new ThFloorInfo();
+            bool isFloorName=false, isFloorNo = false, isStdFlrNo = false,
+                isBottomElevation = false, isElevation = false;
+            foreach (var item in svgCustomAttributes)
+            {
+                switch(item.Key.ToUpper())
+                {
+                    case "FLOORNAME":
+                        isFloorName = true;
+                        floorInfo.FloorName = item.Value;
+                        break;
+                    case "FLOORNO":
+                        isFloorNo = true;
+                        floorInfo.FloorNo = item.Value;
+                        break;
+                    case "STDFLRNO":
+                        isStdFlrNo = true;
+                        floorInfo.StdFlrNo = item.Value;
+                        break;
+                    case "BOTTOM_ELEVATION":
+                        isBottomElevation = true;
+                        floorInfo.Bottom_elevation = item.Value;
+                        break;
+                    case "ELEVATION":
+                        isElevation = true;
+                        floorInfo.Elevation = item.Value;
+                        break;
+                }
+            }
+            if(isFloorName && isFloorNo && isStdFlrNo && isBottomElevation && isElevation)
+            {
+                return floorInfo;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

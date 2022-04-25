@@ -26,43 +26,8 @@ namespace ThMEPStructure.StructPlane.Service
         }
         public void Print()
         {
-            //
             var printers = PrintToCad();
-
             Layout(printers.Select(o=>o.ObjIds).ToList());
-
-            // 打印 标高表
-            var elevationInfos = GetElevations(printers);
-            var extents = ToExtents2d(printers
-                .SelectMany(o => o.ObjIds.OfType<ObjectId>())
-                .ToObjectIdCollection());
-            var elevationObjs = BuildElevationTable(elevationInfos);
-            var tblBasePt = new Point3d(extents.MaxPoint.X+ ElevationTblSpacing, 
-                extents.MinPoint.Y,0);
-            var mt = Matrix3d.Displacement(tblBasePt - Point3d.Origin);
-            elevationObjs.OfType<Entity>().ForEach(o => o.TransformBy(mt));
-            elevationObjs.Print(AcadDb);
-        }
-
-        private List<ElevationInfo> GetElevations(List<ThSvgEntityPrintService> prints)
-        {
-            var elevationInfos = new List<ElevationInfo>();
-            int index = 1;
-            prints.ForEach(o =>
-            {
-                var flrBottomElevation = o.FlrBottomEle / 1000.0;
-                var flrElevation = o.FlrElevation / 1000.0;
-                elevationInfos.Add(new ElevationInfo()
-                {
-                    FloorNo = index.ToString(),
-                    Elevation = flrBottomElevation.ToString("0.000"),
-                    FloorHeight = (flrElevation - flrBottomElevation).ToString("0.000"),
-                    WallColumnGrade = "",
-                    BeamBoardGrade = "",
-                });
-                index++;
-            });
-            return elevationInfos;
         }
 
         private void Layout(List<ObjectIdCollection> floorObjIds)
@@ -124,23 +89,16 @@ namespace ThMEPStructure.StructPlane.Service
             return extents;
         }
 
-        private DBObjectCollection BuildElevationTable(List<ElevationInfo> elevations)
-        {
-            // 在原点生成
-            var tblBuilder = new ThElevationTableBuilder(elevations);
-            return  tblBuilder.Build();
-        }
-
         private List<ThSvgEntityPrintService> PrintToCad()
         {
             var results = new List<ThSvgEntityPrintService>();
             SvgFiles.ForEach(svgFile =>
             {
                 var svg = new ThSVGReader();
-                var svgData = svg.ReadFromFile(svgFile);
+                svg.ReadFromFile(svgFile);
 
                 var prinService = new ThSvgEntityPrintService(
-                    svgData.Item1, svgData.Item2);
+                    svg.Geos, svg.FloorInfos,svg.DocProperties);
                 prinService.Print(AcadDb);
                 results.Add(prinService);
             });
