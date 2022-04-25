@@ -2,15 +2,9 @@
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public abstract class ThPDSProjectGraphNodeCompareTag
+    public abstract class ThPDSProjectGraphNodeCompareTag : ThPDSProjectGraphNodeTag
     {
         //
-    }
-
-    public class ThPDSProjectGraphNodeCompositeTag : ThPDSProjectGraphNodeCompareTag
-    {
-        public ThPDSProjectGraphNodeCompareTag Tag { get; set; }
-        public ThPDSProjectGraphNodeDataTag DataTag { get; set; }
     }
 
     public class ThPDSProjectGraphNodeIdChangeTag : ThPDSProjectGraphNodeCompareTag

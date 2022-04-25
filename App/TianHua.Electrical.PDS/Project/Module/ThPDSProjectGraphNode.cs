@@ -5,12 +5,12 @@ using TianHua.Electrical.PDS.Project.Module.Circuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeCompareTag>
+    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeTag>
     {
         public ThPDSLoad Load { get; set; }
         public PDSNodeType Type { get; set; }
         public NodeDetails Details { get; set; }
-        public ThPDSProjectGraphNodeCompareTag Tag { get; set; }
+        public ThPDSProjectGraphNodeTag Tag { get; set; }
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
