@@ -297,7 +297,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         public string CircuitType { get; set; }
         public string ParentBox { get; set; }
         public string Dwg { get; set; }
-        public string Hint { get; set; }
+        public string Hint { get; set; } = "提示文本";
         public Brush Background { get; set; }
         public ImageSource Img { get; set; }
     }
@@ -307,7 +307,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         public string LoadType { get; set; }
         public string LoadPower { get; set; }
         public string Dwg { get; set; }
-        public string Hint { get; set; }
+        public string Hint { get; set; } = "提示文本";
         public Brush Background { get; set; }
         public ImageSource Img { get; set; }
     }
