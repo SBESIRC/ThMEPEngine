@@ -3,8 +3,10 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -15,6 +17,17 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
 {
     public static class GeoUtils
     {
+        public static void LogInfos(string str, bool creatNewFile = false)
+        {
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var mode = FileMode.Append;
+            if (creatNewFile) mode = FileMode.Create;
+            FileStream fs = new FileStream(dir + "\\WaterDebug.txt", mode);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(str + DateTime.Now.ToString());
+            sw.Close();
+            fs.Close();
+        }
         /// <summary>
         /// 连接认为是一条直线的存在间距的两条直线
         /// </summary>
@@ -40,7 +53,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 Point3d ptStart = lines[i].StartPoint;
                 Point3d ptEnd = lines[i].EndPoint;
                 Vector3d SelfLine = new Vector3d(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y, 0);
-                if (GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
+                if (GetCrossObjsByPtCollection(ptStart.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
+                    && ClosestPointInVertLines(ptStart, lines[i], lines) > 1)
                 {
                     for (int j = 0; j < emilinatedSelfLines.Count; j++)
                     {
@@ -57,6 +71,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptStart, ptmp1);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -72,6 +87,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptStart, ptmp2);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -79,7 +95,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                         }
                     }
                 }
-                if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0)
+                if (GetCrossObjsByPtCollection(ptEnd.CreateRectangle(tolOriHinder, tolOriHinder).Vertices(), dbObjsOriStart).Count == 0
+                    && ClosestPointInVertLines(ptEnd, lines[i], lines) > 1)
                 {
                     for (int j = 0; j < emilinatedSelfLines.Count; j++)
                     {
@@ -96,6 +113,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptEnd, ptmp1);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -111,6 +129,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                             if (bool1 && bool2)
                             {
                                 Line line = new Line(ptEnd, ptmp2);
+                                line.Linetype = lines[i].Linetype;
                                 connectedLines.Add(line);
                                 emilinatedSelfLines.Insert(i, lines[i]);
                                 break;
@@ -343,7 +362,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             {
                 p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
             }
-            p.Closed = closed;
+            if (closed) p.Closed = true;
             return p;
         }
         public static List<Entity> GetAllEntitiesByExplodingTianZhengElementThoroughly(Entity entity)
@@ -358,11 +377,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
                 {
                     if (IsTianZhengElement(ent))
                     {
-                        var res = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
-                        foreach (var r in res)
+                        try
                         {
-                            if (IsTianZhengElement(r)) elements.Add(r);
-                            else results.Add(r);
+                            var res = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+                            foreach (var r in res)
+                            {
+                                if (IsTianZhengElement(r)) elements.Add(r);
+                                else results.Add(r);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            //有的天正元素无法炸开？
                         }
                     }
                 }
@@ -382,6 +408,89 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             if (line.StartPoint.DistanceTo(point) <= tol || line.EndPoint.DistanceTo(point) <= tol)
                 return true;
             return false;
+        }
+        public static void RemoveDuplicatedLines(List<Line> lines)
+        {
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if ((lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < 1)
+                        || (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < 1))
+                    {
+                        lines.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
+        }
+        public static string AnalysisLineList(List<Line> a)
+        {
+            string s = "";
+            foreach (var e in a)
+            {
+                s += AnalysisLine(e);
+            }
+            return s;
+        }
+        public static string AnalysisLine(Line a)
+        {
+            string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
+                a.EndPoint.X.ToString() + "," + a.EndPoint.Y.ToString() + ",";
+            return s;
+        }
+        public static string AnalysisPointList(List<Point3d> points)
+        {
+            string s = "";
+            foreach (var pt in points)
+            {
+                s += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            return s;
+        }
+        public static bool TestContainsChineseCharacter(string text)
+        {
+            return Regex.IsMatch(text, @"[\u4e00-\u9fa5]");
+        }
+        public static double ClosestPointInVertLines(Point3d pt, Line line, IEnumerable<Line> lines, bool returninfinity = true)
+        {
+            var ls = lines.Where(e => IsPerpLine(line, e));
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.GetClosestPointTo(pt, false).DistanceTo(pt);
+                if (res > dis) res = dis;
+            }
+            return res;
+        }
+        public static bool IsPerpLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
+        public static string AnalysisPoly(Polyline a)
+        {
+            string s = "";
+            var e = a.Vertices().Cast<Point3d>().ToList();
+            for (int i = 0; i < e.Count; i++)
+            {
+                s += e[i].X.ToString() + "," + e[i].Y.ToString() + ",";
+            }
+            return s;
+        }
+        public static string AnalysisPolyList(List<Polyline> pls)
+        {
+            string s = "";
+            foreach (var e in pls)
+            {
+                s += AnalysisPoly(e);
+                s.Remove(s.Length - 1);
+                s += ";";
+            }
+            return s;
         }
     }
 }

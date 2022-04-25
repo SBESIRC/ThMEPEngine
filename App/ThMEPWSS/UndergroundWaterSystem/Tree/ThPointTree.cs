@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Command;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
+using ThCADExtension;
+using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
@@ -70,6 +71,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var pt1 = node.Parent.Item.Position;
                 var pt2 = node.Item.Position;
                 var line = new Line(pt1, pt2);
+                line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * 1200));
                 var box = line.Buffer(200);
                 foreach (var valve in valveList)
                 {
@@ -90,7 +92,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 }
             }
             //查找当前节点是否有断线
-            if (node.Item.Riser == null)
+            if (/*node.Item.Riser == null*/true)
             {
                 foreach (var mark in markList)
                 {
@@ -190,7 +192,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public bool MatchMark(Point3d pt, ThMarkModel mark)
         {
             bool isMatch = false;
-            if (pt.DistanceTo(mark.Poistion) < 50.0)
+            double tol = 100;
+            if (pt.DistanceTo(mark.Poistion) < tol)
             {
                 isMatch = true;
             }

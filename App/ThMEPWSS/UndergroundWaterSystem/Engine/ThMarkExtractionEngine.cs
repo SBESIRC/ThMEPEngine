@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundWaterSystem.Command;
 using ThMEPWSS.UndergroundWaterSystem.Model;
@@ -51,72 +52,29 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 foreach (var _object in dbObjs)
                 {
                     var entity = _object as Entity;
-                    if (!(entity.Layer.Contains("W-") && entity.Layer.Contains("-DIMS"))) continue;
+                    if (!entity.Layer.Contains("W-")) continue;
+                    if (!(entity.Layer.Contains("DIMS") || entity.Layer.Contains("NOTE")
+                        || entity.Layer.Contains("EQPM"))) continue;
                     if (IsTianZhengElement(entity))
                     {
-                        var texts = new List<DBText>();
-                        var lines = new List<Line>();
                         var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(entity);
                         foreach (var obj in explodeResult)
                         {
                             var ent = obj as Entity;
-                            if (ent is DBText t) texts.Add(t);
-                            else if (ent is Line l)
-                            {
-                                var tmpPt1 = new Point3d(l.StartPoint.X, l.StartPoint.Y, 0.0);
-                                var tmpPt2 = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
-                                var tmpline = new Line(tmpPt1, tmpPt2);
-                                lines.Add(tmpline);
-                            }
-                            else if (ent is Polyline pl)
-                            {
-                                foreach (var o in pl.ToLines())
-                                {
-                                    var tmpPt1 = new Point3d(o.StartPoint.X, o.StartPoint.Y, 0.0);
-                                    var tmpPt2 = new Point3d(o.EndPoint.X, o.EndPoint.Y, 0.0);
-                                    var tmpline = new Line(tmpPt1, tmpPt2);
-                                    lines.Add(tmpline);
-                                }
-                            }
+                            if (ent is DBText t) textList.Add(t);
+                            else if (ent is Line l) textLines.Add(new Line(l.StartPoint, l.EndPoint));
+                            else if (ent is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => new Line(e.StartPoint, e.EndPoint)));
                         }
-                        results.AddRange(CombMarkList(texts, lines));
                     }
                     else
                     {
-                        if (entity is DBText t)
-                        {
-                            textList.Add(t);
-                            if (t.TextString.Equals("S-JGL-1"))
-                            {
-                                string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                                FileStream fs = new FileStream(dir + "\\WaterDebug.txt", FileMode.Append);
-                                StreamWriter sw = new StreamWriter(fs);
-                                sw.WriteLine(t.Position.X);
-                                sw.WriteLine(t.Position.Y);
-                                sw.Close();
-                                fs.Close();
-                            }
-                        }
-                        else if (entity is Line l)
-                        {
-                            var tmpPt1 = new Point3d(l.StartPoint.X, l.StartPoint.Y, 0.0);
-                            var tmpPt2 = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
-                            var tmpline = new Line(tmpPt1, tmpPt2);
-                            textLines.Add(tmpline);
-                        }
-                        else if (entity is Polyline pl)
-                        {
-                            foreach (var o in pl.ToLines())
-                            {
-                                var tmpPt1 = new Point3d(o.StartPoint.X, o.StartPoint.Y, 0.0);
-                                var tmpPt2 = new Point3d(o.EndPoint.X, o.EndPoint.Y, 0.0);
-                                var tmpline = new Line(tmpPt1, tmpPt2);
-                                textLines.Add(tmpline);
-                            }
-                        }
+                        if (entity is DBText t) textList.Add(t);
+                        else if (entity is Line l) textLines.Add(new Line(l.StartPoint, l.EndPoint));
+                        else if (entity is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => new Line(e.StartPoint, e.EndPoint)));
                     }
                 }
                 results.AddRange(CombMarkList(textList, textLines));
+                results = results.Where(e => !TestContainsChineseCharacter(e.MarkText)).ToList();
                 return results;
             }
         }
@@ -128,7 +86,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 var entities = database.ModelSpace.OfType<Entity>();
 
                 DBObjectCollection dbObjs = null;
-                if (pts!=null)
+                if (pts != null)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
                     var pline = new Polyline()
@@ -144,14 +102,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 }
                 var textList = new List<DBText>();
                 var textLines = new List<Line>();
-                foreach(var obj in dbObjs)
+                foreach (var obj in dbObjs)
                 {
                     var ent = obj as Entity;
-                    if(ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
+                    if (ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         var outTexts = new List<DBText>();
                         var outLines = new List<Line>();
-                        if(GetTianZhengTextAndLine(ent,ref outTexts,ref outLines))
+                        if (GetTianZhengTextAndLine(ent, ref outTexts, ref outLines))
                         {
                             textList.AddRange(outTexts);
                             textLines.AddRange(outLines);
@@ -159,9 +117,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     }
                     else
                     {
-                        if(IsLayer(ent.Layer))
+                        if (IsLayer(ent.Layer))
                         {
-                            if(ent is DBText t)
+                            if (ent is DBText t)
                             {
                                 textList.Add(t);
                                 if (t.TextString.Equals("S-JGL-1"))
@@ -175,16 +133,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                                     fs.Close();
                                 }
                             }
-                            else if(ent is Line l)
+                            else if (ent is Line l)
                             {
                                 var tmpPt1 = new Point3d(l.StartPoint.X, l.StartPoint.Y, 0.0);
                                 var tmpPt2 = new Point3d(l.EndPoint.X, l.EndPoint.Y, 0.0);
                                 var tmpline = new Line(tmpPt1, tmpPt2);
                                 textLines.Add(tmpline);
                             }
-                            else if(ent is Polyline pl)
+                            else if (ent is Polyline pl)
                             {
-                                foreach(var o in pl.ToLines())
+                                foreach (var o in pl.ToLines())
                                 {
                                     var tmpPt1 = new Point3d(o.StartPoint.X, o.StartPoint.Y, 0.0);
                                     var tmpPt2 = new Point3d(o.EndPoint.X, o.EndPoint.Y, 0.0);
@@ -199,13 +157,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 return retLines;
             }
         }
-        public bool GetTianZhengTextAndLine(Entity ent,ref List<DBText> texts,ref List<Line> lines)
+        public bool GetTianZhengTextAndLine(Entity ent, ref List<DBText> texts, ref List<Line> lines)
         {
             var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(ent);
-            foreach(var obj in explodeResult)
+            foreach (var obj in explodeResult)
             {
                 var entity = obj as Entity;
-                if(IsLayer(entity.Layer))
+                if (IsLayer(entity.Layer))
                 {
                     if (entity is DBText t)
                     {
@@ -234,7 +192,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public bool IsLayer(string layer)
         {
-            if ((layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS")) 
+            if ((layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS"))
                 || (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-NOTE"))
                 || layer.ToUpper().Contains("W-"))
             {
@@ -247,7 +205,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             var retList = new List<ThMarkModel>();
             foreach (var t in texts)
             {
-                var tplines = lines.OrderBy(e => e.GetCenter().DistanceTo(t.Position)).Take(20).ToList();
+                var tplines = lines.OrderBy(e =>
+                {
+                    var a = e.StartPoint.DistanceTo(t.Position);
+                    var b = e.EndPoint.DistanceTo(t.Position);
+                    if (a <= b) return a;
+                    else return b;
+                }).Take(10).ToList();
                 var mark = CombMark(t, tplines);
                 mark.Layer = t.Layer;
                 mark.TextStyle = t.TextStyleName;
@@ -255,14 +219,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             }
             return retList;
         }
-        public ThMarkModel CombMark(DBText text,List<Line> lines)
+        public ThMarkModel CombMark(DBText text, List<Line> lines)
         {
             var retMark = new ThMarkModel();
-            var textPt = new Point3d(text.Position.X, text.Position.Y,0.0);
+            var textPt = new Point3d(text.Position.X, text.Position.Y, 0.0);
             Line tmpLine = null;
-            foreach(var l in lines)
+            foreach (var l in lines)
             {
-                if(l.GetClosestPointTo(textPt,false).DistanceTo(textPt) < 200.0)
+                if (l.GetClosestPointTo(textPt, false).DistanceTo(textPt) < 200.0)
                 {
                     tmpLine = l;
                 }
@@ -277,26 +241,26 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 foreach (var pt in tmpPts)
                 {
                     var seriesLines = FindSeriesLine(pt, lines);
-                    if(seriesLines.Count == 2)
+                    if (seriesLines.Count == 2)
                     {
                         Line tempLine = null;
-                        foreach(var seriesLine in seriesLines)
+                        foreach (var seriesLine in seriesLines)
                         {
                             var lineVector = new Vector3d(Math.Cos(seriesLine.Angle), Math.Sin(Math.Sin(seriesLine.Angle)), 0.0);
                             var textVector = new Vector3d(Math.Cos(text.Rotation), Math.Sin(Math.Sin(text.Rotation)), 0.0);
                             if (lineVector.IsParallelToEx(textVector))
                             {
                                 tempLine = seriesLine;
-                                break; 
+                                break;
                             }
 
                         }
-                        if(tempLine != null)
+                        if (tempLine != null)
                         {
                             seriesLines.Remove(tempLine);
                             var line = seriesLines.FirstOrDefault();
-                            var distance1 = tempLine.GetClosestPointTo(line.StartPoint,false).DistanceTo(line.StartPoint);
-                            var distance2 = tempLine.GetClosestPointTo(line.EndPoint,false).DistanceTo(line.EndPoint);
+                            var distance1 = tempLine.GetClosestPointTo(line.StartPoint, false).DistanceTo(line.StartPoint);
+                            var distance2 = tempLine.GetClosestPointTo(line.EndPoint, false).DistanceTo(line.EndPoint);
                             if (distance1 > distance2)
                             {
                                 retMark.Poistion = line.StartPoint;
@@ -306,9 +270,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                                 retMark.Poistion = line.EndPoint;
                             }
                         }
-                        
-
-
                         break;
                     }
                 }
@@ -318,7 +279,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         public List<Line> FindSeriesLine(Point3d startPt, List<Line> allLines)
         {
             var tmpLines = new List<Line>();
-            foreach(var l in allLines)
+            foreach (var l in allLines)
             {
                 var tmpline = new Line(l.StartPoint, l.EndPoint);
                 tmpLines.Add(tmpline);
@@ -339,7 +300,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
             var retLines = new List<Line>();
             retLines.Add(objectLine);
             var conLine = FindConnectLine(objectLine, ref allLines);
-            if(conLine != null)
+            if (conLine != null)
             {
                 retLines.AddRange(FindSeriesLine(conLine, ref allLines));
             }
@@ -349,22 +310,22 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         {
             Line retLine = null;
             var objectEndPt = objectLine.EndPoint;
-            foreach(var l in lines )
+            foreach (var l in lines)
             {
-                if(l.Length < 10.0)
+                if (l.Length < 10.0)
                 {
                     continue;
                 }
                 var startPt = l.StartPoint;
                 var endPt = l.EndPoint;
-                if(objectEndPt.DistanceTo(startPt) < 10.0)
+                if (objectEndPt.DistanceTo(startPt) < 10.0)
                 {
                     retLine = l;
                     break;
                 }
-                else if(objectEndPt.DistanceTo(endPt) < 10.0)
+                else if (objectEndPt.DistanceTo(endPt) < 10.0)
                 {
-                    var tmpPt = new Point3d(l.StartPoint.X,l.StartPoint.Y,l.StartPoint.Z);
+                    var tmpPt = new Point3d(l.StartPoint.X, l.StartPoint.Y, l.StartPoint.Z);
                     l.StartPoint = l.EndPoint;
                     l.EndPoint = tmpPt;
                     retLine = l;

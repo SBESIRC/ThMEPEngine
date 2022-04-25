@@ -1,11 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.UndergroundWaterSystem.Command;
 
@@ -36,10 +38,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 line.TransformBy(mt.Inverse());
                 retLines.Add(line);
             }
-            foreach (var l in lines)
-            {
-                l.Dispose();
-            }
+            foreach (var l in lines) l.Dispose();
             return retLines;
         }
         /// <summary>
@@ -66,7 +65,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             retLines.AddRange(conLines);
             foreach (var line in conLines)
             {
-                retLines.AddRange(FindSeriesLine(line, ref allLines));
+                var tlines = FindSeriesLine(line, ref allLines);
+                retLines.AddRange(tlines);
             }
             return retLines;
         }

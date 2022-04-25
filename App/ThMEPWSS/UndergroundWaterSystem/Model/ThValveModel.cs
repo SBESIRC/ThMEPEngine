@@ -10,13 +10,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Model
 {
     public class ThValveModel
     {
-        public ThValveModel(BlockReference valve)
+        public ThValveModel(BlockReference valve, Point3d point)
         {
             Valve = valve;
-            if (valve.Bounds is Extents3d ex)
-            {
-                Point = ex.CenterPoint();
-            }
+            Point = point;
         }
         public ThValveModel()
         {

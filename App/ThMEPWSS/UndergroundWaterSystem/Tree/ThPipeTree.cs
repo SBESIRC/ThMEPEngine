@@ -10,6 +10,7 @@ using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Tree;
 using ThMEPWSS.UndergroundWaterSystem.Service;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
@@ -26,45 +27,34 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         {
             //找到startPt属于哪个起点
             FloorIndex = GetFloorIndex(startPt, floorList);
-            if(FloorIndex == -1)
-            {
-                return;
-            }
-            
+            if (FloorIndex == -1) return;
             //找到该楼层的横管
             var pipeLines = floorList[FloorIndex].FloorInfo.PipeLines;
-            if(pipeLines.Count == 0)
-            {
-                return;
-            }
+            if (pipeLines.Count == 0) return;
             var tmpLine = new List<Line>();
-            foreach(var l in pipeLines)
+            foreach (var l in pipeLines)
             {
                 var line = new Line(l.StartPoint, l.EndPoint);
+                line.Linetype = l.Linetype;
                 tmpLine.Add(line);
-            }
+            }           
             //处理横管数据
             var pipeHandleService = new ThPipeHandleService();
             var seriesLines = pipeHandleService.FindSeriesLine(startPt, tmpLine);
-            if(seriesLines == null)
-            {
-                return;
-            }
-            var cleanedLines = pipeHandleService.CleanLines(seriesLines, mt);
+            if (seriesLines == null) return;
+            //var cleanedLines = pipeHandleService.CleanLines(seriesLines, mt);
             var points = new List<Point3d>();
             riserInfo.ForEach(e => points.AddRange(e.RiserPts));
-            InterrptLineByPoints(cleanedLines, points);
+            InterrptLineByPoints(seriesLines, points);
+            RemoveDuplicatedLines(seriesLines);
             //todo3:在立管处打断cleanedLines
-            //找到标注
+            //找到标注、管径、冲洗点位
             var markList = floorList[FloorIndex].FloorInfo.MarkList;
-            //提取到管径
             var dimList = floorList[FloorIndex].FloorInfo.DimList;
-            //提取到阀门
             var valveList = floorList[FloorIndex].FloorInfo.ValveList;
-            //提取到皮带水嘴
             var flushpointList = floorList[FloorIndex].FloorInfo.FlushPointList;
             //构建PointTree
-            var pointTree = new ThPointTree(startPt, cleanedLines, riserInfo, markList, dimList,valveList, flushpointList);
+            var pointTree = new ThPointTree(startPt, seriesLines, riserInfo, markList, dimList,valveList, flushpointList);
             //构建RootNode
             RootNode = CreateRootNode(pointTree);
         }

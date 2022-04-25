@@ -1,10 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +65,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     if (IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         var line = TianZhengLine(ent);
+                        line.Linetype = ent.Linetype;
+                        line.ColorIndex = ent.ColorIndex;
                         line.Layer = ent.Layer;
                         if (line.Length > 1.0)
                         {

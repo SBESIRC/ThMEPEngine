@@ -44,6 +44,22 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     return l;
                 }
             }
+            //扩大搜索范围
+            double tol = 100;
+            foreach (var l in lines)
+            {
+                if (l.StartPoint.DistanceTo(startPt) <= tol)
+                {
+                    return l;
+                }
+                else if (l.EndPoint.DistanceTo(startPt) <= tol)
+                {
+                    var tmpPt = l.StartPoint;
+                    l.StartPoint = l.EndPoint;
+                    l.EndPoint = tmpPt;
+                    return l;
+                }
+            }
             return null;
         }
         public static Point3d SelectPoint(string tips)
