@@ -92,7 +92,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 }
             }
             //查找当前节点是否有断线
-            if (node.Item.Riser == null)
+            if (/*node.Item.Riser == null*/true)
             {
                 foreach (var mark in markList)
                 {
@@ -192,7 +192,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public bool MatchMark(Point3d pt, ThMarkModel mark)
         {
             bool isMatch = false;
-            if (pt.DistanceTo(mark.Poistion) < 50.0)
+            double tol = 100;
+            if (pt.DistanceTo(mark.Poistion) < tol)
             {
                 isMatch = true;
             }

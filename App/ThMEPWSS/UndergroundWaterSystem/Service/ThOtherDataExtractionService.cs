@@ -111,7 +111,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
                 //识别天正元素
                 var elements = Entities.Where(e => IsTianZhengElement(e))
-                    .Where(e => bound.Contains(e.GeometricExtents.CenterPoint()));
+                    .Where(e =>
+                    {
+                        if (e.Bounds == null) return false;
+                        return bound.Contains(e.GeometricExtents.CenterPoint());
+                    });
                 foreach (var element in elements)
                 {
                     var brs = RecognizeTianZhengValve(element, names_c).Where(p => bound.Contains(p.Position));
@@ -123,9 +127,19 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
                 //识别块-天正-块
                 var complexed_blocks = Entities.Where(e => e is BlockReference)
+                    .Where(e =>
+                    {
+                        try { return bound.Contains(e.GeometricExtents.CenterPoint()); }
+                        catch { return true; }
+                    })
                     .Where(e => e.ExplodeToDBObjectCollection().OfType<Entity>().Any())
                     .Select(e => e as BlockReference)
-                    .Where(e => bound.Contains(e.GeometricExtents.CenterPoint()));
+                    .Where(e =>
+                     {
+                         try { return bound.Contains(e.GeometricExtents.CenterPoint()); }
+                         catch { return true; }
+                     });
+
                 foreach (var blk in complexed_blocks)
                 {
                     var pt = blk.GeometricExtents.CenterPoint();
@@ -146,74 +160,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }             
                 result = result.Where(e => e.Valve != null)
                     .Where(e => bound.Contains(e.Point)).ToList();
-                return result;
-
-                //foreach (var e in Entities.OfType<BlockReference>().Where(e =>
-                //{
-                //    bool cond_a = e.ObjectId.IsValid;
-                //    bool cond_b = false;
-                //    bool cond_c = false;
-                //    bool cond_d = false;
-                //    foreach (var name in names_a)
-                //        if (e.GetEffectiveName().Contains(name))
-                //            cond_b = true;
-                //    foreach (var name in names_b)
-                //        if (e.GetEffectiveName().Contains(name))
-                //            cond_c = true;
-                //    if (cond_a && (cond_b || cond_c) && pts != null)
-                //        cond_d = bound.Contains(e.Position);
-                //    else cond_d = true;
-                //    if (cond_a && (cond_b || cond_c) && cond_d) return true;
-                //    else return false;
-                //}))
-                //{
-                //    bool isDefaultCorrespondingPipeLineLength = true;
-                //    foreach (var name in names_b)
-                //        if (e.GetEffectiveName().Contains(name))
-                //            isDefaultCorrespondingPipeLineLength = false;
-                //    ThValveModel thValveModel = new ThValveModel(e);
-                //    if (!isDefaultCorrespondingPipeLineLength) thValveModel.CorrespondingPipeLineLength = otherCorrespondingPipeLineLength;
-                //    result.Add(thValveModel);
-                //}
-                //foreach (var e in Entities.OfType<Entity>()
-                //    .Where(e => IsTianZhengElement(e))
-                //    .Where(e =>
-                //    {
-                //        try
-                //        {
-                //            return e.ExplodeToDBObjectCollection().OfType<BlockReference>().Any();
-                //        }
-                //        catch { return false; }
-                //    })
-                //    .Select(e =>
-                //    {
-                //        var brs = e.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
-                //        return brs;
-                //    })
-                //    .Where(e => e.Count > 0)
-                //    .Select(e => e[0])
-                //    .Where(e =>
-                //    {
-                //        var str = e.Name;
-                //        foreach (var name in names_c)
-                //            if (str.Contains(name)) return true;
-                //        return false;
-                //    })
-                //    .Where(e =>
-                //    {
-                //        if (e.Bounds is Extents3d extent3d)
-                //        {
-                //            if (pts == null) return true;
-                //            if (bound.Contains(extent3d.CenterPoint())) return true;
-                //            else return false;
-                //        }
-                //        return false;
-                //    }))
-                //{
-                //    ThValveModel thValveModel = new ThValveModel(e);
-                //    result.Add(thValveModel);
-                //}
-                //return result.Where(e => e.Valve != null).ToList();
+                return result;          
             }
         }
         private List<BlockReference> RecognizeTianZhengValve(Entity entity,string[]names)

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Tree;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
@@ -27,6 +28,17 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public int LineType = -1;//0横管，1立管
         public string Layer = "0";
     }
+    public class CrossedLayerDims
+    {
+        public CrossedLayerDims(string text, Point3d point)
+        {
+            Text = text;
+            Point = point;
+        }
+        public string Text;
+        public Point3d Point;
+    }
+
     public class ThSystemMapService
     {
         public static string PipeLayerName = null;//管线绘制图层
@@ -40,6 +52,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public List<ThFloorModel> FloorList { set; get; }//楼层和范围
         public List<ThRiserInfo> RiserList { set; get; }
         public List<PreLine> PreLines = new List<PreLine>();
+        public List<CrossedLayerDims> CrossedlayerDims = new List<CrossedLayerDims>();
         public List<Entity> HelpLines = new List<Entity>();
         public Matrix3d Mt { set; get; }
         public ThSystemMapService()
@@ -86,10 +99,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         }
         public void DrawMap(Point3d basePt, ThPipeTree pipeTree)
         {
-            if (FloorList.Count <= 0)
-            {
-                return;
-            }
+            if (FloorList.Count <= 0) return;
             MapPostion = basePt;
             //绘制楼层线
             DrawFloorLines(basePt, FloorList, FloorHeight, FloorLength);
@@ -98,11 +108,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             DrawRootNode(startPt, pipeTree.RootNode, pipeTree.FloorIndex);
             //打断横管线
             InterruptAndDisplayPipeLines();
-            HelpLines.ForEach(e =>
+            //HelpLines.ForEach(e =>
+            //{
+            //    e.Layer = "AI-辅助";
+            //    e.ColorIndex = 30;
+            //    e.AddToCurrentSpace();
+            //});
+            CrossedlayerDims.ForEach(e =>
             {
-                e.Layer = "AI-辅助";
-                e.ColorIndex = 30;
-                e.AddToCurrentSpace();
+                DrawText("W-WSUP-DIMS", e.Text, e.Point, 0.0);
             });
         }
         public void InterruptAndDisplayPipeLines()
@@ -179,6 +193,34 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             floorList.Reverse();
         }
+        private void DrawValves(List<ThTreeNode<ThPointModel>> pointList, ref Point3d point, ref double sumLength,
+            Vector3d vector)
+        {
+            var valves = new List<ThValveModel>();
+            for (int j = 0; j < pointList.Count; j++)
+            {
+                var pointNode = pointList[j];
+                foreach (var v in pointNode.Item.Valves)
+                {
+                    if (v != null && !v.Existed)
+                    {
+                        var valve = new ThValveModel();
+                        valve = v;
+                        valve.Existed = true;
+                        valves.Add(valve);
+                    }
+                }
+            }
+            if (valves.Count > 0)
+            {
+                double length = 0;
+                valves.ForEach(e => length += e.CorrespondingPipeLineLength);
+                point = point + vector * length;
+                var valvePt = point - vector * 1000;
+                sumLength += length;
+                InsertValves(ValveLayerName, valves, valvePt, vector);
+            }
+        }
         public double DrawRootNode(Point3d basePt, ThTreeNode<ThPipeModel> rootNode, int floorIndex)
         {
             Vector3d hvector = new Vector3d(1.0, 0.0, 0.0);
@@ -187,10 +229,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             double height = 0.0;
             double endLength = 1000.0;
             double startLength = GetStartLength(rootNode);//考虑阀门
-            //debug
-            var pts = rootNode.Item.PointNodeList.Select(e => e.Item.Position).ToArray();
-            var rootpl = CreatePolyFromPoints(pts, false);
-            HelpLines.Add(rootpl.BufferPL(2000).Cast<Entity>().First());
             //绘制子节点
             double sumLength = 0.0;
             Point3d subPt = basePt + hvector * startLength;
@@ -203,69 +241,23 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //插入阀门
                 var endPointNode = subNode.Item.PointNodeList.First().Parent;
                 var pointList = GetPointList(startPointNode, endPointNode);
-                var valves = new List<ThValveModel>();
-                for (int j = 0; j < pointList.Count; j++)
-                {
-                    var pointNode = pointList[j];
-                    foreach (var v in pointNode.Item.Valves)
-                    {
-                        if (v != null && !v.Existed)
-                        {
-                            var valve = new ThValveModel();
-                            valve = v;
-                            valve.Existed = true;
-                            valves.Add(valve);
-                        }
-                    }
-                }
-                if (valves.Count > 0)
-                {
-                    double length = 0;
-                    valves.ForEach(e => length += e.CorrespondingPipeLineLength);
-                    subPt1 = subPt1 + hvector * length;
-                    var valvePt = subPt1 - hvector * 1000;
-                    sumLength += length;
-                    InsertValves(ValveLayerName, valves, valvePt, hvector);
-                }
-                //绘制冲洗点位情况           
-                bool sflushpointFound = false;
-                foreach (var node in pointList)
-                {
-                    if (node.Item.FlushPoint.Valve != null)
-                    {
-                        sflushpointFound = true;
-                        var flushPoint = node.Item.FlushPoint;
-                        DrawFlushPoint(flushPoint, subPt1, vvector, hvector, rootLine);
-                        break;
-                    }
-                }
-                if (sflushpointFound)
-                {
-                    subPt1 += hvector * 1000;
-                    sumLength += 1000;
-                }
-                //绘制管径              
-                string sdimMark = "";
-                foreach (var pointNode in pointList)
-                {
-                    if (pointNode.Item.DimMark != null)
-                    {
-                        sdimMark = pointNode.Item.DimMark.StrText;
-                    }
-                }
-                var sdimPt = subPt1 - hvector * 1000.0;
-                DrawText("W-WSUP-DIMS", sdimMark, sdimPt, 0.0);
+                DrawValves(pointList, ref subPt1, ref sumLength, hvector);
+                //绘制冲洗点位情况
+                bool _hasFlushPoint = false;
+                Point3d _markLoc = new Point3d();
+                DrawFlushPointEntry(pointList, ref sumLength, ref subPt1, vvector, hvector, rootLine,ref _hasFlushPoint,ref _markLoc);
+                //绘制管径
+                DrawPipeDims(pointList, hvector, subPt1);
                 //立管
                 var riserPoint = subPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector, rootLine);
+                    ref floorIndex, ref mvector,_hasFlushPoint,_markLoc, rootLine);
                 sumLength += riserPoint.DistanceTo(subPt1);
                 subPt1 = riserPoint;
                 //画子节点
                 var subLength = DrawSubNode(subPt1, subNode, height, floorIndex, rootLine);
                 sumLength += subLength;
                 startPointNode = endPointNode;
-                //ToDo2:如果有阀门插入阀门
             }
             //绘制主干线
             double rootLength = startLength + endLength + sumLength;//第一段2000，末尾段1000
@@ -273,71 +265,26 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Point3d rootPt1 = basePt;
             Point3d rootPt2 = basePt + hvector * rootLength;
             var hLine1 = new Line(rootPt1, rootPt2);
-            PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
-
+            if (rootNode.Children.Count > 0)
+                PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
+            else
+                DrawBreakDot(rootPt1);
             //插入阀门
             var _pointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
-            var _valves = new List<ThValveModel>();
-            for (int j = 0; j < _pointList.Count; j++)
-            {
-                var pointNode = _pointList[j];
-                foreach (var v in pointNode.Item.Valves)
-                {
-                    if (v != null && !v.Existed)
-                    {
-                        var valve = new ThValveModel();
-                        valve = v;
-                        valve.Existed = true;
-                        _valves.Add(valve);
-                    }
-                }
-            }
-            if (_valves.Count > 0)
-            {
-                double length = 0;
-                _valves.ForEach(e => length += e.CorrespondingPipeLineLength);
-                rootPt2 = rootPt2 + hvector * length;
-                sumLength += length;
-                var valvePt = rootPt2 - hvector * 1000;
-                InsertValves(ValveLayerName, _valves, valvePt, hvector);
-            }
+            DrawValves(_pointList, ref rootPt2, ref sumLength, hvector);
             //绘制冲洗点位情况
-
-            bool flushpointFound = false;
-            foreach (var node in _pointList)
-            {
-                if (node.Item.FlushPoint.Valve != null)
-                {
-                    flushpointFound = true;
-                    var flushPoint = node.Item.FlushPoint;
-                    DrawFlushPoint(flushPoint, rootPt2, vvector, hvector, rootLine);
-                    break;
-                }
-            }
-            if (flushpointFound)
-            {
-                rootPt2 += hvector * 1000;
-                sumLength += 1000;
-            }
+            bool hasFlushPoint = false;
+            Point3d markLoc = new Point3d();
+            DrawFlushPointEntry(_pointList, ref sumLength, ref rootPt2, vvector, hvector, rootLine,ref hasFlushPoint,ref markLoc);
             //绘制管径
             var rootPointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
-            string dimMark1 = "";
-            foreach (var pointNode in rootPointList)
-            {
-                if (pointNode.Item.DimMark != null)
-                {
-                    dimMark1 = pointNode.Item.DimMark.StrText;
-                }
-            }
-            var dimPt1 = rootPt2 - hvector * 1000.0;
-            DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
+            DrawPipeDims(rootPointList, hvector, rootPt2);
             //立管
             var _riserPoint = rootPt2;
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector, rootLine);
+                ref floorIndex, ref mvector,hasFlushPoint,markLoc, rootLine);
             sumLength += _riserPoint.DistanceTo(rootPt2);
             rootPt2 = _riserPoint;
-
             return rootLength;
         }
         public double DrawSubNode(Point3d basePt, ThTreeNode<ThPipeModel> subNode, double height, int floorIndex, Line rootLine)
@@ -352,6 +299,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制垂直线
             Point3d vLinePt1 = basePt;
             Point3d vLinePt2 = basePt + vvector * 400.0;
+            if (subNode.Children.Count == 0)
+            {
+                var vertlengh = 400.0;
+                if (rootLine != null)
+                    vertlengh += rootLine.GetClosestPointTo(basePt, false).DistanceTo(basePt);
+                vLinePt2 = basePt - vvector * vertlengh;
+            }
             PreLines.Add(new PreLine(new Line(vLinePt1, vLinePt2), PipeLayerName));
             Point3d hLinePt1 = vLinePt2;
             //debug
@@ -368,62 +322,17 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //插入阀门
                 var endPointNode = childNode.Item.PointNodeList.First().Parent;
                 var pointList = GetPointList(startPointNode, endPointNode);
-                var valves = new List<ThValveModel>();
-                for (int j = 0; j < pointList.Count; j++)
-                {
-                    var pointNode = pointList[j];
-                    foreach (var v in pointNode.Item.Valves)
-                    {
-                        if (v != null && !v.Existed)
-                        {
-                            var valve = new ThValveModel();
-                            valve = v;
-                            valve.Existed = true;
-                            valves.Add(valve);
-                        }
-                    }
-                }
-                if (valves.Count > 0)
-                {
-                    double length = 0;
-                    valves.ForEach(e => length += e.CorrespondingPipeLineLength);
-                    childPt1 = childPt1 + hvector * length;
-                    sumLength += length;
-                    var valvePt = childPt1 - hvector * 1000;
-                    InsertValves(ValveLayerName, valves, valvePt, hvector);
-                }
-                //绘制冲洗点位情况             
-                bool sflushpointFound = false;
-                foreach (var node in pointList)
-                {
-                    if (node.Item.FlushPoint.Valve != null)
-                    {
-                        sflushpointFound = true;
-                        var flushPoint = node.Item.FlushPoint;
-                        DrawFlushPoint(flushPoint, childPt1, vvector, hvector, rootLine);
-                        break;
-                    }
-                }
-                if (sflushpointFound)
-                {
-                    childPt1 += hvector * 1000;
-                    sumLength += 1000;
-                }
-                //绘制管径              
-                string sdimMark = "";
-                foreach (var pointNode in pointList)
-                {
-                    if (pointNode.Item.DimMark != null)
-                    {
-                        sdimMark = pointNode.Item.DimMark.StrText;
-                    }
-                }
-                var sdimPt = childPt1 - hvector * 1000.0;
-                DrawText("W-WSUP-DIMS", sdimMark, sdimPt, 0.0);
+                DrawValves(pointList, ref childPt1, ref sumLength, hvector);
+                //绘制冲洗点位情况
+                bool _hasFlushPoint = false;
+                Point3d _markLoc = new Point3d();
+                DrawFlushPointEntry(pointList, ref sumLength, ref childPt1, vvector, hvector, rootLine,ref _hasFlushPoint,ref _markLoc);
+                //绘制管径
+                DrawPipeDims(pointList, hvector, childPt1);
                 //立管
                 var riserPoint = childPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector);
+                    ref floorIndex, ref mvector,_hasFlushPoint, _markLoc);
                 sumLength += riserPoint.DistanceTo(childPt1);
                 childPt1 = riserPoint;      
                 //绘制子节点
@@ -441,35 +350,31 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 cuLength += SubSpace * (subNode.Children.Count - 1);//子节点的间隔1000
                 cuLength += endLength;
             }
-
             Point3d hLinePt2 = vLinePt2 + hvector * cuLength;
             //插入阀门
             var _pointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
-            var _valves = new List<ThValveModel>();
-            for (int j = 0; j < _pointList.Count; j++)
-            {
-                var pointNode = _pointList[j];
-                foreach (var v in pointNode.Item.Valves)
-                {
-                    if (v != null && !v.Existed)
-                    {
-                        var valve = new ThValveModel();
-                        valve = v;
-                        valve.Existed = true;
-                        _valves.Add(valve);
-                    }
-                }
-            }
-            if (_valves.Count > 0)
-            {
-                double length = 0;
-                _valves.ForEach(e => length += e.CorrespondingPipeLineLength);
-                hLinePt2 = hLinePt2 + hvector * length;
-                cuLength += length;
-                var valvePt = hLinePt2 - hvector * 1000;
-                InsertValves(ValveLayerName, _valves, valvePt, hvector);
-            }
+            DrawValves(_pointList, ref hLinePt2, ref cuLength, hvector);
             //绘制冲洗点位情况
+            bool hasFlushPoint = false;
+            Point3d markLoc = new Point3d();
+            DrawFlushPointEntry(_pointList, ref cuLength, ref hLinePt2, vvector, hvector, rootLine,ref hasFlushPoint,ref markLoc);
+            //绘制当前节点干线
+            PreLines.Add(new PreLine(new Line(hLinePt1, hLinePt2), PipeLayerName, 0));
+            DrawBreakDot(hLinePt2, Math.PI / 2);
+            //绘制管径
+            var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
+            DrawPipeDims(rootPointList, hvector, hLinePt2);
+            //立管
+            var _riserPoint = hLinePt2;
+            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
+                ref floorIndex, ref mvector, hasFlushPoint, markLoc);
+            cuLength += _riserPoint.DistanceTo(hLinePt2);
+            hLinePt2 = _riserPoint;
+            return cuLength;
+        }
+        private void DrawFlushPointEntry(List<ThTreeNode<ThPointModel>> _pointList, ref double length,
+            ref Point3d point, Vector3d vvector, Vector3d hvector, Line rootLine,ref bool hasFlushPoint,ref Point3d markLoc)
+        {
             bool flushpointFound = false;
             foreach (var node in _pointList)
             {
@@ -477,40 +382,31 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     flushpointFound = true;
                     var flushPoint = node.Item.FlushPoint;
-                    DrawFlushPoint(flushPoint, hLinePt2, vvector, hvector, rootLine);
+                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, rootLine);
+                    hasFlushPoint = true;
                     break;
                 }
             }
             if (flushpointFound)
             {
-                hLinePt2 += hvector * 1000;
-                cuLength += 1000;
+                point += hvector * 1000;
+                length += 1000;
             }
-            //绘制当前节点干线
-            PreLines.Add(new PreLine(new Line(hLinePt1, hLinePt2), PipeLayerName, 0));
-            var hLine1 = new Line(hLinePt1, hLinePt2);
-            //绘制管径
-            var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
+        }
+        private void DrawPipeDims(List<ThTreeNode<ThPointModel>> pointList, Vector3d hvector, Point3d point)
+        {
             string dimMark1 = "";
-            foreach (var pointNode in rootPointList)
+            foreach (var pointNode in pointList)
             {
                 if (pointNode.Item.DimMark != null)
                 {
                     dimMark1 = pointNode.Item.DimMark.StrText;
                 }
             }
-            var dimPt1 = hLinePt2 - hvector * 1000.0;
+            var dimPt1 = point - hvector * 1000.0;
             DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
-            //立管
-            var _riserPoint = hLinePt2;
-            DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector);
-            cuLength += _riserPoint.DistanceTo(hLinePt2);
-            hLinePt2 = _riserPoint;
-            return cuLength;
         }
-
-        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, Line rootLine = null)
+        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector,ref Point3d markLoc, Line rootLine = null)
         {
             var vertLength = 400.0;
             if (rootLine != null)
@@ -522,7 +418,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             PreLines.Add(new PreLine(new Line(vDownPt2, vDownPt3), PipeLayerName, 0));
             var line2 = new Line(vDownPt2, vDownPt3);
             var vDownPt4 = vDownPt3 - vvector * 1000.0;
-            PreLines.Add(new PreLine(new Line(vDownPt3, vDownPt4), PipeLayerName, 1));
+            var vertline = new Line(vDownPt3, vDownPt4);
+            PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
+            markLoc = vertline.GetCenter();
             using (var adb = AcadDatabase.Active())
             {
                 var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
@@ -531,12 +429,21 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 var br = adb.Element<BlockReference>(blId);
             }
         }
-        public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor)
+        public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor,string crossLayerDims)
         {
             Point3d otherPt = GetMapStartPoint(MapPostion, FloorList, otherFloorIndex);
             Point3d otherStartPt = new Point3d(basePt.X, otherPt.Y, 0.0);
             var vLine1 = new Line(basePt, otherStartPt);
-            PreLines.Add(new PreLine(new Line(basePt, otherStartPt), PipeLayerName, 1));
+            PreLines.Add(new PreLine(vLine1, PipeLayerName, 1));
+            //跨层立管标注
+            var crossp = vLine1.GetCenter();
+            var crossp_left = crossp.TransformBy(Matrix3d.Displacement(-Vector3d.XAxis * 1000));
+            var crossmark_line = new Line(crossp_left, crossp);
+            if (crossLayerDims.Length > 0)
+            {
+                PreLines.Add(new PreLine(crossmark_line, "W-WSUP-DIMS"));
+                CrossedlayerDims.Add(new CrossedLayerDims(crossLayerDims, crossp_left));
+            }
             //构造树
             double floorLength = 0.0;
             var pipeTree = new ThPipeTree(startPt, FloorList, RiserList, Mt);
@@ -553,7 +460,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
                 floorLength = DrawRootNode(otherStartPt, pipeTree.RootNode, otherFloorIndex);
             }
+            else
+                DrawBreakDot(otherStartPt);
             return floorLength;
+        }
+        public void DrawBreakDot(Point3d point, double angle = 0)
+        {
+            using (var adb = AcadDatabase.Active())
+            {
+                var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
+                    "W-WSUP-DIMS", "断线", point, new Scale3d(1), angle);
+                var br = adb.Element<BlockReference>(blId);
+            }
         }
         public void DrawCircle(Point3d center, double radius, string layer, int colorIndex)
         {
@@ -599,7 +517,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         }
         public void DrawRisePipe(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
             , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
-            , Line rootLine = null)
+            ,bool hasFlushPoint,Point3d markloc, Line rootLine = null)
         {
             List<Point3d> riserStartPoints = new List<Point3d>();
             for (int j = 0; j < pointList.Count; j++)
@@ -607,6 +525,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 double curRiserLength = 0;
                 var node = pointList[j];
                 bool hasNode = false;
+                string crossLayerDims = "";
+                if (node.Item.Break != null)
+                {
+                    crossLayerDims = node.Item.Break.BreakName;
+                }
                 if (node.Item.Riser != null && node.Item.Riser.RiserPts.Count > 0)
                 {
                     hasNode = true;
@@ -640,23 +563,48 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         {
                             bool isToCurFloor = false;
                             HelpLines.Add(new Line(vPt1, firstPt));
-                            curRiserLength = DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor);
+                            var compare_ini_lines = PreLines.Select(e => e.Line).ToList();
+                            curRiserLength = DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor,crossLayerDims);
+                            crossLayerDims = "";
+                            //跨层立管太长，同层后面立管位置往前挪排版紧凑些
+                            var compare_out_lines = PreLines.Select(e => e.Line).ToList();
+                            var generated_lines = compare_out_lines.Except(compare_ini_lines);
+                            var points = generated_lines.Select(e => e.GetCenter())
+                                .Where(p => Math.Abs(p.Y - vPt1.Y) < 3000).OrderByDescending(p => p.X);
+                            var point = vPt1;
+                            if (points.Count() > 0) point = points.First();
+                            curRiserLength = point.X - vPt1.X;
+                            curRiserLength = curRiserLength >= 0 ? curRiserLength : 0;
                         }
                     }
                 }
-                if (node.Item.Break != null)
+                var cond = CrossedlayerDims.Count > 0 ? !CrossedlayerDims[CrossedlayerDims.Count - 1].Text.Equals(crossLayerDims) : true;
+                if (node.Item.Break != null && crossLayerDims != "" && cond)
                 {
                     //如果是断线，绘制断线标注
-                    var mPt1 = riserPoint;
-                    var mPt2 = mPt1 + mvector * 1000.0;
-                    var mPt3 = mPt2 - hvector * GetMarkLength(node.Item.Break.BreakName);
-                    PreLines.Add(new PreLine(new Line(mPt1, mPt2), "W-WSUP-DIMS"));
-                    PreLines.Add(new PreLine(new Line(mPt2, mPt3), "W-WSUP-DIMS"));
-                    DrawText("W-WSUP-DIMS", node.Item.Break.BreakName, mPt3, 0.0);
+                    crossLayerDims = node.Item.Break.BreakName;
+                    if (!hasFlushPoint)
+                    {
+                        var iniloc = riserPoint;
+                        var uploc = iniloc + Vector3d.YAxis * 400;
+                        var leftuploc = uploc - Vector3d.XAxis * 1200;
+                        var vertline = new Line(iniloc, uploc);
+                        var horline = new Line(leftuploc, uploc);
+                        PreLines.Add(new PreLine(vertline, "W-WSUP-DIMS"));
+                        PreLines.Add(new PreLine(horline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftuploc, 0.0);
+                    }
+                    else
+                    {
+                        var iniloc = markloc;
+                        var leftloc = markloc - Vector3d.XAxis * 1500;
+                        var flushline = new Line(leftloc, iniloc);
+                        PreLines.Add(new PreLine(flushline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftloc, 0.0);
+                    }
                 }
                 if (hasNode)
                 {
-                    var p = riserPoint;
                     riserPoint += hvector.GetNormal() * (curRiserLength + 1000);
                 }
             }

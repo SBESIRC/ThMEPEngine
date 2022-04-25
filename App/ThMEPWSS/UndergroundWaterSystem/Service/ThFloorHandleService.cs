@@ -54,6 +54,32 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             }
             var retList = new List<ThRiserInfo>();
             var noName = riserList.Where(o => o.MarkName == "").ToList();
+            foreach (var rise in noName)
+            {
+                ThRiserInfo info = new ThRiserInfo();
+                info.MarkName = "";
+                info.RiserPts.Add(rise.Position);
+                retList.Add(info);
+            }
+            //retList.AddRange(GroupAnonymousRiserByPosition(noName, locPoints));
+            riserList = riserList.Except(noName).ToList();
+            var groups = riserList.GroupBy(o => o.MarkName).ToList();
+            foreach (var group in groups)
+            {
+                var riserInfo = new ThRiserInfo();
+                riserInfo.MarkName = group.Key;
+                var risers = group.ToList().OrderBy(o => o.FloorIndex);
+                foreach(var riser in risers)
+                {
+                    riserInfo.RiserPts.Add(riser.Position);
+                }
+                retList.Add(riserInfo);
+            }
+            return retList;
+        }
+        private List<ThRiserInfo> GroupAnonymousRiserByPosition(List<ThRiserModel> noName, List<Point3d> locPoints)
+        {
+            var results = new List<ThRiserInfo>();
             List<List<ThRiserModel>> risemodels = new List<List<ThRiserModel>>();
             if (noName.Count > 0)
             {
@@ -92,22 +118,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 ThRiserInfo info = new ThRiserInfo();
                 info.MarkName = "";
                 foreach (var p in rise) info.RiserPts.Add(p.Position);
-                retList.Add(info);
+                results.Add(info);
             }
-            riserList = riserList.Except(noName).ToList();
-            var groups = riserList.GroupBy(o => o.MarkName).ToList();
-            foreach (var group in groups)
-            {
-                var riserInfo = new ThRiserInfo();
-                riserInfo.MarkName = group.Key;
-                var risers = group.ToList().OrderBy(o => o.FloorIndex);
-                foreach(var riser in risers)
-                {
-                    riserInfo.RiserPts.Add(riser.Position);
-                }
-                retList.Add(riserInfo);
-            }
-            return retList;
+            return results;
         }
         public List<Line> GetPipeList(List<ThFloorInfo> floorInfos)
         {

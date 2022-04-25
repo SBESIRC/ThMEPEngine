@@ -11,10 +11,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
     public class ThDimExtractionService
     {
-        public List<ThDimModel> GetDimModelList(Point3dCollection pts=null)
+        public List<ThDimModel> GetDimModelList(Point3dCollection pts)
         {
             var dimExtractionEngine = new ThDimExtractionEngine();
-            var retList = dimExtractionEngine.GetDimList(pts);
+            var retList = dimExtractionEngine.GetDimListOptimized(pts);
             return retList;
         }
     }
