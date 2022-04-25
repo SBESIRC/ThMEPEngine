@@ -12,14 +12,7 @@ namespace TianHua.Electrical.PDS.UI
     {
         public void Initialize()
         {
-            try
-            {
-                ElecSandboxUI.InitPDSProjectData();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+           
         }
 
         public void Terminate()
@@ -33,15 +26,18 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
         public void THDLXT()
         {
+            try
+            {
+                ElecSandboxUI.InitPDSProjectData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
             var win = ElecSandboxUI.TryGetCurrentWindow();
             if (win is not null) return;
-            var cmd = new ThPDSCommand();
-            cmd.Execute();
-            var g = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-            if (g == null) return;
             win = ElecSandboxUI.TryCreateSingleton();
             if (win == null) return;
-            win.Graph = g;
             AcadApp.ShowModelessWindow(win);
         }
 

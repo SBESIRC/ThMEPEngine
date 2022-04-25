@@ -38,9 +38,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
+        ContextMenu treeCMenu;
+        QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
-            var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            if (graph is null) return;
             var vertices = graph.Vertices.Select(x => new ThPDSVertex { Detail = x.Details, Type = x.Type }).ToList();
             var srcLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Source)).ToList();
             var dstLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Target)).ToList();
@@ -48,7 +50,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var details = graph.Edges.Select(x => x.Details).ToList();
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
-            var treeCMenu = tv.ContextMenu;
+            treeCMenu ??= tv.ContextMenu;
             var config = new ThPDSDistributionPanelConfig();
             treeCMenu.DataContext = config;
             var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();

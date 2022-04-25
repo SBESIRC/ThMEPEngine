@@ -21,28 +21,31 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
     /// </summary>
     public partial class ThPDSInfoCompare : UserControl
     {
+        ThPDSInfoCompareService Service = new();
         public ThPDSInfoCompare()
         {
             InitializeComponent();
-            new ThPDSInfoCompareService().Init(this);
+            Service.Init(this);
         }
 
-        private void btnUseFlatDataClick(object sender, RoutedEventArgs e)
+        private void btnCompareClick(object sender, RoutedEventArgs e)
+        {
+            new Service.ThPDSSecondaryPushDataService().Push();
+            PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
+            Service.UpdateView(this);
+        }
+
+        private void btnAcceptClick(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void btnUseSystemDataClick(object sender, RoutedEventArgs e)
+        private void btnCreateClick(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void btnReloadClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnSaveClick(object sender, RoutedEventArgs e)
+        private void btnUpdateClick(object sender, RoutedEventArgs e)
         {
 
         }

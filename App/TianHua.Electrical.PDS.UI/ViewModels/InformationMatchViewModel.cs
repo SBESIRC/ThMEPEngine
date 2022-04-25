@@ -28,7 +28,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph
         {
             get { return graph; }
-            set { graph = value; }
+            set { graph = value; OnPropertyChanged(); }
         }
 
         //private ThPDSProjectGraphNode currentNode;

@@ -32,255 +32,261 @@ namespace TianHua.Electrical.PDS.UI.Services
     {
         public void Init(ThPDSInfoCompare panel)
         {
-            var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
-            panel.btnRefresh.Click += (s, e) =>
+            panel.btnReadAndRegen.Click += (s, e) =>
             {
-                new ThPDSSecondaryPushDataService().Push();
-                {
-                    var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
-                    foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
-                    {
-                        node.DataList.Add(new() { Name = Path.GetFileName(file), });
-                    }
-                    panel.lbx.DataContext = node;
-                }
-                {
-                    var info = new CircuitDiffInfo() { Items = new(), };
-                    foreach (var edge in g.Edges)
-                    {
-                        var tag = edge.Tag;
-                        if (tag is ThPDSProjectGraphEdgeCompositeTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Mild,
-                                Img = PDSImageSources.Mild,
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphEdgeIdChangeTag projectGraphEdgeIdChangeTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Moderate,
-                                Img = PDSImageSources.Moderate,
-                                Hint = "回路编号变化，原编号" + projectGraphEdgeIdChangeTag.ChangedLastCircuitID,
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Moderate,
-                                Img = PDSImageSources.Moderate,
-                                Hint = "此回路被移动",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphEdgeAddTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "此回路为新增",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphEdgeDeleteTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "此回路被删除",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphEdgeDataTag projectGraphEdgeDataTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Safe,
-                                Img = PDSImageSources.Safe,
-                                Hint = projectGraphEdgeDataTag.ToLastCircuitID,
-                            });
-                        }
-                        else
-                        {
-                            info.Items.Add(new()
-                            {
-                                CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                                CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                                ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                                Dwg = edge.Circuit.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Safe,
-                                Img = PDSImageSources.Safe,
-                            });
-                        }
-                    }
-                    panel.dg1.DataContext = info;
-                }
-                {
-                    var info = new LoadDiffInfo() { Items = new(), };
-                    foreach (var node in g.Vertices)
-                    {
-                        var tag = node.Tag;
-                        if (tag is ThPDSProjectGraphNodeCompositeTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Mild,
-                                Img = PDSImageSources.Mild,
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeIdChangeTag projectGraphNodeIdChangeTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Moderate,
-                                Img = PDSImageSources.Moderate,
-                                Hint = $"负载编号变化，原编号{projectGraphNodeIdChangeTag.ChangedID}",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeExchangeTag projectGraphNodeExchangeTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Moderate,
-                                Img = PDSImageSources.Moderate,
-                                Hint = $"此负载与{projectGraphNodeExchangeTag.ExchangeToID}交换",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeMoveTag projectGraphNodeMoveTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Moderate,
-                                Img = PDSImageSources.Moderate,
-                                Hint = $"此负载由{projectGraphNodeMoveTag}移动至此",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeAddTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "此负载为新增",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeDeleteTag)
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "此负载被删除",
-                            });
-                        }
-                        else if (tag is ThPDSProjectGraphNodeDataTag dataTag)
-                        {
-                            if (dataTag.TagD)
-                            {
-                                info.Items.Add(new()
-                                {
-                                    LoadId = node.Load.ID.LoadID,
-                                    LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                    LoadPower = node.Details.LowPower.ToString(),
-                                    Dwg = node.Load.Location?.ReferenceDWG,
-                                    Background = PDSColorBrushes.Servere,
-                                    Img = PDSImageSources.Servere,
-                                    Hint = "描述变化",
-                                });
-                            }
-                            if (dataTag.TagF)
-                            {
-                                info.Items.Add(new()
-                                {
-                                    LoadId = node.Load.ID.LoadID,
-                                    LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                    LoadPower = node.Details.LowPower.ToString(),
-                                    Dwg = node.Load.Location?.ReferenceDWG,
-                                    Background = PDSColorBrushes.Servere,
-                                    Img = PDSImageSources.Servere,
-                                    Hint = "消防变化",
-                                });
-                            }
-                            if (dataTag.TagP)
-                            {
-                                info.Items.Add(new()
-                                {
-                                    LoadId = node.Load.ID.LoadID,
-                                    LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                    LoadPower = node.Details.LowPower.ToString(),
-                                    Dwg = node.Load.Location?.ReferenceDWG,
-                                    Background = PDSColorBrushes.Servere,
-                                    Img = PDSImageSources.Servere,
-                                    Hint = "功率变化",
-                                });
-                            }
-                        }
-                        else
-                        {
-                            info.Items.Add(new()
-                            {
-                                LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
-                                LoadPower = node.Details.LowPower.ToString(),
-                                Dwg = node.Load.Location?.ReferenceDWG,
-                                Background = PDSColorBrushes.Safe,
-                                Img = PDSImageSources.Safe,
-                            });
-                        }
-                    }
-                    panel.dg2.DataContext = info;
-                }
+                new Command.ThPDSCommand().Execute();
+                PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
+                UpdateView(panel);
             };
+        }
+
+        public void UpdateView(ThPDSInfoCompare panel)
+        {
+            var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
+            {
+                var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
+                foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
+                {
+                    node.DataList.Add(new() { Name = Path.GetFileName(file), });
+                }
+                panel.lbx.DataContext = node;
+            }
+            {
+                var info = new CircuitDiffInfo() { Items = new(), };
+                foreach (var edge in g.Edges)
+                {
+                    var tag = edge.Tag;
+                    if (tag is ThPDSProjectGraphEdgeCompositeTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Mild,
+                            Img = PDSImageSources.Mild,
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeIdChangeTag projectGraphEdgeIdChangeTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Moderate,
+                            Img = PDSImageSources.Moderate,
+                            Hint = "回路编号变化，原编号" + projectGraphEdgeIdChangeTag.ChangedLastCircuitID,
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Moderate,
+                            Img = PDSImageSources.Moderate,
+                            Hint = "此回路被移动",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeAddTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "此回路为新增",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeDeleteTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "此回路被删除",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeDataTag projectGraphEdgeDataTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Safe,
+                            Img = PDSImageSources.Safe,
+                            Hint = projectGraphEdgeDataTag.ToLastCircuitID,
+                        });
+                    }
+                    else
+                    {
+                        info.Items.Add(new()
+                        {
+                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
+                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
+                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            Dwg = edge.Circuit.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Safe,
+                            Img = PDSImageSources.Safe,
+                        });
+                    }
+                }
+                panel.dg1.DataContext = info;
+            }
+            {
+                var info = new LoadDiffInfo() { Items = new(), };
+                foreach (var node in g.Vertices)
+                {
+                    var tag = node.Tag;
+                    if (tag is ThPDSProjectGraphNodeCompositeTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Mild,
+                            Img = PDSImageSources.Mild,
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeIdChangeTag projectGraphNodeIdChangeTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Moderate,
+                            Img = PDSImageSources.Moderate,
+                            Hint = $"负载编号变化，原编号{projectGraphNodeIdChangeTag.ChangedID}",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeExchangeTag projectGraphNodeExchangeTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Moderate,
+                            Img = PDSImageSources.Moderate,
+                            Hint = $"此负载与{projectGraphNodeExchangeTag.ExchangeToID}交换",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeMoveTag projectGraphNodeMoveTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Moderate,
+                            Img = PDSImageSources.Moderate,
+                            Hint = $"此负载由{projectGraphNodeMoveTag}移动至此",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeAddTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "此负载为新增",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeDeleteTag)
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "此负载被删除",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeDataTag dataTag)
+                    {
+                        if (dataTag.TagD)
+                        {
+                            info.Items.Add(new()
+                            {
+                                LoadId = node.Load.ID.LoadID,
+                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadPower = node.Details.LowPower.ToString(),
+                                Dwg = node.Load.Location?.ReferenceDWG,
+                                Background = PDSColorBrushes.Servere,
+                                Img = PDSImageSources.Servere,
+                                Hint = "描述变化",
+                            });
+                        }
+                        if (dataTag.TagF)
+                        {
+                            info.Items.Add(new()
+                            {
+                                LoadId = node.Load.ID.LoadID,
+                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadPower = node.Details.LowPower.ToString(),
+                                Dwg = node.Load.Location?.ReferenceDWG,
+                                Background = PDSColorBrushes.Servere,
+                                Img = PDSImageSources.Servere,
+                                Hint = "消防变化",
+                            });
+                        }
+                        if (dataTag.TagP)
+                        {
+                            info.Items.Add(new()
+                            {
+                                LoadId = node.Load.ID.LoadID,
+                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadPower = node.Details.LowPower.ToString(),
+                                Dwg = node.Load.Location?.ReferenceDWG,
+                                Background = PDSColorBrushes.Servere,
+                                Img = PDSImageSources.Servere,
+                                Hint = "功率变化",
+                            });
+                        }
+                    }
+                    else
+                    {
+                        info.Items.Add(new()
+                        {
+                            LoadId = node.Load.ID.LoadID,
+                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadPower = node.Details.LowPower.ToString(),
+                            Dwg = node.Load.Location?.ReferenceDWG,
+                            Background = PDSColorBrushes.Safe,
+                            Img = PDSImageSources.Safe,
+                        });
+                    }
+                }
+                panel.dg2.DataContext = info;
+            }
         }
     }
     public class CircuitDiffInfo

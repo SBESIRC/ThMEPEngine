@@ -49,8 +49,6 @@ namespace TianHua.Electrical.PDS.UI.UI
 
         static bool hasInited;
 
-        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
-
         /// <summary>
         /// 初始化数据，只执行一次！
         /// </summary>
@@ -83,14 +81,20 @@ namespace TianHua.Electrical.PDS.UI.UI
             topTableItemViewModel = new SandBoxTableItemViewModel();
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电沙盘界面", new ThPDSDistributionSandPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("单线图绘制界面", new ThPDSSingleLineImageDrawingPanel()));
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电箱编辑界面", new ThPDSDistributionPanel() { Graph = Graph, }));
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("配电箱编辑界面", new ThPDSDistributionPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("干线编辑界面", new ThPDSMainBusPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("低压柜编辑界面", new ThPDSLowPressurePanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("高压压柜编辑界面", new ThPDSHighPressurePanel()));
             topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("全局参数设置界面", new UESandboxParameter()));
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare()));
+            var dft = new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare());
+            topTableItemViewModel.FunctionTableItems.Add(dft);
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("成果导出界面", new ThPDSExport()));
             tabTopFunction.DataContext = topTableItemViewModel;
+            tabTopFunction.SelectedItem = dft;
+            if(tabTopFunction.SelectedItem is null)
+            {
+                tabTopFunction.SelectedIndex = topTableItemViewModel.FunctionTableItems.IndexOf(dft);
+            }
         }
         #endregion
 
