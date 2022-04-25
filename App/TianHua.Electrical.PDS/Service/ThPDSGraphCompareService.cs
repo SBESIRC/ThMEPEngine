@@ -320,7 +320,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     if (nodeA.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
                     {
-                        if (compositeTag.Tag is ThPDSProjectGraphNodeExchangeTag)
+                        if (compositeTag.CompareTag is ThPDSProjectGraphNodeExchangeTag)
                         {
                             continue;
                         }
@@ -454,7 +454,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
                 {
-                    Tag = exTagA,
+                    CompareTag = exTagA,
                     DataTag = dataTagA
                 };
                 nodeA.Tag = compositeTagA;
@@ -472,7 +472,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
                 {
-                    Tag = exTagB,
+                    CompareTag = exTagB,
                     DataTag = dataTagB
                 };
                 nodeB.Tag = compositeTagB;
@@ -494,7 +494,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
                 {
-                    Tag = moveTagA,
+                    CompareTag = moveTagA,
                     DataTag = dataTagA
                 };
                 nodeA.Tag = compositeTagA;
@@ -512,7 +512,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
                 {
-                    Tag = moveTagB,
+                    CompareTag = moveTagB,
                     DataTag = dataTagB
                 };
                 nodeB.Tag = compositeTagB;

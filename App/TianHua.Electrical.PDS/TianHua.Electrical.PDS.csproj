@@ -27,6 +27,9 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />
     <Compile Include="Engine\ThPDSZoomEngine.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
