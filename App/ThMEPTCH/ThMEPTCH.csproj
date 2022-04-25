@@ -69,11 +69,18 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="Moel\ThTCHSprinkler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\IO\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
