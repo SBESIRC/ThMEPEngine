@@ -66,20 +66,22 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             edge.Circuit.ViaConduit = true;
                         }
-                        addEdgeList.Add(edge);
-                        
-                        var objectIds = new List<ObjectId>();
-                        var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
-                        if (targetMap != null)
+                        if(!addEdgeList.Contains(edge))
                         {
-                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            addEdgeList.Add(edge);
+                            var objectIds = new List<ObjectId>();
+                            var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
+                            if (targetMap != null)
+                            {
+                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            }
+                            var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
+                            if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
+                            {
+                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            }
+                            targetMap.EdgeMap.Add(edge, objectIds);
                         }
-                        var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
-                        if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
-                        {
-                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
-                        }
-                        targetMap.EdgeMap.Add(edge, objectIds);
 
                         break;
                     }

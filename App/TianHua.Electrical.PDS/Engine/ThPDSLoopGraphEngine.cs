@@ -257,7 +257,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
-                                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey);
+                                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey, true);
                                 PDSGraph.Graph.AddEdge(newEdge);
                                 // 此时节点需要和桥架建立多条回路，由于在dictionary中是通过判断两个节点是否都相同，
                                 // 进而判断两个edge是否相同的，所以此时dictionary认为它们是同一个key
@@ -318,6 +318,7 @@ namespace TianHua.Electrical.PDS.Engine
                 else
                 {
                     node = CacheDistBoxes[startingEntity];
+                    CacheDistBoxesInFrame.Remove(startingEntity);
                 }
                 var polyline = ThPDSBufferService.Buffer(blockObj, Database);
                 var results = FindNextLine(startingEntity, polyline);
@@ -561,6 +562,7 @@ namespace TianHua.Electrical.PDS.Engine
                     else
                     {
                         newNode = CacheDistBoxes[item.Key];
+                        CacheDistBoxesInFrame.Remove(item.Key);
                     }
 
                     if (DistBoxes.Contains(sourceEntity) || CableTrays.Contains(sourceEntity))

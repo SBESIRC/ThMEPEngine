@@ -218,6 +218,12 @@ namespace TianHua.Electrical.PDS.Service
             }
             circuitMarks.Distinct().ForEach(o =>
             {
+                // 过滤无效回路信息
+                if(o.Contains(id.LoadID))
+                {
+                    return;
+                }
+
                 var value = o.Replace("/", "-");
                 var checkID = "-W[a-zA-Z]+[0-9]+";
                 var regexID = new Regex(@checkID);
@@ -366,7 +372,7 @@ namespace TianHua.Electrical.PDS.Service
                     circuitID.SourcePanelID.Add(panelIDs[0]);
                     circuitID.CircuitID.Add(circuitIDs[0]);
                 }
-                else if (!string.IsNullOrEmpty(srcPanelID))
+                else if (panelIDs.Count == 0 && !string.IsNullOrEmpty(srcPanelID))
                 {
                     circuitID.SourcePanelID.Add(srcPanelID);
                     circuitID.CircuitID.Add(circuitIDs[0]);

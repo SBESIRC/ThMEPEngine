@@ -57,7 +57,7 @@ namespace TianHua.Electrical.PDS.Service
         public static readonly string OUT_CIRCUIT_DESCRIPTION = "功能用途";
         public static readonly string CONTROL_CIRCUIT_DESCRIPTION = "控制回路";
 
-        public const double ALLOWABLE_TOLERANCE = 25.0;  //允许公差
+        public const double ALLOWABLE_TOLERANCE = 26.0;  //允许公差
         public const double STOREY_TOLERANCE = 200.0;  //允许楼层位置偏差
         public const double INNER_TOLERANCE = 57400.0;  //内框高度
 
