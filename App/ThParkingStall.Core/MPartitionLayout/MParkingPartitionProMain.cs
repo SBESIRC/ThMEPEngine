@@ -671,7 +671,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine)) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
             var offsetline = new LineSegment(iniobsplit);
-            offsetline.Translation(-gvec * DisCarAndHalfLane);
+            offsetline=offsetline.Translation(-gvec * DisCarAndHalfLane);
             var pl = PolyFromLines(iniobsplit, offsetline);
             if (IsInAnyBoxes(pl.Envelope.Centroid.Coordinate, CarBoxes)) return generate_lane_length;
             if (isStart) paras.SetGStartAdjLane = index;

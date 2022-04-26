@@ -265,7 +265,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         obpoints.AddRange(cross.Coordinates);
                         obpoints.AddRange(cross.IntersectPoint(obpl));
                     }
-                    obpl=obpl.Scale( 1 / (ScareFactorForCollisionCheck - 0.01));
+                    obpl = obpl.Scale(1 / (ScareFactorForCollisionCheck - 0.01));
                     obpoints = obpoints.Where(p => obpl.IsPointInFast(p)).Select(p => bdsplittest.ClosestPoint(p)).ToList();
                     var boxsplits = SplitLine(bdsplittest, obpoints).Where(e => !IsInAnyPolys(e.MidPoint, obcrossed)).Where(e => e.Length >= minlength);
                     foreach (var bxsplit in boxsplits)
@@ -946,7 +946,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 }
                                 Walls?.ForEach(wall =>
                                 {
-                                    if (wall.IntersectPoint(pl_checksc).Count() > 0) cond = false;
+                                    if (wall.IntersectPoint(buffer).Count() > 0) cond = false;
                                 });
                             }
                             else cond = false;
