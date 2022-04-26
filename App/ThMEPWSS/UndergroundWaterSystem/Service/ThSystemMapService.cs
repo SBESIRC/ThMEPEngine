@@ -245,14 +245,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //绘制冲洗点位情况
                 bool _hasFlushPoint = false;
                 Point3d _markLoc = new Point3d();
-                DrawFlushPointEntry(pointList, ref sumLength, ref subPt1, vvector, hvector, rootLine,ref _hasFlushPoint,ref _markLoc);
+                DrawFlushPointEntry(pointList, ref sumLength, ref subPt1, vvector, hvector, rootLine, ref _hasFlushPoint, ref _markLoc, true);
                 //绘制管径
                 DrawPipeDims(pointList, hvector, subPt1);
                 //立管
                 var _hascrossedpipe = false;
                 var riserPoint = subPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector,_hasFlushPoint,_markLoc,ref _hascrossedpipe, rootLine);
+                    ref floorIndex, ref mvector, _hasFlushPoint, _markLoc, ref _hascrossedpipe, rootLine);
                 sumLength += riserPoint.DistanceTo(subPt1);
                 subPt1 = riserPoint;
                 //画子节点
@@ -264,14 +264,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             double rootLength = startLength + endLength + sumLength;//第一段2000，末尾段1000
             rootLength += SubSpace * (rootNode.Children.Count - 1);//子节点的间隔1000
             Point3d rootPt1 = basePt;
-            Point3d rootPt2 = basePt + hvector * rootLength;         
+            Point3d rootPt2 = basePt + hvector * rootLength;
             //插入阀门
             var _pointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             DrawValves(_pointList, ref rootPt2, ref sumLength, hvector);
             //绘制冲洗点位情况
             bool hasFlushPoint = false;
             Point3d markLoc = new Point3d();
-            DrawFlushPointEntry(_pointList, ref sumLength, ref rootPt2, vvector, hvector, rootLine,ref hasFlushPoint,ref markLoc);
+            DrawFlushPointEntry(_pointList, ref sumLength, ref rootPt2, vvector, hvector, rootLine, ref hasFlushPoint, ref markLoc, true);
             //绘制管径
             var rootPointList = GetPointList(startPointNode, rootNode.Item.PointNodeList.LastOrDefault());
             DrawPipeDims(rootPointList, hvector, rootPt2);
@@ -279,7 +279,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var hascrossedpipe = false;
             var _riserPoint = rootPt2;
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector,hasFlushPoint,markLoc,ref hascrossedpipe, rootLine);
+                ref floorIndex, ref mvector, hasFlushPoint, markLoc, ref hascrossedpipe, rootLine);
             sumLength += _riserPoint.DistanceTo(rootPt2);
             //绘制主干线
             if (rootNode.Children.Count > 0)
@@ -328,16 +328,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 //绘制冲洗点位情况
                 bool _hasFlushPoint = false;
                 Point3d _markLoc = new Point3d();
-                DrawFlushPointEntry(pointList, ref sumLength, ref childPt1, vvector, hvector, rootLine,ref _hasFlushPoint,ref _markLoc);
+                DrawFlushPointEntry(pointList, ref sumLength, ref childPt1, vvector, hvector, rootLine, ref _hasFlushPoint, ref _markLoc, true);
                 //绘制管径
                 DrawPipeDims(pointList, hvector, childPt1);
                 //立管
                 var _hascrossedpipe = false;
                 var riserPoint = childPt1;
                 DrawRisePipe(ref pointList, ref riserPoint, ref height, ref vvector, ref hvector,
-                    ref floorIndex, ref mvector,_hasFlushPoint, _markLoc,ref _hascrossedpipe);
+                    ref floorIndex, ref mvector, _hasFlushPoint, _markLoc, ref _hascrossedpipe);
                 sumLength += riserPoint.DistanceTo(childPt1);
-                childPt1 = riserPoint;      
+                childPt1 = riserPoint;
                 //绘制子节点
                 var subLength = DrawSubNode(childPt1, childNode, height, floorIndex, rootLine);
                 sumLength += subLength;
@@ -360,7 +360,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             //绘制冲洗点位情况
             bool hasFlushPoint = false;
             Point3d markLoc = new Point3d();
-            DrawFlushPointEntry(_pointList, ref cuLength, ref hLinePt2, vvector, hvector, rootLine, ref hasFlushPoint, ref markLoc);     
+            DrawFlushPointEntry(_pointList, ref cuLength, ref hLinePt2, vvector, hvector, rootLine, ref hasFlushPoint, ref markLoc, true);
             //绘制管径
             var rootPointList = GetPointList(startPointNode, subNode.Item.PointNodeList.LastOrDefault());
             DrawPipeDims(rootPointList, hvector, hLinePt2);
@@ -381,7 +381,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             return cuLength;
         }
         private void DrawFlushPointEntry(List<ThTreeNode<ThPointModel>> _pointList, ref double length,
-            ref Point3d point, Vector3d vvector, Vector3d hvector, Line rootLine,ref bool hasFlushPoint,ref Point3d markLoc)
+            ref Point3d point, Vector3d vvector, Vector3d hvector, Line rootLine, ref bool hasFlushPoint, ref Point3d markLoc, bool isInChild)
         {
             bool flushpointFound = false;
             foreach (var node in _pointList)
@@ -390,7 +390,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     flushpointFound = true;
                     var flushPoint = node.Item.FlushPoint;
-                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, rootLine);
+                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, isInChild,rootLine);
                     hasFlushPoint = true;
                     break;
                 }
@@ -414,21 +414,30 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var dimPt1 = point - hvector * 1000.0;
             DrawText("W-WSUP-DIMS", dimMark1, dimPt1, 0.0);
         }
-        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector,ref Point3d markLoc, Line rootLine = null)
+        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, ref Point3d markLoc, bool isInChild, Line rootLine = null)
         {
             var vertLength = 400.0;
             if (rootLine != null)
                 vertLength += rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
             var vDownPt1 = basePt;
-            var vDownPt2 = vDownPt1 - vvector * vertLength;
-            PreLines.Add(new PreLine(new Line(vDownPt1, vDownPt2), PipeLayerName, 1));
-            var vDownPt3 = vDownPt2 + hvector * 1000;
-            PreLines.Add(new PreLine(new Line(vDownPt2, vDownPt3), PipeLayerName, 0));
-            var line2 = new Line(vDownPt2, vDownPt3);
-            var vDownPt4 = vDownPt3 - vvector * 1000.0;
-            var vertline = new Line(vDownPt3, vDownPt4);
-            PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
-            markLoc = vertline.GetCenter();
+            var vDownPt4 = vDownPt1 - vvector * 1000.0;
+            if (isInChild)
+            {
+                var vertline = new Line(vDownPt1, vDownPt4);
+                PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
+                markLoc = vertline.GetCenter();
+            }
+            else
+            {
+                var vDownPt2 = vDownPt1 - vvector * vertLength;
+                PreLines.Add(new PreLine(new Line(vDownPt1, vDownPt2), PipeLayerName, 1));
+                var vDownPt3 = vDownPt2 + hvector * 1000;
+                PreLines.Add(new PreLine(new Line(vDownPt2, vDownPt3), PipeLayerName, 0));
+                vDownPt4 = vDownPt3 - vvector * 1000.0;
+                var vertline = new Line(vDownPt3, vDownPt4);
+                PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
+                markLoc = vertline.GetCenter();
+            }
             using (var adb = AcadDatabase.Active())
             {
                 var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
@@ -437,7 +446,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 var br = adb.Element<BlockReference>(blId);
             }
         }
-        public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor,string crossLayerDims)
+        public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor, string crossLayerDims)
         {
             Point3d otherPt = GetMapStartPoint(MapPostion, FloorList, otherFloorIndex);
             Point3d otherStartPt = new Point3d(basePt.X, otherPt.Y, 0.0);
@@ -525,7 +534,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         }
         public void DrawRisePipe(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
             , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
-            ,bool hasFlushPoint,Point3d markloc,ref bool hascrossedpipe, Line rootLine = null)
+            , bool hasFlushPoint, Point3d markloc, ref bool hascrossedpipe, Line rootLine = null)
         {
             List<Point3d> riserStartPoints = new List<Point3d>();
             for (int j = 0; j < pointList.Count; j++)
@@ -573,7 +582,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                             bool isToCurFloor = false;
                             HelpLines.Add(new Line(vPt1, firstPt));
                             var compare_ini_lines = PreLines.Select(e => e.Line).ToList();
-                            curRiserLength = DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor,crossLayerDims);
+                            curRiserLength = DrawOtherFloor(vPt1, firstPt, floorIndex, otherIndex, ref isToCurFloor, crossLayerDims);
                             crossLayerDims = "";
                             //跨层立管太长，同层后面立管位置往前挪排版紧凑些
                             var compare_out_lines = PreLines.Select(e => e.Line).ToList();
