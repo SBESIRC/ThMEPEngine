@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Debug" Guid="{9C4C8506-3BDD-4ED1-A899-54226274ACF8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Debug" Guid="{85A113F1-7339-47FF-AB00-4CF04A03DFE0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_JsonCpp_Debug" Guid="{07281DFB-F2FC-41BD-B2CE-5A6125F9F1C0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_JsonCpp_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Config_Debug" Guid="{AEF9CCF3-2F38-455D-844F-C094DAC656FC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Config_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Color_Debug" Guid="{F9C5F070-0DB8-4F45-A882-0E3945AB79AA}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Color_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Debug" Guid="{BBF8DF32-B96D-4AF8-A0EF-3D94C0FC783C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Debug" Guid="{FB1020BE-5596-4DD4-9093-C7DCD7AA7138}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_JsonCpp_Debug" Guid="{CE5582FB-A633-45A9-84C3-06F1B3FFFB39}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_JsonCpp_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Config_Debug" Guid="{4CA01B41-E564-4267-B77F-A3A4E1C61353}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Config_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Color_Debug" Guid="{5B4A28B7-9DFC-4D55-AE19-4BF396800867}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Color_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Debug" Guid="{3D04C23F-F363-4B7B-A01D-6C029E768B34}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Debug" Guid="{6D50992B-7A97-40A5-95FF-95ED0FCFE86C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Debug" Guid="{85B277D1-A836-4CA9-B448-2B47CF67B3BF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_JsonCpp_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Debug" Guid="{D7F83206-EEF1-48B6-9745-A5A2C4D2BE7E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Config_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Debug" Guid="{F5298703-FB32-4BA4-8FB0-A7110A9FA6BB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Color_Debug" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" Guid="{9BFFAF8F-1CB9-42EA-8483-69AE304826E9}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" Guid="{C5616E03-2BB7-4A87-BB74-C70AEB50D5EB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_JsonCpp_Release" Guid="{2005BCD7-AF89-4DE5-AF91-86ACB46A1F28}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_JsonCpp_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Config_Release" Guid="{CD3D11E6-E583-404B-8634-86C8C6DBA373}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Config_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Color_Release" Guid="{14CB0868-9437-4F3E-A835-25796E78759F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Color_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Release" Guid="{BD8E617D-992F-4CC3-A3F8-0C94715A309E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Release" Guid="{379E7268-F100-4971-9C0F-13ED2AD73F0D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_JsonCpp_Release" Guid="{79FBA60B-A64F-433B-8B4A-5DC239DAF927}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_JsonCpp_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Config_Release" Guid="{1F4669D7-54C5-4164-838F-938EAED01221}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Config_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Color_Release" Guid="{2A23C2E7-CC81-4181-9CE7-ACE97D651504}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Color_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Release" Guid="{0004EED4-FCEE-461F-AA33-97CB528AB6D2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\elevation-generator.exe" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Release" Guid="{9504F634-E822-4D66-B515-B7D39FCAC971}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\IfcOpenHouse.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Release" Guid="{26FA45CF-EB07-4AB7-9DDA-E048B0C57523}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_JsonCpp_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\jsoncpp.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Release" Guid="{5ED73F4D-4C9C-4732-8DF2-450238550651}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Config_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\config.json" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Release" Guid="{1328141A-651B-4D4E-A585-4A5CE68C2CCB}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Color_Release" KeyPath="yes" Source="$(var.ElevationGeneratorPath)\color.json" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppElevationGenerator">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_JsonCpp_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Color_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_JsonCpp_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Color_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ElevationGenerator_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_IfcOpenShell_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_JsonCpp_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Color_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ElevationGenerator_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_IfcOpenShell_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_JsonCpp_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Color_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ElevationGenerator_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_IfcOpenShell_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_JsonCpp_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Color_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

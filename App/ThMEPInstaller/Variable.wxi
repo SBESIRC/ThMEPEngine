@@ -33,4 +33,6 @@
   <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
   <!-- CGAL path -->
   <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
+  <!-- Elevation Generator path -->
+  <?define ElevationGeneratorPath = "$(var.ProjectDir)\..\..\Externals\ElevationGenerator" ?>
 </Include>
