@@ -72,29 +72,43 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
-            var batchGenCmd = new RelayCommand(() =>
+            var selectAllCmd = new RelayCommand(() =>
             {
-                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-                try
+                var tree = tv.DataContext as ThPDSCircuitGraphTreeModel;
+                if (tree is null) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    var vertices = graph.Vertices.ToList();
-                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    node.IsChecked = true;
+                    foreach (var n in node.DataList)
                     {
-                        if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
-                        foreach (var n in node.DataList) dfs(n);
+                        dfs(n);
                     }
-                    dfs(tree);
-                    if (checkeddVertices.Count == 0) return;
-                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
-                    drawCmd.Execute();
-                    AcHelper.Active.Editor.Regen();
                 }
-                finally
-                {
-                    UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-                }
+                dfs(tree);
             });
+            var batchGenCmd = new RelayCommand(() =>
+           {
+               UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
+               try
+               {
+                   var vertices = graph.Vertices.ToList();
+                   var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                   void dfs(ThPDSCircuitGraphTreeModel node)
+                   {
+                       if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                       foreach (var n in node.DataList) dfs(n);
+                   }
+                   dfs(tree);
+                   if (checkeddVertices.Count == 0) return;
+                   var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                   drawCmd.Execute();
+                   AcHelper.Active.Editor.Regen();
+               }
+               finally
+               {
+                   UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
+               }
+           });
             var treeCmenu = new ContextMenu()
             {
                 ItemsSource = new MenuItem[] {
@@ -102,6 +116,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         Header="批量生成",
                         Command=batchGenCmd,
+                    },
+                    new MenuItem()
+                    {
+                        Header = "全部勾选",
+                        Command = selectAllCmd,
                     },
                 },
             };
@@ -114,15 +133,29 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
             {
-                var menu = new MenuItem()
+                var h = "平衡相序";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string== h))
                 {
-                    Header = "平衡相序",
-                    Command = new RelayCommand(() =>
+                    treeCMenu.Items.Add(new MenuItem()
                     {
-                        ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                    }),
-                };
-                treeCMenu.Items.Add(menu);
+                        Header = h,
+                        Command = new RelayCommand(() =>
+                        {
+                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                        }),
+                    });
+                }
+            }
+            {
+                var h = "全部勾选";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                {
+                    treeCMenu.Items.Add(new MenuItem()
+                    {
+                        Header = h,
+                        Command = selectAllCmd,
+                    });
+                }
             }
             tv.DataContext = tree;
             Action<DrawingContext> dccbs;
@@ -150,6 +183,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             Header = "批量生成",
                             Command = batchGenCmd,
+                        });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "全部勾选",
+                            Command = selectAllCmd,
                         });
                     }
                     else
