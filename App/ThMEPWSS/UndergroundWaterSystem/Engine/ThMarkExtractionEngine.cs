@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
 
     public class ThMarkExtractionEngine
     {
-        public List<ThMarkModel> GetMarkListOptimized(Point3dCollection pts = null)
+        public List<ThMarkModel> GetMarkListOptimized(Point3dCollection pts, Point3d startPoint,ref string startinfo)
         {
             using (var adb = AcadDatabase.Active())
             {
@@ -74,6 +74,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     }
                 }
                 results.AddRange(CombMarkList(textList, textLines));
+                startinfo = "";
+                foreach (var res in results)
+                {
+                    if (res.Poistion.DistanceTo(startPoint) < 10)
+                    {
+                        startinfo = res.MarkText;
+                        break;
+                    }
+                }
                 results = results.Where(e => !TestContainsChineseCharacter(e.MarkText)).ToList();
                 return results;
             }

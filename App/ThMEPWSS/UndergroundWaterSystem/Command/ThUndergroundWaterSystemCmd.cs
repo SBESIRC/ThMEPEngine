@@ -80,7 +80,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         foreach (var p in StoryFrameBasePoint)
                             if (pl.Contains(p)) { tmps.Add(p); break; }
                     StoryFrameBasePoint = tmps;
-                    //读取楼层信息_速度优化              
+                    //读取楼层信息_速度优化
+                    var StartMarkInfo = "";
                     Extents3d ext = new Extents3d();
                     for (int i = 0; i < InfoModel.FloorList.Count; i++)
                     {
@@ -89,6 +90,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                         ext.AddExtents(pl.GeometricExtents);
                     }
                     OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt,LogInfo);
+                    StartMarkInfo = dataReader.StartMarkInfo;
                     if (LogInfo) LogInfos("数据提取完成");
                     for (int i = 0; i < InfoModel.FloorList.Count; i++)
                     {
@@ -120,6 +122,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     if (LogInfo) LogInfos("开始绘图");
                     //通过树绘制系统图 
                     var systemMapeService = new ThSystemMapService();
+                    systemMapeService.StartMarkInfo = StartMarkInfo;
                     systemMapeService.FloorHeight = InfoModel.FloorLineSpace;
                     systemMapeService.FloorList = InfoModel.FloorList;
                     systemMapeService.RiserList = risers;

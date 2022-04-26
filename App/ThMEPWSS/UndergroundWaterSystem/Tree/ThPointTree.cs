@@ -46,13 +46,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var pt2 = node.Item.Position;
                 var line = new Line(pt1, pt2);
                 var box = line.Buffer(650);
+                var dims = new List<ThDimModel>();
                 foreach (var dim in dimList)
-                {
                     if (box.Contains(dim.Position))
-                    {
-                        node.Item.DimMark = dim;
-                        break;
-                    }
+                        dims.Add(dim);
+                if (dims.Count > 0)
+                {
+                    var dim = dims.OrderBy(e => line.GetClosestPointTo(e.Position, false).DistanceTo(e.Position)).First();
+                    node.Item.DimMark = dim;
                 }
             }
             //ToDo1:判断节点是否有给水角阀平面:皮带水嘴
