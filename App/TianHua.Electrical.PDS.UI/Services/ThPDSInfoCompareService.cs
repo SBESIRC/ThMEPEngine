@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.UI.Services
 {
     public static class PDSColorBrushes
     {
+        public static readonly SolidColorBrush None = null;
         public static readonly SolidColorBrush Servere = new((Color)ColorConverter.ConvertFromString("#E57373"));
         public static readonly SolidColorBrush Moderate = new((Color)ColorConverter.ConvertFromString("#FFBF07"));
         public static readonly SolidColorBrush Mild = new((Color)ColorConverter.ConvertFromString("#4DD0E2"));
@@ -23,6 +24,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     public static class PDSImageSources
     {
         static readonly ImageSourceConverter cvt = new();
+        public static readonly ImageSource None = null;
         public static readonly ImageSource Servere = (ImageSource)cvt.ConvertFrom(new Uri("pack://application:,,,/ThControlLibraryWPF;component/Images/Servere.ico"));
         public static readonly ImageSource Moderate = (ImageSource)cvt.ConvertFrom(new Uri("pack://application:,,,/ThControlLibraryWPF;component/Images/Moderate.ico"));
         public static readonly ImageSource Mild = (ImageSource)cvt.ConvertFrom(new Uri("pack://application:,,,/ThControlLibraryWPF;component/Images/Mild.ico"));
@@ -157,8 +159,8 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
                             Dwg = edge.Circuit.Location?.ReferenceDWG,
-                            Background = PDSColorBrushes.Safe,
-                            Img = PDSImageSources.Safe,
+                            Background = PDSColorBrushes.None,
+                            Img = PDSImageSources.None,
                         });
                     }
                 }
@@ -296,8 +298,8 @@ namespace TianHua.Electrical.PDS.UI.Services
                             LoadType = node.Load.LoadTypeCat_1.ToString(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
-                            Background = PDSColorBrushes.Safe,
-                            Img = PDSImageSources.Safe,
+                            Background = PDSColorBrushes.None,
+                            Img = PDSImageSources.None,
                         });
                     }
                 }
