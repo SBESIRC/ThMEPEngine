@@ -74,8 +74,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             }
             var selectAllCmd = new RelayCommand(() =>
             {
-                var tree = tv.DataContext as ThPDSCircuitGraphTreeModel;
-                if (tree is null) return;
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
                     node.IsChecked = true;
@@ -91,6 +90,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                try
                {
+                   if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                    var vertices = graph.Vertices.ToList();
                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
                    void dfs(ThPDSCircuitGraphTreeModel node)
