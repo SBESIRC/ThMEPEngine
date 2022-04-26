@@ -104,10 +104,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSLoadIdPlainTextPropertyEditor), typeof(PropertyEditorBase))]
         public string LoadId
         {
-            get => _edge.Circuit.ID.LoadID;
+            get => _edge.Target.Load.ID.LoadID;
             set
             {
-                _edge.Circuit.ID.LoadID = value;
+                _edge.Target.Load.ID.LoadID = value;
                 OnPropertyChanged(nameof(LoadId));
             }
         }
