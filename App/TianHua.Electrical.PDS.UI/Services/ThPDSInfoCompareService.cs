@@ -38,6 +38,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         public void Init(ThPDSInfoCompare panel)
         {
             {
+                var hasDataError = false;
                 var regenCount = 0L;
                 var vm = new
                 ThPDSInfoCompareViewModel()
@@ -47,14 +48,14 @@ namespace TianHua.Electrical.PDS.UI.Services
                         new ThPDSSecondaryPushDataService().Push();
                         PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                         UpdateView(panel);
-                    }, () => regenCount > 1),
-                    AcceptCmd = new RelayCommand(() => { }, () => regenCount > 1),
+                    }, () =>!hasDataError),
+                    AcceptCmd = new RelayCommand(() => { }, () => !hasDataError|| regenCount > 1),
                     CreateCmd = new RelayCommand(() => { }, () =>
-                    regenCount > 1),
+                  !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
                         new ThPDSUpdateToDwgService().Update();
-                    }, () => regenCount > 1),
+                    }, () => !hasDataError || regenCount > 1),
                 };
                 vm.ReadAndRegenCmd = new RelayCommand(() =>
                 {
