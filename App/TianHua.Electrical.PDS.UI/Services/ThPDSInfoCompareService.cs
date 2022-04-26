@@ -32,6 +32,30 @@ namespace TianHua.Electrical.PDS.UI.Services
     {
         public void Init(ThPDSInfoCompare panel)
         {
+            {
+                var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
+                foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
+                {
+                    node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
+                }
+                panel.lbx.DataContext = node;
+                AcadApp.DocumentManager.DocumentCreated += (s, e) =>
+                {
+                    var file = e.Document?.Database?.Filename;
+                    if (!string.IsNullOrEmpty(file))
+                    {
+                        node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
+                    }
+                };
+                AcadApp.DocumentManager.DocumentDestroyed += (s, e) =>
+                {
+                    var file = e.FileName;
+                    if (!string.IsNullOrEmpty(file))
+                    {
+                        node.DataList.Remove(node.DataList.FirstOrDefault(x => x.Key?.ToUpper() == file?.ToUpper()));
+                    }
+                };
+            }
             panel.btnReadAndRegen.Click += (s, e) =>
             {
                 new Command.ThPDSCommand().Execute();
@@ -43,14 +67,6 @@ namespace TianHua.Electrical.PDS.UI.Services
         public void UpdateView(ThPDSInfoCompare panel)
         {
             var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
-            {
-                var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
-                foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
-                {
-                    node.DataList.Add(new() { Name = Path.GetFileName(file), });
-                }
-                panel.lbx.DataContext = node;
-            }
             {
                 var info = new CircuitDiffInfo() { Items = new(), };
                 foreach (var edge in g.Edges)

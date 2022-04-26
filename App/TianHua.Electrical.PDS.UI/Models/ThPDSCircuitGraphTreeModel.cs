@@ -11,6 +11,7 @@ namespace TianHua.Electrical.PDS.UI.Models
     public class ThPDSCircuitGraphTreeModel : NotifyPropertyChangedBase
     {
         public int Id { get; set; }
+        public string Key { get; set; }
         public object Tag { get; set; }
         public ThPDSCircuitGraphTreeModel Parent { get; set; }
         public ThPDSCircuitGraphTreeModel Root { get; set; }

@@ -47,7 +47,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnUpdateClick(object sender, RoutedEventArgs e)
         {
-
+            new Service.ThPDSUpdateToDwgService().Update();
         }
     }
 }
