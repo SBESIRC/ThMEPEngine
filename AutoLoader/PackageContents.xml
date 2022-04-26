@@ -373,6 +373,7 @@
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
                 <Command Local="THSXSC" Global="THSXSC" />
+                <Command Local="THMUTSC" Global="THMUTSC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -384,6 +385,7 @@
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
                 <Command Local="THSXSC" Global="THSXSC" />
+                <Command Local="THMUTSC" Global="THMUTSC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -395,6 +397,7 @@
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
                 <Command Local="THSXSC" Global="THSXSC" />
+                <Command Local="THMUTSC" Global="THMUTSC" />
             </Commands>
         </ComponentEntry>
     </Components>
