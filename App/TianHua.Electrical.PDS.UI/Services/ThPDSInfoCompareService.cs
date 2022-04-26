@@ -1,18 +1,18 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
-using Microsoft.Toolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Windows.Input;
-using System.Windows.Media;
 using ThCADExtension;
-using TianHua.Electrical.PDS.Project.Module;
+using Dreambuild.AutoCAD;
+using System.Windows.Media;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.ApplicationServices;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
+using Microsoft.Toolkit.Mvvm.Input;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+
 namespace TianHua.Electrical.PDS.UI.Services
 {
     public static class PDSColorBrushes
@@ -71,19 +71,17 @@ namespace TianHua.Electrical.PDS.UI.Services
             }
             {
                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
-                foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
+                AcadApp.DocumentManager.OfType<Document>().Where(x => x.IsNamedDrawing).ForEach(x =>
                 {
-                    if (string.IsNullOrEmpty(file)) continue;
-                    //if (file.ToLower().Contains("acsacad.dwt")) continue;
-                    node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
-                }
+                    node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(x.Name), Key = x.Name });
+                });
                 panel.lbx.DataContext = node;
                 AcadApp.DocumentManager.DocumentCreated += (s, e) =>
                 {
-                    var file = e.Document?.Database?.Filename;
-                    if (string.IsNullOrEmpty(file)) return;
-                    //if (file.ToLower().Contains("acsacad.dwt")) return;
-                    node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
+                    if (e.Document.IsNamedDrawing)
+                    {
+                        node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(e.Document.Name), Key = e.Document.Name });
+                    }
                 };
                 AcadApp.DocumentManager.DocumentDestroyed += (s, e) =>
                 {
