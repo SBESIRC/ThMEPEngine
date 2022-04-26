@@ -55,11 +55,15 @@ namespace ThMEPStructure.StructPlane.Service
             get
             {
                 return 
-                    "--config_path " + ModifyPath(SvgConfigFilePath) +
-                    " --input_path " + ModifyPath(IfcFilePath) +
-                    " --output_path " + ModifyPath(SvgSavePath) +
-                    " --log_path " + ModifyPath(Path.Combine(LogSavePath + "log.txt"));
+                    "--config_path " + AddQuotationMarks(ModifyPath(SvgConfigFilePath)) +
+                    " --input_path " + AddQuotationMarks(ModifyPath(IfcFilePath)) +
+                    " --output_path " + AddQuotationMarks(ModifyPath(SvgSavePath)) +
+                    " --log_path " + AddQuotationMarks(ModifyPath(Path.Combine(LogSavePath + "log.txt")));
             }
+        }
+        private string AddQuotationMarks(string path)
+        {
+            return "\"" + path + "\"";
         }
         /// <summary>
         /// 生成的Svg文件存放的目录
