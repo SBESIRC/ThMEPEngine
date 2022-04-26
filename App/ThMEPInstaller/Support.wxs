@@ -18,6 +18,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Structure" Guid="{1748CAE0-4CE9-45B6-AF0C-89622D77B60A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Structure" Source="$(var.AutoloaderContentsPath)\Support\结构图层图块.dwg" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Structure_Plan" Guid="{1C17EC47-53CB-4183-8753-9BAE640E1CAF}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Block_Structure_Plan" Source="$(var.AutoloaderContentsPath)\Support\结构平面图.dwg" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
             </Component>
@@ -220,6 +223,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Structure" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Structure_Plan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Electrical" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
