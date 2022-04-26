@@ -86,29 +86,29 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
             });
             var batchGenCmd = new RelayCommand(() =>
-           {
-               UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-               try
-               {
-                   if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                   var vertices = graph.Vertices.ToList();
-                   var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                   void dfs(ThPDSCircuitGraphTreeModel node)
-                   {
-                       if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
-                       foreach (var n in node.DataList) dfs(n);
-                   }
-                   dfs(tree);
-                   if (checkeddVertices.Count == 0) return;
-                   var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
-                   drawCmd.Execute();
-                   AcHelper.Active.Editor.Regen();
-               }
-               finally
-               {
-                   UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-               }
-           });
+            {
+                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
+                try
+                {
+                    if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                    var vertices = graph.Vertices.ToList();
+                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                        foreach (var n in node.DataList) dfs(n);
+                    }
+                    dfs(tree);
+                    if (checkeddVertices.Count == 0) return;
+                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                    drawCmd.Execute();
+                    AcHelper.Active.Editor.Regen();
+                }
+                finally
+                {
+                    UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
+                }
+            });
             var treeCmenu = new ContextMenu()
             {
                 ItemsSource = new MenuItem[] {
@@ -134,7 +134,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             Action clear = null;
             {
                 var h = "平衡相序";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string== h))
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
                 {
                     treeCMenu.Items.Add(new MenuItem()
                     {

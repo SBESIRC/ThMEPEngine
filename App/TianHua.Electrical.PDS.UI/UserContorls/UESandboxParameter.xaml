@@ -60,7 +60,7 @@
                     <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="默认导体材料"></Label>
-                        <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
+                        <ComboBox ItemsSource="{Binding DefaultConductorMaterial,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding DefaultConductorMaterial}"></ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>消防配电干线及分支干线采用</Label>
@@ -80,6 +80,13 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
+                                <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial}" ></ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -118,14 +125,7 @@
                                 <DataGridTemplateColumn Header="级别" Width="50" CanUserSort="False"  IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Level,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding Level,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial}" ></ComboBox>
+                                            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Level,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding Level,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -191,7 +191,7 @@
                                 <WrapPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap">
                                     潮湿场所、埋于素土内敷设的保护管默认采用
-                                <ComboBox ItemsSource="{Binding GeneralRequirements,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding GeneralRequirements}" ></ComboBox>
+                                <ComboBox ItemsSource="{Binding GeneralRequirements,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding GeneralRequirements}" ></ComboBox>
                                     管。
                                     </TextBlock>
                                     <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
@@ -201,9 +201,9 @@
                                 <WrapPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap">
                                     正负零以上非潮湿场所敷设的保护管默认采用
-                                <ComboBox ItemsSource="{Binding FireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding FireFightingLineLess}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding FireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding FireFightingLineLess}"></ComboBox>
                                     管,DN≤50或采用
-                                <ComboBox ItemsSource="{Binding FireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FireFightingLineMore}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding FireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireFightingLineMore}"></ComboBox>
                                     管(DN>50)。
                                     </TextBlock>
                                     <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
@@ -214,9 +214,9 @@
                                 <WrapPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap">
                                     正负零以上非潮湿场所敷设的保护管默认采用
-                                <ComboBox ItemsSource="{Binding NonFireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime}" SelectedItem="{Binding NonFireFightingLineLess}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding NonFireFightingLineLess,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}" SelectedItem="{Binding NonFireFightingLineLess}"></ComboBox>
                                     管(DN≤50)或采用
-                                <ComboBox ItemsSource="{Binding NonFireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding NonFireFightingLineMore}" ></ComboBox>
+                                <ComboBox ItemsSource="{Binding NonFireFightingLineMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding NonFireFightingLineMore}" ></ComboBox>
                                     管(DN>50)。
                                     </TextBlock>
                                 </WrapPanel>
@@ -253,21 +253,28 @@
                         <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="5"></Rectangle>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="电动机主回路选用"></Label>
-                            <ComboBox ItemsSource="{Binding SelectionOfMainCircuitOfMotor,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding SelectionOfMainCircuitOfMotor}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding SelectionOfMainCircuitOfMotor,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding SelectionOfMainCircuitOfMotor}"></ComboBox>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="消防电动机功率小于"></Label>
                             <cus:InputTextBox  Background="White" Text="{Binding FireMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
                             <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                            <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding FireMotorPowerMore}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireMotorPowerMore}"></ComboBox>
                             <Label Content="方式启动"></Label>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="普通电动机功率小于"></Label>
                             <cus:InputTextBox Background="White" Text="{Binding CommonMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
                             <Label Content="kW时直接启动，超过此功率时采用"></Label>
-                            <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime}"  SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
                             <Label Content="方式启动"></Label>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label>消防应急照明与疏散指示系统采用供电，线路采用。</Label>
+                            <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
+                            <Label>供电，线路采用</Label>
+                            <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

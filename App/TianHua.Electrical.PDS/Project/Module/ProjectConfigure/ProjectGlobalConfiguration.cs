@@ -99,8 +99,8 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
     public enum FireStartType
     {
         星三角启动,
-        软启动器启动,
-        变频器启动,
+        //软启动器启动,
+        //变频器启动,
     }
     public enum MotorUIChoise
     {

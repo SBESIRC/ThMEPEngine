@@ -38,16 +38,17 @@ namespace TianHua.Electrical.PDS.UI.Services
                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
                 foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
                 {
+                    if (string.IsNullOrEmpty(file)) continue;
+                    //if (file.ToLower().Contains("acsacad.dwt")) continue;
                     node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
                 }
                 panel.lbx.DataContext = node;
                 AcadApp.DocumentManager.DocumentCreated += (s, e) =>
                 {
                     var file = e.Document?.Database?.Filename;
-                    if (!string.IsNullOrEmpty(file))
-                    {
-                        node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
-                    }
+                    if (string.IsNullOrEmpty(file)) return;
+                    //if (file.ToLower().Contains("acsacad.dwt")) return;
+                    node.DataList.Add(new() { Name = Path.GetFileName(file), Key = file, });
                 };
                 AcadApp.DocumentManager.DocumentDestroyed += (s, e) =>
                 {
