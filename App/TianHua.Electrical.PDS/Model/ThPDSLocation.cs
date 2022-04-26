@@ -1,6 +1,4 @@
-﻿using Autodesk.AutoCAD.Geometry;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
     public class ThPDSLocation
     {
@@ -9,8 +7,8 @@ namespace TianHua.Electrical.PDS.Model
             ReferenceDWG = "";
             FloorNumber = "";
             RoomType = "";
-            BasePoint = new Point3d();
-            StoreyBasePoint = new Point3d();
+            BasePoint = new ThPDSPoint3d();
+            StoreyBasePoint = new ThPDSPoint3d();
         }
 
         /// <summary>
@@ -31,11 +29,11 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 基点坐标
         /// </summary>
-        public Point3d BasePoint { get; set; }
+        public ThPDSPoint3d BasePoint { get; set; }
 
         /// <summary>
         /// 楼层基点
         /// </summary>
-        public Point3d StoreyBasePoint { get; set; }
+        public ThPDSPoint3d StoreyBasePoint { get; set; }
     }
 }

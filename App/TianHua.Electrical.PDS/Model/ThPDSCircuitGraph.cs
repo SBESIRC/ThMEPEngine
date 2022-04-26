@@ -27,11 +27,11 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSCircuitGraphNode()
         {
             Loads = new List<ThPDSLoad>();
-            IsStartVertexOfGraph = false;
         }
+
         public PDSNodeType NodeType { get; set; }
-        public bool IsStartVertexOfGraph { get; set; }
         public List<ThPDSLoad> Loads { get; set; }
+
         public bool Equals(ThPDSCircuitGraphNode other)
         {
             return this.NodeType == other.NodeType && this.Loads.SequenceEqual(other.Loads);

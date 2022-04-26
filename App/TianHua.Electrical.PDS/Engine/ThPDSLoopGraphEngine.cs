@@ -156,7 +156,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 {
                                     distBoxKey = attri.Value;
                                 }
-                                else if(attri.Value.Contains("K") || attri.Value.Contains("INT"))
+                                else if (attri.Value.Contains("K") || attri.Value.Contains("INT"))
                                 {
                                     distBoxKeyList.Add(key);
                                 }
@@ -289,7 +289,7 @@ namespace TianHua.Electrical.PDS.Engine
             }
             foreach (var distBox in DistBoxes)
             {
-                if(CacheDistBoxesInFrame.Contains(distBox) || !CacheDistBoxes.ContainsKey(distBox))
+                if (CacheDistBoxesInFrame.Contains(distBox) || !CacheDistBoxes.ContainsKey(distBox))
                 {
                     FindGraph(null, distBox);
                 }
@@ -428,7 +428,7 @@ namespace TianHua.Electrical.PDS.Engine
                             // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
                             var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { x }, DistBoxKey);
                             PDSGraph.Graph.AddEdge(newEdge);
-                            if(!EdgeMap.ContainsKey(newEdge))
+                            if (!EdgeMap.ContainsKey(newEdge))
                             {
                                 EdgeMap.Add(newEdge, objectIds);
                             }
@@ -1219,7 +1219,7 @@ namespace TianHua.Electrical.PDS.Engine
                 o.Loads.ForEach(e =>
                 {
                     e.Location.FloorNumber = floorNumber;
-                    e.Location.StoreyBasePoint = storeyBasePoint;
+                    e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
                     e.Location.ReferenceDWG = database.OriginalFileName.Split("\\".ToCharArray()).Last();
                 });
             });

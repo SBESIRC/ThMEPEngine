@@ -33,7 +33,7 @@ namespace TianHua.Electrical.PDS.Service
                 FireLoad = false,
                 Location = new ThPDSLocation
                 {
-                    BasePoint = distBoxData.Position,
+                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
                 }
             };
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
@@ -68,7 +68,7 @@ namespace TianHua.Electrical.PDS.Service
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = loadData.Position,
+                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
                 },
                 FrequencyConversion = frequencyConversion,
             };
@@ -159,7 +159,7 @@ namespace TianHua.Electrical.PDS.Service
                 Location = new ThPDSLocation
                 {
                     ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = distBoxData.Position,
+                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
                 },
                 FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),

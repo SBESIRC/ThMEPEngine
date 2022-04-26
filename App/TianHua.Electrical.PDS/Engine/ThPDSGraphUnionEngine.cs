@@ -66,7 +66,7 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             edge.Circuit.ViaConduit = true;
                         }
-                        if(!addEdgeList.Contains(edge))
+                        if (!addEdgeList.Contains(edge))
                         {
                             addEdgeList.Add(edge);
                             var objectIds = new List<ObjectId>();
@@ -122,15 +122,6 @@ namespace TianHua.Electrical.PDS.Engine
                     unionGraph.AddEdge(newEdge);
                 }
             });
-
-            // 设置图的遍历起点
-            foreach (var vertice in unionGraph.Vertices)
-            {
-                if (!unionGraph.Edges.Any(o => o.Target.Equals(vertice)))
-                {
-                    vertice.IsStartVertexOfGraph = true;
-                }
-            }
 
             return unionGraph;
         }
@@ -200,8 +191,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         private bool PositionCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
         {
-            return ToPoint3d(vertex.Loads[0].Location.StoreyBasePoint - vertex.Loads[0].Location.BasePoint)
-                .DistanceTo(ToPoint3d(node.Loads[0].Location.StoreyBasePoint - node.Loads[0].Location.BasePoint))
+            return ToPoint3d(ThPDSPoint3dService.PDSPoint3dToPoint3d(vertex.Loads[0].Location.StoreyBasePoint)
+                - ThPDSPoint3dService.PDSPoint3dToPoint3d(vertex.Loads[0].Location.BasePoint))
+                .DistanceTo(ToPoint3d(ThPDSPoint3dService.PDSPoint3dToPoint3d(node.Loads[0].Location.StoreyBasePoint)
+                - ThPDSPoint3dService.PDSPoint3dToPoint3d(node.Loads[0].Location.BasePoint)))
                 < ThPDSCommon.STOREY_TOLERANCE;
         }
 
