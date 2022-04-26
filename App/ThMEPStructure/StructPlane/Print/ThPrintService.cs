@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using System.Linq;
+using ThCADExtension;
 
 namespace ThMEPStructure.StructPlane.Print
 {
@@ -64,6 +65,52 @@ namespace ThMEPStructure.StructPlane.Print
                 oHatch.AppendLoop((int)HatchLoopTypes.Default, objIds);
                 oHatch.EvaluateHatch(true);
                 return hatchId;
+            }
+        }
+
+        public static ObjectIdCollection Print(this MPolygon polygon, Database db,HatchPrintConfig hatchConfig, PrintConfig outlineConfig)
+        {
+            using (var acadDatabase = AcadDatabase.Use(db))
+            {
+                var results = new ObjectIdCollection();
+                var shell = polygon.Shell();
+                var holes = polygon.Holes();                
+                var shellId = shell.Print(db, outlineConfig);
+                var holeIds = new ObjectIdCollection();
+                holes.ForEach(h => holeIds.Add(h.Print(db, outlineConfig)));
+
+                Hatch oHatch = new Hatch();
+                oHatch.HatchObjectType = HatchObjectType.HatchObject;
+                oHatch.Normal = hatchConfig.Normal;
+                oHatch.Elevation = hatchConfig.Elevation;
+                //oHatch.PatternAngle = config.PatternAngle;
+                oHatch.PatternScale = hatchConfig.PatternScale;
+                //oHatch.PatternSpace = config.PatternSpace;
+                oHatch.SetHatchPattern(hatchConfig.PatternType, hatchConfig.PatternName);
+                oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
+                oHatch.Layer = hatchConfig.LayerName;                
+                var hatchId = acadDatabase.ModelSpace.Add(oHatch);
+                oHatch.Associative = hatchConfig.Associative;
+                if(holes.Count==0)
+                {
+                    oHatch.AppendLoop((int)HatchLoopTypes.Default, 
+                        new ObjectIdCollection { shellId });
+                }
+                else
+                {
+                    oHatch.AppendLoop(HatchLoopTypes.Outermost,
+                            new ObjectIdCollection { shellId });
+                    holeIds.OfType<ObjectId>().ForEach(o =>
+                    {
+                        oHatch.AppendLoop(HatchLoopTypes.Default, 
+                            new ObjectIdCollection { o });
+                    });
+                }
+                oHatch.EvaluateHatch(true);
+                results.Add(hatchId);
+                results.Add(shellId);
+                holeIds.OfType<ObjectId>().ForEach(o => results.Add(o));
+                return results;
             }
         }
     }

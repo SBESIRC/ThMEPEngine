@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.StructPlane.Print;
 using ThMEPEngineCore.IO.SVG;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.StructPlane.Service
 {
@@ -54,8 +55,12 @@ namespace ThMEPStructure.StructPlane.Service
             elevations = FilterSlabElevations(elevations);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
+            // 给墙造洞
+            var buildAreaSevice =new  ThWallBuildAreaService();
+            var newGeos =buildAreaSevice.BuildArea(Geos);
+
             // 打印对象
-            var res = PrintGeos(db, Geos, slabHatchConfigs); //BeamLines,BeamTexts
+            var res = PrintGeos(db, newGeos, slabHatchConfigs); //BeamLines,BeamTexts
 
             // 过滤多余文字
             var beamLines = ToDBObjectCollection(db, res.Item1);
@@ -83,10 +88,13 @@ namespace ThMEPStructure.StructPlane.Service
             // 删除不要的文字
             Erase(db, removedTexts);
 
+            // 打印标题
+            PrintHeadText(db);
+
             // 打印柱表
-            var maxX= Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var maxX= newGeos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                 .MaxPoint.X).OrderByDescending(o => o).FirstOrDefault();
-            var minY = Geos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
+            var minY = newGeos.Where(o => o.Boundary.GeometricExtents != null).Select(o => o.Boundary.GeometricExtents
                  .MinPoint.Y).OrderBy(o => o).FirstOrDefault();
             var elevationTblBasePt = new Point3d(maxX+1000.0, minY,0);
             var elevationInfos = GetElevationInfos();
@@ -107,13 +115,119 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return objIds
                     .OfType<ObjectId>()
+                    .Where(o=>!o.IsErased)
                     .Select(o => acadDb.Element<Entity>(o)).ToCollection();
             }
         }
-        private void AjustBeamMarks(DBObjectCollection beamLines,
-            DBObjectCollection beamTexts)
+        private Extents2d ToExtents2d(DBObjectCollection objs)
         {
+            var extents = new Extents2d();
+            double minX = double.MaxValue, minY = double.MaxValue,
+                maxX = double.MinValue, maxY = double.MinValue;
+            objs.OfType<Curve>().ForEach(entity =>
+            {
+                if (!entity.IsErased && entity.GeometricExtents != null)
+                {
+                    if (entity.GeometricExtents.MinPoint.X < minX)
+                    {
+                        minX = entity.GeometricExtents.MinPoint.X;
+                    }
+                    if (entity.GeometricExtents.MinPoint.Y < minY)
+                    {
+                        minY = entity.GeometricExtents.MinPoint.Y;
+                    }
+                    if (entity.GeometricExtents.MaxPoint.X > maxX)
+                    {
+                        maxX = entity.GeometricExtents.MaxPoint.X;
+                    }
+                    if (entity.GeometricExtents.MaxPoint.Y > maxY)
+                    {
+                        maxY = entity.GeometricExtents.MaxPoint.Y;
+                    }
+                }
+            });
+            extents = new Extents2d(minX, minY, maxX, maxY);
+            return extents;
+        }
+        private void PrintHeadText(Database database)
+        {
+            using (var acadDb = AcadDatabase.Use(database))
+            {
+                // 打印自然层标识, eg 一层~五层结构平面层
+                var flrRange = GetFloorRange();
+                if (string.IsNullOrEmpty(flrRange))
+                {
+                    return;
+                }
+                var headText = new DBText()
+                {
+                    Position = Point3d.Origin,
+                    TextString = flrRange,
+                    Height = 100,
+                };
+                var config = ThAnnotationPrinter.GetHeadTextConfig();
+                var printer = new ThAnnotationPrinter(config);
+                Append(printer.Print(database, headText));
+                double HeadTextDisToPaperBottom = 3500.0;
+                var extents = ToExtents2d(ToDBObjectCollection(database, ObjIds));
+                var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
+                    extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
+                var lineCenter = new Point3d(textCenter.X, textCenter.Y-headText.Height/2.0-200,0);
+                var obb = headText.TextOBB();
+                var headTextCenter = obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(1));
+                var downLine = new Polyline();
+                var downLineLength = headText.GeometricExtents.MaxPoint.X -
+                    headText.GeometricExtents.MinPoint.X;
+                downLineLength *= 1.05;
+                downLine.AddVertexAt(0, new Point2d(0, 0), 0.0, 80.0, 80.0);
+                downLine.AddVertexAt(1, new Point2d(downLineLength, 0), 0.0, 80.0, 80.0);
+                downLine.Layer = ThPrintLayerManager.HeadTextDownLineLayerName;
+                downLine.ColorIndex = (int)ColorIndex.BYLAYER;
+                ObjIds.Add(acadDb.ModelSpace.Add(downLine));
 
+                // 移动
+                headText = acadDb.Element<DBText>(headText.ObjectId,true);
+                var mt1 = Matrix3d.Displacement(textCenter - headTextCenter);
+                headText.TransformBy(mt1);
+
+                downLine = acadDb.Element<Polyline>(downLine.ObjectId, true);
+                var mt2 = Matrix3d.Displacement(lineCenter-new Point3d(downLine.Length/2.0,0,0));
+                downLine.TransformBy(mt2);
+            }
+        }
+        private string GetFloorRange()
+        {
+            var result = "";
+            var stdFloors = FloorInfos.Where(o =>
+            {
+                double bottomElevation = 0.0;
+                double elevation = 0.0;
+                if (double.TryParse(o.Bottom_elevation,out bottomElevation) &&
+                double.TryParse(o.Elevation, out elevation))
+                {
+                    if(Math.Abs(bottomElevation-FlrBottomEle)<=1e-4)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if(stdFloors.Count()==1)
+            {
+                var stdFlr = stdFloors.First().StdFlrNo;
+                var floors = FloorInfos.Where(o => o.StdFlrNo == stdFlr);
+                if(floors.Count()==1)
+                {
+                    result = floors.First().FloorNo.NumToChinese()+"层结构平面图";
+                }
+                else if (floors.Count() > 1)
+                {
+                    var startRange = floors.First().FloorNo.NumToChinese();
+                    var endRange = floors.Last().FloorNo.NumToChinese();
+                    result = startRange+"~"+endRange+ "层结构平面图";
+                }
+            }
+            return result;
         }
         private DBObjectCollection FilterBeamMarks(
             DBObjectCollection beamLines,DBObjectCollection beamTexts)
@@ -217,6 +331,10 @@ namespace ThMEPStructure.StructPlane.Service
                 // 打印到图纸中
                 geos.ForEach(o =>
                 {
+                    if(o.Boundary is MPolygon)
+                    {
+
+                    }
                     // Svg解析的属性信息存在于Properties中
                     string category = o.Properties.GetCategory();
                     if(o.Boundary is DBText dbText)
@@ -273,7 +391,14 @@ namespace ThMEPStructure.StructPlane.Service
                             var outlineConfig = GetShearWallConfig(o.Properties);
                             var hatchConfig = GetShearWallHatchConfig(o.Properties);
                             var printer = new ThShearwallPrinter(hatchConfig, outlineConfig);
-                            Append(printer.Print(db, o.Boundary as Polyline));
+                            if (o.Boundary is Polyline polyline)
+                            {
+                                Append(printer.Print(db, polyline));
+                            }
+                            else if (o.Boundary is MPolygon mPolygon)
+                            {
+                                Append(printer.Print(db, mPolygon));
+                            }                            
                         }
                         else if (category == "IfcSlab")
                         {
@@ -283,7 +408,14 @@ namespace ThMEPStructure.StructPlane.Service
                             {
                                 var hatchConfig = slabHatchConfigs[bg];
                                 var printer = new ThSlabPrinter(hatchConfig, outlineConfig);
-                                Append(printer.Print(db, o.Boundary as Polyline));
+                                if(o.Boundary is Polyline polyline)
+                                {
+                                    Append(printer.Print(db, polyline));
+                                }
+                                else if(o.Boundary is MPolygon mPolygon)
+                                {
+                                    Append(printer.Print(db, mPolygon));
+                                }
                             }
                         }
                         else if (category == "IfcOpeningElement")

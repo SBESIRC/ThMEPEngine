@@ -31,6 +31,16 @@ namespace ThMEPStructure.StructPlane.Print
                 TextStyleName = "TH-STYLE3",
             };
         }
+        public static AnnotationPrintConfig GetHeadTextConfig()
+        {
+            return new AnnotationPrintConfig
+            {
+                LayerName = ThPrintLayerManager.HeadTextLayerName,
+                Height = 800,
+                WidthFactor = 0.8,
+                TextStyleName = "TH-STYLE2",
+            };
+        }
     }
     internal class ThSlabAnnotationPrinter
     { 

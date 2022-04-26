@@ -10,6 +10,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThCADCore.NTS;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.IO.SVG
 {
@@ -94,11 +98,18 @@ namespace ThMEPEngineCore.IO.SVG
                         }
                     }
                 }
-
                 if (children is SvgPath svgPath)
                 {
                     var curves = ParseSvgPath(svgPath);
-                    curves.ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                    if (properties["type"].ToString() == "IfcSlab" && curves.Count > 1)
+                    {
+                        var polygons = BuildArea(curves.ToCollection());
+                        polygons.OfType<Entity>().ForEach(e => results.Add(CreateThGeometry(e, properties)));
+                    }
+                    else
+                    {
+                        curves.ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                    }
                 }
                 else if (children is SvgRectangle svgRect)
                 {
@@ -254,6 +265,20 @@ namespace ThMEPEngineCore.IO.SVG
             }
         }
 
+        private DBObjectCollection BuildArea(DBObjectCollection objs)
+        {
+            var polygons = objs.FilterSmallArea(1.0);
+            var simplifier = new ThPolygonalElementSimplifier();
+            polygons = simplifier.Normalize(polygons);
+            polygons = polygons.FilterSmallArea(1.0);
+            polygons = simplifier.MakeValid(polygons);
+            polygons = polygons.FilterSmallArea(1.0);
+            polygons = simplifier.Simplify(polygons);
+            polygons = polygons.FilterSmallArea(1.0);
+            var results = polygons.BuildArea();
+            results = results.FilterSmallArea(1.0);
+            return results;
+        }
         private DBText CreateDBText(SvgText svgText)
         {
             if (svgText.Transforms == null || svgText.Transforms.Count == 0)

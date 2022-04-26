@@ -23,6 +23,9 @@ namespace ThMEPStructure.StructPlane.Service
         public static string ElevationTableLineLayerName = "S_TABL";
         public static string ElevationTableTextLayerName = "S_TABL_NUMB";
         public static string SlabPatternTableTextLayerName = "S_PLAN_TEXT";
+        public static string HeadTextLayerName = "S_PLAN_TOPC";
+        public static string HeadTextDownLineLayerName = "S_PLAN_TOPC";
+
         public static List<string> AllLayers
         {
             get
@@ -32,7 +35,7 @@ namespace ThMEPStructure.StructPlane.Service
                     ShearWallLayerName,ShearWallHatchLayerName,BelowShearWallLayerName,
                     BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
-                    SlabPatternTableTextLayerName};
+                    SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName};
                 return layers.Distinct().ToList();
             }
         }
@@ -44,13 +47,13 @@ namespace ThMEPStructure.StructPlane.Service
         public static string ElevationTableTextStyleName = "TH-STYLE3";
         public static string THSTYLE3 = "TH-STYLE3";
         public static string THSTYLE1 = "TH-STYLE1";
-
+        public static string THSTYLE2 = "TH-STYLE2";
         public static List<string> AllTextStyles
         {
             get
             {
                 var styles = new List<string> { BeamTextStyleName, SlabTextStyleName ,
-                    ElevationTableTextStyleName,THSTYLE1,THSTYLE3 };
+                    ElevationTableTextStyleName,THSTYLE1,THSTYLE3 ,THSTYLE2};
                 return styles.Distinct().ToList();
             }
         }

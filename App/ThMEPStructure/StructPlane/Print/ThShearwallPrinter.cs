@@ -1,4 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using System.Linq;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print
@@ -22,7 +24,20 @@ namespace ThMEPStructure.StructPlane.Print
             results.Add(hatchId);
             return results;
         }
-
+        public ObjectIdCollection Print(Database db, MPolygon polygon)
+        {
+            var results = new ObjectIdCollection();
+            if (polygon == null || polygon.Area <= 1.0)
+            {
+                return results;
+            }
+            if (HatchConfig != null && polygon.Hatch != null)
+            {
+                var hatchIds = polygon.Print(db, HatchConfig, OutlineConfig);
+                hatchIds.OfType<ObjectId>().ForEach(o => results.Add(o));
+            }
+            return results;
+        }
         public static PrintConfig GetUpperShearWallConfig()
         {
             return new PrintConfig
