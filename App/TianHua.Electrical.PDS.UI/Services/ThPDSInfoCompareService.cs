@@ -1,9 +1,11 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Input;
 using System.Windows.Media;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Project.Module;
@@ -32,8 +34,41 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class ThPDSInfoCompareService
     {
+
         public void Init(ThPDSInfoCompare panel)
         {
+            {
+                var regenCount = 0L;
+                var vm = new
+                ThPDSInfoCompareViewModel()
+                {
+                    CompareCmd = new RelayCommand(() =>
+                    {
+                        new ThPDSSecondaryPushDataService().Push();
+                        PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
+                        UpdateView(panel);
+                    }, () => regenCount > 1),
+                    AcceptCmd = new RelayCommand(() => { }, () => regenCount > 1),
+                    CreateCmd = new RelayCommand(() => { }, () =>
+                    regenCount > 1),
+                    UpdateCmd = new RelayCommand(() =>
+                    {
+                        new ThPDSUpdateToDwgService().Update();
+                    }, () => regenCount > 1),
+                };
+                vm.ReadAndRegenCmd = new RelayCommand(() =>
+                {
+                    new Command.ThPDSCommand().Execute();
+                    ++regenCount;
+                    PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
+                    UpdateView(panel);
+                    vm.CompareCmd.NotifyCanExecuteChanged();
+                    vm.AcceptCmd.NotifyCanExecuteChanged();
+                    vm.CreateCmd.NotifyCanExecuteChanged();
+                    vm.UpdateCmd.NotifyCanExecuteChanged();
+                });
+                panel.DataContext = vm;
+            }
             {
                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
                 foreach (var file in AcadApp.DocumentManager.OfType<Document>().Select(x => x.Database.Filename).ToList())
@@ -59,12 +94,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                 };
             }
-            panel.btnReadAndRegen.Click += (s, e) =>
-            {
-                new Command.ThPDSCommand().Execute();
-                PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
-                UpdateView(panel);
-            };
         }
 
         public void UpdateView(ThPDSInfoCompare panel)
@@ -306,6 +335,15 @@ namespace TianHua.Electrical.PDS.UI.Services
                 }
                 panel.dg2.DataContext = info;
             }
+        }
+
+        private class ThPDSInfoCompareViewModel
+        {
+            public RelayCommand CompareCmd { get; set; }
+            public RelayCommand AcceptCmd { get; set; }
+            public RelayCommand CreateCmd { get; set; }
+            public RelayCommand UpdateCmd { get; set; }
+            public RelayCommand ReadAndRegenCmd { get; set; }
         }
     }
     public class CircuitDiffInfo

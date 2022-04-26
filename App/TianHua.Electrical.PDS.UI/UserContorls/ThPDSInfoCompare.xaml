@@ -24,7 +24,7 @@
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
-                    <Button Width="150" x:Name="btnReadAndRegen" Style="{x:Null}" >读取并新建项目</Button>
+                    <Button Width="150" Command="{Binding ReadAndRegenCmd}" Style="{x:Null}" >读取并新建项目</Button>
                     <ListBox x:Name="lbx" Width="150" Height="500" Style="{x:Null}" ItemsSource="{Binding DataList}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -141,10 +141,10 @@
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{x:Null}" Click="btnCompareClick">对比平面信息</Button>
-                <Button Style="{x:Null}" Click="btnCompareClick">接收所有对比结果</Button>
-                <Button Style="{x:Null}" Click="btnAcceptClick">创建非平面负载</Button>
-                <Button Style="{x:Null}" Click="btnUpdateClick">更新修改到平面</Button>
+                <Button Style="{x:Null}" Command="{Binding CompareCmd}">对比平面信息</Button>
+                <Button Style="{x:Null}" Command="{Binding AcceptCmd}">接收所有对比结果</Button>
+                <Button Style="{x:Null}" Command="{Binding CreateCmd}">创建非平面负载</Button>
+                <Button Style="{x:Null}" Command="{Binding UpdateCmd}">更新修改到平面</Button>
             </StackPanel>
         </StackPanel>
     </DockPanel>

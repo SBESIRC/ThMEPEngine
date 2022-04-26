@@ -27,27 +27,5 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             InitializeComponent();
             Service.Init(this);
         }
-
-        private void btnCompareClick(object sender, RoutedEventArgs e)
-        {
-            new Service.ThPDSSecondaryPushDataService().Push();
-            PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
-            Service.UpdateView(this);
-        }
-
-        private void btnAcceptClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnCreateClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnUpdateClick(object sender, RoutedEventArgs e)
-        {
-            new Service.ThPDSUpdateToDwgService().Update();
-        }
     }
 }
