@@ -195,7 +195,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.HalfFloorCase
                     halfBranchPipe.BranchPipes.Add(new Line(pt11, pt15));
                     halfBranchPipe.WaterPipeInterrupted.Add(pt15);//第1个水管截断位置
 
-                  
+                    halfBranchPipe.BranchPipes.Add(new Line(pt374, pt7));
                     halfBranchPipe.BranchPipes.Add(new Line(pt7, pt71));
                     halfBranchPipe.BranchPipes.Add(new Line(pt71, pt72));
                     halfBranchPipe.BranchPipes.Add(new Line(pt72, pt11));

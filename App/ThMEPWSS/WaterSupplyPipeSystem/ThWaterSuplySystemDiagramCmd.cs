@@ -379,7 +379,8 @@ namespace ThMEPWSS.Command
                     var pt = new List<double>();
                     for (int i = 0; i < PipeSystem.Count; i++)
                     {
-                        PipeSystem[i].DrawPipeLine(i, sysIn.InsertPt, sysIn.FloorHeight, PipeSystem.Count);
+                        var highestFlag = isHalfFloor && i== PipeSystem.Count-1;
+                        PipeSystem[i].DrawPipeLine(i, sysIn.InsertPt, sysIn.FloorHeight, PipeSystem.Count, highestFlag);
                         pt.Add(PipeSystem[i].GetPipeX());
                     }
                     //楼层线绘制

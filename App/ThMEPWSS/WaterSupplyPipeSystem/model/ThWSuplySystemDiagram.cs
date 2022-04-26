@@ -35,11 +35,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             return PipeX;
         }
 
-        public List<Line> CreatePipeLine(Point3d insertPt, double FloorHeight)
+        public List<Line> CreatePipeLine(Point3d insertPt, double FloorHeight, bool highestFlag)
         {
             var lineList = new List<Line>();
             var pt1 = insertPt.OffsetXY(PipeOffset_X, -300);
-            var pt2 = insertPt.OffsetXY(PipeOffset_X, Higheststorey * FloorHeight - 0.22 * FloorHeight);
+            var pt2Y = Higheststorey * FloorHeight - 0.22 * FloorHeight;
+            if (highestFlag) pt2Y -= 0.5 * FloorHeight;
+            var pt2 = insertPt.OffsetXY(PipeOffset_X, pt2Y);
             if (Higheststorey == 1)
             {
                 var pt121 = new Point3d(pt1.X, pt1.Y + 140 + 300, 0);
@@ -75,10 +77,10 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             return lineList;
         }
 
-        public void DrawPipeLine(int i, Point3d insertPt, double FloorHeight, int PipeNums)
+        public void DrawPipeLine(int i, Point3d insertPt, double FloorHeight, int PipeNums, bool highestFlag = false)
         {
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
-            var PipeLine = CreatePipeLine(insertPt, FloorHeight);
+            var PipeLine = CreatePipeLine(insertPt, FloorHeight, highestFlag);
             foreach (var line1 in PipeLine)
             {
                 acadDatabase.CurrentSpace.Add(line1);
