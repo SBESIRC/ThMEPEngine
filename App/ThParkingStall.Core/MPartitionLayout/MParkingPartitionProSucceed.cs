@@ -330,20 +330,20 @@ namespace ThParkingStall.Core.MPartitionLayout
                         foreach (var slit in splits)
                         {
                             var split = slit;
-                            split=split.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
-                            split=split.Translation(-lane.Vec.Normalize() * mindistance);
+                            split = split.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
+                            split = split.Translation(-lane.Vec.Normalize() * mindistance);
                             if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
                                 split.P0 = split.P0.Translation(Vector(split).Normalize() * DisLaneWidth / 2);
                             if (ClosestPointInVertLines(split.P1, split, IniLanes.Select(e => e.Line)) < 10)
                                 split.P1 = split.P1.Translation(-Vector(split).Normalize() * DisLaneWidth / 2);
                             //
                             var splitnw = new LineSegment(split);
-                            splitnw=splitnw.Translation(lane.Vec.Normalize() * DisLaneWidth / 2);
+                            splitnw = splitnw.Translation(lane.Vec.Normalize() * DisLaneWidth / 2);
                             if (check_adj_collision)
                             {
                                 var pls = ConvertSpecialCollisionCheckRegionForLane(splitnw, lane.Vec.Normalize());
                                 var plsc = pls.Clone();
-                                plsc=plsc.Scale(ScareFactorForCollisionCheck);
+                                plsc = plsc.Scale(ScareFactorForCollisionCheck);
                                 var crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(plsc).Cast<Polygon>().ToList();
                                 var crossedstring = new List<LineString>();
                                 crossed.ForEach(e => crossedstring.Add(new LineString(e.Coordinates)));
@@ -379,7 +379,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 
                                 pls = ConvertSpecialCollisionCheckRegionForLane(splitnw, lane.Vec.Normalize(), false);
                                 plsc = pls.Clone();
-                                plsc=plsc.Scale(ScareFactorForCollisionCheck);
+                                plsc = plsc.Scale(ScareFactorForCollisionCheck);
                                 crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(plsc).Cast<Polygon>().ToList();
                                 crossedstring = new List<LineString>();
                                 crossed.ForEach(e => crossedstring.Add(new LineString(e.Coordinates)));
@@ -414,7 +414,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 }
                             }
                             if (splitnw.Length < minlength) continue;
-                            splitnw=splitnw.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
+                            splitnw = splitnw.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
                             Lane ln = new Lane(splitnw, lane.Vec);
                             lanes.Add(ln);
                         }

@@ -164,18 +164,26 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (p is Polygon) p = RemoveDuplicatedPointOnPolygon((Polygon)p).Shell;
             if (ply is Polygon) ply = RemoveDuplicatedPointOnPolygon((Polygon)ply).Shell;
             var g = OverlayNGRobust.Overlay(p, ply, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
-            if (g is Point) return new Coordinate[] { ((Point)g).Coordinate };
-            else if (g is LineString)
-                return ((LineString)g).Coordinates;
-            else if (g is MultiPoint)
-                return ((MultiPoint)g).Coordinates;
+            var results=new List<Coordinate>();
+            if (g is Point) results.Add(((Point)g).Coordinate);
+            else if (g is LineString) results.AddRange(((LineString)g).Coordinates);
+            else if (g is MultiPoint) results.AddRange(((MultiPoint)g).Coordinates);
             else if (g is Polygon)
             {
                 if (ply is Polygon && p is Polygon)
-                    return ((Polygon)OverlayNGRobust.Overlay(p, ply, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection)).Coordinates.Where(e =>
-           ((Polygon)p).ClosestPoint(e).Distance(e) < 1 && ((Polygon)ply).ClosestPoint(e).Distance(e) < 1).ToArray();
+                    results.AddRange(((Polygon)OverlayNGRobust.Overlay(p, ply, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection)).Coordinates.Where(e =>
+           ((Polygon)p).ClosestPoint(e).Distance(e) < 1 && ((Polygon)ply).ClosestPoint(e).Distance(e) < 1));
             }
-            return new Coordinate[0];
+            else if (g is GeometryCollection collection)
+            {
+                foreach (var geo in collection.Geometries)
+                {
+                    if (geo is Point) results.Add(((Point)geo).Coordinate);
+                    else if (geo is LineString) results.AddRange(((LineString)geo).Coordinates);
+                    else if (geo is MultiPoint) results.AddRange(((MultiPoint)geo).Coordinates);
+                }
+            }
+            return results.ToArray();
         }
         public static Coordinate[] IntersectPoint(this LineSegment line, Polygon ply)
         {
