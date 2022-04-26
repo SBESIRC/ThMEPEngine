@@ -21,28 +21,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <StatusBar DockPanel.Dock="Bottom"  FontSize="14">
-            <TextBlock>进度</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <ProgressBar Width="100" Height="10" Value="50"></ProgressBar>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock>正在计算回路电流:1321/2164</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock>报错信息</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock>0个错误信息</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock>更新状态</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <StackPanel Orientation="Horizontal">
-                <Rectangle Fill="Yellow" Width="14" Height="14"></Rectangle>
-                <TextBlock>未更新</TextBlock>
-            </StackPanel>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock>登录状态</TextBlock>
-            <Separator Width="1"  HorizontalAlignment="Center"/>
-            <TextBlock ><Hyperlink>已登录</Hyperlink>@thape.com.cn</TextBlock>
-        </StatusBar>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
