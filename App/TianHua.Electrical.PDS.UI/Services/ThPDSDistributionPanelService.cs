@@ -1100,7 +1100,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 {
                                                     m.Items.Add(new MenuItem()
                                                     {
-                                                        Header = scinfo.SecondaryCircuitCode,
+                                                        Header = scinfo.Description,
                                                         Command = new RelayCommand(() =>
                                                         {
                                                             ThPDSProjectGraphService.AddControlCircuit(graph, edge, scinfo);
