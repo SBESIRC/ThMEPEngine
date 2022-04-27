@@ -34,7 +34,8 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
         {
             //--管道延长到立管--
             ThPipePreProcessService.ConnectPipeToNearVerticalPipe(dataPass, out var ptDict, out var ptCoolHotDict);
-            //ptDict.ForEach(x => DrawUtils.ShowGeometry(x.Value, "l0finalline"));
+            //ptCoolHotDict.ForEach(x => DrawUtils.ShowGeometry(x.Key, "l0coolhotpt", (x.Value == true ? 142 : 32), r: 30));
+           
 
             //--树--
             var treeEngine = new ThDraingeTreeEngine(dataPass, ptDict, ptCoolHotDict);
@@ -45,20 +46,20 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
                 return;
             }
 
-            /////////////
-            // treeEngine.MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
-            //{
-            //    if (l.Terminal != null)
-            //    {
-            //        DrawUtils.ShowGeometry(l.Pt, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
-            //    }
-            //    if (l.TerminalPair != null)
-            //    {
-            //        DrawUtils.ShowGeometry(new Line(l.Pt, l.TerminalPair.Pt), "l0leafterminalPair", 3);
-            //    }
-            //});
-            // treeEngine.MergedRootList.ForEach(x => PrintTree(x, String.Format("l0tree{0}", treeEngine.MergedRootList.IndexOf(x))));
             ///////////
+           // treeEngine.MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
+           //{
+           //    if (l.Terminal != null)
+           //    {
+           //        DrawUtils.ShowGeometry(l.Pt, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
+           //    }
+           //    if (l.TerminalPair != null)
+           //    {
+           //        DrawUtils.ShowGeometry(new Line(l.Pt, l.TerminalPair.Pt), "l0leafterminalPair", 3);
+           //    }
+           //});
+            treeEngine.MergedRootList.ForEach(x => PrintTree(x, String.Format("l0tree{0}", treeEngine.MergedRootList.IndexOf(x))));
+            /////////
 
             //--管径计算--
             var dimEngine = new ThCalculateDimEngine(dataPass, treeEngine);

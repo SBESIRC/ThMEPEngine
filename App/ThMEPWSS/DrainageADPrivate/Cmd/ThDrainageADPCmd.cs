@@ -43,13 +43,11 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
         }
         private void InitialCmdInfo()
         {
-            ActionName = "布置";
-            CommandName = "THHXDY";
+            ActionName = "生成";
+            CommandName = "THHXDYZC"; //户型大样轴侧
         }
         private void InitialSetting()
         {
-
-
             _qL = ThDrainageADSetting.Instance.qL;
             _m = ThDrainageADSetting.Instance.m;
             _Kh = ThDrainageADSetting.Instance.Kh;
@@ -104,8 +102,8 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameOutputList, layerNameOutputList);
 
                 //转换器
-                //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
                 selectPtPrint = transformer.Transform(selectPtPrint);
 
                 //提取数据

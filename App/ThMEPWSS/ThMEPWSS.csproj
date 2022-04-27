@@ -45,6 +45,7 @@
     <Compile Include="DrainageADPrivate\Engine\ThCalculateDimEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDrainageTransformEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDraingeTreeEngine.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageADPViewModel.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageADSetting.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageBlkOutput.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
@@ -88,7 +89,7 @@
     <Compile Include="DrainageADPrivate\Data\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Model\ThSaniterayTerminal.cs" />
     <Compile Include="DrainageADPrivate\ThDrainageADCommon.cs" />
-    <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THZDXTT.cs" />
+    <Compile Include="DrainageADPrivate\ThDrainageADPrivateCmds.THHXDYZC.cs" />
     <Compile Include="HydrantLayout\Data\ThHandleConflictService.cs" />
     <Compile Include="HydrantLayout\Data\ThCleanEntityService.cs" />
     <Compile Include="HydrantLayout\Data\ThHydrantDoorExtractor.cs" />

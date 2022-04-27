@@ -31,18 +31,10 @@ namespace ThMEPWSS
 {
     public partial class ThDrainageADPrivateCmds
     {
-        [CommandMethod("TIANHUACAD", "ThDrainageADP", CommandFlags.Modal)]
-        public void ThDrainageADP()
-        {
-            //using (var cmd = new ThHydrantLayoutCmd())
-            //{
-            //    cmd.Execute();
-            //}
-        }
-
-        [CommandMethod("TIANHUACAD", "ThDrainageADPNoUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THHXDYZC", CommandFlags.Modal)]
         public void ThDrainageADPNoUI()
         {
+            //户型大样轴侧
             var qL = ThMEPWSSUtils.SettingDouble("\nqL", 230.0);
             var m = ThMEPWSSUtils.SettingDouble("\nm", 3.5);
             var Kh = ThMEPWSSUtils.SettingDouble("\nKh", 1.5);

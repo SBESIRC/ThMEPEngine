@@ -403,6 +403,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
+        /// <summary>
+        /// 户型大样轴侧
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THHXDYZC", CommandFlags.Modal)]
+        public void THDrainageADPrivate()
+        {
+            var ui = new DrainageADPrivateUI();
+            AcadApp.ShowModelessWindow(ui);
+        }
 
 
         /// <summary>

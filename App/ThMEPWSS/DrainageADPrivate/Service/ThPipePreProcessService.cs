@@ -29,20 +29,22 @@ namespace ThMEPWSS.DrainageADPrivate.Service
     {
         public static void ConnectPipeToNearVerticalPipe(ThDrainageADPDataPass dataPass, out Dictionary<Point3d, List<Line>> ptDict, out Dictionary<Point3d, bool> ptCoolHotDict)
         {
-            var pipeCool = new List<Line>();
-            pipeCool.AddRange(dataPass.CoolPipeTopView);
-            pipeCool.AddRange(dataPass.VerticalPipe);
-            pipeCool.RemoveAll(x => x.Length <= 1);
-            var ptDictCool = ConnectSingleSystemToNearVerticalPipe(pipeCool, dataPass.VerticalPipe);
-            var ptCoolDict = RemoveSingleVerticalSetIsCool(ptDictCool, dataPass.VerticalPipe, true);
+            var coolPipe = new List<Line>();
+            var hotPipe = new List<Line>();
+            var verticalPipe = new List<Line>();
 
-            var pipeHot = new List<Line>();
-            pipeHot.AddRange(dataPass.HotPipeTopView);
-            pipeHot.AddRange(dataPass.VerticalPipe);
-            pipeHot.RemoveAll(x => x.Length <= 1);
-            var ptDictHot = ConnectSingleSystemToNearVerticalPipe(pipeHot, dataPass.VerticalPipe);
-            var ptHotDict = RemoveSingleVerticalSetIsCool(ptDictHot, dataPass.VerticalPipe, false);
+            coolPipe.AddRange(dataPass.CoolPipeTopView);
+            hotPipe.AddRange(dataPass.HotPipeTopView);
+            verticalPipe.AddRange(dataPass.VerticalPipe);
 
+            ConnectSingleSystemToNearVerticalPipe(coolPipe, verticalPipe);
+            ConnectSingleSystemToNearVerticalPipe(hotPipe, verticalPipe);
+
+            DrawUtils.ShowGeometry(coolPipe, "l0adjustCool", 142);
+            DrawUtils.ShowGeometry(hotPipe , "l0adjustHot", 22);
+
+            var ptDictCool = ThDrainageADTreeService.GetPtDict(coolPipe);
+            var ptDictHot = ThDrainageADTreeService.GetPtDict(hotPipe);
 
             ptDict = new Dictionary<Point3d, List<Line>>();
             ptCoolHotDict = new Dictionary<Point3d, bool>();
@@ -50,118 +52,78 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             foreach (var item in ptDictCool)
             {
                 ptDict.Add(item.Key, item.Value);
+                ptCoolHotDict.Add(item.Key, true);
             }
             foreach (var item in ptDictHot)
             {
                 ptDict.Add(item.Key, item.Value);
+                ptCoolHotDict.Add(item.Key, false);
             }
-            foreach (var item in ptCoolDict)
-            {
-                ptCoolHotDict.Add(item.Key, item.Value);
-            }
-            foreach (var item in ptHotDict)
-            {
-                ptCoolHotDict.Add(item.Key, item.Value);
-            }
-
         }
-        private static Dictionary<Point3d, List<Line>> ConnectSingleSystemToNearVerticalPipe(List<Line> pipes, List<Line> verticalPipe)
+
+        private static void ConnectSingleSystemToNearVerticalPipe(List<Line> pipe, List<Line> verticalPipe)
         {
-            var minDistTol = 26;
-            var tol = new Tolerance(1, 1);
-            var ptIsCool = new Dictionary<Point3d, bool>();
-            var ptDict = ThDrainageADTreeService.GetPtDict(pipes);
-
-            for (int i = 0; i < ptDict.Count(); i++)
+            var needAdd = new List<Line>();
+            foreach (var vpipe in verticalPipe)
             {
-                //立管上的点
-                if (ptDict.ElementAt(i).Value.Where(x => verticalPipe.Contains(x)).Any())
+                var vst = vpipe.StartPoint;
+                var bNeedAddToPipeS = AdjustLineNearPt(vst, pipe);
+                var ved = vpipe.EndPoint;
+                var bNeedAddToPipeE = AdjustLineNearPt(ved, pipe);
+
+                if (bNeedAddToPipeS || bNeedAddToPipeE)
                 {
-                    var ptVertical = ptDict.ElementAt(i).Key;
-                    var NearPtDict = ptDict.Where(x => x.Key != ptVertical && x.Key.DistanceTo(ptVertical) <= minDistTol);
-                    if (NearPtDict.Count() > 0)
-                    {
-                        foreach (var nearPt in NearPtDict)
-                        {
-                            for (int j = 0; j < nearPt.Value.Count; j++)
-                            {
-                                var line = nearPt.Value[j];
-                                var lineNearPt = line.StartPoint;
-                                var lineOtherPt = line.EndPoint;
-                                if (line.StartPoint.DistanceTo(ptVertical) > line.EndPoint.DistanceTo(ptVertical))
-                                {
-                                    lineNearPt = line.EndPoint;
-                                    lineOtherPt = line.StartPoint;
-                                }
-
-                                var addDir = lineNearPt - ptVertical;
-                                var lineDir = line.EndPoint - line.StartPoint;
-                                var angle = addDir.GetAngleTo(lineDir);
-                                if (Math.Abs(Math.Cos(angle)) > Math.Cos(1 * Math.PI / 180))
-                                {
-                                    //移动点的延长方向和原线必须同向。防止误改附近的管线（比如附近热水的立管）
-                                    var newLine = new Line(ptVertical, lineOtherPt);
-                                    ptDict.ElementAt(i).Value.Add(newLine);
-                                    nearPt.Value.Remove(line);
-
-                                    //更新另一端里面的点线
-                                    var otherSidePt = ptDict.Where(x => x.Value.Contains(line) && x.Key != nearPt.Key).First();
-                                    otherSidePt.Value.Remove(line);
-                                    otherSidePt.Value.Add(newLine);
-
-
-                                }
-                            }
-                        }
-                    }
+                    needAdd.Add(vpipe);
                 }
             }
 
-            var ptRemove = ptDict.Where(x => x.Value.Count() == 0).Select(x => x.Key).ToList();
-            ptRemove.ForEach(x => ptDict.Remove(x));
+            pipe.AddRange(needAdd);
+            verticalPipe.RemoveAll(x => needAdd.Contains(x));
 
-            return ptDict;
         }
-        private static Dictionary<Point3d, bool> RemoveSingleVerticalSetIsCool(Dictionary<Point3d, List<Line>> ptDict, List<Line> verticalPipe, bool isCool)
+
+        private static bool AdjustLineNearPt(Point3d pt, List<Line> pipes)
         {
-            var ptCoolDict = new Dictionary<Point3d, bool>();
-            var tol = new Tolerance(1, 1);
-            var removeList = new List<Point3d>();
-            for (int i = 0; i < ptDict.Count; i++)
-            {
-                var item = ptDict.ElementAt(i);
+            var minDistTol = 100;
+            var bIfAddVertical = false;
+            var nearpipe = pipes.Where(x => x.StartPoint.DistanceTo(pt) < minDistTol ||
+                                            x.EndPoint.DistanceTo(pt) < minDistTol).ToList();
 
-                if (item.Value.Where(x => verticalPipe.Contains(x) == false).Any())
+            var removePipe = new List<Line>();
+
+            foreach (var nPipe in nearpipe)
+            {
+                var lineNearPt = nPipe.StartPoint;
+                var lineOtherPt = nPipe.EndPoint;
+                if (lineNearPt.DistanceTo(pt) > lineOtherPt.DistanceTo(pt))
                 {
-                    ptCoolDict.Add(item.Key, isCool);
+                    lineNearPt = nPipe.EndPoint;
+                    lineOtherPt = nPipe.StartPoint;
                 }
-                else
+
+                if (lineNearPt.DistanceTo(pt) <= 1)
                 {
-                    //末端，只有立管
-                    var ptOther = item.Value[0].EndPoint;
-                    if (item.Key.IsEqualTo(ptOther, tol))
-                    {
-                        ptOther = item.Value[0].StartPoint;
-                    }
-                    var ptOtherEndKey = ThDrainageADTreeService.IsInDict(ptOther, ptDict);
-                    if (ptOtherEndKey != Point3d.Origin)
-                    {
-                        if (ptDict[ptOtherEndKey].Count > 1)
-                        {
-                            //立管另一端有别的线   
-                            ptCoolDict.Add(item.Key, isCool);
-                        }
-                    }
+                    bIfAddVertical = true;
+                    continue;
                 }
-                if (ptCoolDict.ContainsKey(item.Key) == false)
+
+                var addDir = lineNearPt - pt;
+                var lineDir = nPipe.EndPoint - nPipe.StartPoint;
+                var angle = addDir.GetAngleTo(lineDir);
+                if (Math.Abs(Math.Cos(angle)) > Math.Cos(1 * Math.PI / 180))
                 {
-                    removeList.Add(item.Key);
+                    //移动点的延长方向和原线必须同向。防止误改附近的管线（比如附近热水的立管）
+                    var newLine = new Line(pt, lineOtherPt);
+                    removePipe.Add(nPipe);
+                    pipes.Add(newLine);
+                    bIfAddVertical = true;
                 }
             }
-
-            removeList.ForEach(x => ptDict.Remove(x));
-
-            return ptCoolDict;
+            pipes.RemoveAll(x => removePipe.Contains(x));
+            return bIfAddVertical;
         }
+
+
+
     }
 }
