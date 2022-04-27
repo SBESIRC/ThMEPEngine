@@ -83,6 +83,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                         //break;
                     }
                 }
+                node.Item.Valves = node.Item.Valves.OrderBy(e => e.Point.DistanceTo(line.StartPoint)).ToList();
             }
             //查找当前节点是否有立管
             foreach (var riser in riserList)
@@ -102,6 +103,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                     {
                         var breakModel = new ThBreakModel();
                         breakModel.BreakName = mark.MarkText;
+                        breakModel.Point = mark.Poistion;
                         node.Item.Break = breakModel;
                     }
                 }

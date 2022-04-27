@@ -82,7 +82,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             {
                 var result = new List<ThValveModel>();
                 string[] names_a = new string[] { /*"给水角阀平面", */"截止阀", "闸阀", "蝶阀", "电动阀",
-                "止回阀", "防污隔断网", "减压阀", "Y型过滤器", "水表1", "水表井","减压阀组" };
+                "止回阀", "防污隔断网","防污隔断阀", "减压阀", "Y型过滤器", "水表1", "水表井","减压阀组" };
                 string[] names_b = new string[] { "防污隔断阀组", "室内水表详图" };
                 string[] names_c = new string[] { "295", "296", "301", "315", "316", "333", "752", "742", "743", "018", "021", "502" };
                 double otherCorrespondingPipeLineLength = 1500;
