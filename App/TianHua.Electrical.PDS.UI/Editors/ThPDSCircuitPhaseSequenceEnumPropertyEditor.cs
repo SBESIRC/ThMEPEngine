@@ -13,43 +13,39 @@ namespace TianHua.Electrical.PDS.UI.Editors
     {
         public override FrameworkElement CreateElement(PropertyItem propertyItem) => new System.Windows.Controls.ComboBox
         {
-            IsEnabled = GetIsEnabled(propertyItem),
+            IsEnabled = !propertyItem.IsReadOnly,
             ItemsSource = GetItemsSource(propertyItem),
         };
 
         public override DependencyProperty GetDependencyProperty() => Selector.SelectedValueProperty;
 
-        private bool GetIsEnabled(PropertyItem propertyItem)
-        {
-            var model = propertyItem.Value as ThPDSCircuitModel;
-            if (model != null)
-            {
-                return model.PhaseSequence != PhaseSequence.L123;
-            }
-            else
-            {
-                return !propertyItem.IsReadOnly;
-            }
-        }
-
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSCircuitModel;
-            if (model != null)
+            if (propertyItem.Value is ThPDSCircuitModel circuit)
             {
+                // 未知的负载，默认是三相(L123)，但是可以切换成单相(L1，L2，L3)
+                // 已知的负载，如果是三相，那么就只能是三相。如果是单相，那么可以在L1,L2,L3切换
                 var values = Enum.GetValues(propertyItem.PropertyType);
-                if (model.PhaseSequence != PhaseSequence.L123)
+                if (circuit.LoadType != Model.PDSNodeType.None)
                 {
-                    // 剔除掉L123相序
-                    return values.OfType<PhaseSequence>().Where(o => o != PhaseSequence.L123);
+                    if (circuit.PhaseSequence != PhaseSequence.L123)
+                    {
+                        // 剔除掉L123相序
+                        return values.OfType<PhaseSequence>()
+                            .Where(o => o != PhaseSequence.L123);
+                    }
+                    else
+                    {
+                        // 只保留L123相序
+                        return values.OfType<PhaseSequence>().Where(o => o == PhaseSequence.L123);
+                    }
                 }
                 else
                 {
-                    // 只保留L123相序
-                    return values.OfType<PhaseSequence>().Where(o => o == PhaseSequence.L123);
+                    return values;
                 }
             }
-            return Enum.GetValues(propertyItem.PropertyType);
+            throw new NotSupportedException();
         }
     }
 }
