@@ -14,6 +14,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public ManualTransferSwitch(double calculateCurrent, string polesNum)
         {
             this.ComponentType = ComponentType.MTSE;
+
+            if (polesNum == "2P")
+            {
+                AlternativePolesNums = new List<string> { "2P" };
+            }
+            else
+            {
+                AlternativePolesNums = new List<string> { "3P", "4P" };
+            }
             var mTSEComponent = MTSEConfiguration.MTSEComponentInfos.Where(o =>
                 o.Amps > calculateCurrent
                 && o.Poles.Contains(polesNum)).ToList();
@@ -24,12 +33,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             MTSEComponents  = mTSEComponent;
             var MTSEComponent = mTSEComponent.First();
             Model = MTSEComponent.Model;
-            PolesNum = MTSEComponent.Poles;
+            PolesNum = polesNum;
             FrameSpecification = MTSEComponent.FrameSize;
             RatedCurrent = MTSEComponent.Amps.ToString();
 
             AlternativeModels = MTSEComponents.Select(o => o.Model).Distinct().ToList();
-            AlternativePolesNums = MTSEComponents.Select(o => o.Poles).Distinct().ToList();
             AlternativeRatedCurrents = MTSEComponents.Select(o => o.Amps.ToString()).Distinct().ToList();
             AlternativeFrameSpecifications = MTSEComponents.Select(o => o.FrameSize).Distinct().ToList();
         }
@@ -41,7 +49,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public override void SetModel(string model)
         {
             if (MTSEComponents.Any(o => o.Model == model
-            && o.Poles == PolesNum
             && o.FrameSize == FrameSpecification
             && o.Amps.ToString() == RatedCurrent))
             {
@@ -51,7 +58,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var components = MTSEComponents.First(o => o.Model == model);
                 Model = components.Model;
-                PolesNum = components.Poles;
                 RatedCurrent = components.Amps.ToString();
                 FrameSpecification= components.FrameSize;
             }
@@ -68,7 +74,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public override void SetFrameSize(string frameSize)
         {
             if (MTSEComponents.Any(o => o.Model == Model
-            && o.Poles == PolesNum
             && o.FrameSize == frameSize
             && o.Amps.ToString() == RatedCurrent))
             {
@@ -78,9 +83,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var components = MTSEComponents.First(o => o.FrameSize == frameSize);
                 Model = components.Model;
-                PolesNum = components.Poles;
-                FrameSpecification = components.FrameSize;
                 RatedCurrent = components.Amps.ToString();
+                FrameSpecification= components.FrameSize;
             }
         }
         public override List<string> GetFrameSizes()
@@ -94,21 +98,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="polesNum"></param>
         public override void SetPolesNum(string polesNum)
         {
-            if (MTSEComponents.Any(o => o.Poles == polesNum
-            && o.Model == Model
-            && o.FrameSize == FrameSpecification
-            && o.Amps.ToString() == RatedCurrent))
-            {
-                this.PolesNum = polesNum;
-            }
-            else
-            {
-                var components = MTSEComponents.First(o => o.Poles == polesNum);
-                Model = components.Model;
-                PolesNum = components.Poles;
-                FrameSpecification = components.FrameSize;
-                RatedCurrent = components.Amps.ToString();
-            }
+            this.PolesNum = polesNum;
         }
         public override List<string> GetPolesNums()
         {
@@ -121,8 +111,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="polesNum"></param>
         public override void SetRatedCurrent(string ratedCurrent)
         {
-            if (MTSEComponents.Any(o => o.Poles == PolesNum
-            && o.Model == Model
+            if (MTSEComponents.Any(o => o.Model == Model
             && o.FrameSize == FrameSpecification
             && o.Amps.ToString() == ratedCurrent))
             {
@@ -132,9 +121,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 var components = MTSEComponents.First(o => o.Amps.ToString() == ratedCurrent);
                 Model = components.Model;
-                PolesNum = components.Poles;
-                FrameSpecification = components.FrameSize;
                 RatedCurrent = components.Amps.ToString();
+                FrameSpecification= components.FrameSize;
             }
         }
         public override List<string> GetRatedCurrents()
