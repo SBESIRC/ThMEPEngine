@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
     public class OptimizedDataReader
     {
-        public OptimizedDataReader(Extents3d outBound, Point3d start,bool loginfo)
+        public OptimizedDataReader(Extents3d outBound, Point3d start, bool loginfo)
         {
             OutBoundVertices = outBound.ToRectangle().Vertices();
             StartPoint = start;
@@ -29,6 +29,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             Initialize();
         }
         public Point3d StartPoint;
+        public string StartMarkInfo = "";
         public bool LogInfo;
         public Point3dCollection OutBoundVertices = new Point3dCollection();
         public List<Line> PipeLines = new List<Line>();//横管
@@ -37,7 +38,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public List<ThDimModel> Dims = new List<ThDimModel>();//管径
         public List<ThValveModel> Valves = new List<ThValveModel>();//阀门
         public List<ThFlushPointModel> FlushPoints = new List<ThFlushPointModel>();//冲洗点位
-        public ThFloorInfo GetDatas(Polyline Bound,int index)
+        public ThFloorInfo GetDatas(Polyline Bound, int index)
         {
             var info = new ThFloorInfo();
             info.PipeLines = PipeLines.Where(e => Bound.Contains(e.GetCenter())).ToList();
@@ -64,7 +65,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             if (LogInfo) LogInfos("立管提取完成");
             //提取标记
             var markExtractionService = new ThMarkExtractionService();
-            Marks = markExtractionService.GetMarkModelList(OutBoundVertices);
+            var startinfo = "";
+            Marks = markExtractionService.GetMarkModelList(OutBoundVertices, StartPoint, ref startinfo);
+            StartMarkInfo = startinfo;
             if (LogInfo) LogInfos("标记提取完成");
             //提取管径
             var dimExtractionService = new ThDimExtractionService();

@@ -25,10 +25,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             retInfo.PipeLines = pipeExtractionService.GetPipeLines(input);
             //提取标记
             var markExtractionService = new ThMarkExtractionService();
-            retInfo.MarkList = markExtractionService.GetMarkModelList(input);
+            string startinfo = "";
+            retInfo.MarkList = markExtractionService.GetMarkModelList(input, new Point3d(0, 0, 0), ref startinfo);
             //提取立管
             var riserExtractionService = new ThRiserExtracionService();
-            retInfo.RiserList = riserExtractionService.GetRiserModelList(retInfo.PipeLines,input, index);
+            retInfo.RiserList = riserExtractionService.GetRiserModelList(retInfo.PipeLines, input, index);
             //提取管径
             var dimExtractionService = new ThDimExtractionService();
             retInfo.DimList = dimExtractionService.GetDimModelList(input);

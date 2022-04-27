@@ -14,5 +14,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Model
     public class ThBreakModel
     {
         public string BreakName { set; get; }
+        public Point3d Point;
     }
 }

@@ -11,6 +11,7 @@ using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
@@ -46,13 +47,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var pt2 = node.Item.Position;
                 var line = new Line(pt1, pt2);
                 var box = line.Buffer(650);
+                var dims = new List<ThDimModel>();
                 foreach (var dim in dimList)
+                    if (box.Contains(dim.CentralPoint))
+                        dims.Add(dim);
+                if (dims.Count > 0)
                 {
-                    if (box.Contains(dim.Position))
-                    {
-                        node.Item.DimMark = dim;
-                        break;
-                    }
+                    var dim = dims.OrderBy(e => line.GetClosestPointTo(e.CentralPoint, false).DistanceTo(e.Position)).First();
+                    node.Item.DimMark = dim;
                 }
             }
             //ToDo1:判断节点是否有给水角阀平面:皮带水嘴
@@ -68,11 +70,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             //ToDo2:判断节点是否有阀门等
             if (node.Parent != null)
             {
+                double tol = 10;
                 var pt1 = node.Parent.Item.Position;
                 var pt2 = node.Item.Position;
                 var line = new Line(pt1, pt2);
-                line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * 1200));
-                var box = line.Buffer(200);
+                //line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * 1200));
+                var box = line.Buffer(tol);
                 foreach (var valve in valveList)
                 {
                     if (box.Contains(valve.Point))
@@ -81,6 +84,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                         //break;
                     }
                 }
+                node.Item.Valves = node.Item.Valves.OrderBy(e => e.Point.DistanceTo(line.StartPoint)).ToList();
             }
             //查找当前节点是否有立管
             foreach (var riser in riserList)
@@ -100,6 +104,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                     {
                         var breakModel = new ThBreakModel();
                         breakModel.BreakName = mark.MarkText;
+                        breakModel.Point = mark.Poistion;
                         node.Item.Break = breakModel;
                     }
                 }
