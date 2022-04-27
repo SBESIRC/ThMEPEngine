@@ -67,7 +67,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         }
         private static Dictionary<Point3d, List<Line>> ConnectSingleSystemToNearVerticalPipe(List<Line> pipes, List<Line> verticalPipe)
         {
-            var minDistTol = 100;
+            var minDistTol = 26;
             var tol = new Tolerance(1, 1);
             var ptIsCool = new Dictionary<Point3d, bool>();
             var ptDict = ThDrainageADTreeService.GetPtDict(pipes);

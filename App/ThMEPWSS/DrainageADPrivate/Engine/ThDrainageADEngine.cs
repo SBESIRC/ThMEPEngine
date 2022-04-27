@@ -35,8 +35,6 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //--管道延长到立管--
             ThPipePreProcessService.ConnectPipeToNearVerticalPipe(dataPass, out var ptDict, out var ptCoolHotDict);
             //ptDict.ForEach(x => DrawUtils.ShowGeometry(x.Value, "l0finalline"));
-            //ptCoolHotDict.ForEach(x => DrawUtils.ShowGeometry(x.Key, "l0coolhot", (x.Value == true ? 140 : 210), 30, 50));
-
 
             //--树--
             var treeEngine = new ThDraingeTreeEngine(dataPass, ptDict, ptCoolHotDict);
@@ -103,14 +101,13 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1EndValveVisi", 40, hight: 180));
 
             //--断线--
-
+            ThBreakPipeService.BreakPipe(dimEngine.RootList, out var coolPipe, out var hotPipe);
 
             dataPass.OutputDim.AddRange(dim);
             dataPass.OutputValve.AddRange(valveOutput);
             dataPass.OutputAngleValve.AddRange(endValve);
-
-
-
+            dataPass.OutputCoolPipe.AddRange(coolPipe);
+            dataPass.OutputHotPipe.AddRange(hotPipe);
 
         }
 

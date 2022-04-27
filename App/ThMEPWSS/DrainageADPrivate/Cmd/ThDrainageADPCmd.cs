@@ -106,6 +106,7 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 //转换器
                 //var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
                 var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                selectPtPrint = transformer.Transform(selectPtPrint);
 
                 //提取数据
                 var dataFactory = new ThDrainageADPrivateDataFactory()
@@ -136,14 +137,12 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                     OpeningSign = dataFactory.OpeningSign,
                 };
 
-                //dataQuery.Transform(transformer);
+                dataQuery.Transform(transformer);
                 dataQuery.SaperateTopViewAD();
                 dataQuery.CreateVerticalPipe();
                 dataQuery.BuildTermianlMode();
                 dataQuery.BuildValve();
                 dataQuery.Print();
-                //dataQuery.Reset(transformer);
-
 
                 var dataPass = new ThDrainageADPDataPass();
                 dataPass.CoolPipeTopView.AddRange(dataQuery.CoolPipeTopView);
@@ -162,13 +161,18 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                 ThDrainageADEngine.DrainageTransADEngine(dataPass);
 
                 //转换到原位置
-                //dataQuery.Transform(transformer);
+                dataPass.OutputDim.ForEach(x => x.TransformBy(transformer.Displacement.Inverse()));
+                dataPass.OutputAngleValve.ForEach(x => x.TransformBy(transformer.Displacement.Inverse()));
+                dataPass.OutputValve.ForEach(x => x.TransformBy(transformer.Displacement.Inverse()));
+                dataPass.OutputCoolPipe.ForEach(x => x.TransformBy(transformer.Displacement.Inverse()));
+                dataPass.OutputHotPipe.ForEach(x => x.TransformBy(transformer.Displacement.Inverse()));
 
                 //插入
                 ThInsertOutputService.InsertBlk(dataPass.OutputDim);
                 ThInsertOutputService.InsertBlk(dataPass.OutputAngleValve);
                 ThInsertOutputService.InsertBlk(dataPass.OutputValve);
-
+                ThInsertOutputService.InsertLine(dataPass.OutputCoolPipe, ThDrainageADCommon.Layer_CoolPipe);
+                ThInsertOutputService.InsertLine(dataPass.OutputHotPipe, ThDrainageADCommon.Layer_HotPipe);
 
             }
         }

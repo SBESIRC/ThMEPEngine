@@ -51,6 +51,7 @@ namespace ThMEPWSS.DrainageADPrivate
 
         public static double Th = 24.0; //用水时数（h） 等于24
         public static double TransEnlargeScale = 1.5;
+        public static double BreakLineLength = 75.0;
         public enum TerminalType
         {
             Toilet,  //坐便器

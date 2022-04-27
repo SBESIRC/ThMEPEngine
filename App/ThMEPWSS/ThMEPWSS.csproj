@@ -49,6 +49,8 @@
     <Compile Include="DrainageADPrivate\Model\ThDrainageBlkOutput.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
     <Compile Include="DrainageADPrivate\Model\ThValve.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThBreakPipeService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThCreateLineService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThInsertOutputService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThLayoutAngleValveService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThLayoutDimService.cs" />

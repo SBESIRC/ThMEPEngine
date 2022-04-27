@@ -69,7 +69,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
                 }
                 if (root.IsCool == false)
                 {
-                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
+                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal && o.Terminal !=null).Any());
                     if (pairCool.Count() > 0)
                     {
                         var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
@@ -189,7 +189,9 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             var moveTrans = Matrix3d.Displacement(moveDir);
 
             var allNode = rootList.SelectMany(x => x.GetDescendant()).ToList();
-            rootList.ForEach(x => allNode.Add(x));
+            //rootList.ForEach(x => allNode.Add(x));
+            allNode.AddRange(rootList);
+            
 
             foreach (var node in allNode)
             {

@@ -31,6 +31,8 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public List<ThDrainageBlkOutput> OutputDim { get; set; } = new List<ThDrainageBlkOutput>();
         public List<ThDrainageBlkOutput> OutputAngleValve { get; set; } = new List<ThDrainageBlkOutput>();
         public List<ThDrainageBlkOutput> OutputValve { get; set; } = new List<ThDrainageBlkOutput>();
+        public List<Line> OutputCoolPipe { get; set; } = new List<Line>();
+        public List<Line> OutputHotPipe { get; set; } = new List<Line>();
 
     }
 }

@@ -90,6 +90,12 @@ namespace ThMEPWSS
 
                 var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
 
+                var blkNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
+                                                        ThDrainageADCommon.BlkName_ShutoffValve, ThDrainageADCommon.BlkName_GateValve,
+                                                        ThDrainageADCommon.BlkName_CheckValve, ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
+                                                        ThDrainageADCommon.BlkName_Casing,
+                                                        };
+
                 var BlockNameDict = new Dictionary<string, List<string>>() {
                                         { "拖把池", new List<string>() { "A-Kitchen-9"}},
                                         { "洗衣机", new List<string>() {  "sdr ter t","A-Toilet-9"} } ,
@@ -107,12 +113,7 @@ namespace ThMEPWSS
                 {
                     Transformer = transformer,
                     BlockNameDict = BlockNameDict,
-                    BlockNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
-                                                        ThDrainageADCommon.BlkName_ShutoffValve,  ThDrainageADCommon.BlkName_GateValve,
-                                                        ThDrainageADCommon.BlkName_CheckValve,ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
-                                                        ThDrainageADCommon.BlkName_Casing,
-                                                      },
-
+                    BlockNameValve = blkNameValve,
                     BlockNameTchValve = new List<string> { ThDrainageADCommon.BlkName_ShutoffValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_GateValve_TchTag.ToUpper(),
                                                         ThDrainageADCommon.BlkName_CheckValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_AntifoulingCutoffValve_TchTag.ToUpper(),
                                                         ThDrainageADCommon.BlkName_OpeningSign_TchTag.ToUpper(),ThDrainageADCommon .BlkName_WaterMeteValve_TchTag.ToUpper(),
@@ -135,7 +136,7 @@ namespace ThMEPWSS
                     OpeningSign = dataFactory.OpeningSign,
                 };
 
-                //dataQuery.Transform(transformer);
+                dataQuery.Transform(transformer);
                 dataQuery.SaperateTopViewAD();
                 dataQuery.CreateVerticalPipe();
                 dataQuery.BuildTermianlMode();
