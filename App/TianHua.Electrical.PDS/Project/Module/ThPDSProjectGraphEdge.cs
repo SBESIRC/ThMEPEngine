@@ -1,9 +1,11 @@
 ﻿using QuikGraph;
+using System;
 using System.Linq;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public class ThPDSProjectGraphEdge : EquatableTaggedEdge<ThPDSProjectGraphNode, ThPDSProjectGraphEdgeCompareTag>
     {
         public ThPDSCircuit Circuit { get; set; }

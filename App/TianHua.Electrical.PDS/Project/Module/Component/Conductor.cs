@@ -8,6 +8,7 @@ using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
+    [Serializable]
     public class Conductor : PDSBaseComponent
     {
         /// <summary>

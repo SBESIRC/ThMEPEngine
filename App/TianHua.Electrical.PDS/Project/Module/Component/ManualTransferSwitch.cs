@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// MTSE 手动转换开关
     /// </summary>
+    [Serializable]
     public class ManualTransferSwitch : TransferSwitch
     {
         public ManualTransferSwitch(double calculateCurrent, string polesNum)

@@ -11,6 +11,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 回路附加信息
     /// </summary>
+    [Serializable]
     public class CircuitDetails
     {
         public PDSBaseOutCircuit CircuitForm { get; set; }

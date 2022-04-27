@@ -21,6 +21,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<CableCondiutInfo> CondiutInfos = new List<CableCondiutInfo>();
     }
+
+    [Serializable]
     public class CableCondiutInfo
     {
         /// <summary>

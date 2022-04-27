@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 控制回路
     /// </summary>
+    [Serializable]
     public class SecondaryCircuit
     {
         public int Index;

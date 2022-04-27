@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -28,6 +29,7 @@ namespace TianHua.Electrical.PDS.Model
     /// <summary>
     /// 回路
     /// </summary>
+    [Serializable]
     public class ThPDSCircuit
     {
         public ThPDSCircuit()

@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 间接表
     /// </summary>
+    [Serializable]
     public class CurrentTransformer : Meter
     {
         /// <summary>

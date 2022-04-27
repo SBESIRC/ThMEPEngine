@@ -16,6 +16,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<BreakerComponentInfo> breakerComponentInfos = new List<BreakerComponentInfo>();
     }
+
+    [Serializable]
     public class BreakerComponentInfo
     {
         /// <summary>

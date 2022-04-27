@@ -17,6 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static List<OUVPComponentInfo> OUVPComponentInfos = new List<OUVPComponentInfo>();
     }
 
+    [Serializable]
     public class OUVPComponentInfo
     {
         /// <summary>

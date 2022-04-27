@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// ATSE 自动转换开关
     /// </summary>
+    [Serializable]
     public class AutomaticTransferSwitch : TransferSwitch
     {
         public AutomaticTransferSwitch(double calculateCurrent, string polesNum)

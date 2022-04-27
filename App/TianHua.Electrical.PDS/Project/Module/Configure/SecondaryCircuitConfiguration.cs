@@ -29,6 +29,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static Dictionary<string,List<SecondaryCircuitInfo>> SecondaryCircuitConfigs = new Dictionary<string, List<SecondaryCircuitInfo>>();
     }
 
+    [Serializable]
     public class SecondaryCircuitInfo
     {
         /// <summary>

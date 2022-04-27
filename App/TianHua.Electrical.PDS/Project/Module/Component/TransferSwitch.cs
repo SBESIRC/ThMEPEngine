@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// TSE 转换开关
     /// </summary>
+    [Serializable]
     public abstract class TransferSwitch : PDSBaseComponent
     {
         /// <summary>

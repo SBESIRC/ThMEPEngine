@@ -7,6 +7,7 @@ using TianHua.Electrical.PDS.Project.Module.Configure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
+    [Serializable]
     public class OUVP : PDSBaseComponent
     {
         public OUVP(double calculateCurrent, string polesNum)

@@ -318,6 +318,7 @@ namespace TianHua.Electrical.PDS.Model
     /// <summary>
     /// 负载
     /// </summary>
+    [Serializable]
     public class ThPDSLoad : IEquatable<ThPDSLoad>
     {
         public ThPDSLoad()

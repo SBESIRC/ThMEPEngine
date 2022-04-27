@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 隔离开关
     /// </summary>
+    [Serializable]
     public class IsolatingSwitch : PDSBaseComponent
     {
         /// <summary>

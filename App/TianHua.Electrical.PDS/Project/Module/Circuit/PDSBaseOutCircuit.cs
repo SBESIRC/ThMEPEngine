@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
     /// <summary>
     /// 出线回路
     /// </summary>
+    [Serializable]
     public abstract class PDSBaseOutCircuit
     {
         /// <summary>

@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             this._edge = edge;
             _isLeakageProtection = _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump;
-            _calculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            _calculateCurrent = edge.Target.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流
             _cascadeCurrent = edge.Target.Details.CascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public SelectionComponentFactory(ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
         {
             _isLeakageProtection = node.Details.MiniBusbars[miniBusbar].Any(o => o.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump);
-            _calculateCurrent = miniBusbar.CalculateCurrent;//计算电流
+            _calculateCurrent = miniBusbar.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -67,7 +67,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public SelectionComponentFactory(ThPDSProjectGraphNode node, double cascadeCurrent)
         {
-            _calculateCurrent = node.Load.CalculateCurrent;//计算电流
+            _calculateCurrent = node.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法

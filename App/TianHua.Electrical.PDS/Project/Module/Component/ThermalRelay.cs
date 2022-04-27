@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 热继电器
     /// </summary>
+    [Serializable]
     public class ThermalRelay : PDSBaseComponent
     {
         /// <summary>

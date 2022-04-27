@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     /// <summary>
     /// 电表
     /// </summary>
+    [Serializable]
     public abstract class Meter : PDSBaseComponent
     {
         /// <summary>

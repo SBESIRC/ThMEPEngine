@@ -83,7 +83,7 @@
                                 <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial}" ></ComboBox>
+                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial, Mode=OneWay}" ></ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -280,8 +280,8 @@
                 </StackPanel>
                 <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
                 <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Right">
-                    <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
-                    <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
+                    <cus:ImageButton Content="导入设置" Height="25" Width="80" Name="btnImportSet" Click="btnImportSetting"></cus:ImageButton>
+                    <cus:ImageButton Content="导出设置" Height="25" Width="80" Margin="10,0,0,0" Name="btnExportSet" Click="btnExportSetting"></cus:ImageButton>
                     <cus:ImageButton Content="保存设置" Height="25" Width="80" Margin="10,0,10,0" Name="btnSaveSet" Click="btnSaveSetting"></cus:ImageButton>
                 </StackPanel>
             </StackPanel>

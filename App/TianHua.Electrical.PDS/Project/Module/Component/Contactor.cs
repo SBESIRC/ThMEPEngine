@@ -9,6 +9,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 接触器
     /// </summary>
+    [Serializable]
     public class Contactor : PDSBaseComponent
     {
         /// <summary>

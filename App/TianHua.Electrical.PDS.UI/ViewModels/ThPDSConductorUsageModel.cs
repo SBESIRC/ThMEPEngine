@@ -51,12 +51,6 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         public string ConductorMaterial
         {
             get=>_conductorUse.ConductorMaterial;
-            set
-            {
-                if (value == ConductorMaterial) return;
-                _conductorUse.ConductorMaterial = value;
-                OnPropertyChanged();
-            }
         }
 
         public bool IsSpecialConductorType => _conductorUse.IsSpecialConductorType;
@@ -107,7 +101,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 OnPropertyChanged();
             }
         }
-        public Level Level
+        public ConductorLevel Level
         {
             get => _conductorUse.Level;
             set

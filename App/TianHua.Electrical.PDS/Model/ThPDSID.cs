@@ -1,8 +1,10 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Model
 {
+    [Serializable]
     public class ThPDSID
     {
         public ThPDSID()

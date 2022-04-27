@@ -273,7 +273,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
             else
             {
-               edge.Source.CheckCascadeWithMiniBusbar(miniBusbar.Key);
+                edge.Source.CheckCascadeWithMiniBusbar(miniBusbar.Key);
             }
         }
 
@@ -526,7 +526,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void DeleteSmallBusbar(ThPDSProjectGraphNode node, MiniBusbar miniBusbar)
         {
-            if(node.Details.MiniBusbars.ContainsKey(miniBusbar))
+            if (node.Details.MiniBusbars.ContainsKey(miniBusbar))
             {
                 node.Details.MiniBusbars.Remove(miniBusbar);
             }
@@ -615,7 +615,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void DeleteControlCircuit(ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit)
         {
-            if(node.Details.SecondaryCircuits.ContainsKey(secondaryCircuit))
+            if (node.Details.SecondaryCircuits.ContainsKey(secondaryCircuit))
             {
                 node.Details.SecondaryCircuits.Remove(secondaryCircuit);
             }
@@ -812,6 +812,38 @@ namespace TianHua.Electrical.PDS.Project.Module
                 //其他目前暂不支持
                 throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        /// 导出项目
+        /// </summary>
+        public static void ExportProject(string filePath, string fileName)
+        {
+            PDSProject.Instance.ExportProject(filePath, fileName);
+        }
+
+        /// <summary>
+        /// 导入项目
+        /// </summary>
+        public static void ImportProject(string filePath)
+        {
+            PDSProject.Instance.Load(filePath);
+        }
+
+        /// <summary>
+        /// 导出全局配置
+        /// </summary>
+        public static void ExportGlobalConfiguration(string filePath, string fileName)
+        {
+            PDSProject.Instance.ExportGlobalConfiguration(filePath, fileName);
+        }
+
+        /// <summary>
+        /// 导入全局配置
+        /// </summary>
+        public static void ImportGlobalConfiguration(string filePath)
+        {
+            PDSProject.Instance.ImportGlobalConfiguration(filePath);
         }
     }
 }

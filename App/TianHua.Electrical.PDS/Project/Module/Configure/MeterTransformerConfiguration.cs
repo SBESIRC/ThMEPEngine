@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure
 {
@@ -13,6 +14,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static List<MTComponentInfo> MeterComponentInfos = new List<MTComponentInfo>();
     }
 
+    [Serializable]
     public class MTComponentInfo
     {
         /// <summary>

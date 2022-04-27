@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using System;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
 {
     /// <summary>
     /// 二路进线ATSE
     /// </summary>
+    [Serializable]
     public class TwoWayInCircuit : PDSBaseInCircuit
     {
         public TwoWayInCircuit()

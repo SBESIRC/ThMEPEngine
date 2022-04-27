@@ -11,6 +11,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 节点附加信息
     /// </summary>
+    [Serializable]
     public class NodeDetails
     {
         //public CircuitFormInType CircuitFormType { get; set; }
