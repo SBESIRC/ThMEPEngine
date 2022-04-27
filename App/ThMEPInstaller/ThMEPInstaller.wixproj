@@ -27,6 +27,7 @@
     <Compile Include="CGAL.wxs" />
     <Compile Include="DevExpress.wxs" />
     <Compile Include="Electrical.wxs" />
+    <Compile Include="ElevationGenerator.wxs" />
     <Compile Include="External.wxs" />
     <Compile Include="FanSelection.wxs" />
     <Compile Include="HVAC.wxs" />
