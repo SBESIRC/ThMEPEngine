@@ -18,6 +18,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Model
     {
         //文本
         public string StrText { set; get; }
+        public Point3d CentralPoint;
         public ThDimModel()
         {
             StrText = "";

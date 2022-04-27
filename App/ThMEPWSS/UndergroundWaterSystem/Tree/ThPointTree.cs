@@ -11,6 +11,7 @@ using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
@@ -48,11 +49,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var box = line.Buffer(650);
                 var dims = new List<ThDimModel>();
                 foreach (var dim in dimList)
-                    if (box.Contains(dim.Position))
+                    if (box.Contains(dim.CentralPoint))
                         dims.Add(dim);
                 if (dims.Count > 0)
                 {
-                    var dim = dims.OrderBy(e => line.GetClosestPointTo(e.Position, false).DistanceTo(e.Position)).First();
+                    var dim = dims.OrderBy(e => line.GetClosestPointTo(e.CentralPoint, false).DistanceTo(e.Position)).First();
                     node.Item.DimMark = dim;
                 }
             }
