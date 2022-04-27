@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.GeojsonExtractor;
 
 
-namespace ThMEPWSS.DrainageSystemDiagram
+namespace ThMEPWSS.DrainageSystemDiagram.Service
 {
     public class ThDrainageSDCommonService
     {

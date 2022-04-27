@@ -165,7 +165,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 if (x.GetLength() > 310)
                     objs.Add(x);
             });
-            _allCalcALLines = ThMEPLineExtension.LineSimplifier(objs, 5.0, 400.0, 10.0, Math.PI / 180.0).Cast<Line>().ToList();
+            _allCalcALLines = ThMEPLineExtension.LineSimplifier(objs, 5.0, 400.0, 10.0, Math.PI*5.0 / 180.0).Cast<Line>().ToList();
 
             //根据车道线，配电箱构造车道线上各个点到出口的路径
             var routeServices = new LaneLineRoute(outPolylin, _allCalcALLines, alPoint);

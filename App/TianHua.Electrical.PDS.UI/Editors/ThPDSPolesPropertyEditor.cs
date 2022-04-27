@@ -24,27 +24,25 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSThermalRelayModel)
+            if (propertyItem.Value is ThPDSThermalRelayModel thermalRelay)
             {
-                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Poles).Distinct();
+                return thermalRelay.AlternativePolesNums;
             }
-            if (propertyItem.Value is ThPDSContactorModel)
+            if (propertyItem.Value is ThPDSContactorModel contactor)
             {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Poles).Distinct();
+                return contactor.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSIsolatingSwitchModel switchModel)
             {
-                return IsolatorConfiguration.isolatorInfos.Where(o => o.MaxKV == switchModel.MaxKV).Select(o => o.Poles).Distinct();
+                return switchModel.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSATSEModel atse)
             {
-                //  1. 型号决定了可选的极数选项
-                return ATSEConfiguration.ATSEComponentInfos.Where(o=>o.Model==atse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
+                return atse.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSMTSEModel mtse)
             {
-                //  1. 型号决定了可选的极数选项
-                return MTSEConfiguration.MTSEComponentInfos.Where(o => o.Model == mtse.Model).SelectMany(o => o.Poles.Split(';')).Distinct();
+                return mtse.AlternativePolesNums;
             }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {

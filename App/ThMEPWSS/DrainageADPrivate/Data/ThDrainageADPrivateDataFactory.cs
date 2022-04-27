@@ -37,17 +37,16 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
         public List<string> BlockNameValve { get; set; } = new List<string>();
         public List<string> BlockNameTchValve { get; set; } = new List<string>();
-        public List<string> LayerFilterTchValve { get; set; } = new List<string>();
         public ThMEPOriginTransformer Transformer { get; set; }
 
         //output
         public List<ThIfcVirticalPipe> VerticalPipe { get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcFlowSegment> TCHPipe { get; set; } = new List<ThIfcFlowSegment>();
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<ThIfcDistributionFlowElement> AngleValveWaterHeater { get; set; } = new List<ThIfcDistributionFlowElement>();
-        public List<Entity> TchValve { get; set; } = new List<Entity>();
-        public List<Entity> StartPt { get; set; } = new List<Entity>();
-
+        public List<ThIfcDistributionFlowElement> ValveWaterHeater { get; set; } = new List<ThIfcDistributionFlowElement>(); //截止阀等阀门，给水角阀平面，热水器，套管
+        public List<BlockReference> TchValve { get; set; } = new List<BlockReference>();//天正阀
+        public List<BlockReference> TchOpeningSign { get; set; } = new List<BlockReference>();//天正断管
+        public List<Spline> OpeningSign { get; set; } = new List<Spline>();//样条曲线断管
         public ThDrainageADPrivateDataFactory()
         { }
         public void GetElements(Database database, Point3dCollection framePts)
@@ -56,6 +55,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             ExtractPipe(database, framePts);
             ExtractSanitaryTerminal(database, framePts);
             ExtractValve(database, framePts);
+            ExtractOpeningSpline(database, framePts);
             ExtractTCHValve(database, framePts);
             ExtractTCHEquipment(database, framePts);
         }
@@ -121,7 +121,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         }
 
         /// <summary>
-        /// 热水器 角阀
+        /// 热水器 角阀 截止阀 闸阀 止回阀 防污隔断阀 套管
         /// </summary>
         /// <param name="database"></param>
         /// <param name="framePts"></param>
@@ -133,7 +133,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             };
 
             extractor.Recognize(database, framePts);
-            AngleValveWaterHeater.AddRange(extractor.Elements);
+            ValveWaterHeater.AddRange(extractor.Elements);
         }
 
         /// <summary>
@@ -150,21 +150,17 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => CheckLayerFilter(o.Layer, layerFilter));
+                   .Where(o => CheckLayerFilter(o.Layer, layerFilter) && o.IsTCHValve());
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(framePts);
 
-                // 天正阀
-                dbObjs.OfType<Entity>()
-                    .Where(e => e.IsTCHValve())
-                    .ForEach(e => TchValve.Add(e));
-
+                TchValve.AddRange(ExplodeTchBlk(dbObjs));
             }
         }
 
         /// <summary>
-        /// 天正起点
+        /// 天正断管阀
         /// </summary>
         /// <param name="database"></param>
         /// <param name="framePts"></param>
@@ -177,28 +173,42 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => CheckLayerFilter(o.Layer, layerFilter));
+                   .Where(o => CheckLayerFilter(o.Layer, layerFilter) && o.IsTCHEquipment());
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(framePts);
 
-                // 天正阀
-                dbObjs.OfType<Entity>()
-                    .Where(e => e.IsTCHEquipment())
-                    .ForEach(e => StartPt.Add(e));
-
+                TchOpeningSign.AddRange(ExplodeTchBlk(dbObjs));
             }
         }
-        private bool IsTchBlkValve(Entity e)
+        private List<BlockReference> ExplodeTchBlk(DBObjectCollection dbObjs)
         {
-            var bIsVP = true;
-            //var pipeParameters = ThOPMTools.GetOPMProperties(e.Id);
+            var tchItem = new List<BlockReference>();
+            var tchEntity = dbObjs.OfType<Entity>();
+            foreach (var item in tchEntity)
+            {
+                var obj = new DBObjectCollection();
+                item.Explode(obj);
+                var blkList = obj.OfType<BlockReference>().Where(x => BlockNameTchValve.Contains(x.Name.ToUpper())).ToList();
+                tchItem.AddRange(blkList);
+            }
+            return tchItem;
+        }
+        private void ExtractOpeningSpline(Database database, Point3dCollection framePts)
+        {
+            var layerFilter = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D, ThDrainageADCommon.Layer_DIMS, ThDrainageADCommon.Layer_DIMS_D };
 
-            //if (pipeParameters.ContainsKey("起点标高") && pipeParameters.ContainsKey("终点标高") && pipeParameters.ContainsKey("管长"))
-            //{
-            //    bIsVP = BlockNameTchValve.Contains(pipeParameters["起点标高"]);
-            //}
-            return bIsVP;
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Results = acadDatabase
+                   .ModelSpace
+                   .OfType<Spline>()
+                   .Where(o => CheckLayerFilter(o.Layer, layerFilter));
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(framePts);
+                OpeningSign.AddRange(dbObjs.OfType<Spline>());
+            }
         }
         private bool CheckLayerFilter(string layerName, List<string> LayerFilter)
         {

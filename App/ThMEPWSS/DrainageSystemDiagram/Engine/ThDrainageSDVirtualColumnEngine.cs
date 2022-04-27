@@ -7,6 +7,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDVirtualColumnEngine

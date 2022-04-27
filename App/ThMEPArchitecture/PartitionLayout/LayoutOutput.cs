@@ -295,20 +295,28 @@ namespace ThMEPArchitecture.PartitionLayout
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 0))
                 {
                     var angle = 0.0;
-                    if (car.Vector.Equals(Vector3d.YAxis)) angle = 0;
-                    else if (car.Vector.Equals(-Vector3d.YAxis)) angle = Math.PI;
-                    else if (car.Vector.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
-                    else if (car.Vector.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    var vec = car.Vector;
+                    if (Math.Abs(vec.X) < 0.0001) vec = new Vector3d(0, vec.Y, 0);
+                    if (Math.Abs(vec.Y) < 0.0001) vec = new Vector3d(vec.X, 0, 0);
+                    vec = vec.GetNormal();
+                    if (vec.Equals(Vector3d.YAxis)) angle = 0;
+                    else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
+                    else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
+                    else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                 }
                 foreach (var car in Cars.Where(e => e.CarLayoutMode == 1))
                 {
                     var angle = 0.0;
-                    if (car.Vector.Equals(Vector3d.YAxis)) angle = 0;
-                    else if (car.Vector.Equals(-Vector3d.YAxis)) angle = Math.PI;
-                    else if (car.Vector.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
-                    else if (car.Vector.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
+                    var vec = car.Vector;
+                    if (Math.Abs(vec.X) < 0.0001) vec = new Vector3d(0, vec.Y, 0);
+                    if (Math.Abs(vec.Y) < 0.0001) vec = new Vector3d(vec.X, 0, 0);
+                    vec = vec.GetNormal();
+                    if (vec.Equals(Vector3d.YAxis)) angle = 0;
+                    else if (vec.Equals(-Vector3d.YAxis)) angle = Math.PI;
+                    else if (vec.Equals(Vector3d.XAxis)) angle = -Math.PI / 2;
+                    else if (vec.Equals(-Vector3d.XAxis)) angle = Math.PI / 2;
                     var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, PCARBLKNAME, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                 }

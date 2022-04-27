@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPWSS.Common;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Service;
 
 namespace ThMEPWSS.UndergroundWaterSystem.Tree
 {
     public class ThFloorHandleService
-    {
+    {    
         /// <summary>
         /// 匹配立管和标注
         /// </summary>
@@ -44,26 +45,26 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         /// 找到跨层立管,并将跨层立管合并成一个
         /// </summary>
         /// <param name="info"></param>
-        public List<ThRiserInfo> MergeRiser(List<ThFloorModel> floorList)
+        public List<ThRiserInfo> MergeRiser(List<ThFloorModel> floorList,List<Point3d>locPoints)
         {
             var riserList = new List<ThRiserModel>();
             for (int i = 0; i < floorList.Count; i++)
             {
                 riserList.AddRange(floorList[i].FloorInfo.RiserList);
             }
-
             var retList = new List<ThRiserInfo>();
             var noName = riserList.Where(o => o.MarkName == "").ToList();
-            foreach(var riser in noName)
+            foreach (var rise in noName)
             {
-                var riserInfo = new ThRiserInfo();
-                riserInfo.MarkName = "";
-                riserInfo.RiserPts.Add(riser.Position);
-                retList.Add(riserInfo);
+                ThRiserInfo info = new ThRiserInfo();
+                info.MarkName = "";
+                info.RiserPts.Add(rise.Position);
+                retList.Add(info);
             }
+            //retList.AddRange(GroupAnonymousRiserByPosition(noName, locPoints));
             riserList = riserList.Except(noName).ToList();
             var groups = riserList.GroupBy(o => o.MarkName).ToList();
-            foreach(var group in groups)
+            foreach (var group in groups)
             {
                 var riserInfo = new ThRiserInfo();
                 riserInfo.MarkName = group.Key;
@@ -75,6 +76,51 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 retList.Add(riserInfo);
             }
             return retList;
+        }
+        private List<ThRiserInfo> GroupAnonymousRiserByPosition(List<ThRiserModel> noName, List<Point3d> locPoints)
+        {
+            var results = new List<ThRiserInfo>();
+            List<List<ThRiserModel>> risemodels = new List<List<ThRiserModel>>();
+            if (noName.Count > 0)
+            {
+                double tol = 100;
+                risemodels.Add(new List<ThRiserModel>() { noName[0] });
+                if (noName.Count > 1)
+                {
+                    for (int i = 1; i < noName.Count; i++)
+                    {
+                        bool found = false;
+                        for (int j = 0; j < risemodels.Count; j++)
+                        {
+                            foreach (var rise in risemodels[j])
+                            {
+                                var loc_j = locPoints[rise.FloorIndex];
+                                var loc_i = locPoints[noName[i].FloorIndex];
+                                var vec = loc_i - loc_j;
+                                var pi = noName[i].Position;
+                                var pj = rise.Position + vec;
+                                if (pi.DistanceTo(pj) < tol)
+                                {
+                                    found = true;
+                                    risemodels[j].Add(noName[i]);
+                                    break;
+                                }
+                            }
+                            if (found) break;
+                        }
+                        if (!found)
+                            risemodels.Add(new List<ThRiserModel>() { noName[i] });
+                    }
+                }
+            }
+            foreach (var rise in risemodels)
+            {
+                ThRiserInfo info = new ThRiserInfo();
+                info.MarkName = "";
+                foreach (var p in rise) info.RiserPts.Add(p.Position);
+                results.Add(info);
+            }
+            return results;
         }
         public List<Line> GetPipeList(List<ThFloorInfo> floorInfos)
         {

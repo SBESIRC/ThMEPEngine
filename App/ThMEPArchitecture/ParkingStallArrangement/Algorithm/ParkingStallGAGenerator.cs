@@ -13,7 +13,10 @@ using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
-
+using ThMEPArchitecture.MultiProcess;
+using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.MPartitionLayout;
+using static ThParkingStall.Core.MPartitionLayout.MCompute;
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class ParkingStallGAGenerator : IDisposable
@@ -202,7 +205,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             return false;
         }
-        private List<Chromosome> CreateFirstPopulation()
+        public List<Chromosome> CreateFirstPopulation()
         {
             List<Chromosome> solutions = new List<Chromosome>();
             // 添加初始画的分割线,该解必须是合理解
@@ -481,7 +484,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。
         // 对精英种群和一部分交叉产生的后代使用小变异，对一部分后代使用大变异，对剩下的后代不做变异。
-        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious,bool specialOnly = false)
+        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious,bool specialOnly = false,bool MultiProcess = false)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
@@ -509,7 +512,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Logger?.Information($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                 System.Diagnostics.Debug.WriteLine(strCurIterIndex);
                 System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
-                selected = Selection2(pop, out int CurNums);
+                selected = Selection2(pop, out int CurNums, MultiProcess);
                 if (recordprevious)
                 {
                     histories.Add(selected.First());
@@ -559,14 +562,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             // 返回最后一代选择的比例
             return selected.Take(SelectionSize).ToList();
         }
-        private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
+        private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums,bool MultiProcess)
         {
             Logger?.Information("进行选择");
-            inputSolution.ForEach(s =>
+            if (MultiProcess) CalculateParkingSpaces(inputSolution);
+            else
             {
-                s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
-                ReclaimMemory();
-            });
+                inputSolution.ForEach(s =>
+                {
+                    s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
+                    ReclaimMemory();
+                });
+            }
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
             var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
             maxNums = sorted.First().ParkingStallCount;
@@ -605,6 +612,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 rst.RemoveAt(rst.Count - 1);
             }
             return rst;
+        }
+
+        private void CalculateParkingSpaces(List<Chromosome> inputSolution)
+        {
+            var chromosomeCollection = inputSolution.GetChromosomeCollection();
+            for(int i = 0; i < inputSolution.Count;i++)
+            {
+                var chrom = chromosomeCollection.Chromosomes[i];
+                var subAreas = InterParameter.GetSubAreas(chrom);
+                List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+                MParkingPartitionPro mParkingPartition=new MParkingPartitionPro();
+                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+            }
         }
         private List<List<Chromosome>> CreateNextGeneration2(List<Chromosome> solutions)
         {

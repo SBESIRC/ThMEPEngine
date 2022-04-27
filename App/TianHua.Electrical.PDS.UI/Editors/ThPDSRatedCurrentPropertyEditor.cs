@@ -24,9 +24,9 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSContactorModel model)
+            if (propertyItem.Value is ThPDSContactorModel contactor)
             {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Amps.ToString()).Distinct();
+                return contactor.AlternativeRatedCurrents;
             }
             if (propertyItem.Value is ThPDSATSEModel atse)
             {

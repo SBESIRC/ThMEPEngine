@@ -21,10 +21,11 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
     /// </summary>
     public partial class ThPDSInfoCompare : UserControl
     {
+        ThPDSInfoCompareService Service = new();
         public ThPDSInfoCompare()
         {
             InitializeComponent();
-            new ThPDSInfoCompareService().Init(this);
+            Service.Init(this);
         }
     }
 }

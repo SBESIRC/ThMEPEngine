@@ -1,6 +1,7 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -18,7 +19,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => $"{Model}{Combination}-{FrameSpecification}/{CodeLevel}{RatedCurrent}/{PolesNum}{RatedCurrent}";
+        public string Content => _cps.Content();
 
         [ReadOnly(true)]
         [Category("元器件参数")]
@@ -34,7 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetModel(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -47,7 +48,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetFrameSpecification(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -60,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetPolesNum(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -73,7 +74,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetRatedCurrent(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -86,7 +87,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCombination(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -99,17 +100,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCodeLevel(value);
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
-        }
-
-        private void OnPropertiesChanged()
-        {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(CodeLevel));
-            OnPropertyChanged(nameof(Combination));
-            OnPropertyChanged(nameof(FrameSpecification));
         }
 
         [ReadOnly(true)]

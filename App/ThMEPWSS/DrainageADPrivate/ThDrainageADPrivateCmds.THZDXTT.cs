@@ -24,6 +24,7 @@ using ThMEPWSS.Common;
 using ThMEPWSS.DrainageADPrivate.Data;
 using ThMEPWSS.DrainageADPrivate.Cmd;
 using ThMEPWSS.DrainageADPrivate.Model;
+using ThMEPWSS.DrainageADPrivate.Service;
 using ThMEPWSS.DrainageADPrivate;
 
 namespace ThMEPWSS
@@ -83,14 +84,9 @@ namespace ThMEPWSS
                     return;
                 }
 
-                var selectPtsAD = ThSelectFrameUtil.SelectFramePointCollection("框选轴侧", "框选轴侧");
-                if (selectPtsAD.Count == 0)
-                {
-                    return;
-                }
+
                 var selectPts = new Point3dCollection();
                 selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
-                selectPtsAD.Cast<Point3d>().ForEach(x => selectPts.Add(x));
 
                 var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
 
@@ -111,35 +107,41 @@ namespace ThMEPWSS
                 {
                     Transformer = transformer,
                     BlockNameDict = BlockNameDict,
-                    BlockNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve },
-                    BlockNameTchValve = ThDrainageADCommon.BlkName_TchValve,
+                    BlockNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
+                                                        ThDrainageADCommon.BlkName_ShutoffValve,  ThDrainageADCommon.BlkName_GateValve,
+                                                        ThDrainageADCommon.BlkName_CheckValve,ThDrainageADCommon.BlkName_AntifoulingCutoffValve,
+                                                        ThDrainageADCommon.BlkName_Casing,
+                                                      },
 
+                    BlockNameTchValve = new List<string> { ThDrainageADCommon.BlkName_ShutoffValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_GateValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_CheckValve_TchTag.ToUpper(), ThDrainageADCommon.BlkName_AntifoulingCutoffValve_TchTag.ToUpper(),
+                                                        ThDrainageADCommon.BlkName_OpeningSign_TchTag.ToUpper(),ThDrainageADCommon .BlkName_WaterMeteValve_TchTag.ToUpper(),
+                                                        },
                 };
 
                 dataFactory.GetElements(acadDatabase.Database, selectPts);
 
-                var dataQuery = new ThDrainageADDataQueryService()
+                var dataQuery = new ThDrainageADDataProcessService()
                 {
                     BlockNameDict = BlockNameDict,
                     VerticalPipeData = dataFactory.VerticalPipe,
                     HorizontalPipe = dataFactory.TCHPipe,
                     SelectPtsTopView = selectPtsTop,
-                    SelectPtsAD = selectPtsAD,
+                    //SelectPtsAD = selectPtsAD,
                     SanitaryTerminal = dataFactory.SanitaryTerminal,
-                    AngleValveWaterHeater = dataFactory.AngleValveWaterHeater,
+                    ValveWaterHeater = dataFactory.ValveWaterHeater,
                     TchValve = dataFactory.TchValve,
-                    StartPt = dataFactory.StartPt,
+                    TchOpeningSign = dataFactory.TchOpeningSign,
+                    OpeningSign = dataFactory.OpeningSign,
                 };
 
                 //dataQuery.Transform(transformer);
                 dataQuery.SaperateTopViewAD();
                 dataQuery.CreateVerticalPipe();
                 dataQuery.BuildTermianlMode();
+                dataQuery.BuildValve();
                 dataQuery.Print();
                 //dataQuery.Reset(transformer);
-
-
-
 
             }
         }
@@ -151,62 +153,78 @@ namespace ThMEPWSS
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var selectFrame = ThSelectFrameUtil.SelectFramePL("框选俯视", "框选俯视");
+                if (selectFrame.Area < 100)
+                {
+                    return;
+                }
 
-                var linex = new Line(new Point3d(1000, 1000, 3000), new Point3d(3000, 1000, 3000));
-                var liney = new Line(new Point3d(1000, 1000, 3000), new Point3d(1000, 3000, 3000));
-                var linez = new Line(new Point3d(1000, 1000, 3000), new Point3d(1000, 1000, 0));
+                var selectPtPrint = ThSelectFrameUtil.SelectPoint("轴侧起点");
+                if (selectPtPrint == Point3d.Origin)
+                {
+                    return;
+                }
 
-                DrawUtils.ShowGeometry(linex, "l0test", 1);
-                DrawUtils.ShowGeometry(liney, "l0test", 3);
-                DrawUtils.ShowGeometry(linez, "l0test", 5);
+                var pipes = GetLines(selectFrame, acadDatabase, "W-WSUP-COOL-PIPE");
 
-                var linex2 = linex.Clone() as Line;
-                var liney2 = liney.Clone() as Line;
-                var linez2 = linez.Clone() as Line;
+                var pipe = pipes.OfType<Line>().ToList();
 
-                //var matrix = Matrix3d.Rotation(Math.PI / 2, -Vector3d.XAxis, new Point3d(0, 0, 0)) *
-                //             Matrix3d.Rotation(Math.PI / 4, Vector3d.ZAxis, new Point3d(0, 0, 0)) *
-                //             Matrix3d.Displacement(new Vector3d(5000, 0, 0));
+                var engine = new ThTransformTopToADService();
+                var pipeNew = new List<Line>();
+                foreach (var p in pipe)
+                {
+                    var st = p.StartPoint;
+                    var ed = p.EndPoint;
+                    var stN = engine.TransformPt(st);
+                    var edN = engine.TransformPt(ed);
+                    var newL = new Line(stN, edN);
+                    pipeNew.Add(newL);
 
+                }
 
-                //var matrix = Matrix3d.Rotation(Math.PI / 2, -Vector3d.XAxis, new Point3d(0, 0, 0)) *
-                //Matrix3d.Rotation(Math.PI / 4, Vector3d.ZAxis, new Point3d(0, 0, 0));
-
-                var plane = new Plane(new Point3d(0, 0, 0), new Vector3d(0, 0, 1));
-
-                var rotationMatrix = Matrix3d.Rotation(Math.PI / 4, -Vector3d.XAxis, new Point3d(0, 0, 0));
-
-                var shearMatrix = new Matrix3d(new double[] {
-                                        1, 0.5, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0.0, 0.0, 0.0, 1.0
-                                    });
-
-                var matrix = shearMatrix;
-
+                var moveDir = selectPtPrint - pipeNew.First().StartPoint;
+                var moveTrans = Matrix3d.Displacement(moveDir);
+                pipeNew.ForEach(x => x.TransformBy(moveTrans));
 
 
-
-
-                linex2.TransformBy(matrix);
-                liney2.TransformBy(matrix);
-                linez2.TransformBy(matrix);
-
-
-                linex2 = linex2.GetOrthoProjectedCurve(plane) as Line;
-                liney2 = liney2.GetOrthoProjectedCurve(plane) as Line;
-                linez2 = linez2.GetOrthoProjectedCurve(plane) as Line;
-
-                DrawUtils.ShowGeometry(linex2, "l1test", 1);
-                DrawUtils.ShowGeometry(liney2, "l1test", 3);
-                DrawUtils.ShowGeometry(linez2, "l1test", 5);
+                DrawUtils.ShowGeometry(pipeNew, "l0transLine", 30);
 
             }
         }
 
+        private static List<Curve> GetLines(Polyline polyline, AcadDatabase acdb, string layer)
+        {
+            var objs = new DBObjectCollection();
+            var laneLines = acdb.ModelSpace
+                .OfType<Curve>()
+                .Where(o => o.Layer == layer);
 
+            List<Curve> laneList = laneLines.Select(x => x.WashClone()).ToList();
 
+            laneList = laneList.Where(x => x != null).ToList();
+            laneList.ForEach(x => objs.Add(x));
+
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+
+            //return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+            return sprayLines;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThLoadBlkTemplate", CommandFlags.Modal)]
+        public void ThLoadBlkTemplate()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var blkNameList = new List<string> { "热水器标注" };
+                var layerNameList = new List<string> { "" };
+
+                ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameList, layerNameList);
+            }
+        }
 
     }
 }

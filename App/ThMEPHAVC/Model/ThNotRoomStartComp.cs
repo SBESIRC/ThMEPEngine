@@ -7,17 +7,18 @@ namespace ThMEPHVAC.Model
 {
     public class ThNotRoomStartComp
     {
-        public static void DrawEndLineEndComp(ref List<SegInfo> fanDucts, Point3d startPoint, PortParam portParam, ThDuctPortsDrawService service)
+        public static void DrawEndLineEndComp(ref List<SegInfo> fanDucts, Point3d startPoint, PortParam portParam)
         {
             var rootDuct = SearchRootDuct(fanDucts);
             var insertP = rootDuct.l.EndPoint;
             var tor = new Tolerance(1.5, 1.5);
             var endP = ThMEPHVACService.GetOtherPoint(rootDuct.l, insertP, tor);
             var dirVec = (insertP - endP).GetNormal();
-            InsertComp(rootDuct, dirVec, startPoint, insertP, portParam, service);
+            InsertComp(rootDuct, dirVec, startPoint, insertP, portParam);
         }
-        public static void InsertComp(SegInfo shadowRootDuct, Vector3d dirVec, Point3d startPoint, Point3d insertP, PortParam portParam, ThDuctPortsDrawService service)
+        public static void InsertComp(SegInfo shadowRootDuct, Vector3d dirVec, Point3d startPoint, Point3d insertP, PortParam portParam)
         {
+            var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             var rootDuct = new SegInfo(shadowRootDuct);
             var mat = Matrix3d.Displacement(startPoint.GetAsVector());
             var roAngle = dirVec.GetAngleTo(-Vector3d.YAxis);

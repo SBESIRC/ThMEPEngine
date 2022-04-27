@@ -221,9 +221,12 @@
     <Compile Include="IO\ExcelService\NPOIExcelBase.cs" />
     <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
+    <Compile Include="IO\SVG\ThFloorInfo.cs" />
+    <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
     <Compile Include="IO\SVG\ThSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
+    <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
@@ -695,9 +698,9 @@
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-      <Name>DotNetARX</Name>
+      <Name>ThDotNetARX</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThAnalytics\ThMEPAnalytics.csproj">
       <Project>{edf8eb87-5032-47ef-a922-23760bda3d42}</Project>
@@ -764,11 +767,20 @@
     </When>
   </Choose>
   <ItemGroup>
+    <PackageReference Include="EPPlus">
+      <Version>5.8.8</Version>
+    </PackageReference>
     <PackageReference Include="NetTopologySuite" Version="2.4.0" />
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>9.0.1</Version>
+    </PackageReference>
     <PackageReference Include="NPOI">
       <Version>2.5.5</Version>
+    </PackageReference>
+    <PackageReference Include="Svg">
+      <Version>3.4.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

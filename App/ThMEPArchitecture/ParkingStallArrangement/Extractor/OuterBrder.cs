@@ -680,6 +680,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return dbObjs;
         }
+        public static DBObjectCollection ExplodeBlocks(this List<BlockReference> blocks)
+        {
+            var dbObjs = new DBObjectCollection();
+            foreach (BlockReference block in blocks)
+            {
+                block.Explode(dbObjs);
+            }
+            return dbObjs;
+        }
+
         public static void MarkBlock(this BlockReference block,double scaleValue = 1.1, string LayerName = "AI-提示")
         {
             using (AcadDatabase acad = AcadDatabase.Active())

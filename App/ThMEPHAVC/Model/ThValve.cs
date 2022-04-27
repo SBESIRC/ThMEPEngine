@@ -108,6 +108,7 @@ namespace ThMEPHVAC.Model
         public double RotationAngle { get; set; }
         public string FanScenario { get; set; }
         public double DuctWidth { get; set; }
+        public double DuctHeight { get; set; }
         public double ValveToFanSpacing { get; set; }
         public Point3d GroupInsertPoint { get; set; }
     }
@@ -244,7 +245,7 @@ namespace ThMEPHVAC.Model
         {
             return new ThValve()
             {
-                Length = 200,
+                Length = Parameters.DuctHeight + 100,
                 Width = Parameters.DuctWidth + 100,
                 RotationAngle = Parameters.RotationAngle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,

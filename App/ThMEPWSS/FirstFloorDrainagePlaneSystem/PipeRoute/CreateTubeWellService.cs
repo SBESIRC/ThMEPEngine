@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
@@ -14,15 +15,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     public class CreateTubeWellService
     {
         double routeDis = 1500;
-        ParamSettingViewModel paramSetting;
+        double shortedDis = 400;
         List<RouteModel> routes;
-        public CreateTubeWellService(List<RouteModel> _routes, ParamSettingViewModel _paramSetting)
+        public CreateTubeWellService(List<RouteModel> _routes)
         {
             routes = _routes;
-            paramSetting = _paramSetting;
         }
 
-        public void Layout()
+        public List<RouteModel> Layout()
         {
             var usefulRoutes = routes.Where(x => x.connecLine != null).ToList();
             var routeDic = GroupRoutes(usefulRoutes);
@@ -30,8 +30,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var tubeWellPts = new List<Point3d>();
             foreach (var routeLst in resLst)
             {
-                tubeWellPts.Add(CalTubeWellPt(routes));
+                tubeWellPts.Add(CalTubeWellPt(usefulRoutes));
             }
+            Print(tubeWellPts);
+            usefulRoutes.ForEach(x => GeometryUtils.ShortenPolyline(x.route, shortedDis));
+
+            return usefulRoutes;
         }
 
         /// <summary>
@@ -41,8 +45,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <returns></returns>
         private Point3d CalTubeWellPt(List<RouteModel> routes)
         {
-            var routeEndPts = routes.Select(x => x.route.StartPoint.DistanceTo(x.startPosition) > x.route.EndPoint.DistanceTo(x.startPosition) ? x.route.StartPoint : x.route.EndPoint)
-                .ToList(); ;
+            var routeEndPts = routes.Select(x => {
+                if (x.route.StartPoint.DistanceTo(x.startPosition) > x.route.EndPoint.DistanceTo(x.startPosition))
+                    x.route.ReverseCurve();
+                return x.route.EndPoint;
+            }).ToList();
             if (routeEndPts.Count == 1)
             {
                 return routeEndPts.First();
@@ -140,6 +147,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             return routeDic;
+        }
+
+        /// <summary>
+        /// 打印管井
+        /// </summary>
+        /// <param name="layoutPts"></param>
+        private void Print(List<Point3d> layoutPts)
+        {
+            var layoutInfos = layoutPts.Select(x => new KeyValuePair<Point3d, Vector3d>(x, Vector3d.YAxis)).ToList();
+            InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
         }
     }
 }

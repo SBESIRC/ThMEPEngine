@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Collections.Generic;
 using System.Windows.Controls.Primitives;
+using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 using HandyControl.Controls;
 
@@ -18,15 +20,16 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private List<double> GetItemsSource(PropertyItem propertyItem)
         {
-            var model = propertyItem.Value as ThPDSConductorModel;
-            if (model != null)
+            if (propertyItem.Value is ThPDSConductorModel conductor)
             {
-                return model.AlternativeConductorCrossSectionalAreas;
+                switch (conductor.ComponentType)
+                {
+                    case ComponentType.Conductor:
+                    case ComponentType.ControlConductor:
+                        return conductor.AlternativeConductorCrossSectionalAreas;
+                }
             }
-            else
-            {
-                return new List<double> { model.ConductorCrossSectionalArea };
-            }
+            throw new NotSupportedException();
         }
     }
 }

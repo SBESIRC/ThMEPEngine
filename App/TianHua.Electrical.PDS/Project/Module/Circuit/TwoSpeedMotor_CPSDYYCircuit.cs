@@ -33,5 +33,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         /// 坑位4: 高速导体
         /// </summary>
         public Conductor conductor2 { get; set; }
+
+        /// <summary>
+        /// 坑位5：接触器
+        /// </summary>
+        public Contactor contactor { get; set; }
     }
 }

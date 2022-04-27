@@ -7,6 +7,8 @@ using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using ThMEPEngineCore.Diagnostics;
 
+using ThMEPWSS.DrainageSystemDiagram.Model;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDShutValveEngine
@@ -40,10 +42,10 @@ namespace ThMEPWSS.DrainageSystemDiagram
             Point3d pt = node.Node + moveLength * dir;
 
             var valve = new ThDrainageSDADBlkOutput(pt);
-            valve.dir = dir;
-            valve.name = ThDrainageSDCommon.Blk_ShutValves;
-            valve.blkSize = ThDrainageSDCommon.Blk_size_ShutValves;
-            valve.scale = ThDrainageSDCommon.Blk_scale_ShutValves;
+            valve.Dir = dir;
+            valve.Name = ThDrainageSDCommon.Blk_ShutValves;
+            valve.BlkSize = ThDrainageSDCommon.Blk_size_ShutValves;
+            valve.Scale = ThDrainageSDCommon.Blk_scale_ShutValves;
 
             return valve;
         }
@@ -273,15 +275,15 @@ namespace ThMEPWSS.DrainageSystemDiagram
             {
                 foreach (var valve in valveList)
                 {
-                    var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.position, tol)).ToList();
+                    var line = pipes.Where(x => x.ToCurve3d().IsOn(valve.Position, tol)).ToList();
                     if (line.Count > 0)
                     {
                         var l = line.First();
-                        var dir = valve.dir;
-                        double scale = valve.scale;
-                        double blkSize = valve.blkSize;
-                        var blkS = valve.position - dir * scale * blkSize / 2;
-                        var blkE = valve.position + dir * scale * blkSize / 2;
+                        var dir = valve.Dir;
+                        double scale = valve.Scale;
+                        double blkSize = valve.BlkSize;
+                        var blkS = valve.Position - dir * scale * blkSize / 2;
+                        var blkE = valve.Position + dir * scale * blkSize / 2;
                         var newE = l.StartPoint.DistanceTo(blkS) < l.StartPoint.DistanceTo(blkE) ? blkS : blkE;
                         var newE2 = blkS == newE ? blkE : blkS;
 

@@ -19,5 +19,7 @@ namespace ThMEPWSS.DrainageADPrivate.Model
         public string Name { get; set; }
         public ThDrainageADCommon.TerminalType Type { get; set; }
 
+        public Vector3d Dir { get; set; }
+
     }
 }

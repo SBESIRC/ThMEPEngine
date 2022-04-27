@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Diagnostics;
 
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDVirtualPtEngine

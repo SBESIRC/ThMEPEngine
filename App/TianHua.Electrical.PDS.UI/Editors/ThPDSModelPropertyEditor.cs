@@ -24,25 +24,25 @@ namespace TianHua.Electrical.PDS.UI.Editors
 
         private IEnumerable GetItemsSource(PropertyItem propertyItem)
         {
-            if (propertyItem.Value is ThPDSContactorModel)
+            if (propertyItem.Value is ThPDSContactorModel contactor)
             {
-                return ContactorConfiguration.contactorInfos.Select(o => o.Model).Distinct();
+                return contactor.AlternativeModels;
             }
-            if (propertyItem.Value is ThPDSIsolatingSwitchModel)
+            if (propertyItem.Value is ThPDSIsolatingSwitchModel isolatingSwitch)
             {
-                return IsolatorConfiguration.isolatorInfos.Select(o => o.Model).Distinct();
+                return isolatingSwitch.AlternativeModels;
             }
-            if (propertyItem.Value is ThPDSThermalRelayModel)
+            if (propertyItem.Value is ThPDSThermalRelayModel thermalRelay)
             {
-                return ThermalRelayConfiguration.thermalRelayInfos.Select(o => o.Model).Distinct();
+                return thermalRelay.AlternativeModels;
             }
-            if (propertyItem.Value is ThPDSATSEModel)
+            if (propertyItem.Value is ThPDSATSEModel atse)
             {
-                return ATSEConfiguration.ATSEComponentInfos.Select(o => o.Model).Distinct();
+                return atse.AlternativeModels;
             }
-            if (propertyItem.Value is ThPDSMTSEModel)
+            if (propertyItem.Value is ThPDSMTSEModel mtse)
             {
-                return MTSEConfiguration.MTSEComponentInfos.Select(o => o.Model).Distinct();
+                return mtse.AlternativeModels;
             }
             if (propertyItem.Value is ThPDSCPSModel cps)
             {

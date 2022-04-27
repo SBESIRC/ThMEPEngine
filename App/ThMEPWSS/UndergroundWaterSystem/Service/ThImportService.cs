@@ -21,34 +21,29 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 using (AcadDatabase Db = AcadDatabase.Open(file, DwgOpenMode.ReadOnly, false))
                 {
                     //导入图块
-                    List<string> blockNames = new() { "皮带水嘴系统" };
+                    List<string> blockNames = new() { "皮带水嘴系统", "断线" };
                     foreach (var brname in blockNames)
                     {
                         if (!adb.Blocks.Contains(brname)) adb.Blocks.Import(Db.Blocks.ElementOrDefault(brname));
                     }
                     //导入不存在的图层并确认图层unlocked
-                    //List<string> layerNames = new() {  };
-                    //List<short> layerColorIndex = new() {  };
-                    //for (int i = 0; i < layerNames.Count; i++)
-                    //{
-                    //    if (!adb.Layers.Contains(layerNames[i]))
-                    //    {
-                    //        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames[i], layerColorIndex[i]);
-                    //    }
-                    //    else
-                    //    {
-                    //        try
-                    //        {
-                    //            DbHelper.EnsureLayerOn(layerNames[i]);
-                    //        }
-                    //        catch { }
-                    //    }
-                    //}
-                    //try
-                    //{
-                    //    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, "AI-辅助", 255);
-                    //}
-                    //catch { }
+                    List<string> layerNames = new() { "W-NOTE", "W-WSUP-EQPM", "W-WSUP-DIMS", "AI-辅助" };
+                    List<short> layerColorIndex = new() { 9, 0, 0, 30 };
+                    for (int i = 0; i < layerNames.Count; i++)
+                    {
+                        if (!adb.Layers.Contains(layerNames[i]))
+                        {
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames[i], layerColorIndex[i]);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                DbHelper.EnsureLayerOn(layerNames[i]);
+                            }
+                            catch { }
+                        }
+                    }
                 }
             }
         }

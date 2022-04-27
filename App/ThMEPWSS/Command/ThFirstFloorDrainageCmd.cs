@@ -13,6 +13,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute;
@@ -26,11 +27,12 @@ namespace ThMEPWSS.Command
     {
         Dictionary<string, List<string>> config;
         ParamSettingViewModel paramSetting = null;
-
-        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting)
+        FirstFloorPlaneViewModel firstFloorPlane = null;
+        public ThFirstFloorDrainageCmd(Dictionary<string, List<string>> dic, ParamSettingViewModel _paramSetting, FirstFloorPlaneViewModel _firstFloorPlane)
         {
             config = dic;
             paramSetting = _paramSetting;
+            firstFloorPlane = _firstFloorPlane;
         }
 
         public void Execute()
@@ -67,22 +69,32 @@ namespace ThMEPWSS.Command
 
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
-                    //处理冷凝水管
+
+                    //进行路由倒角
+                    ChamferService chamferService = new ChamferService(routes);
+                    routes = chamferService.Chamfer();
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        //处理冷凝水管
                         HandlePipes(routes);
-                        //foreach (var item in holeWalls)
-                        //{
-                        //    originTransformer.Reset(item);
-                        //    acad.ModelSpace.Add(item);
-                        //}
+
+                        //标注管径
+                        PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes);
+                        pipeDiameterMarkingService.CreateDim();
+
+                        //套管标注
+                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane);
+                        drivepipeDimensionService.CreateDim();
+
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
                         PrintPipes.Print(otherPipes);
                     }
                 }
             }
         }
+
+        //private void Layout
 
         /// <summary>
         /// 冷凝水管间接排水

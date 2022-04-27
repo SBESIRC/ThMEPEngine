@@ -55,7 +55,9 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 // 得到的是标准的构件
                 var edgeComponents = GetEdgeComponents();
+                // 绘制配筋表
                 Draw(edgeComponents.Select(o => o.Item2).ToList(), basePt);
+                // 绘制轮廓、标注
                 Draw(edgeComponents.Select(o => o.Item1).ToList());
             }
         }
@@ -82,10 +84,20 @@ namespace ThMEPStructure.Reinforcement.Command
                     extents, elevation, drawScale, tblRowHeight);
                 var results = tblBuilder.Build(edgeComponents);
 
-                var mt1 = Active.Editor.WCS2UCS(); // 旋转
-                var mt2 = Matrix3d.Displacement(basePt - Point3d.Origin); // 偏移
-                var mt = mt1.PreMultiplyBy(mt2);
-                results.OfType<Entity>().ForEach(e => e.TransformBy(mt));
+                // 移动位置
+                var ucs2Wcs = Active.Editor.UCS2WCS();
+                var wcs2Ucs = Active.Editor.WCS2UCS();
+
+                // 把绘制的物体从框左上方移下来
+                var mt1 = Matrix3d.Displacement(new Vector3d(0, -1 * extents.MaxPoint.Y, 0));
+                results.OfType<Entity>().ForEach(e => e.TransformBy(mt1));
+                // 偏移
+                var newBasePt = basePt.TransformBy(wcs2Ucs);
+                var mt2 = Matrix3d.Displacement(newBasePt - Point3d.Origin);
+                results.OfType<Entity>().ForEach(e => e.TransformBy(mt2));
+
+                // 旋转                
+                results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2Wcs));
                 results.OfType<Entity>().ForEach(e=>
                 {
                     acadDb.ModelSpace.Add(e);
@@ -156,52 +168,57 @@ namespace ThMEPStructure.Reinforcement.Command
             {
                 return results;
             }
-            var mt = Active.Editor.WCS2UCS();
+            var wcs2Ucs = Active.Editor.WCS2UCS();
+            var ucs2wcs = Active.Editor.UCS2WCS();
             switch (ThEdgeComponentDrawConfig.Instance.MarkPosition)
             {
                 case "右上":
                     var markPt1 = vertices
                         .OfType<Point3d>()
-                        .Select(o=>o.TransformBy(mt))
+                        .Select(o=>o.TransformBy(wcs2Ucs))
                         .OrderByDescending(o => o.X)
                         .ThenByDescending(o => o.Y)
-                        .First();
-                    var mt1 = Matrix3d.Displacement(markPt1 - Point3d.Origin);
+                        .First();                    
                     results = Mark(number, Point3d.Origin, new Vector3d(1, 1, 0), new Vector3d(1, 0, 0));
-                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt.PreMultiplyBy(mt1)));
+                    var mt1 = Matrix3d.Displacement(markPt1 - Point3d.Origin);
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt1));
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2wcs));
                     break;
                 case "右下":
                     var markPt2 = vertices
                         .OfType<Point3d>()
-                        .Select(o => o.TransformBy(mt))
+                        .Select(o => o.TransformBy(wcs2Ucs))
                         .OrderByDescending(o => o.X)
                         .ThenBy(o => o.Y)
                         .First();
-                    var mt2 = Matrix3d.Displacement(markPt2 - Point3d.Origin);
                     results = Mark(number, Point3d.Origin, new Vector3d(1, -1, 0), new Vector3d(1, 0, 0));
-                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt.PreMultiplyBy(mt2)));
+                    var mt2 = Matrix3d.Displacement(markPt2 - Point3d.Origin);
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt2));
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2wcs));
                     break;
                 case "左上":
                     var markPt3 = vertices
                         .OfType<Point3d>()
-                        .Select(o => o.TransformBy(mt))
+                        .Select(o => o.TransformBy(wcs2Ucs))
                         .OrderBy(o => o.X)
                         .ThenByDescending(o => o.Y)
-                        .First();
-                    var mt3 = Matrix3d.Displacement(markPt3 - Point3d.Origin);
+                        .First();                    
                     results = Mark(number, Point3d.Origin, new Vector3d(-1, 1, 0), new Vector3d(-1, 0, 0));
-                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt.PreMultiplyBy(mt3)));
+                    var mt3 = Matrix3d.Displacement(markPt3 - Point3d.Origin);
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt3));
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2wcs));
                     break;
                 case "左下":
                     var markPt4 = vertices
                        .OfType<Point3d>()
-                       .Select(o => o.TransformBy(mt))
+                       .Select(o => o.TransformBy(wcs2Ucs))
                        .OrderBy(o => o.X)
                        .ThenBy(o => o.Y)
                        .First();
-                    var mt4 = Matrix3d.Displacement(markPt4 - Point3d.Origin);
                     results = Mark(number, Point3d.Origin, new Vector3d(-1, -1, 0), new Vector3d(-1, 0, 0));
-                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt.PreMultiplyBy(mt4)));
+                    var mt4 = Matrix3d.Displacement(markPt4 - Point3d.Origin);
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(mt4));
+                    results.OfType<Entity>().ForEach(e => e.TransformBy(ucs2wcs));
                     break;
                 default:
                     break;
@@ -279,27 +296,28 @@ namespace ThMEPStructure.Reinforcement.Command
                 ExtractInfos.Where(o => o.IsStandard).ForEach(o =>
                 {
                     var bwOrHc2 = GetBwOrHc2(o);
-                    if(bwOrHc2.HasValue)
+                    var specDict = GetSpecDict(o);
+                    if (bwOrHc2.HasValue && specDict.Count>0)
                     {
                         if (o.ComponentType == ComponentType.YBZ)
                         {
-                            var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, o.StirrupRatio,
+                            var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, specDict, o.StirrupRatio,
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade,
                                 ThWallColumnReinforceConfig.Instance.ConcreteStrengthGrade);
                             if(edgeComponent!=null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o);
+                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
                                 results.Add(Tuple.Create(o,edgeComponent));
                             }                            
                         }
                         else if (o.ComponentType == ComponentType.GBZ)
                         {
-                            var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value,
+                            var edgeComponent = query.Query(o.ShapeCode, bwOrHc2.Value, specDict,
                                 ThWallColumnReinforceConfig.Instance.WallLocation,
                                 ThWallColumnReinforceConfig.Instance.AntiSeismicGrade);
                             if (edgeComponent != null)
                             {
-                                SetValueToEdgeComponent(edgeComponent, o);
+                                SetValueToEdgeComponent(edgeComponent, o, query.IsFind);
                                 results.Add(Tuple.Create(o, edgeComponent));
                             }                            
                         }
@@ -309,9 +327,10 @@ namespace ThMEPStructure.Reinforcement.Command
             }            
         }
         private void SetValueToEdgeComponent(ThEdgeComponent edgeComponent,
-            EdgeComponentExtractInfo info)
+            EdgeComponentExtractInfo info,bool isFind)
         {
-            if(edgeComponent ==null || info == null)
+            // isFind 根据Cad计算书中的箍筋体积配箍率，在内置表中确实找到符合条件的列
+            if (edgeComponent ==null || info == null)
             {
                 return;
             }
@@ -357,11 +376,41 @@ namespace ThMEPStructure.Reinforcement.Command
             edgeComponent.StirrupLineWeight = ThWallColumnReinforceConfig.Instance.StirrupLineWeight;
             if(info.IsCalculation)
             {
+                // 放大纵筋
                 edgeComponent.EnhancedReinforce = GetEnhancedReinforce(
                     edgeComponent.Reinforce, info.AllReinforceArea);
+                // 放大箍筋
+                if(!isFind)
+                {
+                    GetEnhancedStirrupAndLinks(edgeComponent, info.StirrupRatio);
+                }
             }            
         }
         
+        private void GetEnhancedStirrupAndLinks(ThEdgeComponent edgeComponent,double stirrupRatio)
+        {
+            ThEdgeComponentStirrupEnhanceService enhanceService = null;
+            if(edgeComponent is ThRectangleEdgeComponent rectEdgeComponent)
+            {
+                enhanceService = new ThRectEdgeComponentStirrupEnhanceService(
+                    rectEdgeComponent, stirrupRatio);
+            }
+            else if(edgeComponent is ThLTypeEdgeComponent lTypeEdgeComponent)
+            {
+                enhanceService = new ThLTypeEdgeComponentStirrupEnhanceService(
+                    lTypeEdgeComponent, stirrupRatio);
+            }
+            else if(edgeComponent is ThTTypeEdgeComponent tTypeEdgeComponent)
+            {
+                enhanceService = new ThTTypeEdgeComponentStirrupEnhanceService(
+                    tTypeEdgeComponent, stirrupRatio);
+            }
+            if(enhanceService!=null)
+            {
+                enhanceService.Enhance();
+            }
+        }
+
         private string GetEnhancedReinforce(string reinforce,double calculationReinforceArea)
         {
             var enhance = new ThReinforceEnhanceService(reinforce, calculationReinforceArea);
@@ -371,7 +420,7 @@ namespace ThMEPStructure.Reinforcement.Command
 
         private int? GetBwOrHc2(EdgeComponentExtractInfo info)
         {
-            int? bwOrHc2 = null;
+            int? bwOrHc2 = null;           
             if (info.ShapeCode == ShapeCode.Rect)
             {
                 bwOrHc2 = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
@@ -391,6 +440,36 @@ namespace ThMEPStructure.Reinforcement.Command
                 }
             }
             return bwOrHc2;
+        }
+        private Dictionary<string, int> GetSpecDict(EdgeComponentExtractInfo info)
+        {
+            var specDict = new Dictionary<string, int>();
+            if (info.ShapeCode == ShapeCode.Rect)
+            {
+                var hcValue = info.QuerySpec(ThHuaRunSecAnalysisService.HcKword);
+                if(hcValue.HasValue)
+                {
+                    specDict.Add(ThHuaRunSecAnalysisService.HcKword, hcValue.Value);
+                }
+                return specDict;
+            }
+            else if (info.ShapeCode == ShapeCode.L || info.ShapeCode == ShapeCode.T)
+            {
+                var bwValue = info.QuerySpec(ThHuaRunSecAnalysisService.BwKword);
+                var bfValue = info.QuerySpec(ThHuaRunSecAnalysisService.BfKword);
+                var hc1Value = info.QuerySpec(ThHuaRunSecAnalysisService.Hc1Kword);
+                if(bwValue.HasValue && bfValue.HasValue && hc1Value.HasValue)
+                {
+                    specDict.Add(ThHuaRunSecAnalysisService.BwKword, bwValue.Value);
+                    specDict.Add(ThHuaRunSecAnalysisService.BfKword, bfValue.Value);
+                    specDict.Add(ThHuaRunSecAnalysisService.Hc1Kword, hc1Value.Value);
+                }
+                return specDict;
+            }
+            else
+            {
+                return specDict;
+            }
         }
         private void Import()
         {

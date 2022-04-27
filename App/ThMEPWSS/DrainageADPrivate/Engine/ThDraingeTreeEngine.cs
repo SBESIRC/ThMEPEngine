@@ -29,14 +29,21 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 {
     internal class ThDraingeTreeEngine
     {
-        private ThDrainageADPDataPass DataPass { get; set; }
+        private List<ThSaniterayTerminal> Terminal { get; set; }
+        private List<ThValve> AngleValve { get; set; }
+        private Dictionary<Point3d, List<Line>> PtDict { get; set; }
+        private Dictionary<Point3d, bool> PtCoolHotDict { get; set; }
         public Dictionary<Point3d, ThSaniterayTerminal> PtTerminal { get; set; }
         public Dictionary<Point3d, Point3d> TerminalPairDict { get; set; }
         public List<ThDrainageTreeNode> OriRootList { get; set; }
         public List<ThDrainageTreeNode> MergedRootList { get; set; }
-        public ThDraingeTreeEngine(ThDrainageADPDataPass dataPass)
+        public ThDraingeTreeEngine(ThDrainageADPDataPass dataPass, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Point3d, bool> ptCoolHotDict)
         {
-            this.DataPass = dataPass;
+            Terminal = dataPass.Terminal;
+            AngleValve = dataPass.AngleValve;
+            PtDict = ptDict;
+            PtCoolHotDict = ptCoolHotDict;
+
             PtTerminal = new Dictionary<Point3d, ThSaniterayTerminal>();
             TerminalPairDict = new Dictionary<Point3d, Point3d>();
             OriRootList = new List<ThDrainageTreeNode>();
@@ -45,58 +52,65 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         public void BuildDraingeTree()
         {
-            //找管线点位对应的线
-            var pipes = new List<Line>();
-            pipes.AddRange(DataPass.CoolPipeTopView);
-            pipes.AddRange(DataPass.HotPipeTopView);
-            pipes.AddRange(DataPass.VerticalPipe);
-            var ptDict = ThDrainageADTreeService.GetPtDict(pipes);
+            ////找管线点位对应的线
+            //var pipes = new List<Line>();
+            //pipes.AddRange(DataPass.CoolPipeTopView);
+            //pipes.AddRange(DataPass.HotPipeTopView);
+            //pipes.AddRange(DataPass.VerticalPipe);
+            //var ptDict = ThDrainageADTreeService.GetPtDict(pipes);
 
-            //找管线对应末端和可能的起点
-            DataPass.Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
-            ThDrainageADTreeService.GetEndTerminal(ptDict, DataPass.Terminal, out var ptTerminalTemp, out var ptStart);
+            //找管线对应末端洁具和可能的起点
+            Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
+            ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
             this.PtTerminal = ptTerminalTemp;
-            //确定末端点位组
+            //利用给水角阀方向给末端洁具方向
+            SetTerminalDir();
+
+            //确定冷热水末端点位组
             this.TerminalPairDict = ThDrainageADTreeService.GetTerminalPairDict(PtTerminal);
             //确定冷热水起点
-            var ptCoolHotStartDict = ThDrainageADTreeService.CheckCoolHotStartPt(ptStart, PtTerminal, ptDict, DataPass);
+            var ptCoolHotStartDict = ThDrainageADTreeService.CheckCoolHotStartPt(ptStart, PtTerminal, PtCoolHotDict);
 
             //造原始树:所有的冷水起点，多热水器每个热水器一个热水起点
             OriRootList = new List<ThDrainageTreeNode>();
             foreach (var startPt in ptCoolHotStartDict)
             {
-                var root = ThDrainageADTreeService.BuildTree(startPt.Key, ptDict);
+                var root = ThDrainageADTreeService.BuildTree(startPt.Key, PtDict);
                 OriRootList.Add(root);
             }
 
-            //对应冷热
+            //设置节点冷热属性
             ThDrainageADTreeService.SetCoolHot(OriRootList, ptCoolHotStartDict);
-            //洁具
+            //设置节点洁具
             ThDrainageADTreeService.SetTerminal(OriRootList, PtTerminal);
 
             //复制多情况冷热树
             MergedRootList = ThDrainageADTreeService.MergeCoolHotTree(OriRootList);
 
             //冷热成对洁具
-            ThDrainageADTreeService.SetTerminalPair(MergedRootList, TerminalPairDict);
-
-            MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
-            {
-                if (l.Terminal != null)
-                {
-                    DrawUtils.ShowGeometry(l.Node, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
-                }
-                if (l.TerminalPair != null)
-                {
-                    DrawUtils.ShowGeometry(new Line(l.Node, l.TerminalPair.Node), "l0leafterminalPair", 3);
-                }
-            });
-
-            MergedRootList.ForEach(x => ThDrainageADTreeService.PrintTree(x, String.Format("l0tree{0}", MergedRootList.IndexOf(x))));
+            ThDrainageADTreeService.SetTerminalPairSingleTree(MergedRootList, TerminalPairDict);
 
         }
 
-
+        private void SetTerminalDir()
+        {
+            var tol = new Tolerance(1, 1);
+            for (int i = 0; i < PtTerminal.Count(); i++)
+            {
+                var item = PtTerminal.ElementAt(i);
+                if (item.Value.Dir != default(Vector3d))
+                {
+                    //冷热水同时有的已经做过一次的跳过
+                    continue;
+                }
+                var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
+                var angleValve = AngleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+                if (angleValve != null)
+                {
+                    item.Value.Dir = angleValve.Dir;
+                }
+            }
+        }
 
     }
 }

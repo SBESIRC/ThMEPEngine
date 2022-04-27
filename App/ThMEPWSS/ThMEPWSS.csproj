@@ -43,32 +43,44 @@
     <Compile Include="DrainageADPrivate\Data\ThTCHValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThCalculateDimEngine.cs" />
+    <Compile Include="DrainageADPrivate\Engine\ThDrainageTransformEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDraingeTreeEngine.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageADSetting.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThDrainageBlkOutput.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageTreeNode.cs" />
+    <Compile Include="DrainageADPrivate\Model\ThValve.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThInsertOutputService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThLayoutAngleValveService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThLayoutDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThPipePreProcessService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\PipeDiameterMarkingService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThLayoutValveService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingRainwaterInlet.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingSealedWellService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DrainningSettingTaggingService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\DrainingSetting\DraningSettingService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\TubeWellModel.cs" />
-    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreatePipePlugService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\ChamferService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\CreateTubeWellService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\PipeRoute\HandleConfluenceService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Print\InsertBlockService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Print\PrintMarks.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Print\PrintPipes.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\RoomPolyService.cs" />
     <Compile Include="DrainageADPrivate\Data\ThVerticalPipeExtractService.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThDrainageADEngine.cs" />
     <Compile Include="DrainageADPrivate\Model\ThDrainageADPDataPass.cs" />
-    <Compile Include="DrainageADPrivate\Service\TransformTopToADService.cs" />
+    <Compile Include="DrainageADPrivate\Service\ThTransformTopToADService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\ViewModel\FirstFloorPlaneViewModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\ViewModel\ParamSettingViewModel.cs" />
     <Compile Include="Common\ThMEPWSSUtils.cs" />
     <Compile Include="Common\ThSelectFrameUtil.cs" />
     <Compile Include="DrainageADPrivate\Cmd\ThDrainageADPCmd.cs" />
-    <Compile Include="DrainageADPrivate\Data\ThDrainageADDataQueryService.cs" />
+    <Compile Include="DrainageADPrivate\Data\ThDrainageADDataProcessService.cs" />
     <Compile Include="DrainageADPrivate\Data\ThDrainageADPrivateDataFactory.cs" />
     <Compile Include="DrainageADPrivate\Data\ThSanitaryTerminalRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThTCHPipeRecognitionEngine.cs" />
@@ -321,8 +333,10 @@
     <Compile Include="UndergroundWaterSystem\Model\ThFlushPointModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThMarkModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThValveModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\OptimizedDataReader.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThDrawSystemMapService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThImportService.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\ThLayerInitializeService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThOtherDataExtractionService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThPipeLineHandleService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThBreakExtractionService.cs" />
@@ -370,7 +384,9 @@
     <Compile Include="WaterSupplyPipeSystem\Data\SysIn.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\SysProcess.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case1.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseAll.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CaseChoose.cs" />
+    <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\CasePara.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfBranchPipe.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case10.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case11.cs" />
@@ -387,6 +403,8 @@
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\Case9.cs" />
     <Compile Include="WaterSupplyPipeSystem\HalfFloorCase\HalfFloor.cs" />
     <Compile Include="WaterSupplyPipeSystem\Method\Tool.cs" />
+    <Compile Include="WaterSupplyPipeSystem\tool\BranchPipeDeal.cs" />
+    <Compile Include="WaterSupplyPipeSystem\tool\BranchPts.cs" />
     <Compile Include="WaterSupplyPipeSystem\ViewModel\HalfPlatformSetVM.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="WaterWellPumpLayout\Command\ThCreateWithdrawalFormCmd.cs" />
@@ -839,9 +857,9 @@
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
       <Project>{5DDFCADA-BEA4-402C-B3E4-5C7F83C2F09E}</Project>
-      <Name>DotNetARX</Name>
+      <Name>ThDotNetARX</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
       <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>

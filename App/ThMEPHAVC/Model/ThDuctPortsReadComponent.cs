@@ -401,7 +401,7 @@ namespace ThMEPHVAC.Model
                 var centerLines = new DBObjectCollection();
                 var lines = db.ModelSpace.OfType<Curve>();
                 foreach (var l in lines)
-                    if (l.Visible && l.Layer == layerName)
+                    if (l.Visible && l.Layer == layerName && (l is Polyline || l is Line))
                         centerLines.Add(l.Clone() as Curve);
                 return centerLines;
             }

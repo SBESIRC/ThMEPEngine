@@ -12,6 +12,9 @@ namespace ThMEPStructure.Reinforcement.Service
     public class ThBuiltinWallColumnTableQueryService : IDisposable
     {
         private readonly string BwKWord = "bw";
+        private readonly string BfKWord = "bf";
+        private readonly string HcKWord = "Hc";
+        private readonly string Hc1Kword = "Hc1";
         private readonly string Hc2Kword = "hc2";
         private readonly string ZYBKword = "轴压比";
         private readonly string StirrupKword = "箍筋";
@@ -22,6 +25,10 @@ namespace ThMEPStructure.Reinforcement.Service
         private readonly int ContinuousRowCount = 5;
         private readonly int ContinuousColumnCount = 5;
         private ExcelPackage Package { get; set; }
+        /// <summary>
+        /// 在内置表中是否找到数据
+        /// </summary>
+        public bool IsFind { get; private set; } 
         public ThBuiltinWallColumnTableQueryService()
         {
             Load();
@@ -33,13 +40,10 @@ namespace ThMEPStructure.Reinforcement.Service
                 Package.Dispose();
             }
         }
-        public ThEdgeComponent Query(
-            ShapeCode shape,
-            int bwOrhc2,
-            double stirrupRatio,
-            string antiSeismicGrade,
-            string concreteStrengthGrade)
+        public ThEdgeComponent Query(ShapeCode shape, int bwOrhc2, Dictionary<string,int> specDict,
+            double stirrupRatio, string antiSeismicGrade,string concreteStrengthGrade)
         {
+            IsFind = false;
             var sheetName = GetSheetName(ComponentType.YBZ, antiSeismicGrade);
             var sheet = GetWorkSheet(sheetName);
             var shapeStr = GetShape(shape);
@@ -49,15 +53,27 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return null;
             }
-            var result = Query(sheet, shapeStr, sizeKword, bwOrhc2, concreteStrengthGrade, stirrupRatio);
+            // 第一步查找 按照specDict和shapeStr查找
+            var specArea = FindSpeaArea(sheet, shapeStr, specDict);
+            if(specArea.Item1 ==-1)
+            {
+                return null;
+            }
+            // 第二步查找 按照sizeKword和bwOrhc2查找
+            var bwOrhc2Range = FindSpecRowRange(sheet, specArea.Item1, specArea.Item4 + 1,
+                specArea.Item3,sizeKword, bwOrhc2);
+            if(bwOrhc2Range.Item1==-1)
+            {
+                return null;
+            }
+            var result = FindYBZDatas(sheet, specArea.Item4 + 1, bwOrhc2Range,concreteStrengthGrade, 
+                stirrupRatio);
             return ParseYBZ(shape, result);
         }
-        public ThEdgeComponent Query(
-            ShapeCode shape,
-            int bwOrhc2,
-            string position,
-            string antiSeismicGrade)
+        public ThEdgeComponent Query(ShapeCode shape, int bwOrhc2, Dictionary<string, int> specDict,
+            string position,string antiSeismicGrade)
         {
+            IsFind = false;
             var sheetName = GetSheetName(ComponentType.GBZ, antiSeismicGrade);
             var sheet = GetWorkSheet(sheetName);
             var shapeStr = GetShape(shape);
@@ -67,7 +83,18 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return null;
             }
-            var result = Query(sheet, shapeStr,bwOrhc2, areaKword);
+            // 第一步查找 按照specDict和shapeStr查找
+            var specArea = FindSpeaArea(sheet, shapeStr, specDict);
+            if (specArea.Item1 == -1)
+            {
+                return null;
+            }
+            // 第二步查找 按照sizeKword和bwOrhc2查找
+            var result = FindGBZDatas(sheet, specArea, bwOrhc2, areaKword);
+            if(result.Count>0)
+            {
+                IsFind = true;
+            }
             return ParseGBZ(shape, result);
         }
         private ThEdgeComponent ParseYBZ(ShapeCode shape, List<Tuple<string, string>> values)
@@ -91,7 +118,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 return null;
             }
         }
-        private ThEdgeComponent ParseGBZ(ShapeCode shape,List<Tuple<string,string>> values)
+        private ThEdgeComponent ParseGBZ(ShapeCode shape, List<Tuple<string, string>> values)
         {
             if (values.Count > 0)
             {
@@ -128,7 +155,7 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             component.Reinforce = GetYBZReinforceSpec(values);
             return component;
-        }        
+        }
         private ThLTypeEdgeComponent ParseYBZLType(List<Tuple<string, string>> values)
         {
             var component = new ThLTypeEdgeComponent();
@@ -143,7 +170,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 component.Link2 = linkSpecs[0];
                 component.Link3 = linkSpecs[1];
             }
-            else if(linkSpecs.Count == 3)
+            else if (linkSpecs.Count == 3)
             {
                 component.Link2 = linkSpecs[0];
                 component.Link3 = linkSpecs[1];
@@ -172,7 +199,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 component.Link3 = linkSpecs[1];
                 component.Link4 = linkSpecs[2];
             }
-            component.Reinforce = GetYBZReinforceSpec(values);           
+            component.Reinforce = GetYBZReinforceSpec(values);
             return component;
         }
         private ThRectangleEdgeComponent ParseGBZRectType(List<Tuple<string, string>> values)
@@ -226,17 +253,15 @@ namespace ThMEPStructure.Reinforcement.Service
             component.Reinforce = GetGBZReinforceSpec(values);
             return component;
         }
-
         private string ReplaceZToC(string spec)
         {
             return spec.Replace('Z', 'C');
         }
-
         private string GetYBZReinforceSpec(List<Tuple<string, string>> values)
         {
             string pattern = @"(实配){1}\s{0,}(AS)\s{0,}[=]{1}";
             var res = values.Where(o => Regex.IsMatch(o.Item2.ToUpper(), pattern));
-            if(res.Count()==1)
+            if (res.Count() == 1)
             {
                 return GetReinforceSpec(res.First().Item2);
             }
@@ -248,7 +273,7 @@ namespace ThMEPStructure.Reinforcement.Service
         private string GetReinforceSpec(string content)
         {
             var index = content.IndexOf("实配");
-            if(index>0)
+            if (index > 0)
             {
                 var reinforce = RemoveEmpty(content.Substring(0, index));
                 reinforce = ReplaceZToC(reinforce);
@@ -265,7 +290,6 @@ namespace ThMEPStructure.Reinforcement.Service
             var res = values.Where(o => o.Item1.Contains("实配"));
             return res.Count() > 0 ? ReplaceZToC(res.First().Item2) : "";
         }
-
         private List<string> GetLinkSpecs(List<Tuple<string, string>> values)
         {
             return values
@@ -273,7 +297,6 @@ namespace ThMEPStructure.Reinforcement.Service
                 .Select(o => ReplaceZToC(RemoveEmpty(o.Item2)))
                 .ToList();
         }
-
         private string GetStirrupSpec(List<Tuple<string, string>> values)
         {
             int index = -1;
@@ -284,7 +307,7 @@ namespace ThMEPStructure.Reinforcement.Service
                     index = i;
                 }
             }
-            if(index!=-1)
+            if (index != -1)
             {
                 return ReplaceZToC(RemoveEmpty(values[index].Item2));
             }
@@ -292,60 +315,90 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return "";
             }
-        }
-
-        private List<Tuple<string, string>> Query(ExcelWorksheet worksheet, string shape, 
-            string sizeKword,int sizeValue, string concreteStrengthGrade, double stirrupRatio)
+        }        
+        private Tuple<int, int, int, int> FindSpeaArea(
+            ExcelWorksheet worksheet, string shape, Dictionary<string,int> equations)
         {
-            // YBZ->约束构件
-            // 参数验证放在外面检查
-            var result = new List<Tuple<string, string>>();
             var baseColumnIndex = 1; // 第一列
             for (int row = 1; row <= 65536; row++)
             {
-                var fourthColunmCell = GetCellValue(worksheet, row, baseColumnIndex + 3);
-                if(string.IsNullOrEmpty(fourthColunmCell) &&
-                    IsContinuousRowEmpty(worksheet, row, baseColumnIndex + 3, ContinuousRowCount))
-                {
-                    break; // 检查第四列，若有连续的空格，则退出
-                }
                 var cellContent = GetCellValue(worksheet, row, baseColumnIndex);
                 cellContent = RemoveEmpty(cellContent);
-                if(string.IsNullOrEmpty(cellContent))
+                if (string.IsNullOrEmpty(cellContent))
                 {
-                    continue;
-                }
+                     if(IsContinuousRowEmpty(worksheet, row, baseColumnIndex, ContinuousRowCount))
+                    {
+                        break; // 检查有连续的空格，则退出
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }                
                 var range = GetMergeCell(worksheet, row, baseColumnIndex);
-                // 判断外形是否一致
-                if (cellContent != shape)
+                if(cellContent.ToUpper().Contains(shape) &&
+                    IsContains(cellContent,equations))
                 {
-                    row = range.Item3 + 1;
-                    continue;
-                }
-                var specRowRange= FindSpecRowRange(worksheet, row, 
-                    baseColumnIndex + 1, range.Item3, sizeKword, sizeValue);
-                if(specRowRange.Item1== -1)
-                {
-                    row = range.Item3 + 1;
-                    continue;
-                }
-                result = FindYBZDatas(worksheet, specRowRange, baseColumnIndex + 1,
-                    concreteStrengthGrade, stirrupRatio);
-                if(result.Count>0)
-                {
-                    break;
+                    return range;
                 }
                 else
                 {
-                    row = range.Item3 + 1;
-                    continue;
+                    row = range.Item3;
                 }
             }
-            return result;
+            return Tuple.Create(-1,-1,-1,-1);
         }
-        private List<Tuple<string,string>> FindYBZDatas(ExcelWorksheet worksheet, 
-            Tuple<int, int, int, int> specRows,int startColumn,
-            string concreteStrengthGrade, double stirrupRatio)
+        private bool IsContains(string cellContent, Dictionary<string, int> equations)
+        {
+            if(equations.Count==0)
+            {
+                return false;
+            }
+            var newCellContent = cellContent.Replace("，", ",").ToUpper();
+            var values = newCellContent.Split(',');
+
+            foreach(var item in equations)
+            {
+                bool isEqual = false;
+                foreach(string value in values)
+                {
+                    if(IsEqual(value,item.Key,item.Value))
+                    {
+                        isEqual = true;
+                        break;
+                    }
+                }
+                if(isEqual==false)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private bool IsEqual(string equation, string key, int value)
+        {
+            // Bw=200
+            if (IsEquation(equation))
+            {
+                var strs = equation.Split('=');
+                var first = strs[0].Trim().ToUpper();
+                var second = int.Parse(strs[1].Trim());
+                return first == key.ToUpper() && second == value;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private bool IsEquation(string content)
+        {
+            // "Bw=100"
+            var newContent = content.Trim().ToUpper();
+            string pattern = @"^[A-Z0-9]+[\s]*[=]{1}[\s]*\d+$";
+            return Regex.IsMatch(newContent, pattern);
+        }
+        private List<Tuple<string, string>> FindYBZDatas(ExcelWorksheet worksheet, int startColumn,
+            Tuple<int, int, int, int> specRows, string concreteStrengthGrade, double stirrupRatio)
         {
             // startColumn->bw,hc2所在的列
             var result = new List<Tuple<string, string>>();
@@ -354,12 +407,12 @@ namespace ThMEPStructure.Reinforcement.Service
             var specValueStartRow = specRows.Item3;
             var specValueEndRow = specRows.Item4;
             var keywords = new List<string>();
-            for(int row = specValueStartRow; row < specValueEndRow; row++)
+            for (int row = specValueStartRow; row < specValueEndRow; row++)
             {
                 keywords.Add(GetCellValue(worksheet, row, startColumn + 2));
             }
             var columnIndexes = new List<int>();
-            for(int column = startColumn+3; column<256; column++)
+            for (int column = startColumn + 3; column < 256; column++)
             {
                 var cell = GetCellValue(worksheet, specKwordEndRow, column);
                 cell = RemoveEmpty(cell);
@@ -375,13 +428,13 @@ namespace ThMEPStructure.Reinforcement.Service
                         continue;
                     }
                 }
-                if(cell.ToUpper() == concreteStrengthGrade.ToUpper())
+                if (cell.ToUpper() == concreteStrengthGrade.ToUpper())
                 {
                     columnIndexes.Add(column);
                 }
             }
             var datas = new List<List<string>>();
-            for(int i =0;i< columnIndexes.Count;i++)
+            for (int i = 0; i < columnIndexes.Count; i++)
             {
                 var values = new List<string>();
                 for (int row = specValueStartRow; row < specValueEndRow; row++)
@@ -391,36 +444,93 @@ namespace ThMEPStructure.Reinforcement.Service
                 datas.Add(values);
             }
             var pminIndex = -1;
-            for(int i =0;i< keywords.Count;i++)
+            for (int i = 0; i < keywords.Count; i++)
             {
-                // ρ min=λ vfc/fy 找到此表达式
-                if (keywords[i].Contains("ρ") && keywords[i].ToLower().Contains("min"))
+                // 找到此表达式 ρ v(%) 或 ρ v
+                if (IsPvKeyWord(keywords[i]))
                 {
                     pminIndex = i;
                     break;
                 }
             }
-            if(pminIndex!=-1)
+            if (pminIndex != -1)
             {
                 var dataIndex = -1;
-                for(int i=0;i< datas.Count;i++)
+                for (int i = 0; i < datas.Count; i++)
                 {
                     var dValues = GetDoubleValues(datas[i][pminIndex]);
-                    if(dValues.Count ==1 && dValues[0]>= stirrupRatio)
+                    if (dValues.Count == 1 &&
+                        ThReinforcementUtils.IsBiggerThan(dValues[0], stirrupRatio, 2))
                     {
+                        IsFind = true;
                         dataIndex = i;
                         break;
-                    }                    
+                    }
                 }
-                if(dataIndex!=-1)
+                // 如果找不到，就取最后一列
+                if(dataIndex == -1)
                 {
-                    for(int i=0;i<keywords.Count;i++)
+                    dataIndex = datas.Count - 1;
+                }
+                if (dataIndex != -1)
+                {
+                    for (int i = 0; i < keywords.Count; i++)
                     {
                         result.Add(Tuple.Create(keywords[i], datas[dataIndex][i]));
                     }
                 }
             }
             return result;
+        }
+        private List<Tuple<string, string>> FindGBZDatas(ExcelWorksheet worksheet, 
+            Tuple<int, int, int, int> specRows,int sizeValue, string areaKword)
+        {
+            // GBZ->构造件
+            // 参数验证放在外面检查
+            var result = new List<Tuple<string, string>>();
+            var baseColumnIndex = specRows.Item4+1; // Bw和Hc2所在的列
+            for (int row = specRows.Item1; row <= specRows.Item3; row++)
+            {
+                var cellContent = GetCellValue(worksheet, row, baseColumnIndex);
+                cellContent = RemoveEmpty(cellContent);
+                if(string.IsNullOrEmpty(cellContent))
+                {
+                    continue;
+                }
+                var specValue = GetIntegerValue(RemoveEmpty(cellContent));
+                if (!specValue.HasValue || specValue.Value != sizeValue)
+                {
+                    continue;
+                }
+                var specRange = GetMergeCell(worksheet, row, baseColumnIndex);
+                var columnIndexStep = -1;
+                if (areaKword == BottomStrengthAreaKword)
+                {
+                    columnIndexStep = 3;
+                }
+                else if (areaKword == OtherPartitionKword)
+                {
+                    columnIndexStep = 4;
+                }
+                else
+                {
+                    break;
+                }
+                result = GetBelowCellDatas(worksheet, specRange.Item1, specRange.Item3,
+                    baseColumnIndex, columnIndexStep);
+                break;
+            }
+            return result;
+        }
+        private bool IsPvKeyWord(string content)
+        {
+            //ρ v(%)
+            var newContent = content.Trim();
+            newContent = newContent.Replace("（", "(");
+            newContent = newContent.Replace("）", ")");
+            string pattern1 = @"^ρ[\s]*v$";
+            string pattern2 = @"^ρ[\s]*v[\s]*[(][\s]*[%][\s]*[)]$";
+            return Regex.IsMatch(newContent, pattern1) || Regex.IsMatch(newContent, pattern2);
         }
         private Tuple<int,int,int,int> FindSpecRowRange(ExcelWorksheet sheet,int row,int column,
             int endRow,string sizeKword,int size)
@@ -486,82 +596,14 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             return results;
         }
-        private List<Tuple<string, string>> Query(ExcelWorksheet worksheet, string shape, 
-            int sizeValue, string areaKword)
-        {
-            // GBZ->构造件
-            // 参数验证放在外面检查
-            var result = new List<Tuple<string, string>>();
-            var baseColumnIndex = 2; // 第二列
-            for (int row = 1; row <= 65536; row++)
-            {
-                var cellContent =GetCellValue(worksheet, row, baseColumnIndex);
-                cellContent = RemoveEmpty(cellContent);
-                if(string.IsNullOrEmpty(cellContent))
-                {
-                    if(IsContinuousRowEmpty(worksheet, row, baseColumnIndex, ContinuousRowCount))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-                // 判断外形是否一致
-                if(cellContent != shape)
-                {
-                    continue;
-                }
-                var specCell = GetCellValue(worksheet, row + 2, baseColumnIndex - 1);
-                var specRange = GetMergeCell(worksheet, row + 2, baseColumnIndex - 1);
-                if(string.IsNullOrEmpty(specCell))
-                {
-                    row = specRange.Item3;
-                    continue;
-                }
-                var specValue = GetIntegerValue(RemoveEmpty(specCell));
-                if (!specValue.HasValue || specValue.Value != sizeValue)
-                {
-                    row = specRange.Item3;
-                    continue;
-                }
-                var columnIndexStep = -1;
-                if(areaKword == BottomStrengthAreaKword)
-                {
-                    columnIndexStep = 2;
-                }
-                else if(areaKword == OtherPartitionKword)
-                {
-                    columnIndexStep = 3;
-                }
-                else
-                {
-                    break;
-                }
-                result = GetBelowCellDatas(worksheet, specRange.Item1, specRange.Item3, 
-                    baseColumnIndex, columnIndexStep);
-                break;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sheel"></param>
-        /// <param name="startRow">规格合并单元格的起始行</param>
-        /// <param name="endRow">规格合并单元格的末尾行</param>
-        /// <param name="column">L型、一型、T型，所在列</param>
-        /// <param name="columnStepIndex"></param>
-        /// <returns></returns>
         private List<Tuple<string,string>> GetBelowCellDatas(
             ExcelWorksheet sheel,int startRow, int endRow,int column,int columnStepIndex)
         {
+            // column bw or Hc2 所在的列
             var results = new List<Tuple<string, string>>();
             for(int row= startRow; row< endRow;row++)
             {
-                var cell1 = GetCellValue(sheel, row, column + 1);
+                var cell1 = GetCellValue(sheel, row, column+2);
                 var cell2 = GetCellValue(sheel, row, column + columnStepIndex);
                 results.Add(Tuple.Create(cell1, cell2));
             }
@@ -598,11 +640,6 @@ namespace ThMEPStructure.Reinforcement.Service
             var newContent = RemoveEmpty(content);
             return newContent.Contains(BottomStrengthAreaKword);
         }
-        private bool IsContainsAsMin(string content)
-        {
-            var newContent = RemoveEmpty(content).ToLower();
-            return newContent.Contains("as") && content.ToLower().Contains("min");
-        }
         private string RemoveEmpty(string content)
         {
             return content
@@ -630,7 +667,6 @@ namespace ThMEPStructure.Reinforcement.Service
                 return "";
             }
         }
-
         private string GetMergeValue(ExcelWorksheet sheet, int row, int column)
         {
             if(sheet != null && IsValidRowIndex(row) && IsValidColumnIndex(column))
@@ -651,7 +687,6 @@ namespace ThMEPStructure.Reinforcement.Service
                 return "";
             }
         }
-
         private bool IsValidColumnIndex(int columnIndex)
         {
             // 256 列
@@ -662,7 +697,6 @@ namespace ThMEPStructure.Reinforcement.Service
             // 65536 行
             return rowIndex >= 1 && rowIndex <= 65536;
         }
-
         private int? GetIntegerValue(string content)
         {
             if(IsInteger(content))
@@ -674,13 +708,11 @@ namespace ThMEPStructure.Reinforcement.Service
                 return null;
             }
         }
-
         private bool IsInteger(string content)
         {
             var pattern = @"^\s{0,}\d+\s{0,}$";
             return Regex.IsMatch(content, pattern);
         }
-
         private string GetAreaKword(string position)
         {
             if(position.Contains("底部"))
@@ -711,7 +743,6 @@ namespace ThMEPStructure.Reinforcement.Service
                 return "";
             }
         }
-
         private string GetShape(ShapeCode shapeCode)
         {
             switch (shapeCode)
@@ -726,7 +757,6 @@ namespace ThMEPStructure.Reinforcement.Service
                     return "";
             }
         } 
-
         private ExcelWorksheet GetWorkSheet(string sheetName)
         {
             if(Package==null || string.IsNullOrEmpty(sheetName))

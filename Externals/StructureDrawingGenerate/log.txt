@@ -1,0 +1,223 @@
+loadConfig	 used 0.001s.
+	Prepare  used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.015s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.002s.
+hideClip		 used 0.130s.
+merge		 used 0.009s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.127s.
+merge		 used 0.011s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.433s.
+boxClip		 used 0.000s.
+hideClip		 used 0.014s.
+merge		 used 0.005s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.016s.
+merge		 used 0.003s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.173s.
+boxClip		 used 0.001s.
+hideClip		 used 0.014s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.024s.
+boxClip		 used 0.000s.
+hideClip		 used 0.006s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.010s.
+	Handle holes  used 0.026s.
+	Handle comments  used 0.004s.
+	Save Svg file  used 0.002s.
+Total time  used 0.672s.
+	Prepare  used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.017s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.064s.
+merge		 used 0.006s.
+strictBoxClip	 used 0.001s.
+boxClip		 used 0.001s.
+hideClip		 used 0.065s.
+merge		 used 0.007s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.230s.
+boxClip		 used 0.001s.
+hideClip		 used 0.012s.
+merge		 used 0.003s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.010s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.083s.
+boxClip		 used 0.001s.
+hideClip		 used 0.006s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.011s.
+boxClip		 used 0.000s.
+hideClip		 used 0.004s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.007s.
+	Handle holes  used 0.011s.
+	Handle comments  used 0.002s.
+	Save Svg file  used 0.002s.
+Total time  used 0.346s.
+	Prepare  used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.008s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.043s.
+merge		 used 0.005s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.042s.
+merge		 used 0.005s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.143s.
+boxClip		 used 0.000s.
+hideClip		 used 0.009s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.008s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.051s.
+boxClip		 used 0.000s.
+hideClip		 used 0.006s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.008s.
+boxClip		 used 0.000s.
+hideClip		 used 0.005s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.007s.
+	Handle holes  used 0.008s.
+	Handle comments  used 0.001s.
+	Save Svg file  used 0.002s.
+Total time  used 0.220s.
+	Prepare  used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.007s.
+merge		 used 0.003s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.044s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.052s.
+merge		 used 0.005s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.153s.
+boxClip		 used 0.000s.
+hideClip		 used 0.007s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.008s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.048s.
+boxClip		 used 0.000s.
+hideClip		 used 0.006s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.008s.
+boxClip		 used 0.001s.
+hideClip		 used 0.004s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.007s.
+	Handle holes  used 0.007s.
+	Handle comments  used 0.002s.
+	Save Svg file  used 0.001s.
+Total time  used 0.226s.
+	Prepare  used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.009s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.048s.
+merge		 used 0.004s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.052s.
+merge		 used 0.006s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.166s.
+boxClip		 used 0.000s.
+hideClip		 used 0.011s.
+merge		 used 0.003s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.009s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.062s.
+boxClip		 used 0.000s.
+hideClip		 used 0.004s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.007s.
+boxClip		 used 0.000s.
+hideClip		 used 0.003s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.004s.
+	Handle holes  used 0.010s.
+	Handle comments  used 0.002s.
+	Save Svg file  used 0.001s.
+Total time  used 0.252s.
+	Prepare  used 0.000s.
+boxClip		 used 0.001s.
+hideClip		 used 0.010s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.021s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.020s.
+merge		 used 0.002s.
+strictBoxClip	 used 0.000s.
+	Handle beam, total 3 pass  used 0.070s.
+boxClip		 used 0.000s.
+hideClip		 used 0.009s.
+merge		 used 0.001s.
+strictBoxClip	 used 0.000s.
+boxClip		 used 0.000s.
+hideClip		 used 0.003s.
+merge		 used 0.000s.
+strictBoxClip	 used 0.000s.
+	Handle slab, total 2 pass  used 0.023s.
+boxClip		 used 0.000s.
+hideClip		 used 0.003s.
+merge		 used 0.000s.
+strictBoxClip	 used 0.000s.
+	Handle low floor column components, total 1 pass  used 0.004s.
+boxClip		 used 0.000s.
+hideClip		 used 0.000s.
+merge		 used 0.000s.
+strictBoxClip	 used 0.000s.
+	Handle high floor column components, total 1 pass  used 0.000s.
+	Handle holes  used 0.003s.
+	Handle comments  used 0.001s.
+	Save Svg file  used 0.001s.
+Total time  used 0.102s.

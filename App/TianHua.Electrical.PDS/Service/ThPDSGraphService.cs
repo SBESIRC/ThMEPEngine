@@ -99,8 +99,8 @@ namespace TianHua.Electrical.PDS.Service
         {
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
-            
-            if(LoadBlocks[entity].EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
+
+            if (LoadBlocks[entity].EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
             {
                 var service = new ThPDSMarkAnalysisService();
                 objectIds.Add(LoadBlocks[entity].ObjId);
@@ -110,24 +110,36 @@ namespace TianHua.Electrical.PDS.Service
                 load.SetOnLightingCableTray(true);
                 loads.Add(load);
             }
-            
+
             node.Loads = loads;
             node.NodeType = PDSNodeType.Load;
             return node;
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
-            ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey)
+            ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey, bool circuitAssign = false)
         {
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
-            var srcPanelID = source.Loads.Count > 0 ? source.Loads[0].ID.LoadID : "";
+            var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
-            if (source.NodeType == PDSNodeType.CableCarrier)
+
+            if (string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
+            {
+                var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
+                var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
+                anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                if(!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber.Last()))
+                {
+                    edge = anotherEdge;
+                }
+            }
+
+            if (edge.Source.NodeType == PDSNodeType.CableCarrier)
             {
                 edge.Circuit.ViaCableTray = true;
             }
-            if (target.NodeType == PDSNodeType.Load || target.NodeType == PDSNodeType.None)
+            if (edge.Target.NodeType == PDSNodeType.Load || edge.Target.NodeType == PDSNodeType.None)
             {
                 edge.Circuit.ViaConduit = true;
             }
@@ -135,20 +147,21 @@ namespace TianHua.Electrical.PDS.Service
             var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.Last());
             if (circuitModel.CircuitType != ThPDSCircuitType.None)
             {
-                if (target.Loads.Count > 0)
+                if (edge.Target.Loads.Count > 0)
                 {
-                    target.Loads[0].CircuitType = circuitModel.CircuitType;
+                    edge.Target.Loads[0].CircuitType = circuitModel.CircuitType;
                 }
             }
+
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
-            if (string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
+            if (circuitAssign && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
                 var circuitIDs = new List<string>();
-                target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
+                edge.Target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
                     .ForEach(id => circuitIDs.Add(id)));
                 circuitIDs = circuitIDs.Distinct().ToList();
                 var sourcePanelIDs = new List<string>();
-                target.Loads.ForEach(o => o.ID.SourcePanelID.Where(id => !string.IsNullOrEmpty(id))
+                edge.Target.Loads.ForEach(o => o.ID.SourcePanelID.Where(id => !string.IsNullOrEmpty(id))
                     .ForEach(id => sourcePanelIDs.Add(id)));
                 sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
                 if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
@@ -158,17 +171,17 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
-            if (source.Loads.Count > 0
+            if (edge.Source.Loads.Count > 0
                 && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
                 && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
-                && !string.IsNullOrEmpty(source.Loads[0].ID.LoadID))
+                && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.SourcePanelID.Add(source.Loads[0].ID.LoadID);
+                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
             }
 
-            if (target.NodeType == PDSNodeType.None)
+            if (edge.Target.NodeType == PDSNodeType.None)
             {
-                ThPDSLayerService.Assign(target.Loads[0]);
+                ThPDSLayerService.Assign(edge.Target.Loads[0]);
             }
             return edge;
         }

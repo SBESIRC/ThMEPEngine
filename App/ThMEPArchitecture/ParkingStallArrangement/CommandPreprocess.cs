@@ -246,5 +246,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             return center;//返回块表记录的Id
         }
+        public static void ShowAsBlock(this List<Entity> entities, string blockName, string LayerName)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                // 创建块，并且插入到原位
+                Point3d InsertPoint = acad.Database.AddBlockTableRecord(blockName, entities);
+                acad.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0);
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
-﻿using HandyControl.Controls;
+using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
 
@@ -21,7 +21,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Category("配电回路参数")]
         public string CircuitID
         {
-            get => _edge.Circuit.ID.CircuitID.LastOrDefault();
+            get
+            {
+                var v = _edge.Circuit.ID.CircuitID.LastOrDefault();
+                if (string.IsNullOrEmpty(v))
+                {
+                    return string.Join(",", _edge.Circuit.ID.CircuitID.Where(x => !string.IsNullOrEmpty(x)));
+                }
+                return v;
+            }
             set
             {
                 _edge.Circuit.ID.CircuitID[_edge.Circuit.ID.CircuitID.Count - 1] = value;
@@ -104,10 +112,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Editor(typeof(ThPDSLoadIdPlainTextPropertyEditor), typeof(PropertyEditorBase))]
         public string LoadId
         {
-            get => _edge.Circuit.ID.LoadID;
+            get => _edge.Target.Load.ID.LoadID;
             set
             {
-                _edge.Circuit.ID.LoadID = value;
+                _edge.Target.Load.ID.LoadID = value;
                 OnPropertyChanged(nameof(LoadId));
             }
         }

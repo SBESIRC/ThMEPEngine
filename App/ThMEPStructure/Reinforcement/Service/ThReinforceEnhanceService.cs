@@ -8,13 +8,12 @@ namespace ThMEPStructure.Reinforcement.Service
     internal class ThReinforceEnhanceService
     {
         private readonly double DoubleTolerance = 1e-3;
-        private Dictionary<double,double> SteelSpecAreaDict { get; set; }
         private string Reinforce { get;set; }
         private double CalculationArea { get; set; }
         /// <summary>
         /// 增强的纵筋
         /// </summary>
-        public string EnhancedReinforce { get; private set; }
+        public string EnhancedReinforce { get; private set; } = "";
         /// <summary>
         /// 迭代步数
         /// </summary>
@@ -23,26 +22,8 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             Reinforce = reinforce;
             CalculationArea = calculationArea;
-            InitSteelSpecAreaDict();
         }
-        private void InitSteelSpecAreaDict()
-        {
-            SteelSpecAreaDict = new Dictionary<double, double>();
-            SteelSpecAreaDict.Add(6, 28.3);
-            SteelSpecAreaDict.Add(8, 50.3);
-            SteelSpecAreaDict.Add(10, 78.5);
-            SteelSpecAreaDict.Add(12, 113.1);
-            SteelSpecAreaDict.Add(14, 153.9);
-            SteelSpecAreaDict.Add(16, 201.1);
-            SteelSpecAreaDict.Add(18, 254.5);
-            SteelSpecAreaDict.Add(20, 314.2);
-            SteelSpecAreaDict.Add(22, 380.1);
-            SteelSpecAreaDict.Add(25, 490.9);
-            SteelSpecAreaDict.Add(28, 615.8);
-            SteelSpecAreaDict.Add(32, 804.2);
-            SteelSpecAreaDict.Add(36, 1017.9);
-            SteelSpecAreaDict.Add(40, 1256.6);
-        }
+        
         public void Enhance()
         {
             var reinforces = Split();
@@ -57,7 +38,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 // 如果纵筋根数小于4
                 return;
             }
-            if (GetAllReinforceAreas(diameters)>CalculationArea)
+            if (IsBiggThanCalculationArea(GetAllReinforceAreas(diameters)))
             {
                 // 如果纵筋面积大于计算面积
                 return;
@@ -69,7 +50,7 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
-            else if(GetAllReinforceAreas(firstDiameters)>CalculationArea)
+            else if(IsBiggThanCalculationArea(GetAllReinforceAreas(firstDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(firstDiameters);
                 return;
@@ -81,7 +62,7 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
-            else if(GetAllReinforceAreas(secondDiameters) > CalculationArea)
+            else if(IsBiggThanCalculationArea(GetAllReinforceAreas(secondDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(secondDiameters);
                 return;
@@ -93,7 +74,7 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
-            else if (GetAllReinforceAreas(thirdDiameters) > CalculationArea)
+            else if (IsBiggThanCalculationArea(GetAllReinforceAreas(thirdDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(thirdDiameters);
                 return;
@@ -105,7 +86,7 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return;
             }
-            else if (GetAllReinforceAreas(fourthDiameters) > CalculationArea)
+            else if (IsBiggThanCalculationArea(GetAllReinforceAreas(fourthDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(fourthDiameters);
                 return;
@@ -113,7 +94,7 @@ namespace ThMEPStructure.Reinforcement.Service
 
             // Step5：为墙的第一端增加并筋(两根)
             var fifthDiameters = AddFirstPort(diameters);
-            if (GetAllReinforceAreas(fifthDiameters) > CalculationArea)
+            if (IsBiggThanCalculationArea(GetAllReinforceAreas(fifthDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(fifthDiameters);
                 return;
@@ -121,13 +102,20 @@ namespace ThMEPStructure.Reinforcement.Service
 
             // Step6：在Step5的基础上，为墙的第二端再增加并筋(两根)
             var sixthDiameters = AddSecondPort(fifthDiameters);
-            if (GetAllReinforceAreas(sixthDiameters) > CalculationArea)
+            if (IsBiggThanCalculationArea(GetAllReinforceAreas(sixthDiameters)))
             {
                 EnhancedReinforce = ToReinforceSpec(sixthDiameters);
                 return;
             }
 
             //
+        }
+
+        private bool IsBiggThanCalculationArea(double allReinforceArea)
+        {
+            //CalculationArea 是从图纸中提取的计算书的面积值
+            //表中实配As = 3455.75，yjk提取值=3456,即满足yjk提取值 <= 实配钢筋
+            return ThReinforcementUtils.IsBiggerThan(allReinforceArea, CalculationArea,0);
         }
 
         private List<double> AddFirstPort(List<double> diameters)
@@ -171,8 +159,8 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             // 先取墙一端的两根放大
             var results = new List<double>();
-            var firstEnlarge = FindEnhancedDiameter(diameters[0]);
-            var secondEnlarge = FindEnhancedDiameter(diameters[1]);
+            var firstEnlarge = ThSteelDataManager.Instance.FindEnhancedDiameter(diameters[0]);
+            var secondEnlarge = ThSteelDataManager.Instance.FindEnhancedDiameter(diameters[1]);
             if(firstEnlarge.HasValue && secondEnlarge.HasValue)
             {
                 results = diameters.Select(o => o).ToList();
@@ -187,8 +175,8 @@ namespace ThMEPStructure.Reinforcement.Service
         {
             // 先取墙一端的两根放大
             var results = new List<double>();
-            var thirdEnlarge = FindEnhancedDiameter(diameters[2]);
-            var fourthEnlarge = FindEnhancedDiameter(diameters[3]);
+            var thirdEnlarge = ThSteelDataManager.Instance.FindEnhancedDiameter(diameters[2]);
+            var fourthEnlarge = ThSteelDataManager.Instance.FindEnhancedDiameter(diameters[3]);
             if (thirdEnlarge.HasValue && fourthEnlarge.HasValue)
             {
                 results = diameters.Select(o => o).ToList();
@@ -197,18 +185,6 @@ namespace ThMEPStructure.Reinforcement.Service
             }
             X++;
             return results;
-        }
-
-        private double? FindEnhancedDiameter(double currentDiameter)
-        {
-            foreach(var diameter in SteelSpecAreaDict.Keys)
-            {
-                if(diameter> currentDiameter)
-                {
-                    return diameter;
-                }
-            }
-            return null;
         }
 
         private List<double> GetAllDiameters(List<string> reinforces)
@@ -252,20 +228,10 @@ namespace ThMEPStructure.Reinforcement.Service
             string pattern = @"^\s{0,}\d+\s{0,}[C]{1}\s{0,}\d+([.]\d+){0,}$";
             return Regex.IsMatch(reinforce.ToUpper(), pattern);
         }
-        private double GetSteelArea(double diameter)
-        {
-           foreach(var item in SteelSpecAreaDict)
-            {
-                if(Math.Abs(item.Key - diameter)<=DoubleTolerance)
-                {
-                    return item.Value;
-                }
-            }
-            return Math.Round(Math.PI * Math.Pow(diameter / 2.0, 2),1);
-        }
+        
         private double GetAllReinforceAreas(List<double> diameters)
         {
-            return diameters.Sum(o=> GetSteelArea(o));
+            return diameters.Sum(o=> ThSteelDataManager.Instance.GetSteelArea(o,DoubleTolerance));
         }
         private string ToReinforceSpec(List<double> diameters)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 
@@ -23,9 +24,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
             }
+            ThermalRelaySelection = thermalRelay;
             Model = thermalRelay.Model;
             PolesNum = thermalRelay.Poles;
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
+            AlternativeModels = new List<string>() { Model };
+            AlternativePolesNums = new List<string>() { PolesNum };
+            AlternativeRatedCurrents = new List<string>() { RatedCurrent };
         }
 
         public ThermalRelay(string thermalRelayConfig)
@@ -49,9 +54,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.First();
             }
+            ThermalRelaySelection = thermalRelay;
             Model = thermalRelay.Model;
             PolesNum = thermalRelay.Poles;
             RatedCurrent = $"{thermalRelay.MinAmps}~{thermalRelay.MaxAmps}";
+            AlternativeModels = new List<string>() { Model };
+            AlternativePolesNums = new List<string>() { PolesNum };
+            AlternativeRatedCurrents = new List<string>() { RatedCurrent };
         }
 
         /// <summary>
@@ -68,5 +77,49 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 电流整定范围
         /// </summary>
         public string RatedCurrent { get; set; }
+
+        /// <summary>
+        /// 修改型号
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetModel(string model)
+        {
+            //暂时先不支持切换，且也无法切换
+        }
+        public List<string> GetModels()
+        {
+            return AlternativeModels;
+        }
+
+        /// <summary>
+        /// 修改级数
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetPolesNum(string polesNum)
+        {
+            //暂时先不支持切换，且也无法切换
+        }
+        public List<string> GetPolesNums()
+        {
+            return AlternativePolesNums;
+        }
+
+        /// <summary>
+        /// 修改额定电流
+        /// </summary>
+        /// <param name="polesNum"></param>
+        public void SetRatedCurrent(string ratedCurrent)
+        {
+            //暂时先不支持切换，且也无法切换
+        }
+        public List<string> GetRatedCurrents()
+        {
+            return AlternativeRatedCurrents;
+        }
+
+        private List<string> AlternativeModels { get; set; }
+        private List<string> AlternativePolesNums { get; set; }
+        private List<string> AlternativeRatedCurrents { get; set; }
+        private ThermalRelayConfigurationItem ThermalRelaySelection { get; set; }
     }
 }

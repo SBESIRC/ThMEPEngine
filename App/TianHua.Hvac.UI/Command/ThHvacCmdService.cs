@@ -112,10 +112,10 @@ namespace TianHua.Hvac.UI.Command
                                             PortParam portParam, 
                                             bool haveMultiFan,
                                             Dictionary<Polyline, ObjectId> allFansDic,
-                                            ObjectIdList brokenLineIds,
-                                            ThDuctPortsDrawService service)
+                                            ObjectIdList brokenLineIds)
         {
             var bypassLines = new DBObjectCollection();
+            var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan, service);
             if (anayRes.centerLines.Count == 0)
                 return;
@@ -127,8 +127,8 @@ namespace TianHua.Hvac.UI.Command
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic, service);
-                ductPort.Execute(ref gId);
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId, brokenLineIds);
             }
         }
 
@@ -140,11 +140,11 @@ namespace TianHua.Hvac.UI.Command
                                          PortParam portParam,
                                          bool haveMultiFan,
                                          Dictionary<Polyline, ObjectId> allFansDic,
-                                         ObjectIdList brokenLineIds,
-                                         ThDuctPortsDrawService service)
+                                         ObjectIdList brokenLineIds)
 
         {
             var bypassLines = fanParam.bypassLines;
+            var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             ProcBypass(fanParam.bypassPattern, ioBypassSepDis, ref bypassLines, out Line maxBypass);
             var orgMaxBypass = maxBypass.Clone() as Line;
             if (!CheckoutInput(fanParam.bypassPattern, bypassLines, fanParam.centerLines))
@@ -171,8 +171,8 @@ namespace TianHua.Hvac.UI.Command
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic, service);
-                ductPort.Execute(ref gId);
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId, brokenLineIds);
             }
         }
         public static void InitTables(string curDbPath, string templateDbPath, ref ulong gId)

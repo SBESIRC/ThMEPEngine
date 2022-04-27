@@ -1,7 +1,7 @@
-﻿using System;
-using ThCADExtension;
+﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
@@ -21,33 +21,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content
-        {
-            get
-            {
-                switch (_breaker.ComponentType)
-                {
-                    case ComponentType.CB:
-                    case ComponentType.一体式RCD:
-                        {
-                            if (_breaker.Appendix == AppendixType.ST)
-                            {
-                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix}";
-                            }
-                            else
-                            {
-                                return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}";
-                            }
-                        }
-                    case ComponentType.组合式RCD:
-                        {
-                            return $"{Model}{FrameSpecification}-{TripUnitType}{RatedCurrent}/{PolesNum}/{Appendix} {RCDType}{ResidualCurrent.GetDescription()}";
-                        }
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-        }
+        public string Content => _breaker.Content();
 
         [ReadOnly(true)]
         [Category("元器件参数")]
@@ -129,7 +103,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.Appendix = value;
-                OnPropertyChanged(nameof(Appendix));
+                OnPropertyChanged();
             }
         }
 
@@ -220,17 +194,5 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [ReadOnly(true)]
         [Browsable(false)]
         public ComponentType ComponentType => _breaker.ComponentType;
-
-        protected virtual void OnPropertyChanged()
-        {
-            OnPropertyChanged(nameof(Model));
-            OnPropertyChanged(nameof(Content));
-            OnPropertyChanged(nameof(RCDType));
-            OnPropertyChanged(nameof(PolesNum));
-            OnPropertyChanged(nameof(RatedCurrent));
-            OnPropertyChanged(nameof(TripUnitType));
-            OnPropertyChanged(nameof(ResidualCurrent));
-            OnPropertyChanged(nameof(FrameSpecification));
-        }
     }
 }

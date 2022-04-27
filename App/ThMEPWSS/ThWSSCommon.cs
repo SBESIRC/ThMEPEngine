@@ -104,5 +104,13 @@
         public static string RainwaterInletBlockName = "13#雨水口";
         public static string SealedWellLayerName = "W-RAIN-EQPM";
         public static string SealedWellBlockName = "13#雨水口";
+        //管径标注
+        public static string RainDimsLayerName = "W-RAIN-DIMS";
+        public static string DraiDimsLayerName = "W-DRAI-DIMS";
+        public static string DimsBlockName = "给水管径100";
+        //套管标注
+        public static string DrivepipeBlockName = "套管";
+        public static string DrivepipeLayerName = "W-BUSH";
+        public static string DrivepipeNoteLayerName = "W-BUSH-NOTE";
     }
 }

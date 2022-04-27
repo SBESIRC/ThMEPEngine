@@ -237,18 +237,18 @@ namespace ThMEPStructure.Reinforcement.Draw
             //把一对对点的位置计算出来，计算竖直方向上的位置,0，7号点每次向下偏移deltaY,水平方向3，6号点每次向右偏移deltaX
             for (int i = 0; i < result; i++)
             {
-                Point3d tmpPoint1 = new Point3d(points[0].X, points[0].Y - deltaY, 0);
+                Point3d tmpPoint1 = new Point3d(points[0].X, points[0].Y - deltaY * (i + 1), 0);
                 points.Add(tmpPoint1);
-                Point3d tmpPoint2 = new Point3d(points[7].X, points[7].Y - deltaY, 0);
+                Point3d tmpPoint2 = new Point3d(points[7].X, points[7].Y - deltaY * (i + 1), 0);
                 points.Add(tmpPoint2);
                 pointsFlag.Add(2);
                 pointsFlag.Add(2);
             }
             for (int i = 0; i < pointsPair - result; i++)
             {
-                Point3d tmpPoint1 = new Point3d(points[3].X + deltaX, points[3].Y, 0);
+                Point3d tmpPoint1 = new Point3d(points[3].X + deltaX * (i + 1), points[3].Y, 0);
                 points.Add(tmpPoint1);
-                Point3d tmpPoint2 = new Point3d(points[6].X + deltaX, points[6].Y, 0);
+                Point3d tmpPoint2 = new Point3d(points[6].X + deltaX * (i + 1), points[6].Y, 0);
                 points.Add(tmpPoint2);
                 pointsFlag.Add(3);
                 pointsFlag.Add(3);
@@ -844,7 +844,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 }
 
 
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true && !thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     //先判断是第几次迭代
                     //这里的Reinforce默认有两种以上的纵筋规格
@@ -1147,7 +1147,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true&&!thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();
@@ -1387,7 +1387,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                 int Csize = LReinStr.Rein_Detail_list[0].TypeDist;
                 bool isCal = false;
                 int Step = 0;
-                if (thLTypeEdgeComponent.IsCalculation == true)
+                if (thLTypeEdgeComponent.IsCalculation == true && !thLTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())//修改
                 {
                     isCal = true;
                     StrToReinforce enhanceRein = new StrToReinforce();

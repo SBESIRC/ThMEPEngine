@@ -1,6 +1,6 @@
 ﻿using AcHelper;
-using System.Windows;
 using Autodesk.AutoCAD.Runtime;
+using System.Windows;
 using TianHua.Electrical.PDS.Command;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.UI;
@@ -12,14 +12,7 @@ namespace TianHua.Electrical.PDS.UI
     {
         public void Initialize()
         {
-            try
-            {
-                ElecSandboxUI.InitPDSProjectData();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+           
         }
 
         public void Terminate()
@@ -33,15 +26,18 @@ namespace TianHua.Electrical.PDS.UI
         [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
         public void THDLXT()
         {
+            try
+            {
+                ElecSandboxUI.InitPDSProjectData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
             var win = ElecSandboxUI.TryGetCurrentWindow();
             if (win is not null) return;
-            var cmd = new ThPDSCommand();
-            cmd.Execute();
-            var g = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-            if (g == null) return;
             win = ElecSandboxUI.TryCreateSingleton();
             if (win == null) return;
-            win.Graph = g;
             AcadApp.ShowModelessWindow(win);
         }
 
@@ -64,11 +60,15 @@ namespace TianHua.Electrical.PDS.UI
             //var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
             //drawCmd.Execute();
 
-            // 标注修改
             var modifyCmd = new ThPDSUpdateToDwgService();
-            modifyCmd.Update();
+            // 标注修改
+            //modifyCmd.Update();
 
-            Active.Editor.Regen();
+            // 标注定位
+            //modifyCmd.Zoom();
+
+            // 创建标注
+            modifyCmd.AddLoadDimension();
         }
     }
 }

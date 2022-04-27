@@ -181,7 +181,7 @@ namespace ThMEPHVAC.CAD
             var insertP = rootDuct.l.EndPoint;
             var dirVec = (rootDuct.l.EndPoint - rootDuct.l.StartPoint).GetNormal();
             if (portParam.genStyle == GenerationStyle.Auto)
-                ThNotRoomStartComp.InsertComp(rootDuct, dirVec, moveSrtP, insertP, portParam, service);
+                ThNotRoomStartComp.InsertComp(rootDuct, dirVec, moveSrtP, insertP, portParam);
         }
 
         private void SearchConnectors(Point3d iRoomP,

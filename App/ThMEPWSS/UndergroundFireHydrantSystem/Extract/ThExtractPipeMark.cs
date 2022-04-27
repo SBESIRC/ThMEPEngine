@@ -13,6 +13,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -48,7 +49,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
         }
 
-        public List<List<Point3d>> GetPipeMarkPoisition(ref Dictionary<Point3d, double> markAngleDic)
+        public List<List<Point3d>> GetPipeMarkPoisition(ref Dictionary<Point3dEx, double> markAngleDic)
         {
             var poisition = new List<List<Point3d>>();
             foreach (var db in DBobj)
@@ -71,8 +72,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 pos.Add(pt1);
                 pos.Add(pt2);
                 poisition.Add(pos);
-                markAngleDic.Add(pt1, ang1);
-                markAngleDic.Add(pt2, ang2);
+                markAngleDic.Add(new Point3dEx(pt1), ang1);
+                markAngleDic.Add(new Point3dEx(pt2), ang2);
             }
             return poisition;
         }

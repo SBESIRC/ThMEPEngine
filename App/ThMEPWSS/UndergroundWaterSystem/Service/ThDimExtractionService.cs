@@ -14,7 +14,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public List<ThDimModel> GetDimModelList(Point3dCollection pts)
         {
             var dimExtractionEngine = new ThDimExtractionEngine();
-            var retList = dimExtractionEngine.GetDimList(pts);
+            var retList = dimExtractionEngine.GetDimListOptimized(pts);
             return retList;
         }
     }

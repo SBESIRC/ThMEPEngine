@@ -109,12 +109,33 @@
     <Compile Include="Reinforcement\Service\ThImportTemplateStyleService.cs" />
     <Compile Include="Reinforcement\Service\ThReinforceEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisUtils.cs" />
+    <Compile Include="Reinforcement\Service\ThSteelDataManager.cs" />
+    <Compile Include="Reinforcement\Service\ThStirrupEnhanceService.cs" />
     <Compile Include="Reinforcement\Service\ThTTypeSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThLTypeSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThRectangleSpecAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThShapeAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThReinforcementUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructPlane\Print\PrintConfig.cs" />
+    <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
+    <Compile Include="StructPlane\Print\ThPrintService.cs" />
+    <Compile Include="StructPlane\Print\ThShearwallPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
+    <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
+    <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
+    <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
+    <Compile Include="StructPlane\Service\ThMultiSvgPrintService.cs" />
+    <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
+    <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
+    <Compile Include="StructPlane\Service\ThStructurePlaneGenerator.cs" />
+    <Compile Include="StructPlane\Service\ThSvgEntityPrintService.cs" />
+    <Compile Include="StructPlane\Service\ThStructurePlaneConfig.cs" />
+    <Compile Include="StructPlane\Service\ThWallBuildAreaService.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +143,9 @@
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-      <Name>DotNetARX</Name>
+      <Name>ThDotNetARX</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
       <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
@@ -200,11 +221,6 @@
     <Content Include="bin\Debug-NET45\ThMEPStructure.dll" />
     <Content Include="bin\Debug-NET45\ThMEPStructure.pdb" />
     <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="EPPlus">
-      <Version>5.8.8</Version>
-    </PackageReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

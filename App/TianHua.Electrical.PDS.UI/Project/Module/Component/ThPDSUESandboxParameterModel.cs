@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
@@ -13,7 +14,8 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {
-        public ThPDSConductorUsageModel[] ConductorUsages { get; } = new ConductorUse[]
+        public ThPDSConductorUsageModel[] ConductorUsages => _ConductorUsages.Skip(1).ToArray();
+        private ThPDSConductorUsageModel[] _ConductorUsages { get; } = new ConductorUse[]
         {
                 PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunk,
                 PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionBranchCircuiCables,
@@ -25,15 +27,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireControlSignalWire,
                 PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFireControlSignalWire,
         }.Select(x => new ThPDSConductorUsageModel(x)).ToArray();
-        public ThPDSConductorUsageModel FireDistributionTrunk => ConductorUsages[0];
-        public ThPDSConductorUsageModel FireDistributionBranchCircuiCables => ConductorUsages[1];
-        public ThPDSConductorUsageModel FireDistributionWire => ConductorUsages[2];
-        public ThPDSConductorUsageModel NonFireDistributionBranchCircuiCables => ConductorUsages[3];
-        public ThPDSConductorUsageModel NonFireDistributionWire => ConductorUsages[4];
-        public ThPDSConductorUsageModel FireDistributionControlCable => ConductorUsages[5];
-        public ThPDSConductorUsageModel NonFireDistributionControlCable => ConductorUsages[6];
-        public ThPDSConductorUsageModel FireControlSignalWire => ConductorUsages[7];
-        public ThPDSConductorUsageModel NonFireControlSignalWire => ConductorUsages[8];
+        public ThPDSConductorUsageModel FireDistributionTrunk => _ConductorUsages[0];
+        public ThPDSConductorUsageModel FireDistributionBranchCircuiCables => _ConductorUsages[1];
+        public ThPDSConductorUsageModel FireDistributionWire => _ConductorUsages[2];
+        public ThPDSConductorUsageModel NonFireDistributionBranchCircuiCables => _ConductorUsages[3];
+        public ThPDSConductorUsageModel NonFireDistributionWire => _ConductorUsages[4];
+        public ThPDSConductorUsageModel FireDistributionControlCable => _ConductorUsages[5];
+        public ThPDSConductorUsageModel NonFireDistributionControlCable => _ConductorUsages[6];
+        public ThPDSConductorUsageModel FireControlSignalWire => _ConductorUsages[7];
+        public ThPDSConductorUsageModel NonFireControlSignalWire => _ConductorUsages[8];
         string _DefaultLengthOfMunicipalPowerLine;
         public string DefaultLengthOfMunicipalPowerLine
         {
@@ -144,15 +146,15 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
-        public MaterialStructure FirePowerDistributionTrunkLineAndBranchTrunkLine
+        public List<string> FirePowerDistributionTrunkLineAndBranchTrunkLineItemsSource => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FireDistributionTrunkOuterSheathMaterials.Select(x => x.GetEnumDescription()).ToList();
+        public string FirePowerDistributionTrunkLineAndBranchTrunkLine
         {
-            get =>FireDistributionTrunk.OuterSheathMaterial;
+            get => FireDistributionTrunk.OuterSheathMaterial.GetEnumDescription();
             set
             {
                 if (value != FirePowerDistributionTrunkLineAndBranchTrunkLine)
                 {
-                    FireDistributionTrunk.OuterSheathMaterial= value;
+                    FireDistributionTrunk.OuterSheathMaterial = value.GetEnumName<MaterialStructure>();
                     OnPropertyChanged(nameof(FirePowerDistributionTrunkLineAndBranchTrunkLine));
                 }
             }

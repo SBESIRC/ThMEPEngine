@@ -1189,18 +1189,18 @@ namespace TianHua.Electrical.PDS.Diagram
                         var CPS2Text = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CPS2).First();
                         CPS2Text.TextString = circuit.cps2.Content();
 
-                        // 元器件3
-                        var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR).First();
-                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor.ComponentType.GetDescription()];
-                        if (!thirdComponentName.Equals(srcContactor.Name))
-                        {
-                            var thirdPosition = srcContactor.Position;
-                            var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
-                            tableObjs.Add(newComponent);
-                            srcContactor.Erase();
-                        }
-                        var QACText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC).First();
-                        QACText.TextString = circuit.contactor.Content();
+                        //// 元器件3
+                        //var srcContactor = components.Where(c => c.Name == ThPDSCommon.DEFAULT_CONTACTOR).First();
+                        //var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.contactor.ComponentType.GetDescription()];
+                        //if (!thirdComponentName.Equals(srcContactor.Name))
+                        //{
+                        //    var thirdPosition = srcContactor.Position;
+                        //    var newComponent = insertEngine.Insert1(activeDb, configDb, thirdComponentName, thirdPosition, 100 * scale);
+                        //    tableObjs.Add(newComponent);
+                        //    srcContactor.Erase();
+                        //}
+                        //var QACText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_QAC).First();
+                        //QACText.TextString = circuit.contactor.Content();
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
@@ -1269,7 +1269,7 @@ namespace TianHua.Electrical.PDS.Diagram
             var texts = objs.OfType<DBText>().ToList();
             // Conductor
             var conductor = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CONDUCTOR)).First();
-            conductor.TextString = secondaryCircuit.conductor.Content;
+            conductor.TextString = secondaryCircuit.Conductor.Content;
 
             // 回路编号
             var circuitId = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CIRCUIT_NUMBER)).First();

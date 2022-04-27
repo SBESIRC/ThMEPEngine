@@ -11,7 +11,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 {
     public class ThPipeExtractionService
     {
-        public List<Line> GetPipeLines(Point3dCollection pts)
+        public List<Line> GetPipeLines(Point3dCollection pts=null)
         {
             var waterPipeEngine = new ThPipeExtractionEngine();
             //取出所有满足条件的线

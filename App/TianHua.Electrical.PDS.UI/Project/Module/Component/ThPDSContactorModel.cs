@@ -1,5 +1,6 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
+using System.Collections.Generic;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
@@ -36,7 +37,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _contactor.Model;
             set
             {
-                _contactor.Model = value;
+                _contactor.SetModel(value);
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }
@@ -50,7 +51,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _contactor.PolesNum;
             set
             {
-                _contactor.PolesNum = value;
+                _contactor.SetPolesNum(value);
                 OnPropertyChanged(nameof(PolesNum));
                 OnPropertyChanged(nameof(Content));
             }
@@ -64,10 +65,31 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _contactor.RatedCurrent;
             set
             {
-                _contactor.RatedCurrent = value;
+                _contactor.SetRatedCurrent(value);
                 OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(RatedCurrent));
             }
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _contactor.GetPolesNums();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeRatedCurrents
+        {
+            get => _contactor.GetRatedCurrents();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _contactor.GetModels();
         }
     }
 }

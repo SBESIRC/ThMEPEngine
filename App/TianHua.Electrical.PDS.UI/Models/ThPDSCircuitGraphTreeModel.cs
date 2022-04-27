@@ -11,6 +11,8 @@ namespace TianHua.Electrical.PDS.UI.Models
     public class ThPDSCircuitGraphTreeModel : NotifyPropertyChangedBase
     {
         public int Id { get; set; }
+        public string Key { get; set; }
+        public object Tag { get; set; }
         public ThPDSCircuitGraphTreeModel Parent { get; set; }
         public ThPDSCircuitGraphTreeModel Root { get; set; }
         string _Name;
@@ -39,7 +41,7 @@ namespace TianHua.Electrical.PDS.UI.Models
         {
             if (value == _IsChecked) return;
             _IsChecked = value;
-            if (updateChildren && _IsChecked.HasValue)
+            if (updateChildren && _IsChecked.HasValue && DataList != null)
             {
                 foreach (var o in DataList)
                 {

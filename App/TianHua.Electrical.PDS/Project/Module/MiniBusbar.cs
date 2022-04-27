@@ -59,7 +59,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public double PowerFactor { get; set; }
 
         /// <summary>
-        /// 坑位1：预留
+        /// 坑位1：断路器
         /// </summary>
         public Breaker Breaker { get; set; }
 
@@ -77,7 +77,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             if (node.Details.MiniBusbars.ContainsKey(this))
             {
                 this.PowerFactor = powerFactor;
-                PDSProject.Instance.graphData.UpdateWithMiniBusbar(node ,this, false);
+                node.UpdateWithMiniBusbar(this, false);
             }
         }
 
@@ -90,7 +90,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             if (node.Details.MiniBusbars.ContainsKey(this))
             {
                 this.DemandFactor = demandFactor;
-                PDSProject.Instance.graphData.UpdateWithMiniBusbar(node, this, false);
+                node.UpdateWithMiniBusbar(this, false);
             }
         }
     }

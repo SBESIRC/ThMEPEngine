@@ -26,6 +26,11 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         /// </summary>
         public ConductorUse FireDistributionTrunk = new ConductorUse() { IsSpecialConductorType = true, OuterSheathMaterial = MaterialStructure.NG_A_BTLY, ConductorType = ConductorType.消防配电干线 };
 
+        /// <summary>
+        /// 消防配电干线外护套材质范围
+        /// </summary>
+        public List<MaterialStructure> FireDistributionTrunkOuterSheathMaterials = new List<MaterialStructure>() { MaterialStructure.BTTZ, MaterialStructure.BTTRZ, MaterialStructure.RTTZ, MaterialStructure.NG_A_BTLY };
+
 
         //UI的Table显示顺序为
         //ConductorType(导体用途) - ConductorMaterial(燃烧特性代号) - OuterSheathMaterial(材料特征及结构)
@@ -82,23 +87,20 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         #endregion
 
         #region 常用用电设备供电
-        //public string MotorUIChoise = "分立元件";//UI端的Combox要做成分立元件和CPS，两种模式
         public MotorUIChoise MotorUIChoise = MotorUIChoise.分立元件;//UI端的Combox要做成分立元件和CPS，两种模式
         //消防电动机
         public double FireMotorPower = 45;//kw
-        //public string FireStartType = "星三角启动";//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
         public FireStartType FireStartType = FireStartType.星三角启动;//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
         //普通电动机
         public double NormalMotorPower = 45;//kw
-        //public string NormalStartType = "星三角启动";//同上
         public FireStartType NormalStartType = FireStartType.星三角启动;//同上
         #endregion
     }
     public enum FireStartType
     {
         星三角启动,
-        软启动器启动,
-        变频器启动,
+        //软启动器启动,
+        //变频器启动,
     }
     public enum MotorUIChoise
     {
@@ -127,14 +129,26 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 
         public bool IsSpecialConductorType { get; set; }
 
-        public string Content { 
-            get 
-            { 
-                if(IsSpecialConductorType)
-                    return OuterSheathMaterial.GetDescription(); 
+        public string Content
+        {
+            get
+            {
+                if (IsSpecialConductorType)
+                    return OuterSheathMaterial.GetDescription();
                 else
                     return ConductorMaterial + "-" + OuterSheathMaterial.GetDescription();
-            } 
+            }
         }
+
+        public bool Refractory { get; set; }
+        public bool FlameRetardant { get; set; }
+        public bool LowToxicity { get; set; }
+        public bool LowSmoke { get; set; }
+        public bool HalogenFree { get; set; }
+        public Level Level { get; set; }
+    }
+    public enum Level
+    {
+        A, B, C, D,
     }
 }

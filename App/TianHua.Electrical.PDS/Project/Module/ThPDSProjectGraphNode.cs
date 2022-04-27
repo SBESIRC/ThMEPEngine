@@ -5,18 +5,16 @@ using TianHua.Electrical.PDS.Project.Module.Circuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
-    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeCompareTag>
+    public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeTag>
     {
         public ThPDSLoad Load { get; set; }
         public PDSNodeType Type { get; set; }
         public NodeDetails Details { get; set; }
-        public ThPDSProjectGraphNodeCompareTag Tag { get; set; }
-        public bool IsStartVertexOfGraph { get; set; }
+        public ThPDSProjectGraphNodeTag Tag { get; set; }
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
             Type = PDSNodeType.None;
-            IsStartVertexOfGraph = false;
             Details = new NodeDetails();
         }
 
@@ -26,7 +24,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public void SetNodeHighPower(double power)
         {
             this.Details.HighPower = power;
-            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+            this.UpdateWithNode(false);
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public void SetNodeLowPower(double power)
         {
             this.Details.LowPower = power;
-            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+            this.UpdateWithNode(false);
         }
 
         /// <summary>
@@ -63,7 +61,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         throw new NotSupportedException();
                     }
             }
-            PDSProject.Instance.graphData.UpdateWithNode(this, true);
+            this.UpdateWithNode(true);
         }
 
         /// <summary>
@@ -73,7 +71,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public void SetPowerFactor(double powerFactor)
         {
             Load.PowerFactor = powerFactor;
-            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+            this.UpdateWithNode(false);
         }
 
         /// <summary>
@@ -83,7 +81,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public void SetDemandFactor(double demandFactor)
         {
             Load.DemandFactor = demandFactor;
-            PDSProject.Instance.graphData.UpdateWithNode(this, false);
+            this.UpdateWithNode(false);
         }
 
         #region

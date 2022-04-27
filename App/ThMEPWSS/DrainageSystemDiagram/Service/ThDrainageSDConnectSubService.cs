@@ -7,6 +7,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
 
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageSDConnectSubService

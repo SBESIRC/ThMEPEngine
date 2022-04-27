@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Diagram.ViewModel;
@@ -15,7 +16,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         public WaterSupplySetVM setViewModel;
         //private DrainageSetViewModel orgViewModel;
-        public WaterSupplySystemSet( WaterSupplySetVM viewModel = null)
+        public WaterSupplySystemSet(WaterSupplySetVM viewModel = null)
         {
             InitializeComponent();
             this.Title = "参数设置";
@@ -43,7 +44,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.DialogResult = true;
             this.Close();
         }
-      
+
         /// <summary>
         /// 楼层线间距
         /// </summary>
@@ -68,7 +69,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void FloorLineGap_KeyPress(object sender, KeyEventArgs e)//输入键值判断，只能输入 0 到 9
         {
-            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)  || (e.Key >= Key.D0 && e.Key <= Key.D9))
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || (e.Key >= Key.D0 && e.Key <= Key.D9))
             {
                 e.Handled = false;
             }
@@ -82,7 +83,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             TextBox txtBox = sender as TextBox;
             string strText = txtBox.Text;
-            if(strText.Length >= 5)
+            if (strText.Length >= 5)
                 (sender as TextBox).Text = Convert.ToString(9999);
             else
             {
@@ -100,8 +101,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void FlushFaucet_KeyPress(object sender, KeyEventArgs e)
         {
-            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || 
-                (e.Key >= Key.D0 && e.Key <= Key.D9) || 
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) ||
+                (e.Key >= Key.D0 && e.Key <= Key.D9) ||
                  e.Key == Key.OemComma || e.Key == Key.OemMinus)
             {
                 e.Handled = false;
@@ -123,9 +124,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 if (item >= '0' && item <= '9')
                 {
-                    if(item == '0' && newStr.Length > 0)
+                    if (item == '0' && newStr.Length > 0)
                     {
-                        if(newStr.Last() != '0' && newStr.Last() != '-' && newStr.Last() != ',')
+                        if (newStr.Last() != '0' && newStr.Last() != '-' && newStr.Last() != ',')
                         {
                             newStr += item;
                         }
@@ -134,9 +135,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     {
                         newStr += item;
                     }
-                    
+
                 }
-                if(item == '-' || item == ',')
+                if (item == '-' || item == ',')
                 {
                     newStr += item;
                 }
@@ -149,8 +150,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void NoCheckValve_KeyPress(object sender, KeyEventArgs e)
         {
-            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || 
-                (e.Key >= Key.D0 && e.Key <= Key.D9) || 
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) ||
+                (e.Key >= Key.D0 && e.Key <= Key.D9) ||
                  e.Key == Key.OemComma || e.Key == Key.OemMinus)
             {
                 e.Handled = false;
@@ -250,7 +251,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void LostFocus_MaxDayHourCoefficient(object sender, RoutedEventArgs e)
         {
             TextBox txtBox = sender as TextBox;
-            
+
             if ((sender as TextBox).Text.Contains('.'))
             {
                 (sender as TextBox).Text = Convert.ToDouble((sender as TextBox).Text).ToString("#0.0");
@@ -357,7 +358,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     newStr += item;
                 }
-                if(item == '.' && !newStr.Contains('.'))
+                if (item == '.' && !newStr.Contains('.'))
                 {
                     newStr += item;
                 }
@@ -386,4 +387,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         }
     }
+
+
+   
+
 }

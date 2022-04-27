@@ -16,11 +16,19 @@ using ThMEPArchitecture.ParkingStallArrangement;
 using ThMEPArchitecture.ParkingStallArrangement.IO;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
-
+using ThMEPArchitecture.MultiProcess;
 namespace ThMEPArchitecture
 {
     public partial class ThParkingStallArrangement
     {
+        [CommandMethod("TIANHUACAD", "-THDJCCWBZ", CommandFlags.Modal)]
+        public void ThMPArrangement()
+        {
+            using (var cmd = new ThMPArrangementCmd())
+            {
+                cmd.Execute();
+            }
+        }
         [CommandMethod("TIANHUACAD", "-THZDCWYCL", CommandFlags.Modal)]
         public void ThParkingStallPreprocess()
         {

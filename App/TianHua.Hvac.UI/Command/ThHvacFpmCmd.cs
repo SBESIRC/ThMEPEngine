@@ -55,7 +55,6 @@ namespace TianHua.Hvac.UI.Command
             DrawBrokenLines(portParam, out ObjectIdList brokenLineIds);
             if (!status)
                 return;
-            var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
             if (isSelectFan)
             {
                 var knife = new ThSepereateFansDuct(startPoint, connNotRoomLines, dicFans);
@@ -64,8 +63,8 @@ namespace TianHua.Hvac.UI.Command
                 var flag = dicFans.Count > 1;
                 if (flag)
                 {
-                    ThNotRoomStartComp.DrawEndLineEndComp(ref anay.fanDucts, startPoint, portParam, service);// 先插入comp
-                    DrawMultiFanMainDuct(ref gId, anay, startPoint, fanParam, curDbPath, portParam);                        // 会改变线信息
+                    ThNotRoomStartComp.DrawEndLineEndComp(ref anay.fanDucts, startPoint, portParam);// 先插入comp
+                    DrawMultiFanMainDuct(ref gId, anay, startPoint, fanParam, curDbPath, portParam);// 会改变线信息
                 }
                 var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var wallIndex = ThMEPHVACService.CreateRoomOutlineIndex(portParam.srtPoint);
@@ -77,15 +76,15 @@ namespace TianHua.Hvac.UI.Command
                     var wallLines = GetWalls(p, wallIndex);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
-                        cmdService.PressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic, brokenLineIds, service);
+                        cmdService.PressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic, brokenLineIds);
                     else
-                        cmdService.NotPressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic, brokenLineIds, service);
+                        cmdService.NotPressurizedAirSupply(ref gId, curDbPath, fan, model, wallLines, portParam, flag, allFansDic, brokenLineIds);
                 }
             }
             else
             {
-                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic, service);
-                ductPort.Execute(ref gId);
+                var ductPort = new ThHvacDuctPortsCmd(curDbPath, portParam, allFansDic);
+                ductPort.Execute(ref gId, brokenLineIds);
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
 #if ACAD_ABOVE_2014

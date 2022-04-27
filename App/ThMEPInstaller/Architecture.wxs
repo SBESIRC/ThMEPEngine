@@ -11,6 +11,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" Guid="{0792C5BD-2D20-45ED-9E66-A22141C1E44D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Architecture.WPI.UI.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Debug" Guid="{879E48DA-9D59-4561-85C6-433F59F6B5E0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThParkingStall.Core.exe" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -20,6 +23,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" Guid="{F1C4A540-8912-4645-BFDF-76481DDC2F8C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Architecture.WPI.UI.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Debug" Guid="{0EF2953D-79EB-4B02-A4BE-1820C1CA3AB3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThParkingStall.Core.exe" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -28,6 +34,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" Guid="{BACFE15A-D1CC-4B04-83AA-87C3A2D934CE}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Debug" Guid="{4D6A261F-B6D5-442C-B912-83CCA6004AE1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThParkingStall.Core.exe" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -39,6 +48,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" Guid="{8C5A9698-B6F0-402B-80B9-2FB3B2ADC718}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Architecture.WPI.UI.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Release" Guid="{83503E34-FD9C-4ACD-A2BC-5A9918F75F0A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThParkingStall.Core.exe" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -47,7 +59,10 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" Guid="{79FE0FA4-1BE9-4FF0-9B95-373D5EC74F35}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Architecture.WPI.UI.dll" />
-            </Component>   
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Release" Guid="{734498F9-BD2F-4697-94BF-62BEDE6CAD60}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThParkingStall.Core.exe" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -56,6 +71,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" Guid="{9FDCE59A-E8B9-4BD8-91AC-064E9FEEB92A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Release" Guid="{21CD7280-9138-4BCB-81D8-4F9128BF503D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThParkingStall.Core.exe" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -69,6 +87,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Release" />
@@ -76,6 +97,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ParkingStall_Core_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ParkingStall_Core_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ParkingStall_Core_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

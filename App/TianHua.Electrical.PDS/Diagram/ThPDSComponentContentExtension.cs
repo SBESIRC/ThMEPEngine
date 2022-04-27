@@ -34,18 +34,42 @@ namespace TianHua.Electrical.PDS.Diagram
 
         public static string Content(this Breaker breaker)
         {
-            if(breaker.ComponentType == ComponentType.CB || breaker.ComponentType == ComponentType.一体式RCD)
+            switch(breaker.ComponentType)
             {
-                return $"{breaker.Model}{breaker.FrameSpecification} {breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}{(breaker.Appendix == Project.Module.AppendixType.ST?"/ST":"")}";
+                case ComponentType.CB:
+                    {
+                        if (breaker.Appendix == Project.Module.AppendixType.无)
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}";
+                        }
+                        else
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix}";
+                        }
+                    }
+                case ComponentType.一体式RCD:
+                    {
+                        if (breaker.Appendix == Project.Module.AppendixType.无)
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}";
+                        }
+                        else
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}/{breaker.Appendix}";
+                        }
+                    }
+                case ComponentType.组合式RCD:
+                    {
+                        return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix} {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
+                    }
+                default:
+                    throw new NotSupportedException();
             }
-            else if(breaker.ComponentType == ComponentType.组合式RCD)
-            {
-                return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/RC {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+        }
+
+        public static string Content(this TransferSwitch transferSwitch)
+        {
+            return $"{transferSwitch.Model} {transferSwitch.RatedCurrent}A {transferSwitch.PolesNum}";
         }
     }
 }

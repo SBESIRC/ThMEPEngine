@@ -85,6 +85,14 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 Data = br.GetEffectiveName(),
             });
 
+            //var geom = br.GetTransformedCopy(matrix);
+            //var data = new ThBlockReferenceData(br.ObjectId, matrix);
+            //results.Add(new ThRawIfcDistributionElementData()
+            //            {
+            //                Geometry = geom,
+            //                Data = data,
+            //            });
+
             return results;
         }
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)

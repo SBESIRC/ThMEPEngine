@@ -1,10 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +30,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 var entities = database.ModelSpace.OfType<Entity>();
                 foreach (var ent in entities)
                 {
-                    if(IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
+                    if (IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         retLines.Add(TianZhengLine(ent));
                     }
@@ -36,14 +38,14 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 return retLines;
             }
         }
-        public List<Line> GetPipeLines(Point3dCollection pts)
+        public List<Line> GetPipeLines(Point3dCollection pts=null)
         {
             using (var database = AcadDatabase.Active())
             {
                 var retLines = new List<Line>();
                 var entities = database.ModelSpace.OfType<Entity>();
                 DBObjectCollection dbObjs = null;
-                if (pts.Count > 0)
+                if (pts!=null)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(entities.ToCollection());
                     var pline = new Polyline()
@@ -57,13 +59,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                 {
                     dbObjs = entities.ToCollection();
                 }
-                foreach(var obj in dbObjs)
+                foreach (var obj in dbObjs)
                 {
                     var ent = obj as Entity;
                     if (IsLayer(ent.Layer) && ThUndergroundWaterSystemUtils.IsTianZhengElement(ent))
                     {
                         var line = TianZhengLine(ent);
-                        if(line.Length >1.0)
+                        line.Linetype = ent.Linetype;
+                        line.ColorIndex = ent.ColorIndex;
+                        line.Layer = ent.Layer;
+                        if (line.Length > 1.0)
                         {
                             retLines.Add(line);
                         }
@@ -74,7 +79,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public bool IsLayer(string layer)
         {
-            if ((layer.ToUpper().Contains("W-WSUP") && layer.ToUpper().Contains("COOL-PIPE"))|| layer.ToUpper().Contains("PIPE-给水"))
+            if ((layer.ToUpper().Contains("W-WSUP") && layer.ToUpper().Contains("COOL-PIPE")) || layer.ToUpper().Contains("PIPE-给水"))
             {
                 return true;
             }

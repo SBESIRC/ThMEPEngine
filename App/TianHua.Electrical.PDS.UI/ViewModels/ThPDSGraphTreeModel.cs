@@ -12,6 +12,11 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             this.o = o;
         }
         public int Id => o.Id;
+        public object Tag
+        {
+            get => o.Tag;
+            set => o.Tag = value;
+        }
         public string Name
         {
             get => o.Name;

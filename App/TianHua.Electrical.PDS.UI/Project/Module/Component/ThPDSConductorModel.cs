@@ -9,7 +9,7 @@ using TianHua.Electrical.PDS.UI.Editors;
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     /// <summary>
-    /// 导体（配电回路）
+    /// 导体
     /// </summary>
     public class ThPDSConductorModel : NotifyPropertyChangedBase
     {
@@ -35,6 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _conductor.OuterSheathMaterial;
         }
 
+        [Browsable(true)]
         [DisplayName("电缆根数")]
         [Category("电线电缆参数")]
         [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
@@ -44,11 +45,28 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _conductor.SetNumberOfPhaseWire(value);
-                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(NumberOfPhaseWire));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
+
+        [Browsable(true)]
+        [DisplayName("控制线芯数")]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorWireNumbersPropertyEditor), typeof(PropertyEditorBase))]
+        public int ConductorCount
+        {
+            get => _conductor.ConductorCount;
+            set
+            {
+                _conductor.SetConductorCount(value);
+                OnPropertyChanged(nameof(ConductorCount));
+                OnPropertyChanged(nameof(Content));
+            }
+        }
+
+        [Browsable(true)]
         [Category("电线电缆参数")]
         [DisplayName("相导体截面")]
         [Editor(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
@@ -58,24 +76,25 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _conductor.SetConductorCrossSectionalArea(value);
-                OnPropertyChanged(nameof(Content));
                 OnPropertyChanged(nameof(ConductorCrossSectionalArea));
+                OnPropertyChanged(nameof(Content));
             }
         }
 
-        //[ReadOnly(true)]
-        //[DisplayName("中性线导体截面")]
-        //public double NeutralConductorCrossSectionalArea
-        //{
-        //    get => _conductor.NeutralConductorCrossSectionalArea;
-        //}
-
-        //[ReadOnly(true)]
-        //[DisplayName("PE线导体截面")]
-        //public double PECrossSectionalArea
-        //{
-        //    get => _conductor.PECrossSectionalArea;
-        //}
+        [Browsable(true)]
+        [Category("电线电缆参数")]
+        [DisplayName("控制线导体截面")]
+        [Editor(typeof(ThPDSConductorCrossSectionalAreasPropertyEditor), typeof(PropertyEditorBase))]
+        public double ControlConductorCrossSectionalArea
+        {
+            get => _conductor.ConductorCrossSectionalArea;
+            set
+            {
+                _conductor.SetConductorCrossSectionalArea(value);
+                OnPropertyChanged(nameof(ControlConductorCrossSectionalArea));
+                OnPropertyChanged(nameof(Content));
+            }
+        }
 
         [ReadOnly(true)]
         [DisplayName("敷设方式")]
@@ -119,9 +138,21 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
+        public List<int> ConductorCounts => _conductor.GetConductorCounts();
+
+        [ReadOnly(true)]
+        [Browsable(false)]
         public List<double> AlternativeConductorCrossSectionalAreas
         {
             get => _conductor.GetConductorCrossSectionalAreas();
         }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public ComponentType ComponentType => _conductor.ComponentType;
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsCustom => _conductor.IsCustom;
     }
 }

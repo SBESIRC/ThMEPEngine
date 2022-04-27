@@ -239,7 +239,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, firLine.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
                 }
-                return new RouteModel(resConnectLine, type, connectPt);
+                return new RouteModel(resConnectLine, type, connectPt, false);
             }
 
             var closetP = closetLine.GetClosestPointTo(connectPt, true);
@@ -250,7 +250,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                      ? closetLine.StartPoint : closetLine.EndPoint;
                 resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, otherP.ToPoint2D(), 0, 0, 0);
             }
-            return new RouteModel(resConnectLine, type, connectPt);
+            return new RouteModel(resConnectLine, type, connectPt, false);
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var connectLine = new Polyline();
                 connectLine.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
                 connectLine.AddVertexAt(1, pipe.Position.ToPoint2D(), 0, 0, 0);
-                resPolys.Add(new RouteModel(connectLine, pipe.PipeType, pipe.Position));
+                resPolys.Add(new RouteModel(connectLine, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe));
             }
             return resPolys;
         }

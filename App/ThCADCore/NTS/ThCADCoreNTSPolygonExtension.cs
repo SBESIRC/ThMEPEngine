@@ -150,7 +150,7 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection GeometryIntersection(this AcPolygon polyFirst, AcPolygon polySec)
         {
-            return polyFirst.ToNTSPolygon().Intersection(polySec.ToNTSPolygon())
+            return OverlayNGRobust.Overlay(polyFirst.ToNTSPolygon(), polySec.ToNTSPolygon(), SpatialFunction.Intersection)
                 .ToDbCollection()
                 .Cast<Entity>()
                 .Where(o => o is AcPolygon)

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Editors;
 using HandyControl.Controls;
@@ -35,7 +36,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _isolatingSwitch.Model;
             set
             {
-                _isolatingSwitch.Model = value;
+                _isolatingSwitch.SetModel(value);
                 OnPropertyChanged(nameof(Model));
                 OnPropertyChanged(nameof(Content));
             }
@@ -49,7 +50,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             get => _isolatingSwitch.PolesNum;
             set
             {
-                _isolatingSwitch.PolesNum = value;
+                _isolatingSwitch.SetPolesNum(value);
                 OnPropertyChanged(nameof(PolesNum));
                 OnPropertyChanged(nameof(Content));
             }
@@ -77,13 +78,27 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public string Content => $"{Model} {RatedCurrent}/{PolesNum}";
+        public string Content => _isolatingSwitch.Content();
 
         [ReadOnly(true)]
         [Browsable(false)]
         public List<string> AlternativeRatedCurrents
         {
             get => _isolatingSwitch.GetRatedCurrents();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeModels
+        {
+            get => _isolatingSwitch.GetModels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativePolesNums
+        {
+            get => _isolatingSwitch.GetPolesNums();
         }
     }
 }

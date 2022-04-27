@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(1.8)" SizeToContent="Manual" Height="710"
+              Title="车位自动排布(2.0)" SizeToContent="Manual" Height="710"
               Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -18,17 +18,20 @@
     <Grid>
         <StackPanel>
             <StackPanel >
+                <StackPanel Orientation="Horizontal">
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
+                <CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>
+                </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动设置分区线，自动迭代排布</RadioButton>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}" Width="210">
                         <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">只生成分区线</CheckBox>
-                        <Label Margin="0,2,5,0">方案数：</Label>
-                        <TextBox Width="25" Height="15" Margin="0,4,5,5" Text="{Binding LayoutCount}"></TextBox>
+                        <Label Margin="0,2,0,0">方案数：</Label>
+                        <TextBox Width="25" Height="15" Margin="0,5,0,5" Text="{Binding LayoutCount}"></TextBox>
                     </StackPanel>
                 </StackPanel>
 
@@ -134,7 +137,9 @@
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                     <StackPanel>
                         <StackPanel >
-                            <Label>速度：</Label>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>速度：</Label>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">快速(5分钟)</RadioButton>
                                 <RadioButton GroupName="SpeedGroup" IsChecked="{Binding CommandRunSpeed, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">一般(30分钟)</RadioButton>

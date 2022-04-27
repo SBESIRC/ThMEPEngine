@@ -39,3 +39,4 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public int NumberOfPhaseWire { get; set; }
     }
 }
+

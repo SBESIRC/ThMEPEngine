@@ -98,6 +98,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" Guid="{14468397-BCD4-4809-A9F1-2F3CAA2C2D26}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\MathNet.Numerics.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Debug" Guid="{4E7FD0D6-FB9B-4D5E-9C85-95F6574C669A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Svg_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" Guid="{9B7D73A4-6EF1-493D-8495-36FA7CE1BA31}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Fizzler.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -200,6 +206,13 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" Guid="{9CD21CF6-E7A0-42FB-9294-B588B8A0E0E4}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MathNet.Numerics.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Debug" Guid="{E409CF40-A540-414C-A718-372E10567D15}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Svg_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" Guid="{899F2D51-A9BE-4E58-8919-8054BF47A418}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Fizzler.dll" />
+            </Component>
+
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -301,6 +314,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" Guid="{129D4C4A-C4C5-4059-8AB9-CEA6CCDD1D8E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\MathNet.Numerics.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Debug" Guid="{E1729D47-97DA-49B0-B7C8-F6E7269D4B2F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Svg_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" Guid="{5DF91514-756D-4F12-AD76-9C04A6D051A4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Fizzler.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -405,6 +424,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" Guid="{2B8F6B9E-CB3A-4DF9-AE93-80851E31DA55}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\MathNet.Numerics.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Release" Guid="{61E109DD-7731-4A46-A192-E2CD1207B007}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Svg_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" Guid="{54D4C601-30E7-4E8A-9DAC-5CC2554B60A0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Fizzler.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19_Runtimes_X64_Native">
             <?define OutputPath_R19_Release="bin\Release-NET40" ?>
@@ -507,6 +532,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" Guid="{C88993A3-9096-44D2-B775-1715ABE2224F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MathNet.Numerics.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Release" Guid="{F4DFF5CB-B397-4862-995A-04A3CCAF844F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Svg_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Release" Guid="{1E141B60-A877-47B6-86F5-8E18572D72C4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Fizzler.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20_Runtimes_X64_Native">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -608,6 +639,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" Guid="{B3CBD377-5C6D-478B-96FB-266F81648611}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\MathNet.Numerics.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Release" Guid="{30FCEFB0-3192-4DCF-9F44-027B294E5309}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Svg_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Svg.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Release" Guid="{69F46A33-D8C4-4312-8B92-76EAFB73A93A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Fizzler_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Fizzler.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22_Runtimes_X64_Native">
@@ -718,6 +755,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -816,6 +859,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MathNet_Numerics_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MathNet_Numerics_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MathNet_Numerics_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Svg_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Svg_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Svg_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

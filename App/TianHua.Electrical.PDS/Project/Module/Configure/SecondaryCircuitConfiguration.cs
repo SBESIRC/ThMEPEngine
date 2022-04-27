@@ -14,9 +14,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     public class SecondaryCircuitConfiguration
     {
         /// <summary>
+        /// 消防控制回路信息
+        /// </summary>
+        public static List<SecondaryCircuitInfo> FireSecondaryCircuitInfos = new List<SecondaryCircuitInfo>();
+
+        /// <summary>
+        /// 非消防控制回路信息
+        /// </summary>
+        public static List<SecondaryCircuitInfo> NonFireSecondaryCircuitInfos = new List<SecondaryCircuitInfo>();
+
+        /// <summary>
         /// 控制回路配置
         /// </summary>
-        public static Dictionary<string,List<SecondaryCircuitInfo>> SecondaryCircuitInfos = new Dictionary<string, List<SecondaryCircuitInfo>>();
+        public static Dictionary<string,List<SecondaryCircuitInfo>> SecondaryCircuitConfigs = new Dictionary<string, List<SecondaryCircuitInfo>>();
     }
 
     public class SecondaryCircuitInfo

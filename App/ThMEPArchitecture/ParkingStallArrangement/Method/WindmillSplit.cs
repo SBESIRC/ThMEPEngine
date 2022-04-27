@@ -340,7 +340,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 foreach (var seg in segLines)
                 {
                     seg.Layer = splitterDebugLayerName;
-                    currentDb.CurrentSpace.Add(seg);
+                    //currentDb.CurrentSpace.Add(seg);
                 }
             }
 #endif

@@ -33,7 +33,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                 }
                 InsertBlockService.InsertConnectPipe(group.Select(x=>x.route).ToList(), layer, null);
             }
-            
         }
     }
 }

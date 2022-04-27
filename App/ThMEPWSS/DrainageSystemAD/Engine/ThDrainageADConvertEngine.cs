@@ -14,6 +14,9 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Diagnostics;
 
+using ThMEPWSS.DrainageSystemDiagram.Model;
+using ThMEPWSS.DrainageSystemDiagram.Service;
+
 namespace ThMEPWSS.DrainageSystemDiagram
 {
     public class ThDrainageADConvertEngine
@@ -71,7 +74,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
             //插入水表阀
             var valveOutput = ThDrainageADConvertValveService.convertValveInPipe(dataset.valveList, convertedPipe, convertNodeDict);
             DrawUtils.ShowGeometry(convertedPipe, "l2ADLines", 200, 30);
-            valveOutput.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l2valve", 40, 30));
+            valveOutput.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l2valve", 40, 30));
 
             //插入末端阀
             var endValveOutput = ThDrainageADConvertValveService.convertEndValve(endStackPipe, endToiDict, convertNodeDict);
@@ -95,11 +98,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
      
             //计算管径标注位置，主管支管 
             var nodeDiaDimOutput = ThDrainageADDiameterDim.calculatePositionDiaDim(nodeDia, convertNodeDict, allIsolateLine);
-            nodeDiaDimOutput.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l1dim", 191, 30, 500));
+            nodeDiaDimOutput.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1dim", 191, 30, 500));
 
             //计算管径标注位置，末端立管 
             var nodeDiaDimEndOutput = ThDrainageADDiameterDim.calculatePositionDiaDimEnd(allNodeDiaDict, endStackPipe, allIsolateLine);
-            nodeDiaDimEndOutput.ForEach(x => DrawUtils.ShowGeometry(x.position, x.dir, "l1dimEnd", 191, 30, 500));
+            nodeDiaDimEndOutput.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1dimEnd", 191, 30, 500));
             DrawUtils.ShowGeometry(allIsolateLine, "l0isolate", 2);
 
             //for all final output data

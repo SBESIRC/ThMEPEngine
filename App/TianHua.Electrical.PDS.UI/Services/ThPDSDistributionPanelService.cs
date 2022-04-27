@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using ThCADExtension;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -11,321 +12,17 @@ using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
-using Microsoft.Toolkit.Mvvm.Input;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.Helpers;
 using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.UI.ViewModels;
 using TianHua.Electrical.PDS.UI.Converters;
+using TianHua.Electrical.PDS.UI.Project.Module;
+using TianHua.Electrical.PDS.UI.Project.Module.Component;
+using Microsoft.Toolkit.Mvvm.Input;
+
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
-    public struct GArc
-    {
-        public double X;
-        public double Y;
-        public Point Center => new(X, Y);
-        public double Radius;
-        public double StartAngle;
-        public double EndAngle;
-        public bool IsClockWise;
-        public GArc(Point center, double radius, double startAngle, double endAngle, bool isClockWise) : this(center.X, center.Y, radius, startAngle, endAngle, isClockWise) { }
-        public GArc(double x, double y, double radius, double startAngle, double endAngle, bool isClockWise)
-        {
-            X = x;
-            Y = y;
-            Radius = radius;
-            StartAngle = startAngle;
-            EndAngle = endAngle;
-            IsClockWise = isClockWise;
-        }
-        public GCircle ToGCircle() => new(X, Y, Radius);
-    }
-    public struct GRect
-    {
-        public class EqualityComparer : IEqualityComparer<GRect>
-        {
-            double tol;
-            public EqualityComparer(double tollerence)
-            {
-                this.tol = tollerence;
-            }
-            public bool Equals(GRect x, GRect y)
-            {
-                return x.EqualsTo(y, tol);
-            }
-            public int GetHashCode(GRect obj)
-            {
-                return 0;
-            }
-        }
-        public bool IsNull => Equals(this, default(GRect));
-        public bool IsValid => Width > 0 && Height > 0;
-        public double MinX { get; }
-        public double MinY { get; }
-        public double MaxX { get; }
-        public double MaxY { get; }
-        public Point LeftTop => new Point(MinX, MaxY);
-        public Point LeftButtom => new Point(MinX, MinY);
-        public Point RightButtom => new Point(MaxX, MinY);
-        public Point RightTop => new Point(MaxX, MaxY);
-        public Point Center => new Point(CenterX, CenterY);
-        public GRect(double x1, double y1, double x2, double y2)
-        {
-            MinX = Math.Min(x1, x2);
-            MinY = Math.Min(y1, y2);
-            MaxX = Math.Max(x1, x2);
-            MaxY = Math.Max(y1, y2);
-        }
-        public GRect OffsetXY(Vector v)
-        {
-            return this.OffsetXY(v.X, v.Y);
-        }
-        public GRect OffsetXY(double deltaX, double deltaY)
-        {
-            return new GRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
-        }
-        public static GRect Create(double widht, double height)
-        {
-            return new GRect(0, 0, widht, height);
-        }
-        public static GRect Create(Point pt, double extX, double extY)
-        {
-            return new GRect(pt.X - extX, pt.Y - extY, pt.X + extX, pt.Y + extY);
-        }
-        public static GRect Create(Point pt, double ext)
-        {
-            return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
-        }
-        public GRect(Point leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
-        {
-        }
-        public GRect(Point p1, Point p2) : this(p1.X, p1.Y, p2.X, p2.Y)
-        {
-        }
-        public double Radius => Math.Sqrt(Math.Pow(Width / 2, 2) + Math.Pow(Height / 2, 2));
-        public double Width => MaxX - MinX;
-        public double Height => MaxY - MinY;
-        public double CenterX => (MinX + MaxX) / 2;
-        public double CenterY => (MinY + MaxY) / 2;
-        public double OuterRadius => (new Point(MinX, MinY)).GetDistanceTo(new Point(CenterX, CenterY));
-        public double MiddleRadius => Math.Max(Width, Height) / 2;
-        public double InnerRadius => Math.Min(Width, Height) / 2;
-        public GRect Expand(double thickness)
-        {
-            return new GRect(this.MinX - thickness, this.MinY - thickness, this.MaxX + thickness, this.MaxY + thickness);
-        }
-        public GRect Expand(double dx, double dy)
-        {
-            return new GRect(this.MinX - dx, this.MinY - dy, this.MaxX + dx, this.MaxY + dy);
-        }
-        public bool ContainsRect(GRect rect)
-        {
-            return rect.MinX > this.MinX && rect.MinY > this.MinY && rect.MaxX < this.MaxX && rect.MaxY < this.MaxY;
-        }
-        public bool ContainsPoint(Point point)
-        {
-            return MinX <= point.X && point.X <= MaxX && MinY <= point.Y && point.Y <= MaxY;
-        }
-        public bool EqualsTo(GRect other, double tollerance)
-        {
-            return Math.Abs(this.MinX - other.MinX) < tollerance && Math.Abs(this.MinY - other.MinY) < tollerance
-                && Math.Abs(this.MaxX - other.MaxX) < tollerance && Math.Abs(this.MaxY - other.MaxY) < tollerance;
-        }
-        public static GRect Combine(IEnumerable<GRect> rs)
-        {
-            double minX = double.MaxValue, minY = double.MaxValue;
-            double maxX = double.MinValue, maxY = double.MinValue;
-            var ok = false;
-            foreach (var r in rs)
-            {
-                if (r.MinX < minX) minX = r.MinX;
-                if (r.MinY < minY) minY = r.MinY;
-                if (r.MaxX > maxX) maxX = r.MaxX;
-                if (r.MaxY > maxY) maxY = r.MaxY;
-                ok = true;
-            }
-            if (ok) return new GRect(minX, minY, maxX, maxY);
-            return default;
-        }
-    }
-    public struct GLineSegment
-    {
-        public GLineSegment(Point startPoint, Point endPoint)
-        {
-            StartPoint = startPoint;
-            EndPoint = endPoint;
-        }
-        public Point StartPoint { get; }
-        public Point EndPoint { get; }
-        public bool IsNull => Equals(this, default(GLineSegment));
-        public bool IsValid => StartPoint != EndPoint;
-        public double Length => StartPoint.GetDistanceTo(EndPoint);
-        public GLineSegment Offset(Vector v)
-        {
-            return new GLineSegment(StartPoint + v, EndPoint + v);
-        }
-        public GLineSegment Extend(double ext)
-        {
-            var vec = EndPoint - StartPoint;
-            var len = vec.Length;
-            if (len == 0) return this;
-            var k = ext / len;
-            var ep = EndPoint + vec * k;
-            var sp = StartPoint + vec * (-k);
-            return new GLineSegment(sp, ep);
-        }
-    }
-    public struct GCircle
-    {
-        public double X;
-        public double Y;
-        public double Radius;
-        public bool IsValid => Radius > 0 && !double.IsNaN(X) && !double.IsNaN(Y);
-        public GCircle(double x, double y, double radius)
-        {
-            X = x;
-            Y = y;
-            this.Radius = radius;
-        }
-        public GCircle(Point center, double radius) : this(center.X, center.Y, radius)
-        {
-        }
-        public Point Center => new Point(X, Y);
-        public GCircle OffsetXY(double dx, double dy)
-        {
-            return new GCircle(X + dx, Y + dy, Radius);
-        }
-    }
-    public class LineInfo
-    {
-        public GLineSegment Line;
-        public string LayerName;
-        public double Thickness;
-        public LineInfo(GLineSegment line, string layerName)
-        {
-            this.Line = line;
-            this.LayerName = layerName;
-        }
-    }
-    public class ArcInfo
-    {
-        public GArc Arc;
-        public string LayerName;
-        public ArcInfo(GArc arc, string layerName)
-        {
-            this.Arc = arc;
-            this.LayerName = layerName;
-        }
-    }
-    public class HatchInfo
-    {
-        public IList<Point> Points;
-        public string LayerName;
-        public HatchInfo(IList<Point> points, string layerName)
-        {
-            Points = points;
-            LayerName = layerName;
-        }
-    }
-    public class CircleInfo
-    {
-        public GCircle Circle;
-        public string LayerName;
-        public CircleInfo(Point center, double radius, string layerName) : this(new GCircle(center, radius), layerName)
-        {
-        }
-        public CircleInfo(GCircle circle, string layerName)
-        {
-            this.Circle = circle;
-            this.LayerName = layerName;
-        }
-    }
-    public class BlockDefInfo
-    {
-        public string BlockName;
-        public GRect Bounds;
-        public BlockDefInfo(string blockName, GRect bounds)
-        {
-            BlockName = blockName;
-            Bounds = bounds;
-        }
-    }
-    public class BlockInfo
-    {
-        public string LayerName;
-        public string BlockName;
-        public Point BasePoint;
-        public double Rotate;
-        public double Scale;
-        public Dictionary<string, string> PropDict;
-        public Dictionary<string, object> DynaDict;
-        public BlockInfo(string blockName, string layerName, Point basePoint)
-        {
-            this.LayerName = layerName;
-            this.BlockName = blockName;
-            this.BasePoint = basePoint;
-            this.PropDict = new Dictionary<string, string>();
-            this.DynaDict = new Dictionary<string, object>();
-            this.Rotate = 0;
-            this.Scale = 1;
-        }
-    }
-    public class DBTextInfo
-    {
-        public string LayerName;
-        public string TextStyle;
-        public Point BasePoint;
-        public string Text;
-        public double Rotation;
-        public double Height;
-        public DBTextInfo(Point point, string text, string layerName, string textStyle)
-        {
-            text ??= "";
-            this.LayerName = layerName;
-            this.TextStyle = textStyle;
-            this.BasePoint = point;
-            this.Text = text;
-        }
-    }
-    public static class GeoExtensions
-    {
-        public static double AngleToDegree(this double angle)
-        {
-            return angle * 180 / Math.PI;
-        }
-        public static double AngleFromDegree(this double degree)
-        {
-            return degree * Math.PI / 180;
-        }
-        public static Rect OffsetXY(this Rect r, double dx, double dy)
-        {
-            var r2 = r;
-            r2.Offset(dx, dy);
-            return r2;
-        }
-        public static Rect ToWpfRect(this GRect r) => new(r.LeftTop, r.RightButtom);
-        public static Point OffsetXY(this Point point, double dx, double dy)
-        {
-            point.Offset(dx, dy);
-            return point;
-        }
-        public static Point OffsetY(this Point point, double dy)
-        {
-            point.Offset(0, dy);
-            return point;
-        }
-        public static Point OffsetX(this Point point, double dx)
-        {
-            point.Offset(dx, 0);
-            return point;
-        }
-        public static double GetDistanceTo(this Point pt1, Point pt2)
-        {
-            var v1 = pt1.X - pt2.X;
-            var v2 = pt1.Y - pt2.Y;
-            return Math.Sqrt(v1 * v1 + v2 * v2);
-        }
-    }
     public class ThPDSVertex
     {
         public NodeDetails Detail;
@@ -341,9 +38,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
+        ContextMenu treeCMenu;
+        QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
-            var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
+            if (graph is null) return;
             var vertices = graph.Vertices.Select(x => new ThPDSVertex { Detail = x.Details, Type = x.Type }).ToList();
             var srcLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Source)).ToList();
             var dstLst = graph.Edges.Select(x => graph.Vertices.ToList().IndexOf(x.Target)).ToList();
@@ -351,7 +50,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var details = graph.Edges.Select(x => x.Details).ToList();
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
-            var treeCMenu = tv.ContextMenu;
+            treeCMenu ??= tv.ContextMenu;
             var config = new ThPDSDistributionPanelConfig();
             treeCMenu.DataContext = config;
             var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
@@ -373,11 +72,25 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
+            var selectAllCmd = new RelayCommand(() =>
+            {
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    node.IsChecked = true;
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            });
             var batchGenCmd = new RelayCommand(() =>
             {
                 UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                 try
                 {
+                    if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                     var vertices = graph.Vertices.ToList();
                     var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
                     void dfs(ThPDSCircuitGraphTreeModel node)
@@ -404,6 +117,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         Header="批量生成",
                         Command=batchGenCmd,
                     },
+                    new MenuItem()
+                    {
+                        Header = "全部勾选",
+                        Command = selectAllCmd,
+                    },
                 },
             };
             tv.ContextMenu = treeCmenu;
@@ -414,6 +132,31 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
+            {
+                var h = "平衡相序";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                {
+                    treeCMenu.Items.Add(new MenuItem()
+                    {
+                        Header = h,
+                        Command = new RelayCommand(() =>
+                        {
+                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                        }),
+                    });
+                }
+            }
+            {
+                var h = "全部勾选";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                {
+                    treeCMenu.Items.Add(new MenuItem()
+                    {
+                        Header = h,
+                        Command = selectAllCmd,
+                    });
+                }
+            }
             tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
@@ -424,7 +167,33 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is not null)
                 {
-                    tv.ContextMenu = treeCMenu;
+                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                    {
+                        var cm = new ContextMenu();
+                        tv.ContextMenu = cm;
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "平衡相序",
+                            Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                            }),
+                        });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "批量生成",
+                            Command = batchGenCmd,
+                        });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "全部勾选",
+                            Command = selectAllCmd,
+                        });
+                    }
+                    else
+                    {
+                        tv.ContextMenu = treeCMenu;
+                    }
                     var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
@@ -470,7 +239,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("LowPower", false);
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
                     }
-
+                }
+                if (vm is Project.Module.Component.ThPDSConductorModel conductor)
+                {
+                    if (conductor.ComponentType == ComponentType.Conductor)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCount", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                    }
+                    else if (conductor.ComponentType == ComponentType.ControlConductor)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("NumberOfPhaseWire", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCrossSectionalArea", false);
+                    }
                 }
                 if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
                 {
@@ -714,6 +495,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             Action cb = null;
                             IEnumerable<MenuItem> getInputMenus()
                             {
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                    yield break;
+                                }
                                 if (GetInputOUVP() == null && GetInputMeter() == null)
                                 {
                                     yield return new MenuItem()
@@ -721,7 +506,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加过欠电压保护",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -730,7 +515,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加电能表",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.InsertEnergyMeter(graph, vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -742,8 +527,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "还原为标准样式",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.RemoveUndervoltageProtector(new ThPDSProjectGraph(graph), vertice);
-                                            ThPDSProjectGraphService.RemoveEnergyMeter(new ThPDSProjectGraph(graph), vertice);
+                                            ThPDSProjectGraphService.RemoveUndervoltageProtector(vertice);
+                                            ThPDSProjectGraphService.RemoveEnergyMeter(vertice);
                                             UpdateCanvas();
                                         }),
                                     };
@@ -1095,12 +880,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                     var blkVm = new ThPDSBlockViewModel();
-                                    Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
                                     {
                                         void reg(Breaker breaker, string templateStr)
                                         {
-                                            vm = new(breaker);
+                                            var vm = new ThPDSBreakerModel(breaker);
+                                            vm.PropertyChanged += (s, e) =>
+                                            {
+                                                if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                {
+                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                }
+                                            };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
@@ -1301,6 +1092,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
                                         if (_info != null)
                                         {
+                                            void AddSecondaryCircuitMenus(ContextMenu cm)
+                                            {
+                                                var m = new MenuItem() { Header = "新建控制回路", };
+                                                cm.Items.Add(m);
+                                                foreach (var scinfo in ThPDSProjectGraphService.GetSecondaryCircuitInfos(edge))
+                                                {
+                                                    m.Items.Add(new MenuItem()
+                                                    {
+                                                        Header = scinfo.Description,
+                                                        Command = new RelayCommand(() =>
+                                                        {
+                                                            ThPDSProjectGraphService.AddControlCircuit(graph, edge, scinfo);
+                                                            UpdateCanvas();
+                                                        }),
+                                                    });
+                                                }
+                                            }
                                             var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
                                             {
                                                 var tr = new TranslateTransform(r.X, -r.Y - r.Height);
@@ -1421,7 +1229,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            contactor = twoSpeedMotor_CPSDYYCircuit.contactor;
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                                         {
@@ -1459,8 +1267,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else
                                                         {
-                                                            cb += () => UpdatePropertyGrid(null);
+                                                            throw new ArgumentNullException();
                                                         }
+                                                        var cm = new ContextMenu();
+                                                        cvs.ContextMenu = cm;
+                                                        AddSecondaryCircuitMenus(cm);
                                                     }
                                                     else if (info.IsThermalRelay())
                                                     {
@@ -1575,7 +1386,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     }
                                                     else if (info.IsCPS())
                                                     {
-                                                        CPS cps = null;
+                                                        var cpss = item.brInfos.Where(x => x.IsCPS()).ToList();
+                                                        CPS cps = null, cps1 = null, cps2 = null, cps3 = null;
                                                         if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
                                                         {
                                                             throw new NotSupportedException();
@@ -1646,29 +1458,52 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            cps1 = twoSpeedMotor_CPSDYYCircuit.cps1;
+                                                            cps2 = twoSpeedMotor_CPSDYYCircuit.cps2;
                                                         }
                                                         else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                                         {
-                                                            throw new NotSupportedException();
+                                                            cps1 = twoSpeedMotor_CPSYYCircuit.cps1;
+                                                            cps2 = twoSpeedMotor_CPSYYCircuit.cps2;
                                                         }
-                                                        if (cps != null)
+                                                        void reg(CPS cps, string templateStr)
                                                         {
-                                                            var vm = new Project.Module.Component.ThPDSCPSModel(cps);
-                                                            cb += () => UpdatePropertyGrid(vm);
+                                                            var vm = new ThPDSCPSModel(cps);
+                                                            vm.PropertyChanged += (s, e) =>
                                                             {
-                                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "CPS");
-                                                                if (m != null)
+                                                                if (e.PropertyName == nameof(ThPDSCPSModel.RatedCurrent))
                                                                 {
-                                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
                                                                 }
+                                                            };
+                                                            var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
+                                                            if (m != null && vm != null)
+                                                            {
+                                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                                             }
+                                                            cb += () => { UpdatePropertyGrid(vm); };
+                                                        }
+                                                        if (cpss.Count > 1)
+                                                        {
+                                                            var idx = cpss.IndexOf(info);
+                                                            cps = idx == 0 ? cps1 : (idx == 1 ? cps2 : cps3);
+                                                            if (cps != null)
+                                                            {
+                                                                reg(cps, "CPS" + (idx + 1));
+                                                            }
+                                                        }
+                                                        else if (cps != null)
+                                                        {
+                                                            reg(cps, "CPS");
                                                         }
                                                         else
                                                         {
-                                                            cb += () => UpdatePropertyGrid(null);
+                                                            throw new ArgumentNullException();
                                                         }
+                                                        var cm = new ContextMenu();
+                                                        cvs.ContextMenu = cm;
+                                                        AddSecondaryCircuitMenus(cm);
                                                     }
                                                     else if (info.IsMeter())
                                                     {
@@ -1890,7 +1725,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor = fireEmergencyLighting.Conductor;
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
                                 {
@@ -1915,11 +1750,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor1 = twoSpeedMotor_CPSDYYCircuit.conductor1;
+                                    conductor2 = twoSpeedMotor_CPSDYYCircuit.conductor2;
                                 }
                                 else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
                                 {
-                                    throw new NotSupportedException();
+                                    conductor1 = twoSpeedMotor_CPSYYCircuit.conductor1;
+                                    conductor2 = twoSpeedMotor_CPSYYCircuit.conductor2;
                                 }
                                 var w = 200.0;
                                 void reg(Rect r, object vm)
@@ -2065,11 +1902,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 var menu = new ContextMenu();
                                 cvs.ContextMenu = menu;
+                                if (vertice.Details.CircuitFormType is not PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit)
                                 {
                                     var mi = new MenuItem();
                                     menu.Items.Add(mi);
                                     mi.Header = "切换回路样式";
-                                    var sw = new CircuitFormOutSwitcher(edge);
+                                    var sw = ThPDSProjectGraphService.GetCircuitFormOutSwitcher(edge);
                                     var outTypes = sw.AvailableTypes();
                                     foreach (var outType in outTypes)
                                     {
@@ -2101,13 +1939,41 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var w = new Window() { Title = "分类负载", Width = 400, Height = 300, Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                         var ctrl = new UserContorls.ThPDSLoadDistribution();
+                                        var tree = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
+                                        void Update(bool filt)
+                                        {
+                                            tree.DataList.Clear();
+                                            foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
+                                            {
+                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.Load.ID.LoadID, Tag = node });
+                                            }
+                                            ctrl.treeView.DataContext = tree;
+                                        }
+                                        ctrl.cbxFilt.Checked += (s, e) =>
+                                        {
+                                            Update(true);
+                                        };
+                                        ctrl.cbxFilt.Unchecked += (s, e) =>
+                                        {
+                                            Update(false);
+                                        };
+                                        Update(ctrl.cbxFilt.IsChecked.Value);
+                                        var ok = false;
                                         ctrl.btnYes.Command = new RelayCommand(() =>
                                         {
+                                            ok = true;
                                             w.Close();
                                         });
                                         w.Content = ctrl;
                                         w.ShowDialog();
-                                        UpdateCanvas();
+                                        if (ok)
+                                        {
+                                            foreach (var node in tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<ThPDSProjectGraphNode>())
+                                            {
+                                                ThPDSProjectGraphService.DistributeLoad(graph, node, vertice);
+                                            }
+                                            UpdateCanvas();
+                                        }
                                     });
                                 }
                                 {
@@ -2168,17 +2034,64 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                     }
                 }
+                var circuitIDSortNames = "WPE、WP、WLE、WL、WS、WFEL".Split('、').ToList();
+                IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
+                {
+                    return from edge in edges
+                           where edge.Source == vertice
+                           let circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge)
+                           let id = circuitVM.CircuitID ?? ""
+                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                           select edge;
+                }
                 {
                     var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
-                    foreach (var edge in edges)
+                    foreach (var edge in GetSortedEdges(edges))
                     {
                         DrawEdge(edge);
                     }
                 }
+                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                {
+                    var cvs = new Canvas() { Width = 100, Height = 320, Background = Brushes.Transparent, };
+                    Canvas.SetLeft(cvs, 98);
+                    canvas.Children.Add(cvs);
+                    hoverDict[cvs] = cvs;
+                    var cm = new ContextMenu();
+                    var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
+                    if (edges.Count < 8)
+                    {
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "增加消防应急照明回路（WFEL）",
+                            Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.AddCircuit(graph, vertice, "消防应急照明回路（WFEL）");
+                                UpdateCanvas();
+                            }),
+                        });
+                    }
+                    cvs.ContextMenu = cm;
+                    cvs.MouseUp += (s, e) =>
+                    {
+                        void Update()
+                        {
+                            SetSel(new Rect(98, 0, cvs.Width, cvs.Height));
+                            UpdatePropertyGrid(null);
+                        }
+                        if (e.ChangedButton != MouseButton.Left)
+                        {
+                            if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                            return;
+                        }
+                        Update();
+                        e.Handled = true;
+                    };
+                }
                 foreach (var kv in vertice.Details.MiniBusbars)
                 {
                     var mbb = kv.Key;
-                    var edges = ThPDSProjectGraphService.GetSmallBusbarCircuit(null, vertice, mbb);
+                    var edges = GetSortedEdges(ThPDSProjectGraphService.GetSmallBusbarCircuit(graph, vertice, mbb));
                     var start = new Point(busStart.X + 205, -dy - 10);
                     var end = start.OffsetY(10);
                     busEnd = end;
@@ -2245,12 +2158,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                     breaker = mbb.Breaker;
                                     var blkVm = new ThPDSBlockViewModel();
-                                    Project.Module.Component.ThPDSBreakerModel vm;
                                     void UpdateBreakerViewModel()
                                     {
                                         void reg(Breaker breaker, string templateStr)
                                         {
-                                            vm = new(breaker);
+                                            var vm = new ThPDSBreakerModel(breaker);
+                                            vm.PropertyChanged += (s, e) =>
+                                            {
+                                                if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                {
+                                                    ThPDSProjectGraphService.UpdateWithMiniBusbar(vertice);
+                                                }
+                                            };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                             if (m != null && vm != null)
@@ -2477,14 +2396,27 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     {
                                         var breakers = item.brInfos.Where(x => x.IsBreaker()).ToList();
                                         Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
-                                        breaker = mbb.Breaker;
+                                        if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.RegularCircuit regularCircuit)
+                                        {
+                                            breaker = regularCircuit.breaker;
+                                        }
+                                        else
+                                        {
+                                            throw new NotSupportedException();
+                                        }
                                         var blkVm = new ThPDSBlockViewModel();
-                                        Project.Module.Component.ThPDSBreakerModel vm;
                                         void UpdateBreakerViewModel()
                                         {
                                             void reg(Breaker breaker, string templateStr)
                                             {
-                                                vm = new(breaker);
+                                                var vm = new ThPDSBreakerModel(breaker);
+                                                vm.PropertyChanged += (s, e) =>
+                                                {
+                                                    if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
+                                                    {
+                                                        ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                    }
+                                                };
                                                 blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
                                                 var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
                                                 if (m != null && vm != null)
@@ -2934,7 +2866,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             void Update()
                             {
                                 SetSel(new Rect(Canvas.GetLeft(cvs), Canvas.GetTop(cvs), cvs.Width, cvs.Height));
-                                var vm = new PDS.UI.Project.Module.ThPDSMiniBusbarModel(mbb);
+                                var vm = new ThPDSMiniBusbarModel(vertice, mbb);
                                 UpdatePropertyGrid(vm);
                             }
                             if (e.ChangedButton != MouseButton.Left)
@@ -2954,13 +2886,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             mi.Command = new RelayCommand(() =>
                             {
                                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
-                                var edges = ThPDSProjectGraphService.GetCircuit(graph, vertice).Where(x => x.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规).ToList();
+                                var edges = ThPDSProjectGraphService.GetSuitableSmallBusbarCircuit(graph, vertice);
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
                                     node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID.LastOrDefault(), });
                                 }
-                                var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar();
+                                var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
                                 var r = w.ShowDialog();
                                 if (r == true)
@@ -2983,234 +2915,181 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 UpdateCanvas();
                             });
                         }
+                        {
+                            var mi = new MenuItem();
+                            menu.Items.Add(mi);
+                            mi.Header = "删除";
+                            mi.Command = new RelayCommand(() =>
+                            {
+                                ThPDSProjectGraphService.DeleteSmallBusbar(vertice, mbb);
+                                UpdateCanvas();
+                            });
+                        }
                         cvs.Cursor = Cursors.Hand;
                         canvas.Children.Add(cvs);
                     }
                 }
-                foreach (var kv in vertice.Details.SecondaryCircuits)
+                var visitedSecondaryCircuits = new HashSet<SecondaryCircuit>();
+                var visitedEdges = new HashSet<ThPDSProjectGraphEdge>();
                 {
-                    var sc = kv.Key;
-                    var scVm = new PDS.UI.Project.Module.ThPDSSecondaryCircuitModel(sc);
-                    foreach (var edge in ThPDSProjectGraphService.GetControlCircuit(graph, vertice, sc))
+                    var fs = new Dictionary<ThPDSProjectGraphEdge, Action>();
+                    foreach (var kv in vertice.Details.SecondaryCircuits)
                     {
-                        DrawEdge(edge);
-                    }
-                    var start = new Point(busStart.X + 205, -dy - 10);
-                    var end = start.OffsetY(40);
-                    busEnd = end;
-                    dy -= end.Y - start.Y;
-                    var pt = new Point(start.X - 205, start.Y);
-                    var cvt1 = new DoubleCollectionConverter();
-                    var dashArrBORDERBorder = (DoubleCollection)cvt1.ConvertFrom("12.7, 6.35, 12.7, 6.35, 1, 6.35 ");
-                    var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
-                    var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
-                    var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
-                    {
-                        var st = new Point(pt.X + 144, pt.Y + 10);
-                        var ed = st;
-                        ed.Y = pt.Y + 40;
-                        var ln = CreateLine(null, Brushes.Black, st, ed);
-                        ln.StrokeDashCap = PenLineCap.Square;
-                        ln.StrokeDashArray = currentDashArr;
-                        canvas.Children.Add(ln);
-                    }
-                    pt.Y = -pt.Y;
-                    var item = PDSItemInfo.Create("控制（从属接触器）", pt);
-                    {
-                        var glyphs = new List<Glyphs>();
-                        foreach (var fe in CreateDrawingObjects(trans, item, false))
+                        var _sc = kv.Key;
+                        if (visitedSecondaryCircuits.Contains(_sc)) continue;
+                        visitedSecondaryCircuits.Add(_sc);
+                        var scVm = new Project.Module.ThPDSSecondaryCircuitModel(_sc);
+                        scVm.PropertyChanged += (s, e) =>
                         {
-                            if (fe is Glyphs g) glyphs.Add(g);
-                            canvas.Children.Add(fe);
-                        }
-                        {
-                            var w = 200.0;
-                            void reg(Rect r, object vm)
+                            if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
                             {
-                                GRect gr = new GRect(r.TopLeft, r.BottomRight);
-                                gr = gr.Expand(5);
-                                var cvs = new Canvas
+                                if (!scVm.ConductorModel.IsCustom)
                                 {
-                                    Width = gr.Width,
-                                    Height = gr.Height,
-                                    Background = Brushes.Transparent,
-                                };
-                                Canvas.SetLeft(cvs, gr.MinX);
-                                Canvas.SetTop(cvs, gr.MinY);
-                                canvas.Children.Add(cvs);
-                                cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
-                                cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
-                                cvs.Cursor = Cursors.Hand;
-                                cvs.MouseUp += (s, e) =>
-                                {
-                                    void Update()
-                                    {
-                                        UpdatePropertyGrid(vm);
-                                        SetSel(gr.ToWpfRect());
-                                    }
-                                    if (e.ChangedButton != MouseButton.Left)
-                                    {
-                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
-                                        return;
-                                    }
-                                    Update();
-                                    e.Handled = true;
-                                };
-                                cvs.ContextMenu = new();
-                            }
-                            {
-                                Conductor conductor = sc.conductor;
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
-                                if (m != null)
-                                {
-                                    if (conductor != null)
-                                    {
-                                        var vm = new Project.Module.Component.ThPDSConductorModel(conductor);
-                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                        m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                        var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
-                                        reg(r, vm);
-                                    }
+                                    scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
                                 }
                             }
+                        };
+                        var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
+                        if (_edges.Count == 0) continue;
+                        var scs = new HashSet<SecondaryCircuit>() { _sc };
+                        foreach (var k in vertice.Details.SecondaryCircuits.Keys)
+                        {
+                            if (k == _sc) continue;
+                            var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
+                            foreach (var edge in egs)
                             {
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
-                                if (m != null)
+                                if (_edges.Contains(edge))
                                 {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                }
-                            }
-                            {
-                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
-                                if (m != null)
-                                {
-                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                    scs.Add(k);
+                                    foreach (var eg in egs)
+                                    {
+                                        _edges.Add(eg);
+                                    }
+                                    break;
                                 }
                             }
                         }
+                        foreach (var sc in scs)
                         {
-                            var w1 = 485.0;
-                            var w2 = 500.0;
-                            var h = 40.0;
-                            var cvs = new Canvas
-                            {
-                                Width = w2,
-                                Height = h,
-                                Background = Brushes.Transparent,
-                            };
-                            pt.Y = -pt.Y;
-                            var offsetY = -20.0;
-                            Canvas.SetLeft(cvs, pt.X + w1);
-                            Canvas.SetTop(cvs, pt.Y - offsetY);
-                            var cvs2 = new Canvas
-                            {
-                                Width = w1 + w2,
-                                Height = h,
-                                IsHitTestVisible = false,
-                            };
-                            Canvas.SetLeft(cvs2, pt.X);
-                            Canvas.SetTop(cvs2, pt.Y - offsetY);
-                            cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
-                            cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
-                            var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
-                            cvs.MouseUp += (s, e) =>
-                            {
-                                void Update()
-                                {
-                                    SetSel(rect);
-                                    UpdatePropertyGrid(scVm);
-                                }
-                                if (e.ChangedButton != MouseButton.Left)
-                                {
-                                    if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
-                                    return;
-                                }
-                                Update();
-                                e.Handled = true;
-                            };
-                            cvs.Cursor = Cursors.Hand;
-                            canvas.Children.Add(cvs);
-                            canvas.Children.Add(cvs2);
+                            visitedSecondaryCircuits.Add(sc);
                         }
-                        IEnumerable<FrameworkElement> CreateDrawingObjects(Transform trans, PDSItemInfo item, bool isBlock, Brush strockBrush = null)
+                        foreach (var edge in _edges)
                         {
-                            strockBrush ??= Brushes.Black;
-                            foreach (var info in item.lineInfos)
+                            visitedEdges.Add(edge);
+                        }
+                        var edges = GetSortedEdges(_edges).ToList();
+                        fs.Add(edges.First(), () =>
+                        {
+                            foreach (var edge in edges)
                             {
-                                var st = info.Line.StartPoint;
-                                var ed = info.Line.EndPoint;
-                                var ln = CreateLine(trans, strockBrush, st, ed);
-                                if (!isBlock) ln.StrokeDashArray = currentDashArr;
-                                yield return ln;
+                                DrawEdge(edge);
                             }
+                            if (scs.Count > 0)
                             {
-                                var path = new Path();
-                                var geo = new PathGeometry();
-                                path.Stroke = strockBrush;
-                                path.Data = geo;
-                                path.RenderTransform = trans;
-                                foreach (var info in item.arcInfos)
+                                var pts = new List<Point>();
+                                var cvt1 = new DoubleCollectionConverter();
+                                var dashArrBORDERBorder = (DoubleCollection)cvt1.ConvertFrom("12.7, 6.35, 12.7, 6.35, 1, 6.35 ");
+                                var dashArrBORDER2Border5x = (DoubleCollection)cvt1.ConvertFrom("6.35, 3.175, 6.35, 3.175, 1, 3.175 ");
+                                var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
+                                var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
+                                var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
+                                foreach (var sc in scs)
                                 {
-                                    var figure = new PathFigure();
-                                    figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
-                                    var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
-                                      new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
-                                    figure.Segments.Add(arcSeg);
-                                    geo.Figures.Add(figure);
-                                }
-                                yield return path;
-                            }
-                            foreach (var info in item.circleInfos)
-                            {
-                                var path = new Path();
-                                var geo = new EllipseGeometry(info.Circle.Center, info.Circle.Radius, info.Circle.Radius);
-                                path.Stroke = strockBrush;
-                                path.Data = geo;
-                                path.RenderTransform = trans;
-                                yield return path;
-                            }
-                            foreach (var info in item.textInfos)
-                            {
-                                var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
-                                if (info.Height > 0)
-                                {
-                                    glyph.FontRenderingEmSize = info.Height;
-                                }
-                                Canvas.SetLeft(glyph, info.BasePoint.X);
-                                Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
-                                yield return glyph;
-                            }
-                            foreach (var info in item.brInfos)
-                            {
-                                {
-                                    foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), true, Brushes.Red))
+                                    var start = new Point(busStart.X + 205, -dy - 10);
+                                    var end = start.OffsetY(40);
+                                    busEnd = end;
+                                    dy -= end.Y - start.Y;
+                                    var pt = new Point(start.X - 205, start.Y);
                                     {
-                                        yield return el;
-                                    }
-                                    if (info.IsMotor()) continue;
-                                    {
-                                        var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
-                                        if (_info != null)
+                                        var h = 38.0 * (_edges.Count - 1);
+                                        switch (edges.Last().Details.CircuitForm.CircuitFormType)
                                         {
-                                            var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                            case CircuitFormOutType.None:
+                                                break;
+                                            case CircuitFormOutType.常规:
+                                                break;
+                                            case CircuitFormOutType.漏电:
+                                                break;
+                                            case CircuitFormOutType.接触器控制:
+                                                break;
+                                            case CircuitFormOutType.热继电器保护:
+                                                break;
+                                            case CircuitFormOutType.配电计量_上海CT:
+                                                break;
+                                            case CircuitFormOutType.配电计量_上海直接表:
+                                                break;
+                                            case CircuitFormOutType.配电计量_CT表在前:
+                                                break;
+                                            case CircuitFormOutType.配电计量_直接表在前:
+                                                break;
+                                            case CircuitFormOutType.配电计量_CT表在后:
+                                                break;
+                                            case CircuitFormOutType.配电计量_直接表在后:
+                                                break;
+                                            case CircuitFormOutType.电动机_分立元件:
+                                                break;
+                                            case CircuitFormOutType.电动机_CPS:
+                                                break;
+                                            case CircuitFormOutType.电动机_分立元件星三角启动:
+                                                break;
+                                            case CircuitFormOutType.电动机_CPS星三角启动:
+                                                break;
+                                            case CircuitFormOutType.双速电动机_分立元件detailYY:
+                                                h += 100;
+                                                break;
+                                            case CircuitFormOutType.双速电动机_分立元件YY:
+                                                h += 60;
+                                                break;
+                                            case CircuitFormOutType.双速电动机_CPSdetailYY:
+                                                h += 100;
+                                                break;
+                                            case CircuitFormOutType.双速电动机_CPSYY:
+                                                h += 60;
+                                                break;
+                                            case CircuitFormOutType.消防应急照明回路WFEL:
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        var st = new Point(pt.X + (hasCPS ? 46 : 144), pt.Y + 10 - h);
+                                        var ed = st;
+                                        ed.Y = pt.Y + 40;
+                                        pts.Add(st);
+                                        pts.Add(ed);
+                                    }
+                                    pt.Y = -pt.Y;
+                                    var item = PDSItemInfo.Create(hasCPS ? "控制（从属CPS）" : "控制（从属接触器）", pt);
+                                    {
+                                        var glyphs = new List<Glyphs>();
+                                        foreach (var fe in CreateDrawingObjects(trans, item, false))
+                                        {
+                                            if (fe is Glyphs g) glyphs.Add(g);
+                                            canvas.Children.Add(fe);
+                                        }
+                                        {
+                                            var w = 200.0;
+                                            void reg(Rect r, object vm)
                                             {
-                                                var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                                                GRect gr = new GRect(r.TopLeft, r.BottomRight);
+                                                gr = gr.Expand(5);
                                                 var cvs = new Canvas
                                                 {
-                                                    Width = r.Width,
-                                                    Height = r.Height,
+                                                    Width = gr.Width,
+                                                    Height = gr.Height,
                                                     Background = Brushes.Transparent,
-                                                    RenderTransform = tr
                                                 };
+                                                Canvas.SetLeft(cvs, gr.MinX);
+                                                Canvas.SetTop(cvs, gr.MinY);
+                                                canvas.Children.Add(cvs);
                                                 cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
                                                 cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
+                                                cvs.Cursor = Cursors.Hand;
                                                 cvs.MouseUp += (s, e) =>
                                                 {
                                                     void Update()
                                                     {
-                                                        SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                        UpdatePropertyGrid(vm);
+                                                        SetSel(gr.ToWpfRect());
                                                     }
                                                     if (e.ChangedButton != MouseButton.Left)
                                                     {
@@ -3220,15 +3099,195 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                     Update();
                                                     e.Handled = true;
                                                 };
-                                                cvs.ContextMenu ??= new();
-                                                cvs.Cursor = Cursors.Hand;
-                                                canvas.Children.Add(cvs);
+                                                cvs.ContextMenu = new();
+                                            }
+                                            {
+                                                Conductor conductor = sc.Conductor;
+                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "Conductor");
+                                                if (m != null)
+                                                {
+                                                    if (conductor != null)
+                                                    {
+                                                        var vm = scVm.ConductorModel;
+                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                        m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                        var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
+                                                        reg(r, vm);
+                                                    }
+                                                }
+                                            }
+                                            {
+                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "回路编号");
+                                                if (m != null)
+                                                {
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitID)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                }
+                                            }
+                                            {
+                                                var m = glyphs.FirstOrDefault(x => x.Tag as string == "控制回路");
+                                                if (m != null)
+                                                {
+                                                    var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = scVm, Path = new PropertyPath(nameof(scVm.CircuitDescription)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                    m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                }
+                                            }
+                                        }
+                                        {
+                                            var w1 = 485.0;
+                                            var w2 = 500.0;
+                                            var h = 40.0;
+                                            var cvs = new Canvas
+                                            {
+                                                Width = w2,
+                                                Height = h,
+                                                Background = Brushes.Transparent,
+                                            };
+                                            pt.Y = -pt.Y;
+                                            var offsetY = -20.0;
+                                            Canvas.SetLeft(cvs, pt.X + w1);
+                                            Canvas.SetTop(cvs, pt.Y - offsetY);
+                                            var cvs2 = new Canvas
+                                            {
+                                                Width = w1 + w2,
+                                                Height = h,
+                                                IsHitTestVisible = false,
+                                            };
+                                            Canvas.SetLeft(cvs2, pt.X);
+                                            Canvas.SetTop(cvs2, pt.Y - offsetY);
+                                            cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
+                                            cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
+                                            var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
+                                            cvs.MouseUp += (s, e) =>
+                                            {
+                                                void Update()
+                                                {
+                                                    SetSel(rect);
+                                                    UpdatePropertyGrid(scVm);
+                                                }
+                                                if (e.ChangedButton != MouseButton.Left)
+                                                {
+                                                    if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                    return;
+                                                }
+                                                Update();
+                                                e.Handled = true;
+                                            };
+                                            cvs.Cursor = Cursors.Hand;
+                                            canvas.Children.Add(cvs);
+                                            canvas.Children.Add(cvs2);
+                                        }
+                                        IEnumerable<FrameworkElement> CreateDrawingObjects(Transform trans, PDSItemInfo item, bool isBlock, Brush strockBrush = null)
+                                        {
+                                            strockBrush ??= Brushes.Black;
+                                            foreach (var info in item.lineInfos)
+                                            {
+                                                var st = info.Line.StartPoint;
+                                                var ed = info.Line.EndPoint;
+                                                var ln = CreateLine(trans, strockBrush, st, ed);
+                                                if (!isBlock) ln.StrokeDashArray = currentDashArr;
+                                                yield return ln;
+                                            }
+                                            {
+                                                var path = new Path();
+                                                var geo = new PathGeometry();
+                                                path.Stroke = strockBrush;
+                                                path.Data = geo;
+                                                path.RenderTransform = trans;
+                                                foreach (var info in item.arcInfos)
+                                                {
+                                                    var figure = new PathFigure();
+                                                    figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
+                                                    var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
+                                                      new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
+                                                    figure.Segments.Add(arcSeg);
+                                                    geo.Figures.Add(figure);
+                                                }
+                                                yield return path;
+                                            }
+                                            foreach (var info in item.circleInfos)
+                                            {
+                                                var path = new Path();
+                                                var geo = new EllipseGeometry(info.Circle.Center, info.Circle.Radius, info.Circle.Radius);
+                                                path.Stroke = strockBrush;
+                                                path.Data = geo;
+                                                path.RenderTransform = trans;
+                                                yield return path;
+                                            }
+                                            foreach (var info in item.textInfos)
+                                            {
+                                                var glyph = new Glyphs() { UnicodeString = FixString(info.Text), Tag = info.Text, FontRenderingEmSize = 13, Fill = strockBrush, FontUri = fontUri, };
+                                                if (info.Height > 0)
+                                                {
+                                                    glyph.FontRenderingEmSize = info.Height;
+                                                }
+                                                Canvas.SetLeft(glyph, info.BasePoint.X);
+                                                Canvas.SetTop(glyph, -info.BasePoint.Y - glyph.FontRenderingEmSize);
+                                                yield return glyph;
+                                            }
+                                            foreach (var info in item.brInfos)
+                                            {
+                                                {
+                                                    foreach (var el in CreateDrawingObjects(trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), true, Brushes.Red))
+                                                    {
+                                                        yield return el;
+                                                    }
+                                                    if (info.IsMotor()) continue;
+                                                    {
+                                                        var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
+                                                        if (_info != null)
+                                                        {
+                                                            var r = _info.Bounds.ToWpfRect().OffsetXY(info.BasePoint.X, info.BasePoint.Y);
+                                                            {
+                                                                var tr = new TranslateTransform(r.X, -r.Y - r.Height);
+                                                                var cvs = new Canvas
+                                                                {
+                                                                    Width = r.Width,
+                                                                    Height = r.Height,
+                                                                    Background = Brushes.Transparent,
+                                                                    RenderTransform = tr
+                                                                };
+                                                                cvs.MouseEnter += (s, e) => { cvs.Background = LightBlue3; };
+                                                                cvs.MouseLeave += (s, e) => { cvs.Background = Brushes.Transparent; };
+                                                                cvs.MouseUp += (s, e) =>
+                                                                {
+                                                                    void Update()
+                                                                    {
+                                                                        SetSel(new Rect(r.X, -r.Y - r.Height, cvs.Width, cvs.Height));
+                                                                    }
+                                                                    if (e.ChangedButton != MouseButton.Left)
+                                                                    {
+                                                                        if (e.ChangedButton == MouseButton.Right && e.OriginalSource == cvs) Update();
+                                                                        return;
+                                                                    }
+                                                                    Update();
+                                                                    e.Handled = true;
+                                                                };
+                                                                cvs.ContextMenu ??= new();
+                                                                cvs.Cursor = Cursors.Hand;
+                                                                canvas.Children.Add(cvs);
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                {
+                                    var st = new Point(pts[0].X, pts.Select(x => x.Y).Min());
+                                    var ed = new Point(pts[0].X, pts.Select(x => x.Y).Max());
+                                    var ln = CreateLine(null, Brushes.Black, st, ed);
+                                    ln.StrokeDashCap = PenLineCap.Square;
+                                    ln.StrokeDashArray = currentDashArr;
+                                    canvas.Children.Add(ln);
+                                }
                             }
-                        }
+                        });
+                    }
+                    foreach (var edge in GetSortedEdges(fs.Keys))
+                    {
+                        fs[edge]();
                     }
                 }
                 void SetSel(Rect r)
@@ -3423,7 +3482,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             var mi = new MenuItem();
                             menu.Items.Add(mi);
                             mi.Header = "切换进线形式";
-                            var sw = new CircuitFormInSwitcher(vertice);
+                            var sw = ThPDSProjectGraphService.GetCircuitFormInSwitcher(vertice);
                             var inTypes = sw.AvailableTypes();
                             foreach (var inType in inTypes)
                             {
@@ -3440,6 +3499,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     cvs.Cursor = Cursors.Hand;
                     canvas.Children.Add(cvs);
+                }
+                if (busEnd.Y > canvas.Height)
+                {
+                    canvas.Height = busEnd.Y + 300;
                 }
                 {
                     void f(object sender, MouseButtonEventArgs e)
@@ -3527,883 +3590,5 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             return path;
         }
         static readonly SolidColorBrush LightBlue3 = new SolidColorBrush(Color.FromArgb(50, 0, 0, 150));
-        public class PDSItemInfo
-        {
-            public Guid Guid = Guid.NewGuid();
-            public Point BasePoint;
-            public List<LineInfo> lineInfos = new();
-            public List<ArcInfo> arcInfos = new();
-            public List<BlockInfo> brInfos = new();
-            public List<DBTextInfo> textInfos = new();
-            public List<CircleInfo> circleInfos = new();
-            public List<HatchInfo> hatchInfos = new();
-            const double EXPY = 0;
-            public static List<BlockDefInfo> blockDefInfos = new(128)
-            {
-                new BlockDefInfo("CircuitBreaker", new GRect(0, -10, 50, 6)),
-                new BlockDefInfo("Contactor", new GRect(0, -12, 50, 0)),
-                new BlockDefInfo("ThermalRelay", new GRect(0, -10, 40, 10)),
-                new BlockDefInfo("Isolator", new GRect(0, -10, 50, 6)),
-                new BlockDefInfo("CPS", new GRect(0, -10, 50, 5)),
-                new BlockDefInfo("RCD", new GRect(0, -10, 50, 6)),
-                new BlockDefInfo("ATSE", new GRect(-55, -35, 0, 35)),
-                new BlockDefInfo("TSE", new GRect(-55, -26, 0, 26)),
-                new BlockDefInfo("SPD", new GRect(0, -10, 78, 5)),
-                new BlockDefInfo("常规", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("漏电", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("SPD附件", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("接触器控制", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("热继电器保护", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（上海CT）", new GRect(0, -24, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（上海直接表）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（CT表在前）", new GRect(0, -24, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（直接表在前）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（CT表在后）", new GRect(0, -24, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("配电计量（直接表在后）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("电动机（分立元件）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("电动机（CPS）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("电动机（分立元件星三角启动）", new GRect(0, -112, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("电动机（CPS星三角启动）", new GRect(0, -113, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("双速电动机（分立元件 D-YY）", new GRect(0, -113, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("双速电动机（分立元件 Y-Y）", new GRect(0, -77, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("双速电动机（CPS Y-Y）", new GRect(0, -77, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("双速电动机（CPS D-YY）", new GRect(0, -113, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("消防应急照明回路（WFEL）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("控制（从属接触器）", new GRect(144, -7, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("控制（从属CPS）", new GRect(46, -7, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("SPD附件", new GRect(0, -10, 78, 21).Expand(0, EXPY)),
-                new BlockDefInfo("1路进线", new GRect(0, -140, 200, -2).Expand(0, EXPY)),
-                new BlockDefInfo("2路进线ATSE", new GRect(0, -300, 200, -2).Expand(0, EXPY)),
-                new BlockDefInfo("集中电源", new GRect(0, -320, 200, 0).Expand(0, EXPY)),
-                new BlockDefInfo("设备自带控制箱", new GRect(0, -320, 200, 0).Expand(0, EXPY)),
-                new BlockDefInfo("Motor", new GRect(-10, -10, 10, 10)),
-                new BlockDefInfo("直接表", new GRect(0, -7, 50, 7)),
-                new BlockDefInfo("间接表", new GRect(0, -7, 50, 7)),
-                new BlockDefInfo("Meter", new GRect(-10, -4, 10, 10)),
-                new BlockDefInfo("CT", new GRect(0, -8, 50, 18)),
-                new BlockDefInfo("1路进线", new GRect(0, -140, 200, -2)),
-                new BlockDefInfo("2路进线ATSE", new GRect(0, -300, 200, -2)),
-                new BlockDefInfo("3路进线", new GRect(0, -300, 200, -2)),
-                new BlockDefInfo("分支小母排", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("小母排分支", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("消防应急照明回路（WFEL）", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
-                new BlockDefInfo("过欠电压保护器", new GRect(0, -10, 50, 10)),
-            };
-            public static BlockDefInfo GetBlockDefInfo(string blkName)
-            {
-                return PDSItemInfo.blockDefInfos.FirstOrDefault(x => x.BlockName == blkName);
-            }
-            public static PDSItemInfo Create(string name, Point px)
-            {
-                var r = new PDSItemInfo();
-                r.BasePoint = px;
-                switch (name)
-                {
-                    case "直接表":
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(19.9599999999998, -5.90769230769251), "kWh", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 0.999999999999318), px.OffsetXY(35, 1)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(14.9999999999998, -6.99999999999977), px.OffsetXY(34.9999999999998, -6.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 6.99999999999977), px.OffsetXY(14.9999999999998, -6.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 6.99999999999977), px.OffsetXY(35, 6.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35, 6.99999999999977), px.OffsetXY(34.9999999999998, -6.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(34.9999999999998, 0), px.OffsetXY(50, 0)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(14.9999999999998, 0), px.OffsetXY(0, 0)), "E-UNIV-WIRE"));
-                        break;
-                    case "过欠电压保护器":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(15.0000000000033, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15.0000000000033, -9.99999999999727), px.OffsetXY(35.0000000000033, -9.99999999999727)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, -9.99999999999727), px.OffsetXY(35.0000000000033, 10.0000000000027)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0000000000033, 10.0000000000027), px.OffsetXY(15.0000000000033, 10.0000000000027)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15.0000000000033, 10.0000000000027), px.OffsetXY(15.0000000000033, -9.99999999999727)), "E-UNIV-Oppo"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(22.7249999998486, -5.50000000050886), "U", "E-UNIV-EL", "TH-STYLE3") { Height = 13, });
-                        break;
-                    case "1路进线（带电表）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(140, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "2路进线ATSE（带电表）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -60)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(200, 0)), "内框"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(0, 0)), "内框"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "3路进线（带电表）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
-                        r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -165)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(200, 0)), "内框"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(0, 0)), "内框"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -155), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "1路进线（带过欠电压保护）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(155, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "2路进线ATSE（带过欠电压保护）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -60)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "3路进线（带过欠电压保护）":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
-                        r.brInfos.Add(new BlockInfo("过欠电压保护器", "0", px.OffsetXY(140, -165)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -165), px.OffsetXY(155, -165)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -155), "过欠电压保护器", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "1路进线":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "2路进线ATSE":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "3路进线":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
-                        r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
-                        r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "集中电源":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -240)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, 0), px.OffsetXY(200, 0)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(200, -320)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, -320), px.OffsetXY(95, -320)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, -320), px.OffsetXY(95, 0)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(87, -30), px.OffsetXY(95, -35)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, -35), px.OffsetXY(87, -40)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(87, -30), px.OffsetXY(20, -30)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(87, -40), px.OffsetXY(20, -40)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -30), px.OffsetXY(20, -20)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -50), px.OffsetXY(20, -40)), "E-CTRL-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, -75), px.OffsetXY(0, -75)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -240), px.OffsetXY(0, -240)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -240), px.OffsetXY(95, -240)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -234), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -220), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -16), "通讯线", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -71), "市电监测线 ", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(103, -167), "A型应急照明集中电源", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(133, -180), "DC36V", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(116, -316), "本设备由厂家配套", "E-UNIV-NOTE", "TH-STYLE3"));
-                        {
-                            var vecs = new List<Vector> { new Vector(13.4824608598765, -0.033501501497426), new Vector(-2.56184213504093, 2.64906698011407), new Vector(9.72115787093117, -2.61556547861665), new Vector(-9.8127552088763, -2.6283232281271), new Vector(2.65343947298607, 2.59482172662968) };
-                            var p = px.OffsetXY(74.3582, -20);
-                            foreach (var v in vecs)
-                            {
-                                r.lineInfos.Add(new LineInfo(new GLineSegment(p, p + v), "E-CTRL-WIRE"));
-                                p += v;
-                                var lst = new List<Point>();
-                                lst.Add(p);
-                                for (int i = 1; i < vecs.Count; i++)
-                                {
-                                    var vec = vecs[i];
-                                    p += vec;
-                                    lst.Add(p);
-                                }
-                                r.hatchInfos.Add(new HatchInfo(lst, "E-CTRL-WIRE"));
-                                break;
-                            }
-                            for (int i = 0; i < vecs.Count; i++)
-                            {
-                                var v = vecs[i];
-                                vecs[i] = new Vector(-v.X, v.Y);
-                            }
-                            p = px.OffsetXY(74.3582 + 20.6415, -20 - 27.8171);
-                            foreach (var v in vecs)
-                            {
-                                r.lineInfos.Add(new LineInfo(new GLineSegment(p, p + v), "E-CTRL-WIRE"));
-                                p += v;
-                                var lst = new List<Point>();
-                                lst.Add(p);
-                                for (int i = 1; i < vecs.Count; i++)
-                                {
-                                    var vec = vecs[i];
-                                    p += vec;
-                                    lst.Add(p);
-                                }
-                                r.hatchInfos.Add(new HatchInfo(lst, "E-CTRL-WIRE"));
-                                break;
-                            }
-                        }
-                        break;
-                    case "设备自带控制箱":
-                        r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -75)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(95, 0)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -75), px.OffsetXY(0, -75)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -75), px.OffsetXY(95, -75)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, 0), px.OffsetXY(200, 0)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, 0), px.OffsetXY(200, -320)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(200, -320), px.OffsetXY(95, -320)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(95, -320), px.OffsetXY(95, 0)), "E-POWR-DEVC"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(116, 4), "本设备由厂家配套", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(125, -167), "设备控制箱", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -69), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -55), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(116, -316), "本设备由厂家配套", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "常规":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "漏电":
-                        r.brInfos.Add(new BlockInfo("RCD", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "接触器控制":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(114, -30), "QAC", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -46), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -36), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -56), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -36), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "热继电器保护":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -46), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -36), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -56), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -36), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "KH", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（上海CT）":
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(155, -80)));
-                        r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(115, -60)) { Rotate = Math.PI / 2 });
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -60)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(215, -60)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -60), px.OffsetXY(15, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -60), px.OffsetXY(115, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -60), px.OffsetXY(215, -60)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -60), px.OffsetXY(485, -60)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -50), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(198, -50), "CB2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -50), "CB1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -66), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -56), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -76), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -76), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -50), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -82), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（上海直接表）":
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(140, -43)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(130, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(150, -40), px.OffsetXY(215, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(198, -30), "CB2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（CT表在前）":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(55, -60)));
-                        r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(15, -40)) { Rotate = Math.PI / 2 });
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -62), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（直接表在前）":
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(40, -43)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(30, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(50, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（CT表在后）":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(155, -60)));
-                        r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(115, -40)) { Rotate = Math.PI / 2 });
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -62), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "配电计量（直接表在后）":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(140, -43)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(130, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(150, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "电动机（分立元件）":
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -40), px.OffsetXY(165, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "QAC", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -30), "KH", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "电动机（CPS）":
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CPS", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "电动机（分立元件星三角启动）":
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -100)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -140)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -40), px.OffsetXY(165, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -100), px.OffsetXY(105, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -100), px.OffsetXY(105, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -140), px.OffsetXY(105, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -148), px.OffsetXY(105, -132)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -140), px.OffsetXY(276, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(276, -140), px.OffsetXY(276, -100)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "QAC1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -30), "KH", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -130), "QAC3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -90), "QAC2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "电动机（CPS星三角启动）":
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -100)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -140)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -100), px.OffsetXY(105, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -100), px.OffsetXY(105, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -140), px.OffsetXY(105, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -148), px.OffsetXY(105, -132)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -140), px.OffsetXY(276, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(276, -140), px.OffsetXY(276, -100)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CPS", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -130), "QAC2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -90), "QAC1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -46), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -36), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -56), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -36), "功率", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "双速电动机（分立元件 D-YY）":
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -100)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -140)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -100)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -40), px.OffsetXY(165, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -100), px.OffsetXY(165, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -100), px.OffsetXY(105, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -100), px.OffsetXY(105, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -140), px.OffsetXY(105, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -148), px.OffsetXY(105, -132)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -140), px.OffsetXY(276, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(276, -140), px.OffsetXY(276, -100)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "QAC1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -30), "KH1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -90), "QAC2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -90), "KH2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -130), "QAC3", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -46), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -97), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -117), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -97), "功率(高)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -117), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "双速电动机（分立元件 Y-Y）":
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -40)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -100)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.brInfos.Add(new BlockInfo("ThermalRelay", "E-UNIV-Oppo", px.OffsetXY(215, -100)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(115, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -40), px.OffsetXY(165, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -100), px.OffsetXY(165, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -100), px.OffsetXY(105, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -100), px.OffsetXY(105, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -30), "QAC1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -30), "KH1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -90), "QAC2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(214, -90), "KH2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -97), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -117), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -97), "功率(高)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -117), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "双速电动机（CPS Y-Y）":
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -100)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -100), px.OffsetXY(15, -100)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CPS1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -90), "CPS2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -36), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -56), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -36), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -97), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -117), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -97), "功率(高)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -117), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "双速电动机（CPS D-YY）":
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -40)));
-                        r.brInfos.Add(new BlockInfo("Motor", "E-POWR-EQPM", px.OffsetXY(475, -40)));
-                        r.brInfos.Add(new BlockInfo("CPS", "E-POWR-DEVC", px.OffsetXY(15, -100)));
-                        r.brInfos.Add(new BlockInfo("Contactor", "E-UNIV-Oppo", px.OffsetXY(115, -140)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(465, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -100), px.OffsetXY(475, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(475, -100), px.OffsetXY(475, -50)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -100), px.OffsetXY(15, -100)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(115, -140), px.OffsetXY(105, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(105, -148), px.OffsetXY(105, -132)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(165, -140), px.OffsetXY(276, -140)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(276, -140), px.OffsetXY(276, -100)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CPS1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -90), "Conductor2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -90), "CPS2", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(115, -130), "QAC", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -36), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -56), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -36), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -56), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -97), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -117), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -97), "功率(高)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -117), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "CircuitBreaker":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(24, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(24, 6), px.OffsetXY(24, -6)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(5.63603896932113, 6.36396103067909), px.OffsetXY(18.3639610306789, -6.36396103067909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18.3639610306789, 6.36396103067909), px.OffsetXY(5.63603896932113, -6.36396103067909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(22.6794919243112, -10)), "E-UNIV-Oppo"));
-                        break;
-                    case "RCD":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(24, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(24, 6), px.OffsetXY(24, -6)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(5.63603896932113, 6.36396103067909), px.OffsetXY(18.3639610306789, -6.36396103067909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18.3639610306789, 6.36396103067909), px.OffsetXY(5.63603896932113, -6.36396103067909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(22.6794919243112, -10)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(31.3397459621556, -5), 4), "E-UNIV-Oppo"));
-                        break;
-                    case "Contactor":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(20, 0)), "E-UNIV-Oppo"));
-                        r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(15, 1.33974596215558), 5.17638090205041, 195.0.AngleFromDegree(), 345.0.AngleFromDegree(), false), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(18.3493649053889, -12.5)), "E-UNIV-Oppo"));
-                        break;
-                    case "ThermalRelay":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(31.2500000000002, 10), px.OffsetXY(18.7500000000002, 10)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18.7500000000002, 10), px.OffsetXY(18.7500000000002, -10)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18.7500000000002, -10), px.OffsetXY(31.2500000000002, -10)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(31.2500000000002, -10), px.OffsetXY(31.2500000000002, 10)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(22.5000000000005, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(22.5000000000005, 0), px.OffsetXY(22.5000000000005, 6.25)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(22.5000000000005, 6.25), px.OffsetXY(27.5000000000005, 6.25)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(27.5000000000005, 6.25), px.OffsetXY(27.5000000000002, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(27.5000000000002, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        break;
-                    case "CT":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(25, 8), px.OffsetXY(25, 18)), "0"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(25, 0), 8), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(50, 0)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(21.6237162160389, 14.4736240109228), px.OffsetXY(27.1322197687448, 10.6934289129881)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(23.2438643197761, 15.8236936887565), px.OffsetXY(28.7523678724817, 12.0434985908219)), "0"));
-                        break;
-                    case "Meter":
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(-5.03999999999996, -2.90769230769251), "kWh", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 3.99999999999932), px.OffsetXY(10, 4)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, -3.99999999999977), px.OffsetXY(10, -3.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 9.99999999999977), px.OffsetXY(-10, -3.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 9.99999999999977), px.OffsetXY(10, 9.99999999999977)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(10, 9.99999999999977), px.OffsetXY(10, -3.99999999999977)), "0")); break;
-                    case "Motor":
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(0, 0), 10), "0"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(-1.55076923076922, -0.907692307692514), "M", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(-1.74461538461583, -6.83076923076919), "~", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
-                        break;
-                    case "CPS":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(24, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(16.5, 4.5), px.OffsetXY(16.5, -4.5)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(4.97702922699068, 4.77297077300909), px.OffsetXY(14.5229707730093, -4.77297077300909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(14.5229707730093, 4.77297077300909), px.OffsetXY(4.97702922699068, -4.77297077300909)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(22.6794919243112, -10)), "E-UNIV-Oppo"));
-                        r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(21, 0.803847577293254), 3.10582854123025, 195.0.AngleFromDegree(), 345.0.AngleFromDegree(), false), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(29.6076951545867, -6), px.OffsetXY(31.6076951545867, -9.46410161513768)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(31.6076951545867, -9.46410161513768), px.OffsetXY(35.0717967697244, -7.46410161513768)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(35.0717967697244, -7.46410161513768), px.OffsetXY(33.0717967697244, -4)), "E-UNIV-Oppo"));
-                        break;
-                    case "Isolator":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(21, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(21, 6), px.OffsetXY(21, -6)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(50, 0)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(40, 0), px.OffsetXY(22.6794919243112, -10)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(24, 0), 3), "E-UNIV-Oppo"));
-                        break;
-                    case "ATSE":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, 20), px.OffsetXY(-34, 20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, 14), px.OffsetXY(-34, 26)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-15, 20), px.OffsetXY(-5, 20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-15, 20), px.OffsetXY(-32.3205080756888, 30)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, 20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, -20), px.OffsetXY(-34, -20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, -14), px.OffsetXY(-34, -26)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-15, -20), px.OffsetXY(-5, -20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-15, -20), px.OffsetXY(-32.3205080756888, -30)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, -20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-5, 20), px.OffsetXY(-5, -20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-23.6602540378444, 25), px.OffsetXY(-23.6602540378444, 4.00000000001683)), "E-UNIV-NOTE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-23.6602540378444, -3.99999999998727), px.OffsetXY(-23.6602540378444, -25)), "E-UNIV-NOTE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-27.1243556529789, 6.00000000001501), px.OffsetXY(-27.1243556529789, -5.99999999998499)), "E-UNIV-NOTE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-27.1243556529789, -5.99999999998499), px.OffsetXY(-16.7320508075657, 1.50066625792533E-11)), "E-UNIV-NOTE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-16.7320508075657, 1.50066625792533E-11), px.OffsetXY(-27.1243556529789, 6.00000000001501)), "E-UNIV-NOTE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(-5, 0)), "E-UNIV-Oppo"));
-                        break;
-                    case "TSE":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, 20), px.OffsetXY(-34, 20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, 14), px.OffsetXY(-34, 26)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(0, 0)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, 20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-55, -20), px.OffsetXY(-34, -20)), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-34, -14), px.OffsetXY(-34, -26)), "E-UNIV-Oppo"));
-                        r.circleInfos.Add(new CircleInfo(new GCircle(px.OffsetXY(-31, -20), 3), "E-UNIV-Oppo"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-10, 0), px.OffsetXY(-44.5, 0)), "E-UNIV-Oppo"));
-                        break;
-                    case "SPD附件":
-                        r.brInfos.Add(new BlockInfo("SPD", "E-UNIV-Oppo", px.OffsetXY(0, -40)));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(3, -30), "SPD1", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "SPD":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72.9919784453705, -0.000226596953552871), px.OffsetXY(42.6156667589894, 6.43058558580378E-06)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72.9919094777506, -4.50748979746368), px.OffsetXY(72.9919500743326, 4.50703660355987)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(75.4959511584293, -3.0487805263466), px.OffsetXY(75.4959786164418, 3.04830477905341)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(77.9999928391098, -1.59007125563107), px.OffsetXY(78.0000071585582, 1.58957295455036)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9838433146178, -3.60601460357543), px.OffsetXY(67.9838757918806, 3.60560651724347)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9515624231608, -3.60603524490614), px.OffsetXY(67.9838433141213, -3.60612545965478)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(18, 0), px.OffsetXY(0, 0)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9839244612049, 3.60560651684523), px.OffsetXY(47.9516435702444, 3.60569673159375)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9838433146178, -3.60601460357543), px.OffsetXY(67.9838757918806, 3.60560651724347)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9516110929817, -3.60592438922151), px.OffsetXY(47.9516435702444, 3.60569673159375)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.983843314687, -3.60599873829165), px.OffsetXY(67.9838757919497, 3.60562238252726)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.951562423239, -3.60601937962235), px.OffsetXY(67.9838433141977, -3.6061095943744)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.9839244608775, 3.60553388676021), px.OffsetXY(47.951643569917, 3.60562410150885)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(67.983843314687, -3.60599873829165), px.OffsetXY(67.9838757919497, 3.60562238252726)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(47.9516110930526, -3.60590852394114), px.OffsetXY(47.9516435703154, 3.60571259687754)), "E-POWR-DEVC"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(24.578755982202, -1.45046977819334), px.OffsetXY(21.6777718340727, 1.45051436993208)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(21.6777718340727, -1.45046977819334), px.OffsetXY(24.578755982202, 1.45051436993208)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(38.5130556325494, 2.22958693711917E-05), px.OffsetXY(28.1256620542608, -5.99714218273562)), "0"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(42.615666759064, 2.22958693711917E-05), px.OffsetXY(29.1513148358881, -7.77362491144856)), "0"));
-                        r.hatchInfos.Add(new HatchInfo(new Point[] { px.OffsetXY(27.1000092726281, -4.22065945402983), px.OffsetXY(30.1769676175099, -9.55010764015429), px.OffsetXY(24.0230509277371, -9.55010764015429), }, "E-POWR-DEVC"));
-                        r.hatchInfos.Add(new HatchInfo(new Point[] { px.OffsetXY(54.620, -1.959), px.OffsetXY(63.704, 0), px.OffsetXY(54.620, 1.959), }, "E-POWR-DEVC"));
-                        break;
-                    case "分支小母排":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(15, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(15, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(65, -40), px.OffsetXY(205, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(15, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "小母排分支":
-                        r.brInfos.Add(new BlockInfo("CircuitBreaker", "E-UNIV-Oppo", px.OffsetXY(215, -40)));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(215, -40), px.OffsetXY(205, -40)), "E-UNIV-WIRE"));
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(265, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(215, -30), "CB", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "消防应急照明回路（WFEL）":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -40), px.OffsetXY(485, -40)), "E-UNIV-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(595, -37), "负载编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -57), "功能用途", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -37), "功率(低)", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(545, -57), "相序", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "控制（从属接触器）":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(144, -40), px.OffsetXY(485, -40)), "E-CTRL-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -47), "控制回路", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    case "控制（从属CPS）":
-                        r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(46, -40), px.OffsetXY(485, -40)), "E-CTRL-WIRE"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(294, -30), "Conductor", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(594, -47), "控制回路", "E-UNIV-NOTE", "TH-STYLE3"));
-                        r.textInfos.Add(new DBTextInfo(px.OffsetXY(495, -47), "回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
-                return r;
-            }
-        }
     }
 }

@@ -66,20 +66,22 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             edge.Circuit.ViaConduit = true;
                         }
-                        addEdgeList.Add(edge);
-                        
-                        var objectIds = new List<ObjectId>();
-                        var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
-                        if (targetMap != null)
+                        if (!addEdgeList.Contains(edge))
                         {
-                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            addEdgeList.Add(edge);
+                            var objectIds = new List<ObjectId>();
+                            var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
+                            if (targetMap != null)
+                            {
+                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            }
+                            var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
+                            if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
+                            {
+                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                            }
+                            targetMap.EdgeMap.Add(edge, objectIds);
                         }
-                        var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
-                        if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
-                        {
-                            objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
-                        }
-                        targetMap.EdgeMap.Add(edge, objectIds);
 
                         break;
                     }
@@ -120,15 +122,6 @@ namespace TianHua.Electrical.PDS.Engine
                     unionGraph.AddEdge(newEdge);
                 }
             });
-
-            // 设置图的遍历起点
-            foreach (var vertice in unionGraph.Vertices)
-            {
-                if (!unionGraph.Edges.Any(o => o.Target.Equals(vertice)))
-                {
-                    vertice.IsStartVertexOfGraph = true;
-                }
-            }
 
             return unionGraph;
         }
@@ -198,8 +191,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <returns></returns>
         private bool PositionCheck(ThPDSCircuitGraphNode vertex, ThPDSCircuitGraphNode node)
         {
-            return ToPoint3d(vertex.Loads[0].Location.StoreyBasePoint - vertex.Loads[0].Location.BasePoint)
-                .DistanceTo(ToPoint3d(node.Loads[0].Location.StoreyBasePoint - node.Loads[0].Location.BasePoint))
+            return ToPoint3d(ThPDSPoint3dService.PDSPoint3dToPoint3d(vertex.Loads[0].Location.StoreyBasePoint)
+                - ThPDSPoint3dService.PDSPoint3dToPoint3d(vertex.Loads[0].Location.BasePoint))
+                .DistanceTo(ToPoint3d(ThPDSPoint3dService.PDSPoint3dToPoint3d(node.Loads[0].Location.StoreyBasePoint)
+                - ThPDSPoint3dService.PDSPoint3dToPoint3d(node.Loads[0].Location.BasePoint)))
                 < ThPDSCommon.STOREY_TOLERANCE;
         }
 
