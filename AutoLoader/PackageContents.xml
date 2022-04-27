@@ -541,6 +541,7 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -573,6 +574,7 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -605,6 +607,7 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
             </Commands>
         </ComponentEntry>
     </Components>
