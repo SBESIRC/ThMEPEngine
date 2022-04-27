@@ -641,7 +641,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                var ViaConduitStr = ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial.ToString() + PipeDiameter + "-" + Pipelaying;
+                var ViaConduitStr = !IsBAControl && ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial.ToString() + PipeDiameter + "-" + Pipelaying;
                 if (ViaCableTray && ViaConduit)
                 {
                     return $"{this.BridgeLaying.ToString()}/ {ViaConduitStr }";

@@ -7,20 +7,23 @@ using ThCADExtension;
 
 namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
 {
-    public enum ConductorMaterial
-    {
-        铜,
-    }
     public class ProjectGlobalConfiguration
     {
         #region 供配电系统
+        public double MunicipalPowerCircuitDefaultLength = 1000;//m 市政电源线路默认长度
+        public double TreeTrunkDistributionCurrent = 250;//A 树干式配电电流
+        public Feeder DefaultFeeder = Feeder.T接电缆;//默认馈线
+        public Feeder OtherFeeder = Feeder.预分支电缆;//
+
+        public double SecondaryDistributionBoxDefaultLength = 100;//m 二级配电箱线路默认长度
+        public double LoopSettingCurrent = 630;//A 回路整定电流
+
+        public double SubsequentDefaultLength = 50;//m 后续线路默认长度
         public double CalculateCurrentMagnification = 1.1;//计算电流放大倍率
         #endregion
 
         #region 导体及敷设管材选型
         //默认导体材料
-        //理论上要用枚举，暂时不知道是什么用，暂时用string代替
-        //public string DefaultConductorMaterial = "铜";
         public ConductorMaterial DefaultConductorMaterial = ConductorMaterial.铜;
 
         //消防配电干线及分支干线采用""矿物绝缘电力
@@ -100,12 +103,26 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         public FireStartType NormalStartType = FireStartType.星三角启动;//同上
         #endregion
     }
+
+    public enum Feeder
+    {
+        T接电缆,
+        预分支电缆,
+        密集型母线槽,
+    }
+
+    public enum ConductorMaterial
+    {
+        铜,
+    }
+
     public enum FireStartType
     {
         星三角启动,
         //软启动器启动,
         //变频器启动,
     }
+
     public enum MotorUIChoise
     {
         分立元件,
