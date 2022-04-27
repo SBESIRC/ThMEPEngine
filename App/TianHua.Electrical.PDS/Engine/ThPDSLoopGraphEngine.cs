@@ -577,15 +577,18 @@ namespace TianHua.Electrical.PDS.Engine
                                 newEdge.Circuit.ViaCableTray = true;
                             }
                         }
-                        PDSGraph.Graph.AddEdge(newEdge);
-                        EdgeMap.Add(newEdge, logos.ObjectIds);
-                        if (item.Value.Count > 0)
+                        if(!PDSGraph.Graph.ContainsEdge(newEdge))
                         {
-                            FindGraph(item.Value.Last(), item.Key);
-                        }
-                        else
-                        {
-                            FindGraph(nextEntity, item.Key);
+                            PDSGraph.Graph.AddEdge(newEdge);
+                            EdgeMap.Add(newEdge, logos.ObjectIds);
+                            if (item.Value.Count > 0)
+                            {
+                                FindGraph(item.Value.Last(), item.Key);
+                            }
+                            else
+                            {
+                                FindGraph(nextEntity, item.Key);
+                            }
                         }
                     }
                     else
