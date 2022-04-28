@@ -83,42 +83,42 @@
                                 <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial, Mode=OneWay}" ></ComboBox>
+                                            <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" ></ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding HalogenFree}"></CheckBox>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding HalogenFree,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="低烟" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowSmoke}"></CheckBox>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowSmoke,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="低毒" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowToxicity}"></CheckBox>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding LowToxicity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="阻燃" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding FlameRetardant}"></CheckBox>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding FlameRetardant,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="耐火" Width="40" CanUserSort="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding Refractory}"></CheckBox>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" IsChecked="{Binding Refractory,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -132,7 +132,7 @@
                                 <DataGridTemplateColumn Header="导体标注样式预览" Width="100" CanUserSort="False" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content}"></TextBlock>
+                                            <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding Content,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

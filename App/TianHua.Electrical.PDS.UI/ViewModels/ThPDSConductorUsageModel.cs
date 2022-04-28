@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == ConductorType) return;
                 _conductorUse.ConductorType = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == OuterSheathMaterial) return;
                 _conductorUse.OuterSheathMaterial = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -62,7 +62,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.HalogenFree = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool LowSmoke
@@ -71,7 +71,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.LowSmoke = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool LowToxicity
@@ -80,7 +80,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.LowToxicity = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool FlameRetardant
@@ -89,7 +89,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.FlameRetardant = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool Refractory
@@ -98,7 +98,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.Refractory = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public ConductorLevel Level
@@ -107,7 +107,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.Level = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
     }

@@ -2943,49 +2943,42 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var fs = new Dictionary<ThPDSProjectGraphEdge, Action>();
                     foreach (var kv in vertice.Details.SecondaryCircuits)
                     {
-                        var _sc = kv.Key;
-                        if (visitedSecondaryCircuits.Contains(_sc)) continue;
-                        visitedSecondaryCircuits.Add(_sc);
-                        var scVm = new Project.Module.ThPDSSecondaryCircuitModel(_sc);
-                        scVm.PropertyChanged += (s, e) =>
+                        List<ThPDSProjectGraphEdge> edges;
+                        HashSet<SecondaryCircuit> scs;
                         {
-                            if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
+                            var _sc = kv.Key;
+                            if (visitedSecondaryCircuits.Contains(_sc)) continue;
+                            visitedSecondaryCircuits.Add(_sc);
+                            var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
+                            if (_edges.Count == 0) continue;
+                            scs = new() { _sc };
+                            foreach (var k in vertice.Details.SecondaryCircuits.Keys)
                             {
-                                if (!scVm.ConductorModel.IsCustom)
+                                if (k == _sc) continue;
+                                var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
+                                foreach (var edge in egs)
                                 {
-                                    scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
-                                }
-                            }
-                        };
-                        var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
-                        if (_edges.Count == 0) continue;
-                        var scs = new HashSet<SecondaryCircuit>() { _sc };
-                        foreach (var k in vertice.Details.SecondaryCircuits.Keys)
-                        {
-                            if (k == _sc) continue;
-                            var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
-                            foreach (var edge in egs)
-                            {
-                                if (_edges.Contains(edge))
-                                {
-                                    scs.Add(k);
-                                    foreach (var eg in egs)
+                                    if (_edges.Contains(edge))
                                     {
-                                        _edges.Add(eg);
+                                        scs.Add(k);
+                                        foreach (var eg in egs)
+                                        {
+                                            _edges.Add(eg);
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
+                            foreach (var sc in scs)
+                            {
+                                visitedSecondaryCircuits.Add(sc);
+                            }
+                            foreach (var edge in _edges)
+                            {
+                                visitedEdges.Add(edge);
+                            }
+                            edges = GetSortedEdges(_edges).ToList();
                         }
-                        foreach (var sc in scs)
-                        {
-                            visitedSecondaryCircuits.Add(sc);
-                        }
-                        foreach (var edge in _edges)
-                        {
-                            visitedEdges.Add(edge);
-                        }
-                        var edges = GetSortedEdges(_edges).ToList();
                         fs.Add(edges.First(), () =>
                         {
                             foreach (var edge in edges)
@@ -3003,13 +2996,24 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
                                 foreach (var sc in scs)
                                 {
+                                    var scVm = new Project.Module.ThPDSSecondaryCircuitModel(sc);
+                                    scVm.PropertyChanged += (s, e) =>
+                                    {
+                                        if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
+                                        {
+                                            if (!scVm.ConductorModel.IsCustom)
+                                            {
+                                                scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
+                                            }
+                                        }
+                                    };
                                     var start = new Point(busStart.X + 205, -dy - 10);
                                     var end = start.OffsetY(40);
                                     busEnd = end;
                                     dy -= end.Y - start.Y;
                                     var pt = new Point(start.X - 205, start.Y);
                                     {
-                                        var h = 38.0 * (_edges.Count - 1);
+                                        var h = 38.0 * (edges.Count - 1);
                                         switch (edges.Last().Details.CircuitForm.CircuitFormType)
                                         {
                                             case CircuitFormOutType.None:
