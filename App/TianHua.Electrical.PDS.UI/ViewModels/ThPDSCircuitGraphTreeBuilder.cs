@@ -86,10 +86,30 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     dfs(node, null);
                 }
             }
-            return new ThPDSCircuitGraphTreeModel()
             {
-                DataList = lst,
-            };
+                var node = new ThPDSCircuitGraphTreeModel()
+                {
+                    DataList = lst,
+                };
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    if (node.DataList != null)
+                    {
+                        var lst = node.DataList.OrderBy(x => x.Name).ToList();
+                        node.DataList.Clear();
+                        foreach (var n in lst)
+                        {
+                            node.DataList.Add(n);
+                        }
+                        foreach (var n in node.DataList)
+                        {
+                            dfs(n);
+                        }
+                    }
+                }
+                dfs(node);
+                return node;
+            }
         }
     }
 }
