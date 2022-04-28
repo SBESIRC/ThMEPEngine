@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
+    <Compile Include="Model\ThPDSControlCircuitData.cs" />
     <Compile Include="Model\ThPDSPoint3d.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />

@@ -48,7 +48,7 @@ namespace TianHua.Electrical.PDS.Engine
             tableAnalysis.Analysis(tableInfo, ref nameFilter, ref propertyFilter, ref distBoxKey);
 
             //加载数据
-            foreach(Database database in databases)
+            foreach (Database database in databases)
             {
                 if (Application.DocumentManager.GetDocument(database) is Document doc)
                 {
@@ -158,8 +158,8 @@ namespace TianHua.Electrical.PDS.Engine
                             var distBoxes = distBoxIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
 
                             // 负载
-                            var distBoxFrame = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
-                            var loads = distBoxFrame.SelectCrossingPolygon(x).OfType<Entity>().ToList();
+                            var loadIndex = new ThCADCoreNTSSpatialIndex(loadExtractService.LoadBlocks.Keys.ToCollection());
+                            var loads = loadIndex.SelectCrossingPolygon(x).OfType<Entity>().ToList();
 
                             // 配电箱框线
                             var distBoxFrameIndex = new ThCADCoreNTSSpatialIndex(allDistBoxFrame);

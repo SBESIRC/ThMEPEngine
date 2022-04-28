@@ -9,7 +9,7 @@ namespace TianHua.Electrical.PDS.Service
         /// <summary>
         /// 配电箱序列
         /// </summary>
-        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
         public void Analysis(List<ThPDSBlockInfo> tableInfo, ref List<string> nameFilter,ref List<string> propertyFilter,
             ref List<string> distBoxKey)
