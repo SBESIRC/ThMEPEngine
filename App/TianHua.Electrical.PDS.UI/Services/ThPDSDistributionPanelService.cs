@@ -2043,11 +2043,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                 }
                 var circuitIDSortNames = "WPE、WP、WLE、WL、WS、WFEL".Split('、').ToList();
+                IEnumerable<SecondaryCircuit> GetSortedSecondaryCircuits(IEnumerable<SecondaryCircuit> scs)
+                {
+                    return from sc in scs
+                           let scVm = new ThPDSSecondaryCircuitModel(sc)
+                           let id = scVm.CircuitID ?? ""
+                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                           select sc;
+                }
                 IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
                 {
                     return from edge in edges
                            where edge.Source == vertice
-                           let circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge)
+                           let circuitVM = new ThPDSCircuitModel(edge)
                            let id = circuitVM.CircuitID ?? ""
                            orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
                            select edge;
@@ -2994,7 +3002,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
                                 var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                                 var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
-                                foreach (var sc in scs)
+                                foreach (var sc in GetSortedSecondaryCircuits(scs))
                                 {
                                     var scVm = new Project.Module.ThPDSSecondaryCircuitModel(sc);
                                     scVm.PropertyChanged += (s, e) =>
