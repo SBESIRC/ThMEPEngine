@@ -45,11 +45,12 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     CompareCmd = new RelayCommand(() =>
                     {
-                        new ThPDSSecondaryPushDataService().Push();
+                        if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                        new ThPDSSecondaryPushDataService().Push(tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<Document>().Select(x => x.Database).ToList());
                         PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                         UpdateView(panel);
-                    }, () =>!hasDataError),
-                    AcceptCmd = new RelayCommand(() => { }, () => !hasDataError|| regenCount > 1),
+                    }, () => !hasDataError),
+                    AcceptCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
                     CreateCmd = new RelayCommand(() => { }, () =>
                   !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
@@ -74,7 +75,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 var node = new ThPDSCircuitGraphTreeModel() { DataList = new(), };
                 AcadApp.DocumentManager.OfType<Document>().Where(x => x.IsNamedDrawing).ForEach(x =>
                 {
-                    node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(x.Name), Key = x.Name });
+                    node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(x.Name), Key = x.Name, Tag = x, });
                 });
                 panel.lbx.DataContext = node;
                 AcadApp.DocumentManager.DocumentCreated += (s, e) =>
