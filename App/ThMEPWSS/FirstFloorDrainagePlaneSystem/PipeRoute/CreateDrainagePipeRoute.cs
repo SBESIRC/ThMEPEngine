@@ -1,11 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
@@ -14,7 +16,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
     public class CreateDrainagePipeRoute
     {
-        Polyline frame;                                     //外框线
+        Polyline frame;                                     //最大框线
         List<Polyline> mainSewagePipes;                     //排水主管
         List<Polyline> mainRainPipes;                       //雨水主管
         List<VerticalPipeModel> verticalPipes;              //排雨水立管
@@ -27,18 +29,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double lineDis = 210;                      //连接线区域范围
         readonly double lineWieght = 5;                     //连接线区域权重
         double angleTolerance = 1 * Math.PI / 180.0;
-        public CreateDrainagePipeRoute(Polyline polyline, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
+        public CreateDrainagePipeRoute(List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
             List<Curve> grids, List<Polyline> _outUserPoly, Dictionary<Polyline, List<string>> _rooms, ParamSettingViewModel _paramSetting)
         {
-            frame = polyline;
             mainSewagePipes = sewagePolys;
             mainRainPipes = rainPolys;
             verticalPipes = verticalPipesModel;
-            wallPolys = walls;
             gridLines = grids;
             outUserPoly = _outUserPoly;
             rooms = _rooms;
             paramSetting = _paramSetting;
+            frame = HandleStructService.GetMaxFrame(rooms.Select(x => x.Key).ToList(), mainSewagePipes, mainRainPipes);
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
+            wallPolys = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
         }
 
         /// <summary>
@@ -50,7 +53,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var resRoutes = new List<RouteModel>();
             RoomPolyService roomPolyService = new RoomPolyService();
             var roomDeep = roomPolyService.GetRoomDeep(rooms, outUserPoly);
-
             HandleConfluenceService handleConfluenceService = new HandleConfluenceService(paramSetting, verticalPipes, roomDeep);
             handleConfluenceService.GetMainPolyVerticalPipe();
             foreach (var pipeTuple in handleConfluenceService.pipeTuples)
@@ -59,7 +61,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 mainPipes.Add(pipeTuple.Item2);
                 mainPipes.AddRange(pipeTuple.Item5);
                 mainPipes = mainPipes.Where(x => x != null).ToList();
-                var routing = RoutingMainPipe(mainPipes);
+                var routing = RoutingMainPipe(mainPipes, pipeTuple.Item6.Select(x => x.Key.Key).ToList());
                 ReprocessingPipe reprocessingPipe = new ReprocessingPipe(routing, outUserPoly);     //后处理间距
                 routing = reprocessingPipe.Reprocessing();
 
@@ -110,11 +112,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (mainWasteRoute != null)
                 {
                     var poly = mainWasteRoute.route;
-                    var frame = GeometryUtils.FindOutFrame(poly, outUserPoly, point, false);
-                    var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, frame);
+                    var outFrame = GeometryUtils.FindOutFrame(poly, outUserPoly, point, false);
+                    var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, outFrame);
                     var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
                     var pts = new Point3dCollection();
-                    intersectLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    intersectLine.IntersectWith(outFrame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
                     if (pts.Count > 0)
                     {
                         var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();
@@ -132,7 +134,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="mainPipes"></param>
         /// <returns></returns>
-        private List<RouteModel> RoutingMainPipe(List<VerticalPipeModel> mainPipes)
+        private List<RouteModel> RoutingMainPipe(List<VerticalPipeModel> mainPipes, List<Polyline> rooms)
         {
             var resRoutes = new List<RouteModel>();
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
@@ -160,7 +162,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 weightHoles.Add(wallPolys, double.MaxValue);
                 weightHoles.Add(CreateOtherPipeHoles(connectPipes, pipe, closetLine.Key), double.MaxValue);
                 weightHoles.Add(holeConnectLines, lineWieght);
-                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
+                var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
+                var connectLine = connectPipesService.CreatePipes(outFrame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
@@ -205,7 +208,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 weightHoles.Add(wallPolys, double.MaxValue);
                 weightHoles.Add(CreateOtherPipeHoles(outPipes, pipe, closetLine.Key), double.MaxValue);
                 weightHoles.Add(holeConnectLines, lineWieght);
-                var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, pipe.Position, weightHoles);
+                var needFrame = HandleStructService.GetNeedFrame(closetLine.Key, pipe.Position);
+                var connectLine = connectPipesService.CreatePipes(needFrame, closetLine.Key, pipe.Position, weightHoles);
                 holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
                 foreach (var line in connectLine)
                 {
@@ -348,7 +352,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         {
             var closeInfo = GeometryUtils.GetClosetLine(lines, startPt);
             Line checkLine = new Line(startPt, closeInfo.Value);
-            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline))
+            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline) && !CheckService.CheckIntersectWithHoles(checkLine, wallPolys))
             {
                 var checkDir = (closeInfo.Value - startPt).GetNormal();
                 var lineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
@@ -358,7 +362,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
-            BFSPathPlaner pathPlaner = new BFSPathPlaner(step);
+            BFSPathPlaner pathPlaner = new BFSPathPlaner(step, wallPolys);
             var closetLine = pathPlaner.FindingClosetLine(startPt, lines, polyline);
             var closetPt = closetLine.GetClosestPointTo(startPt, false);
 

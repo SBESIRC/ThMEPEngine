@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
@@ -138,7 +139,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 return new List<RouteModel>();
             }
             var mainLine = GetMainPipeLine(mainRoute, rooms, outFrames, wallPolys);
-            return ConnectOtherPipes(frame, mainLine, otherPipes, wallPolys);
+            var roomPolys = rooms.Select(x => x.Key.Key).ToList();
+            return ConnectOtherPipes(frame, mainLine, otherPipes, wallPolys, roomPolys);
         }
 
         /// <summary>
@@ -149,7 +151,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="otherPipes"></param>
         /// <param name="wallPolys"></param>
         /// <returns></returns>
-        private List<RouteModel> ConnectOtherPipes(Polyline frame, KeyValuePair<Polyline, Line> mainLineDic, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys)
+        private List<RouteModel> ConnectOtherPipes(Polyline frame, KeyValuePair<Polyline, Line> mainLineDic, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, List<Polyline> roomPolys)
         {
             var mainLine = mainLineDic.Key;
             var orderPipeDic = OrderPipes(mainLine, otherPipes);
@@ -158,7 +160,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var otherPolyline = new List<RouteModel>();
             foreach (var pipes in cPipe)
             {
-                resPipeLines.Add(ConnectPipes(frame, mainLine, resPipeLines, pipes, wallPolys, out List<RouteModel> otherConnectPipeLines));
+                resPipeLines.Add(ConnectPipes(frame, mainLine, resPipeLines, pipes, wallPolys, roomPolys, out List<RouteModel> otherConnectPipeLines));
                 otherPolyline.AddRange(otherConnectPipeLines);
             }
             var lastPipe = resPipeLines.Last();
@@ -176,7 +178,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="connectLines"></param>
         /// <param name="otherPipes"></param>
         /// <param name="mainDir"></param>
-        private RouteModel ConnectPipes(Polyline frame, Polyline mainPoly, List<RouteModel> connectLines, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, out List<RouteModel> otherConnectPipeLines)
+        private RouteModel ConnectPipes(Polyline frame, Polyline mainPoly, List<RouteModel> connectLines, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, List<Polyline> rooms, out List<RouteModel> otherConnectPipeLines)
         {
             otherPipes = otherPipes.OrderByDescending(x => mainPoly.GetClosestPointTo(x.Position, true).DistanceTo(x.Position)).ToList();
             var closePt = mainPoly.GetClosestPointTo(otherPipes.First().Position, true);
@@ -210,7 +212,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
             weightHoles.Add(wallPolys, double.MaxValue);
             var closetLine = GeometryUtils.GetClosetLane(connectPoly.GetAllLineByPolyline(), connectPt, frame, step);
-            var connectLine = connectPipesService.CreatePipes(frame, closetLine.Key, connectPt, weightHoles);
+            var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
+            var connectLine = connectPipesService.CreatePipes(outFrame, closetLine.Key, connectPt, weightHoles);
 
             otherPipes.Remove(otherPipes.First());
             var resLine = CreateConnectLine(resConnectLine, connectLine, connectPt, closetLine.Key, pipeType);

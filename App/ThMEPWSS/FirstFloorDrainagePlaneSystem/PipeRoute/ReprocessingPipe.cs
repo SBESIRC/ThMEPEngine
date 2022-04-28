@@ -191,7 +191,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <returns></returns>
         private Polyline FindOutFrame(List<RouteModel> routePolys)
         {
-            var frames = outFrame.Where(x => routePolys.Any(y=>y.route.IsIntersects(x))).ToList();
+            var frames = outFrame.Where(x => routePolys.Any(y => y.route.IsIntersects(x))).ToList();
             var ep = routePolys.First().route.EndPoint;
             if (routePolys.First().startPosition.DistanceTo(ep) < 1)
             {

@@ -50,24 +50,25 @@ namespace ThMEPWSS.Command
                 {
                     var frame = dic.Key.Clone() as Polyline;
                     originTransformer.Transform(frame);
-                    var thRooms = frame.GetRoomInfo(acad, originTransformer);
-                    var userOutFrame = frame.GetUserFrame(acad, originTransformer);
-                    frame.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
-                    var rooms = CalAllRoomPolylines(thRooms);
-                    var roomWalls = CalStructrueService.GetRoomWall(rooms.Keys.ToList(), userOutFrame);
-                    var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
-                    holeWalls.AddRange(columns);
+                    CalStructrueService.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
                     if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)        //不考虑一层出户不需要读取洁具立管
                     {
                         var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
                         verticalPipe.AddRange(drainingEquipment);
                     }
-                    var sewagePipes = frame.GetSewageDrainageMainPipe(acad, originTransformer);
-                    var rainPipes = frame.GetRainDrainageMainPipe(acad, originTransformer);
-                    var gridLines = frame.GetAxis(acad, originTransformer);
+                    var thRooms = CalStructrueService.GetRoomInfo(acad, originTransformer);
+                    var rooms = CalAllRoomPolylines(thRooms);
+                    var userOutFrame = CalStructrueService.GetUserFrame(acad, originTransformer);
+                    var deepRooms = HandleStructService.GetNeedStruct(rooms, userOutFrame, verticalPipe);       //拿到需要的房间（房间内有点位的房间）
+                    var roomWalls = CalStructrueService.GetRoomWall(rooms.Keys.ToList());
+                    var holeWalls = CutWallByUserOutFrame(userOutFrame, walls, roomWalls);
+                    holeWalls.AddRange(columns);
+                    var sewagePipes = CalStructrueService.GetSewageDrainageMainPipe(acad, originTransformer);
+                    var rainPipes = CalStructrueService.GetRainDrainageMainPipe(acad, originTransformer);
+                    var gridLines = CalStructrueService.GetAxis(acad, originTransformer);
 
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(frame, sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, rooms, paramSetting);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
                     //进行路由倒角
@@ -76,6 +77,10 @@ namespace ThMEPWSS.Command
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        foreach (var item in holeWalls)
+                        {
+                            acad.ModelSpace.Add(item);
+                        }
                         //处理冷凝水管
                         HandlePipes(routes);
 
@@ -93,8 +98,6 @@ namespace ThMEPWSS.Command
                 }
             }
         }
-
-        //private void Layout
 
         /// <summary>
         /// 冷凝水管间接排水
@@ -156,7 +159,7 @@ namespace ThMEPWSS.Command
         /// <param name="walls"></param>
         /// <param name="roomWalls"></param>
         /// <returns></returns>
-        private List<Polyline> CutWallByUserOutFrame(List<Polyline> userOutFrame, List<Polyline> walls, List<MPolygon> roomWalls)
+        private List<Polyline> CutWallByUserOutFrame(List<Polyline> userOutFrame, List<Polyline> walls, List<Polyline> roomWalls)
         {
             var wallCurves = new List<Entity>(walls);
             wallCurves.AddRange(roomWalls);

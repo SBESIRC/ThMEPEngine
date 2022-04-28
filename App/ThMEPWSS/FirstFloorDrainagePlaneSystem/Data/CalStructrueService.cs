@@ -113,7 +113,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="acdb"></param>
         /// <param name="originTransformer"></param>
         /// <returns></returns>
-        public static List<ThIfcRoom> GetRoomInfo(this Polyline polyline, AcadDatabase acdb, ThMEPOriginTransformer originTransformer)
+        public static List<ThIfcRoom> GetRoomInfo(AcadDatabase acdb, ThMEPOriginTransformer originTransformer)
         {
             var roomEngine = new ThAIRoomOutlineExtractionEngine();
             roomEngine.ExtractFromMS(acdb.Database);
@@ -124,10 +124,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
             var boundaryEngine = new ThAIRoomOutlineRecognitionEngine();
-            boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
+            boundaryEngine.Recognize(roomEngine.Results, new Point3dCollection());
             var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
             var markRecEngine = new ThAIRoomMarkRecognitionEngine();
-            markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
+            markRecEngine.Recognize(markEngine.Results, new Point3dCollection());
             var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
             var builder = new ThRoomBuilderEngine();
             builder.Build(rooms, marks);
@@ -140,7 +140,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// </summary>
         /// <param name="acadDatabase"></param>
         /// <returns></returns>
-        public static List<Polyline> GetUserFrame(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        public static List<Polyline> GetUserFrame(AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
         {
             List<Polyline> frameLst = new List<Polyline>();
             var dxfNames = new string[]
@@ -155,10 +155,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 var frame = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
                 originTransformer.Transform(frame);
-                if (polyline.Contains(frame) || polyline.IsIntersects(frame))
-                {
-                    frameLst.Add(frame);
-                }
+                frameLst.Add(frame);
             }
 
             return frameLst;
@@ -172,36 +169,23 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        public static void GetStructureInfo(this Polyline pFrame, AcadDatabase acdb, out List<Polyline> columns, out List<Polyline> walls, ThMEPOriginTransformer originTransformer)
+        public static void GetStructureInfo(AcadDatabase acdb, out List<Polyline> columns, out List<Polyline> walls, ThMEPOriginTransformer originTransformer)
         {
-            var outFrame = pFrame.Clone() as Polyline;
-            originTransformer.Reset(outFrame);
-            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, outFrame.Vertices());
+            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, new Point3dCollection());
 
             //获取柱
             columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            var objs = new DBObjectCollection();
-            columns.ForEach(x => objs.Add(x));
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(outFrame).Cast<Polyline>().ToList();
 
             //获取剪力墙
             walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            objs = new DBObjectCollection();
-            walls.ForEach(x => objs.Add(x));
-            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(outFrame).Cast<Polyline>().ToList();
 
             //建筑构建
             using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
             {
                 //建筑墙
-                archWallEngine.Recognize(acdb.Database, outFrame.Vertices());
+                archWallEngine.Recognize(acdb.Database, new Point3dCollection());
                 var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
-                objs = new DBObjectCollection();
-                arcWall.ForEach(x => objs.Add(x));
-                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(outFrame).Cast<Polyline>().ToList());
+                walls.AddRange(arcWall);
             }
 
             columns.ForEach(x => originTransformer.Transform(x));
@@ -214,22 +198,29 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="rooms"></param>
         /// <param name="userFrames"></param>
         /// <returns></returns>
-        public static List<MPolygon> GetRoomWall(List<Polyline> rooms, List<Polyline> userFrames)
+        public static List<Polyline> GetRoomWall(List<Polyline> rooms)
         {
-            var roomWallLst = new List<MPolygon>();
-            //var bufferFrames = userFrames.Select(x => x.Buffer(100)[0] as Polyline).ToList();
+            var roomWallLst = new List<Polyline>();
             foreach (var room in rooms)
             {
-                var bufferRoom = room.Buffer(50)[0] as Polyline;
-                var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
-                roomWallLst.Add(resMPoly);
-                //var checkFrame = bufferFrames.Where(x => room.IsIntersects(x)).ToList();
-                //if (checkFrame.Count > 0)
-                //{
-                //    var bufferRoom = room.Buffer(150)[0] as Polyline;
-                //    var resMPoly = ThMPolygonTool.CreateMPolygon(bufferRoom, new List<Curve>() { room });
-                //    roomWallLst.Add(resMPoly);
-                //}
+                if (room.IsCCW())
+                {
+                    room.ReverseCurve();
+                }
+                for (int i = 1; i < room.NumberOfVertices; i++)
+                {
+                    var pt1 = room.GetPoint3dAt(i - 1);
+                    var pt2 = room.GetPoint3dAt(i);
+                    var dir = Vector3d.ZAxis.CrossProduct((pt2 - pt1).GetNormal());
+                    var pt3 = pt2 + dir * 100;
+                    var pt4 = pt1 + dir * 100;
+                    Polyline wallPoly = new Polyline() { Closed = true };
+                    wallPoly.AddVertexAt(0, pt1.ToPoint2d(), 0, 0, 0);
+                    wallPoly.AddVertexAt(1, pt2.ToPoint2d(), 0, 0, 0);
+                    wallPoly.AddVertexAt(2, pt3.ToPoint2d(), 0, 0, 0);
+                    wallPoly.AddVertexAt(3, pt4.ToPoint2d(), 0, 0, 0);
+                    roomWallLst.Add(wallPoly);
+                }
             }
 
             return roomWallLst;
@@ -393,7 +384,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="polyline"></param>
         /// <param name="acadDatabase"></param>
         /// <returns></returns>
-        public static List<Polyline> GetSewageDrainageMainPipe(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        public static List<Polyline> GetSewageDrainageMainPipe(AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
         {
             List<Polyline> pipeLst = new List<Polyline>();
             var dxfNames = new string[]
@@ -410,14 +401,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     var pipe = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
                     originTransformer.Transform(pipe);
-                    if (polyline.Intersects(pipe))
-                    {
-                        pipeLst.Add(pipe);
-                    }
+                    pipeLst.Add(pipe);
                 }
             }
 
-            return pipeLst.SelectMany(x=> polyline.Trim(x).OfType<Polyline>()).ToList();
+            return pipeLst;
         }
 
         /// <summary>
@@ -426,7 +414,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// <param name="polyline"></param>
         /// <param name="acadDatabase"></param>
         /// <returns></returns>
-        public static List<Polyline> GetRainDrainageMainPipe(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        public static List<Polyline> GetRainDrainageMainPipe(AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
         {
             List<Polyline> pipeLst = new List<Polyline>();
             var dxfNames = new string[]
@@ -443,10 +431,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     var pipe = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
                     originTransformer.Transform(pipe);
-                    if (polyline.Contains(pipe))
-                    {
-                        pipeLst.Add(pipe);
-                    }
+                    pipeLst.Add(pipe);
                 }
             }
 
@@ -457,12 +442,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
         /// 获取轴网线
         /// </summary>
         /// <param name="polyline"></param>
-        public static List<Curve> GetAxis(this Polyline polyline, AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
+        public static List<Curve> GetAxis(AcadDatabase acadDatabase, ThMEPOriginTransformer originTransformer)
         {
-            var outFrame = polyline.Clone() as Polyline;
-            originTransformer.Reset(outFrame);
             var axisEngine = new ThAXISLineRecognitionEngine();
-            axisEngine.Recognize(acadDatabase.Database, outFrame.Vertices());
+            axisEngine.Recognize(acadDatabase.Database, new Point3dCollection());
             var retAxisCurves = new List<Curve>();
             foreach (var item in axisEngine.Elements)
             {

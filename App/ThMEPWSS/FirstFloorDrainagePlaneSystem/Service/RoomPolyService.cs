@@ -12,7 +12,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
     {
         public List<Dictionary<KeyValuePair<Polyline, List<string>>, int>> GetRoomDeep(Dictionary<Polyline, List<string>> rooms, List<Polyline> outUserFrames)
         {
-            var bufferFrames = outUserFrames.Select(x => x.ExtendByLengthLine(100)).Where(x => x != null).ToList();
+            var bufferFrames = outUserFrames.Where(x => x.Area > 10).Select(x => x.ExtendByLengthLine(100)).Where(x => x != null).ToList();
             var interDic = bufferFrames.ToDictionary(x => x, y => rooms.Where(x => x.Key.IsIntersects(y)).ToList())
                 .Where(x => x.Value.Count >= 0).ToDictionary(x => x.Key, y => y.Value);
             var oneDeepRooms = interDic.Where(x => x.Value.Count == 1).ToDictionary(x => x.Key, y => y.Value);
