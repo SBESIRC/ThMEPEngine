@@ -48,6 +48,17 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnSaveClick(object sender, RoutedEventArgs e)
         {
+            if (!Directory.Exists(setting.Path))
+            {
+                try
+                {
+                    Directory.CreateDirectory(setting.Path);
+                }
+                catch(Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                }
+            }
             File.WriteAllText(file, JsonConvert.SerializeObject(setting));
             Close();
         }
