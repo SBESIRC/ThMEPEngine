@@ -708,20 +708,46 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             lane = line;
         }
+        private class LocCar
+        {
+            public LocCar(Polygon car, Coordinate point)
+            {
+                Car = car;
+                Point = point;
+            }
+            public Polygon Car;
+            public Coordinate Point;
+        }
+        private class LocCarComparer : IEqualityComparer<LocCar>
+        {
+            public bool Equals(LocCar a, LocCar b)
+            {
+                if (a.Point.Distance(b.Point) < 1000) return true;
+                return false;
+            }
+            public int GetHashCode(LocCar car)
+            {
+                return ((int)car.Point.X).GetHashCode();
+            }
+        }
         private void RemoveDuplicateCars()
         {
-            for (int i = 1; i < CarSpots.Count; i++)
-            {
-                for (int j = 0; j < i; j++)
-                {
-                    if (CarSpots[i].Envelope.Centroid.Coordinate.Distance(CarSpots[j].Envelope.Centroid.Coordinate) < 1000)
-                    {
-                        CarSpots.RemoveAt(i);
-                        i--;
-                        break;
-                    }
-                }
-            }
+            var locCars = CarSpots.Select(e => new LocCar(e, e.Envelope.Coordinate));
+            var compare = new LocCarComparer();
+            locCars = locCars.Distinct(compare);
+            CarSpots = locCars.Select(e => e.Car).ToList();
+            //for (int i = 1; i < CarSpots.Count; i++)
+            //{
+            //    for (int j = 0; j < i; j++)
+            //    {
+            //        if (CarSpots[i].Envelope.Centroid.Coordinate.Distance(CarSpots[j].Envelope.Centroid.Coordinate) < 1000)
+            //        {
+            //            CarSpots.RemoveAt(i);
+            //            i--;
+            //            break;
+            //        }
+            //    }
+            //}
         }
         private void RemoveCarsIntersectedWithBoundary()
         {
@@ -934,9 +960,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (Math.Abs(car.Area - DisVertCarLength * DisVertCarWidth) < 1)
                     {
                         var pl_checksc = ConvertVertCarToCollisionCar(seg, vec.Normalize());
-                        if (pl_checksc.BufferPL(1) is Polygon)
+                        var buffer_pl = pl_checksc.BufferPL(1);
+                        if (buffer_pl is Polygon)
                         {
-                            var buffers = ((Polygon)pl_checksc.BufferPL(1)).Holes;
+                            var buffers = ((Polygon)buffer_pl).Holes;
                             if (buffers.Count() > 0)
                             {
                                 var buffer = new Polygon(buffers[0]);

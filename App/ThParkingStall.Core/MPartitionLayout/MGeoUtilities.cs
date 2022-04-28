@@ -507,10 +507,58 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return res;
         }
-        public static bool IsInAnyPolys(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false)
+        public static bool IsInAnyPolys(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false, bool accurate = false)
         {
             if (pls.Count == 0) return false;
-            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.ClosestPoint(pt).Distance(pt));
+            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.Envelope.Centroid.Coordinate.Distance(pt)).ToArray();
+            var bigpolys = pls.OrderByDescending(e => e.Area).ToArray();
+            int fast_cal_count = 20;
+            if (!accurate && ps.Count() > fast_cal_count) ps = ps.Take(fast_cal_count).ToArray();
+            if (!accurate && ps.Count() > fast_cal_count) bigpolys = bigpolys.Take(fast_cal_count).ToArray();
+            if (!allowOnEdge)
+            {
+                foreach (var p in ps)
+                {
+                    if (p.Coordinates.Count() == 5)
+                        if (p.Envelope.Contains(new Point(pt)) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
+                    if (p.Contains(pt) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
+                }
+                if (!accurate && ps.Count() > fast_cal_count)
+                {
+                    foreach (var p in bigpolys)
+                    {
+                        if (p.Coordinates.Count() == 5)
+                            if (p.Envelope.Contains(new Point(pt)) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
+                        if (p.Contains(pt) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var p in ps)
+                {
+                    if (p.Coordinates.Count() == 5)
+                        if (p.Envelope.Contains(new Point(pt))) return true;
+                    if (p.Contains(pt)) return true;
+                }
+                if (!accurate && ps.Count() > fast_cal_count)
+                {
+                    foreach (var p in bigpolys)
+                    {
+                        if (p.Coordinates.Count() == 5)
+                            if (p.Envelope.Contains(new Point(pt))) return true;
+                        if (p.Contains(pt)) return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public static bool IsInAnyPolysOld(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false,bool accurate = false)
+        {
+            if (pls.Count == 0) return false;
+            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.ClosestPoint(pt).Distance(pt)).ToArray();
+            int fast_cal_count = 20;
+            if (!accurate && ps.Count() > fast_cal_count) ps = ps.Take(fast_cal_count).ToArray();
             if (!allowOnEdge)
             {
                 foreach (var p in ps)
@@ -630,9 +678,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             spatialIndex.Update(new List<Geometry>() { e}, new List<Geometry>());
             return;
         }
-        public static bool ClosestPointInCurveInAllowDistance(Coordinate pt, List<Polygon> crvs, double distance)
+        public static bool ClosestPointInCurveInAllowDistance(Coordinate pt, List<Polygon> crvs, double distance,bool accurated=false)
         {
-            foreach (var t in crvs)
+            int take_count = 30;
+            var _crvs = crvs.Select(e => e);
+            if (!accurated && crvs.Count()> take_count)
+            {
+                _crvs = crvs.OrderBy(e => e.Coordinate.Distance(pt)).Take(take_count);
+            }
+            foreach (var t in _crvs)
             {
                 if (t.ClosestPoint(pt).Distance(pt) < distance) return true;
             }
