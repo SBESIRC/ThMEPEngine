@@ -98,8 +98,8 @@ namespace ThMEPHVAC.Model
             {
                 DrawPort(anayRes.endLinesInfos, ref gId);
                 // 画Dimension需要插入风口，所以必须先画风口再画Dimension
-                service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
-                //tchDrawService.dimensionService.DrawDimension(anayRes.endLinesInfos, portParam, ref gId);
+                //service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
+                tchDrawService.dimensionService.DrawDimension(anayRes.endLinesInfos, portParam, ref gId);
             }
         }
 
@@ -157,7 +157,7 @@ namespace ThMEPHVAC.Model
                 }
             }
             var markP = p + orgDisVec;
-            service.markService.InsertMark(portParam, portWidth, portHeight, 0, markP);
+            service.markService.InsertMark(portParam, portWidth, portHeight, markP);
         }
     }
 }

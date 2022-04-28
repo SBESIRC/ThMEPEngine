@@ -43,6 +43,13 @@ namespace ThMEPHVAC.CAD
                             FanAirVolumeService.CalcAirVolume(subModel),
                         };
                     }
+                    else
+                    {
+                        return new List<double>()
+                        {
+                            FanAirVolumeService.CalcAirVolume(model)
+                        };
+                    }
                 }
                 else
                 {

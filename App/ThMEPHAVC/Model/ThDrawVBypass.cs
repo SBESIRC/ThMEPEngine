@@ -21,7 +21,8 @@ namespace ThMEPHVAC.Model
             var param = new ThMEPHVACParam()
             {
                 elevation = double.Parse(fanParam.roomElevation),
-                mainHeight = ThMEPHVACService.GetHeight(fanParam.roomDuctSize)
+                mainHeight = ThMEPHVACService.GetHeight(fanParam.roomDuctSize),
+                scale = fanParam.scale
             };
             tchDrawService.ductService.DrawVTDuct(anayRes.vt.vtDuct, disMat, false, param, ref gId);
             tchDrawService.ductService.DrawVerticalPipe(anayRes.vt.vtElbow, disMat, ref gId);

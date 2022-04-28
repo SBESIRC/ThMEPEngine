@@ -9,7 +9,6 @@ using Linq2Acad;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
-using ThMEPHVAC.Duct;
 using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
