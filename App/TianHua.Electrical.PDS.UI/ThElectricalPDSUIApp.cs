@@ -44,7 +44,7 @@ namespace TianHua.Electrical.PDS.UI
             {
                 win.Width = w - 200;
                 win.Height = h - 200;
-                if (win.Width > 1500) win.Width = 1500;
+                if (win.Width > 1300) win.Width = 1300;
                 if (win.Height > 850) win.Height = 850;
                 win.Left = (w - win.Width) / 2;
                 win.Top = (h - win.Height) / 2;
