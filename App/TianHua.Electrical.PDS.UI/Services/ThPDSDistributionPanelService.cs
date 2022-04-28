@@ -355,7 +355,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         return null;
                     }
                 }
-                var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                var boxVM = new ThPDSDistributionBoxModel(vertice);
                 UpdatePropertyGrid(boxVM);
                 {
                     var leftTemplates = new List<Glyphs>();
