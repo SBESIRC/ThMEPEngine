@@ -523,25 +523,38 @@ namespace ThMEPArchitecture.PartitionLayout
             return false;
         }
 
-        public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes, bool true_on_edge = false)
+        public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes, bool true_on_edge = false, bool accurate = false)
         {
+            int fast_take_count = 10;
             if (boxes.Count == 0) return false;
             if (true_on_edge)
             {
                 if (ClosestPointInCurves(pt, boxes) < 10) return true;
             }
-            foreach (var p in boxes)
+            var recs = boxes.OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt)).ToArray();
+            if (!accurate && recs.Count() > fast_take_count) recs = recs.Take(fast_take_count).ToArray();
+            foreach (var rec in recs)
             {
-                if (p.Area < 1) continue;
-                p.TransformBy(Matrix3d.Scaling(0.99999, p.GetRecCentroid()));
-                if (p.Contains(pt))
+                if (rec.Area < 1) continue;
+                if (rec.Contains(pt))
                 {
-                    p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
-                    return true;
+                    rec.TransformBy(Matrix3d.Scaling(0.99999, rec.GetRecCentroid()));
+                    if (rec.Contains(pt)) return true;
                 }
-                p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
             }
             return false;
+            //foreach (var p in boxes)
+            //{
+            //    if (p.Area < 1) continue;
+            //    p.TransformBy(Matrix3d.Scaling(0.99999, p.GetRecCentroid()));
+            //    if (p.Contains(pt))
+            //    {
+            //        p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
+            //        return true;
+            //    }
+            //    p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
+            //}
+            //return false;
         }
 
         public static double ClosestPointInCurves(Point3d pt, List<Line> crvs)
@@ -611,20 +624,23 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static double ClosestPointInCurves(Point3d pt, List<Polyline> crvs)
         {
-            if (crvs.Count == 0) return 0;
-            var p = crvs[0].GetClosestPointTo(pt, false);
-            var res = p.DistanceTo(pt);
-            if (crvs.Count == 1) return res;
-            for (int i = 1; i < crvs.Count; i++)
-            {
-                var pc = crvs[i].GetClosestPointTo(pt, false);
-                var d = pc.DistanceTo(pt);
-                if (d < res)
-                {
-                    res = d;
-                }
-            }
-            return res;
+            var res = crvs.Select(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
+            if (res.Count() > 0) return res.First();
+            else return 0;
+            //if (crvs.Count == 0) return 0;
+            //var p = crvs[0].GetClosestPointTo(pt, false);
+            //var res = p.DistanceTo(pt);
+            //if (crvs.Count == 1) return res;
+            //for (int i = 1; i < crvs.Count; i++)
+            //{
+            //    var pc = crvs[i].GetClosestPointTo(pt, false);
+            //    var d = pc.DistanceTo(pt);
+            //    if (d < res)
+            //    {
+            //        res = d;
+            //    }
+            //}
+            //return res;
         }
 
         public static Point3dCollection DivideCurveByLength(Curve crv, double length, ref DBObjectCollection segs)

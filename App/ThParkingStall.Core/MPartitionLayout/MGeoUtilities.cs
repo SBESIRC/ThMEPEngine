@@ -375,20 +375,23 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static double ClosestPointInCurves(Coordinate pt, List<Polygon> crvs)
         {
-            if (crvs.Count == 0) return 0;
-            var p = crvs[0].ClosestPoint(pt);
-            var res = p.Distance(pt);
-            if (crvs.Count == 1) return res;
-            for (int i = 1; i < crvs.Count; i++)
-            {
-                var pc = crvs[i].ClosestPoint(pt);
-                var d = pc.Distance(pt);
-                if (d < res)
-                {
-                    res = d;
-                }
-            }
-            return res;
+            var res = crvs.Select(e => e.ClosestPoint(pt).Distance(pt));
+            if (res.Count() > 0) return res.First();
+            else return 0;
+            //if (crvs.Count == 0) return 0;
+            //var p = crvs[0].ClosestPoint(pt);
+            //var res = p.Distance(pt);
+            //if (crvs.Count == 1) return res;
+            //for (int i = 1; i < crvs.Count; i++)
+            //{
+            //    var pc = crvs[i].ClosestPoint(pt);
+            //    var d = pc.Distance(pt);
+            //    if (d < res)
+            //    {
+            //        res = d;
+            //    }
+            //}
+            //return res;
         }
         public static double ClosestPointInCurves(Coordinate pt, List<LineString> crvs)
         {
@@ -458,25 +461,38 @@ namespace ThParkingStall.Core.MPartitionLayout
                 points.Add(points[0]);
             return new Polygon(new LinearRing(points.ToArray()));
         }
-        public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false)
+        public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false, bool accurate = false)
         {
+            int fast_take_count = 10;
             if (boxes.Count == 0) return false;
             if (true_on_edge)
             {
                 if (ClosestPointInCurves(pt, boxes) < 10) return true;
             }
-            for (int i=0;i< boxes.Count;i++)
+            var recs = boxes.OrderBy(e => e.ClosestPoint(pt).Distance(pt)).ToArray();
+            if (!accurate && recs.Count() > fast_take_count) recs = recs.Take(fast_take_count).ToArray();
+            foreach (var rec in recs)
             {
-                if (boxes[i].Area < 1) continue;
-                boxes[i] = boxes[i].Scale(0.99999);
-                if (boxes[i].Contains(pt))
+                if (rec.Area < 1) continue;
+                if (rec.Contains(pt))
                 {
-                    boxes[i]=boxes[i].Scale(1 / 0.99999);
-                    return true;
+                    var r = rec.Scale(0.99999);
+                    if (r.Contains(pt)) return true;
                 }
-                boxes[i] = boxes[i].Scale(1 / 0.99999);
             }
             return false;
+            //for (int i=0;i< boxes.Count;i++)
+            //{
+            //    if (boxes[i].Area < 1) continue;
+            //    boxes[i] = boxes[i].Scale(0.99999);
+            //    if (boxes[i].Contains(pt))
+            //    {
+            //        boxes[i]=boxes[i].Scale(1 / 0.99999);
+            //        return true;
+            //    }
+            //    boxes[i] = boxes[i].Scale(1 / 0.99999);
+            //}
+            //return false;
         }
         public static double ClosestPointInVertLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
         {
