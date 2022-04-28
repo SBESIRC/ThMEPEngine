@@ -122,7 +122,7 @@ namespace TianHua.Electrical.PDS.Engine
                     unionGraph.AddEdge(newEdge);
                 }
             });
-
+            
             return unionGraph;
         }
 

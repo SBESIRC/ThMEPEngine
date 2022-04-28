@@ -68,7 +68,7 @@ namespace TianHua.Electrical.PDS.UI
             //modifyCmd.Zoom();
 
             // 创建标注
-            modifyCmd.AddLoadDimension();
+            //modifyCmd.AddLoadDimension();
         }
     }
 }
