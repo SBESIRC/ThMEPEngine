@@ -207,53 +207,61 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             void UpdatePropertyGrid(object vm)
             {
                 var pg = panel.propertyGrid;
-                if (vm is Project.Module.Component.ThPDSBreakerModel breaker)
+                if (vm is ThPDSBreakerModel breaker)
                 {
                     if (breaker.ComponentType == ComponentType.CB)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDType", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ResidualCurrent", false);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", true);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDType", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ResidualCurrent", true);
                     }
                     if (breaker.ComponentType == ComponentType.组合式RCD)
                     {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", true);
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", true);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", false);
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", false);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSCircuitModel circuit)
+                if (vm is ThPDSCircuitModel circuit)
                 {
                     if (circuit.IsDualPower)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("Power", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("Power", false);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("LowPower", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", false);
+                    }
+                    if (circuit.LoadType == PDSNodeType.None)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", false);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", true);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSConductorModel conductor)
+                if (vm is ThPDSConductorModel conductor)
                 {
                     if (conductor.ComponentType == ComponentType.Conductor)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCount", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
                     }
                     else if (conductor.ComponentType == ComponentType.ControlConductor)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("NumberOfPhaseWire", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCrossSectionalArea", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("NumberOfPhaseWire", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCrossSectionalArea", false);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
+                if (vm is ThPDSCircuitModel circuitVM)
                 {
                     pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
                 }

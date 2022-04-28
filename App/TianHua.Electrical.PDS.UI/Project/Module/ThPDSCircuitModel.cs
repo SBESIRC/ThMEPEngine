@@ -44,6 +44,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public ThPDSCircuitType CircuitType
         {
             get => _edge.Target.Load.CircuitType;
+            set
+            {
+                _edge.Target.Load.CircuitType = value;
+                OnPropertyChanged(nameof(CircuitType));
+            }
         }
 
         [Browsable(true)]
