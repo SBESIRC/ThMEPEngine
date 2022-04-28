@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Electrical.PDS.UI.UserContorls"
              xmlns:hc="clr-namespace:HandyControl.Controls;assembly=HandyControl"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns:cvt="clr-namespace:TianHua.PDS.UI.Converter"
              mc:Ignorable="d" 
              FontSize="14"
@@ -21,28 +22,52 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <StackPanel Orientation="Vertical">
-                    <Button Width="150" Command="{Binding ReadAndRegenCmd}" Style="{x:Null}" >读取并新建项目</Button>
-                    <ListBox x:Name="lbx" Width="150" Height="500" Style="{x:Null}" ItemsSource="{Binding DataList}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsChecked}"></CheckBox>
-                                    <TextBlock Text="{Binding Name}"></TextBlock>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-                <StackPanel Orientation="Vertical" Width="450">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{x:Null}">筛选</Button>
-                        <TextBox Width="200" x:Name="tbx1" Style="{x:Null}" ></TextBox>
-                        <Button x:Name="btn1" Style="{x:Null}" >查找</Button>
-                    </StackPanel>
-                    <DataGrid Width="450" Height="500" x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CompareCmd}">对比平面信息</cus:ImageButton>
+            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</cus:ImageButton>
+            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CreateCmd}">创建非平面负载</cus:ImageButton>
+            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding UpdateCmd}">更新修改到平面</cus:ImageButton>
+        </StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="1*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <cus:ImageButton Height="25" Grid.Row="0" Grid.Column="0" Command="{Binding ReadAndRegenCmd}" Margin="3" Style="{x:Null}" >读取并新建项目</cus:ImageButton>
+                <ListBox Grid.Row="1" Grid.Column="0" x:Name="lbx"  Style="{x:Null}" ItemsSource="{Binding DataList}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IsChecked}"></CheckBox>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}"></TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <DockPanel LastChildFill="True">
+                    <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" DockPanel.Dock="Top" x:Name="searchBar2" Command="{Binding SearchCmd1}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
+                    <DataGrid x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
           CanUserSortColumns="True"   CanUserReorderColumns="False"    CanUserResizeColumns="True"     ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="回路编号" Width="100">
@@ -87,14 +112,14 @@
 
                         </DataGrid.Columns>
                     </DataGrid>
-                </StackPanel>
-                <StackPanel Orientation="Vertical" Width="400">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{x:Null}" >筛选</Button>
-                        <TextBox Width="200" x:Name="tbx2" Style="{x:Null}" ></TextBox>
-                        <Button x:Name="btn2" Style="{x:Null}" >查找</Button>
-                    </StackPanel>
-                    <DataGrid Width="400" Height="500" x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
+
+                </DockPanel>
+
+            </Grid>
+            <Grid Grid.Row="0" Grid.Column="2">
+                <DockPanel LastChildFill="True">
+                    <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" DockPanel.Dock="Top" x:Name="searchBar1" Command="{Binding SearchCmd2}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
+                    <DataGrid x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
      CanUserSortColumns="True"     CanUserReorderColumns="False"    CanUserResizeColumns="True"        ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="负载编号" Width="100">
@@ -138,14 +163,9 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{x:Null}" Command="{Binding CompareCmd}">对比平面信息</Button>
-                <Button Style="{x:Null}" Command="{Binding AcceptCmd}">接收所有对比结果</Button>
-                <Button Style="{x:Null}" Command="{Binding CreateCmd}">创建非平面负载</Button>
-                <Button Style="{x:Null}" Command="{Binding UpdateCmd}">更新修改到平面</Button>
-            </StackPanel>
-        </StackPanel>
+                </DockPanel>
+
+            </Grid>
+        </Grid>
     </DockPanel>
 </UserControl>

@@ -95,11 +95,11 @@ namespace TianHua.Electrical.PDS.UI.UI
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("高压压柜编辑界面", new ThPDSHighPressurePanel()));
             var dft = new Models.UTableItem("全局参数设置界面", new UESandboxParameter());
             topTableItemViewModel.FunctionTableItems.Add(dft);
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare()));
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare().Init()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("成果导出界面", new ThPDSExport()));
             tabTopFunction.DataContext = topTableItemViewModel;
             tabTopFunction.SelectedItem = dft;
-            if(tabTopFunction.SelectedItem is null)
+            if (tabTopFunction.SelectedItem is null)
             {
                 tabTopFunction.SelectedIndex = topTableItemViewModel.FunctionTableItems.IndexOf(dft);
             }
@@ -145,7 +145,7 @@ namespace TianHua.Electrical.PDS.UI.UI
         }
         private void btnSetting_Click(object sender, RoutedEventArgs e)
         {
-            new ThPDSSetting() { Width = 400, Height = 200 }.ShowDialog();
+            new ThPDSSetting() { Width = 400, Height = 200, WindowStartupLocation = WindowStartupLocation.CenterScreen, }.ShowDialog();
         }
         private void btnImportProject_Click(object sender, RoutedEventArgs e)
         {
