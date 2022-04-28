@@ -3,6 +3,7 @@ using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             var obs = new List<Polygon>();
             foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (InterParameter.MultiThread)
             {
                 Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display,
@@ -45,6 +47,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display,
                      ref Walls, ref Cars, ref Pillars, ref IniPillars, ref ObsVertices, ref Lanes));
             }
+            stopwatch.Stop();
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            FileStream fs = new FileStream(dir + "\\time.txt", FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(stopwatch.Elapsed.TotalSeconds);
+            sw.Close();
+            fs.Close();
             if (display)
             {
                 var walls = Walls.ToList();
