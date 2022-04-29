@@ -37,7 +37,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetModel(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -50,7 +50,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetFrameSpecification(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -63,7 +63,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetPolesNum(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -76,7 +76,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetRatedCurrent(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -89,7 +89,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetTripDevice(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -103,7 +103,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.Appendix = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -117,7 +117,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetRCDType(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -131,7 +131,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetResidualCurrent(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
