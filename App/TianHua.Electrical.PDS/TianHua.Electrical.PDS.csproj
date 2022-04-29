@@ -34,6 +34,7 @@
     <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />
     <Compile Include="Project\PDSProjectUBinder.cs" />
     <Compile Include="Service\ThPDSPoint3dService.cs" />
+    <Compile Include="Service\ThPDSPushDataService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />
     <Compile Include="Engine\ThPDSZoomEngine.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />

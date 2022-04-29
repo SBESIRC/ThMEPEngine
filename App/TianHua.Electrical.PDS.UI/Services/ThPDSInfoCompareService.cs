@@ -46,13 +46,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                     CompareCmd = new RelayCommand(() =>
                     {
                         if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                        new ThPDSSecondaryPushDataService().Push(tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<Document>().Select(x => x.Database).ToList());
+                        var databases = tree.DataList
+                        .Where(x => x.IsChecked == true)
+                        .Select(x => ((Document)x.Tag).Database);
+                        if (!databases.Any()) return;
+                        new ThPDSSecondaryPushDataService().Push(databases.ToList());
                         PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                         UpdateView(panel);
                     }, () => !hasDataError),
                     AcceptCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
-                    CreateCmd = new RelayCommand(() => { }, () =>
-                  !hasDataError || regenCount > 1),
+                    CreateCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
                         new ThPDSUpdateToDwgService().Update();
@@ -60,14 +63,19 @@ namespace TianHua.Electrical.PDS.UI.Services
                 };
                 vm.ReadAndRegenCmd = new RelayCommand(() =>
                 {
-                    new Command.ThPDSCommand().Execute();
-                    ++regenCount;
+                    if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                    var databases = tree.DataList
+                    .Where(x => x.IsChecked == true)
+                    .Select(x => ((Document)x.Tag).Database);
+                    if (!databases.Any()) return;
+                    new ThPDSPushDataService().Push(databases.ToList());
                     PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                     UpdateView(panel);
                     vm.CompareCmd.NotifyCanExecuteChanged();
                     vm.AcceptCmd.NotifyCanExecuteChanged();
                     vm.CreateCmd.NotifyCanExecuteChanged();
                     vm.UpdateCmd.NotifyCanExecuteChanged();
+                    ++regenCount;
                 });
                 panel.DataContext = vm;
             }
