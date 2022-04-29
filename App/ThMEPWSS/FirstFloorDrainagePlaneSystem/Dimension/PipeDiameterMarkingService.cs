@@ -16,7 +16,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         List<RouteModel> routes;
         public PipeDiameterMarkingService(List<RouteModel> _routes)
         {
-            routes = _routes;
+            routes = _routes.Where(x => !x.IsBranchPipe).ToList();
         }
 
         public void CreateDim()

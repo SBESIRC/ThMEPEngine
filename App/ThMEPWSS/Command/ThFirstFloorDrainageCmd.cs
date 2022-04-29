@@ -101,7 +101,7 @@ namespace ThMEPWSS.Command
         /// <param name="routes"></param>
         private void HandlePipes(List<RouteModel> routes)
         {
-            var condensatePipes = routes.Where(x => x.verticalPipeType == VerticalPipeType.CondensatePipe).ToList();
+            var condensatePipes = routes.Where(x => x.verticalPipeType == VerticalPipeType.CondensatePipe && !x.IsBranchPipe).ToList();
             DraningSettingService drainningSettingService = null;
             switch (paramSetting.IndirectDrainageSetting)
             {

@@ -32,5 +32,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// 是否是洁具点位
         /// </summary>
         public bool IsEquimentPipe = false;
+
+        /// <summary>
+        /// 是否是连接支管（污废合流接上去的支管）
+        /// </summary>
+        public bool IsBranchPipe = false;
     }
 }

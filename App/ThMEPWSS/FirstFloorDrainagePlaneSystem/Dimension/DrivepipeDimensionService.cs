@@ -23,7 +23,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         FirstFloorPlaneViewModel firstFloorPlane;
         public DrivepipeDimensionService(List<RouteModel> _routes, List<Polyline> _outFrames, FirstFloorPlaneViewModel _firstFloorPlane)
         {
-            routes = _routes;
+            routes = _routes.Where(x => !x.IsBranchPipe).ToList();
             outFrames = _outFrames;
             firstFloorPlane = _firstFloorPlane;
         }
