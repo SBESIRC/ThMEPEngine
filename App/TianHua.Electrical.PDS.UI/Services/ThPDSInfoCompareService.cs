@@ -111,7 +111,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Mild,
                             Img = PDSImageSources.Mild,
                         });
@@ -123,7 +122,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = "回路编号变化，原编号" + projectGraphEdgeIdChangeTag.ChangedLastCircuitID,
@@ -136,7 +134,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = "此回路被移动",
@@ -149,7 +146,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此回路为新增",
@@ -162,7 +158,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此回路被删除",
@@ -175,7 +170,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.Safe,
                             Img = PDSImageSources.Safe,
                             Hint = projectGraphEdgeDataTag.ToLastCircuitID,
@@ -188,7 +182,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
                             CircuitType = edge.Target.Load.CircuitType.GetDescription(),
                             ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
-                            Dwg = edge.Circuit.Location.ReferenceDWG,
                             Background = PDSColorBrushes.None,
                             Img = PDSImageSources.None,
                         });
@@ -359,7 +352,6 @@ namespace TianHua.Electrical.PDS.UI.Services
         public string CircuitId { get; set; }
         public string CircuitType { get; set; }
         public string ParentBox { get; set; }
-        public string Dwg { get; set; }
         public string Hint { get; set; } = "提示文本";
         public Brush Background { get; set; }
         public ImageSource Img { get; set; }
