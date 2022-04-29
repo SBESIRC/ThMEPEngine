@@ -207,7 +207,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Mild,
                             Img = PDSImageSources.Mild,
@@ -219,7 +219,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
@@ -232,7 +232,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
@@ -245,7 +245,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
@@ -258,7 +258,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
@@ -271,7 +271,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
@@ -286,7 +286,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             {
                                 LoadId = node.Load.ID.LoadID,
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.LowPower.ToString(),
+                                LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
@@ -299,7 +299,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             {
                                 LoadId = node.Load.ID.LoadID,
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.LowPower.ToString(),
+                                LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
@@ -312,7 +312,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             {
                                 LoadId = node.Load.ID.LoadID,
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.LowPower.ToString(),
+                                LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
@@ -326,7 +326,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             LoadId = node.Load.ID.LoadID,
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.LowPower.ToString(),
+                            LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.None,
                             Img = PDSImageSources.None,
