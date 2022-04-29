@@ -197,7 +197,14 @@ namespace TianHua.Electrical.PDS.Service
                         var m = r.Match(infos[i]);
                         if (m.Success)
                         {
-                            if (m.Value.Contains("-W") || m.Value.Contains("/W"))
+                            var value = m.Value.Replace("/", "-");
+                            var check1 = "-W[a-zA-Z]+[-0-9]+";
+                            var regex1 = new Regex(@check1);
+                            var match1 = regex1.Match(value);
+                            var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                            var regex2 = new Regex(@check2);
+                            var match2 = regex2.Match(value);
+                            if (match1.Success || match2.Success)
                             {
                                 circuitMarks.Add(m.Value);
                             }
@@ -219,19 +226,26 @@ namespace TianHua.Electrical.PDS.Service
             circuitMarks.Distinct().ForEach(o =>
             {
                 // 过滤无效回路信息
-                if(o.Contains(id.LoadID))
+                if (!string.IsNullOrEmpty(id.LoadID) && o.Contains(id.LoadID))
                 {
                     return;
                 }
 
-                var value = o.Replace("/", "-");
-                var checkID = "-W[a-zA-Z]+[0-9]+";
-                var regexID = new Regex(@checkID);
-                var matchID = regexID.Match(value);
-                if (matchID.Success)
+                var check1 = "-W[a-zA-Z]+[-0-9]+";
+                var regex1 = new Regex(@check1);
+                var match1 = regex1.Match(o);
+                var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                var regex2 = new Regex(@check2);
+                var match2 = regex2.Match(o);
+                if (match1.Success)
                 {
-                    id.SourcePanelID.Add(o.Replace(matchID.Value, ""));
-                    id.CircuitID.Add(matchID.Value.Replace("-", ""));
+                    id.SourcePanelID.Add(o.Replace(match1.Value, ""));
+                    id.CircuitID.Add(match1.Value.Replace("-", ""));
+                }
+                else if (match2.Success)
+                {
+                    id.SourcePanelID.Add(o.Replace(match2.Value, ""));
+                    id.CircuitID.Add(match2.Value.Remove(0, 1));
                 }
             });
 
@@ -253,27 +267,25 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        var check = "";
-                        if (str.Contains("-W"))
-                        {
-                            check = "-W.+";
-                        }
-                        else if (str.Contains("/W"))
-                        {
-                            check = "/W.+";
-                        }
+                        var value = str.Replace("/", "-");
+                        var check1 = "-W[a-zA-Z]+[-0-9]+";
+                        var regex1 = new Regex(@check1);
+                        var match1 = regex1.Match(value);
+                        var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                        var regex2 = new Regex(@check2);
+                        var match2 = regex2.Match(value);
 
-                        if (string.IsNullOrEmpty(check))
+                        if (match1.Success)
                         {
-                            break;
+                            searchedString.Add(value);
+                            panelIDs.Add(value.Replace(match1.Value, ""));
+                            circuitIDs.Add(match1.Value.Substring(1, match1.Value.Length - 1));
                         }
-                        var r = new Regex(@check);
-                        var m = r.Match(str);
-                        if (m.Success)
+                        else if (match2.Success)
                         {
-                            searchedString.Add(str);
-                            panelIDs.Add(str.Replace(m.Value, ""));
-                            circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
+                            searchedString.Add(value);
+                            panelIDs.Add(value.Replace(match2.Value, ""));
+                            circuitIDs.Add(match2.Value.Substring(1, match2.Value.Length - 1));
                         }
                         break;
                     }
@@ -324,24 +336,24 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        if (str.Contains("-W") || str.Contains("/W"))
+                        var value = str.Replace("/", "-");
+                        var check1 = "-W[a-zA-Z]+[-0-9]+";
+                        var regex1 = new Regex(@check1);
+                        var match1 = regex1.Match(value);
+                        var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                        var regex2 = new Regex(@check2);
+                        var match2 = regex2.Match(value);
+
+                        if (match1.Success)
                         {
-                            var check = "";
-                            if (str.Contains("-W"))
-                            {
-                                check = "-W[a-zA-Z]+[0-9]+";
-                            }
-                            else if (str.Contains("/W"))
-                            {
-                                check = "/W[a-zA-Z]+[0-9]+";
-                            }
-                            var r = new Regex(@check);
-                            var m = r.Match(str);
-                            if (m.Success)
-                            {
-                                panelIDs.Add(str.Replace(m.Value, ""));
-                                circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
-                            }
+                            panelIDs.Add(value.Replace(match1.Value, ""));
+                            circuitIDs.Add(match1.Value.Substring(1, match1.Value.Length - 1));
+                            doSearch = false;
+                        }
+                        else if (match2.Success)
+                        {
+                            panelIDs.Add(value.Replace(match2.Value, ""));
+                            circuitIDs.Add(match2.Value.Substring(1, match2.Value.Length - 1));
                             doSearch = false;
                         }
                     }
@@ -350,14 +362,21 @@ namespace TianHua.Electrical.PDS.Service
 
             if (doSearch)
             {
-                var check = "W[a-zA-Z]+[0-9]+";
-                var r = new Regex(@check);
+                var check1 = "W[a-zA-Z]+[-0-9]+";
+                var regex1 = new Regex(@check1);
+                var check2 = "[0-9]W[0-9]{3}[-][0-9]";
+                var regex2 = new Regex(@check2);
                 infos.ForEach(str =>
                 {
-                    var m = r.Match(str);
-                    if (m.Success)
+                    var match1 = regex1.Match(str);
+                    var match2 = regex2.Match(str);
+                    if (match1.Success)
                     {
-                        circuitIDs.Add(m.Value);
+                        circuitIDs.Add(match1.Value);
+                    }
+                    else if (match2.Success)
+                    {
+                        circuitIDs.Add(match2.Value);
                     }
                 });
             }

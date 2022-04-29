@@ -116,6 +116,7 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
+        // circuitAssign参数是否是必须的，存疑
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey, bool circuitAssign = false)
         {

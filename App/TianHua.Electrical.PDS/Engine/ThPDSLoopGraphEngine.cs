@@ -278,7 +278,7 @@ namespace TianHua.Electrical.PDS.Engine
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
                                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey, true);
-                                if(EdgeContains(newEdge))
+                                if (EdgeContains(newEdge))
                                 {
                                     return;
                                 }
@@ -357,7 +357,7 @@ namespace TianHua.Electrical.PDS.Engine
                     //线得搭到块上才可遍历，否则认为线只是跨过块
                     if (polyline.Contains(findcurve.StartPoint) || polyline.Contains(findcurve.EndPoint))
                     {
-                        PrepareNavigate(node, new List<Entity>(), new ThPDSTextInfo(), startingEntity, findcurve);
+                        PrepareNavigate(node, new List<Entity>(), startingEntity, findcurve);
                     }
                 }
 
@@ -412,7 +412,7 @@ namespace TianHua.Electrical.PDS.Engine
                     if (!CacheLoads.Contains(load))
                     {
                         CacheLoads.Add(load);
-                        PrepareNavigate(node, new List<Entity> { load }, new ThPDSTextInfo(), startingEntity, load);
+                        PrepareNavigate(node, new List<Entity> { load }, startingEntity, load);
                     }
                 }
             }
@@ -432,7 +432,7 @@ namespace TianHua.Electrical.PDS.Engine
                     //都不相邻即无关系，都相邻即近似平行，都不符合
                     if (IsStart != IsEnd)
                     {
-                        PrepareNavigate(CableTrayNode, new List<Entity>(), new ThPDSTextInfo(), curve, findCurve,
+                        PrepareNavigate(CableTrayNode, new List<Entity>(), curve, findCurve,
                             onLightingCableTray);
                     }
                 }
@@ -515,65 +515,121 @@ namespace TianHua.Electrical.PDS.Engine
         /// <summary>
         /// 寻路（核心算法）
         /// </summary>
-        public void PrepareNavigate(ThPDSCircuitGraphNode node, List<Entity> loads, ThPDSTextInfo logos,
+        public void PrepareNavigate(ThPDSCircuitGraphNode node, List<Entity> loads,
             Entity sourceEntity, Entity nextEntity, bool onLightingCableTray = false)
         {
-            var distributionBox = Navigate(node, loads, logos, sourceEntity, nextEntity);
-            if (loads.Count > 0)
+            var findLoop = FindRootNextElement(sourceEntity, nextEntity, out var isBranch);
+            var entityList = new List<Tuple<Entity, Entity, ThPDSTextInfo, List<Entity>>>();
+            if (isBranch)
             {
-                var attributesCopy = "";
-                var objectIds = new List<ObjectId>();
-                var newNode = ThPDSGraphService.CreateNode(loads, Database, MarkService, DistBoxKey,
-                    objectIds, ref attributesCopy);
-                if (onLightingCableTray)
+                foreach (var item in findLoop)
                 {
-                    newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
-                }
-                PDSGraph.Graph.AddVertex(newNode);
-                NodeMap.Add(newNode, objectIds);
+                    var newLoads = new List<Entity>();
+                    loads.ForEach(x => newLoads.Add(x));
+                    var logos = new ThPDSTextInfo();
 
-                if (!string.IsNullOrEmpty(attributesCopy))
-                {
-                    node.Loads[0].AttributesCopy = attributesCopy;
-                }
-
-                var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos.Texts, DistBoxKey);
-                if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && nextEntity is Line circuit)
-                {
-                    ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer,
-                        true);
-                }
-                if (EdgeContains(newEdge))
-                {
-                    return;
-                }
-                PDSGraph.Graph.AddEdge(newEdge);
-                EdgeMap.Add(newEdge, logos.ObjectIds);
-                distributionBox.ForEach(box =>
-                {
-                    var distBoxNode = CacheDistBoxes[box.Item2];
-                    var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3.Texts, DistBoxKey);
-                    if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
+                    // 搜索回路标注
+                    item.Value.ForEach(curve =>
                     {
-                        var needAssign = false;
-                        if (newDistBoxEdge.Target.Loads.Count == 0)
+                        var marks = MarkService.GetMarks(ThPDSBufferService.Buffer(curve, Database));
+                        logos.Texts.AddRange(marks.Texts);
+                        logos.ObjectIds.AddRange(marks.ObjectIds);
+                    });
+
+                    //搭着负载
+                    if (!CacheLoads.Contains(item.Key))
+                    {
+                        newLoads.Add(item.Key);
+                        CacheLoads.Add(item.Key);
+                        var nextLoops = new List<Entity>();
+                        if (item.Key is Curve curve)
                         {
-                            newDistBoxEdge.Target.Loads.Add(new ThPDSLoad());
-                            needAssign = true;
+                            nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
                         }
-                        ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Target.Loads[0],
-                            otherCircuit.Layer, needAssign);
+                        else if(item.Key is BlockReference block)
+                        {
+                            nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
+                        }
+                        if (item.Value.Count > 0)
+                        {
+                            nextLoops.Remove(item.Value.Last());
+                        }
+                        else
+                        {
+                            nextLoops.Remove(nextEntity);
+                        }
+                        foreach (var entity in nextLoops)
+                        {
+                            //这就是自己本身延伸出去的块
+                            entityList.Add(Tuple.Create(item.Key, entity, logos, newLoads));
+                        }
                     }
-                    if (EdgeContains(newDistBoxEdge))
+                }
+            }
+            else
+            {
+                entityList.Add(Tuple.Create(sourceEntity, nextEntity, new ThPDSTextInfo(), loads));
+            }
+
+            entityList.ForEach(tuple =>
+            {
+                var distributionBox = Navigate(node, tuple.Item4, tuple.Item3, tuple.Item1, tuple.Item2);
+                if (tuple.Item4.Count > 0)
+                {
+                    var attributesCopy = "";
+                    var objectIds = new List<ObjectId>();
+                    var newNode = ThPDSGraphService.CreateNode(tuple.Item4, Database, MarkService, DistBoxKey,
+                        objectIds, ref attributesCopy);
+                    if (onLightingCableTray)
+                    {
+                        newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
+                    }
+                    PDSGraph.Graph.AddVertex(newNode);
+                    NodeMap.Add(newNode, objectIds);
+
+                    if (!string.IsNullOrEmpty(attributesCopy))
+                    {
+                        node.Loads[0].AttributesCopy = attributesCopy;
+                    }
+
+                    var newEdge = ThPDSGraphService.CreateEdge(node, newNode, tuple.Item3.Texts, DistBoxKey);
+                    if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && tuple.Item2 is Line circuit)
+                    {
+                        ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer,
+                            true);
+                    }
+                    if (EdgeContains(newEdge))
                     {
                         return;
                     }
-                    PDSGraph.Graph.AddEdge(newDistBoxEdge);
-                    EdgeMap.Add(newDistBoxEdge, box.Item3.ObjectIds);
+                    PDSGraph.Graph.AddEdge(newEdge);
+                    EdgeMap.Add(newEdge, tuple.Item3.ObjectIds);
+                    distributionBox.ForEach(box =>
+                    {
+                        var distBoxNode = CacheDistBoxes[box.Item2];
+                        var newDistBoxEdge = ThPDSGraphService.CreateEdge(distBoxNode, newNode, box.Item3.Texts, DistBoxKey);
+                        if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && box.Item1 is Line otherCircuit)
+                        {
+                            var needAssign = false;
+                            if (newDistBoxEdge.Target.Loads.Count == 0)
+                            {
+                                newDistBoxEdge.Target.Loads.Add(new ThPDSLoad());
+                                needAssign = true;
+                            }
+                            ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Target.Loads[0],
+                                otherCircuit.Layer, needAssign);
+                        }
+                        if (EdgeContains(newDistBoxEdge))
+                        {
+                            return;
+                        }
+                        PDSGraph.Graph.AddEdge(newDistBoxEdge);
+                        EdgeMap.Add(newDistBoxEdge, box.Item3.ObjectIds);
 
-                    FindGraph(box.Item1, box.Item2);
-                });
-            }
+                        FindGraph(box.Item1, box.Item2);
+                    });
+                }
+            });
         }
 
         /// <summary>
@@ -583,7 +639,7 @@ namespace TianHua.Electrical.PDS.Engine
             ThPDSTextInfo logos, Entity sourceEntity, Entity nextEntity)
         {
             var results = new List<Tuple<Entity, Entity, ThPDSTextInfo>>();
-            var findLoop = FindRootNextElement(sourceEntity, nextEntity);
+            var findLoop = FindRootNextElement(sourceEntity, nextEntity, out var isBranch);
 
             if (findLoop.Count == 0)
             {
@@ -694,8 +750,9 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="rootElement"></param>
         /// <param name="specifyElement"></param>
         /// <returns></returns>
-        public Dictionary<Entity, List<Curve>> FindRootNextElement(Entity rootElement, Entity specifyElement)
+        public Dictionary<Entity, List<Curve>> FindRootNextElement(Entity rootElement, Entity specifyElement, out bool isBranch)
         {
+            isBranch = false;
             var NextElement = new Dictionary<Entity, List<Curve>>();
             if (specifyElement is BlockReference blk)
             {
@@ -715,12 +772,12 @@ namespace TianHua.Electrical.PDS.Engine
                     //起点连着块
                     if (obb.Distance(curve.StartPoint) < obb.Distance(curve.EndPoint))
                     {
-                        NextElement = FindRootNextPath(rootBlk, sharedpath, curve, false);
+                        NextElement = FindRootNextPath(rootBlk, sharedpath, curve, false, out isBranch);
                     }
                     //终点连着块
                     else
                     {
-                        NextElement = FindRootNextPath(rootBlk, sharedpath, curve, true);
+                        NextElement = FindRootNextPath(rootBlk, sharedpath, curve, true, out isBranch);
                     }
                 }
                 //桥架
@@ -730,12 +787,12 @@ namespace TianHua.Electrical.PDS.Engine
                     if (curve.StartPoint.DistanceTo(rootCurve.GetClosestPointTo(curve.StartPoint, false))
                         < ThPDSCommon.ALLOWABLE_TOLERANCE)
                     {
-                        NextElement = FindRootNextPath(sharedpath, curve, false);
+                        NextElement = FindRootNextPath(sharedpath, curve, false, out isBranch);
                     }
                     //终点连着桥架
                     else
                     {
-                        NextElement = FindRootNextPath(sharedpath, curve, true);
+                        NextElement = FindRootNextPath(sharedpath, curve, true, out isBranch);
                     }
                 }
             }
@@ -748,20 +805,22 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="block"></param>
         /// <param name="sharedPath"></param>
         /// <param name="sourceElement"></param>
-        /// <param name="IsStartPoint"></param>
+        /// <param name="isStartPoint"></param>
         /// <returns></returns>
-        public Dictionary<Entity, List<Curve>> FindRootNextPath(BlockReference block, List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
+        public Dictionary<Entity, List<Curve>> FindRootNextPath(BlockReference block, List<Curve> sharedPath, Curve sourceElement,
+            bool isStartPoint, out bool isBranch)
         {
+            isBranch = false;
             var findPath = new Dictionary<Entity, List<Curve>>();
             if (sharedPath.Contains(sourceElement))
             {
                 return findPath;
             }
             sharedPath.Add(sourceElement);
-            var probe = (IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThPDSCommon.ALLOWABLE_TOLERANCE);
-            var blockProbe = ShrinkLineFrame(sourceElement, IsStartPoint);
+            var probe = (isStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThPDSCommon.ALLOWABLE_TOLERANCE);
+            var blockProbe = ShrinkLineFrame(sourceElement, isStartPoint);
             var probeResults = FindNext(sourceElement, block, probe, blockProbe);
-            return Switch(probeResults, sharedPath, sourceElement, IsStartPoint);
+            return Switch(probeResults, sharedPath, sourceElement, isStartPoint, out isBranch);
         }
 
         /// <summary>
@@ -770,8 +829,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="sourceElement">已存在的曲线</param>
         /// <param name="space">探针</param>
         /// <returns></returns>
-        public Dictionary<Entity, List<Curve>> FindRootNextPath(List<Curve> sharedPath, Curve sourceElement, bool isStartPoint)
+        public Dictionary<Entity, List<Curve>> FindRootNextPath(List<Curve> sharedPath, Curve sourceElement, bool isStartPoint,
+            out bool IsBranch)
         {
+            IsBranch = false;
             var findPath = new Dictionary<Entity, List<Curve>>();
             if (sharedPath.Contains(sourceElement))
             {
@@ -781,12 +842,14 @@ namespace TianHua.Electrical.PDS.Engine
             var probe = (isStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint).CreateSquare(ThPDSCommon.ALLOWABLE_TOLERANCE);
             var blockProbe = ShrinkLineFrame(sourceElement, isStartPoint);
             var probeResults = FindNext(sourceElement, probe, blockProbe);
-            return Switch(probeResults, sharedPath, sourceElement, isStartPoint);
+            return Switch(probeResults, sharedPath, sourceElement, isStartPoint, out IsBranch);
         }
 
-        private Dictionary<Entity, List<Curve>> Switch(List<Entity> probeResults, List<Curve> sharedPath, Curve sourceElement, bool IsStartPoint)
+        private Dictionary<Entity, List<Curve>> Switch(List<Entity> probeResults, List<Curve> sharedPath, Curve sourceElement,
+            bool IsStartPoint, out bool IsBranch)
         {
             var findPath = new Dictionary<Entity, List<Curve>>();
+            IsBranch = false;
             switch (probeResults.Count)
             {
                 //没有找到任何元素，说明元素进行了跳过，创建长探针，进行搜索，如果还搜索不到，则是未知负载
@@ -817,7 +880,7 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 var isStartPoint = point.DistanceTo(longProbeLineResults[0].StartPoint)
                                     > point.DistanceTo(longProbeLineResults[0].EndPoint);
-                                return FindRootNextPath(sharedPath, longProbeLineResults[0], isStartPoint);
+                                return FindRootNextPath(sharedPath, longProbeLineResults[0], isStartPoint, out _);
                             }
                             else
                             {
@@ -838,12 +901,12 @@ namespace TianHua.Electrical.PDS.Engine
                             if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint)
                                 < ThPDSCommon.ALLOWABLE_TOLERANCE)
                             {
-                                return FindRootNextPath(sharedPath, curve, true);
+                                return FindRootNextPath(sharedPath, curve, true, out _);
                             }
                             else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint)
                                 < ThPDSCommon.ALLOWABLE_TOLERANCE)
                             {
-                                return FindRootNextPath(sharedPath, curve, false);
+                                return FindRootNextPath(sharedPath, curve, false, out _);
                             }
                             else if (sourceElement is Line sourceLine && probeResults[0] is Line targetLine)
                             {
@@ -876,26 +939,28 @@ namespace TianHua.Electrical.PDS.Engine
                                                 {
                                                     var newsharedPath = new List<Curve>();
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
-                                                    FindRootNextPath(newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                    foreach (var newPath in FindRootNextPath(newsharedPath, secondCurve, false, out IsBranch))
                                                     {
                                                         if (!findPath.ContainsKey(newPath.Key))
                                                         {
                                                             findPath.Add(newPath.Key, newPath.Value);
+                                                            IsBranch = true;
                                                         }
-                                                    });
+                                                    }
                                                 }
                                                 else if (secondCurve.EndPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.EndPoint, false))
                                                     < ThPDSCommon.ALLOWABLE_TOLERANCE)
                                                 {
                                                     var newsharedPath = new List<Curve>();
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
-                                                    FindRootNextPath(newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                    foreach (var newPath in FindRootNextPath(newsharedPath, secondCurve, true, out IsBranch))
                                                     {
                                                         if (!findPath.ContainsKey(newPath.Key))
                                                         {
                                                             findPath.Add(newPath.Key, newPath.Value);
+                                                            IsBranch = true;
                                                         }
-                                                    });
+                                                    }
                                                 }
                                             }
                                         }
@@ -951,26 +1016,28 @@ namespace TianHua.Electrical.PDS.Engine
                                                 {
                                                     var newsharedPath = new List<Curve>();
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
-                                                    FindRootNextPath(newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                    foreach (var newPath in FindRootNextPath(newsharedPath, secondCurve, false, out _))
                                                     {
                                                         if (!findPath.ContainsKey(newPath.Key))
                                                         {
                                                             findPath.Add(newPath.Key, newPath.Value);
+                                                            IsBranch = true;
                                                         }
-                                                    });
+                                                    }
                                                 }
                                                 else if (secondCurve.EndPoint.DistanceTo(targetLine.GetClosestPointTo(secondCurve.EndPoint, false))
                                                     < ThPDSCommon.ALLOWABLE_TOLERANCE)
                                                 {
                                                     var newsharedPath = new List<Curve>();
                                                     sharedPath.ForEach(c => newsharedPath.Add(c));
-                                                    FindRootNextPath(newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                    foreach (var newPath in FindRootNextPath(newsharedPath, secondCurve, true, out _))
                                                     {
                                                         if (!findPath.ContainsKey(newPath.Key))
                                                         {
                                                             findPath.Add(newPath.Key, newPath.Value);
+                                                            IsBranch = true;
                                                         }
-                                                    });
+                                                    }
                                                 }
                                             }
                                         }
@@ -1157,6 +1224,30 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
+        public void UnionEdge()
+        {
+            var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            foreach (var edge in PDSGraph.Graph.Edges)
+            {
+                if (removeEdges.Contains(edge))
+                {
+                    continue;
+                }
+                var sameEdge = PDSGraph.Graph.Edges
+                    .Where(e => e.Circuit.ID.CircuitNumber.Last().Equals(edge.Circuit.ID.CircuitNumber.Last()))
+                    .OrderByDescending(e => e.Target.Loads.Count)
+                    .ToList();
+                if (sameEdge.Count > 1)
+                {
+                    for (var i = 1; i < sameEdge.Count; i++)
+                    {
+                        removeEdges.Add(sameEdge[i]);
+                    }
+                }
+            }
+            removeEdges.ForEach(e => PDSGraph.Graph.RemoveEdge(e));
+        }
+
         public void UnionLightingEdge()
         {
             var distBoxes = PDSGraph.Graph.Vertices
@@ -1224,7 +1315,7 @@ namespace TianHua.Electrical.PDS.Engine
                 {
                     o.ID.SourcePanelID.Add(distBox.Loads[0].ID.LoadID);
                 });
-                var newEdge = ThPDSGraphService.CreateEdge(distBox, load, new List<string>(), DistBoxKey);
+                var newEdge = ThPDSGraphService.CreateEdge(distBox, load, new List<string>(), DistBoxKey, true);
                 if (EdgeContains(newEdge))
                 {
                     return;
@@ -1243,7 +1334,7 @@ namespace TianHua.Electrical.PDS.Engine
                     o.ID.SourcePanelID.Add(sourcePanelId);
                 });
                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, load, new List<string>(), DistBoxKey);
-                if(EdgeContains(newEdge))
+                if (EdgeContains(newEdge))
                 {
                     return;
                 }
@@ -1306,7 +1397,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         private bool EdgeContains(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge)
         {
-            return PDSGraph.Graph.ContainsEdge(edge) 
+            return PDSGraph.Graph.ContainsEdge(edge)
                 || PDSGraph.Graph.ContainsEdge(new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(edge.Target, edge.Source));
         }
     }

@@ -102,7 +102,7 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
                         var srcIsolatingSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_ISOLATING_SWITCH).First();
                         var componentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()];
-                            var firstPosition = srcIsolatingSwitch.Position;
+                        var firstPosition = srcIsolatingSwitch.Position;
                         if (!componentName.Equals(srcIsolatingSwitch.BlockName))
                         {
                             var newComponent = insertEngine.Insert1(activeDb, configDb, componentName, firstPosition, 100 * scale);
@@ -244,8 +244,8 @@ namespace TianHua.Electrical.PDS.Diagram
                         var forthPosition = srcTransferSwitch.Position;
                         if (!transferSwitchName.Equals(srcTransferSwitch.BlockName))
                         {
-                            
-                               var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, forthPosition, 100 * scale);
+
+                            var newComponent = insertEngine.Insert1(activeDb, configDb, transferSwitchName, forthPosition, 100 * scale);
                             tableObjs.Add(newComponent);
                             srcTransferSwitch.Erase();
                         }
@@ -313,14 +313,7 @@ namespace TianHua.Electrical.PDS.Diagram
             var table = objs.OfType<Table>().First();
 
             // Pn
-            if (node.Details.IsDualPower)
-            {
-                CellAssign(table.Cells[0, 1], node.Details.HighPower);
-            }
-            else
-            {
-                CellAssign(table.Cells[0, 1], node.Details.LowPower);
-            }
+            CellAssign(table.Cells[0, 1], node.Details.HighPower);
             // Kx
             CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
             // cos(\Phi)
@@ -439,7 +432,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.漏电:
@@ -464,7 +464,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.接触器控制:
@@ -500,7 +507,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.热继电器保护:
@@ -536,7 +550,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.配电计量_上海CT:
@@ -611,7 +632,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductorText.TextString = conductor.Content;
+                        if (!conductor.IsNull())
+                        {
+                            conductorText.TextString = conductor.Content;
+                        }
+                        else
+                        {
+                            conductorText.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.配电计量_CT表在前:
@@ -669,7 +697,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductorText.TextString = conductor.Content;
+                        if (!conductor.IsNull())
+                        {
+                            conductorText.TextString = conductor.Content;
+                        }
+                        else
+                        {
+                            conductorText.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.配电计量_CT表在后:
@@ -727,7 +762,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductorText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductorText.TextString = conductor.Content;
+                        if (!conductor.IsNull())
+                        {
+                            conductorText.TextString = conductor.Content;
+                        }
+                        else
+                        {
+                            conductorText.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.电动机_分立元件:
@@ -775,8 +817,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
-
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
                         break;
                     }
                 case CircuitFormOutType.电动机_CPS:
@@ -798,7 +846,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
 
                         break;
                     }
@@ -875,11 +930,26 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.Conductor1.Content;
+                        if (!circuit.Conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.Conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
                         conductor2.TextString = circuit.Conductor2.Content;
+                        if (!circuit.Conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.Conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -930,11 +1000,25 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.Conductor1.Content;
+                        if (!circuit.Conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.Conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
-                        conductor2.TextString = circuit.Conductor2.Content;
+                        if (!circuit.Conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.Conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -1025,11 +1109,25 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.conductor1.Content;
+                        if (!circuit.conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
-                        conductor2.TextString = circuit.conductor2.Content;
+                        if (!circuit.conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -1107,11 +1205,25 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.conductor1.Content;
+                        if (!circuit.conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
-                        conductor2.TextString = circuit.conductor2.Content;
+                        if (!circuit.conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -1149,11 +1261,25 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.conductor1.Content;
+                        if (!circuit.conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
-                        conductor2.TextString = circuit.conductor2.Content;
+                        if (!circuit.conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -1204,11 +1330,25 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor1
                         var conductor1 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR1).First();
-                        conductor1.TextString = circuit.conductor1.Content;
+                        if (!circuit.conductor1.IsNull())
+                        {
+                            conductor1.TextString = circuit.conductor1.Content;
+                        }
+                        else
+                        {
+                            conductor1.TextString = "";
+                        }
 
                         // Conductor2
                         var conductor2 = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR2).First();
-                        conductor2.TextString = circuit.conductor2.Content;
+                        if (!circuit.conductor2.IsNull())
+                        {
+                            conductor2.TextString = circuit.conductor2.Content;
+                        }
+                        else
+                        {
+                            conductor2.TextString = "";
+                        }
 
                         break;
                     }
@@ -1218,7 +1358,14 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // Conductor
                         var conductor = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CONDUCTOR).First();
-                        conductor.TextString = circuit.Conductor.Content;
+                        if (!circuit.Conductor.IsNull())
+                        {
+                            conductor.TextString = circuit.Conductor.Content;
+                        }
+                        else
+                        {
+                            conductor.TextString = "";
+                        }
 
                         break;
                     }

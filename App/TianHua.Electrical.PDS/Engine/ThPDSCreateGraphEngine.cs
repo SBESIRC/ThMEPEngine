@@ -173,6 +173,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                             graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
                             graphEngine.CreatGraph();
+                            graphEngine.UnionEdge();
                             graphEngine.UnionLightingEdge();
                             graphEngine.CopyAttributes();
                             var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),
