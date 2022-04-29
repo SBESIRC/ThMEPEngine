@@ -92,15 +92,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                     var vertices = graph.Vertices.ToList();
-                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                    var nodes = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
                     void dfs(ThPDSCircuitGraphTreeModel node)
                     {
-                        if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                        if (node.IsChecked == true)
+                        {
+                            var nd = vertices[node.Id];
+                            if (!nodes.Any(x => new ThPDSDistributionBoxModel(x).ID == new ThPDSDistributionBoxModel(nd).ID))
+                            {
+                                nodes.Add(nd);
+                            }
+                        }
                         foreach (var n in node.DataList) dfs(n);
                     }
                     dfs(tree);
-                    if (checkeddVertices.Count == 0) return;
-                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                    if (nodes.Count == 0) return;
+                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, nodes);
                     drawCmd.Execute();
                     AcHelper.Active.Editor.Regen();
                 }
@@ -194,7 +201,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         tv.ContextMenu = treeCMenu;
                     }
-                    var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                    var boxVM = new ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
                 else
