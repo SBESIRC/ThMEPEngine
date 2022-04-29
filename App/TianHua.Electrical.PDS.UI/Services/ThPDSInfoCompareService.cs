@@ -206,7 +206,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Mild,
@@ -218,7 +218,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
@@ -231,7 +231,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
@@ -244,7 +244,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Moderate,
@@ -257,7 +257,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
@@ -270,7 +270,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.Servere,
@@ -285,7 +285,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             info.Items.Add(new()
                             {
                                 LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.LowPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
@@ -298,7 +298,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             info.Items.Add(new()
                             {
                                 LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.LowPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
@@ -311,7 +311,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             info.Items.Add(new()
                             {
                                 LoadId = node.Load.ID.LoadID,
-                                LoadType = node.Load.LoadTypeCat_1.ToString(),
+                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.LowPower.ToString(),
                                 Dwg = node.Load.Location?.ReferenceDWG,
                                 Background = PDSColorBrushes.Servere,
@@ -325,7 +325,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         info.Items.Add(new()
                         {
                             LoadId = node.Load.ID.LoadID,
-                            LoadType = node.Load.LoadTypeCat_1.ToString(),
+                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.LowPower.ToString(),
                             Dwg = node.Load.Location?.ReferenceDWG,
                             Background = PDSColorBrushes.None,

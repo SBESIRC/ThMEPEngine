@@ -75,7 +75,7 @@
                         <DataGrid x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
           CanUserSortColumns="True"   CanUserReorderColumns="False"    CanUserResizeColumns="True"     ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="回路编号" Width="100">
+                                <DataGridTemplateColumn Header="回路编号" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitId}"></TextBlock>
@@ -96,7 +96,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="参照图纸" Width="70">
+                                <DataGridTemplateColumn Header="参照图纸" Width="200">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
@@ -151,7 +151,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="参照图纸" Width="80">
+                                <DataGridTemplateColumn Header="参照图纸" Width="200">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock  Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
