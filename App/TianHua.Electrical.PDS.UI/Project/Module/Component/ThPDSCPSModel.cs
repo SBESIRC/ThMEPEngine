@@ -35,7 +35,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetModel(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -48,7 +48,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetFrameSpecification(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetPolesNum(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -74,7 +74,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetRatedCurrent(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -87,7 +87,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCombination(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -100,7 +100,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _cps.SetCodeLevel(value);
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
