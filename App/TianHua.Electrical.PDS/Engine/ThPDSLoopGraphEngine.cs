@@ -1229,7 +1229,7 @@ namespace TianHua.Electrical.PDS.Engine
             var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
             foreach (var edge in PDSGraph.Graph.Edges)
             {
-                if (removeEdges.Contains(edge))
+                if (removeEdges.Contains(edge) || string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
                 {
                     continue;
                 }

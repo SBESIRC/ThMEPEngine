@@ -80,7 +80,15 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
                             }
-                            targetMap.EdgeMap.Add(edge, objectIds);
+                            if(!targetMap.EdgeMap.ContainsKey(edge))
+                            {
+                                targetMap.EdgeMap.Add(edge, objectIds);
+                            }
+                            else
+                            {
+                                targetMap.EdgeMap[edge].AddRange(objectIds);
+                                targetMap.EdgeMap[edge] = targetMap.EdgeMap[edge].Distinct().ToList();
+                            }
                         }
 
                         break;
