@@ -41,6 +41,10 @@ namespace ThMEPStructure.StructPlane.Print
         {
             using (var acadDb = AcadDatabase.Use(TblParameter.Database))
             {
+                if(objs.Count==0)
+                {
+                    return;
+                }
                 var maxX = objs.OfType<Entity>()
                     .Select(o => o.GeometricExtents.MaxPoint.X)
                     .OrderByDescending(o => o).First();
@@ -73,7 +77,10 @@ namespace ThMEPStructure.StructPlane.Print
                     }
                     return text;
                 }).ToCollection();
-
+                if(dbTexts.Count==0)
+                {
+                    return results;
+                }
                 var textMaxWidth = dbTexts.OfType<DBText>().Select(o =>
                 o.GeometricExtents.MaxPoint.X - o.GeometricExtents.MinPoint.X)
                     .OrderByDescending(o => o).First();

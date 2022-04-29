@@ -139,27 +139,10 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return false;
             }
-            for(int i=0;i< strs.Length;i++)
+            if (!IsInteger(strs[0]))
             {
-                if(i==0)
-                {
-                    if(!IsInteger(strs[i]))
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    if(i==strs.Length-1 && string.IsNullOrEmpty(strs[i]))
-                    {
-                        continue;
-                    }
-                    if(!strs[i].ToUpper().StartsWith("FLOOR"))
-                    {
-                        return false;
-                    }
-                }
-            }
+                return false;
+            }            
             return true;
         }
         private bool IsInteger(string content)
