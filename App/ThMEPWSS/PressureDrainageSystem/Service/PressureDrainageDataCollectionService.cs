@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Common;
@@ -22,6 +24,7 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using ThMEPWSS.PressureDrainageSystem.Utils;
 using ThMEPWSS.Uitl;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 
 namespace ThMEPWSS.PressureDrainageSystem.Service
@@ -248,6 +251,25 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
             }
         }
+        private DBObjectCollection ExtractBlocks(Database db, string blockName)
+        {
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+            {
+                if (e is BlockReference br)
+                {
+                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                }
+                return false;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.Extract(db); // 提取块中块(包括外参)
+            extractor.ExtractFromMS(db); // 提取本地块
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
+        }
         /// <summary>
         /// 提取雨水井及编号
         /// </summary>
@@ -256,37 +278,20 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 this.CollectedData.DrainWells = new List<DrainWellClass>();
-                foreach (var e in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName().Contains("雨水井编号")))
+                var names = new string[] { "雨水井编号", "污废合流井编号", "污水井编号" };
+                foreach (var name in names)
                 {
-                    if (e.Bounds is Extents3d extent)
+                    var bks = ExtractBlocks(adb.Database, name).Cast<BlockReference>().ToList();
+                    foreach (var bk in bks)
                     {
-                        DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
-                        drainWell.Label = e.GetAttributesStrValue("-") ?? "";
-                        drainWell.WellTypeName = e.Name;
-                        this.CollectedData.DrainWells.Add(drainWell);
-                    }
-                }
-                foreach (var e in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName().Contains("污废合流井编号")))
-                {
-                    if (e.Bounds is Extents3d extent)
-                    {
-                        DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
-                        drainWell.Label = e.GetAttributesStrValue("-") ?? "";
-                        drainWell.WellTypeName = e.Name;
-                        this.CollectedData.DrainWells.Add(drainWell);
-                    }
-                }
-                foreach (var e in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName().Contains("污水井编号")))
-                {
-                    if (e.Bounds is Extents3d extent)
-                    {
-                        DrainWellClass drainWell = new DrainWellClass();
-                        drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
-                        drainWell.Label = e.GetAttributesStrValue("-") ?? "";
-                        drainWell.WellTypeName = e.Name;
-                        this.CollectedData.DrainWells.Add(drainWell);
+                        if (bk.Bounds is Extents3d extent)
+                        {
+                            DrainWellClass drainWell = new DrainWellClass();
+                            drainWell.Extents = new Extents3d(extent.MinPoint.ToPoint2d().ToPoint3d(), extent.MaxPoint.ToPoint2d().ToPoint3d());
+                            drainWell.Label = bk.GetAttributesStrValue("-") ?? "";
+                            drainWell.WellTypeName = bk.Name;
+                            this.CollectedData.DrainWells.Add(drainWell);
+                        }
                     }
                 }
             }
@@ -371,7 +376,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 this.CollectedData.SubmergedPumps = new List<SubmergedPumpClass>();
                 ObjectIdCollection objs = new ObjectIdCollection();
                 var validRefs = Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid);
-                var pumps = validRefs.Where(e => e.GetEffectiveName().Contains("潜水泵"));
+                //var pumps = validRefs.Where(e => e.GetEffectiveName().Contains("潜水泵"));
+                var pumps = ExtractBlocks(adb.Database, "潜水泵").Cast<BlockReference>().ToList();
                 foreach (var e in pumps)
                 {
                     if (e.Bounds is Extents3d)
@@ -395,7 +401,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         Extents3d boundExtent = new Extents3d(ptsboundary[0], ptsboundary[1]);
                         SubmergedPumpClass submergedPump = new SubmergedPumpClass();
                         submergedPump.Extents = boundExtent;
-                        submergedPump.Visibility = e.ObjectId.GetDynBlockValue("可见性");
+                        try { submergedPump.Visibility = e.ObjectId.GetDynBlockValue("可见性"); }
+                        catch { /*对于动态块调用GetDynProperties()方法莫名报错，原因未知。提取的块的名字也有改变，如变成*UXXX*/}
                         submergedPump.Serial = e.GetAttributesStrValue("编号");
                         if (submergedPump.Visibility == "单台")
                         {
