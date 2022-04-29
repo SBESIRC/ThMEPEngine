@@ -29,6 +29,7 @@
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Model\ThPDSControlCircuitData.cs" />
     <Compile Include="Model\ThPDSPoint3d.cs" />
+    <Compile Include="Project\GlobalConfiguration\FolderSetting.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />

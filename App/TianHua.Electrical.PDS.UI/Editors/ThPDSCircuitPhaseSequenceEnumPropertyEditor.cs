@@ -26,7 +26,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
                 // 未知的负载，默认是三相(L123)，但是可以切换成单相(L1，L2，L3)
                 // 已知的负载，如果是三相，那么就只能是三相。如果是单相，那么可以在L1,L2,L3切换
                 var values = Enum.GetValues(propertyItem.PropertyType);
-                if (circuit.LoadType != Model.PDSNodeType.None)
+                if (circuit.LoadType != Model.PDSNodeType.Unkown)
                 {
                     if (circuit.PhaseSequence != PhaseSequence.L123)
                     {

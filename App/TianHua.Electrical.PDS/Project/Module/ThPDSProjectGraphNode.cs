@@ -15,7 +15,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
-            Type = PDSNodeType.None;
+            Type = PDSNodeType.Empty;
             Details = new NodeDetails();
         }
 

@@ -396,7 +396,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             edge.Details = new CircuitDetails();
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
-            if (edge.Target.Type == PDSNodeType.None)
+            if (edge.Target.Type == PDSNodeType.Unkown)
             {
                 edge.Details.CircuitForm = new RegularCircuit()
                 {

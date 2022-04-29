@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -83,6 +84,22 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
                 }
             }
             return false;
+        }
+
+        public static List<Breaker> GetCircuitBreakers(this PDSBaseOutCircuit circuit)
+        {
+            List<Breaker> result = new List<Breaker>();
+            foreach (PropertyInfo prop in circuit.GetType().GetProperties())
+            {
+                if (prop.PropertyType == typeof(Breaker))
+                {
+                    object oValue = prop.GetValue(circuit);
+                    if (oValue.IsNull())
+                        continue;
+                    result.Add(oValue as Breaker);
+                }
+            }
+            return result;
         }
     }
 }

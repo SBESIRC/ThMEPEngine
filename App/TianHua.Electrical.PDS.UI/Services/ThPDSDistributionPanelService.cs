@@ -246,7 +246,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", false);
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", false);
                     }
-                    if (circuit.LoadType == PDSNodeType.None)
+                    if (circuit.LoadType == PDSNodeType.Unkown)
                     {
                         ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", false);
                     }

@@ -85,7 +85,7 @@ namespace TianHua.Electrical.PDS.Service
             node.Loads = loads;
             if (noneLoad)
             {
-                node.NodeType = PDSNodeType.None;
+                node.NodeType = PDSNodeType.Unkown;
             }
             else
             {
@@ -143,7 +143,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Circuit.ViaCableTray = true;
             }
-            if (edge.Target.NodeType == PDSNodeType.Load || edge.Target.NodeType == PDSNodeType.None)
+            if (edge.Target.NodeType == PDSNodeType.Load || edge.Target.NodeType == PDSNodeType.Unkown)
             {
                 edge.Circuit.ViaConduit = true;
             }
@@ -183,7 +183,7 @@ namespace TianHua.Electrical.PDS.Service
                 edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
             }
 
-            if (edge.Target.NodeType == PDSNodeType.None)
+            if (edge.Target.NodeType == PDSNodeType.Unkown)
             {
                 ThPDSLayerService.Assign(edge.Target.Loads[0]);
             }

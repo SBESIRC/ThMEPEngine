@@ -8,18 +8,22 @@ namespace TianHua.Electrical.PDS.Model
 {
     public enum PDSNodeType
     {
-        [Description("未知")]
+        [Description("None")]
         None = 0,
+        [Description("空负载")]
+        Empty = 1,
+        [Description("未知负载")]
+        Unkown = 2,
         [Description("配电箱")]
-        DistributionBox = 1,
+        DistributionBox = 3,
         [Description("负载")]
-        Load = 2,
+        Load = 4,
         [Description("桥架")]
-        CableCarrier = 3,
+        CableCarrier = 5,
         [Description("变压器")]
-        PowerTransformer = 4,
+        PowerTransformer = 6,
         [Description("馈线母排")]
-        FeederBusbar = 5,
+        FeederBusbar = 7,
     }
 
     public class ThPDSCircuitGraphNode : IEquatable<ThPDSCircuitGraphNode>
