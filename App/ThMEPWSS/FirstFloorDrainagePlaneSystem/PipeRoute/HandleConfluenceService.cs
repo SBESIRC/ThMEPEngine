@@ -356,7 +356,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var outRooms = deepRooms.Select(x => x.Key.Key).ToList();
             var frames = outFrames.Where(x =>
             {
-                var bufferFrame = x.Buffer(100)[0] as Polyline;
+                var bufferFrame = x;
+                var bufferCollect = x.Buffer(100);
+                if (bufferCollect.Count > 0)
+                {
+                    bufferFrame = bufferCollect[0] as Polyline;
+                }
                 return outRooms.Where(y => y.Intersects(bufferFrame)).Count() == 1;
             }).ToList();
             var mainLine = mainRoute.route.GetAllLineByPolyline().FirstOrDefault(x => frames.Any(y => y.IsIntersects(x)));

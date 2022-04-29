@@ -28,7 +28,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double step = 50;                          //步长
         readonly double lineDis = 210;                      //连接线区域范围
         readonly double lineWieght = 5;                     //连接线区域权重
-        double angleTolerance = 1 * Math.PI / 180.0;
+        //double angleTolerance = 1 * Math.PI / 180.0;
         public CreateDrainagePipeRoute(List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
             List<Curve> grids, List<Polyline> _outUserPoly, Dictionary<Polyline, List<string>> _rooms, ParamSettingViewModel _paramSetting)
         {
@@ -61,9 +61,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 mainPipes.Add(pipeTuple.Item2);
                 mainPipes.AddRange(pipeTuple.Item5);
                 mainPipes = mainPipes.Where(x => x != null).ToList();
-                var routing = RoutingMainPipe(mainPipes, pipeTuple.Item6.Select(x => x.Key.Key).ToList());
-                ReprocessingPipe reprocessingPipe = new ReprocessingPipe(routing, outUserPoly);     //后处理间距
-                routing = reprocessingPipe.Reprocessing();
+                // 连接主管（连接污水、废水主管和立管）
+                ConnectMainPipeService connectMainPipeService = new ConnectMainPipeService(frame, mainSewagePipes, mainRainPipes, gridLines, outUserPoly, wallPolys, step, lineWieght);
+                var routing = connectMainPipeService.Connect(mainPipes, pipeTuple.Item6);
 
                 if (paramSetting.SingleRowSetting == SingleRowSettingEnum.DrawDetail)
                 {
@@ -93,7 +93,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 
                 resRoutes.AddRange(routing);
             }
-            resRoutes.AddRange(RoutingOutPipe(handleConfluenceService.otherOutPoly, resRoutes));
+            resRoutes.AddRange(RoutingOutPipe(handleConfluenceService.otherOutPoly, resRoutes)); //连接户外管
 
             return resRoutes;
         }
@@ -130,57 +130,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         }
 
         /// <summary>
-        /// 连接主管（连接污水、废水主管和立管）
-        /// </summary>
-        /// <param name="mainPipes"></param>
-        /// <returns></returns>
-        private List<RouteModel> RoutingMainPipe(List<VerticalPipeModel> mainPipes, List<Polyline> rooms)
-        {
-            var resRoutes = new List<RouteModel>();
-            var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var connecLines = new List<Line>(sewageLines);
-            connecLines.AddRange(rainLines);
-            var gridInfo = ClassifyGridInfo();
-            var holeConnectLines = new List<Polyline>();
-
-            var connectPipes = OrderPipeConnect(connecLines, mainPipes);
-            foreach (var pipe in connectPipes)
-            {
-                var allLines = sewageLines;
-                if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
-                {
-                    //allLines = rainLines;
-                }
-                if (allLines.Count <= 0)
-                {
-                    continue;
-                }
-                var closetLine = GetClosetLane(allLines, pipe.Position, frame);
-                CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, gridInfo);
-                Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
-                weightHoles.Add(wallPolys, double.MaxValue);
-                weightHoles.Add(CreateOtherPipeHoles(connectPipes, pipe, closetLine.Key), double.MaxValue);
-                weightHoles.Add(holeConnectLines, lineWieght);
-                var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
-                var connectLine = connectPipesService.CreatePipes(outFrame, closetLine.Key, pipe.Position, weightHoles);
-                holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
-                foreach (var line in connectLine)
-                {
-                    RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
-                    if (pipe.IsEuiqmentPipe)
-                    {
-                        route.printCircle = pipe.PipeCircle;
-                    }
-                    route.connecLine = closetLine.Key;
-                    resRoutes.Add(route);
-                }
-            }
-
-            return resRoutes;
-        }
-
-        /// <summary>
         /// 连接主管（连接房间外的各种管线）
         /// </summary>
         /// <param name="mainPipes"></param>
@@ -202,15 +151,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     continue;
                 }
-                var closetLine = GetClosetLane(allLines, pipe.Position, frame);
+                var closetLine = CreateRouteHelper.GetClosetLane(allLines, pipe.Position, frame, wallPolys, step);
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, new Dictionary<Vector3d, List<Line>>());
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
-                weightHoles.Add(CreateOtherPipeHoles(outPipes, pipe, closetLine.Key), double.MaxValue);
+                weightHoles.Add(CreateRouteHelper.CreateOtherPipeHoles(outPipes, pipe, closetLine.Key, step), double.MaxValue);
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var needFrame = HandleStructService.GetNeedFrame(closetLine.Key, pipe.Position);
                 var connectLine = connectPipesService.CreatePipes(needFrame, closetLine.Key, pipe.Position, weightHoles);
-                holeConnectLines.AddRange(CreateConnectLineHoles(connectLine));
+                holeConnectLines.AddRange(CreateRouteHelper.CreateConnectLineHoles(connectLine, lineDis));
                 foreach (var line in connectLine)
                 {
                     RouteModel route = new RouteModel(line, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
@@ -224,41 +173,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             return resRoutes;
-        }
-
-        /// <summary>
-        /// 创建连接线加权区域
-        /// </summary>
-        /// <param name="polylines"></param>
-        /// <returns></returns>
-        private List<Polyline> CreateConnectLineHoles(List<Polyline> polylines)
-        {
-            var resLines = new List<Polyline>();
-            foreach (var polyline in polylines)
-            {
-                resLines.AddRange(polyline.BufferPL(lineDis).Cast<Polyline>().ToList());
-            }
-            return resLines;
-        }
-
-        /// <summary>
-        /// 将其他点创建成洞口（不允许通过其他点）
-        /// </summary>
-        /// <param name="pipes"></param>
-        /// <param name="thisPipe"></param>
-        /// <param name="closeLine"></param>
-        /// <returns></returns>
-        private List<Polyline> CreateOtherPipeHoles(List<VerticalPipeModel> pipes, VerticalPipeModel thisPipe, Line closeLine)
-        {
-            var dir = (closeLine.EndPoint - closeLine.StartPoint).GetNormal();
-            var otherPipes = pipes.Except(new List<VerticalPipeModel>() { thisPipe }).ToList();
-            var pipeHoles = new List<Polyline>();
-            foreach (var pipe in otherPipes)
-            {
-                pipeHoles.Add(pipe.Position.CreatePolylineByPt(step / 2, dir));
-            }
-            
-            return pipeHoles;
         }
 
         /// <summary>
@@ -339,79 +253,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 else
                     return pipes.OrderBy(x => Math.Floor(x.Value.Y)).ThenByDescending(x => Math.Floor(x.Value.X)).Select(x => x.Key).ToList();
             }
-        }
-
-        /// <summary>
-        /// 获取最近的线信息
-        /// </summary>
-        /// <param name="lanes"></param>
-        /// <param name="startPt"></param>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private KeyValuePair<Line, Point3d> GetClosetLane(List<Line> lines, Point3d startPt, Polyline polyline)
-        {
-            var closeInfo = GeometryUtils.GetClosetLine(lines, startPt);
-            Line checkLine = new Line(startPt, closeInfo.Value);
-            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline) && !CheckService.CheckIntersectWithHoles(checkLine, wallPolys))
-            {
-                var checkDir = (closeInfo.Value - startPt).GetNormal();
-                var lineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
-                if (checkDir.IsEqualTo(lineDir, new Tolerance(0.001, 0.001)))
-                {
-                    return closeInfo;
-                }
-            }
-
-            BFSPathPlaner pathPlaner = new BFSPathPlaner(step, wallPolys);
-            var closetLine = pathPlaner.FindingClosetLine(startPt, lines, polyline);
-            var closetPt = closetLine.GetClosestPointTo(startPt, false);
-
-            return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
-        }
-
-        /// <summary>
-        /// 计算轴网方向信息并分类
-        /// </summary>
-        /// <returns></returns>
-        private Dictionary<Vector3d, List<Line>> ClassifyGridInfo()
-        {
-            var lineGrids = new List<Line>();
-            foreach (var grid in gridLines)
-            {
-                if (grid is Polyline polyline)
-                {
-                    lineGrids.AddRange(polyline.GetAllLineByPolyline());
-                }
-                else if (grid is Line line)
-                {
-                    lineGrids.Add(line);
-                }
-            }
-
-            var lineGroup = new Dictionary<Vector3d, List<Line>>();
-            foreach (var line in lineGrids)
-            {
-                var dir = (line.EndPoint - line.StartPoint).GetNormal();
-                var compareKey = lineGroup.Keys.Where(x =>
-                {
-                    var angle = x.GetAngleTo(dir);
-                    angle %= Math.PI;
-                    if (angle <= angleTolerance || angle >= Math.PI - angleTolerance)
-                    {
-                        return true;//平行
-                    }
-                    return false;
-                }).ToList();
-                if (compareKey.Count > 0)
-                {
-                    lineGroup[compareKey.First()].Add(line);
-                }
-                else
-                {
-                    lineGroup.Add(dir, new List<Line>() { line });
-                }
-            }
-            return lineGroup;
         }
     }
 }

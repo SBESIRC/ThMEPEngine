@@ -17,9 +17,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
     {
         double frameSpace = 300;
         double frameDis = 150;
-        List<RouteModel> routes;
+        Dictionary<VerticalPipeModel, Polyline> routes;
         List<Polyline> outFrame;
-        public ReprocessingPipe(List<RouteModel> routeModels, List<Polyline> _outFrame)
+        public ReprocessingPipe(Dictionary<VerticalPipeModel, Polyline> routeModels, List<Polyline> _outFrame)
         {
             routes = routeModels;
             outFrame = _outFrame;
@@ -28,18 +28,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <summary>
         /// 后处理
         /// </summary>
-        public List<RouteModel> Reprocessing()
+        public Dictionary<VerticalPipeModel, Polyline> Reprocessing()
         {
             if (routes.Count <= 0)
             {
                 return routes;
             }
-            var polys = routes.Select(x => x.route).ToList();
+            var polys = routes.Select(x => x.Value).ToList();
             var frame = FindOutFrame(routes);
             var line = GeometryUtils.FindRouteIntersectLine(polys.First(), frame);
             var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
 
-            var routeDic = routes.ToDictionary(x => x, y => GeometryUtils.FindRouteIntersectLine(y.route, frame));
+            var routeDic = routes.ToDictionary(x => x, y => GeometryUtils.FindRouteIntersectLine(y.Value, frame));
             return AdjustRoute(routeDic, dir);
         }
 
@@ -48,14 +48,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="routeDic"></param>
         /// <param name="dir"></param>
-        private List<RouteModel> AdjustRoute(Dictionary<RouteModel, Line> routeDic, Vector3d dir)
+        private Dictionary<VerticalPipeModel, Polyline> AdjustRoute(Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> routeDic, Vector3d dir)
         {
-            var firRoute = routeDic.OrderBy(x => x.Key.route.NumberOfVertices).First();
-            var leftDics = new Dictionary<RouteModel, Line>();
-            var rightDics = new Dictionary<RouteModel, Line>();
+            var firRoute = routeDic.OrderBy(x => x.Key.Value.NumberOfVertices).First();
+            var leftDics = new Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line>();
+            var rightDics = new Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line>();
             foreach (var dic in routeDic)
             {
-                if (dic.Key != firRoute.Key)
+                if (dic.Key.Key != firRoute.Key.Key)
                 {
                     var checkDir = (dic.Value.StartPoint - firRoute.Value.StartPoint).GetNormal();
                     if (checkDir.DotProduct(dir) >= 0)
@@ -70,8 +70,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             var resRoutes = MoveRouteBySpace(firRoute, leftDics, dir);
-            resRoutes.Add(firRoute.Key);
-            resRoutes.AddRange(MoveRouteBySpace(firRoute, rightDics, dir));
+            resRoutes.Add(firRoute.Key.Key, firRoute.Key.Value);
+            foreach (var dic in MoveRouteBySpace(firRoute, rightDics, dir))
+            {
+                resRoutes.Add(dic.Key, dic.Value);
+            }
 
             return resRoutes;
         }
@@ -83,9 +86,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="routeDic"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private List<RouteModel> MoveRouteBySpace(KeyValuePair<RouteModel, Line> firRoute, Dictionary<RouteModel, Line> routeDic, Vector3d dir)
+        private Dictionary<VerticalPipeModel, Polyline> MoveRouteBySpace(KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> firRoute, Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> routeDic, Vector3d dir)
         {
-            List<RouteModel> resRoute = new List<RouteModel>();
+            Dictionary<VerticalPipeModel, Polyline> resRoute = new Dictionary<VerticalPipeModel, Polyline>();
             if (routeDic.Count <= 0)
             {
                 return resRoute;
@@ -107,9 +110,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (dis != space)
                 {
                     var moveDis = (space - dis);
-                    routeModel.route = MoveRouteLineSegment(dir, moveDis, dic);
+                    routeModel = new KeyValuePair<VerticalPipeModel, Polyline>(routeModel.Key, MoveRouteLineSegment(dir, moveDis, dic));
                 }
-                resRoute.Add(routeModel);
+                resRoute.Add(routeModel.Key, routeModel.Value);
                 space += frameSpace;
                 routeDic.Remove(dic.Key);
             }
@@ -124,9 +127,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="moveDis"></param>
         /// <param name="route"></param>
         /// <returns></returns>
-        private Polyline MoveRouteLineSegment(Vector3d dir, double moveDis, KeyValuePair<RouteModel, Line> route)
+        private Polyline MoveRouteLineSegment(Vector3d dir, double moveDis, KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> route)
         {
-            var allLines = route.Key.route.GetAllLineByPolyline();
+            var allLines = route.Key.Value.GetAllLineByPolyline();
             var resLineDic = new Dictionary<Line, bool>();
             foreach (var line in allLines)
             {
@@ -135,7 +138,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     var moveLine = new Line(line.StartPoint + dir * moveDis, line.EndPoint + dir * moveDis);
                     resLineDic.Add(moveLine, true);
-                    route = new KeyValuePair<RouteModel, Line>(route.Key, moveLine);
+                    route = new KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line>(route.Key, moveLine);
                 }
                 else
                 {
@@ -189,13 +192,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 寻找出户的框线
         /// </summary>
         /// <returns></returns>
-        private Polyline FindOutFrame(List<RouteModel> routePolys)
+        private Polyline FindOutFrame(Dictionary<VerticalPipeModel, Polyline> routePolys)
         {
-            var frames = outFrame.Where(x => routePolys.Any(y => y.route.IsIntersects(x))).ToList();
-            var ep = routePolys.First().route.EndPoint;
-            if (routePolys.First().startPosition.DistanceTo(ep) < 1)
+            var frames = outFrame.Where(x => routePolys.Any(y => y.Value.IsIntersects(x))).ToList();
+            var ep = routePolys.First().Value.EndPoint;
+            if (routePolys.First().Key.Position.DistanceTo(ep) < 1)
             {
-                ep = routePolys.First().route.StartPoint;
+                ep = routePolys.First().Value.StartPoint;
             }
             var needFrame = frames.OrderBy(x => x.DistanceTo(ep, false)).First();
             return needFrame;

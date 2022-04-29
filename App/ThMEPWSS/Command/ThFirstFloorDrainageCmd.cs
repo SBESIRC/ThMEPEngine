@@ -77,10 +77,6 @@ namespace ThMEPWSS.Command
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
-                        foreach (var item in holeWalls)
-                        {
-                            acad.ModelSpace.Add(item);
-                        }
                         //处理冷凝水管
                         HandlePipes(routes);
 

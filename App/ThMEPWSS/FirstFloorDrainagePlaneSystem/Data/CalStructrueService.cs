@@ -154,8 +154,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             foreach (ObjectId obj in result.Value.GetObjectIds())
             {
                 var frame = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
-                originTransformer.Transform(frame);
-                frameLst.Add(frame);
+                if (frame.Area > 10)
+                {
+                    originTransformer.Transform(frame);
+                    frameLst.Add(frame);
+                }
             }
 
             return frameLst;
@@ -323,7 +326,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     {
                         return false;
                     }
-                    
+
                 }
                 return polyline.Contains(position);
             }).ToList();

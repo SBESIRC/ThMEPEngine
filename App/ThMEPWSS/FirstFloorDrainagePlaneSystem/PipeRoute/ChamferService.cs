@@ -51,7 +51,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 if (CheckAngle(line, thisLine))
                 {
                     var resLine = ChamferByLine(line, thisLine, out Line resLine1, out Line resLine2);
-                    if (resLine1 == null)
+                    if (resLine1 != null)
                     {
                         resLines.Remove(line);
                         resLines.Add(resLine1);
@@ -65,6 +65,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     else
                     {
                         line = null;
+                        continue;
                     }
                 }
                 else
@@ -117,7 +118,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             {
                 var lineDir = (thisLine.EndPoint - thisLine.StartPoint).GetNormal();
                 var lineSP = thisLine.StartPoint + lineDir * length;
-                resLine1 = new Line(lineSP, ep);
+                resLine2 = new Line(lineSP, ep);
                 ep = lineSP;
             }
 
