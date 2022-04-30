@@ -73,18 +73,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
             }
             var selectAllCmd = new RelayCommand(() =>
-            {
-                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                void dfs(ThPDSCircuitGraphTreeModel node)
-                {
-                    node.IsChecked = true;
-                    foreach (var n in node.DataList)
-                    {
-                        dfs(n);
-                    }
-                }
-                dfs(tree);
-            });
+           {
+               if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+               void dfs(ThPDSCircuitGraphTreeModel node)
+               {
+                   node.IsChecked = true;
+                   foreach (var n in node.DataList)
+                   {
+                       dfs(n);
+                   }
+               }
+               dfs(tree);
+           });
             var batchGenCmd = new RelayCommand(() =>
             {
                 UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
@@ -116,6 +116,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
                 }
             });
+            Action createBackupCircuit = null;
+            var createBackupCircuitCmd = new RelayCommand(() =>
+            {
+                createBackupCircuit?.Invoke();
+            });
             var treeCmenu = new ContextMenu()
             {
                 ItemsSource = new MenuItem[] {
@@ -128,6 +133,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         Header = "全部勾选",
                         Command = selectAllCmd,
+                    },
+                      new MenuItem()
+                    {
+                        Header = "新建备用回路",
+                        Command = createBackupCircuitCmd,
                     },
                 },
             };
@@ -164,6 +174,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     });
                 }
             }
+            {
+                var h = "新建备用回路";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                {
+                    treeCMenu.Items.Add(new MenuItem()
+                    {
+                        Header = h,
+                        Command = createBackupCircuitCmd,
+                    });
+                }
+            }
             tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
@@ -195,6 +216,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             Header = "全部勾选",
                             Command = selectAllCmd,
+                        });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "新建备用回路",
+                            Command = createBackupCircuitCmd,
                         });
                     }
                     else
@@ -284,6 +310,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (id < 0) return null;
                 return graph.Vertices.ToList()[id];
             }
+            createBackupCircuit = () =>
+            {
+                var vertice = GetCurrentVertice();
+                if (vertice is null) return;
+                ThPDSProjectGraphService.CreatBackupCircuit(graph, vertice);
+                UpdateCanvas();
+            };
             void UpdateCanvas()
             {
                 canvas.Children.Clear();
@@ -1819,6 +1852,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
@@ -1833,6 +1870,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
@@ -1846,6 +1887,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
+                                        }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
                                         }
                                     }
                                 }
