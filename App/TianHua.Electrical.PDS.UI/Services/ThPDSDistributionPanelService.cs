@@ -137,7 +137,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     },
                       new MenuItem()
                     {
-                        Header = "新建备用回路",
+                        Header = "创建备用回路",
                         Command = createBackupCircuitCmd,
                     },
                 },
@@ -176,7 +176,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
             }
             {
-                var h = "新建备用回路";
+                var h = "创建备用回路";
                 if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
                 {
                     treeCMenu.Items.Add(new MenuItem()
@@ -220,7 +220,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         });
                         cm.Items.Add(new MenuItem()
                         {
-                            Header = "新建备用回路",
+                            Header = "创建备用回路",
                             Command = createBackupCircuitCmd,
                         });
                     }
