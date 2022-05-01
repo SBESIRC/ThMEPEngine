@@ -10,6 +10,7 @@ using Linq2Acad;
 using QuikGraph;
 
 using ThCADExtension;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;

@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
+    <Compile Include="Extension\ThPDSCircuitExtension.cs" />
     <Compile Include="Model\ThPDSControlCircuitData.cs" />
     <Compile Include="Model\ThPDSPoint3d.cs" />
     <Compile Include="Project\GlobalConfiguration\FolderSetting.cs" />
@@ -44,7 +45,7 @@
     <Compile Include="Service\ThPDSSecondaryPushDataService.cs" />
     <Compile Include="Command\ThPDSSystemDiagramCommand.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
-    <Compile Include="Diagram\ThPDSComponentContentExtension.cs" />
+    <Compile Include="Extension\ThPDSComponentContentExtension.cs" />
     <Compile Include="Diagram\ThPDSComponentMap.cs" />
     <Compile Include="Diagram\ThPDSDiagramAssignment.cs" />
     <Compile Include="Diagram\ThPDSExplodeService.cs" />

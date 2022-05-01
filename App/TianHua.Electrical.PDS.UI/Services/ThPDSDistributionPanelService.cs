@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Models;
@@ -2107,8 +2108,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     return from edge in edges
                            where edge.Source == vertice
-                           let circuitVM = new ThPDSCircuitModel(edge)
-                           let id = circuitVM.CircuitID ?? ""
+                           let id = edge.GetCircuitID()
                            orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
                            select edge;
                 }

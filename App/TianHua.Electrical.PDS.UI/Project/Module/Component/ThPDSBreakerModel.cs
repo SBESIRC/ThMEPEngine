@@ -1,7 +1,7 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
-using TianHua.Electrical.PDS.Diagram;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;

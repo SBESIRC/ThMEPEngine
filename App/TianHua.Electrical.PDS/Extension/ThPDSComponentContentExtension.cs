@@ -1,9 +1,8 @@
 ﻿using System;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Project.Module.Component;
-using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
-namespace TianHua.Electrical.PDS.Diagram
+namespace TianHua.Electrical.PDS.Extension
 {
     public static class ThPDSComponentContentExtension
     {
@@ -34,7 +33,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
         public static string Content(this Breaker breaker)
         {
-            switch(breaker.ComponentType)
+            switch (breaker.ComponentType)
             {
                 case ComponentType.CB:
                     {

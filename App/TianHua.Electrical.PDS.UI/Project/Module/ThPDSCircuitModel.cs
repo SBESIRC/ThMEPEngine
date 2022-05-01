@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using HandyControl.Controls;
@@ -23,16 +23,11 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         {
             get
             {
-                var v = _edge.Circuit.ID.CircuitID.LastOrDefault();
-                if (string.IsNullOrEmpty(v))
-                {
-                    return string.Join(",", _edge.Circuit.ID.CircuitID.Where(x => !string.IsNullOrEmpty(x)));
-                }
-                return v;
+                return _edge.GetCircuitID();
             }
             set
             {
-                _edge.Circuit.ID.CircuitID[_edge.Circuit.ID.CircuitID.Count - 1] = value;
+                _edge.SetCircuitID(value);
                 OnPropertyChanged(nameof(CircuitID));
             }
         }

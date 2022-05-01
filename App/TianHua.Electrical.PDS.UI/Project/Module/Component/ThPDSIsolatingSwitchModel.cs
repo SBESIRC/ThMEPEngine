@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
-using TianHua.Electrical.PDS.Diagram;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Editors;
 using HandyControl.Controls;
