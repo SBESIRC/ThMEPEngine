@@ -18,19 +18,19 @@ namespace ThParkingStall.Core.InterProcess
     {
         public double Value { get; set; }//线的值
         public bool Vertical { get; set; }//点的方向，true是y方向
-        public double MinValue { get; set; }//线的最小值
-        public double MaxValue { get; set; }//线的最大值
+        //public double MinValue { get; set; }//线的最小值
+        //public double MaxValue { get; set; }//线的最大值
         public double StartValue { get; set; }//线的起始点另一维
         public double EndValue { get; set; }//线的终止点另一维
-        public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
-        {
-            Value = value;
-            Vertical = direction;
-            MinValue = minValue;//相对的最小值
-            MaxValue = maxValue;//相对的最大值
-            StartValue = startValue;
-            EndValue = endValue;
-        }
+        //public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
+        //{
+        //    Value = value;
+        //    Vertical = direction;
+        //    MinValue = minValue;//相对的最小值
+        //    MaxValue = maxValue;//相对的最大值
+        //    StartValue = startValue;
+        //    EndValue = endValue;
+        //}
         public Gene(double value, bool direction, double startValue, double endValue)
         {
             Value = value;
@@ -70,9 +70,27 @@ namespace ThParkingStall.Core.InterProcess
                 EndValue = Math.Max(lineSegment.P0.X, lineSegment.P1.X);
             }
         }
+
+        public void WriteToStream( BinaryWriter writer)
+        {
+            writer.Write(Value);
+            writer.Write(Vertical);
+            writer.Write(StartValue);
+            writer.Write(EndValue);
+        }
+
+        public static Gene ReadFromStream(BinaryReader reader)
+        {
+            var value = reader.ReadDouble();
+            var vertical = reader.ReadBoolean();
+            var startValue = reader.ReadDouble();
+            var endValue = reader.ReadDouble();
+
+            return new Gene(value, vertical, startValue, endValue);
+        }
         public Gene Clone()
         {
-            var gene = new Gene(Value, Vertical, MinValue, MaxValue, StartValue, EndValue);
+            var gene = new Gene(Value, Vertical, StartValue, EndValue);
             return gene;
         }
         public override int GetHashCode()
@@ -103,7 +121,7 @@ namespace ThParkingStall.Core.InterProcess
         public override string ToString()
         {
             return string.Format(NumberFormatInfo.InvariantInfo, "({0:R},{1:R},{2:R},{3:R},{4:R},{5:R})", 
-                Value, Vertical, MinValue, MaxValue, StartValue, EndValue);
+                Value, Vertical, StartValue, EndValue);
         }
     }
     [Serializable]
@@ -113,6 +131,26 @@ namespace ThParkingStall.Core.InterProcess
         public List<Gene> Genome = new List<Gene>();
 
         public int ParkingStallCount { get; set; }
+        public void WriteToStream( BinaryWriter writer)
+        {
+            writer.Write(Genome.Count);
+            Genome.ForEach(g =>g.WriteToStream(writer));
+            writer.Write(ParkingStallCount);
+        }
+
+        public static Chromosome ReadFromStream(BinaryReader reader)
+        {
+            var genomeCnt = reader.ReadInt32();
+            List<Gene> genome = new List<Gene>();
+            for (int i = 0; i < genomeCnt; ++i)
+            {
+                var gene = Gene.ReadFromStream(reader);
+                genome.Add(gene);
+            }
+            var parkingStallCount = reader.ReadInt32();
+            return new Chromosome() { Genome = genome, ParkingStallCount = parkingStallCount };
+        }
+
         public Chromosome Clone()
         {
             var clone = new Chromosome();
@@ -163,10 +201,22 @@ namespace ThParkingStall.Core.InterProcess
             get { return _newcachedPartitionCnt; }
             set { _newcachedPartitionCnt = value; }
         }
-
         public void Append(Chromosome chromosome)
         {
             Chromosomes.Add(chromosome);
+        }
+        public static ChromosomeCollection ReadFromStream(Stream stream)
+        {
+            BinaryReader reader = new BinaryReader(stream);
+            var chromosomes = ReadWriteEx.ReadChromosomes(reader);
+            var newcachedPartitionCnt = ReadWriteEx.ReadCached(reader);
+            return new ChromosomeCollection { Chromosomes = chromosomes, NewCachedPartitionCnt = newcachedPartitionCnt };
+        }
+        public void WriteToStream(Stream stream)
+        {
+            BinaryWriter writer = new BinaryWriter(stream);
+            Chromosomes.WriteToStream(writer);
+            NewCachedPartitionCnt.WriteToStream(writer);
         }
     }
     [Serializable]
@@ -333,6 +383,90 @@ namespace ThParkingStall.Core.InterProcess
                 typeName, assemblyName));
 
             return typeToDeserialize;
+        }
+    }
+
+    public static class ReadWriteEx
+    {
+        public static void WriteToStream(this LinearRing linearRing, BinaryWriter writer)
+        {
+            var coordinates = linearRing.Coordinates;
+            writer.Write(coordinates.Count());
+            foreach(var coordinate in coordinates)
+            {
+                writer.Write(coordinate.X);
+                writer.Write(coordinate.Y);
+            }
+        }
+        public static LinearRing ReadLinearRing( BinaryReader reader)
+        {
+            var CoorCnt = reader.ReadInt32();
+            var coordinates = new Coordinate[CoorCnt];
+            for (int i = 0; i < CoorCnt; i++)
+            {
+                {
+                    var x = reader.ReadDouble();
+                    var y = reader.ReadDouble();
+                    coordinates[i] = new Coordinate(x, y);
+                }
+            }
+            return new LinearRing(coordinates);
+        }
+        public static void WriteToStream(this Dictionary<LinearRing, int> CachedCnts , BinaryWriter writer)
+        {
+            var dicCnt = CachedCnts.Count;
+            writer.Write(dicCnt);
+            foreach (var kv in CachedCnts)
+            {
+                kv.Key.WriteToStream(writer);
+                writer.Write(kv.Value);
+            }
+        }
+        public static Dictionary<LinearRing, int> ReadCached(BinaryReader reader)
+        {
+            var cached = new Dictionary<LinearRing, int>();
+            var keyCnt = reader.ReadInt32();
+            for (int i = 0; i < keyCnt; ++i)
+            {
+                var key = ReadLinearRing(reader);
+                var value = reader.ReadInt32();
+                cached.Add(key, value);
+            }
+            return cached;
+        }
+
+        public static void WriteToStream(this List<Chromosome> chromosomes, BinaryWriter writer)
+        {
+            var Cnts = chromosomes.Count;
+            writer.Write(Cnts);
+            chromosomes.ForEach(chromosome => chromosome.WriteToStream(writer));
+        }
+        public static List<Chromosome> ReadChromosomes(BinaryReader reader)
+        {
+            List<Chromosome> chromosomes = new List<Chromosome>();
+            var Cnts = reader.ReadInt32();
+            for (int i = 0; i < Cnts; ++i)
+            {
+                chromosomes.Add(Chromosome.ReadFromStream(reader));
+            }
+            return chromosomes;
+        }
+
+        public static void WriteToStream(this List<int> intgers, BinaryWriter writer)
+        {
+            writer.Write(intgers.Count);
+            intgers.ForEach(i => writer.Write(i));
+        }
+        public static List<int> ReadInts(BinaryReader reader)
+        {
+            var Cnt = reader.ReadInt32();
+            var Ints = new List<int>();
+            for (int i = 0; i < Cnt; i++)
+            {
+                Ints.Add(reader.ReadInt32());
+
+            }
+            return Ints;
         }
     }
 }
