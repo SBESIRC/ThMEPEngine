@@ -34,7 +34,6 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class ThPDSInfoCompareService
     {
-
         public void Init(ThPDSInfoCompare panel)
         {
             {
@@ -116,9 +115,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Mild,
                             Img = PDSImageSources.Mild,
                         });
@@ -127,9 +126,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = "回路编号变化，原编号" + projectGraphEdgeIdChangeTag.ChangedLastCircuitID,
@@ -139,9 +138,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = "此回路被移动",
@@ -151,9 +150,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此回路为新增",
@@ -163,9 +162,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此回路被删除",
@@ -175,9 +174,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Safe,
                             Img = PDSImageSources.Safe,
                             Hint = projectGraphEdgeDataTag.ToLastCircuitID,
@@ -187,9 +186,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = edge.Circuit.ID.CircuitNumber.LastOrDefault(),
-                            CircuitType = edge.Target.Load.CircuitType.GetDescription(),
-                            ParentBox = edge.Circuit.ID.SourcePanelID.LastOrDefault(),
+                            CircuitId = GetCircuitID(edge),
+                            CircuitType = GetCircuitType(edge),
+                            SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.None,
                             Img = PDSImageSources.None,
                         });
@@ -338,6 +337,31 @@ namespace TianHua.Electrical.PDS.UI.Services
             }
         }
 
+        private string GetCircuitID(ThPDSProjectGraphEdge edge)
+        {
+            var id = edge.Circuit.ID.CircuitID.Last();
+            if (string.IsNullOrEmpty(id))
+            {
+                return "未知编号回路";
+            }
+            return id;
+        }
+
+        private string GetCircuitType(ThPDSProjectGraphEdge edge)
+        {
+            return edge.Target.Load.CircuitType.GetDescription();
+        }
+
+        private string GetSourcePanelID(ThPDSProjectGraphEdge edge)
+        {
+            var id = edge.Circuit.ID.SourcePanelID.Last();
+            if (string.IsNullOrEmpty(id))
+            {
+                return "未知编号配电箱";
+            }
+            return id;
+        }
+
         private class ThPDSInfoCompareViewModel
         {
             public RelayCommand CompareCmd { get; set; }
@@ -359,7 +383,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     {
         public string CircuitId { get; set; }
         public string CircuitType { get; set; }
-        public string ParentBox { get; set; }
+        public string SourcePanelID { get; set; }
         public string Hint { get; set; } = "提示文本";
         public Brush Background { get; set; }
         public ImageSource Img { get; set; }
