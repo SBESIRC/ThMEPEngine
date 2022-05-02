@@ -35,14 +35,14 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var bufferRoom = room.Buffer(50)[0] as Polyline;
             var nCols = getLayoutStructureService.GetNeedColumns(columns, bufferRoom, poly);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom, poly);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                //db.ModelSpace.Add(poly);
-                foreach (var item in nWalls)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    db.ModelSpace.Add(poly);
+            //    foreach (var item in nWalls)
+            //    {
+            //        db.ModelSpace.Add(item);
+            //    }
+            //}
             //计算布置点位
             var checkDoors = new List<Polyline>(doors);
             checkDoors.Remove(door);

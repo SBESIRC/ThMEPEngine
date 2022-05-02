@@ -89,7 +89,7 @@ namespace ThMEPElectrical.ConnectPipe
         private List<BlockReference> GetMatchBroadcasts(Polyline polyline, List<BlockReference> broadcasts)
         {
             var bufferPoly = polyline.BufferPoly(tol);
-            var broads = broadcasts.Where(x => bufferPoly.Contains(x.Position)).ToList();
+            var broads = broadcasts.Where(x => bufferPoly.Contains(x.Position) || bufferPoly.Distance(x.Position) < 300).ToList();
             var dir = (polyline.EndPoint - polyline.StartPoint).GetNormal();
             var otherDir = Vector3d.ZAxis.CrossProduct(dir);
 

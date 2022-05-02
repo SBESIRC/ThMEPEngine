@@ -19,7 +19,7 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
         /// 删除广播图块
         /// </summary>
         /// <param name="polyline"></param>
-        public static void ClearBroadCast(this Polyline polyline, ThMEPOriginTransformer originTransformer)
+        public static void ClearBroadCast(this Polyline polyline, ThMEPOriginTransformer originTransformer, List<Polyline> otherFrames)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -57,7 +57,7 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                 {
                     var transBlock = o.Clone() as BlockReference;
                     originTransformer.Transform(transBlock);
-                    return polyline.Contains(transBlock.Position); 
+                    return polyline.Contains(transBlock.Position) && !otherFrames.Any(x=>x.Contains(transBlock.Position)); 
                 }).ForEachDbObject(o => objs.Add(o));
                 foreach (Entity spray in objs)
                 {
@@ -147,6 +147,32 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                     sLine.UpgradeOpen();
                     sLine.Erase();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取房间内部的房间线（mpolygon）
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static List<Polyline> GetInnerFrames(this Polyline polyline, ThMEPOriginTransformer originTransformer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThMEPCommon.FrameLayer);
+                acadDatabase.Database.UnLockLayer(ThMEPCommon.FrameLayer);
+                acadDatabase.Database.UnOffLayer(ThMEPCommon.FrameLayer);
+                var frameLines = acadDatabase.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(o => o.Layer == ThMEPCommon.FrameLayer)
+                    .Select(x => {
+                        var clonePoly = x.Clone() as Polyline;
+                        originTransformer.Transform(clonePoly);
+                        return clonePoly;
+                    })
+                    .Where(x=> Math.Abs(x.Area - polyline.Area) > 1000)
+                    .Where(x=>polyline.Contains(x))
+                    .ToList();
+                return frameLines;
             }
         }
     }

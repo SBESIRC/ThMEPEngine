@@ -14,6 +14,7 @@ namespace ThMEPElectrical
         public static readonly string BroadcastLayerName = "E-FAS-DEVC";     //消防应急广播图层
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
         public static readonly string BlindAreaLayer = "E-MQ-XFGB";     //广播盲区图层
+        public static readonly string FrameLayer = "AI-房间框线";     //房间框线图层
 
         //连管
         public static readonly string ConnectPipeLayerName = "E-BRST-WIRE";     //广播连管图层

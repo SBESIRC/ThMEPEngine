@@ -11,7 +11,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
 {
     public class PathfindingByPointService
     {
-        public List<Polyline> Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<Polyline> mainConnectPolys, 
+        double overLength = 10000;
+        public List<Polyline> Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<Polyline> mainConnectPolys,
             List<BlockReference> broadcasts, ref List<BlockReference> otherBroadcasts)
         {
             if (mainConnectPolys.Count <= 0)
@@ -19,7 +20,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 return new List<Polyline>();
             }
             var connectPts = FindingPolyPoints(mainConnectPolys);
-            var broadcastPts = broadcasts.OrderBy(x => connectPts.Select(y=>y.DistanceTo(x.Position)).OrderBy(y => y).First()).ToList();   //根据现有连接主车道距离排序
+            var broadcastPts = broadcasts.OrderBy(x => connectPts.Select(y => y.DistanceTo(x.Position)).OrderBy(y => y).First()).ToList();   //根据现有连接主车道距离排序
 
             var connectPolys = new List<Polyline>(mainConnectPolys);
             //连接剩余其他副车道点
@@ -68,7 +69,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     connectPolys.Add(connectPoly);
                     DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(connectPolys.Cast<Curve>().ToList());
                     var length = dijkstra.FindingAllPathMinLength(broadcastPt).OrderByDescending(x => x).First();
-                    if (length > maxLength)
+                    if (length > maxLength + overLength)
                     {
                         if (!isFirst)
                         {

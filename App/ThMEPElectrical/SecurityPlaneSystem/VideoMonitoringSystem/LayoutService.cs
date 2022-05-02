@@ -43,6 +43,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 models.AddRange(CreateModels(lRoom.Value, layoutVByLine));
             }
 
+            walls.AddRange(doors);  //门也当作墙障碍
             //入口控制布置模式
             foreach (var door in doors)
             {
