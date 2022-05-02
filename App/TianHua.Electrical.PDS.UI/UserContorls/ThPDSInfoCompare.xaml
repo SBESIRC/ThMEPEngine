@@ -73,7 +73,7 @@
                                 <DataGridTemplateColumn Header="回路编号" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitId}"></TextBlock>
+                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitNumber}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

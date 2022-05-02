@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Dreambuild.AutoCAD;
+using Microsoft.Toolkit.Mvvm.Input;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
 using System.Windows.Media;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.ApplicationServices;
-using TianHua.Electrical.PDS.Service;
+using ThCADExtension;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
-using Microsoft.Toolkit.Mvvm.Input;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI.Services
@@ -115,7 +115,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Mild,
@@ -126,7 +126,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Moderate,
@@ -138,7 +138,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Moderate,
@@ -150,7 +150,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Servere,
@@ -162,7 +162,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Servere,
@@ -174,7 +174,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.Safe,
@@ -186,7 +186,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            CircuitId = GetCircuitID(edge),
+                            CircuitNumber = GetCircuitNumber(edge),
                             CircuitType = GetCircuitType(edge),
                             SourcePanelID = GetSourcePanelID(edge),
                             Background = PDSColorBrushes.None,
@@ -337,7 +337,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             }
         }
 
-        private string GetCircuitID(ThPDSProjectGraphEdge edge)
+        private string GetCircuitNumber(ThPDSProjectGraphEdge edge)
         {
             var id = edge.Circuit.ID.CircuitID.Last();
             if (string.IsNullOrEmpty(id))
@@ -357,7 +357,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             var id = edge.Circuit.ID.SourcePanelID.Last();
             if (string.IsNullOrEmpty(id))
             {
-                return "未知编号配电箱";
+                return "未知负载";
             }
             return id;
         }
@@ -381,7 +381,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class CircuitDiffItem
     {
-        public string CircuitId { get; set; }
+        public string CircuitNumber { get; set; }
         public string CircuitType { get; set; }
         public string SourcePanelID { get; set; }
         public string Hint { get; set; } = "提示文本";
