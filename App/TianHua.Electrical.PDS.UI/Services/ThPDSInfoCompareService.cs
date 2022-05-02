@@ -384,7 +384,14 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                return Node.Details.HighPower.ToString();
+                if (Node.Details.IsDualPower)
+                {
+                    return string.Format("{0}/{1}", Node.Details.HighPower, Node.Details.LowPower);
+                }
+                else
+                {
+                    return string.Format("{0}", Node.Details.HighPower);
+                }
             }
         }
         public string Dwg
