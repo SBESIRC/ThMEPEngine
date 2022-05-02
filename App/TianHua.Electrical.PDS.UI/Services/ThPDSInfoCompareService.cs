@@ -205,7 +205,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -217,7 +217,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -230,7 +230,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -243,7 +243,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -256,7 +256,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -269,7 +269,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -284,7 +284,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = node.Load.ID.LoadID,
+                                LoadId = GetLoadID(node),
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location.ReferenceDWG,
@@ -297,7 +297,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = node.Load.ID.LoadID,
+                                LoadId = GetLoadID(node),
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location.ReferenceDWG,
@@ -310,7 +310,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = node.Load.ID.LoadID,
+                                LoadId = GetLoadID(node),
                                 LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                                 LoadPower = node.Details.HighPower.ToString(),
                                 Dwg = node.Load.Location.ReferenceDWG,
@@ -324,7 +324,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = node.Load.ID.LoadID,
+                            LoadId = GetLoadID(node),
                             LoadType = node.Load.LoadTypeCat_1.GetDescription(),
                             LoadPower = node.Details.HighPower.ToString(),
                             Dwg = node.Load.Location.ReferenceDWG,
@@ -355,6 +355,16 @@ namespace TianHua.Electrical.PDS.UI.Services
         private string GetSourcePanelID(ThPDSProjectGraphEdge edge)
         {
             var id = edge.Circuit.ID.SourcePanelID.Last();
+            if (string.IsNullOrEmpty(id))
+            {
+                return "未知负载";
+            }
+            return id;
+        }
+
+        private string GetLoadID(ThPDSProjectGraphNode node)
+        {
+            var id = node.Load.ID.LoadID;
             if (string.IsNullOrEmpty(id))
             {
                 return "未知负载";
