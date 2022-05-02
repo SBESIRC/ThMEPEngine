@@ -1,16 +1,18 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
-using Dreambuild.AutoCAD;
-using Microsoft.Toolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Windows.Media;
 using ThCADExtension;
-using TianHua.Electrical.PDS.Project.Module;
+using Dreambuild.AutoCAD;
+using System.Windows.Media;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.ApplicationServices;
+using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Service;
+using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
+using Microsoft.Toolkit.Mvvm.Input;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI.Services
@@ -205,10 +207,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Mild,
                             Img = PDSImageSources.Mild,
                         });
@@ -217,10 +216,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = $"负载编号变化，原编号{projectGraphNodeIdChangeTag.ChangedID}",
@@ -230,10 +226,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = $"此负载与{projectGraphNodeExchangeTag.ExchangeToID}交换",
@@ -243,10 +236,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
                             Hint = $"此负载由{projectGraphNodeMoveTag}移动至此",
@@ -256,10 +246,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此负载为新增",
@@ -269,10 +256,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.Servere,
                             Img = PDSImageSources.Servere,
                             Hint = "此负载被删除",
@@ -284,10 +268,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = GetLoadID(node),
-                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.HighPower.ToString(),
-                                Dwg = node.Load.Location.ReferenceDWG,
+                                Node = node,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
                                 Hint = "描述变化",
@@ -297,10 +278,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = GetLoadID(node),
-                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.HighPower.ToString(),
-                                Dwg = node.Load.Location.ReferenceDWG,
+                                Node = node,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
                                 Hint = "消防变化",
@@ -310,10 +288,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             info.Items.Add(new()
                             {
-                                LoadId = GetLoadID(node),
-                                LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                                LoadPower = node.Details.HighPower.ToString(),
-                                Dwg = node.Load.Location.ReferenceDWG,
+                                Node = node,
                                 Background = PDSColorBrushes.Servere,
                                 Img = PDSImageSources.Servere,
                                 Hint = "功率变化",
@@ -324,16 +299,21 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         info.Items.Add(new()
                         {
-                            LoadId = GetLoadID(node),
-                            LoadType = node.Load.LoadTypeCat_1.GetDescription(),
-                            LoadPower = node.Details.HighPower.ToString(),
-                            Dwg = node.Load.Location.ReferenceDWG,
+                            Node = node,
                             Background = PDSColorBrushes.None,
                             Img = PDSImageSources.None,
+                            Hint = "无变化",
                         });
                     }
                 }
                 panel.dg2.DataContext = info;
+                panel.dg2.MouseDoubleClick += (s, e) =>
+                {
+                    if (panel.dg2.SelectedItem == null) return;
+                    var item = panel.dg2.SelectedItem as LoadDiffItem;
+                    var engine = new ThPDSZoomEngine(g);
+                    engine.Zoom(item.Node);
+                };
             }
         }
 
@@ -355,16 +335,6 @@ namespace TianHua.Electrical.PDS.UI.Services
         private string GetSourcePanelID(ThPDSProjectGraphEdge edge)
         {
             var id = edge.Circuit.ID.SourcePanelID.Last();
-            if (string.IsNullOrEmpty(id))
-            {
-                return "未知负载";
-            }
-            return id;
-        }
-
-        private string GetLoadID(ThPDSProjectGraphNode node)
-        {
-            var id = node.Load.ID.LoadID;
             if (string.IsNullOrEmpty(id))
             {
                 return "未知负载";
@@ -400,12 +370,49 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class LoadDiffItem
     {
-        public string LoadId { get; set; }
-        public string LoadType { get; set; }
-        public string LoadPower { get; set; }
-        public string Dwg { get; set; }
-        public string Hint { get; set; } = "提示文本";
+        public string LoadId
+        {
+            get
+            {
+                var id = Node.Load.ID.LoadID;
+                if (string.IsNullOrEmpty(id))
+                {
+                    return "未知负载";
+                }
+                return id;
+            }
+        }
+        public string LoadType
+        {
+            get
+            {
+                return Node.Load.LoadTypeCat_1.GetDescription();
+            }
+        }
+        public string LoadPower
+        {
+            get
+            {
+                return Node.Details.HighPower.ToString();
+            }
+        }
+        public string Dwg
+        {
+            get
+            {
+                return Node.Load.Location.ReferenceDWG;
+            }
+        }
+        public Point3d BasePoint
+        {
+            get
+            {
+                return ThPDSPoint3dService.PDSPoint3dToPoint3d(Node.Load.Location.BasePoint);
+            }
+        }
+        public string Hint { get; set; }
         public Brush Background { get; set; }
         public ImageSource Img { get; set; }
+        public ThPDSProjectGraphNode Node { get; set; }
     }
 }
