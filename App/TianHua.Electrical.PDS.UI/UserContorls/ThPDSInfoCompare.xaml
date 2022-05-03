@@ -68,37 +68,36 @@
                         <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" x:Name="searchBar2" Command="{Binding SearchCmd1}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
+                        <DataGrid x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="回路编号" Width="150">
+                                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{Binding Background}">
+                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
+                                                </Image>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="回路编号">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitNumber}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="回路类型" Width="100">
+                                <DataGridTemplateColumn Header="回路类型">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitType}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="上级配电箱" Width="100">
+                                <DataGridTemplateColumn Header="上级配电箱">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding SourcePanelID}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="注" Width="20">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <!--<TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Hint}"></TextBlock>-->
-                                            <Grid Background="{Binding Background}">
-                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
-                                                </Image>
-                                            </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -114,44 +113,43 @@
                         <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" x:Name="searchBar1" Command="{Binding SearchCmd2}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
+                        <DataGrid x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="负载编号" Width="100">
+                                <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{Binding Background}">
+                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
+                                                </Image>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="负载编号">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadId}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="负载类型" Width="100">
+                                <DataGridTemplateColumn Header="负载类型">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadType}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="负载功率" Width="70">
+                                <DataGridTemplateColumn Header="负载功率">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding LoadPower}"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="参照图纸" Width="200">
+                                <DataGridTemplateColumn Header="参照图纸">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Dwg}"></TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="注" Width="20">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <!--<TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding Hint}"></TextBlock>-->
-                                            <Grid Background="{Binding Background}">
-                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
-                                                </Image>
-                                            </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
