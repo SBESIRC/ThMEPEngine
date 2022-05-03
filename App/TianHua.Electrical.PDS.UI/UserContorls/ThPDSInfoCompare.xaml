@@ -65,10 +65,10 @@
             <Grid Grid.Row="0" Grid.Column="1">
                 <DockPanel LastChildFill="True">
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3" DockPanel.Dock="Top">
-                        <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" x:Name="searchBar2" Command="{Binding SearchCmd1}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
+                        <hc:SearchBar Name="CircuitSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="dg1" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}">
+                        <DataGrid x:Name="CircuitDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -105,15 +105,14 @@
                         </DataGrid>
                     </Border>
                 </DockPanel>
-
             </Grid>
             <Grid Grid.Row="0" Grid.Column="2">
                 <DockPanel LastChildFill="True">
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3" DockPanel.Dock="Top">
-                        <hc:SearchBar ShowClearButton="True" Style="{StaticResource SearchBarPlus}" IsRealTime="True" x:Name="searchBar1" Command="{Binding SearchCmd2}" CommandParameter="{Binding Text,RelativeSource={RelativeSource Self}}"/>
+                        <hc:SearchBar Name="LoadSearchBar" ShowClearButton="True" Style="{StaticResource SearchBarPlus}"/>
                     </Border>
                     <Border BorderBrush="Black" BorderThickness="1" Background="White" Margin="3">
-                        <DataGrid x:Name="dg2" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True" ItemsSource="{Binding Items,Mode=TwoWay}">
+                        <DataGrid x:Name="LoadDataGrid" Style="{x:Null}" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserSortColumns="True" CanUserReorderColumns="False" CanUserResizeColumns="True">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -157,7 +156,6 @@
                         </DataGrid>
                     </Border>
                 </DockPanel>
-
             </Grid>
         </Grid>
     </DockPanel>
