@@ -435,9 +435,9 @@ namespace TianHua.Electrical.PDS.Service
             graphB.InEdges(nodeB).ForEach(e => inEdgesIdB.Add(e.Circuit.ID.CircuitNumber.Last()));
             foreach (var inEdgeIdA in inEdgesIdA)
             {
-                if (inEdgesIdB.Contains(inEdgeIdA))
+                if (!inEdgesIdB.Contains(inEdgeIdA))
                 {
-                    return false;
+                    return true;
                 }
             }
 
@@ -447,12 +447,12 @@ namespace TianHua.Electrical.PDS.Service
             graphB.OutEdges(nodeB).ForEach(e => outNodesIdB.Add(e.Target.Load.ID.LoadID));
             foreach (var outNodeIdA in outNodesIdA)
             {
-                if (outNodesIdB.Contains(outNodeIdA))
+                if (!outNodesIdB.Contains(outNodeIdA))
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
         #endregion
 
