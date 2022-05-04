@@ -18,8 +18,8 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         private void btnImportSetting(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Filter = "Config (.GlobleSettion)|*.globleSettion"; // Filter files by extension
-            dlg.DefaultExt = ".GlobleSettion"; // Default file extension
+            dlg.DefaultExt = ".Config"; // Default file extension
+            dlg.Filter = "Global Configuration|*.Config"; // Filter files by extension
             var result = dlg.ShowDialog();
             if (result == true)
             {
@@ -34,20 +34,15 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             //选择路径
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Config"; // Default file name
-            dlg.DefaultExt = ".GlobleSettion"; // Default file extension
-            dlg.Filter = "Config (.GlobleSettion)|*.globleSettion"; // Filter files by extension
+            dlg.FileName = "GlobalConfiguration"; // Default file name
+            dlg.DefaultExt = ".Config"; // Default file extension
+            dlg.Filter = "Global Configuration|*.Config"; // Filter files by extension
             bool? result = dlg.ShowDialog();
-            // Process save file dialog box results
             if (result == true)
             {
                 var filePathUrl = dlg.FileName.Substring(0, dlg.FileName.LastIndexOf("\\"));
                 var fileName = dlg.SafeFileName;
                 ThPDSProjectGraphService.ExportGlobalConfiguration(filePathUrl, fileName);
-            }
-            else
-            {
-                return;
             }
         }
     }
