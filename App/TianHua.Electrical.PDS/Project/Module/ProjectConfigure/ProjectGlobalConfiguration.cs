@@ -200,6 +200,9 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
             }
         }
 
+        public string ConductorMaterialAndStructure = "材料特征及结构哪里拿呀";
+        public string[] ConductorMaterialAndStructureItemsSource => new string[] { "材料特征及结构哪里拿呀", "材料特征及结构可选项哪里拿呀" };
+
         /// <summary>
         /// 导体标注样式预览
         /// </summary>

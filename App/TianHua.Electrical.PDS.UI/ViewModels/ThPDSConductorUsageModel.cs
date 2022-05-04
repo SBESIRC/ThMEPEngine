@@ -50,9 +50,21 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         /// </summary>
         public string ConductorMaterial
         {
-            get=>_conductorUse.ConductorMaterial;
+            get => _conductorUse.ConductorMaterial;
         }
-
+        public string ConductorMaterialAndStructure
+        {
+            get => _conductorUse.ConductorMaterialAndStructure;
+            set
+            {
+                _conductorUse.ConductorMaterialAndStructure = value;
+                OnPropertyChanged(null);
+            }
+        }
+        public string[] ConductorMaterialAndStructureItemsSource
+        {
+            get => _conductorUse.ConductorMaterialAndStructureItemsSource;
+        }
         public bool IsSpecialConductorType => _conductorUse.IsSpecialConductorType;
 
         public string Content => _conductorUse.Content;
