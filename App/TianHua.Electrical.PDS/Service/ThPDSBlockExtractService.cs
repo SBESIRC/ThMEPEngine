@@ -76,6 +76,11 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             if (value.IndexOf(distBoxKey[i]) == 0 && !checker)
                             {
+                                if(value.Contains("APE") && !distBoxKey[i].Equals("APE"))
+                                {
+                                    continue;
+                                }
+
                                 foreach (var row in tableInfo)
                                 {
                                     if (row.Properties == distBoxKey[i])
@@ -120,6 +125,7 @@ namespace TianHua.Electrical.PDS.Service
             blockData.Phase = row.Phase;
             blockData.DemandFactor = row.DemandFactor;
             blockData.PowerFactor = row.PowerFactor;
+            blockData.FireLoad = row.FireLoad;
         }
     }
 }

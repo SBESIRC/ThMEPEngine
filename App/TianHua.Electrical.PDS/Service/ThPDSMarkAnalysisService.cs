@@ -30,7 +30,6 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                FireLoad = false,
                 Location = new ThPDSLocation
                 {
                     BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
@@ -40,6 +39,17 @@ namespace TianHua.Electrical.PDS.Service
             foreach (var str in marks)
             {
                 thPDSDistBox.ID.Description += StringClean(str);
+            }
+
+            thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
+
+            // 处理无标注时识别ACa不准确的情况
+            if(thPDSDistBox.ID.LoadID.Contains("ACa") 
+                && thPDSDistBox.LoadTypeCat_2 != ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel)
+            {
+                thPDSDistBox.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel;
+                thPDSDistBox.CircuitType = ThPDSCircuitType.EmergencyPowerEquipment;
+                thPDSDistBox.SetFireLoad(true);
             }
 
             return thPDSDistBox;
@@ -73,15 +83,30 @@ namespace TianHua.Electrical.PDS.Service
                 FrequencyConversion = frequencyConversion,
             };
 
-            var fireLoad = false;
-            marks.ForEach(str =>
+            if (loadData.FireLoad == true)
             {
-                if (str.Contains(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER))
+                thPDSLoad.SetFireLoad(true);
+            }
+            else if (loadData.FireLoad == false)
+            {
+                thPDSLoad.SetFireLoad(false);
+            }
+            else if (loadData.FireLoad == null)
+            {
+                bool? fireLoad = null;
+                marks.ForEach(str =>
                 {
-                    fireLoad = true;
-                }
-            });
-            thPDSLoad.FireLoad = fireLoad;
+                    if (str.Contains(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER))
+                    {
+                        fireLoad = true;
+                    }
+                    else if (str.Contains(ThPDSCommon.NON_PROPERTY_VALUE_FIRE_POWER))
+                    {
+                        fireLoad = false;
+                    }
+                });
+                thPDSLoad.SetFireLoad(fireLoad);
+            }
 
             if (needCopy)
             {
@@ -119,15 +144,21 @@ namespace TianHua.Electrical.PDS.Service
 
             if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+                var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
                 if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
                 {
-                    thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                    cat3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                    thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                    thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
                 }
             }
             else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                var cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             }
 
             return thPDSLoad;
@@ -148,8 +179,6 @@ namespace TianHua.Electrical.PDS.Service
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                         ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
-                FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
-                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER) : false,
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
@@ -165,14 +194,38 @@ namespace TianHua.Electrical.PDS.Service
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
             };
 
-            thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+            if (distBoxData.FireLoad == true)
+            {
+                thPDSLoad.SetFireLoad(true);
+            }
+            else if (distBoxData.FireLoad == false)
+            {
+                thPDSLoad.SetFireLoad(false);
+            }
+            else if (distBoxData.FireLoad == null)
+            {
+                bool? fireLoad = null;
+                if (distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                {
+                    fireLoad = distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
+                }
+                thPDSLoad.SetFireLoad(fireLoad);
+            }
+
+            var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+            thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+            thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                cat3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3)); 
             }
             if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             }
 
             return thPDSLoad;
@@ -560,72 +613,76 @@ namespace TianHua.Electrical.PDS.Service
             return Tuple.Create(exist, primaryAvail, spareAvail);
         }
 
-        private static ThPDSLoadTypeCat_3 MatchFanIDCat3(string loadID)
+        private static Tuple<ThPDSLoadTypeCat_3, bool> MatchFanIDCat3(string loadID)
         {
             if (loadID.Contains("ESF"))
             {
-                return ThPDSLoadTypeCat_3.SmokeExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SmokeExhaustFan, true);
             }
             else if (loadID.Contains("SSF"))
             {
-                return ThPDSLoadTypeCat_3.MakeupAirFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.MakeupAirFan, true);
             }
             else if (loadID.Contains("SPF"))
             {
-                return ThPDSLoadTypeCat_3.StaircasePressurizationFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.StaircasePressurizationFan, true);
             }
             else if (loadID.Contains("E(S)F"))
             {
-                return ThPDSLoadTypeCat_3.ExhaustFan_Smoke;
+                return Tuple.Create(ThPDSLoadTypeCat_3.ExhaustFan_Smoke, true);
             }
             else if (loadID.Contains("S(S)F"))
             {
-                return ThPDSLoadTypeCat_3.SupplyFan_Smoke;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SupplyFan_Smoke, true);
             }
             else if (loadID.Contains("EF"))
             {
-                return ThPDSLoadTypeCat_3.ExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.ExhaustFan, false);
             }
             else if (loadID.Contains("SF"))
             {
-                return ThPDSLoadTypeCat_3.SupplyFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SupplyFan, false);
             }
             else if (loadID.Contains("EKF"))
             {
-                return ThPDSLoadTypeCat_3.KitchenExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.KitchenExhaustFan, false);
             }
-            return ThPDSLoadTypeCat_3.None;
+            return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
         }
 
-        public static ThPDSLoadTypeCat_3 MatchFanDescriptionCat3(string description)
+        public static Tuple<ThPDSLoadTypeCat_3, bool> MatchFanDescriptionCat3(string description)
         {
-            if (description.Contains("事故风机"))
+            if (description.Contains("事故风机") || description.Contains("事故排风") || description.Contains("事故送风"))
             {
-                return ThPDSLoadTypeCat_3.EmergencyFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.EmergencyFan, false);
             }
             else
             {
-                return ThPDSLoadTypeCat_3.None;
+                return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
             }
         }
 
-        public static ThPDSLoadTypeCat_3 MatchPumpCat3(string description)
+        public static Tuple<ThPDSLoadTypeCat_3, bool> MatchPumpCat3(string description)
         {
             if (description.Contains("生活水泵"))
             {
-                return ThPDSLoadTypeCat_3.DomesticWaterPump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.DomesticWaterPump, false);
             }
             else if (description.Contains("消防泵") || description.Contains("喷淋泵") || description.Contains("消火栓泵"))
             {
-                return ThPDSLoadTypeCat_3.FirePump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.FirePump, true);
+            }
+            else if (description.Contains("稳压泵"))
+            {
+                return Tuple.Create(ThPDSLoadTypeCat_3.RegulatorsPump, false);
             }
             else if (description.Contains("潜水泵"))
             {
-                return ThPDSLoadTypeCat_3.SubmersiblePump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SubmersiblePump, false);
             }
             else
             {
-                return ThPDSLoadTypeCat_3.None;
+                return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
             }
         }
 
@@ -643,6 +700,25 @@ namespace TianHua.Electrical.PDS.Service
                 str = str.Remove(0, 1);
             }
             return str;
+        }
+
+        private bool? SetCat3FireLoad(bool? fireLoad, Tuple<ThPDSLoadTypeCat_3, bool> cat3)
+        {
+            if(fireLoad != null)
+            {
+                return fireLoad;
+            }
+            else
+            {
+                if(cat3.Item1 != ThPDSLoadTypeCat_3.None)
+                {
+                    return cat3.Item2;
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
     }
 }

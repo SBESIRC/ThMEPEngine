@@ -79,6 +79,20 @@ namespace TianHua.Electrical.PDS.Service
                 column++;
                 blockInfo.PowerFactor = Convert.ToDouble(StringFilter(table.Rows[row][column].ToString()));
 
+                // Fire Load
+                column++;
+                if (table.Rows[row][column].Equals("True"))
+                {
+                    blockInfo.FireLoad = true;
+                }
+                else if(table.Rows[row][column].Equals("False"))
+                {
+                    blockInfo.FireLoad = false;
+                }
+                else
+                {
+                    blockInfo.FireLoad = null;
+                }
                 blockInfos.Add(blockInfo);
             }
             return blockInfos;

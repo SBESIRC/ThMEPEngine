@@ -125,7 +125,9 @@ namespace TianHua.Electrical.PDS.Service
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
 
-            if (source.NodeType != PDSNodeType.CableCarrier && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
+            if (source.NodeType != PDSNodeType.CableCarrier
+                && target.NodeType != PDSNodeType.Load
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
             {
                 var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                 var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";

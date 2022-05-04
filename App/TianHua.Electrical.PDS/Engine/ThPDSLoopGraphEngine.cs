@@ -595,8 +595,7 @@ namespace TianHua.Electrical.PDS.Engine
                     var newEdge = ThPDSGraphService.CreateEdge(node, newNode, tuple.Item3.Texts, DistBoxKey);
                     if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && tuple.Item2 is Line circuit)
                     {
-                        ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer,
-                            true);
+                        ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer, true);
                     }
                     if (EdgeContains(newEdge))
                     {
