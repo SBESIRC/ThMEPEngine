@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 OnPropertyChanged(null);
             }
         }
-        public string[] ConductorMaterialAndStructureItemsSource
+        public IEnumerable<string> ConductorMaterialAndStructureItemsSource
         {
             get => _conductorUse.ConductorMaterialAndStructureItemsSource;
         }
