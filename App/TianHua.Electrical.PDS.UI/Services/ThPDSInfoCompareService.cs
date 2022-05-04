@@ -5,6 +5,7 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Globalization;
 using System.ComponentModel;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -181,12 +182,14 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                 }
 
-                // CollectionViewSource with filter
-                panel.CircuitDataGrid.ItemsSource = CollectionViewSource.GetDefaultView(items);
+                // CollectionViewSource with group, sort, and filter
+                var cv = CollectionViewSource.GetDefaultView(items);
+                cv.SortDescriptions.Add(new SortDescription("CircuitNumber", ListSortDirection.Ascending));
+                cv.GroupDescriptions.Add(new PropertyGroupDescription("SourcePanelID"));
+                panel.CircuitDataGrid.ItemsSource = cv;
                 panel.CircuitSearchBar.SearchStarted += (s, e) =>
                 {
                     var searchKey = e.Info;
-                    ICollectionView cv = CollectionViewSource.GetDefaultView(panel.CircuitDataGrid.ItemsSource);
                     cv.Filter = (e) =>
                     {
                         if (string.IsNullOrEmpty(searchKey))
@@ -200,6 +203,48 @@ namespace TianHua.Electrical.PDS.UI.Services
                         }
                     };
                 };
+
+                //// Column header clicked
+                //// http://www.scottlogic.co.uk/blog/colin/2008/12/wpf-datagrid-detecting-clicked-cell-and-row/
+                //panel.CircuitDataGrid.MouseRightButtonUp += (s, e) =>
+                //{
+                //    DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+                //    // iteratively traverse the visual tree
+                //    while ((dep != null) &&
+                //    dep is not DataGridCell &&
+                //    dep is not DataGridColumnHeader)
+                //    {
+                //        dep = VisualTreeHelper.GetParent(dep);
+                //    }
+
+                //    if (dep == null)
+                //        return;
+
+                //    if (dep is DataGridColumnHeader columnHeader)
+                //    {
+                //        DataGridColumn column = columnHeader.Column;
+                //        if ((string)column.Header == "回路编号")
+                //        {
+                //            ListSortDirection direction = (column.SortDirection != ListSortDirection.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending;
+                //            ICollectionView cv = CollectionViewSource.GetDefaultView(panel.CircuitDataGrid.ItemsSource);
+                //            if (cv != null && cv.CanSort == true)
+                //            {
+                //                using (cv.DeferRefresh())
+                //                {
+                //                    cv.SortDescriptions.Clear();
+                //                    cv.SortDescriptions.Add(new SortDescription("回路编号", ListSortDirection.Descending));
+                //                }
+                //            }
+                //        }
+                //    }
+
+                //    if (dep is DataGridCell)
+                //    {
+                //        DataGridCell cell = dep as DataGridCell;
+                //        // do something
+                //    }
+                //};
             }
             {
                 var items = new List<LoadDiffItem>();
@@ -305,8 +350,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                 }
 
-                // CollectionViewSource with filter
-                panel.LoadDataGrid.ItemsSource = CollectionViewSource.GetDefaultView(items);
+                // CollectionViewSource with group, sort, and filter
+                var cv = CollectionViewSource.GetDefaultView(items);
+                cv.SortDescriptions.Add(new SortDescription("LoadId", ListSortDirection.Ascending));
+                cv.GroupDescriptions.Add(new PropertyGroupDescription("LoadType"));
+                panel.LoadDataGrid.ItemsSource = cv;
                 panel.LoadSearchBar.SearchStarted += (s, e) =>
                 {
                     var searchKey = e.Info;
@@ -348,6 +396,13 @@ namespace TianHua.Electrical.PDS.UI.Services
     public class CircuitDiffItem
     {
         public string CircuitNumber
+        {
+            get
+            {
+                return Edge.Circuit.ID.CircuitNumber.Last();
+            }
+        }
+        public string CircuitId
         {
             get
             {
