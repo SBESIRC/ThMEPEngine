@@ -94,29 +94,31 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         #endregion
 
         #region 常用用电设备供电
-        public MotorUIChoise MotorUIChoise = MotorUIChoise.分立元件;//UI端的Combox要做成分立元件和CPS，两种模式
-        //消防电动机
+        public MotorUIChoise MotorUIChoise = MotorUIChoise.分立元件;
         public double FireMotorPower = 45;//kw
-        public FireStartType FireStartType = FireStartType.星三角启动;//这里也要做成Combox，选择有"星三角启动","软启动器启动","变频器启动"
-        //普通电动机
+        public FireStartType FireStartType = FireStartType.星三角启动;
         public double NormalMotorPower = 45;//kw
-        public FireStartType NormalStartType = FireStartType.星三角启动;//同上
-        public Enum1 Enum1;
-        public Enum2 Enum2;
-        public Enum3 Enum3;
+        public FireStartType NormalStartType = FireStartType.星三角启动;//
+
+        public FireEmergencyLightingModel fireEmergencyLightingModel = FireEmergencyLightingModel.A型;
+        public FireEmergencyLightingType fireEmergencyLightingType = FireEmergencyLightingType.集中电源;
+        public CircuitSystem circuitSystem = CircuitSystem.双线制;
         #endregion
     }
-    public enum Enum1
+    public enum FireEmergencyLightingModel
     {
         A型,
+        B型,
     }
-    public enum Enum2
+    public enum FireEmergencyLightingType
     {
         集中电源,
+        应急照明配电箱,
     }
-    public enum Enum3
+    public enum CircuitSystem
     {
         双线制,
+        四线制,
     }
     public enum Feeder
     {
@@ -124,19 +126,16 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         预分支电缆,
         密集型母线槽,
     }
-
     public enum ConductorMaterial
     {
         铜,
     }
-
     public enum FireStartType
     {
         星三角启动,
         //软启动器启动,
         //变频器启动,
     }
-
     public enum MotorUIChoise
     {
         分立元件,

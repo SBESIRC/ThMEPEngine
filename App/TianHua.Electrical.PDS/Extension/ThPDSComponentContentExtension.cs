@@ -1,5 +1,6 @@
 ﻿using System;
 using ThCADExtension;
+using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Extension
@@ -76,6 +77,11 @@ namespace TianHua.Electrical.PDS.Extension
         public static string Content(this TransferSwitch transferSwitch)
         {
             return $"{transferSwitch.Model} {transferSwitch.RatedCurrent}A {transferSwitch.PolesNum}";
+        }
+
+        public static string CentralizedPowerContent()
+        {
+            return $"{PDSProject.Instance.projectGlobalConfiguration.fireEmergencyLightingModel}应急照明{PDSProject.Instance.projectGlobalConfiguration.fireEmergencyLightingType}";
         }
     }
 }

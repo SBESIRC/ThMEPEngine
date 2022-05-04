@@ -364,38 +364,38 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-        public Enum1 Enum1
+        public FireEmergencyLightingModel Enum1
         {
-            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum1;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingModel;
             set
             {
                 if (value != Enum1)
                 {
-                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum1 = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingModel = value;
                     OnPropertyChanged();
                 }
             }
         }
-        public Enum2 Enum2
+        public FireEmergencyLightingType Enum2
         {
-            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum2;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingType;
             set
             {
                 if (value != Enum2)
                 {
-                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum2 = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingType = value;
                     OnPropertyChanged();
                 }
             }
         }
-        public Enum3 Enum3
+        public CircuitSystem Enum3
         {
-            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum3;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.circuitSystem;
             set
             {
                 if (value != Enum3)
                 {
-                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum3 = value;
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.circuitSystem = value;
                     OnPropertyChanged();
                 }
             }

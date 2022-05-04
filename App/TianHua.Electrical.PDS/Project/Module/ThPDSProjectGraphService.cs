@@ -562,19 +562,62 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 新建负载
+        /// </summary>
+        /// <param name="defaultKV">额定电压</param>
+        /// <param name="defaultPhaseSequence">相序</param>
+        /// <param name="defaultLoadID">设备编号</param>
+        /// <param name="defaultPower">设备功率</param>
+        /// <param name="defaultDescription">描述信息</param>
+        /// <param name="defaultFireLoad">是否消防</param>
+        public static ThPDSProjectGraphNode CreatNewLoad(double defaultKV = 0.38, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
+        {
+            //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
+            var node = new ThPDSProjectGraphNode();
+            node.Load.KV = defaultKV;
+            if(defaultKV == 0.38)
+            {
+                node.Load.Phase = ThPDSPhase.三相;
+                node.Details.PhaseSequence = Circuit.PhaseSequence.L123;
+            }
+            else
+            {
+                if(defaultPhaseSequence == Circuit.PhaseSequence.L123)
+                {
+                    node.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                }
+                else
+                {
+                    node.Details.PhaseSequence = defaultPhaseSequence;
+                }
+            }
+            node.Load.ID.LoadID = defaultLoadID;
+            node.Details.HighPower = defaultPower;
+            node.Load.ID.Description = defaultDescription;
+            
+            node.Load.FireLoad = defaultFireLoad;
+            PDSProject.Instance.graphData.Graph.AddVertex(node);
+            return node;
+        }
+
+        /// <summary>
         /// 新建回路
         /// </summary>
         public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = new ThPDSProjectGraphNode();
-            if (defaultPhase == ThPDSPhase.一相)
+            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
+            if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
-                target.Load.Phase = defaultPhase;
+                target.Load.Phase = ThPDSPhase.一相;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
+            }
+            else if (defaultPhase == ThPDSPhase.一相)//三相配电箱搭配一相负载
+            {
+                target.Load.Phase = ThPDSPhase.一相;
                 target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
             }
-            graph.AddVertex(target);
-            //Step 2:新建回路
+            //Step  2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
@@ -590,8 +633,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
-            var target = new ThPDSProjectGraphNode();
-            graph.AddVertex(target);
+            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:获取对应的CircuitFormOutType
@@ -600,11 +642,10 @@ namespace TianHua.Electrical.PDS.Project.Module
             newEdge.ComponentSelection(CircuitFormOutType);
             //Step 5:添加到Graph
             graph.AddEdge(newEdge);
-
             if (type.Contains("消防应急照明回路"))
             {
                 target.Load.Phase = ThPDSPhase.一相;
-                target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
                 newEdge.Circuit.ID.Description = "疏散照明/指示灯";
             }
             return newEdge;

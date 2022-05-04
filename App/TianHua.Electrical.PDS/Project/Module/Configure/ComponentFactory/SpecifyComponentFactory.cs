@@ -72,6 +72,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         }
 
         /// <summary>
+        /// 获取消防应急照明回路信息
+        /// </summary>
+        /// <returns></returns>
+        public FireEmergencyLighting GetFireEmergencyLighting()
+        {
+            var CircuitForm = new FireEmergencyLighting();
+            CircuitForm.Conductor = CreatFireEmergencyLightingConductor();
+            return CircuitForm;
+        }
+
+        /// <summary>
         /// 获取电动机-分立元件回路信息
         /// </summary>
         /// <param name="type"></param>
@@ -291,6 +302,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             if (_IsEmptyLoad)
                 return null;
             return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
+        }
+
+        /// <summary>
+        /// 创建消防应急照明回路导体
+        /// </summary>
+        /// <returns></returns>
+        private Conductor CreatFireEmergencyLightingConductor()
+        {
+            if (_IsEmptyLoad)
+                return null;
+            return new Conductor("2x2.5+E2.5", MaterialStructure.YJY, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
         }
 
         public override Contactor CreatContactor()

@@ -28,5 +28,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
         L3,
         [Description("L123")]
         L123,
+        [Description("L")]
+        L,
     }
 }
