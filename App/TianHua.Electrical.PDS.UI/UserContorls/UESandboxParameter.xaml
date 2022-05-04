@@ -32,13 +32,12 @@
                             <Label Content="市政电源线路默认长度" Width="190"></Label>
                             <cus:InputTextBox Text="{Binding DefaultLengthOfMunicipalPowerLine}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
                             <Label Content="m"></Label>
-
                             <Label Content="树干式配电的电流≤" Margin="20,0,0,0"></Label>
                             <cus:InputTextBox Text="{Binding CurrentOfTrunkDistribution}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False" Height="22"></cus:InputTextBox>
                             <Label Content="A时，默认采用"></Label>
-                            <ComboBox SelectedItem="{Binding DefaultFeeder}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding DefaultFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding DefaultFeeder}"></ComboBox>
                             <Label Content="馈线，否则采用"></Label>
-                            <ComboBox SelectedItem="{Binding ElseFeeder}"></ComboBox>
+                            <ComboBox ItemsSource="{Binding ElseFeeder,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding ElseFeeder}"></ComboBox>
                             <Label Content="馈线。"></Label>
                         </StackPanel>
                         <StackPanel Visibility="Visible"  Orientation="Horizontal"  VerticalAlignment="Center">
@@ -53,6 +52,9 @@
                             <Label Content="后续线路的默认长度" Width="190"></Label>
                             <cus:InputTextBox Text="{Binding DefaultLengthOfSubsequentLines}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
                             <Label Content="m"></Label>
+                            <Label Margin="20,0,0,0">额定电流放大倍数：</Label>
+                            <cus:InputTextBox Text="{Binding CalculateCurrentMagnification}" Width="60" CornerRadius="0" TextBoxInputType="InputDouble" NumCanMinus="False"  Height="22"></cus:InputTextBox>
+                            <Label>倍计算电流。</Label>
                         </StackPanel>
                         <Rectangle Stroke="Transparent" Fill="Transparent" StrokeThickness="10"></Rectangle>
                         <Rectangle Stroke="Black" Fill="Transparent" StrokeThickness="1"></Rectangle>
@@ -81,13 +83,8 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" ></ComboBox>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                            
+                              
                                     <DataGridTemplateColumn Header="无卤" Width="40" CanUserSort="False">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -130,6 +127,15 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterial, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" ></ComboBox>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
                                     <DataGridTemplateColumn Header="导体标注样式预览" Width="100" CanUserSort="False" IsReadOnly="True">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -272,10 +278,10 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>消防应急照明与疏散指示系统采用供电，线路采用。</Label>
-                                <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
-                                <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding Enum1,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum1}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding Enum2,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum2}"></ComboBox>
                                 <Label>供电，线路采用</Label>
-                                <ComboBox ItemsSource="{Binding xxx,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding xxx}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding Enum3,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum3}"></ComboBox>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

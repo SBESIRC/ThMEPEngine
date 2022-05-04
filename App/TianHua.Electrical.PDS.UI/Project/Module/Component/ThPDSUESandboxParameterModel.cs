@@ -36,100 +36,93 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public ThPDSConductorUsageModel NonFireDistributionControlCable => _ConductorUsages[6];
         public ThPDSConductorUsageModel FireControlSignalWire => _ConductorUsages[7];
         public ThPDSConductorUsageModel NonFireControlSignalWire => _ConductorUsages[8];
-        string _DefaultLengthOfMunicipalPowerLine;
-        public string DefaultLengthOfMunicipalPowerLine
+
+        public double DefaultLengthOfMunicipalPowerLine
         {
-            get => _DefaultLengthOfMunicipalPowerLine;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MunicipalPowerCircuitDefaultLength;
             set
             {
-                if (value != _DefaultLengthOfMunicipalPowerLine)
+                if (value != DefaultLengthOfMunicipalPowerLine)
                 {
-                    _DefaultLengthOfMunicipalPowerLine = value;
-                    OnPropertyChanged(nameof(DefaultLengthOfMunicipalPowerLine));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MunicipalPowerCircuitDefaultLength = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        string _CurrentOfTrunkDistribution;
-        public string CurrentOfTrunkDistribution
+        public double CurrentOfTrunkDistribution
         {
-            get => _CurrentOfTrunkDistribution;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent;
             set
             {
-                if (value != _CurrentOfTrunkDistribution)
+                if (value != CurrentOfTrunkDistribution)
                 {
-                    _CurrentOfTrunkDistribution = value;
-                    OnPropertyChanged(nameof(CurrentOfTrunkDistribution));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        string _DefaultFeeder;
-        public string DefaultFeeder
+        public Feeder DefaultFeeder
         {
-            get => _DefaultFeeder;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DefaultFeeder;
             set
             {
-                if (value != _DefaultFeeder)
+                if (value != DefaultFeeder)
                 {
-                    _DefaultFeeder = value;
-                    OnPropertyChanged(nameof(DefaultFeeder));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DefaultFeeder = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public Feeder ElseFeeder
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.OtherFeeder;
+            set
+            {
+                if (value != ElseFeeder)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.OtherFeeder = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        string _ElseFeeder;
-        public string ElseFeeder
+        public double DefaultLengthOfCircuitToTheFirstLevelDistributionBox
         {
-            get => _ElseFeeder;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SecondaryDistributionBoxDefaultLength;
             set
             {
-                if (value != _ElseFeeder)
+                if (value != DefaultLengthOfCircuitToTheFirstLevelDistributionBox)
                 {
-                    _ElseFeeder = value;
-                    OnPropertyChanged(nameof(ElseFeeder));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SecondaryDistributionBoxDefaultLength = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        string _DefaultLengthOfCircuitToTheFirstLevelDistributionBox;
-        public string DefaultLengthOfCircuitToTheFirstLevelDistributionBox
+        public double LoopSettingCurrent
         {
-            get => _DefaultLengthOfCircuitToTheFirstLevelDistributionBox;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.LoopSettingCurrent;
             set
             {
-                if (value != _DefaultLengthOfCircuitToTheFirstLevelDistributionBox)
+                if (value != LoopSettingCurrent)
                 {
-                    _DefaultLengthOfCircuitToTheFirstLevelDistributionBox = value;
-                    OnPropertyChanged(nameof(DefaultLengthOfCircuitToTheFirstLevelDistributionBox));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.LoopSettingCurrent = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        string _LoopSettingCurrent;
-        public string LoopSettingCurrent
+        public double DefaultLengthOfSubsequentLines
         {
-            get => _LoopSettingCurrent;
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SubsequentDefaultLength;
             set
             {
-                if (value != _LoopSettingCurrent)
+                if (value != DefaultLengthOfSubsequentLines)
                 {
-                    _LoopSettingCurrent = value;
-                    OnPropertyChanged(nameof(LoopSettingCurrent));
-                }
-            }
-        }
-
-        string _DefaultLengthOfSubsequentLines;
-        public string DefaultLengthOfSubsequentLines
-        {
-            get => _DefaultLengthOfSubsequentLines;
-            set
-            {
-                if (value != _DefaultLengthOfSubsequentLines)
-                {
-                    _DefaultLengthOfSubsequentLines = value;
-                    OnPropertyChanged(nameof(DefaultLengthOfSubsequentLines));
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SubsequentDefaultLength = value;
+                    OnPropertyChanged();
                 }
             }
         }
@@ -159,7 +152,18 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
+        public double CalculateCurrentMagnification
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.CalculateCurrentMagnification;
+            set
+            {
+                if (value != CalculateCurrentMagnification)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.CalculateCurrentMagnification = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         string _AmbientTemperature;
         public string AmbientTemperature
         {
@@ -360,7 +364,42 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
+        public Enum1 Enum1
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum1;
+            set
+            {
+                if (value != Enum1)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum1 = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public Enum2 Enum2
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum2;
+            set
+            {
+                if (value != Enum2)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum2 = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public Enum3 Enum3
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum3;
+            set
+            {
+                if (value != Enum3)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.Enum3 = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         public FireStartType CommonMotorPowerMore
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NormalStartType;

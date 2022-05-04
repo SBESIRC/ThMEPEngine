@@ -44,42 +44,42 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         /// <summary>
         /// 消防配电分支电路电缆
         /// </summary>
-        public ConductorUse FireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial=MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true , Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电分支线路 };
+        public ConductorUse FireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电分支线路 };
 
         /// <summary>
         /// 消防配电电线
         /// </summary>
-        public ConductorUse FireDistributionWire = new ConductorUse() { OuterSheathMaterial=MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防配电电线 };
+        public ConductorUse FireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防配电电线 };
 
         /// <summary>
         /// 非消防配电电缆
         /// </summary>
-        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial=MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电缆 };
+        public ConductorUse NonFireDistributionBranchCircuiCables = new ConductorUse() { OuterSheathMaterial = MaterialStructure.YJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电缆 };
 
         /// <summary>
         /// 非消防配电电线
         /// </summary>
-        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial=MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线 };
+        public ConductorUse NonFireDistributionWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.BYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防配电电线 };
 
         /// <summary>
         /// 消防配电控制电缆
         /// </summary>
-        public ConductorUse FireDistributionControlCable = new ConductorUse() { OuterSheathMaterial=MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电控制电缆 };
+        public ConductorUse FireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.A, ConductorType = ConductorType.消防配电控制电缆 };
 
         /// <summary>
         /// 非消防配电控制电缆
         /// </summary>
-        public ConductorUse NonFireDistributionControlCable = new ConductorUse() { OuterSheathMaterial=MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.A, ConductorType = ConductorType.非消防配电控制电缆 };
+        public ConductorUse NonFireDistributionControlCable = new ConductorUse() { OuterSheathMaterial = MaterialStructure.KYJY, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.A, ConductorType = ConductorType.非消防配电控制电缆 };
 
         /// <summary>
         /// 消防控制信号软线
         /// </summary>
-        public ConductorUse FireControlSignalWire = new ConductorUse() { OuterSheathMaterial=MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防控制信号软线 };
+        public ConductorUse FireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = true, Level = ConductorLevel.C, ConductorType = ConductorType.消防控制信号软线 };
 
         /// <summary>
         /// 非消防控制信号软线
         /// </summary>
-        public ConductorUse NonFireControlSignalWire = new ConductorUse() { OuterSheathMaterial=MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防控制信号软线 };
+        public ConductorUse NonFireControlSignalWire = new ConductorUse() { OuterSheathMaterial = MaterialStructure.RYJ, HalogenFree = true, LowSmoke = true, LowToxicity = true, FlameRetardant = true, Refractory = false, Level = ConductorLevel.C, ConductorType = ConductorType.非消防控制信号软线 };
         #endregion
 
         #region 管材铺设原则
@@ -101,9 +101,23 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         //普通电动机
         public double NormalMotorPower = 45;//kw
         public FireStartType NormalStartType = FireStartType.星三角启动;//同上
+        public Enum1 Enum1;
+        public Enum2 Enum2;
+        public Enum3 Enum3;
         #endregion
     }
-
+    public enum Enum1
+    {
+        A型,
+    }
+    public enum Enum2
+    {
+        集中电源,
+    }
+    public enum Enum3
+    {
+        双线制,
+    }
     public enum Feeder
     {
         T接电缆,
@@ -182,7 +196,7 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         {
             get
             {
-                return (HalogenFree ? "W" : "") + (LowSmoke ? "D" : "") + (LowToxicity ? "U" : "")+  (FlameRetardant ? "Z" : "") + Level.ToString() + (Refractory ? "N" : "");
+                return (HalogenFree ? "W" : "") + (LowSmoke ? "D" : "") + (LowToxicity ? "U" : "") + (FlameRetardant ? "Z" : "") + Level.ToString() + (Refractory ? "N" : "");
             }
         }
 
