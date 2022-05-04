@@ -83,15 +83,15 @@ namespace TianHua.Electrical.PDS.Service
                 column++;
                 if (table.Rows[row][column].Equals("True"))
                 {
-                    blockInfo.FireLoad = true;
+                    blockInfo.FireLoad = ThPDSFireLoad.FireLoad;
                 }
                 else if(table.Rows[row][column].Equals("False"))
                 {
-                    blockInfo.FireLoad = false;
+                    blockInfo.FireLoad = ThPDSFireLoad.NonFireLoad;
                 }
                 else
                 {
-                    blockInfo.FireLoad = null;
+                    blockInfo.FireLoad = ThPDSFireLoad.Unknown;
                 }
                 blockInfos.Add(blockInfo);
             }

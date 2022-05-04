@@ -339,7 +339,7 @@ namespace TianHua.Electrical.PDS.Model
             Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
             PowerFactor = 0.85;
-            FireLoadWithNull = null;
+            FireLoadWithNull = ThPDSFireLoad.Unknown;
             Location = new ThPDSLocation();
             OnLightingCableTray = false;
         }
@@ -387,7 +387,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 是否是消防设备
         /// </summary>
-        private bool? FireLoadWithNull { get; set; }
+        private ThPDSFireLoad FireLoadWithNull { get; set; }
 
         /// <summary>
         /// 是否是消防设备
@@ -396,7 +396,7 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                return FireLoadWithNull == true;
+                return FireLoadWithNull == ThPDSFireLoad.FireLoad;
             }
         }
 
@@ -479,14 +479,26 @@ namespace TianHua.Electrical.PDS.Model
             OnLightingCableTray = onLightingCableTray;
         }
 
-        public bool? GetFireLoad()
+        public ThPDSFireLoad GetFireLoad()
         {
             return FireLoadWithNull;
         }
 
-        public void SetFireLoad(bool? fireLoad)
+        public void SetFireLoad(ThPDSFireLoad fireLoad)
         {
             FireLoadWithNull = fireLoad;
+        }
+
+        public void SetFireLoad(bool fireLoad)
+        {
+            if(fireLoad)
+            {
+                FireLoadWithNull = ThPDSFireLoad.FireLoad;
+            }
+            else
+            {
+                FireLoadWithNull = ThPDSFireLoad.NonFireLoad;
+            }
         }
     }
 }
