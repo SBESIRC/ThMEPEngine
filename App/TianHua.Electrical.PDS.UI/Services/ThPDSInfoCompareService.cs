@@ -117,7 +117,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     var tag = edge.Tag;
                     if (tag is ThPDSProjectGraphEdgeCompositeTag)
                     {
-                        throw new NotSupportedException();
+                        //throw new NotSupportedException();
                     }
                     else if (tag is ThPDSProjectGraphEdgeIdChangeTag projectGraphEdgeIdChangeTag)
                     {
@@ -208,7 +208,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     var tag = node.Tag;
                     if (tag is ThPDSProjectGraphNodeCompositeTag)
                     {
-                        throw new NotSupportedException();
+                        //throw new NotSupportedException();
                     }
                     else if (tag is ThPDSProjectGraphNodeIdChangeTag projectGraphNodeIdChangeTag)
                     {

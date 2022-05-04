@@ -73,10 +73,7 @@
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Grid Background="{Binding Background}">
-                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
-                                                </Image>
-                                            </Grid>
+                                            <Image Source="{Binding Img}" ToolTip="{Binding Hint}" Stretch="None"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -117,10 +114,7 @@
                                 <DataGridTemplateColumn Width="SizeToCells" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Grid Background="{Binding Background}">
-                                                <Image ToolTip="{Binding Hint}" Source="{Binding Img}">
-                                                </Image>
-                                            </Grid>
+                                            <Image Source="{Binding Img}" ToolTip="{Binding Hint}" Stretch="None"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
