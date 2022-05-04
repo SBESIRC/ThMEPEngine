@@ -200,7 +200,17 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
             }
         }
 
-        public string ConductorMaterialAndStructure = "材料特征及结构哪里拿呀";
+        public string ConductorMaterialAndStructure
+        {
+            get
+            {
+                return OuterSheathMaterial.GetEnumDescription();
+            }
+            set
+            {
+                OuterSheathMaterial = value.GetEnumName<MaterialStructure>();
+            }
+        }
         public IEnumerable<string> ConductorMaterialAndStructureItemsSource
         {
             get
