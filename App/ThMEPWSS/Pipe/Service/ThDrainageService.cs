@@ -2985,7 +2985,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             ThDrainageService.PreFixGeoData(geoData);
             if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
             {
-                MessageBox.Show(THESAURUSREBATE);
+                MessageBox.Show(PARALINGUISTICALLY);
             }
             var (_drDatas, exInfo) = _CreateDrainageDrawingData(geoData, THESAURUSOBSTINACY);
             drDatas = _drDatas;
@@ -5408,7 +5408,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         }
                     }
                     {
-                        if (entity is BlockReference br && br.BlockTableRecord.IsValid && br.GetEffectiveName() is THESAURUSCONFRONTATION)
+                        if (entity is BlockReference br && br.BlockTableRecord.IsValid && br.GetEffectiveName() is THESAURUSCONFRONTATION or PARATHYROIDECTOMY)
                         {
                             var c = EntityTool.GetCircles(br).Where(x => x.Visible).Select(x => x.ToGCircle()).Where(x => x.Radius > THESAURUSINCOMPLETE).FirstOrDefault();
                             if (c.IsValid)
@@ -7670,7 +7670,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int THESAURUSCELESTIAL = 1239;
         public const int THESAURUSPRIVILEGE = 675;
         public const string MÖNCHENGLADBACH = "通气帽系统-AI";
-        public const string THESAURUSREBATE = "暂不支持污废分流";
         public const string THESAURUSDECLAIM = "PL";
         public const string THESAURUSCONFIRM = "TL";
         public const string QUOTATIONSTRETTO = "管底h+X.XX";
@@ -7732,6 +7731,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSRECIPE = "沉箱立管";
         public const string THESAURUSRAFFLE = "通气立管";
         public const string HYDROCHLOROFLUOROCARBON = "2F";
+        public const string PARATHYROIDECTOMY = "地漏-AI";
+        public const string PARALINGUISTICALLY = "暂不支持污废分流，仅生成废水系统图";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>
