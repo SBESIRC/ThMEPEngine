@@ -97,13 +97,19 @@
         public static string DraiSewageLayerName = "W-DRAI-SEWA-PIPE";      //污水管
         public static string DraiWasteLayerName = "W-DRAI-WAST-PIPE";       //废水管
         public static string DraiLayerName = "W-RAIN-PIPE";                 //雨水、冷凝水管
+        //室外雨污水井
+        public static string OutdoorWasteWellLayerName = "W-DRAI-EQPM";         //室外污水井图层名
+        public static string OutdoorWasteWellBlockName = "污废合流井编号";      //室外污水井块名
+        public static string OutdoorRainWellLayerName = "W-RAIN-EQPM";          //室外雨水井图层名
+        public static string OutdoorRainWellBlockName = "重力流雨水井编号";     //室外雨水井块名
+
         //处理冷凝水管
         public static string DisconnectionLayerName = "W-WSUP-EQPM";
         public static string DisconnectionBlockName = "断线";
         public static string RainwaterInletLayerName = "W-RAIN-EQPM";
         public static string RainwaterInletBlockName = "13#雨水口";
         public static string SealedWellLayerName = "W-RAIN-EQPM";
-        public static string SealedWellBlockName = "13#雨水口";
+        public static string SealedWellBlockName = "水封井";
         //管径标注
         public static string RainDimsLayerName = "W-RAIN-DIMS";
         public static string DraiDimsLayerName = "W-DRAI-DIMS";

@@ -11,6 +11,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
 {
     public class PipeDiameterMarkingService
     {
+        public double scale = 1;
         double startDis = 1100;
         double moveDis = 200;
         List<RouteModel> routes;
@@ -41,8 +42,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             foreach (var route in cRoutes)
             {
                 var routeLine = route.route;
-                var lastPt = routeLine.GetPoint3dAt(0);
-                var secPt = routeLine.GetPoint3dAt(1);
+                var lastPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 1);
+                var secPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 2);
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
                 var sPt = lastPt + dir * startDis;// + moveDir * moveDis;
@@ -81,6 +82,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                     break;
             }
             var attri = new Dictionary<string, string>() { { "可见性", attriName } };
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfos, layerName, ThWSSCommon.DimsBlockName, attri);
         }
     }

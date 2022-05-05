@@ -14,6 +14,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
 {
     public class DrivepipeDimensionService
     {
+        public double scale = 1;
         double length = 157;
         double noteLength = 500;
         double dimLength = 1000;
@@ -63,6 +64,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var pt = lInfo.Key + dir * length;
                 lst.Add(new KeyValuePair<Point3d, Vector3d>(pt, dir));
             }
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(lst, ThWSSCommon.DrivepipeLayerName, ThWSSCommon.DrivepipeBlockName, attri);
         }
 
@@ -113,8 +115,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             var leveltext = new DBText() { Height = 200, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = firstFloorPlane.DrivepipeLevel.ToString(), Position = levelPt, AlignmentPoint = levelPt };
             dbTexts.Add(leveltext);
 
-            PrintMarks.PrintNoteLines(noteLines);
-            PrintMarks.PrintText(dbTexts);
+            PrintMarks.PrintNoteLines(noteLines, scale);
+            PrintMarks.PrintText(dbTexts, scale);
         }
 
         /// <summary>
@@ -176,7 +178,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             foreach (var rRoute in resRoutes)
             {
                 var pts = resPoly.IntersectWithEx(rRoute.route);
-                var endPt = rRoute.route.GetPoint3dAt(0);
+                var endPt = rRoute.route.GetPoint3dAt(rRoute.route.NumberOfVertices - 1);
                 if (pts.Count >= 2)
                 {
                     var orderPts = pts.Cast<Point3d>().OrderBy(x => x.DistanceTo(endPt)).ToList();
@@ -197,7 +199,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         /// <returns></returns>
         private Polyline GetOutFrames(Polyline connectLine)
         {
-            var endPt = connectLine.GetPoint3dAt(0);
+            var endPt = connectLine.GetPoint3dAt(connectLine.NumberOfVertices - 1);
             var interPolys = outFrames.Where(x => x.IsIntersects(connectLine))
                 .OrderBy(x => x.GetClosestPointTo(endPt, false).DistanceTo(endPt)).ToList();
             return interPolys.FirstOrDefault();

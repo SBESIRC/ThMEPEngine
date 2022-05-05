@@ -9,6 +9,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 {
     public abstract class DraningSettingService
     {
+        public double scale = 1;
+
         public List<RouteModel> pipes;
         
         public virtual void CreateDraningSetting() { }

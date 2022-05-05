@@ -13,7 +13,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
 {
     public class DrainningSettingRainwaterInlet : DraningSettingService
     {
-        double scale = 1;
         double inletWidth = 100;
         double moveLength = 500;
         public DrainningSettingRainwaterInlet(List<RouteModel> _pipes)

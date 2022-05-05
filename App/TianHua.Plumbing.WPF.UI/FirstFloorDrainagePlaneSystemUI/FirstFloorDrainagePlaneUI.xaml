@@ -30,7 +30,9 @@
         <cus:ImageButton Grid.Row="3" Content="绘制户外雨水管" x:Name="btnRainPipe" Width="140" Height="22" Margin="7" ImageTextLocation="TextOnly"  Click="btnRainPipe_Click"></cus:ImageButton>
         <cus:ImageButton Grid.Row="4" Content="框选出户外墙" x:Name="btnDrawWall" Width="140" Height="22" Margin="7,7,7,20" ImageTextLocation="TextOnly"  Click="btnDrawWall_Click"></cus:ImageButton>
         <Label Grid.Row="5" Margin="5" >出图比例：</Label>
-        <ComboBox Grid.Row="6" Margin="5,0,5,10" Name="cbbScale"></ComboBox>
+        <ComboBox Grid.Row="6" Margin="5,0,5,10" Name="cbbScale" SelectedItem="{Binding BlockScale,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding BlockScaleList,Mode=OneWay,NotifyOnSourceUpdated=True}">
+        </ComboBox>
         <cus:ImageButton Grid.Row="7" Content="生成管线路由" x:Name="btnPipeLine" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnPipeLine_Click"></cus:ImageButton>
         <Line Grid.Row="8" X1="5" Y1="0" X2="170" Y2="0" StrokeDashArray="5" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Center"/>
         <Label Grid.Row="9" Margin="5" >套管类型：</Label>
@@ -40,7 +42,7 @@
         </ComboBox>
         <Label Grid.Row="11" Margin="5" >套管标高：</Label>
         <StackPanel Grid.Row="12"  Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,5,5" >
-            <cus:InputTextBox Width ="160" TextBoxInputType="InputInteger"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding DrivepipeLevel, Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+            <cus:InputTextBox Width ="160" TextBoxInputType="InputDouble"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding DrivepipeLevel, Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
             <Label  Content="m"/>
         </StackPanel>
         <cus:ImageButton Grid.Row="13" Content="生成套管标注" x:Name="btnPipeTag" Width="150" Height="24" Margin="10" ImageTextLocation="TextOnly"  Click="btnParamSet_Click"></cus:ImageButton>

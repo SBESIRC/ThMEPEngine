@@ -45,7 +45,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
                 var pt = frameDic.First().Key.StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0));
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 foreach (var dic in frameDic)
                 {
                     var frame = dic.Key.Clone() as Polyline;
@@ -80,19 +80,26 @@ namespace ThMEPWSS.Command
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        //放置管井
+                        CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes);
+                        createTubeWellService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
+                        routes = createTubeWellService.Layout();
+
                         //处理冷凝水管
                         HandlePipes(routes);
 
                         //标注管径
                         PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes);
+                        pipeDiameterMarkingService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         pipeDiameterMarkingService.CreateDim();
 
                         //套管标注
                         DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane);
+                        drivepipeDimensionService.scale  = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         drivepipeDimensionService.CreateDim();
 
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
-                        PrintPipes.Print(otherPipes);
+                        PrintPipes.Print(otherPipes, Convert.ToDouble(firstFloorPlane.BlockScale.Tag));
                     }
                 }
             }
@@ -123,6 +130,7 @@ namespace ThMEPWSS.Command
             }
             if (drainningSettingService != null)
             {
+                drainningSettingService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                 drainningSettingService.CreateDraningSetting();
             }
         }
