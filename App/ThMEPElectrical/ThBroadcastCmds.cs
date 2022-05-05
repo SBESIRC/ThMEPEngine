@@ -69,7 +69,7 @@ namespace ThMEPElectrical
                 }
 
                 var pt = frameLst.First().StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frameLst = frameLst.Select(x =>
                 {
                     originTransformer.Transform(x);

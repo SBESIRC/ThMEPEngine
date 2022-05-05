@@ -67,7 +67,10 @@ namespace ThMEPWSS.Command
                     var sewagePipes = CalStructrueService.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = CalStructrueService.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = CalStructrueService.GetAxis(acad, originTransformer);
-
+                    if (userOutFrame.Count == 0|| rooms.Count == 0)
+                    {
+                        continue;
+                    }
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 

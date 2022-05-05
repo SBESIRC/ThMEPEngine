@@ -85,7 +85,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             //合并延伸线（删除多余延伸线并尽量均匀）
             MergeExtendLineService mergeExtendLineService = new MergeExtendLineService();
             resLines = mergeExtendLineService.MergeLines(xLanes, yLanes, resLines);
-            
+
             //连接孤立车道线
             List<List<Line>> allLineLanes = new List<List<Line>>(xLanes);
             allLineLanes.AddRange(yLanes);

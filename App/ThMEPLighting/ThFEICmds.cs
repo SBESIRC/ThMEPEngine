@@ -19,6 +19,7 @@ using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.PrintEntity;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.ThEmgPilotLamp;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting
 {

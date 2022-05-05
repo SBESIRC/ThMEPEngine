@@ -151,13 +151,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
                                                  o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
             var result = Active.Editor.SelectAll(filterlist);
-            foreach (ObjectId obj in result.Value.GetObjectIds())
+            if (result.Status == PromptStatus.OK)
             {
-                var frame = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
-                if (frame.Area > 10)
+                foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    originTransformer.Transform(frame);
-                    frameLst.Add(frame);
+                    var frame = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
+                    if (frame.Area > 10)
+                    {
+                        originTransformer.Transform(frame);
+                        frameLst.Add(frame);
+                    }
                 }
             }
 
