@@ -378,7 +378,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (panel.LoadDataGrid.SelectedItem == null) return;
                     var item = panel.LoadDataGrid.SelectedItem as LoadDiffItem;
-                    var engine = new ThPDSZoomEngine(g);
+                    var engine = new ThPDSZoomEngine();
                     engine.Zoom(item.Node);
                 };
             }

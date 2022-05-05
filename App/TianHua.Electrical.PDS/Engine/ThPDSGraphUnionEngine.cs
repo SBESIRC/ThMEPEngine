@@ -80,7 +80,7 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
                             }
-                            if(!targetMap.EdgeMap.ContainsKey(edge))
+                            if (!targetMap.EdgeMap.ContainsKey(edge))
                             {
                                 targetMap.EdgeMap.Add(edge, objectIds);
                             }
@@ -127,13 +127,26 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         Circuit = edge.Circuit,
                     };
-                    if(!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, unionGraph))
+                    if (!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, unionGraph))
                     {
                         unionGraph.AddEdge(newEdge);
                     }
                 }
             });
-            
+
+            // 将无连接关系的散点加入到图中
+            graphList.ForEach(graph =>
+            {
+                graph.Vertices.ForEach(vertex =>
+                {
+                    if (vertex.NodeType != PDSNodeType.CableCarrier
+                        && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
+                    {
+                        unionGraph.AddVertex(vertex);
+                    }
+                });
+            });
+
             return unionGraph;
         }
 

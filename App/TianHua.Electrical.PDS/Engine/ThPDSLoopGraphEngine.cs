@@ -322,6 +322,13 @@ namespace TianHua.Electrical.PDS.Engine
                     FindGraph(null, distBox);
                 }
             }
+            foreach (var load in Loads)
+            {
+                if (!CacheLoads.Contains(load))
+                {
+                    FindGraph(load);
+                }
+            }
         }
 
         /// <summary>
@@ -461,6 +468,16 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                 });
             }
+        }
+
+        public void FindGraph(Entity load)
+        {
+            var objectIds = new List<ObjectId>();
+            var attributesCopy = "";
+            var newNode = ThPDSGraphService.CreateNode(new List<Entity> { load }, Database, MarkService, 
+                DistBoxKey, objectIds, ref attributesCopy);
+            PDSGraph.Graph.AddVertex(newNode);
+            NodeMap.Add(newNode, objectIds);
         }
 
         public void FindDistBoxOnTrayGraph(Entity extraEntity, Entity startingEntity)

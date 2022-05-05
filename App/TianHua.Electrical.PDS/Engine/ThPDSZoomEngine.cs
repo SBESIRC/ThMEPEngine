@@ -16,16 +16,14 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSZoomEngine
     {
-        private ProjectGraph ProjectGraph;
-
-        public ThPDSZoomEngine(ProjectGraph projectGraph)
+        public ThPDSZoomEngine()
         {
-            ProjectGraph = projectGraph;
+
         }
 
-        public void Zoom(ThPDSProjectGraphNode projectNode)
+        public void Zoom(ThPDSProjectGraphNode projectNode, ProjectGraph projectGraph)
         {
-            var nodeList = ProjectGraph.Vertices
+            var nodeList = projectGraph.Vertices
                 .Where(o => o.Load.ID.LoadID.Equals(projectNode.Load.ID.LoadID)).ToList();
             if (nodeList.Count != 1)
             {
@@ -53,6 +51,34 @@ namespace TianHua.Electrical.PDS.Engine
                                                    node.Load.Location.BasePoint.Y - scaleFactor, 0);
                         var maxPoint = new Point3d(node.Load.Location.BasePoint.X + scaleFactor,
                                                    node.Load.Location.BasePoint.Y + scaleFactor, 0);
+                        Active.Editor.ZoomWindow(minPoint, maxPoint);
+                    }
+                }
+            }
+        }
+
+        public void Zoom(ThPDSProjectGraphNode projectNode)
+        {
+            foreach (Document doc in Application.DocumentManager)
+            {
+                //var fileName = doc.Name.Split('\\').Last();
+                //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
+                //{
+                //    continue;
+                //}
+
+                using (var docLock = doc.LockDocument())
+                using (var activeDb = AcadDatabase.Use(doc.Database))
+                {
+                    var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                    if (projectNode.Load.Location.ReferenceDWG.Equals(referenceDWG))
+                    {
+                        Application.DocumentManager.MdiActiveDocument = doc;
+                        var scaleFactor = 8000;
+                        var minPoint = new Point3d(projectNode.Load.Location.BasePoint.X - scaleFactor,
+                                                   projectNode.Load.Location.BasePoint.Y - scaleFactor, 0);
+                        var maxPoint = new Point3d(projectNode.Load.Location.BasePoint.X + scaleFactor,
+                                                   projectNode.Load.Location.BasePoint.Y + scaleFactor, 0);
                         Active.Editor.ZoomWindow(minPoint, maxPoint);
                     }
                 }
