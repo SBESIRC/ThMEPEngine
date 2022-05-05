@@ -127,7 +127,10 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         Circuit = edge.Circuit,
                     };
-                    unionGraph.AddEdge(newEdge);
+                    if(!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, unionGraph))
+                    {
+                        unionGraph.AddEdge(newEdge);
+                    }
                 }
             });
             

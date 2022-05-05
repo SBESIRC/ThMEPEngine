@@ -278,7 +278,7 @@ namespace TianHua.Electrical.PDS.Engine
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
                                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey, true);
-                                if (EdgeContains(newEdge))
+                                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                                 {
                                     return;
                                 }
@@ -382,7 +382,7 @@ namespace TianHua.Electrical.PDS.Engine
                             }
 
                             var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { circuitNumber }, DistBoxKey);
-                            if (EdgeContains(newEdge))
+                            if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                             {
                                 return;
                             }
@@ -491,7 +491,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                             // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
                             var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { x }, DistBoxKey);
-                            if (EdgeContains(newEdge))
+                            if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                             {
                                 return;
                             }
@@ -546,7 +546,7 @@ namespace TianHua.Electrical.PDS.Engine
                         {
                             nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
                         }
-                        else if(item.Key is BlockReference block)
+                        else if (item.Key is BlockReference block)
                         {
                             nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
                         }
@@ -597,7 +597,7 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer, true);
                     }
-                    if (EdgeContains(newEdge))
+                    if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                     {
                         return;
                     }
@@ -618,7 +618,7 @@ namespace TianHua.Electrical.PDS.Engine
                             ThPDSLayerService.SelectCircuitType(newDistBoxEdge.Target.Loads[0],
                                 otherCircuit.Layer, needAssign);
                         }
-                        if (EdgeContains(newDistBoxEdge))
+                        if (ThPDSEdgeContainsService.EdgeContains(newDistBoxEdge, PDSGraph.Graph))
                         {
                             return;
                         }
@@ -684,7 +684,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 newEdge.Circuit.ViaCableTray = true;
                             }
                         }
-                        if (!EdgeContains(newEdge))
+                        if (!ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                         {
                             PDSGraph.Graph.AddEdge(newEdge);
                             EdgeMap.Add(newEdge, logos.ObjectIds);
@@ -1233,6 +1233,8 @@ namespace TianHua.Electrical.PDS.Engine
                     continue;
                 }
                 var sameEdge = PDSGraph.Graph.Edges
+                    .Where(e => e.Source.NodeType == edge.Source.NodeType)
+                    .Where(e => e.Target.NodeType == edge.Target.NodeType)
                     .Where(e => e.Circuit.ID.CircuitNumber.Last().Equals(edge.Circuit.ID.CircuitNumber.Last()))
                     .OrderByDescending(e => e.Target.Loads.Count)
                     .ToList();
@@ -1315,7 +1317,7 @@ namespace TianHua.Electrical.PDS.Engine
                     o.ID.SourcePanelID.Add(distBox.Loads[0].ID.LoadID);
                 });
                 var newEdge = ThPDSGraphService.CreateEdge(distBox, load, new List<string>(), DistBoxKey, true);
-                if (EdgeContains(newEdge))
+                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                 {
                     return;
                 }
@@ -1333,7 +1335,7 @@ namespace TianHua.Electrical.PDS.Engine
                     o.ID.SourcePanelID.Add(sourcePanelId);
                 });
                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, load, new List<string>(), DistBoxKey);
-                if (EdgeContains(newEdge))
+                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
                 {
                     return;
                 }
@@ -1394,10 +1396,6 @@ namespace TianHua.Electrical.PDS.Engine
             return results;
         }
 
-        private bool EdgeContains(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge)
-        {
-            return PDSGraph.Graph.ContainsEdge(edge)
-                || PDSGraph.Graph.ContainsEdge(new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(edge.Target, edge.Source));
-        }
+
     }
 }
