@@ -49,11 +49,6 @@ namespace TianHua.Electrical.PDS.Model
         public ThPDSID ID { get; set; }
 
         /// <summary>
-        /// 位置信息
-        /// </summary>
-        public ThPDSLocation Location { get; set; }
-
-        /// <summary>
         /// 回路是否利用桥架
         /// </summary>
         public bool ViaCableTray { get; set; }

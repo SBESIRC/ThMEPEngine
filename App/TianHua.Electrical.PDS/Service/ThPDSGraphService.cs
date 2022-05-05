@@ -80,6 +80,7 @@ namespace TianHua.Electrical.PDS.Service
             if (loads.Count == 0)
             {
                 loads.Add(new ThPDSLoad());
+                loads[0].SetLocation(new ThPDSLocation());
             }
 
             node.Loads = loads;

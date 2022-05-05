@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model
@@ -340,7 +341,7 @@ namespace TianHua.Electrical.PDS.Model
             DemandFactor = 1.0;
             PowerFactor = 0.85;
             FireLoadWithNull = ThPDSFireLoad.Unknown;
-            Location = new ThPDSLocation();
+            LocationList = new List<ThPDSLocation> ();
             OnLightingCableTray = false;
         }
 
@@ -433,7 +434,18 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 位置信息
         /// </summary>
-        public ThPDSLocation Location { get; set; }
+        public ThPDSLocation Location
+        {
+            get
+            {
+                return LocationList[0];
+            }
+        }
+
+        /// <summary>
+        /// 位置信息
+        /// </summary>
+        private List<ThPDSLocation> LocationList { get; set; }
 
         /// <summary>
         /// 是否变频
@@ -491,7 +503,7 @@ namespace TianHua.Electrical.PDS.Model
 
         public void SetFireLoad(bool fireLoad)
         {
-            if(fireLoad)
+            if (fireLoad)
             {
                 FireLoadWithNull = ThPDSFireLoad.FireLoad;
             }
@@ -500,5 +512,21 @@ namespace TianHua.Electrical.PDS.Model
                 FireLoadWithNull = ThPDSFireLoad.NonFireLoad;
             }
         }
+
+        public void SetLocation(ThPDSLocation Location)
+        {
+            if (LocationList == null)
+            {
+                LocationList = new List<ThPDSLocation>();
+            }
+            LocationList.Add(Location);
+        }
+
+        public List<ThPDSLocation> GetLocationList()
+        {
+            return LocationList;
+        }
+
+
     }
 }

@@ -171,6 +171,10 @@ namespace TianHua.Electrical.PDS.Engine
                             && DescriptionCheck(vertex, node) && PowerCheck(vertex, node) && TypeCheck(vertex, node))
                         {
                             originalNode = vertex;
+                            if (!LocationEquals(node.Loads[0].Location, originalNode.Loads[0].Location))
+                            {
+                                originalNode.Loads[0].SetLocation(node.Loads[0].Location);
+                            }
                             return true;
                         }
                     }
@@ -255,6 +259,20 @@ namespace TianHua.Electrical.PDS.Engine
             return vertex.Loads[0].LoadTypeCat_1 == node.Loads[0].LoadTypeCat_1
                 && vertex.Loads[0].LoadTypeCat_2 == node.Loads[0].LoadTypeCat_2
                 && vertex.Loads[0].LoadTypeCat_3 == node.Loads[0].LoadTypeCat_3;
+        }
+
+        /// <summary>
+        /// 位置信息校核
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        private bool LocationEquals(ThPDSLocation first, ThPDSLocation second)
+        {
+            return first.ReferenceDWG.Equals(second.ReferenceDWG)
+                && first.FloorNumber.Equals(second.FloorNumber)
+                && first.RoomType.Equals(second.RoomType)
+                && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.StoreyBasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.StoreyBasePoint)) < 1.0
+                && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.BasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.BasePoint)) < 1.0;
         }
     }
 }

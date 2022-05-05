@@ -1390,6 +1390,10 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 o.Loads.ForEach(e =>
                 {
+                    if(e.GetLocationList().Count == 0)
+                    {
+                        e.SetLocation(new ThPDSLocation());
+                    }
                     e.Location.FloorNumber = floorNumber;
                     e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
                     e.Location.ReferenceDWG = database.OriginalFileName.Split("\\".ToCharArray()).Last();

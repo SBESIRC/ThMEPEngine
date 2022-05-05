@@ -30,11 +30,11 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                Location = new ThPDSLocation
-                {
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
-                }
             };
+            thPDSDistBox.SetLocation(new ThPDSLocation
+            {
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+            });
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
             foreach (var str in marks)
             {
@@ -75,13 +75,13 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = loadData.Phase,
                 DemandFactor = loadData.DemandFactor,
                 PowerFactor = loadData.PowerFactor,
-                Location = new ThPDSLocation
-                {
-                    ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
-                },
                 FrequencyConversion = frequencyConversion,
             };
+            thPDSLoad.SetLocation(new ThPDSLocation
+            {
+                ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
+            });
 
             if (loadData.FireLoad == ThPDSFireLoad.FireLoad)
             {
@@ -185,14 +185,14 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                Location = new ThPDSLocation
-                {
-                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
-                },
                 FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
             };
+            thPDSLoad.SetLocation(new ThPDSLocation
+            {
+                ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+            });
 
             if (distBoxData.FireLoad == ThPDSFireLoad.FireLoad)
             {
