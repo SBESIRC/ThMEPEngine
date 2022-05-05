@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.UI.ViewModels;
@@ -14,6 +15,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {
+        public string CentralizedPowerContent => ThPDSComponentContentExtension.CentralizedPowerContent();
         public ThPDSConductorUsageModel[] ConductorUsages => _ConductorUsages.Skip(1).ToArray();
         private ThPDSConductorUsageModel[] _ConductorUsages { get; } = new ConductorUse[]
         {
@@ -45,7 +47,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != DefaultLengthOfMunicipalPowerLine)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MunicipalPowerCircuitDefaultLength = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -58,7 +60,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != CurrentOfTrunkDistribution)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -71,7 +73,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != DefaultFeeder)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DefaultFeeder = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -83,7 +85,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != ElseFeeder)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.OtherFeeder = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -96,7 +98,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != DefaultLengthOfCircuitToTheFirstLevelDistributionBox)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SecondaryDistributionBoxDefaultLength = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -109,7 +111,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != LoopSettingCurrent)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.LoopSettingCurrent = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -122,7 +124,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != DefaultLengthOfSubsequentLines)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.SubsequentDefaultLength = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -160,7 +162,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 if (value != CalculateCurrentMagnification)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.CalculateCurrentMagnification = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
@@ -364,39 +366,39 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-        public FireEmergencyLightingModel Enum1
+        public FireEmergencyLightingModel FireEmergencyLightingModel
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingModel;
             set
             {
-                if (value != Enum1)
+                if (value != FireEmergencyLightingModel)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingModel = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
-        public FireEmergencyLightingType Enum2
+        public FireEmergencyLightingType FireEmergencyLightingType
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingType;
             set
             {
-                if (value != Enum2)
+                if (value != FireEmergencyLightingType)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.fireEmergencyLightingType = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }
-        public CircuitSystem Enum3
+        public CircuitSystem CircuitSystem
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.circuitSystem;
             set
             {
-                if (value != Enum3)
+                if (value != CircuitSystem)
                 {
                     PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.circuitSystem = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(null);
                 }
             }
         }

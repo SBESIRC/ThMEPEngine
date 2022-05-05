@@ -488,6 +488,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             yield return path;
                         }
                         {
+                            leftTemplates.FirstOrDefault(x => x.Tag as string == "A型应急照明集中电源")?.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = Project.PDSProjectVM.Instance.GlobalParameterModel, Path = new PropertyPath(nameof(Project.PDSProjectVM.Instance.GlobalParameterModel.CentralizedPowerContent)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                             {
                                 var circuitNumbers = Service.ThPDSCircuitNumberSeacher.Seach(vertice, graph);
                                 var str = string.Join(",", circuitNumbers);

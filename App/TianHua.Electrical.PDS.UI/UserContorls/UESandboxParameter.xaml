@@ -278,10 +278,10 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>消防应急照明与疏散指示系统采用</Label>
-                                <ComboBox ItemsSource="{Binding Enum1,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum1}"></ComboBox>
-                                <ComboBox ItemsSource="{Binding Enum2,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum2}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding FireEmergencyLightingModel,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireEmergencyLightingModel}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding FireEmergencyLightingType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireEmergencyLightingType}"></ComboBox>
                                 <Label>供电，线路采用</Label>
-                                <ComboBox ItemsSource="{Binding Enum3,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding Enum3}"></ComboBox>
+                                <ComboBox ItemsSource="{Binding CircuitSystem,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding CircuitSystem}"></ComboBox>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

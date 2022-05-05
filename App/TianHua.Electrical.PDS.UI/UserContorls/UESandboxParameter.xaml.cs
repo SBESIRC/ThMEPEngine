@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public UESandboxParameter()
         {
             InitializeComponent();
-            DataContext = new ThPDSUESandboxParameterModel();
+            DataContext = Project.PDSProjectVM.Instance.GlobalParameterModel;
         }
         private void btnImportSetting(object sender, RoutedEventArgs e)
         {
