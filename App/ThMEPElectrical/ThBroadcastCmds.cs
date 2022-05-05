@@ -83,7 +83,8 @@ namespace ThMEPElectrical
                 {
                     var plFrame = plInfo.Key;
                     //删除原有构建
-                    plFrame.ClearBroadCast(originTransformer);
+                    var otherFrames = plFrame.GetInnerFrames(originTransformer);
+                    plFrame.ClearBroadCast(originTransformer, otherFrames);
                     plFrame.ClearBlindArea(originTransformer);
                     plFrame.ClearPipeLines(originTransformer);
 

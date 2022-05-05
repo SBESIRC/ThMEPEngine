@@ -45,6 +45,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                         ThDimModel thDim = new ThDimModel();
                         thDim.StrText = text.TextString;
                         thDim.Position = text.Position;
+                        thDim.CentralPoint = text.GeometricExtents.CenterPoint();
                         results.Add(thDim);
                     }
                     else if (IsTianZhengElement(entity))
@@ -57,6 +58,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                             ThDimModel thDim = new ThDimModel();
                             thDim.StrText = ent.TextString;
                             thDim.Position = ent.Position;
+                            thDim.CentralPoint = ent.GeometricExtents.CenterPoint();
                             results.Add(thDim);
                         }
                     }
@@ -104,8 +106,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public bool IsLayer(string layer)
         {
-            return true;
-            if (layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS"))
+            var cond_a = layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-DIMS");
+            var cond_b = layer.ToUpper().Contains("W-") && layer.ToUpper().Contains("-NOTE");
+            if (cond_a || cond_b)
             {
                 return true;
             }

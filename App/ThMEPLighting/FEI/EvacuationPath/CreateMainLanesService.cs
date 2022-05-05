@@ -42,6 +42,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         {
             List<Line> preLanes = preLines;
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
+            int thisNum = startNum;
             for (int i = startNum; i < lanes.Count; i++)
             {
                 bool avoidFrame = true;
@@ -83,7 +84,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                                     var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
                                     if (ajustPt != null)
                                     {
-                                        resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes, Priority.secondLevel));
+                                        resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, thisNum, preLanes, Priority.secondLevel));
                                     }
                                 }
                             }
@@ -99,6 +100,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                             resLines.Add(extendLine);
                             spt = intersectPts[0];
                         }
+                        thisNum = i;
                         preLanes = lanes[i];
                         avoidFrame = false;
                         break;

@@ -23,7 +23,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
             //将主车道上的广播连线
             var mainBlockLines = ConnectBroadcastsToLine(firstBroadcasts);
-
+            
             //连接主车道（最不利路劲长度最短）
             var connectPolys = ConnectMainParkingLines(holeInfo, mainBlockLines, otherParkingBroadcast);
 

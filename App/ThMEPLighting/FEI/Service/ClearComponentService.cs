@@ -79,6 +79,8 @@ namespace ThMEPLighting.FEI.Service
                 };
                 var filterlist = OpFilter.Bulid(o =>
                 o.Dxf((int)DxfCode.LayerName) == ThMEPLightingCommon.EmgLightLayerName &
+                (o.Dxf((int)DxfCode.BlockName) == ThMEPLightingCommon.ExitEBlockName | 
+                o.Dxf((int)DxfCode.BlockName) == ThMEPLightingCommon.ExitSBlockName) &
                 o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
                 var blocks = new List<BlockReference>();
                 var allBlocks = Active.Editor.SelectAll(filterlist);

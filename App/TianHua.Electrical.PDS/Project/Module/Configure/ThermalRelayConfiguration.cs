@@ -16,6 +16,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<ThermalRelayConfigurationItem> thermalRelayInfos = new List<ThermalRelayConfigurationItem>();
     }
+
+    [Serializable]
     public class ThermalRelayConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>

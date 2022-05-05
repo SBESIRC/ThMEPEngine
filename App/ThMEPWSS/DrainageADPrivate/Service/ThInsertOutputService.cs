@@ -85,6 +85,22 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             }
         }
 
-
+        public static void InsertLine(List<Line> outputLine, string layer)
+        {
+            if (outputLine == null || outputLine.Count() == 0)
+            {
+                return;
+            }
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                for (int i = 0; i < outputLine.Count(); i++)
+                {
+                    var linkLine = outputLine[i];
+                    linkLine.Layer = layer;
+                    linkLine.Color = Color.FromColorIndex(ColorMethod.ByLayer, (short)ColorIndex.BYLAYER);
+                    acadDatabase.ModelSpace.Add(linkLine);
+                }
+            }
+        }
     }
 }

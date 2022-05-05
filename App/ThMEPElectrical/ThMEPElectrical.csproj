@@ -147,12 +147,11 @@
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorWireRecognitionEngine.cs" />
-    <Compile Include="EarthingGrid\Engine\ThMainBuildingHatchExtractionVisitor.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\ColumnGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\DataProcess.cs" />
-    <Compile Include="EarthingGrid\Generator\Connect\DownConductor.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\EarthGrid.cs" />
     <Compile Include="EarthingGrid\Generator\Connect\GridGenerator.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\PostProcess.cs" />
     <Compile Include="EarthingGrid\Generator\Data\ClassData.cs" />
     <Compile Include="EarthingGrid\Generator\Data\LayerDealer.cs" />
     <Compile Include="EarthingGrid\Generator\Data\PreProcess.cs" />

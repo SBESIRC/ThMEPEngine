@@ -16,9 +16,14 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
         double startX = 0;
         double startY = 0;
         double step = 400;
-        public BFSPathPlaner(double _step)
+        List<Polyline> holes = new List<Polyline>();
+        public BFSPathPlaner(double _step, List<Polyline> _holes = null)
         {
             step = _step;
+            if (holes != null)
+            {
+                holes = _holes;
+            }
         }
 
         /// <summary>
@@ -136,13 +141,16 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
                 //遍历
                 foreach (var aNode in adjNodes)
                 {
-                    aNode.parent = node;
-                    q.Enqueue(aNode);
-                    nodes[aNode.X][aNode.Y] = null;
-                    var line = IsEndNode(endLines, aNode.point);
-                    if (line != null)
+                    if (holes == null || !holes.Any(x=>x.Contains(aNode.point)))
                     {
-                        return line;
+                        aNode.parent = node;
+                        q.Enqueue(aNode);
+                        nodes[aNode.X][aNode.Y] = null;
+                        var line = IsEndNode(endLines, aNode.point);
+                        if (line != null)
+                        {
+                            return line;
+                        }
                     }
                 }
             }

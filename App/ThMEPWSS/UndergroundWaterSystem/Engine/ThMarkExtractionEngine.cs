@@ -21,7 +21,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
 
     public class ThMarkExtractionEngine
     {
-        public List<ThMarkModel> GetMarkListOptimized(Point3dCollection pts = null)
+        public List<ThMarkModel> GetMarkListOptimized(Point3dCollection pts, Point3d startPoint,ref string startinfo)
         {
             using (var adb = AcadDatabase.Active())
             {
@@ -58,13 +58,19 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     if (IsTianZhengElement(entity))
                     {
                         var explodeResult = GetAllEntitiesByExplodingTianZhengElementThoroughly(entity);
+                        DBText ts = new DBText();
                         foreach (var obj in explodeResult)
                         {
                             var ent = obj as Entity;
-                            if (ent is DBText t) textList.Add(t);
+                            if (ent is DBText t)
+                            {
+                                if (ts.TextString.Length == 0) ts = t;
+                                else ts.TextString += t.TextString;
+                            }
                             else if (ent is Line l) textLines.Add(new Line(l.StartPoint, l.EndPoint));
                             else if (ent is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => new Line(e.StartPoint, e.EndPoint)));
                         }
+                        if (ts.TextString.Length > 0) textList.Add(ts);
                     }
                     else
                     {
@@ -74,7 +80,17 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                     }
                 }
                 results.AddRange(CombMarkList(textList, textLines));
-                results = results.Where(e => !TestContainsChineseCharacter(e.MarkText)).ToList();
+                startinfo = "";
+                foreach (var res in results)
+                {
+                    if (res.Poistion.DistanceTo(startPoint) < 10)
+                    {
+                        startinfo = res.MarkText;
+                        break;
+                    }
+                }
+                //results = results.Where(e => !TestContainsChineseCharacter(e.MarkText)).ToList();
+                //results = results.Where(e => !e.MarkText.Contains("DN")).ToList();
                 return results;
             }
         }

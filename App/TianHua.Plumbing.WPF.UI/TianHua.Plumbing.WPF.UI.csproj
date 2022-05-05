@@ -147,6 +147,9 @@
     <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\DrainageADPrivateUI.xaml.cs">
+      <DependentUpon>DrainageADPrivateUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\WaterSupplySystem.xaml.cs">
       <DependentUpon>WaterSupplySystem.xaml</DependentUpon>
     </Compile>
@@ -325,6 +328,10 @@
     <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\DrainageADPrivateUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\WaterSupplySystem.xaml">
       <SubType>Designer</SubType>

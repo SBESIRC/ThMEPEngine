@@ -34,10 +34,10 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Category("配电箱参数")]
         public double InstallCapacity
         {
-            get => _node.Details.LowPower;
+            get => _node.Details.HighPower;
             set
             {
-                _node.Details.LowPower = value;
+                _node.Details.HighPower = value;
                 OnPropertyChanged(nameof(InstallCapacity));
             }
         }

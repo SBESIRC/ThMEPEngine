@@ -61,7 +61,7 @@ namespace TianHua.Electrical.PDS.Service
             new ThPDSCircuitConfigItem
             {
                 CircuitType = ThPDSCircuitType.PowerEquipment,
-                TextKey = "WM",
+                TextKey = "WM*-*",
                 KV = 0.38,
                 Phase = ThPDSPhase.三相,
                 DemandFactor = 0.8,

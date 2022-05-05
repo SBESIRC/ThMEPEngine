@@ -508,7 +508,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 this.HangingAiringMachineNames ??= new HashSet<string>();
             }
             {
-                foreach (var br in adb.ModelSpace.OfType<BlockReference>().Where(x => x.BlockTableRecord.IsValid && x.GetEffectiveName() is THESAURUSCONFRONTATION))
+                foreach (var br in adb.ModelSpace.OfType<BlockReference>().Where(x => x.BlockTableRecord.IsValid && x.GetEffectiveName() is THESAURUSCONFRONTATION or PARATHYROIDECTOMY))
                 {
                     var c = EntityTool.GetCircles(br).Where(x => x.Visible).Select(x => x.ToGCircle()).Where(x => x.Radius > THESAURUSINCOMPLETE).FirstOrDefault();
                     if (c.IsValid)
@@ -8695,6 +8695,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const double ALSOMONOSIPHONIC = 3e4;
         public const string CONSTRUCTIONIST = "YIL";
         public const string BROKENHEARTEDNESS = "重";
+        public const string PARATHYROIDECTOMY = "地漏-AI";
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;

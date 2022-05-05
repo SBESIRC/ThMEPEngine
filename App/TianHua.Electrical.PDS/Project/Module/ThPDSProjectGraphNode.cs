@@ -5,6 +5,7 @@ using TianHua.Electrical.PDS.Project.Module.Circuit;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public class ThPDSProjectGraphNode : IEquatable<ThPDSProjectGraphNode>, ITagged<ThPDSProjectGraphNodeTag>
     {
         public ThPDSLoad Load { get; set; }
@@ -14,7 +15,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public ThPDSProjectGraphNode()
         {
             Load = new ThPDSLoad();
-            Type = PDSNodeType.None;
+            Type = PDSNodeType.Empty;
             Details = new NodeDetails();
         }
 

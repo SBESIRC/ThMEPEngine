@@ -137,6 +137,11 @@ namespace TianHua.Electrical.PDS.Service
                 load.Phase = config.Phase;
                 load.DemandFactor = config.DemandFactor;
                 load.PowerFactor = config.PowerFactor;
+
+                if(load.GetFireLoad() == ThPDSFireLoad.Unknown)
+                {
+                    load.SetFireLoad(config.FireLoad);
+                }
             }
         }
 

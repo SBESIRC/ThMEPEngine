@@ -74,7 +74,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             foreach(var buildingWithWall in buildingWithWalls)
             {
                 var curOutline = buildingWithWall.Key;
-
+                if(curOutline.GetPoint3dAt(0).DistanceTo(curOutline.GetPoint3dAt(curOutline.NumberOfVertices - 1)) < 1000)
+                {
+                    curOutline.Closed = true;
+                }
                 var shell = curOutline.Buffer(outBufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
                 var holes = curOutline.Buffer(-inBufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());

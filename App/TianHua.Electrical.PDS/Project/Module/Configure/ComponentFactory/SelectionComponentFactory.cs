@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
     {
         private ThPDSProjectGraphEdge _edge;
         private double _calculateCurrent;//计算电流
+        private double _calculateCurrentMagnification;//计算电流
         private double _cascadeCurrent;//获取Target级联电流
         private double _maxCalculateCurrent;//获取Target级联电流
         private string _polesNum;//级数
@@ -23,11 +24,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private string _characteristics;//瞬时脱扣器类型
         private List<string> _tripDevice;//脱扣器类型
         private bool _isLeakageProtection;//是否是生活水泵
+        private bool _IsEmptyLoad;//是否是空负载
         public SelectionComponentFactory(ThPDSProjectGraphEdge edge)
         {
             this._edge = edge;
+            _IsEmptyLoad = edge.Target.Type==PDSNodeType.Empty;
             _isLeakageProtection = _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump;
             _calculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            _calculateCurrentMagnification = edge.Target.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
             _cascadeCurrent = edge.Target.Details.CascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -52,6 +56,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             _isLeakageProtection = node.Details.MiniBusbars[miniBusbar].Any(o => o.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump);
             _calculateCurrent = miniBusbar.CalculateCurrent;//计算电流
+            _calculateCurrentMagnification = miniBusbar.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -68,6 +73,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public SelectionComponentFactory(ThPDSProjectGraphNode node, double cascadeCurrent)
         {
             _calculateCurrent = node.Load.CalculateCurrent;//计算电流
+            _calculateCurrentMagnification = node.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
             _cascadeCurrent = cascadeCurrent;//额定级联电流
             _maxCalculateCurrent = Math.Max(_calculateCurrent, _cascadeCurrent);
             _polesNum = "3P";//极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
@@ -99,11 +105,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Breaker CreatBreaker()
         {
-            return new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
+            var breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _polesNum, _characteristics, _isLeakageProtection, false);
+            var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            breaker.SetRatedCurrent(ratedCurrent);
+            return breaker;
         }
 
         public override Conductor CreatConductor()
         {
+            if(_IsEmptyLoad)
+                return null;
             return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
         }
 
@@ -114,7 +125,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Contactor CreatContactor()
         {
-            return new Contactor(_calculateCurrent, _polesNum);
+            var contactor = new Contactor(_calculateCurrent, _polesNum);
+            var ratedCurrent = contactor.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            contactor.SetRatedCurrent(ratedCurrent);
+            return contactor;
         }
 
         public override CPS CreatCPS()
@@ -140,32 +154,50 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override IsolatingSwitch CreatIsolatingSwitch()
         {
-            return new IsolatingSwitch(_calculateCurrent, _specialPolesNum);
+            var isolatingSwitch =  new IsolatingSwitch(_calculateCurrent, _specialPolesNum);
+            var ratedCurrent = isolatingSwitch.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            isolatingSwitch.SetRatedCurrent(ratedCurrent);
+            return isolatingSwitch;
         }
 
         public override AutomaticTransferSwitch CreatAutomaticTransferSwitch()
         {
-            return new AutomaticTransferSwitch(_calculateCurrent, _specialPolesNum);
+            var ATSE = new AutomaticTransferSwitch(_calculateCurrent, _specialPolesNum);
+            var ratedCurrent = ATSE.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            ATSE.SetRatedCurrent(ratedCurrent);
+            return ATSE;
         }
 
         public override ManualTransferSwitch CreatManualTransferSwitch()
         {
-            return new ManualTransferSwitch(_calculateCurrent, _specialPolesNum);
+            var MTSE = new ManualTransferSwitch(_calculateCurrent, _specialPolesNum);
+            var ratedCurrent = MTSE.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            MTSE.SetRatedCurrent(ratedCurrent);
+            return MTSE;
         }
 
         public override Breaker CreatResidualCurrentBreaker()
         {
-            return new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _isLeakageProtection, true);
+            var breaker = new Breaker(_maxCalculateCurrent, _tripDevice, _specialPolesNum, _characteristics, _isLeakageProtection, true);
+            var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            breaker.SetRatedCurrent(ratedCurrent);
+            return breaker;
         }
 
         public override ThermalRelay CreatThermalRelay()
         {
-            return new ThermalRelay(_calculateCurrent);
+            var thermalRelay = new ThermalRelay(_calculateCurrent);
+            var ratedCurrent = thermalRelay.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
+            thermalRelay.SetRatedCurrent(ratedCurrent);
+            return thermalRelay;
         }
 
         public override OUVP CreatOUVP()
         {
-            return new OUVP(_calculateCurrent, _ouvpPolesNum);
+            var ouvp = new OUVP(_calculateCurrent, _ouvpPolesNum);
+            var ratedCurrent = ouvp.GetRatedCurrents().First(o => o > _calculateCurrentMagnification);
+            ouvp.SetRatedCurrent(ratedCurrent);
+            return ouvp;
         }
     }
 }

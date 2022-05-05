@@ -37,13 +37,14 @@ namespace ThMEPElectrical.EarthingGrid.Data
         }
         protected override void GetElements(Database database, Point3dCollection collection)
         {
+            RemoveLayer(collection, "E-GRND-WIRE");
             var beams = ExtractBeams(database, collection);
             var columns = ExtractColumns(database, collection);
             var shearWalls = ExtractShearwalls(database, collection);
             Conductors = ExtractDownConductors(database, collection);
             ConductorWires = ExtractDownConductorWires(database, collection);
-            ArchitectOutlines = ExtractArchitectureOutlines(database, collection);
-            MainBuildings = ExtractMainBuildingsA(database, collection);
+            ArchitectOutlines = ExtractLayer(database, collection, "AI-AREA-EXT");
+            MainBuildings = ExtractLayer(database, collection, "AI-AREA-INT");
             BeamCenterLinePts = GetLinearBeamPts(beams);
             Beams = beams.Select(o => o.Outline).ToCollection();
             Columns = columns.Select(o => o.Outline).ToCollection();
@@ -92,13 +93,13 @@ namespace ThMEPElectrical.EarthingGrid.Data
             extractionEngine.ExtractFromEditor(pts);            
             return extractionEngine.Results.Select(o=>o.Geometry).ToCollection();
         }
-        private DBObjectCollection ExtractArchitectureOutlines(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractLayer(Database database, Point3dCollection pts, string layerName)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Use(database))
             {
                 var outlines = acadDb.ModelSpace
                     .OfType<Polyline>()
-                    .Where(p => p.Layer.ToUpper() == "AI-AREA-EXT") //AI-建筑轮廓线
+                    .Where(p => p.Layer.ToUpper() == layerName) 
                     .Select(o => o.Clone() as Polyline)
                     .ToCollection();
                 var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
@@ -109,63 +110,6 @@ namespace ThMEPElectrical.EarthingGrid.Data
                 transformer.Reset(results);
                 return results;
             }
-        }
-        private DBObjectCollection ExtractMainBuildingsA(Database database, Point3dCollection pts)
-        {
-            using (var acadDb = Linq2Acad.AcadDatabase.Use(database))
-            {
-                var outlines = acadDb.ModelSpace
-                    .OfType<Polyline>()
-                    .Where(p => p.Layer.ToUpper() == "AI-AREA-INT") 
-                    .Select(o => o.Clone() as Polyline)
-                    .ToCollection();
-                var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
-                transformer.Transform(outlines);
-                var newPts = transformer.Transform(pts);
-                var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(outlines);
-                var results = spatialIndex.SelectCrossingPolygon(newPts);
-                transformer.Reset(results);
-                return results;
-            }
-        }
-        private DBObjectCollection ExtractMainBuildings(Database database,Point3dCollection pts)
-        {
-            // 主楼填充数据
-            var mainBuildingVisitor = new ThMainBuildingHatchExtractionVisitor()
-            {
-                LayerFilter = ThMainBuildingLayerManager.HatchXrefLayers(database),
-            };
-            var spatialExtractor = new ThSpatialElementExtractor();
-            spatialExtractor.Accept(mainBuildingVisitor);
-            spatialExtractor.Extract(database);
-            mainBuildingVisitor.Results
-                .ForEach(o =>
-                {
-                    if (o.Geometry is Polyline pl)
-                        pl.Closed = true;
-                }
-               );
-            var mainBuildings = mainBuildingVisitor.Results.Select(o => o.Geometry).ToCollection();
-            var newMainBuildings = Clean(mainBuildings);
-            mainBuildings = mainBuildings.Difference(newMainBuildings);
-            mainBuildings.OfType<Curve>().ForEach(c => c.Dispose());
-
-            var transformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
-            transformer.Transform(newMainBuildings);
-            var newPts = transformer.Transform(pts);
-            var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(newMainBuildings);
-            var results = spatialIndex.SelectCrossingPolygon(newPts);
-            transformer.Reset(results);
-            newMainBuildings = newMainBuildings.Difference(results);
-            newMainBuildings.OfType<Curve>().ForEach(c => c.Dispose());
-            return results;
-        }
-        private DBObjectCollection Clean(DBObjectCollection objs)
-        {
-            var simplifier = new ThPolygonalElementSimplifier();
-            var results = simplifier.Simplify(objs);
-            results = simplifier.Normalize(results);
-            return results;
         }
         private List<Tuple<Point3d,Point3d>> GetLinearBeamPts(List<ThIfcBuildingElement> beams)
         {
@@ -174,5 +118,27 @@ namespace ThMEPElectrical.EarthingGrid.Data
                 .Select(o => Tuple.Create(o.StartPoint,o.EndPoint))
                 .ToList();
         }
+        private void RemoveLayer(Point3dCollection pts, string layerName)
+        {
+            using (var acdb = Linq2Acad.AcadDatabase.Active())
+            {
+                var outlines = acdb.ModelSpace
+                    .OfType<Line>()
+                    .Where(p => p.Layer.ToUpper() == layerName)
+                    //.Select(o => o.Clone() as Polyline)
+                    .ToCollection();
+                var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(outlines);
+                var results = spatialIndex.SelectCrossingPolygon(pts);
+                foreach(var result in results)
+                {
+                    if(result is Line l)
+                    {
+                        var entity = acdb.Element<Entity>(l.Id, true);
+                        entity.Erase();
+                    }
+                }
+            }
+        }
+
     }
 }

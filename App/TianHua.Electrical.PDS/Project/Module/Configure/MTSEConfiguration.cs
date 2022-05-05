@@ -16,6 +16,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<ATSEComponentInfo> ATSEComponentInfos = new List<ATSEComponentInfo>();
     }
+
+    [Serializable]
     public class ATSEComponentInfo
     {
         /// <summary>

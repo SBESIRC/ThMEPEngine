@@ -266,13 +266,13 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
                     List<Polyline> polys = new List<Polyline>(intersectPolys.Select(x => x.Key));
                     polys.Add(firPoly);
-                    var longestLine = GeUtils.CalLongestLineByPoly(polys);
 
                     Circle circle = new Circle(connectPt, Vector3d.ZAxis, distance);
                     Point3dCollection pts = new Point3dCollection();
                     circle.IntersectWith(firPoly, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                     if (pts.Count > 0)
                     {
+                        var longestLine = GeUtils.CalIntersectPtPoly(polys, pts[0]);
                         firPoly = CreateNewConnectLine(firPoly, longestLine[firPoly], pts[0], connectPt, false);
                     }
                     foreach (var polyInfo in intersectPolys)
@@ -281,6 +281,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                         circle.IntersectWith(polyInfo.Key, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                         if (pts.Count > 0)
                         {
+                            var longestLine = GeUtils.CalIntersectPtPoly(polys, pts[0]);
                             var secPoly = CreateNewConnectLine(polyInfo.Key, longestLine[polyInfo.Key], pts[0], connectPt, false);
                             polylines.Add(secPoly);
                             polylines.Remove(polyInfo.Key);

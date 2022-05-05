@@ -25,7 +25,11 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         public ThPDSInfoCompare()
         {
             InitializeComponent();
+        }
+        public ThPDSInfoCompare Init()
+        {
             Service.Init(this);
+            return this;
         }
     }
 }

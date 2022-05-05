@@ -8,6 +8,7 @@ using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
+    [Serializable]
     public class Conductor : PDSBaseComponent
     {
         /// <summary>
@@ -34,6 +35,25 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.ComponentType = ComponentType.Conductor;
             this.IsMotor = true;
             this.Phase = phase;
+            if (!ViaConduit && !ViaCableTray)
+            {
+                ViaCableTray = true;
+            }
+            //3x2.5+E2.5
+            ChooseMaterial(loadType, FireLoad, calculateCurrent);
+            ChooseCrossSectionalArea(conductorConfig);
+            ChooseLaying(FloorNumber, circuitType, phase, ViaConduit, ViaCableTray, FireLoad);
+        }
+
+        /// <summary>
+        /// 导体
+        /// </summary>
+        public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber)
+        {
+            this.ComponentType = ComponentType.Conductor;
+            this.Phase = phase;
+            this.IsSpecifyMaterialStructure = true;
+            this.SpecifyMaterialStructure = materialStructure;
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -496,7 +516,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                string val = $"{(IsBAControl ? "" : ConductorUse.Content+"-"+ConductorInfo+"-")}{LayingTyle}";
+                string val = $"{(IsBAControl ? "" : (IsSpecifyMaterialStructure ? ConductorUse.ConductorMaterial + "-" + SpecifyMaterialStructure : ConductorUse.Content)+"-"+ConductorInfo+"-")}{LayingTyle}";
                 if (NumberOfPhaseWire != 1)
                 {
                     val = $"{NumberOfPhaseWire}×({val})";
@@ -640,7 +660,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         {
             get
             {
-                var ViaConduitStr = ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial.ToString() + PipeDiameter + "-" + Pipelaying;
+                var ViaConduitStr = !IsBAControl && ConductorUse.IsSpecialConductorType ? Pipelaying.ToString() : PipeMaterial.ToString() + PipeDiameter + "-" + Pipelaying;
                 if (ViaCableTray && ViaConduit)
                 {
                     return $"{this.BridgeLaying.ToString()}/ {ViaConduitStr }";
@@ -773,6 +793,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 是否是BA控制
         /// </summary>
         private bool IsBAControl { get; set; } = false;
+        
+        /// <summary>
+        /// 是否指定外护套材质
+        /// </summary>
+        private bool IsSpecifyMaterialStructure { get; set; } = false;
+
+        /// <summary>
+        /// 外护套材质
+        /// </summary>
+        private MaterialStructure SpecifyMaterialStructure;
         #endregion
     }
 }

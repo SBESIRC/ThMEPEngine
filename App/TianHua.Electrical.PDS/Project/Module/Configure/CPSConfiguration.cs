@@ -16,6 +16,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<CPSComponentInfo> CPSComponentInfos = new List<CPSComponentInfo>();
     }
+
+    [Serializable]
     public class CPSComponentInfo
     {
         /// <summary>

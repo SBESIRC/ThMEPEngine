@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Project.Module.Configure
 {
@@ -12,6 +13,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<IsolatorConfigurationItem> isolatorInfos = new List<IsolatorConfigurationItem>();
     }
+
+    [Serializable]
     public class IsolatorConfigurationItem : PDSBaseComponentConfigurationItem
     {
         /// <summary>

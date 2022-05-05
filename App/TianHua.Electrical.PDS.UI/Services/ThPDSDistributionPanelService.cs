@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.UI.Models;
@@ -73,18 +74,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
             }
             var selectAllCmd = new RelayCommand(() =>
-            {
-                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                void dfs(ThPDSCircuitGraphTreeModel node)
-                {
-                    node.IsChecked = true;
-                    foreach (var n in node.DataList)
-                    {
-                        dfs(n);
-                    }
-                }
-                dfs(tree);
-            });
+           {
+               if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+               void dfs(ThPDSCircuitGraphTreeModel node)
+               {
+                   node.IsChecked = true;
+                   foreach (var n in node.DataList)
+                   {
+                       dfs(n);
+                   }
+               }
+               dfs(tree);
+           });
             var batchGenCmd = new RelayCommand(() =>
             {
                 UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
@@ -92,15 +93,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                     var vertices = graph.Vertices.ToList();
-                    var checkeddVertices = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
+                    var nodes = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
                     void dfs(ThPDSCircuitGraphTreeModel node)
                     {
-                        if (node.IsChecked == true) checkeddVertices.Add(vertices[node.Id]);
+                        if (node.IsChecked == true)
+                        {
+                            var nd = vertices[node.Id];
+                            if (!nodes.Any(x => new ThPDSDistributionBoxModel(x).ID == new ThPDSDistributionBoxModel(nd).ID))
+                            {
+                                nodes.Add(nd);
+                            }
+                        }
                         foreach (var n in node.DataList) dfs(n);
                     }
                     dfs(tree);
-                    if (checkeddVertices.Count == 0) return;
-                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, checkeddVertices);
+                    if (nodes.Count == 0) return;
+                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, nodes);
                     drawCmd.Execute();
                     AcHelper.Active.Editor.Regen();
                 }
@@ -108,6 +116,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
                 }
+            });
+            Action createBackupCircuit = null;
+            var createBackupCircuitCmd = new RelayCommand(() =>
+            {
+                createBackupCircuit?.Invoke();
             });
             var treeCmenu = new ContextMenu()
             {
@@ -121,6 +134,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         Header = "全部勾选",
                         Command = selectAllCmd,
+                    },
+                      new MenuItem()
+                    {
+                        Header = "创建备用回路",
+                        Command = createBackupCircuitCmd,
                     },
                 },
             };
@@ -157,6 +175,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     });
                 }
             }
+            {
+                var h = "创建备用回路";
+                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                {
+                    treeCMenu.Items.Add(new MenuItem()
+                    {
+                        Header = h,
+                        Command = createBackupCircuitCmd,
+                    });
+                }
+            }
             tv.DataContext = tree;
             Action<DrawingContext> dccbs;
             var cbDict = new Dictionary<Rect, Action>(4096);
@@ -189,12 +218,17 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             Header = "全部勾选",
                             Command = selectAllCmd,
                         });
+                        cm.Items.Add(new MenuItem()
+                        {
+                            Header = "创建备用回路",
+                            Command = createBackupCircuitCmd,
+                        });
                     }
                     else
                     {
                         tv.ContextMenu = treeCMenu;
                     }
-                    var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                    var boxVM = new ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
                 else
@@ -207,53 +241,61 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             void UpdatePropertyGrid(object vm)
             {
                 var pg = panel.propertyGrid;
-                if (vm is Project.Module.Component.ThPDSBreakerModel breaker)
+                if (vm is ThPDSBreakerModel breaker)
                 {
                     if (breaker.ComponentType == ComponentType.CB)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDType", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ResidualCurrent", false);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("RCDType", true);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSBreakerModel>("ResidualCurrent", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDType", true);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ResidualCurrent", true);
                     }
                     if (breaker.ComponentType == ComponentType.组合式RCD)
                     {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", true);
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", true);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<Project.Module.Component.ThPDSBreakerModel>("Appendix", false);
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", false);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSCircuitModel circuit)
+                if (vm is ThPDSCircuitModel circuit)
                 {
                     if (circuit.IsDualPower)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("Power", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("Power", false);
                     }
                     else
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("LowPower", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSCircuitModel>("HighPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("LowPower", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSCircuitModel>("HighPower", false);
+                    }
+                    if (circuit.LoadType == PDSNodeType.Unkown)
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", false);
+                    }
+                    else
+                    {
+                        ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSCircuitModel>("CircuitType", true);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSConductorModel conductor)
+                if (vm is ThPDSConductorModel conductor)
                 {
                     if (conductor.ComponentType == ComponentType.Conductor)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCount", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ControlConductorCrossSectionalArea", false);
                     }
                     else if (conductor.ComponentType == ComponentType.ControlConductor)
                     {
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("NumberOfPhaseWire", false);
-                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<Project.Module.Component.ThPDSConductorModel>("ConductorCrossSectionalArea", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("NumberOfPhaseWire", false);
+                        ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCrossSectionalArea", false);
                     }
                 }
-                if (vm is Project.Module.Component.ThPDSCircuitModel circuitVM)
+                if (vm is ThPDSCircuitModel circuitVM)
                 {
                     pg.SetBinding(UIElement.IsEnabledProperty, new Binding() { Source = circuitVM, Path = new PropertyPath(nameof(circuitVM.CircuitLock)), Converter = new NotConverter() });
                 }
@@ -269,6 +311,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (id < 0) return null;
                 return graph.Vertices.ToList()[id];
             }
+            createBackupCircuit = () =>
+            {
+                var vertice = GetCurrentVertice();
+                if (vertice is null) return;
+                ThPDSProjectGraphService.CreatBackupCircuit(graph, vertice);
+                UpdateCanvas();
+            };
             void UpdateCanvas()
             {
                 canvas.Children.Clear();
@@ -347,7 +396,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         return null;
                     }
                 }
-                var boxVM = new Project.Module.Component.ThPDSDistributionBoxModel(vertice);
+                var boxVM = new ThPDSDistributionBoxModel(vertice);
                 UpdatePropertyGrid(boxVM);
                 {
                     var leftTemplates = new List<Glyphs>();
@@ -439,6 +488,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             yield return path;
                         }
                         {
+                            leftTemplates.FirstOrDefault(x => x.Tag as string == "A型应急照明集中电源")?.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = Project.PDSProjectVM.Instance.GlobalParameterModel, Path = new PropertyPath(nameof(Project.PDSProjectVM.Instance.GlobalParameterModel.CentralizedPowerContent)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
                             {
                                 var circuitNumbers = Service.ThPDSCircuitNumberSeacher.Seach(vertice, graph);
                                 var str = string.Join(",", circuitNumbers);
@@ -1804,6 +1854,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
@@ -1818,6 +1872,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
                                         }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
+                                        }
                                     }
                                 }
                                 {
@@ -1831,6 +1889,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                             var r = new Rect(Canvas.GetLeft(m), Canvas.GetTop(m), w, m.FontRenderingEmSize);
                                             reg(r, vm);
+                                        }
+                                        else
+                                        {
+                                            m.Visibility = Visibility.Collapsed;
                                         }
                                     }
                                 }
@@ -2035,12 +2097,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                 }
                 var circuitIDSortNames = "WPE、WP、WLE、WL、WS、WFEL".Split('、').ToList();
+                IEnumerable<SecondaryCircuit> GetSortedSecondaryCircuits(IEnumerable<SecondaryCircuit> scs)
+                {
+                    return from sc in scs
+                           let scVm = new ThPDSSecondaryCircuitModel(sc)
+                           let id = scVm.CircuitID ?? ""
+                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                           select sc;
+                }
                 IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
                 {
                     return from edge in edges
                            where edge.Source == vertice
-                           let circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge)
-                           let id = circuitVM.CircuitID ?? ""
+                           let id = edge.GetCircuitID()
                            orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
                            select edge;
                 }
@@ -2935,49 +3004,42 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var fs = new Dictionary<ThPDSProjectGraphEdge, Action>();
                     foreach (var kv in vertice.Details.SecondaryCircuits)
                     {
-                        var _sc = kv.Key;
-                        if (visitedSecondaryCircuits.Contains(_sc)) continue;
-                        visitedSecondaryCircuits.Add(_sc);
-                        var scVm = new Project.Module.ThPDSSecondaryCircuitModel(_sc);
-                        scVm.PropertyChanged += (s, e) =>
+                        List<ThPDSProjectGraphEdge> edges;
+                        HashSet<SecondaryCircuit> scs;
                         {
-                            if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
+                            var _sc = kv.Key;
+                            if (visitedSecondaryCircuits.Contains(_sc)) continue;
+                            visitedSecondaryCircuits.Add(_sc);
+                            var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
+                            if (_edges.Count == 0) continue;
+                            scs = new() { _sc };
+                            foreach (var k in vertice.Details.SecondaryCircuits.Keys)
                             {
-                                if (!scVm.ConductorModel.IsCustom)
+                                if (k == _sc) continue;
+                                var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
+                                foreach (var edge in egs)
                                 {
-                                    scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
-                                }
-                            }
-                        };
-                        var _edges = GetSortedEdges(ThPDSProjectGraphService.GetControlCircuit(graph, vertice, _sc)).Except(visitedEdges).ToHashSet();
-                        if (_edges.Count == 0) continue;
-                        var scs = new HashSet<SecondaryCircuit>() { _sc };
-                        foreach (var k in vertice.Details.SecondaryCircuits.Keys)
-                        {
-                            if (k == _sc) continue;
-                            var egs = ThPDSProjectGraphService.GetControlCircuit(graph, vertice, k);
-                            foreach (var edge in egs)
-                            {
-                                if (_edges.Contains(edge))
-                                {
-                                    scs.Add(k);
-                                    foreach (var eg in egs)
+                                    if (_edges.Contains(edge))
                                     {
-                                        _edges.Add(eg);
+                                        scs.Add(k);
+                                        foreach (var eg in egs)
+                                        {
+                                            _edges.Add(eg);
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
+                            foreach (var sc in scs)
+                            {
+                                visitedSecondaryCircuits.Add(sc);
+                            }
+                            foreach (var edge in _edges)
+                            {
+                                visitedEdges.Add(edge);
+                            }
+                            edges = GetSortedEdges(_edges).ToList();
                         }
-                        foreach (var sc in scs)
-                        {
-                            visitedSecondaryCircuits.Add(sc);
-                        }
-                        foreach (var edge in _edges)
-                        {
-                            visitedEdges.Add(edge);
-                        }
-                        var edges = GetSortedEdges(_edges).ToList();
                         fs.Add(edges.First(), () =>
                         {
                             foreach (var edge in edges)
@@ -2993,15 +3055,26 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var dashArrBORDERX2Border2x = (DoubleCollection)cvt1.ConvertFrom("25.4, 12.7, 25.4, 12.7, 1, 12.7 ");
                                 var currentDashArr = new DoubleCollection(new double[] { 12.7, 6.35, 12.7, 6.35, 1, 6.35 }.Select(x => x * .5));
                                 var hasCPS = edges.Any(x => x.Details.CircuitForm.CircuitFormType.GetDescription().Contains("CPS"));
-                                foreach (var sc in scs)
+                                foreach (var sc in GetSortedSecondaryCircuits(scs))
                                 {
+                                    var scVm = new Project.Module.ThPDSSecondaryCircuitModel(sc);
+                                    scVm.PropertyChanged += (s, e) =>
+                                    {
+                                        if (e.PropertyName == nameof(ThPDSSecondaryCircuitModel.CircuitDescription))
+                                        {
+                                            if (!scVm.ConductorModel.IsCustom)
+                                            {
+                                                scVm.ConductorModel.RaisePropertyChanged(nameof(ThPDSConductorModel.Content));
+                                            }
+                                        }
+                                    };
                                     var start = new Point(busStart.X + 205, -dy - 10);
                                     var end = start.OffsetY(40);
                                     busEnd = end;
                                     dy -= end.Y - start.Y;
                                     var pt = new Point(start.X - 205, start.Y);
                                     {
-                                        var h = 38.0 * (_edges.Count - 1);
+                                        var h = 38.0 * (edges.Count - 1);
                                         switch (edges.Last().Details.CircuitForm.CircuitFormType)
                                         {
                                             case CircuitFormOutType.None:

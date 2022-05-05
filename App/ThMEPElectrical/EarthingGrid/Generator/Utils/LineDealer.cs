@@ -237,5 +237,25 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             }
             return tuples;
         }
+
+        public static Polyline LinesToConvexHull(HashSet<Tuple<Point3d, Point3d>> lines)
+        {
+            HashSet<Point3d> pts = new HashSet<Point3d>();
+            foreach(var line in lines)
+            {
+                pts.Add(line.Item1);
+                pts.Add(line.Item2);
+            }
+            var cvpts = Algorithms.GetConvexHull(pts.ToList());
+            var pl = new Polyline();
+            int cnt = 0;
+            foreach (var cvpt in cvpts)
+            {
+                pl.AddVertexAt(cnt, new Point2d(cvpt.X, cvpt.Y), 0, 0, 0);
+                ++cnt;
+            }
+            pl.Closed = true;
+            return pl;
+        }
     }
 }

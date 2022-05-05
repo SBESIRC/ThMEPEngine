@@ -38,7 +38,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 
             RemoveInneriorLines(spatialIndex);
             RemoveExteriorLines(spatialIndex);
-
+            RemoveZeroArea();
             _lineToCenter = lineToCenter;
             _centerToFace = centerToFace;
             _centerGrid = centerGrid;
@@ -74,6 +74,18 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                         continue;
                     }
                     RemoveAPointFromStructure(curCenterPt);
+                }
+            }
+        }
+
+        private void RemoveZeroArea()
+        {
+            foreach (var pt in centerGrid.Keys.ToList())
+            {
+                var pl = LineDealer.Tuples2Polyline(centerToFace[pt].ToList());
+                if (pl.Area < 1000)
+                {
+                    RemoveAPointFromStructure(pt);
                 }
             }
         }

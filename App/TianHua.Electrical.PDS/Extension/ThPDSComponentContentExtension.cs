@@ -1,9 +1,9 @@
 ﻿using System;
 using ThCADExtension;
+using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module.Component;
-using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 
-namespace TianHua.Electrical.PDS.Diagram
+namespace TianHua.Electrical.PDS.Extension
 {
     public static class ThPDSComponentContentExtension
     {
@@ -34,7 +34,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
         public static string Content(this Breaker breaker)
         {
-            switch(breaker.ComponentType)
+            switch (breaker.ComponentType)
             {
                 case ComponentType.CB:
                     {
@@ -60,7 +60,14 @@ namespace TianHua.Electrical.PDS.Diagram
                     }
                 case ComponentType.组合式RCD:
                     {
-                        return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix} {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
+                        if (breaker.Appendix == Project.Module.AppendixType.无)
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
+                        }
+                        else
+                        {
+                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix} {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
+                        }
                     }
                 default:
                     throw new NotSupportedException();
@@ -70,6 +77,11 @@ namespace TianHua.Electrical.PDS.Diagram
         public static string Content(this TransferSwitch transferSwitch)
         {
             return $"{transferSwitch.Model} {transferSwitch.RatedCurrent}A {transferSwitch.PolesNum}";
+        }
+
+        public static string CentralizedPowerContent()
+        {
+            return $"{PDSProject.Instance.projectGlobalConfiguration.fireEmergencyLightingModel}应急照明{PDSProject.Instance.projectGlobalConfiguration.fireEmergencyLightingType}";
         }
     }
 }

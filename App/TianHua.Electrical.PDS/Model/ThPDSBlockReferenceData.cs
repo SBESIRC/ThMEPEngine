@@ -49,6 +49,11 @@ namespace TianHua.Electrical.PDS.Model
         /// 功率因数
         /// </summary>
         public double PowerFactor { get; set; }
+        
+        /// <summary>
+        /// 是否消防
+        /// </summary>
+        public ThPDSFireLoad FireLoad{ get; set; }
 
         public ThPDSBlockReferenceData(ObjectId blockRef)
         {
@@ -65,6 +70,7 @@ namespace TianHua.Electrical.PDS.Model
             Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
             PowerFactor = 0.85;
+            FireLoad = ThPDSFireLoad.Unknown;
         }
 
         public ThPDSBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
@@ -83,6 +89,7 @@ namespace TianHua.Electrical.PDS.Model
             DemandFactor = 1.0;
             PowerFactor = 0.85;
             OwnerSpace2WCS = transfrom;
+            FireLoad = ThPDSFireLoad.Unknown;
         }
     }
 }

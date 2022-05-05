@@ -85,9 +85,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
        
         private static bool IsTargetLayer(string layer)//立管图层
         {
-            return (layer.Contains("FRPT") && !layer.Contains("SPRL")) //包含FRPT且不包含SPRL
-                 ||(layer.Contains("HYDT"))//包含HYDT
-                 ; //不包含消火栓横管图层
+            return layer.Equals("W-FRPT-HYDT-VPIPE")
+                 || layer.Equals("W-FRPT-HYDT-EQPM")
+                 || layer.Equals("W-FRPT-HYDT");
         }
         private static bool IsTargetObject(Entity ent)
         {
@@ -204,7 +204,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     try
                     {
-                        return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                        return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper()) &&
+                               IsTargetLayer(br.Layer);
                     }
                     catch
                     {

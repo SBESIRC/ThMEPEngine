@@ -1,11 +1,11 @@
 ﻿using ThCADExtension;
 using System.ComponentModel;
 using System.Collections.Generic;
+using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using HandyControl.Controls;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.UI.Editors;
-using TianHua.Electrical.PDS.Diagram;
 
 namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 {

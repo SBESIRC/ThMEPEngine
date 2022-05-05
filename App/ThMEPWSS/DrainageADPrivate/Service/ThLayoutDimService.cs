@@ -25,7 +25,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         public static List<ThDrainageBlkOutput> LayoutDim(List<ThDrainageTreeNode> rootList)
         {
             var allNode = rootList.SelectMany(x => x.GetDescendant()).ToList();
-            var allLine = ThLayoutDimService.TurnNodeToTransLine(allNode);
+            var allLine = ThCreateLineService.TurnNodeToTransLine(allNode);
             var allIsolateLine = new List<Line>();
             allIsolateLine.AddRange(allLine);
             //之后要加上阀门???
@@ -34,21 +34,6 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
             return nodeDiaDimOutput;
 
-        }
-
-        private static List<Line> TurnNodeToTransLine(List<ThDrainageTreeNode> allNode)
-        {
-            var allLine = new List<Line>();
-
-            foreach (var node in allNode)
-            {
-                if (node.Parent != null)
-                {
-                    var line = new Line(node.Parent.TransPt, node.TransPt);
-                    allLine.Add(line);
-                }
-            }
-            return allLine;
         }
 
         private static List<ThDrainageBlkOutput> CalculatePositionDim(List<ThDrainageTreeNode> allNode, List<Line> allIsolateLine)

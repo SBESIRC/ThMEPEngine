@@ -1,4 +1,5 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+﻿using System;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
@@ -6,6 +7,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// <summary>
     /// 电动机-CPS星三角启动 回路
     /// </summary>
+    [Serializable]
     [CircuitGroup(CircuitGroup.Group2)]
     public class Motor_CPSStarTriangleStartCircuit : PDSBaseOutCircuit
     {

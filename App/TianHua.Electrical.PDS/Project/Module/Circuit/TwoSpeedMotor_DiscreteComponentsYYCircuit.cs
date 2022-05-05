@@ -1,8 +1,10 @@
 ﻿using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+using System;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
+    [Serializable]
     [CircuitGroup(CircuitGroup.Group3)]
     public class TwoSpeedMotor_DiscreteComponentsYYCircuit : PDSBaseOutCircuit
     {

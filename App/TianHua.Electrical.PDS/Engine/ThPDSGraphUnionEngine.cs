@@ -80,7 +80,15 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
                             }
-                            targetMap.EdgeMap.Add(edge, objectIds);
+                            if (!targetMap.EdgeMap.ContainsKey(edge))
+                            {
+                                targetMap.EdgeMap.Add(edge, objectIds);
+                            }
+                            else
+                            {
+                                targetMap.EdgeMap[edge].AddRange(objectIds);
+                                targetMap.EdgeMap[edge] = targetMap.EdgeMap[edge].Distinct().ToList();
+                            }
                         }
 
                         break;
@@ -119,8 +127,24 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         Circuit = edge.Circuit,
                     };
-                    unionGraph.AddEdge(newEdge);
+                    if (!ThPDSEdgeContainsService.EdgeContainsEx(newEdge, unionGraph))
+                    {
+                        unionGraph.AddEdge(newEdge);
+                    }
                 }
+            });
+
+            // 将无连接关系的散点加入到图中
+            graphList.ForEach(graph =>
+            {
+                graph.Vertices.ForEach(vertex =>
+                {
+                    if (vertex.NodeType != PDSNodeType.CableCarrier
+                        && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
+                    {
+                        unionGraph.AddVertex(vertex);
+                    }
+                });
             });
 
             return unionGraph;
@@ -136,7 +160,7 @@ namespace TianHua.Electrical.PDS.Engine
         private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
-            if (node.NodeType != PDSNodeType.None)
+            if (node.NodeType != PDSNodeType.Unkown)
             {
                 if (!string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
                 {
@@ -147,6 +171,10 @@ namespace TianHua.Electrical.PDS.Engine
                             && DescriptionCheck(vertex, node) && PowerCheck(vertex, node) && TypeCheck(vertex, node))
                         {
                             originalNode = vertex;
+                            if (!LocationEquals(node.Loads[0].Location, originalNode.Loads[0].Location))
+                            {
+                                originalNode.Loads[0].SetLocation(node.Loads[0].Location);
+                            }
                             return true;
                         }
                     }
@@ -231,6 +259,20 @@ namespace TianHua.Electrical.PDS.Engine
             return vertex.Loads[0].LoadTypeCat_1 == node.Loads[0].LoadTypeCat_1
                 && vertex.Loads[0].LoadTypeCat_2 == node.Loads[0].LoadTypeCat_2
                 && vertex.Loads[0].LoadTypeCat_3 == node.Loads[0].LoadTypeCat_3;
+        }
+
+        /// <summary>
+        /// 位置信息校核
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        private bool LocationEquals(ThPDSLocation first, ThPDSLocation second)
+        {
+            return first.ReferenceDWG.Equals(second.ReferenceDWG)
+                && first.FloorNumber.Equals(second.FloorNumber)
+                && first.RoomType.Equals(second.RoomType)
+                && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.StoreyBasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.StoreyBasePoint)) < 1.0
+                && ThPDSPoint3dService.PDSPoint3dToPoint3d(first.BasePoint).DistanceTo(ThPDSPoint3dService.PDSPoint3dToPoint3d(second.BasePoint)) < 1.0;
         }
     }
 }

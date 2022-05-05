@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Model
@@ -35,7 +36,7 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 插座
         /// </summary>
-        [Description("插座")] 
+        [Description("插座")]
         Socket,
     }
 
@@ -53,181 +54,181 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 照明配电箱
         /// </summary>
-        [Description("照明配电箱")] 
+        [Description("照明配电箱")]
         LightingDistributionPanel,
 
         /// <summary>
         /// 动力配电箱
         /// </summary>
-        [Description("动力配电箱")] 
+        [Description("动力配电箱")]
         PowerDistributionPanel,
 
         /// <summary>
         /// 应急照明配电箱
         /// </summary>
-        [Description("应急照明配电箱")] 
+        [Description("应急照明配电箱")]
         EmergencyLightingDistributionPanel,
 
         /// <summary>
         /// 消防动力配电箱
         /// </summary>
-        [Description("消防动力配电箱")] 
+        [Description("消防动力配电箱")]
         EmergencyPowerDistributionPanel,
 
         /// <summary>
         /// 电表箱
         /// </summary>
-        [Description("电表箱")] 
+        [Description("电表箱")]
         ElectricalMeterPanel,
 
         /// <summary>
         /// 设备控制箱
         /// </summary>
-        [Description("设备控制箱")] 
+        [Description("设备控制箱")]
         ElectricalControlPanel,
 
         /// <summary>
         /// 隔离开关箱
         /// </summary>
-        [Description("隔离开关箱")] 
+        [Description("隔离开关箱")]
         IsolationSwitchPanel,
 
         /// <summary>
         /// 集中电源
         /// </summary>
-        [Description("集中电源")] 
+        [Description("集中电源")]
         FireEmergencyLightingDistributionPanel,
 
         /// <summary>
         /// 泵
         /// </summary>
-        [Description("泵")] 
+        [Description("泵")]
         Pump,
 
         /// <summary>
         /// 风机
         /// </summary>
-        [Description("风机")] 
+        [Description("风机")]
         Fan,
 
         /// <summary>
         /// 防火卷帘
         /// </summary>
-        [Description("防火卷帘")] 
+        [Description("防火卷帘")]
         FireResistantShutter,
 
         /// <summary>
         /// 电动门
         /// </summary>
-        [Description("电动门")] 
+        [Description("电动门")]
         ElectricDoor,
 
         /// <summary>
         /// 电动窗
         /// </summary>
-        [Description("电动窗")] 
+        [Description("电动窗")]
         ElectricWindow,
 
         /// <summary>
         /// 交流充电桩
         /// </summary>
-        [Description("交流充电桩")] 
+        [Description("交流充电桩")]
         ACCharger,
 
         /// <summary>
         /// 直流非车载充电机
         /// </summary>
-        [Description("直流非车载充电机")] 
+        [Description("直流非车载充电机")]
         DCCharger,
 
         /// <summary>
         /// 机械停车设备
         /// </summary>
-        [Description("机械停车设备")] 
+        [Description("机械停车设备")]
         MechanicalParkingDevice,
 
         /// <summary>
         /// 电梯
         /// </summary>
-        [Description("电梯")] 
+        [Description("电梯")]
         Elevator,
 
         /// <summary>
         /// 扶梯
         /// </summary>
-        [Description("扶梯")] 
+        [Description("扶梯")]
         Escalator,
 
         /// <summary>
         /// 自动人行道
         /// </summary>
-        [Description("自动人行道")] 
+        [Description("自动人行道")]
         MovingSidewalk,
 
         /// <summary>
         /// 空调设备（空调机组、新风机组、冷却塔、多联机、冷冻/冷却水机组，风冷/地源热泵机组等）
         /// </summary>
-        [Description("空调设备")] 
+        [Description("空调设备")]
         AirConditioningEquipment,
 
         /// <summary>
         /// 锅炉
         /// </summary>
-        [Description("锅炉")] 
+        [Description("锅炉")]
         Boiler,
 
         /// <summary>
         /// 车道灯具
         /// </summary>
-        [Description("车道灯具")] 
+        [Description("车道灯具")]
         LaneLights,
 
         /// <summary>
         /// 防水灯具
         /// </summary>
-        [Description("防水灯具")] 
+        [Description("防水灯具")]
         WaterproofLights,
 
         /// <summary>
         /// 室外灯具
         /// </summary>
-        [Description("室外灯具")] 
+        [Description("室外灯具")]
         OutdoorLights,
 
         /// <summary>
         /// 消防应急照明灯具
         /// </summary>
-        [Description("消防应急照明灯具")] 
+        [Description("消防应急照明灯具")]
         FireEmergencyLuminaire,
 
         /// <summary>
         /// 备用照明灯具
         /// </summary>
-        [Description("备用照明灯具")] 
+        [Description("备用照明灯具")]
         EmergencyLuminaire,
 
         /// <summary>
         /// 单相插座
         /// </summary>
-        [Description("单相插座")] 
+        [Description("单相插座")]
         OnePhaseSocket,
 
         /// <summary>
         /// 三相插座
         /// </summary>
-        [Description("三相插座")] 
+        [Description("三相插座")]
         ThreePhaseSocket,
 
         /// <summary>
         /// 低压插座
         /// </summary>
-        [Description("低压插座")] 
+        [Description("低压插座")]
         LVSocket,
 
         /// <summary>
         /// 未知负载
         /// </summary>
-        [Description("未知负载")] 
+        [Description("未知负载")]
         None,
     }
 
@@ -239,85 +240,92 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 消防排烟风机
         /// </summary>
-        [Description("消防排烟风机")] 
+        [Description("消防排烟风机")]
         SmokeExhaustFan,
 
         /// <summary>
         /// 消防补风风机
         /// </summary>
-        [Description("消防补风风机")] 
+        [Description("消防补风风机")]
         MakeupAirFan,
 
         /// <summary>
         /// 消防加压送风风机
         /// </summary>
-        [Description("消防加压送风风机")] 
+        [Description("消防加压送风风机")]
         StaircasePressurizationFan,
 
         /// <summary>
         /// 消防排烟兼平时排风风机
         /// </summary>
-        [Description("消防排烟兼平时排风风机")] 
+        [Description("消防排烟兼平时排风风机")]
         ExhaustFan_Smoke,
 
         /// <summary>
         /// 消防补风兼平时送风风机
         /// </summary>
-        [Description("消防补风兼平时送风风机")] 
+        [Description("消防补风兼平时送风风机")]
         SupplyFan_Smoke,
 
         /// <summary>
         /// 平时排风风机
         /// </summary>
-        [Description("平时排风风机")] 
+        [Description("平时排风风机")]
         ExhaustFan,
 
         /// <summary>
         /// 平时送风风机
         /// </summary>
-        [Description("平时送风风机")] 
+        [Description("平时送风风机")]
         SupplyFan,
 
         /// <summary>
         /// 厨房排油烟风机
         /// </summary>
-        [Description("厨房排油烟风机")] 
+        [Description("厨房排油烟风机")]
         KitchenExhaustFan,
 
         /// <summary>
         /// 事故风机
         /// </summary>
-        [Description("事故风机")] 
+        [Description("事故风机")]
         EmergencyFan,
 
         /// <summary>
         /// 生活水泵
         /// </summary>
-        [Description("生活水泵")] 
+        [Description("生活水泵")]
         DomesticWaterPump,
+
+        /// <summary>
+        /// 稳压泵
+        /// </summary>
+        [Description("稳压泵")]
+        RegulatorsPump,
 
         /// <summary>
         /// 消防泵/喷淋泵/消火栓泵
         /// </summary>
-        [Description("消防泵")] 
+        [Description("消防泵")]
         FirePump,
 
         /// <summary>
         /// 潜水泵
         /// </summary>
-        [Description("潜水泵")] 
+        [Description("潜水泵")]
         SubmersiblePump,
 
         /// <summary>
         /// 未知负载
         /// </summary>
-        [Description("未知负载")] 
+        [Description("未知负载")]
         None,
     }
 
     /// <summary>
     /// 负载
     /// </summary>
+    [Serializable]
     public class ThPDSLoad : IEquatable<ThPDSLoad>
     {
         public ThPDSLoad()
@@ -332,7 +340,8 @@ namespace TianHua.Electrical.PDS.Model
             Phase = ThPDSPhase.三相;
             DemandFactor = 1.0;
             PowerFactor = 0.85;
-            Location = new ThPDSLocation();
+            FireLoadWithNull = ThPDSFireLoad.Unknown;
+            LocationList = new List<ThPDSLocation> ();
             OnLightingCableTray = false;
         }
 
@@ -379,7 +388,18 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 是否是消防设备
         /// </summary>
-        public bool FireLoad { get; set; }
+        private ThPDSFireLoad FireLoadWithNull { get; set; }
+
+        /// <summary>
+        /// 是否是消防设备
+        /// </summary>
+        public bool FireLoad
+        {
+            get
+            {
+                return FireLoadWithNull == ThPDSFireLoad.FireLoad;
+            }
+        }
 
         /// <summary>
         /// 主用设备数量
@@ -414,7 +434,18 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 位置信息
         /// </summary>
-        public ThPDSLocation Location { get; set; }
+        public ThPDSLocation Location
+        {
+            get
+            {
+                return LocationList[0];
+            }
+        }
+
+        /// <summary>
+        /// 位置信息
+        /// </summary>
+        private List<ThPDSLocation> LocationList { get; set; }
 
         /// <summary>
         /// 是否变频
@@ -459,5 +490,43 @@ namespace TianHua.Electrical.PDS.Model
         {
             OnLightingCableTray = onLightingCableTray;
         }
+
+        public ThPDSFireLoad GetFireLoad()
+        {
+            return FireLoadWithNull;
+        }
+
+        public void SetFireLoad(ThPDSFireLoad fireLoad)
+        {
+            FireLoadWithNull = fireLoad;
+        }
+
+        public void SetFireLoad(bool fireLoad)
+        {
+            if (fireLoad)
+            {
+                FireLoadWithNull = ThPDSFireLoad.FireLoad;
+            }
+            else
+            {
+                FireLoadWithNull = ThPDSFireLoad.NonFireLoad;
+            }
+        }
+
+        public void SetLocation(ThPDSLocation Location)
+        {
+            if (LocationList == null)
+            {
+                LocationList = new List<ThPDSLocation>();
+            }
+            LocationList.Add(Location);
+        }
+
+        public List<ThPDSLocation> GetLocationList()
+        {
+            return LocationList;
+        }
+
+
     }
 }

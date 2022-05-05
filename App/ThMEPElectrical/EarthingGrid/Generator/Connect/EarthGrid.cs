@@ -55,7 +55,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             {
                 if (findPolylineFromLines.ContainsKey(new Tuple<Point3d, Point3d>(findPolylineFromLine.Key.Item2, findPolylineFromLine.Key.Item1)))
                 {
-
                     var lines = findPolylineFromLine.Value;
                     var pt = GetObjects.GetLinesCenter(lines);
                     if (centerToFace.ContainsKey(pt))
@@ -114,14 +113,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             while (splitedFaces.Count > 0)
             {
                 var centerPt = splitedFaces.Dequeue();
-                
-                var polyline = LineDealer.Tuples2Polyline(centerToFace[centerPt].ToList());
+                var polyline = LineDealer.LinesToConvexHull(centerToFace[centerPt]);
                 if(polyline.Area < 10000)
                 {
                     continue;
                 }
                 var rectangle = OBB(polyline);
-                //if (CheckRectangleA(rectangle) < 0)
                 if (CheckRectangle(rectangle) < 0)
                 {
                     //1、找到平分线
@@ -160,7 +157,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                     var faceLinesB = new HashSet<Tuple<Point3d, Point3d>>();
                     GetSplitedFaceLines(centerPt, splitCenterPtA, splitCenterPtB, lineA, lineB,
                         ref faceLinesA, ref faceLinesB);
-
+                    var plA = LineDealer.LinesToConvexHull(faceLinesA);
+                    var plB = LineDealer.LinesToConvexHull(faceLinesB);
+                    if(plA.Area < 1000 || plB.Area < 1000)
+                    {
+                        continue;////////////////////////////////
+                    }
                     //5.2、重建结构
                     //获取两个面的中点
                     var centerPtA = GetObjects.GetLinesCenter(faceLinesA.ToList());
@@ -313,10 +315,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             }
             //2.2、update centerToFace
             centerToFace.Remove(basePt);
+            centerToFace.Remove(centerPtA);
+            centerToFace.Remove(centerPtB);
             centerToFace.Add(centerPtA, faceLinesA);
             centerToFace.Add(centerPtB, faceLinesB); 
         }
-
 
         /// <summary>
         /// 查看一个矩形是否符合所给数据

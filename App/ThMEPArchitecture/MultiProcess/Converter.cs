@@ -132,7 +132,7 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public static MPGene GetMPGene(this Gene gene)
         {
-            return new MPGene(gene.Value, gene.VerticalDirection, gene.MaxValue, gene.MinValue, gene.StartValue, gene.EndValue);
+            return new MPGene(gene.Value, gene.VerticalDirection, gene.StartValue, gene.EndValue);
         }
         public static MPChromosome GetMPChromosome(this Chromosome chromosome)
         {

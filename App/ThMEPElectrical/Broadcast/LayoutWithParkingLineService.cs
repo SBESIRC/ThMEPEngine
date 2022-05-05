@@ -43,6 +43,7 @@ namespace ThMEPElectrical.Broadcast
                 //将构建分为上下部分
                 var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines, tol * 2);
                 var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines, tol * 2);
+                //GetNeedStruct(usefulColumns, usefulWalls, out List<Polyline> needCols, out List<Polyline> needWalls);
 
                 //过滤掉不应该使用的构建
                 CheckService checkService = new CheckService();
@@ -195,6 +196,29 @@ namespace ThMEPElectrical.Broadcast
             }
 
             return resPts;
+        }
+
+        /// <summary>
+        /// 获取需要的构建
+        /// </summary>
+        /// <param name="usefulColumns"></param>
+        /// <param name="usefulWalls"></param>
+        /// <param name="needColumns"></param>
+        /// <param name="needWalls"></param>
+        private void GetNeedStruct(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, out List<Polyline> needColumns, out List<Polyline> needWalls)
+        {
+            needColumns = new List<Polyline>();
+            needWalls = new List<Polyline>();
+            if (usefulColumns[0].Count > usefulColumns[1].Count)
+            {
+                needColumns = usefulColumns[0];
+                needWalls = usefulWalls[0];
+            }
+            else
+            {
+                needColumns = usefulColumns[1];
+                needWalls = usefulWalls[1];
+            }
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Component;
+﻿using System;
+using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
 {
     /// <summary>
     /// 一路进线
     /// </summary>
+    [Serializable]
     public class OneWayInCircuit : PDSBaseInCircuit
     {
         public OneWayInCircuit()

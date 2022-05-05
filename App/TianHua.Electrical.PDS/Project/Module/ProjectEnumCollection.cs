@@ -191,6 +191,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         NG_A_BTLY,
     }
 
+    public enum ConductorLevel
+    {
+        A,
+        B,
+        C,
+        D,
+    }
+
     /// <summary>
     /// 导体类型
     /// </summary>

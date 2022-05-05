@@ -26,14 +26,14 @@ namespace ThMEPStructure.Reinforcement.Service
                 return new List<string> { 
                     "COLU_DE_TH","COLU_DE_DIM","COLU_DE_TEXT","Defpoints",
                     "LABEL" ,"LINK","REIN", "TAB", "TAB_TEXT","THIN",
-                    "xk-biaozhu","z-详图标注"};
+                    "xk-biaozhu","z-详图标注","tab-表头"};
             }
         }
         private static List<string> TextStyles
         {
             get
             {
-                return new List<string> { "TSSD_REIN", "TSSD_Norm","Bw_Dim",
+                return new List<string> { "TSSD_REIN", "TSSD_Norm","Bw_Dim","BW_Rein",
                     ThStyle3TextStyle};
             }
         }

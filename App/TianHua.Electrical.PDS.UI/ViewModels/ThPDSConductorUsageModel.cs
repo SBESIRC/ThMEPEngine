@@ -27,7 +27,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == ConductorType) return;
                 _conductorUse.ConductorType = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             {
                 if (value == OuterSheathMaterial) return;
                 _conductorUse.OuterSheathMaterial = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
 
@@ -50,15 +50,21 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
         /// </summary>
         public string ConductorMaterial
         {
-            get=>_conductorUse.ConductorMaterial;
+            get => _conductorUse.ConductorMaterial;
+        }
+        public string ConductorMaterialAndStructure
+        {
+            get => _conductorUse.ConductorMaterialAndStructure;
             set
             {
-                if (value == ConductorMaterial) return;
-                _conductorUse.ConductorMaterial = value;
-                OnPropertyChanged();
+                _conductorUse.ConductorMaterialAndStructure = value;
+                OnPropertyChanged(null);
             }
         }
-
+        public IEnumerable<string> ConductorMaterialAndStructureItemsSource
+        {
+            get => _conductorUse.ConductorMaterialAndStructureItemsSource;
+        }
         public bool IsSpecialConductorType => _conductorUse.IsSpecialConductorType;
 
         public string Content => _conductorUse.Content;
@@ -68,7 +74,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.HalogenFree = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool LowSmoke
@@ -77,7 +83,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.LowSmoke = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool LowToxicity
@@ -86,7 +92,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.LowToxicity = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool FlameRetardant
@@ -95,7 +101,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.FlameRetardant = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
         public bool Refractory
@@ -104,16 +110,16 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             set
             {
                 _conductorUse.Refractory = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
-        public Level Level
+        public ConductorLevel Level
         {
             get => _conductorUse.Level;
             set
             {
                 _conductorUse.Level = value;
-                OnPropertyChanged();
+                OnPropertyChanged(null);
             }
         }
     }

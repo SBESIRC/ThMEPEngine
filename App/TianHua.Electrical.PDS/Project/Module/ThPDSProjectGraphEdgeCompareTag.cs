@@ -1,16 +1,21 @@
-﻿namespace TianHua.Electrical.PDS.Project.Module
+﻿using System;
+
+namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public abstract class ThPDSProjectGraphEdgeCompareTag
     {
         //
     }
 
+    [Serializable]
     public class ThPDSProjectGraphEdgeCompositeTag : ThPDSProjectGraphEdgeCompareTag
     {
         public ThPDSProjectGraphEdgeCompareTag Tag { get; set; }
         public ThPDSProjectGraphEdgeDataTag DataTag { get; set; }
     }
 
+    [Serializable]
     public class ThPDSProjectGraphEdgeIdChangeTag : ThPDSProjectGraphEdgeCompareTag
     {
         public bool ChangeFrom { get; set; }

@@ -1,4 +1,5 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+﻿using System;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
@@ -6,6 +7,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit
     /// <summary>
     /// 双速电动机（CPS Y-Y）
     /// </summary>
+    [Serializable]
     [CircuitGroup(CircuitGroup.Group3)]
     public class TwoSpeedMotor_CPSYYCircuit : PDSBaseOutCircuit
     {

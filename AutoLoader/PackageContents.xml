@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{292BF126-0597-4C4D-BA92-29E9FF0DD3C5}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{2408CF8E-B511-4339-9FB0-ED1BCAA7CE45}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -541,6 +541,8 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
+				<Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -573,6 +575,8 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
+				<Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -605,6 +609,8 @@
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
                 <Command Local="ThSCPSPM" Global="ThSCPSPM" />
                 <Command Local="THXHSYH" Global="THXHSYH" />
+                <Command Local="THHXDYZC" Global="THHXDYZC" />
+				<Command Local="THDXJSXT" Global="THDXJSXT" />
             </Commands>
         </ComponentEntry>
     </Components>

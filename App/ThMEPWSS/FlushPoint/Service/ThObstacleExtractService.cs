@@ -99,7 +99,7 @@ namespace ThMEPWSS.FlushPoint.Service
                         var btr = acadDb.Element<BlockTableRecord>(o.BlockTableRecord);
                         if(IsBuildElementBlock(btr))
                         {
-                            var key = GetBlockKey(o.GetEffectiveName());
+                            var key = GetBlockKey(GetEffectiveName(db, o));
                             if (!string.IsNullOrEmpty(key))
                             {
                                 BlkEntityDic[key].Add(GetOutline(key, o));
@@ -107,6 +107,23 @@ namespace ThMEPWSS.FlushPoint.Service
                         }
                     }
                 });
+            }
+        }
+
+        private string GetEffectiveName(Database db, BlockReference bref)
+        {
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                // BlockReference.IsDynamicBlock可能会抛出异常
+                // 这里通过比较块名是否包含动态块的前缀（*U）来判断
+                if (bref.Name.StartsWith("*U"))
+                {
+                    return acadDb.Element<BlockTableRecord>(bref.DynamicBlockTableRecord).Name;
+                }
+                else
+                {
+                    return bref.Name;
+                }
             }
         }
 

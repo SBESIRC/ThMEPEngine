@@ -8,6 +8,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 直接表
     /// </summary>
+    [Serializable]
     public class MeterTransformer : Meter
     {
         /// <summary>

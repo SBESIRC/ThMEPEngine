@@ -173,7 +173,7 @@ namespace TianHua.Electrical.PDS.Service
                                     {
                                         if (i < 10)
                                         {
-                                            circuitNumbers.Add(Tuple.Create( loadId + "0" + i.ToString(), TextDic[o]));
+                                            circuitNumbers.Add(Tuple.Create(loadId + "0" + i.ToString(), TextDic[o]));
                                         }
                                         else
                                         {
@@ -254,7 +254,7 @@ namespace TianHua.Electrical.PDS.Service
             var result = GetMarks(frame, dbTexts);
             dbTexts.Distinct().ForEach(o =>
             {
-                result.Texts.Add(o.Item1.TextString);
+                result.Texts.Add(Filter(o.Item1.TextString));
                 result.ObjectIds.Add(o.Item2);
             });
             return result;
@@ -271,7 +271,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     multiList.Add(new ThPDSTextInfo
                     {
-                        Texts = new List<string> { o },
+                        Texts = Filter(new List<string> { o }),
                         ObjectIds = result.ObjectIds,
                     });
                 });
@@ -310,7 +310,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
-            if(doSearch)
+            if (doSearch)
             {
                 var textLeads = new List<Line>();
                 SearchMarkLine(frame, textLeads);
@@ -422,7 +422,7 @@ namespace TianHua.Electrical.PDS.Service
                 var info = new ThPDSTextInfo();
                 text.Texts.ForEach(o =>
                 {
-                    info.Texts.AddRange(o.Item1);
+                    info.Texts.AddRange(Filter(o.Item1));
                     info.ObjectIds.Add(o.Item2);
                 });
                 result.Add(info);
@@ -449,6 +449,11 @@ namespace TianHua.Electrical.PDS.Service
         private List<string> Filter(List<string> info)
         {
             return info.Select(o => o.Replace(" ", "")).ToList();
+        }
+
+        private string Filter(string info)
+        {
+            return info.Replace(" ", "");
         }
 
         private void Filter(List<Tuple<DBText, ObjectId>> dbTexts)

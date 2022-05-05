@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private ThPDSProjectGraphEdge _edge;
         private bool _isDualPower;//是否双功率
         private bool _isFireLoad;//是否是消防负载
+        private bool _IsEmptyLoad;//是否是空负载
         private double _lowPower;//单速功率/双速低速功率
         private double _highPower;//双速高速功率
 
@@ -41,6 +42,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public SpecifyComponentFactory(ThPDSProjectGraphEdge edge)
         {
             this._edge = edge;
+            _IsEmptyLoad = edge.Target.Type==PDSNodeType.Empty;
             _isDualPower = edge.Target.Details.IsDualPower;
             _isFireLoad = edge.Target.Load.FireLoad;
             _lowPower = edge.Target.Details.LowPower;
@@ -67,6 +69,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
                 return GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
             else
                 throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// 获取消防应急照明回路信息
+        /// </summary>
+        /// <returns></returns>
+        public FireEmergencyLighting GetFireEmergencyLighting()
+        {
+            var CircuitForm = new FireEmergencyLighting();
+            CircuitForm.Conductor = CreatFireEmergencyLightingConductor();
+            return CircuitForm;
         }
 
         /// <summary>
@@ -286,7 +299,20 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Conductor CreatConductor()
         {
+            if (_IsEmptyLoad)
+                return null;
             return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
+        }
+
+        /// <summary>
+        /// 创建消防应急照明回路导体
+        /// </summary>
+        /// <returns></returns>
+        private Conductor CreatFireEmergencyLightingConductor()
+        {
+            if (_IsEmptyLoad)
+                return null;
+            return new Conductor("2x2.5+E2.5", MaterialStructure.YJY, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
         }
 
         public override Contactor CreatContactor()

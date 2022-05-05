@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
 using Linq2Acad;
 using QuikGraph;
 using Dreambuild.AutoCAD;
@@ -114,7 +113,7 @@ namespace TianHua.Electrical.PDS.Command
                     basePoint = new Point3d(firstRowPoint.X, firstRowPoint.Y - 1000.0 * scaleFactor, 0);
                     var edgeCount = 0;
                     // 所有不在小母排/控制回路上的分支
-                    var ordinaryEdges = ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode);
+                    var ordinaryEdges = CircuitSort(ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode));
                     DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
                     edgeCount += ordinaryEdges.Count;
                     // 小母排节下分支
@@ -125,7 +124,7 @@ namespace TianHua.Electrical.PDS.Command
                         var smallBusbarLine = assignment.SmallBusbarAssign(activeDb, configDb, smallBusbar, tableObjs, o, scale);
                         basePoint = new Point3d(basePoint.X, basePoint.Y + 500.0 * scaleFactor, 0);
 
-                        var smallBusbarEdges = ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o);
+                        var smallBusbarEdges = CircuitSort(ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o));
                         DrawCircuit(smallBusbarEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, true);
                         edgeCount += smallBusbarEdges.Count;
 
@@ -145,39 +144,65 @@ namespace TianHua.Electrical.PDS.Command
                     // 控制回路节下分支
                     if (thisNode.Details.SecondaryCircuits.Keys.Count > 0)
                     {
+                        var circuitDatas = new List<ThPDSControlCircuitData>();
                         thisNode.Details.SecondaryCircuits.Keys.ForEach(o =>
                         {
-                            var controlStartPoint1 = new Point3d(basePoint.X + 1333.4936 * scaleFactor, basePoint.Y - 211.6025 * scaleFactor, 0);
-                            var controlStartPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y - 156.25 * scaleFactor, 0);
-                            var belongToCPS = false;
+                            var circuitData = new ThPDSControlCircuitData();
+                            var controlEdges = CircuitSort(ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o));
+                            circuitData.CircuitNumber = controlEdges[0].Circuit.ID.CircuitNumber.Last();
+                            var dataList = circuitDatas.Where(data => data.CircuitNumber.Equals(circuitData.CircuitNumber)).ToList();
+                            if (dataList.Count > 0)
+                            {
+                                circuitData.BelongToCPS = dataList[0].BelongToCPS;
+                                circuitData.StartPoint = dataList[0].StartPoint;
+                            }
+                            else
+                            {
+                                var controlStartPoint1 = new Point3d(basePoint.X + 1333.4936 * scaleFactor, basePoint.Y - 211.6025 * scaleFactor, 0);
+                                var controlStartPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y - 156.25 * scaleFactor, 0);
+                                var belongToCPS = false;
 
-                            var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o);
-                            DrawCircuit(controlEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, ref belongToCPS);
-                            edgeCount += controlEdges.Count;
+                                DrawCircuit(controlEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, ref belongToCPS);
+                                edgeCount += controlEdges.Count;
+                                circuitDatas.Add(circuitData);
+                                circuitData.BelongToCPS = belongToCPS;
+                                circuitData.StartPoint = belongToCPS ? controlStartPoint1 : controlStartPoint2;
+                            }
 
-                            if (belongToCPS)
+                            if (circuitData.BelongToCPS)
                             {
                                 var controlCircuit = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.CONTROL_CIRCUIT_BELONG_TO_CPS, basePoint, scale);
                                 assignment.ControlCircuitAssign(activeDb, controlCircuit, tableObjs, o);
                                 var controlEndPoint1 = new Point3d(basePoint.X + 1333.4936 * scaleFactor, basePoint.Y, 0);
-                                var line = new Line(controlStartPoint1, controlEndPoint1);
-                                tableObjs.Add(line);
-                                activeDb.ModelSpace.Add(line);
-                                line.Layer = ThPDSLayerService.ControlCircuitLayer();
+                                circuitData.EndPoint = controlEndPoint1;
+                                if (dataList.Count > 0)
+                                {
+                                    dataList[0].EndPoint = controlEndPoint1;
+                                }
+
                             }
                             else
                             {
                                 var controlCircuit = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.CONTROL_CIRCUIT_BELONG_TO_QAC, basePoint, scale);
                                 assignment.ControlCircuitAssign(activeDb, controlCircuit, tableObjs, o);
                                 var controlEndPoint2 = new Point3d(basePoint.X + 3979.3671 * scaleFactor, basePoint.Y, 0);
-                                var line = new Line(controlStartPoint2, controlEndPoint2);
-                                tableObjs.Add(line);
-                                activeDb.ModelSpace.Add(line);
-                                line.Layer = ThPDSLayerService.ControlCircuitLayer();
+                                circuitData.EndPoint = controlEndPoint2;
+                                if (dataList.Count > 0)
+                                {
+                                    dataList[0].EndPoint = controlEndPoint2;
+                                }
                             }
 
                             edgeCount++;
                             basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                        });
+
+                        circuitDatas.ForEach(data =>
+                        {
+                            var line = new Line(data.StartPoint, data.EndPoint);
+                            tableObjs.Add(line);
+                            activeDb.ModelSpace.Add(line);
+                            line.Layer = ThPDSLayerService.ControlCircuitLayer();
                         });
                     }
 
@@ -454,6 +479,11 @@ namespace TianHua.Electrical.PDS.Command
         private static Point3d PointClone(Point3d srcPoint)
         {
             return new Point3d(srcPoint.X, srcPoint.Y, 0);
+        }
+
+        private static List<ThPDSProjectGraphEdge> CircuitSort(List<ThPDSProjectGraphEdge> edges)
+        {
+            return edges.OrderBy(e => e.Circuit.ID.CircuitID.Last()).ToList();
         }
 
         public void Dispose()

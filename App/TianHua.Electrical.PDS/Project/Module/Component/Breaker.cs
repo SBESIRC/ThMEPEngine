@@ -12,6 +12,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// 断路器
     /// </summary>
     [CascadeComponent]
+    [Serializable]
     public class Breaker : PDSBaseComponent
     {
         /// <summary>

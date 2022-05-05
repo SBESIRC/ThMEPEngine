@@ -554,9 +554,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -220), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -16), "通讯线", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(4, -71), "市电监测线 ", "E-UNIV-NOTE", "TH-STYLE3"));
-                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(103, -167), "A型应急照明集中电源", "E-UNIV-NOTE", "TH-STYLE3") { Height = 10 });
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(103, -167), "A型应急照明集中电源", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(133, -180), "DC36V", "E-UNIV-NOTE", "TH-STYLE3"));
-                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(116, -316), "本设备由厂家配套", "E-UNIV-NOTE", "TH-STYLE3") { Height = 10 });
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(97, -316), "本设备由厂家配套", "E-UNIV-NOTE", "TH-STYLE3"));
                     {
                         var vecs = new List<Vector> { new Vector(13.4824608598765, -0.033501501497426), new Vector(-2.56184213504093, 2.64906698011407), new Vector(9.72115787093117, -2.61556547861665), new Vector(-9.8127552088763, -2.6283232281271), new Vector(2.65343947298607, 2.59482172662968) };
                         var p = px.OffsetXY(74.3582, -20);

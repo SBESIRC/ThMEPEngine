@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -48,6 +49,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
     /// <summary>
     /// 元器件（抽象基类）
     /// </summary>
+    [Serializable]
     public abstract class PDSBaseComponent
     {
         /// <summary>

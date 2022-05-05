@@ -10,6 +10,7 @@ using TianHua.Electrical.PDS.Project.Module.Configure;
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
     [CascadeComponent]
+    [Serializable]
     public class CPS : PDSBaseComponent
     {
         /// <summary>

@@ -204,6 +204,29 @@ namespace ThMEPElectrical.ConnectPipe.Service
         }
 
         /// <summary>
+        /// 找到polyline中的最长线
+        /// </summary>
+        /// <param name="connectPolys"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, Line> CalIntersectPtPoly(List<Polyline> connectPolys, Point3d intersectPt)
+        {
+            Dictionary<Polyline, Line> polyDic = new Dictionary<Polyline, Line>();
+            foreach (var poly in connectPolys)
+            {
+                var handleLine = HandleConnectPolys(poly);
+                List<Line> lines = new List<Line>();
+                for (int i = 0; i < handleLine.NumberOfVertices - 1; i++)
+                {
+                    lines.Add(new Line(handleLine.GetPoint3dAt(i), handleLine.GetPoint3dAt(i + 1)));
+                }
+                var longestLine = lines.OrderBy(x => x.GetClosestPointTo(intersectPt, false).DistanceTo(intersectPt)).First();
+                polyDic.Add(poly, longestLine);
+            }
+
+            return polyDic;
+        }
+
+        /// <summary>
         /// 判断点是否在线上
         /// </summary>
         /// <param name="line"></param>

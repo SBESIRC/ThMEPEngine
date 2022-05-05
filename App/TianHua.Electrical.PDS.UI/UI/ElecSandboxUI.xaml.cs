@@ -1,6 +1,14 @@
-﻿using QuikGraph;
+﻿using ICSharpCode.SharpZipLib.Zip;
+using Newtonsoft.Json;
+using QuikGraph;
+using QuikGraph.Serialization;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
+using System.Windows.Forms;
 using ThControlLibraryWPF.CustomControl;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module;
@@ -85,13 +93,13 @@ namespace TianHua.Electrical.PDS.UI.UI
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("干线编辑界面", new ThPDSMainBusPanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("低压柜编辑界面", new ThPDSLowPressurePanel()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("高压压柜编辑界面", new ThPDSHighPressurePanel()));
-            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("全局参数设置界面", new UESandboxParameter()));
-            var dft = new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare());
+            var dft = new Models.UTableItem("全局参数设置界面", new UESandboxParameter());
             topTableItemViewModel.FunctionTableItems.Add(dft);
+            topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("信息匹配查看器", new ThPDSInfoCompare().Init()));
             //topTableItemViewModel.FunctionTableItems.Add(new Models.UTableItem("成果导出界面", new ThPDSExport()));
             tabTopFunction.DataContext = topTableItemViewModel;
             tabTopFunction.SelectedItem = dft;
-            if(tabTopFunction.SelectedItem is null)
+            if (tabTopFunction.SelectedItem is null)
             {
                 tabTopFunction.SelectedIndex = topTableItemViewModel.FunctionTableItems.IndexOf(dft);
             }
@@ -101,16 +109,43 @@ namespace TianHua.Electrical.PDS.UI.UI
         #region 界面顶部按钮响应事件
         private void btnNewProject_Click(object sender, RoutedEventArgs e)
         {
+            ThPDSProjectGraphService.ImportProject("");
         }
         private void btnOpenProject_Click(object sender, RoutedEventArgs e)
         {
+            //ImportProject
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Project (.PDSProject)|*.pdsProject"; // Filter files by extension
+            dlg.DefaultExt = ".PDSProject"; // Default file extension
+            var result = dlg.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                ThPDSProjectGraphService.ImportProject(dlg.FileName);
+            }
         }
         private void btnSaveProject_Click(object sender, RoutedEventArgs e)
         {
+            //选择路径
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = "Project"; // Default file name
+            dlg.DefaultExt = ".PDSProject"; // Default file extension
+            dlg.Filter = "Project (.PDSProject)|*.pdsProject"; // Filter files by extension
+            bool? result = dlg.ShowDialog();
+            // Process save file dialog box results
+            if (result == true)
+            {
+                var filePathUrl = dlg.FileName.Substring(0, dlg.FileName.LastIndexOf("\\"));
+                var fileName = dlg.SafeFileName;
+                ThPDSProjectGraphService.ExportProject(filePathUrl, fileName);
+            }
+            else
+            {
+                return;
+            }
         }
         private void btnSetting_Click(object sender, RoutedEventArgs e)
         {
-            new ThPDSSetting() { Width = 400, Height = 200 }.ShowDialog();
+            new ThPDSSetting() { Width = 400, Height = 200, WindowStartupLocation = WindowStartupLocation.CenterScreen, }.ShowDialog();
         }
         private void btnImportProject_Click(object sender, RoutedEventArgs e)
         {

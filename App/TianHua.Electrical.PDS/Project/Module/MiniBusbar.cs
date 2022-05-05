@@ -13,6 +13,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// <summary>
     /// 小母排
     /// </summary>
+    [Serializable]
     public class MiniBusbar
     {
         public MiniBusbar()

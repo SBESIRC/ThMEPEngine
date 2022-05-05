@@ -1,8 +1,10 @@
-﻿using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
+﻿using System;
+using TianHua.Electrical.PDS.Project.Module.Circuit.Extension;
 using TianHua.Electrical.PDS.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.Project.Module.Circuit
 {
+    [Serializable]
     [CircuitGroup(CircuitGroup.Group1)]
     public class DistributionMetering_CTInBehindCircuit : PDSBaseOutCircuit
     {

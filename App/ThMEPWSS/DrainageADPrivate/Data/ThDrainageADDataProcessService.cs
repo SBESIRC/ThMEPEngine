@@ -33,7 +33,6 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         public List<ThIfcVirticalPipe> VerticalPipeData { private get; set; } = new List<ThIfcVirticalPipe>();
         public List<ThIfcFlowSegment> HorizontalPipe { private get; set; } = new List<ThIfcFlowSegment>();
         public Point3dCollection SelectPtsTopView { private get; set; }
-        public Point3dCollection SelectPtsAD { private get; set; }
         public List<ThIfcDistributionFlowElement> SanitaryTerminal { private get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<ThIfcDistributionFlowElement> ValveWaterHeater { private get; set; } = new List<ThIfcDistributionFlowElement>();
         public List<BlockReference> TchValve { private get; set; } = new List<BlockReference>(); //天正阀
@@ -44,8 +43,6 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         //----output
         public List<Line> HotPipeTopView { get; private set; }
         public List<Line> CoolPipeTopView { get; private set; }
-        public List<Line> HotPipeAD { get; private set; }
-        public List<Line> CoolPipeAD { get; private set; }
         public List<Line> VerticalPipe { get; private set; }//立管
         public List<ThSaniterayTerminal> Terminal { get; private set; }//末端洁具 热水器
         public List<ThValve> Valve { get; private set; } //截止阀,闸阀,止回阀,防污隔断阀,天正阀，天正断管,样条曲线
@@ -56,8 +53,6 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         {
             HotPipeTopView = new List<Line>();
             CoolPipeTopView = new List<Line>();
-            HotPipeAD = new List<Line>();
-            CoolPipeAD = new List<Line>();
 
             VerticalPipe = new List<Line>();
             Terminal = new List<ThSaniterayTerminal>();
@@ -86,22 +81,22 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
             });
 
-            if (SelectPtsAD == null)
-            {
-                return;
-            }
-            var ADPipes = spatialIndex.SelectCrossingPolygon(SelectPtsAD);
-            HorizontalPipe.Where(o => ADPipes.Contains(o.Outline)).ToList().ForEach(x =>
-            {
-                if (x.Outline.Layer == ThDrainageADCommon.Layer_HotPipe)
-                {
-                    HotPipeAD.Add(x.Outline as Line);
-                }
-                else if (x.Outline.Layer == ThDrainageADCommon.Layer_CoolPipe)
-                {
-                    CoolPipeAD.Add(x.Outline as Line);
-                }
-            });
+            //if (SelectPtsAD == null)
+            //{
+            //    return;
+            //}
+            //var ADPipes = spatialIndex.SelectCrossingPolygon(SelectPtsAD);
+            //HorizontalPipe.Where(o => ADPipes.Contains(o.Outline)).ToList().ForEach(x =>
+            //{
+            //    if (x.Outline.Layer == ThDrainageADCommon.Layer_HotPipe)
+            //    {
+            //        HotPipeAD.Add(x.Outline as Line);
+            //    }
+            //    else if (x.Outline.Layer == ThDrainageADCommon.Layer_CoolPipe)
+            //    {
+            //        CoolPipeAD.Add(x.Outline as Line);
+            //    }
+            //});
 
         }
 
@@ -129,21 +124,18 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         {
             VerticalPipeData.ForEach(x => transformer.Transform(x.Outline));
             HorizontalPipe.ForEach(x => transformer.Transform(x.Outline));
-
+            SelectPtsTopView = transformer.Transform(SelectPtsTopView);
             SanitaryTerminal.ForEach(x => transformer.Transform(x.Outline));
+            ValveWaterHeater.ForEach(x => transformer.Transform(x.Outline));
+
+            TchValve.ForEach(x => transformer.Transform(x));
+            TchOpeningSign.ForEach(x => transformer.Transform(x));
+            OpeningSign.ForEach(x => transformer.Transform(x));
 
         }
 
         public void Reset(ThMEPOriginTransformer transformer)
         {
-            VerticalPipeData.ForEach(x => transformer.Reset(x.Outline));
-            HorizontalPipe.ForEach(x => transformer.Reset(x.Outline));
-
-            HotPipeTopView.ForEach(x => transformer.Reset(x));
-            CoolPipeTopView.ForEach(x => transformer.Reset(x));
-            HotPipeAD.ForEach(x => transformer.Reset(x));
-            CoolPipeAD.ForEach(x => transformer.Reset(x));
-
 
         }
 
@@ -151,9 +143,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         {
             DrawUtils.ShowGeometry(HotPipeTopView, "l0HotPipeTopView", 230);
             DrawUtils.ShowGeometry(CoolPipeTopView, "l0CoolPipeTopView", 140);
-            DrawUtils.ShowGeometry(HotPipeAD, "l0HotPipeAD", 230);
-            DrawUtils.ShowGeometry(CoolPipeAD, "l0CoolPipeAD", 140);
-            VerticalPipe.ForEach(x => DrawUtils.ShowGeometry(x.StartPoint, "l0VerticalPipe", 140, r: 25));
+            DrawUtils.ShowGeometry(VerticalPipe, "l0VerticalPipe", 140);
 
             Terminal.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0terminal", 30));
             Terminal.ForEach(x => DrawUtils.ShowGeometry(x.Boundary.GetCenter(), x.Type.ToString(), "l0terminalType", 30, hight: 50));

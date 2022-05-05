@@ -11,6 +11,7 @@ using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
+using Dreambuild.AutoCAD;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -273,7 +274,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
             else
             {
-               edge.Source.CheckCascadeWithMiniBusbar(miniBusbar.Key);
+                edge.Source.CheckCascadeWithMiniBusbar(miniBusbar.Key);
             }
         }
 
@@ -381,6 +382,152 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 创建备用回路
+        /// </summary>
+        public static void CreatBackupCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        {
+            var edges = graph.OutEdges(node);
+            var OnePhaseCB = new List<ThPDSProjectGraphEdge>();
+            var OnePhaseRCD = new List<ThPDSProjectGraphEdge>();
+            var ThreePhaseCB = new List<ThPDSProjectGraphEdge>();
+            var ThreePhaseRCD = new List<ThPDSProjectGraphEdge>();
+
+            var BackupOnePhaseCB = new List<ThPDSProjectGraphEdge>();
+            var BackupOnePhaseRCD = new List<ThPDSProjectGraphEdge>();
+            var BackupThreePhaseCB = new List<ThPDSProjectGraphEdge>();
+            var BackupThreePhaseRCD = new List<ThPDSProjectGraphEdge>();
+
+            foreach (var edge in edges)
+            {
+                var breakers = edge.Details.CircuitForm.GetCircuitBreakers();
+                if (breakers.Count > 0)
+                {
+                    if (edge.Target.Type != PDSNodeType.None && edge.Target.Type != PDSNodeType.Empty)
+                    {
+                        if (edge.Target.Load.Phase == ThPDSPhase.三相)
+                        {
+                            if (breakers.Any(o => o.ComponentType == ComponentType.一体式RCD|| o.ComponentType == ComponentType.组合式RCD))
+                            {
+                                ThreePhaseRCD.Add(edge);
+                            }
+                            else
+                            {
+                                ThreePhaseCB.Add(edge);
+                            }
+                        }
+                        else
+                        {
+                            if (breakers.Any(o => o.ComponentType == ComponentType.一体式RCD|| o.ComponentType == ComponentType.组合式RCD))
+                            {
+                                OnePhaseRCD.Add(edge);
+                            }
+                            else
+                            {
+                                OnePhaseCB.Add(edge);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (edge.Target.Load.Phase == ThPDSPhase.三相)
+                        {
+                            if (breakers.Any(o => o.ComponentType == ComponentType.一体式RCD|| o.ComponentType == ComponentType.组合式RCD))
+                            {
+                                BackupThreePhaseRCD.Add(edge);
+                            }
+                            else
+                            {
+                                BackupThreePhaseCB.Add(edge);
+                            }
+                        }
+                        else
+                        {
+                            if (breakers.Any(o => o.ComponentType == ComponentType.一体式RCD|| o.ComponentType == ComponentType.组合式RCD))
+                            {
+                                BackupOnePhaseRCD.Add(edge);
+                            }
+                            else
+                            {
+                                BackupOnePhaseCB.Add(edge);
+                            }
+                        }
+                    }
+                }
+            }
+            //单项CB
+            {
+                int CreatBackupCircuitCount;
+                if(OnePhaseCB.Count > 0 && (CreatBackupCircuitCount = (int)Math.Ceiling(OnePhaseCB.Count * 0.2) - BackupOnePhaseCB.Count) > 0)
+                {
+                    var breakers = OnePhaseCB.SelectMany(o => o.Details.CircuitForm.GetCircuitBreakers());
+                    double maxRatedCurrent = breakers.Max(o => double.Parse(o.RatedCurrent));
+                    string modeRatedCurrent = breakers.GroupBy(o => o.RatedCurrent).OrderBy(o => o.Count()).ThenBy(o => double.Parse(o.Key)).First().Key;
+                    var newCircuits = new List<ThPDSProjectGraphEdge>();
+                    for (int i = 0; i < CreatBackupCircuitCount; i++)
+                    {
+                        newCircuits.Add(AddCircuit(graph, node, CircuitFormOutType.常规, ThPDSPhase.一相));
+                    }
+                    (newCircuits.First().Details.CircuitForm as Circuit.RegularCircuit).breaker.SetRatedCurrent(maxRatedCurrent.ToString());
+                    newCircuits.Skip(1).ForEach(o => (o.Details.CircuitForm as Circuit.RegularCircuit).breaker.SetRatedCurrent(modeRatedCurrent));
+                }
+            }
+
+            //三相CB
+            {
+                int CreatBackupCircuitCount;
+                if (ThreePhaseCB.Count > 0 && (CreatBackupCircuitCount = (int)Math.Ceiling(ThreePhaseCB.Count * 0.2) - BackupThreePhaseCB.Count) > 0)
+                {
+                    var breakers = ThreePhaseCB.SelectMany(o => o.Details.CircuitForm.GetCircuitBreakers());
+                    double maxRatedCurrent = breakers.Max(o => double.Parse(o.RatedCurrent));
+                    string modeRatedCurrent = breakers.GroupBy(o => o.RatedCurrent).OrderBy(o => o.Count()).ThenBy(o => double.Parse(o.Key)).First().Key;
+                    var newCircuits = new List<ThPDSProjectGraphEdge>();
+                    for (int i = 0; i < CreatBackupCircuitCount; i++)
+                    {
+                        newCircuits.Add(AddCircuit(graph, node, CircuitFormOutType.常规));
+                    }
+                    (newCircuits.First().Details.CircuitForm as Circuit.RegularCircuit).breaker.SetRatedCurrent(maxRatedCurrent.ToString());
+                    newCircuits.Skip(1).ForEach(o => (o.Details.CircuitForm as Circuit.RegularCircuit).breaker.SetRatedCurrent(modeRatedCurrent));
+                }
+            }
+
+            //单项RCD
+            {
+                int CreatBackupCircuitCount;
+                if (OnePhaseRCD.Count > 0 && (CreatBackupCircuitCount = (int)Math.Ceiling(OnePhaseRCD.Count * 0.2) - BackupOnePhaseRCD.Count) > 0)
+                {
+                    var breakers = OnePhaseRCD.SelectMany(o => o.Details.CircuitForm.GetCircuitBreakers());
+                    double maxRatedCurrent = breakers.Max(o => double.Parse(o.RatedCurrent));
+                    string modeRatedCurrent = breakers.GroupBy(o => o.RatedCurrent).OrderBy(o => o.Count()).ThenBy(o => double.Parse(o.Key)).First().Key;
+                    var newCircuits = new List<ThPDSProjectGraphEdge>();
+                    for (int i = 0; i < CreatBackupCircuitCount; i++)
+                    {
+                        newCircuits.Add(AddCircuit(graph, node, CircuitFormOutType.漏电, ThPDSPhase.一相));
+                    }
+                    (newCircuits.First().Details.CircuitForm as Circuit.LeakageCircuit).breaker.SetRatedCurrent(maxRatedCurrent.ToString());
+                    newCircuits.Skip(1).ForEach(o => (o.Details.CircuitForm as Circuit.LeakageCircuit).breaker.SetRatedCurrent(modeRatedCurrent));
+                }
+            }
+
+            //三相RCD
+            {
+                int CreatBackupCircuitCount;
+                if (ThreePhaseRCD.Count > 0 && (CreatBackupCircuitCount = (int)Math.Ceiling(ThreePhaseRCD.Count * 0.2) - BackupThreePhaseRCD.Count) > 0)
+                {
+                    var breakers = ThreePhaseRCD.SelectMany(o => o.Details.CircuitForm.GetCircuitBreakers());
+                    double maxRatedCurrent = breakers.Max(o => double.Parse(o.RatedCurrent));
+                    string modeRatedCurrent = breakers.GroupBy(o => o.RatedCurrent).OrderBy(o => o.Count()).ThenBy(o => double.Parse(o.Key)).First().Key;
+                    var newCircuits = new List<ThPDSProjectGraphEdge>();
+                    for (int i = 0; i < CreatBackupCircuitCount; i++)
+                    {
+                        newCircuits.Add(AddCircuit(graph, node, CircuitFormOutType.漏电));
+                    }
+                    (newCircuits.First().Details.CircuitForm as Circuit.LeakageCircuit).breaker.SetRatedCurrent(maxRatedCurrent.ToString());
+                    newCircuits.Skip(1).ForEach(o => (o.Details.CircuitForm as Circuit.LeakageCircuit).breaker.SetRatedCurrent(modeRatedCurrent));
+                }
+            }
+        }
+
+        /// <summary>
         /// 获取未分配负载
         /// </summary>
         /// <param name="FilterEdged">是否过滤已分配回路的负载</param>
@@ -391,7 +538,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             //分配负载 就是拿到所有的 未知负载
             return graph.Vertices
-                .Where(node => node.Type == PDSNodeType.None || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//未知负载/未分配负载
+                .Where(node => node.Type == PDSNodeType.Unkown || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//未知负载/未分配负载
                 .Where(node => !FilterEdged || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//已分配回路负载
                 .ToList();
         }
@@ -415,14 +562,62 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 新建负载
+        /// </summary>
+        /// <param name="defaultKV">额定电压</param>
+        /// <param name="defaultPhaseSequence">相序</param>
+        /// <param name="defaultLoadID">设备编号</param>
+        /// <param name="defaultPower">设备功率</param>
+        /// <param name="defaultDescription">描述信息</param>
+        /// <param name="defaultFireLoad">是否消防</param>
+        public static ThPDSProjectGraphNode CreatNewLoad(double defaultKV = 0.38, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
+        {
+            //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
+            var node = new ThPDSProjectGraphNode();
+            node.Load.KV = defaultKV;
+            if(defaultKV == 0.38)
+            {
+                node.Load.Phase = ThPDSPhase.三相;
+                node.Details.PhaseSequence = Circuit.PhaseSequence.L123;
+            }
+            else
+            {
+                if(defaultPhaseSequence == Circuit.PhaseSequence.L123)
+                {
+                    node.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                }
+                else
+                {
+                    node.Details.PhaseSequence = defaultPhaseSequence;
+                }
+            }
+            node.Load.ID.LoadID = defaultLoadID;
+            node.Details.HighPower = defaultPower;
+            node.Load.ID.Description = defaultDescription;
+            
+            node.Load.SetFireLoad(defaultFireLoad);
+            PDSProject.Instance.graphData.Graph.AddVertex(node);
+            return node;
+        }
+
+        /// <summary>
         /// 新建回路
         /// </summary>
-        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type)
+        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
-            //Step 1:新建未知负载
-            var target = new ThPDSProjectGraphNode();
-            graph.AddVertex(target);
-            //Step 2:新建回路
+            //Step 1:新建空负载
+            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
+            if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
+            {
+                target.Load.Phase = ThPDSPhase.一相;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
+            }
+            else if (defaultPhase == ThPDSPhase.一相)//三相配电箱搭配一相负载
+            {
+                target.Load.Phase = ThPDSPhase.一相;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+            }
+            //Step  2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
@@ -437,9 +632,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, string type)
         {
-            //Step 1:新建未知负载
-            var target = new ThPDSProjectGraphNode();
-            graph.AddVertex(target);
+            //Step 1:新建空负载
+            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:获取对应的CircuitFormOutType
@@ -448,11 +642,10 @@ namespace TianHua.Electrical.PDS.Project.Module
             newEdge.ComponentSelection(CircuitFormOutType);
             //Step 5:添加到Graph
             graph.AddEdge(newEdge);
-
             if (type.Contains("消防应急照明回路"))
             {
                 target.Load.Phase = ThPDSPhase.一相;
-                target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
+                target.Details.PhaseSequence = Circuit.PhaseSequence.L;
                 newEdge.Circuit.ID.Description = "疏散照明/指示灯";
             }
             return newEdge;
@@ -526,7 +719,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void DeleteSmallBusbar(ThPDSProjectGraphNode node, MiniBusbar miniBusbar)
         {
-            if(node.Details.MiniBusbars.ContainsKey(miniBusbar))
+            if (node.Details.MiniBusbars.ContainsKey(miniBusbar))
             {
                 node.Details.MiniBusbars.Remove(miniBusbar);
             }
@@ -615,7 +808,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void DeleteControlCircuit(ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit)
         {
-            if(node.Details.SecondaryCircuits.ContainsKey(secondaryCircuit))
+            if (node.Details.SecondaryCircuits.ContainsKey(secondaryCircuit))
             {
                 node.Details.SecondaryCircuits.Remove(secondaryCircuit);
             }
@@ -812,6 +1005,38 @@ namespace TianHua.Electrical.PDS.Project.Module
                 //其他目前暂不支持
                 throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        /// 导出项目
+        /// </summary>
+        public static void ExportProject(string filePath, string fileName)
+        {
+            PDSProject.Instance.ExportProject(filePath, fileName);
+        }
+
+        /// <summary>
+        /// 导入项目
+        /// </summary>
+        public static void ImportProject(string filePath)
+        {
+            PDSProject.Instance.Load(filePath);
+        }
+
+        /// <summary>
+        /// 导出全局配置
+        /// </summary>
+        public static void ExportGlobalConfiguration(string filePath, string fileName)
+        {
+            PDSProject.Instance.ExportGlobalConfiguration(filePath, fileName);
+        }
+
+        /// <summary>
+        /// 导入全局配置
+        /// </summary>
+        public static void ImportGlobalConfiguration(string filePath)
+        {
+            PDSProject.Instance.ImportGlobalConfiguration(filePath);
         }
     }
 }

@@ -30,16 +30,26 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                FireLoad = false,
-                Location = new ThPDSLocation
-                {
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
-                }
             };
+            thPDSDistBox.SetLocation(new ThPDSLocation
+            {
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+            });
             thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
             foreach (var str in marks)
             {
                 thPDSDistBox.ID.Description += StringClean(str);
+            }
+
+            thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
+
+            // 处理无标注时识别ACa不准确的情况
+            if (thPDSDistBox.ID.LoadID.Contains("ACa")
+                && thPDSDistBox.LoadTypeCat_2 != ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel)
+            {
+                thPDSDistBox.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel;
+                thPDSDistBox.CircuitType = ThPDSCircuitType.EmergencyPowerEquipment;
+                thPDSDistBox.SetFireLoad(true);
             }
 
             return thPDSDistBox;
@@ -65,23 +75,38 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = loadData.Phase,
                 DemandFactor = loadData.DemandFactor,
                 PowerFactor = loadData.PowerFactor,
-                Location = new ThPDSLocation
-                {
-                    ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
-                },
                 FrequencyConversion = frequencyConversion,
             };
-
-            var fireLoad = false;
-            marks.ForEach(str =>
+            thPDSLoad.SetLocation(new ThPDSLocation
             {
-                if (str.Contains(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER))
-                {
-                    fireLoad = true;
-                }
+                ReferenceDWG = loadData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(loadData.Position),
             });
-            thPDSLoad.FireLoad = fireLoad;
+
+            if (loadData.FireLoad == ThPDSFireLoad.FireLoad)
+            {
+                thPDSLoad.SetFireLoad(true);
+            }
+            else if (loadData.FireLoad == ThPDSFireLoad.NonFireLoad)
+            {
+                thPDSLoad.SetFireLoad(false);
+            }
+            else if (loadData.FireLoad == ThPDSFireLoad.Unknown)
+            {
+                marks.ForEach(str =>
+                {
+                    if (str.Contains(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER))
+                    {
+                        thPDSLoad.SetFireLoad(true);
+                        return;
+                    }
+                    else if (str.Contains(ThPDSCommon.NON_PROPERTY_VALUE_FIRE_POWER))
+                    {
+                        thPDSLoad.SetFireLoad(false);
+                        return;
+                    }
+                });
+            }
 
             if (needCopy)
             {
@@ -119,15 +144,21 @@ namespace TianHua.Electrical.PDS.Service
 
             if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Fan)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+                var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
                 if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
                 {
-                    thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                    cat3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                    thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                    thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
                 }
             }
             else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.Pump)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                var cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             }
 
             return thPDSLoad;
@@ -148,31 +179,56 @@ namespace TianHua.Electrical.PDS.Service
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                         ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
-                FireLoad = distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY)
-                    ? distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER) : false,
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
-                Location = new ThPDSLocation
-                {
-                    ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
-                    BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
-                },
                 FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
             };
+            thPDSLoad.SetLocation(new ThPDSLocation
+            {
+                ReferenceDWG = distBoxData.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
+            });
 
-            thPDSLoad.LoadTypeCat_3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+            if (distBoxData.FireLoad == ThPDSFireLoad.FireLoad)
+            {
+                thPDSLoad.SetFireLoad(true);
+            }
+            else if (distBoxData.FireLoad == ThPDSFireLoad.NonFireLoad)
+            {
+                thPDSLoad.SetFireLoad(false);
+            }
+            else if (distBoxData.FireLoad == ThPDSFireLoad.Unknown)
+            {
+                if (distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                {
+                    var fireLoad = distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
+                    thPDSLoad.SetFireLoad(fireLoad);
+                }
+                else
+                {
+                    thPDSLoad.SetFireLoad(ThPDSFireLoad.Unknown);
+                }
+            }
+
+            var cat3 = MatchFanIDCat3(thPDSLoad.ID.LoadID);
+            thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+            thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                cat3 = MatchFanDescriptionCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             }
             if (thPDSLoad.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
             {
-                thPDSLoad.LoadTypeCat_3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                cat3 = MatchPumpCat3(thPDSLoad.ID.Description);
+                thPDSLoad.LoadTypeCat_3 = cat3.Item1;
+                thPDSLoad.SetFireLoad(SetCat3FireLoad(thPDSLoad.GetFireLoad(), cat3));
             }
 
             return thPDSLoad;
@@ -197,7 +253,14 @@ namespace TianHua.Electrical.PDS.Service
                         var m = r.Match(infos[i]);
                         if (m.Success)
                         {
-                            if (m.Value.Contains("-W") || m.Value.Contains("/W"))
+                            var value = m.Value.Replace("/", "-");
+                            var check1 = "-W[a-zA-Z]+[-0-9]+";
+                            var regex1 = new Regex(@check1);
+                            var match1 = regex1.Match(value);
+                            var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                            var regex2 = new Regex(@check2);
+                            var match2 = regex2.Match(value);
+                            if (match1.Success || match2.Success)
                             {
                                 circuitMarks.Add(m.Value);
                             }
@@ -219,19 +282,26 @@ namespace TianHua.Electrical.PDS.Service
             circuitMarks.Distinct().ForEach(o =>
             {
                 // 过滤无效回路信息
-                if(o.Contains(id.LoadID))
+                if (!string.IsNullOrEmpty(id.LoadID) && o.Contains(id.LoadID))
                 {
                     return;
                 }
 
-                var value = o.Replace("/", "-");
-                var checkID = "-W[a-zA-Z]+[0-9]+";
-                var regexID = new Regex(@checkID);
-                var matchID = regexID.Match(value);
-                if (matchID.Success)
+                var check1 = "-W[a-zA-Z]+[-0-9]+";
+                var regex1 = new Regex(@check1);
+                var match1 = regex1.Match(o);
+                var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                var regex2 = new Regex(@check2);
+                var match2 = regex2.Match(o);
+                if (match1.Success)
                 {
-                    id.SourcePanelID.Add(o.Replace(matchID.Value, ""));
-                    id.CircuitID.Add(matchID.Value.Replace("-", ""));
+                    id.SourcePanelID.Add(o.Replace(match1.Value, ""));
+                    id.CircuitID.Add(match1.Value.Replace("-", ""));
+                }
+                else if (match2.Success)
+                {
+                    id.SourcePanelID.Add(o.Replace(match2.Value, ""));
+                    id.CircuitID.Add(match2.Value.Remove(0, 1));
                 }
             });
 
@@ -253,27 +323,25 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        var check = "";
-                        if (str.Contains("-W"))
-                        {
-                            check = "-W.+";
-                        }
-                        else if (str.Contains("/W"))
-                        {
-                            check = "/W.+";
-                        }
+                        var value = str.Replace("/", "-");
+                        var check1 = "-W[a-zA-Z]+[-0-9]+";
+                        var regex1 = new Regex(@check1);
+                        var match1 = regex1.Match(value);
+                        var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                        var regex2 = new Regex(@check2);
+                        var match2 = regex2.Match(value);
 
-                        if (string.IsNullOrEmpty(check))
+                        if (match1.Success)
                         {
-                            break;
+                            searchedString.Add(value);
+                            panelIDs.Add(value.Replace(match1.Value, ""));
+                            circuitIDs.Add(match1.Value.Substring(1, match1.Value.Length - 1));
                         }
-                        var r = new Regex(@check);
-                        var m = r.Match(str);
-                        if (m.Success)
+                        else if (match2.Success)
                         {
-                            searchedString.Add(str);
-                            panelIDs.Add(str.Replace(m.Value, ""));
-                            circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
+                            searchedString.Add(value);
+                            panelIDs.Add(value.Replace(match2.Value, ""));
+                            circuitIDs.Add(match2.Value.Substring(1, match2.Value.Length - 1));
                         }
                         break;
                     }
@@ -324,24 +392,24 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        if (str.Contains("-W") || str.Contains("/W"))
+                        var value = str.Replace("/", "-");
+                        var check1 = "-W[a-zA-Z]+[-0-9]+";
+                        var regex1 = new Regex(@check1);
+                        var match1 = regex1.Match(value);
+                        var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
+                        var regex2 = new Regex(@check2);
+                        var match2 = regex2.Match(value);
+
+                        if (match1.Success)
                         {
-                            var check = "";
-                            if (str.Contains("-W"))
-                            {
-                                check = "-W[a-zA-Z]+[0-9]+";
-                            }
-                            else if (str.Contains("/W"))
-                            {
-                                check = "/W[a-zA-Z]+[0-9]+";
-                            }
-                            var r = new Regex(@check);
-                            var m = r.Match(str);
-                            if (m.Success)
-                            {
-                                panelIDs.Add(str.Replace(m.Value, ""));
-                                circuitIDs.Add(m.Value.Substring(1, m.Value.Length - 1));
-                            }
+                            panelIDs.Add(value.Replace(match1.Value, ""));
+                            circuitIDs.Add(match1.Value.Substring(1, match1.Value.Length - 1));
+                            doSearch = false;
+                        }
+                        else if (match2.Success)
+                        {
+                            panelIDs.Add(value.Replace(match2.Value, ""));
+                            circuitIDs.Add(match2.Value.Substring(1, match2.Value.Length - 1));
                             doSearch = false;
                         }
                     }
@@ -350,14 +418,21 @@ namespace TianHua.Electrical.PDS.Service
 
             if (doSearch)
             {
-                var check = "W[a-zA-Z]+[0-9]+";
-                var r = new Regex(@check);
+                var check1 = "W[a-zA-Z]+[-0-9]+";
+                var regex1 = new Regex(@check1);
+                var check2 = "[0-9]W[0-9]{3}[-][0-9]";
+                var regex2 = new Regex(@check2);
                 infos.ForEach(str =>
                 {
-                    var m = r.Match(str);
-                    if (m.Success)
+                    var match1 = regex1.Match(str);
+                    var match2 = regex2.Match(str);
+                    if (match1.Success)
                     {
-                        circuitIDs.Add(m.Value);
+                        circuitIDs.Add(match1.Value);
+                    }
+                    else if (match2.Success)
+                    {
+                        circuitIDs.Add(match2.Value);
                     }
                 });
             }
@@ -541,72 +616,76 @@ namespace TianHua.Electrical.PDS.Service
             return Tuple.Create(exist, primaryAvail, spareAvail);
         }
 
-        private static ThPDSLoadTypeCat_3 MatchFanIDCat3(string loadID)
+        private static Tuple<ThPDSLoadTypeCat_3, bool> MatchFanIDCat3(string loadID)
         {
             if (loadID.Contains("ESF"))
             {
-                return ThPDSLoadTypeCat_3.SmokeExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SmokeExhaustFan, true);
             }
             else if (loadID.Contains("SSF"))
             {
-                return ThPDSLoadTypeCat_3.MakeupAirFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.MakeupAirFan, true);
             }
             else if (loadID.Contains("SPF"))
             {
-                return ThPDSLoadTypeCat_3.StaircasePressurizationFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.StaircasePressurizationFan, true);
             }
             else if (loadID.Contains("E(S)F"))
             {
-                return ThPDSLoadTypeCat_3.ExhaustFan_Smoke;
+                return Tuple.Create(ThPDSLoadTypeCat_3.ExhaustFan_Smoke, true);
             }
             else if (loadID.Contains("S(S)F"))
             {
-                return ThPDSLoadTypeCat_3.SupplyFan_Smoke;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SupplyFan_Smoke, true);
             }
             else if (loadID.Contains("EF"))
             {
-                return ThPDSLoadTypeCat_3.ExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.ExhaustFan, false);
             }
             else if (loadID.Contains("SF"))
             {
-                return ThPDSLoadTypeCat_3.SupplyFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SupplyFan, false);
             }
             else if (loadID.Contains("EKF"))
             {
-                return ThPDSLoadTypeCat_3.KitchenExhaustFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.KitchenExhaustFan, false);
             }
-            return ThPDSLoadTypeCat_3.None;
+            return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
         }
 
-        public static ThPDSLoadTypeCat_3 MatchFanDescriptionCat3(string description)
+        public static Tuple<ThPDSLoadTypeCat_3, bool> MatchFanDescriptionCat3(string description)
         {
-            if (description.Contains("事故风机"))
+            if (description.Contains("事故风机") || description.Contains("事故排风") || description.Contains("事故送风"))
             {
-                return ThPDSLoadTypeCat_3.EmergencyFan;
+                return Tuple.Create(ThPDSLoadTypeCat_3.EmergencyFan, false);
             }
             else
             {
-                return ThPDSLoadTypeCat_3.None;
+                return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
             }
         }
 
-        public static ThPDSLoadTypeCat_3 MatchPumpCat3(string description)
+        public static Tuple<ThPDSLoadTypeCat_3, bool> MatchPumpCat3(string description)
         {
             if (description.Contains("生活水泵"))
             {
-                return ThPDSLoadTypeCat_3.DomesticWaterPump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.DomesticWaterPump, false);
             }
             else if (description.Contains("消防泵") || description.Contains("喷淋泵") || description.Contains("消火栓泵"))
             {
-                return ThPDSLoadTypeCat_3.FirePump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.FirePump, true);
+            }
+            else if (description.Contains("稳压泵"))
+            {
+                return Tuple.Create(ThPDSLoadTypeCat_3.RegulatorsPump, false);
             }
             else if (description.Contains("潜水泵"))
             {
-                return ThPDSLoadTypeCat_3.SubmersiblePump;
+                return Tuple.Create(ThPDSLoadTypeCat_3.SubmersiblePump, false);
             }
             else
             {
-                return ThPDSLoadTypeCat_3.None;
+                return Tuple.Create(ThPDSLoadTypeCat_3.None, false);
             }
         }
 
@@ -624,6 +703,25 @@ namespace TianHua.Electrical.PDS.Service
                 str = str.Remove(0, 1);
             }
             return str;
+        }
+
+        private ThPDSFireLoad SetCat3FireLoad(ThPDSFireLoad fireLoad, Tuple<ThPDSLoadTypeCat_3, bool> cat3)
+        {
+            if (fireLoad != ThPDSFireLoad.Unknown)
+            {
+                return fireLoad;
+            }
+            else
+            {
+                if (cat3.Item1 != ThPDSLoadTypeCat_3.None)
+                {
+                    return cat3.Item2 ? ThPDSFireLoad.FireLoad : ThPDSFireLoad.NonFireLoad;
+                }
+                else
+                {
+                    return ThPDSFireLoad.Unknown;
+                }
+            }
         }
     }
 }

@@ -10,6 +10,7 @@
         public ThPDSPhase Phase { get; set; }
         public double DemandFactor { get; set; }
         public double PowerFactor { get; set; }
+        public ThPDSFireLoad FireLoad { get; set; }
 
         public ThPDSBlockInfo()
         {

@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.UI
     {
         public void Initialize()
         {
-           
+
         }
 
         public void Terminate()
@@ -38,6 +38,17 @@ namespace TianHua.Electrical.PDS.UI
             if (win is not null) return;
             win = ElecSandboxUI.TryCreateSingleton();
             if (win == null) return;
+            int w = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+            int h = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
+            win.Loaded += (s, e) =>
+            {
+                win.Width = w - 200;
+                win.Height = h - 200;
+                if (win.Width > 1300) win.Width = 1300;
+                if (win.Height > 850) win.Height = 850;
+                win.Left = (w - win.Width) / 2;
+                win.Top = (h - win.Height) / 2;
+            };
             AcadApp.ShowModelessWindow(win);
         }
 
@@ -68,7 +79,7 @@ namespace TianHua.Electrical.PDS.UI
             //modifyCmd.Zoom();
 
             // 创建标注
-            modifyCmd.AddLoadDimension();
+            //modifyCmd.AddLoadDimension();
         }
     }
 }

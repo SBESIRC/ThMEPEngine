@@ -18,7 +18,7 @@ namespace ThMEPHVAC.Model
             this.portMarkName = portMarkName;
             this.portMarkLayer = portMarkLayer;
         }
-        public void InsertMark(PortParam portParam, double portWidth, double portHeight, double textAngle, Point3d p)
+        public void InsertMark(PortParam portParam, double portWidth, double portHeight, Point3d p)
         {
             using (var acadDb = AcadDatabase.Active())
             {

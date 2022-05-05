@@ -86,6 +86,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 电动机-分立元件 配置
     /// </summary>
+    [Serializable]
     public class Motor_DiscreteComponentsInfo
     {
         /// <summary>
@@ -127,6 +128,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 电动机-分立元件星三角启动 配置
     /// </summary>
+    [Serializable]
     public class Motor_DiscreteComponentsStarTriangleStartInfo
     {
         /// <summary>
@@ -183,6 +185,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 电动机-CPS 配置
     /// </summary>
+    [Serializable]
     public class Motor_CPS
     {
         /// <summary>
@@ -214,6 +217,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 电动机-CPS星三角启动 配置
     /// </summary>
+    [Serializable]
     public class Motor_CPSStarTriangleStartInfo
     {
         /// <summary>
@@ -260,6 +264,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 双速电动机-分立元件D-YY 配置
     /// </summary>
+    [Serializable]
     public class TwoSpeedMotor_DiscreteComponentsDYYInfo
     {
         /// <summary>
@@ -296,6 +301,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 双速电动机-分立元件Y-Y 配置
     /// </summary>
+    [Serializable]
     public class TwoSpeedMotor_DiscreteComponentsYYInfo
     {
         /// <summary>
@@ -327,6 +333,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
     /// <summary>
     /// 双速电动机-CPS 配置
     /// </summary>
+    [Serializable]
     public class TwoSpeedMotor_CPSInfo
     {
         /// <summary>

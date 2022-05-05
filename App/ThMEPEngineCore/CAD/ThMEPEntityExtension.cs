@@ -130,8 +130,141 @@ namespace ThMEPEngineCore.CAD
         {
             // Reference:
             // https://knowledge.autodesk.com/support/autocad/learn-explore/caas/sfdcarticles/sfdcarticles/how-to-flatten-a-drawing-in-autocad.html
-            geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
-            geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+            if (geos is Line line)
+            {
+                if (ValidVector(line.Normal))
+                {
+                    line.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    line.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Polyline polyline)
+            {
+                if (ValidVector(polyline.Normal))
+                {
+                    polyline.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    polyline.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Circle circle)
+            {
+                if (ValidVector(circle.Normal))
+                {
+                    circle.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    circle.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Arc arc)
+            {
+                if (ValidVector(arc.Normal))
+                {
+                    arc.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    arc.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is MPolygon mPolygon)
+            {
+                if (ValidVector(mPolygon.Normal))
+                {
+                    mPolygon.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    mPolygon.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is BlockReference block)
+            {
+                if (ValidVector(block.Normal))
+                {
+                    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    block.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is DBPoint point)
+            {
+                if (ValidVector(point.Normal))
+                {
+                    point.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    point.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is DBText text)
+            {
+                if (ValidVector(text.Normal))
+                {
+                    text.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    text.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Dimension dimension)
+            {
+                if (ValidVector(dimension.Normal))
+                {
+                    dimension.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    dimension.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Hatch hatch)
+            {
+                if (ValidVector(hatch.Normal))
+                {
+                    hatch.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    hatch.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Leader leader)
+            {
+                if (ValidVector(leader.Normal))
+                {
+                    leader.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    leader.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is MLeader mLeader)
+            {
+                if (ValidVector(mLeader.Normal))
+                {
+                    mLeader.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    mLeader.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is MText mText)
+            {
+                if (ValidVector(mText.Normal))
+                {
+                    mText.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    mText.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+            else if (geos is Solid solid)
+            {
+                if (ValidVector(solid.Normal))
+                {
+                    solid.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                    solid.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+                    return;
+                }
+            }
+
+            // 其余类型暂不做变换
+        }
+
+        private static bool ValidVector(Vector3d vector)
+        {
+            var rightSystem = new Vector3d(0, 0, 1);
+            var leftSystem = new Vector3d(0, 0, -1);
+            return vector.Equals(rightSystem) || vector.Equals(leftSystem);
         }
     }
 }

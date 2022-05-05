@@ -1,5 +1,8 @@
-﻿namespace TianHua.Electrical.PDS.Model
+using System;
+
+namespace TianHua.Electrical.PDS.Model
 {
+    [Serializable]
     public class ThPDSLocation
     {
         public ThPDSLocation()

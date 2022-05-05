@@ -21,6 +21,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         /// </summary>
         public static List<ConductorComponentInfo> WireConductorInfos = new List<ConductorComponentInfo>();
     }
+
+    [Serializable]
     public class ConductorComponentInfo
     {
         /// <summary>

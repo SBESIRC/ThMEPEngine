@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Operation
 {
     public class GridService
     {
-        readonly double tol = 10;
+        public double tol = 200;
         double minSpace = 4000;
 
         /// <summary>

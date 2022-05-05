@@ -10,6 +10,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 回路图
         /// </summary>
         public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph;
+
         /// <summary>
         /// 构造函数
         /// </summary>

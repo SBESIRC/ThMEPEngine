@@ -1,12 +1,15 @@
-﻿using TianHua.Electrical.PDS.Model;
+﻿using System;
+using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public abstract class ThPDSProjectGraphNodeCompareTag : ThPDSProjectGraphNodeTag
     {
         //
     }
 
+    [Serializable]
     public class ThPDSProjectGraphNodeIdChangeTag : ThPDSProjectGraphNodeCompareTag
     {
         public bool ChangeFrom { get; set; }
@@ -19,6 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
     }
 
+    [Serializable]
     public class ThPDSProjectGraphNodeExchangeTag : ThPDSProjectGraphNodeCompareTag
     {
         public string ExchangeToID { get; set; }

@@ -1,17 +1,23 @@
-﻿using Dreambuild.AutoCAD;
+﻿using System;
 using QuikGraph;
-using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Dreambuild.AutoCAD;
+using System.IO.Compression;
+using QuikGraph.Serialization;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
-using TianHua.Electrical.PDS.Service;
 using DwgGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode, TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using Newtonsoft.Json;
+using System.Runtime.Serialization.Formatters.Binary;
+using ICSharpCode.SharpZipLib.Zip;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Reflection;
 
 namespace TianHua.Electrical.PDS.Project
 {
@@ -44,12 +50,12 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="url"></param>
         public void Load(string url)
         {
-            if(!InitializedState)
+            if (!InitializedState)
             {
                 this.LoadGlobalConfig();
                 InitializedState = true;
             }
-            if(string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(url))
             {
                 //Creat New Project
                 this.graphData = new ProjectGraph().CreatPDSProjectGraph();
@@ -62,7 +68,7 @@ namespace TianHua.Electrical.PDS.Project
             }
             else
             {
-                //Load Choise Project
+                ImportProject(url);
                 if (!instance.DataChanged.IsNull())
                 {
                     instance.DataChanged();//推送消息告知VM刷新
@@ -142,7 +148,7 @@ namespace TianHua.Electrical.PDS.Project
                     node.Load.InstalledCapacity.HighPower = node.Load.InstalledCapacity.HighPower > 0 ? node.Details.HighPower : 0;
                 });
                 ThPDSGraphCompareService compareService = new ThPDSGraphCompareService();
-                compareService.Diff(ProjectGraph , this.graphData.Graph);
+                compareService.Diff(ProjectGraph, this.graphData.Graph);
                 return ProjectGraph;
             }
             else
@@ -157,7 +163,7 @@ namespace TianHua.Electrical.PDS.Project
             var newNode = new ThPDSProjectGraphNode();
             newNode.Type = node.NodeType;
             newNode.Load = node.Loads.Count == 0 ? new ThPDSLoad() : node.Loads[0];
-            if(node.Loads.Count > 1)
+            if (node.Loads.Count > 1)
             {
                 //多负载必定单功率
                 newNode.Load.InstalledCapacity.HighPower = node.Loads.Sum(o => o.InstalledCapacity.IsNull() ? 0 : o.InstalledCapacity.HighPower);
@@ -175,6 +181,164 @@ namespace TianHua.Electrical.PDS.Project
             }
             newNode.Details.IsOnlyLoad = node.Loads.Count == 1;
             return newNode;
+        }
+
+        public void ExportProject(string filePath, string fileName)
+        {
+            var path = Path.Combine(filePath, fileName);
+            try
+            {
+                string[] ConfigFiles = new string[2];
+                var GraphFile = ExportGraph(filePath);
+                var GlobalConfigurationFile = ExportGlobalConfiguration(filePath);
+                ConfigFiles[0] = GraphFile;
+                ConfigFiles[1] = GlobalConfigurationFile;
+                using (ZipOutputStream outStream = new ZipOutputStream(File.Create(path)))
+                {
+                    Zip(ConfigFiles, outStream,"PDSProjectKey");
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public void ImportProject(string filePath)
+        {
+            try
+            {
+                var files = UnZip(filePath, "PDSProjectKey");
+                var GraphFileBuffer = files.First(o => o.Key.Equals("Graph.Config")).Value;
+                var GlobalConfigurationFileBuffer = files.First(o => o.Key.Equals("GlobalConfiguration.Config")).Value;
+                GraphFileBuffer.Seek(0, SeekOrigin.Begin);
+                //1.直接序列化会报<无法找到程序集的错误，本质原因是"提示找不到程序集，原因是序列化时把序列化类的命名空间等信息保存了，但应用程序和类库的命名空间可能是不一样的,所以提示找不到程序集">
+                //graphData.Graph = GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>();
+
+                //2.重写SerializationBinder，可以解决上述问题，但是会有另外一个问题无法解决，就是反序列化时GetType无法找到对应的Type
+                var uBinder = new PDSProjectUBinder();
+                this.graphData = new ThPDSProjectGraph(GraphFileBuffer.DeserializeFromBinary<ThPDSProjectGraphNode, ThPDSProjectGraphEdge, ProjectGraph>(uBinder));
+
+                GlobalConfigurationFileBuffer.Seek(0, SeekOrigin.Begin);
+                BinaryFormatter bf = new BinaryFormatter();
+                string data = bf.Deserialize(GlobalConfigurationFileBuffer).ToString();
+                this.projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
+            }
+            catch (Exception ex) 
+            {
+            }
+        }
+
+        public void ImportGlobalConfiguration(string filePath)
+        {
+            try
+            {
+                FileStream fs = new FileStream(filePath, FileMode.Open);
+                try
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    string data = bf.Deserialize(fs).ToString();
+                    fs.Close();
+                    projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
+                }
+                catch (Exception ex)
+                {
+                    fs.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        private string ExportGraph(string filePath,string fileName = "Graph.Config")
+        {
+            var path = Path.Combine(filePath, fileName);
+            using (var stream = File.Open(path, FileMode.Create))
+            {
+                graphData.Graph.SerializeToBinary(stream);
+            }
+            return path;
+        }
+
+        public string ExportGlobalConfiguration(string filePath, string fileName = "GlobalConfiguration.Config")
+        {
+            var path = Path.Combine(filePath, fileName);
+            var data = JsonConvert.SerializeObject(projectGlobalConfiguration, Formatting.Indented);
+            //var dataModel = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
+            //File.WriteAllText(path, data);
+            FileInfo fileInfo = new FileInfo(path);
+            if (!Directory.Exists(fileInfo.DirectoryName))
+            {
+                Directory.CreateDirectory(fileInfo.DirectoryName);
+            }
+            FileStream fs = new FileStream(path, FileMode.Create);
+            BinaryFormatter bf = new BinaryFormatter();
+            bf.Serialize(fs, data);
+            fs.Close();
+            return path;
+        }
+
+        public void Zip(string[] files, ZipOutputStream outStream, string pwd)
+        {
+            try
+            {
+                for (int i = 0; i < files.Length; i++)
+                {
+                    if (!File.Exists(files[i]))
+                    {
+                        throw new Exception("文件不存在");
+                    }
+                    using (FileStream fs = File.OpenRead(files[i]))
+                    {
+                        byte[] buffer = new byte[fs.Length];
+                        fs.Read(buffer, 0, buffer.Length);
+                        if (!string.IsNullOrWhiteSpace(pwd))
+                        {
+                            outStream.Password = pwd;
+                        }
+                        ZipEntry ZipEntry = new ZipEntry(Path.GetFileName(files[i]));
+                        outStream.PutNextEntry(ZipEntry);
+                        outStream.Write(buffer, 0, buffer.Length);
+                    }
+                    File.Delete(files[i]);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public Dictionary<string , MemoryStream> UnZip(string zipFile, string pwd)
+        {
+            Dictionary<string, MemoryStream> result = new Dictionary<string, MemoryStream>();
+            try
+            {
+                using (ZipInputStream zipInputStream = new ZipInputStream(File.OpenRead(zipFile)))
+                {
+                    if (!string.IsNullOrWhiteSpace(pwd))
+                    {
+                        zipInputStream.Password = pwd;
+                    }
+                    ZipEntry theEntry;
+                    while ((theEntry = zipInputStream.GetNextEntry()) != null)
+                    {
+                        byte[] data = new byte[1024 * 1024];
+                        int dataLength = 0;
+                        MemoryStream stream = new MemoryStream();
+                        while ((dataLength = zipInputStream.Read(data, 0, data.Length)) > 0)
+                        {
+                            stream.Write(data, 0, dataLength);
+                        }
+                        result.Add(theEntry.Name, stream);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return result;
         }
     }
 }

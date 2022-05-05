@@ -1,5 +1,8 @@
-﻿namespace TianHua.Electrical.PDS.Project.Module
+﻿using System;
+
+namespace TianHua.Electrical.PDS.Project.Module
 {
+    [Serializable]
     public class ThPDSProjectGraphNodeCompositeTag : ThPDSProjectGraphNodeTag
     {
         public ThPDSProjectGraphNodeDataTag DataTag { get; set; }

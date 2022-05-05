@@ -21,7 +21,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         {
             List<ExtendLineModel> resLines = extendLines.Where(x => x.priority == Priority.startExtendLine || x.priority == Priority.MergeStartLine).ToList();
             List<ExtendLineModel> otherLines = extendLines.Except(resLines).ToList();
-
+            
             resLines.AddRange(MergeMainLines(otherLines, xLanes, yLanes));
             resLines.AddRange(MergeMainLines(otherLines, yLanes, xLanes));
 

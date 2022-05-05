@@ -64,7 +64,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PopulationSize = parameterViewModel == null ? 80 : parameterViewModel.PopulationCount;//种群数量
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             //默认值 核心数 -1,最多为种群数
-            ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);
+            //ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);
+            ProcessCount = Math.Min(180, PopulationSize);//hard code 180
             ProcList = new List<Process>();
             MutexLists = new List<List<Mutex>>();
             MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
@@ -233,6 +234,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
+            Logger?.Information($"CPU数量："+ Environment.ProcessorCount.ToString());
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             List<MPChromosome> selected = new List<MPChromosome>();
@@ -410,8 +412,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 using (MemoryMappedViewStream stream = mmf.CreateViewStream())
                 {
-                    IFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, chromosomeCollection);
+                    //IFormatter formatter = new BinaryFormatter();
+                    //formatter.Serialize(stream, chromosomeCollection);
+                    chromosomeCollection.WriteToStream(stream);
                     SubAreaParkingCnt.ClearNewAdded();//清空上一轮记录
                 }
                 var ParkingCntFileList = new List<MemoryMappedFile>();
@@ -427,7 +430,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Logger?.Information($"写入数据用时: {stopWatch.Elapsed.TotalSeconds -t_pre}秒");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
 
-                currentMutexList.ForEach(mutex =>mutex.ReleaseMutex());//起始锁解锁，子进程开始计算
+                currentMutexList.Reverse();
+                currentMutexList.ForEach(mutex => mutex.ReleaseMutex());//起始锁解锁，子进程开始计算
                 //Thread.Sleep(100);
                 currentMutexList.ForEach(mutex => mutex.WaitOne(-1,true));//等待结束
                 currentMutexList.ForEach(mutex => mutex.Dispose());
@@ -441,9 +445,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var submmf = ParkingCntFileList[idx];
                     using (MemoryMappedViewStream stream = submmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
                     {
-                        IFormatter formatter = new BinaryFormatter();
-                        var subProcResult = ((List<int>,List<List<(double, double)>>, List<int>))formatter.Deserialize(stream);
-                        UpdateParkingNumber(idx,inputSolution, subProcResult);
+                        //IFormatter formatter = new BinaryFormatter();
+                        //var subProcResult = ((List<int>,List<List<(double, double)>>, List<int>))formatter.Deserialize(stream);
+                        BinaryReader reader = new BinaryReader(stream);
+                        var ParkingCnts = ReadWriteEx.ReadInts(reader);
+                        var subProcCached = ReadWriteEx.ReadCached(reader);
+                        UpdateParkingNumber(idx,inputSolution, ParkingCnts, subProcCached);
                     }
                 }
                 ParkingCntFileList.ForEach(submmf => submmf.Dispose());
@@ -479,6 +486,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
             }
             SubAreaParkingCnt.Update(subProcResult.Item2, subProcResult.Item3);//更新子进程记录
+
+        }
+
+        private void UpdateParkingNumber(int idx, List<MPChromosome> inputSolution, List<int> parkingCnts, Dictionary<LinearRing, int> subProcResult)
+        {
+
+            for (int i = 0; i < parkingCnts.Count; i++)
+            {
+                inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
+            }
+            SubAreaParkingCnt.Update(subProcResult);//更新子进程记录
 
         }
         private List<List<MPChromosome>> CreateNextGeneration2(List<MPChromosome> solutions)
