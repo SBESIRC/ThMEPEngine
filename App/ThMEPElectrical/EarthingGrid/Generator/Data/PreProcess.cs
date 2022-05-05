@@ -12,14 +12,14 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
 {
     class PreProcess
     {
-        private DBObjectCollection Beams = new DBObjectCollection();
+        //private DBObjectCollection Beams = new DBObjectCollection();
         private DBObjectCollection Columns = new DBObjectCollection();
         private DBObjectCollection Conductors = new DBObjectCollection();
-        private DBObjectCollection Shearwalls  = new DBObjectCollection();
+        //private DBObjectCollection Shearwalls  = new DBObjectCollection();
         private DBObjectCollection MainBuildings = new DBObjectCollection();
         private DBObjectCollection ConductorWires = new DBObjectCollection();
         private DBObjectCollection ArchitectOutlines = new DBObjectCollection();
-        private List<Tuple<Point3d, Point3d>> BeamCenterLinePts = new List<Tuple<Point3d, Point3d>>();
+        //private List<Tuple<Point3d, Point3d>> BeamCenterLinePts = new List<Tuple<Point3d, Point3d>>();
         private Dictionary<Polyline, List<Polyline>> buildingWithWalls = new Dictionary<Polyline, List<Polyline>>();
 
         public List<Polyline> outlines = new List<Polyline>();
@@ -36,11 +36,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Data
         {
             Columns = dataset.Columns;
             Conductors = dataset.Conductors;
-            Shearwalls = dataset.Shearwalls;
+            //Shearwalls = dataset.Shearwalls;
             MainBuildings = dataset.MainBuildings;
             ConductorWires = dataset.ConductorWires;
             ArchitectOutlines = dataset.ArchitectOutlines;
-            BeamCenterLinePts = dataset.BeamCenterLinePts;
+            //BeamCenterLinePts = dataset.BeamCenterLinePts;
 
             var group = new ThShearwallGroupService(dataset.Shearwalls, dataset.MainBuildings);
             buildingWithWalls = group.Group();

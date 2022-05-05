@@ -84,17 +84,23 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             return borderPts;
         }
 
-        public static Point3d GetLeftDownPt(HashSet<Point3d> points) //目前的方向算法并不适合LeftDown， 而是
+        public static Point3d GetLeftDownPt(HashSet<Point3d> points)
         {
             var ansPt = points.First();
-            double minSum = double.MaxValue;
+            //double minSum = double.MaxValue;
+            double maxSum = double.MinValue;
             double curSum;
             foreach(var curPt in points)
             {
                 curSum = curPt.X + curPt.Y;
-                if(curSum < minSum)
+                //if(curSum < minSum)
+                //{
+                //    minSum = curSum;
+                //    ansPt = curPt;
+                //}
+                if (curSum > maxSum)
                 {
-                    minSum = curSum;
+                    maxSum = curSum;
                     ansPt = curPt;
                 }
             }
