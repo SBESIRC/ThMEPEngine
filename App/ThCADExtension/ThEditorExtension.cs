@@ -1,12 +1,8 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
-#if ACAD2012
-using System.Drawing;
-#else
 using System.Windows;
-#endif
-using ThCADExtension;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -54,7 +50,7 @@ namespace ThCADExtension
 
         public static void ZoomWindow(this Editor ed, Extents3d ext)
         {
-            ext.TransformBy(ed.CurrentUserCoordinateSystem.Inverse());
+            ext.TransformBy(ed.WCS2UCS());
             COMTool.ZoomWindow(ext.MinPoint, ext.MaxPoint);
         }
 

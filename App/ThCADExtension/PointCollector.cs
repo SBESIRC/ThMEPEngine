@@ -1,4 +1,5 @@
 ﻿using System;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
@@ -87,7 +88,7 @@ namespace ThCADExtension
                 }
             }
 
-            Point3d compPt = e.Context.ComputedPoint.TransformBy(AcadApp.DocumentManager.MdiActiveDocument.Editor.CurrentUserCoordinateSystem.Inverse());
+            Point3d compPt = e.Context.ComputedPoint.TransformBy(AcadApp.DocumentManager.MdiActiveDocument.Editor.WCS2UCS());
 
             if (mShape == Shape.Window)
             {
