@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.0)" SizeToContent="Manual" Height="710"
+              Title="车位自动排布(2.1)" SizeToContent="Manual" Height="710"
               Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >

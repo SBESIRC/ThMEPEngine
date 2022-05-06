@@ -64,6 +64,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             return CrossingFilter(
               Query(geo.EnvelopeInternal), geometryFactory.Create(geo)).ToList();
         }
+        public List<Geometry> SelectNOTCrossingGeometry(Geometry geo)
+        {
+            return Geometries.Except(SelectCrossingGeometry(geo)).ToList();
+        }
+
         private IEnumerable<Geometry> CrossingFilter(List<Geometry> geos, IPreparedGeometry preparedGeometry)
         {
             return geos.Where(o => Intersects(preparedGeometry, o));

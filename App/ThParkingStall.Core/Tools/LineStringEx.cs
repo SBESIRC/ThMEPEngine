@@ -84,6 +84,20 @@ namespace ThParkingStall.Core.Tools
             if (intSection.Length >0 ) return true;
             else return false;
         }
+        public static List<LineSegment> GetVaildParts(this IEnumerable<LineString> lstrs,Polygon area)
+        {
+            var VaildParts = new List<LineSegment>();
+            foreach(var lstr in lstrs)
+            {
+                var intSection = lstr.Intersection(area.Shell);
+                if (intSection.Length > 0)
+                {
+                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
+                }
+            }
+            return VaildParts;
+        }
         // 合并一堆linestring
         public static Geometry Union(this List<LineString> linestrings)
         {

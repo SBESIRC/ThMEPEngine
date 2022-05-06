@@ -17,5 +17,41 @@ namespace ThParkingStall.Core.Tools
             polygonizer.Add(geo);
             return polygonizer.GetPolygons().Cast<Polygon>();
         }
+        public static Polygon GetEnvelope(this List<Geometry> geos)
+        {
+            var Envelope = new GeometryCollection(geos.ToArray()).Envelope;
+            if (Envelope is Polygon polygon) return polygon;
+            else return null;
+        }
+        //removeHoles Only active when T is polygon 
+        public static List<T> Get<T>(this Geometry geometry,bool removeHoles = true)
+        {
+            var objs = new List<T>();
+            var typeToGet = typeof(T);
+            var geoType = typeof(Geometry);
+            if (!(typeToGet.IsSubclassOf(geoType)|| typeToGet == geoType)) throw new NotSupportedException();
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is T t)
+            {
+                if (t is Polygon polygon && removeHoles) objs.Add((T)Convert.ChangeType(polygon.RemoveHoles(), typeToGet));
+                else objs.Add(t);
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                foreach (var geo in lineStrings.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                foreach (var geo in polygons.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                foreach (var geo in geometries.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            return objs;
+        }
     }
 }

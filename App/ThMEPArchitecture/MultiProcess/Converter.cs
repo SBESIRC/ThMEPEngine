@@ -20,6 +20,7 @@ using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.MPartitionLayout;
 using Dreambuild.AutoCAD;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -35,25 +36,32 @@ namespace ThMEPArchitecture.MultiProcess
             InterParameter.Init(dataWraper);
             return dataWraper;
         }
+        public static DataWraper GetDataWraper(LayoutData layoutData, ParkingStallArrangementViewModel vm)
+        {
+            var dataWraper = new DataWraper();
+            dataWraper.UpdateVMParameter(vm);
+            VMStock.Init(dataWraper);
+            dataWraper.UpdateInterParameter(layoutData);
+            InterParameter.Init(dataWraper);
+            return dataWraper;
+        }
+        private static void UpdateInterParameter(this DataWraper dataWraper, LayoutData layoutData)
+        {
+            dataWraper.TotalArea = layoutData.WallLine;
+            dataWraper.SegLines = layoutData.SegLines;
+            dataWraper.Buildings = layoutData.Buildings;
+            dataWraper.BoundingBoxes = layoutData.BoundingBoxes;
+            dataWraper.Ramps = layoutData.Ramps;
+            dataWraper.SegLineIntsecDic = layoutData.SeglineIndexDic;
+            dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
+            dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
+        }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
             dataWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
             dataWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
                 Select(l => l.ToNTSLineSegment()).ToList();
             var entities = outerBrder.BuildingObjs.ExplodeBlocks();
-            //var buildingBounds = new List<LinearRing>();
-            //foreach (var ent in entities)
-            //{
-            //    if (ent is Polyline pline && pline.Closed)
-            //    {
-            //        var bound = pline.ToNTSLineString();
-            //        if(bound is LinearRing ring)
-            //        {
-            //            buildingBounds.Add(ring);
-            //        }
-            //    }
-            //}
-            //dataWraper.Buildings = buildingBounds.Select(lr => new Polygon(lr)).ToList();
             var buildingBounds = new List<LineString>();
             foreach (var ent in entities)
             {
@@ -61,7 +69,6 @@ namespace ThMEPArchitecture.MultiProcess
                 {
                     var bound = pline.ToNTSLineString();
                     buildingBounds.Add(bound);
-
                 }
             }
             dataWraper.Buildings = buildingBounds.GetPolygons();
