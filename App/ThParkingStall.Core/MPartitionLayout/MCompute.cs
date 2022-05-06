@@ -36,10 +36,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
 
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
-
             if (InterParameter.MultiThread)
             {
-
                 Parallel.ForEach(subAreas, new ParallelOptions { MaxDegreeOfParallelism = 2 }, subarea => subarea.UpdateParkingCnts(display));
             }
             else
