@@ -7,6 +7,7 @@ using Linq2Acad;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -105,6 +106,38 @@ namespace TianHua.Electrical.PDS.Service
                         return;
                     }
                 });
+            }
+
+            if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger)
+            {
+                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                {
+                    var N = 0;
+                    switch (thPDSLoad.ID.BlockName)
+                    {
+                        case "E-BDB111":
+                        case "＄equip_U＄00000102":
+                        case "＄equip_U＄00000109":
+                            N = 1;
+                            break;
+                        case "E-BDB112":
+                        case "＄equip_U＄00000103":
+                            N = 2;
+                            break;
+                        case "E-BDB114":
+                        case "＄equip_U＄00000104":
+                            N = 4;
+                            break;
+                    }
+                    thPDSLoad.InstalledCapacity.HighPower = N * PDSProject.Instance.projectGlobalConfiguration.ACChargerPower;
+                }
+            }
+            else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
+            {
+                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                {
+                    thPDSLoad.InstalledCapacity.HighPower = PDSProject.Instance.projectGlobalConfiguration.DCChargerPower;
+                }
             }
 
             if (needCopy)
