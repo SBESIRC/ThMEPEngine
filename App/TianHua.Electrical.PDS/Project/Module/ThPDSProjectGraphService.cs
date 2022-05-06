@@ -606,6 +606,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Load.ID.LoadID = defaultLoadID;
             node.Details.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
+            node.Load.ID.Description = "备用";
             
             node.Load.SetFireLoad(defaultFireLoad);
             PDSProject.Instance.graphData.Graph.AddVertex(node);
