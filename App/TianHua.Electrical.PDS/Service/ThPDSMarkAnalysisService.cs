@@ -133,7 +133,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     else
                     {
-                        thPDSLoad.ID.LoadID = str;
+                        thPDSLoad.ID.LoadID = StringFilter(str);
                     }
                 }
                 else
@@ -722,6 +722,20 @@ namespace TianHua.Electrical.PDS.Service
                     return ThPDSFireLoad.Unknown;
                 }
             }
+        }
+
+        private string StringFilter(string str)
+        {
+            str = str.Replace(" ", "");
+            str = str.Replace("(", "");
+            str = str.Replace("（", "");
+            str = str.Replace(")", "");
+            str = str.Replace("）", "");
+            if (str.Equals("E"))
+            {
+                str = "";
+            }
+            return str;
         }
     }
 }

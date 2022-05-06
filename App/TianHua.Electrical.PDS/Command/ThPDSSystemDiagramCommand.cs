@@ -211,7 +211,9 @@ namespace TianHua.Electrical.PDS.Command
                     {
                         var surgeProtection = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SURGE_PROTECTION, basePoint, scale);
                         assignment.SurgeProtectionAssign(activeDb, surgeProtection, tableObjs, thisNode.Details.SurgeProtection.ToString());
+                        insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
                         basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                        edgeCount++;
                     }
 
                     if (edgeCount < blankLineCount)
