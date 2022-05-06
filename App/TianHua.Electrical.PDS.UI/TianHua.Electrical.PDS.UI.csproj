@@ -103,6 +103,9 @@
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserContorls\ThPDSCreateLoad.xaml.cs">
+      <DependentUpon>ThPDSCreateLoad.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml.cs">
       <DependentUpon>ThPDSAssignCircuit2SmallBusbar.xaml</DependentUpon>
     </Compile>
@@ -173,6 +176,10 @@
     <Page Include="UI\ElecSandboxUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSCreateLoad.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml">
       <Generator>MSBuild:Compile</Generator>

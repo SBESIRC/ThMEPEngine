@@ -61,7 +61,8 @@ namespace TianHua.Electrical.PDS.UI.Services
                     AcceptCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
                     CreateCmd = new RelayCommand(() =>
                     {
-                        ThPDSProjectGraphService.CreatNewLoad();
+                        var w = new ThPDSCreateLoad() { Width = 250, Height = 250, WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen, };
+                        w.ShowDialog();
                     }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
