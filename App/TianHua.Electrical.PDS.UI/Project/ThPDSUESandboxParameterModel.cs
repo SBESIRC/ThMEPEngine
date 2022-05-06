@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using ThCADExtension;
+using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.UI.ViewModels;
 
-namespace TianHua.Electrical.PDS.UI.Project.Module.Component
+namespace TianHua.Electrical.PDS.UI.Project
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {

@@ -1,4 +1,5 @@
 ﻿using TianHua.Electrical.PDS.Project;
+using TianHua.Electrical.PDS.UI.ViewModels;
 
 namespace TianHua.Electrical.PDS.UI.Project
 {
@@ -6,10 +7,8 @@ namespace TianHua.Electrical.PDS.UI.Project
     {
         public static void ConvertToViewModel()
         {
-            PDSProjectVM.Instance.graphInfo = new ThPDSProjectVMGraphInfo();
-            PDSProjectVM.Instance.graphInfo.graphData = PDSProject.Instance.graphData.Graph;
-            PDSProjectVM.Instance.InformationMatchViewModel = new ViewModels.InformationMatchViewModel(PDSProjectVM.Instance.graphInfo);
-            PDSProjectVM.Instance.GlobalParameterViewModel = new ViewModels.GlobalParameterViewModel(PDSProject.Instance.projectGlobalConfiguration);
+            PDSProjectVM.Instance.InformationMatchViewModel = new InformationMatchViewModel(PDSProject.Instance.graphData.Graph);
+            PDSProjectVM.Instance.GlobalParameterViewModel = new GlobalParameterViewModel(PDSProject.Instance.projectGlobalConfiguration);
         }
     }
 }
