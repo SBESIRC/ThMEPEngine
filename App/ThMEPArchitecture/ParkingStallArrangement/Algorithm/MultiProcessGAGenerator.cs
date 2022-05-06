@@ -241,7 +241,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var currentMutexList = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "0", "0");
+                var proc = CreateSubProcess(idx, "1", "0");
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
