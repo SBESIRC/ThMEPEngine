@@ -49,6 +49,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         [Browsable(true)]
         [DisplayName("功率")]
         [Category("配电回路参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double Power
         {
             get => _edge.Target.Details.HighPower;
@@ -56,12 +57,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetNodeHighPower(value);
                 OnPropertyChanged(nameof(Power));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
         [Browsable(true)]
         [DisplayName("低速功率")]
         [Category("配电回路参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double LowPower
         {
             get => _edge.Target.Details.LowPower;
@@ -69,12 +72,14 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetNodeLowPower(value);
                 OnPropertyChanged(nameof(LowPower));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
         [Browsable(true)]
         [DisplayName("高速功率")]
         [Category("配电回路参数")]
+        [Editor(typeof(ThPDSNumberPropertyEditor), typeof(PropertyEditorBase))]
         public double HighPower
         {
             get => _edge.Target.Details.HighPower;
@@ -82,6 +87,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetNodeHighPower(value);
                 OnPropertyChanged(nameof(HighPower));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
