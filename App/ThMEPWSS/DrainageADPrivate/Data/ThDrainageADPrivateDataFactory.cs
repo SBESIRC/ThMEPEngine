@@ -60,20 +60,40 @@ namespace ThMEPWSS.DrainageADPrivate.Data
             ExtractTCHEquipment(database, framePts);
         }
 
+        ///// <summary>
+        ///// 天正立管
+        ///// </summary>
+        ///// <param name="database"></param>
+        ///// <param name="framePts"></param>
+        //private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
+        //{
+        //    var vertical = new ThVerticalPipeExtractService()
+        //    {
+        //        //LayerFilter = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D },
+        //    };
+        //    vertical.Extract(database, framePts);
+        //    VerticalPipe.AddRange(vertical.VerticalPipe);
+        //}
+
         /// <summary>
-        /// 天正立管
+        /// 天正，圆，块
         /// </summary>
         /// <param name="database"></param>
         /// <param name="framePts"></param>
         private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
         {
-            var vertical = new ThVerticalPipeExtractService()
+            var layer = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D };
+            var vertical = new ThMEPWSS.Service.ThVerticalPipeExtractService()
             {
-                //LayerFilter = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D },
+                LayerFilterTch = layer,
+                LayerFilterBlk = layer,
+                LayerFilterCircle = layer,
+                Radius = ThDrainageADCommon.Radius_Vertical,
             };
             vertical.Extract(database, framePts);
-            VerticalPipe.AddRange(vertical.VerticalPipe);
+            VerticalPipe = vertical.VerticalPipe;
         }
+
 
         /// <summary>
         /// 洁具

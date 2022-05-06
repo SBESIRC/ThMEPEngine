@@ -80,6 +80,8 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 }
 
             });
+            CoolPipeTopView = CoolPipeTopView.Where(x => x.Length >= 10).ToList();
+            HotPipeTopView = HotPipeTopView.Where(x => x.Length >= 10).ToList();
 
             //if (SelectPtsAD == null)
             //{
@@ -100,26 +102,142 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
         }
 
+        /// <summary>
+        /// 块，圆，天正
+        /// </summary>
         public void CreateVerticalPipe()
         {
+            var allpipe = new List<Line>();
+            allpipe.AddRange(CoolPipeTopView);
+            allpipe.AddRange(HotPipeTopView);
+
             foreach (var pipe in VerticalPipeData)
             {
-                var entity = pipe.Data;
-                var pipeParameters = ThOPMTools.GetOPMProperties(entity.Id);
-                var start = Convert.ToDouble(pipeParameters["起点标高"]);
-                var end = Convert.ToDouble(pipeParameters["终点标高"]);
-
                 var pt = (pipe.Outline as DBPoint).Position;
 
+                if (pipe.Data is BlockReference || pipe.Data is Circle)
+                {
+                    var nearPipe = FindClosePipe(allpipe, pt);
+                    var vpipeLine = CreateBlkCVPipe(nearPipe, pt);
+                    if (vpipeLine != null)
+                    {
+                        VerticalPipe.Add(vpipeLine);
+                    }
+                }
+                else if (pipe.Data is Entity entity)
+                {
+                    //天正
+                    //var entity = pipe.Data;
+                    var pipeParameters = ThOPMTools.GetOPMProperties(entity.Id);
+                    var start = Convert.ToDouble(pipeParameters["起点标高"]);
+                    var end = Convert.ToDouble(pipeParameters["终点标高"]);
 
-                var pts = new Point3d(pt.X, pt.Y, start);
-                var pte = new Point3d(pt.X, pt.Y, end);
+                    var pts = new Point3d(pt.X, pt.Y, start);
+                    var pte = new Point3d(pt.X, pt.Y, end);
 
-                var trueVertical = new Line(pts, pte);
+                    var trueVertical = new Line(pts, pte);
 
-                VerticalPipe.Add(trueVertical);
+                    VerticalPipe.Add(trueVertical);
+                }
             }
         }
+        private static List<Point3d> FindClosePipe(List<Line> allpipe, Point3d pt)
+        {
+            var minDistTol = 100;
+
+            var projpt = new Point3d(pt.X, pt.Y, 0);
+            var nearpipe = allpipe.Where(x => new Point3d(x.StartPoint.X, x.StartPoint.Y, 0).DistanceTo(projpt) < minDistTol ||
+                                              new Point3d(x.EndPoint.X, x.EndPoint.Y, 0).DistanceTo(projpt) < minDistTol).ToList();
+
+            var nearSameDirPipe = new List<Point3d>();
+            foreach (var nPipe in nearpipe)
+            {
+                var lineNearPt = nPipe.StartPoint;
+                var lineOtherPt = nPipe.EndPoint;
+                if (new Point3d(lineNearPt.X, lineNearPt.Y, 0).DistanceTo(projpt) > new Point3d(lineOtherPt.X, lineOtherPt.Y, 0).DistanceTo(projpt))
+                {
+                    lineNearPt = nPipe.EndPoint;
+                    lineOtherPt = nPipe.StartPoint;
+                }
+
+                if (new Point3d(lineNearPt.X, lineNearPt.Y, 0).DistanceTo(projpt) <= 1)
+                {
+                    nearSameDirPipe.Add(lineNearPt);
+                    continue;
+                }
+
+                var addDir = new Point3d(lineNearPt.X, lineNearPt.Y, 0) - projpt;
+                var lineDir = nPipe.EndPoint - nPipe.StartPoint;
+                var angle = addDir.GetAngleTo(lineDir);
+                if (Math.Abs(Math.Cos(angle)) > Math.Cos(1 * Math.PI / 180))
+                {
+                    nearSameDirPipe.Add(lineNearPt);
+                }
+            }
+
+            return nearSameDirPipe;
+        }
+
+        private static Line CreateBlkCVPipe(List<Point3d> nearPoint, Point3d pt)
+        {
+            Line vpipeLine = null;
+            var nearZPt = new Point3d();
+            var projPt = new Point3d(pt.X, pt.Y, 0);
+
+            if (nearPoint.Count >= 2)
+            {
+                var zDict = nearPoint.Select(x => new KeyValuePair<double, double>(x.Z, Math.Round(x.Z / 1000, MidpointRounding.AwayFromZero))).ToList();
+                var zdictGroup = zDict.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.Select(v => v.Key).ToList());
+                zdictGroup = zdictGroup.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+                if (zdictGroup.Count() >= 2)
+                {
+                    //立管附近点在不同平面
+                    //立管附近点里面找最大z和最小z
+                    //如果有0 1000 3000 三层则无法处理 直接找最大最小
+                    var zMax = zdictGroup.First().Value.Max();
+                    var zMin = zdictGroup.Last().Value.Min();
+
+                    var spt = new Point3d(pt.X, pt.Y, zMax);
+                    var ept = new Point3d(pt.X, pt.Y, zMin);
+                    vpipeLine = new Line(spt, ept);
+                }
+                else if (zdictGroup.Count() == 1)
+                {
+                    //立管附近点都在一个平面，找最近的点z当一个点处理，即立管只有一段连平面管线另一端为末端或起点
+                    nearZPt = nearPoint.OrderBy(x => new Point3d(x.X, x.Y, 0).DistanceTo(projPt)).First();
+                }
+            }
+            else if (nearPoint.Count == 1)
+            {
+                nearZPt = nearPoint.First();
+            }
+
+            if (vpipeLine == null && nearZPt != Point3d.Origin)
+            {
+                var roundZ = Math.Round(nearZPt.Z / 1000, MidpointRounding.AwayFromZero);
+                if (roundZ == 0) //
+                {
+                    //0平面
+                    var spt = new Point3d(pt.X, pt.Y, nearZPt.Z + 1000);
+                    var ept = new Point3d(pt.X, pt.Y, nearZPt.Z);
+                    vpipeLine = new Line(spt, ept);
+                }
+                else if (roundZ == 3)
+                {
+                    //3000平面
+                    var spt = new Point3d(pt.X, pt.Y, nearZPt.Z);
+                    var ept = new Point3d(pt.X, pt.Y, nearZPt.Z - 1000);
+                    vpipeLine = new Line(spt, ept);
+                }
+            }
+
+            return vpipeLine;
+
+        }
+
+
+
+
         public void Transform(ThMEPOriginTransformer transformer)
         {
             VerticalPipeData.ForEach(x => transformer.Transform(x.Outline));

@@ -38,6 +38,8 @@ namespace ThMEPWSS.DrainageADPrivate
         public static string BlkName_Casing_AD = "套管系统";
 
         public static string BlkName_Dim = "给水管径50";
+        public static List<double> Radius_Vertical = new List<double> { 25, 50 };
+
         public static string DiameterDN_visi_pre = "DN";
         public static int DiameterDim_move_x = 25;
         public static int DiameterDim_move_y = 30;
