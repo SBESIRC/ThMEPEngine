@@ -101,6 +101,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetNodePhaseSequence(value);
                 OnPropertyChanged(nameof(PhaseSequence));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
@@ -148,6 +149,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetDemandFactor(value);
                 OnPropertyChanged(nameof(DemandFactor));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
@@ -161,15 +163,16 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _edge.Target.SetPowerFactor(value);
                 OnPropertyChanged(nameof(PowerFactor));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
         [ReadOnly(true)]
         [DisplayName("计算电流")]
         [Category("配电回路参数")]
-        public double CalculateCurrent
+        public string CalculateCurrent
         {
-            get => _edge.Target.Load.CalculateCurrent;
+            get => string.Format("{0}", _edge.Target.Load.CalculateCurrent);
         }
 
         [Browsable(false)]
