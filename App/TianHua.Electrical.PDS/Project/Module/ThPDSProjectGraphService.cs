@@ -253,7 +253,12 @@ namespace TianHua.Electrical.PDS.Project.Module
             }
         }
 
-        public static void UpdateWithNode(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        /// <summary>
+        /// 对节点检查级联
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        public static void CheckCascadeWithNode(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.InEdges(node);
             foreach (var edge in edges)
@@ -261,11 +266,21 @@ namespace TianHua.Electrical.PDS.Project.Module
                 edge.CheckCascadeWithEdge();
             }
         }
-        public static void UpdateWithMiniBusbar(ThPDSProjectGraphNode node)
+
+        /// <summary>
+        /// 对小母排检查级联
+        /// </summary>
+        /// <param name="node"></param>
+        public static void CheckCascadeWithMiniBusbar(ThPDSProjectGraphNode node)
         {
             node.CheckCascadeWithNode();
         }
-        public static void UpdateWithEdge(ThPDSProjectGraphEdge edge)
+
+        /// <summary>
+        /// 对回路检查级联
+        /// </summary>
+        /// <param name="edge"></param>
+        public static void CheckCascadeWithEdge(ThPDSProjectGraphEdge edge)
         {
             var miniBusbar = edge.Source.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge));
             if (miniBusbar.Key.IsNull())
@@ -564,33 +579,19 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建负载
         /// </summary>
-        /// <param name="defaultKV">额定电压</param>
+        /// <param name="defaultPhase">项数</param>
         /// <param name="defaultPhaseSequence">相序</param>
         /// <param name="defaultLoadID">设备编号</param>
         /// <param name="defaultPower">设备功率</param>
         /// <param name="defaultDescription">描述信息</param>
         /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(double defaultKV = 0.38, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
-            node.Load.KV = defaultKV;
-            if(defaultKV == 0.38)
-            {
-                node.Load.Phase = ThPDSPhase.三相;
-                node.Details.PhaseSequence = Circuit.PhaseSequence.L123;
-            }
-            else
-            {
-                if(defaultPhaseSequence == Circuit.PhaseSequence.L123)
-                {
-                    node.Details.PhaseSequence = Circuit.PhaseSequence.L1;
-                }
-                else
-                {
-                    node.Details.PhaseSequence = defaultPhaseSequence;
-                }
-            }
+            node.Load.Phase = defaultPhase;
+            node.Details.PhaseSequence = defaultPhaseSequence;
+            node.Load.KV = node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22;
             node.Load.ID.LoadID = defaultLoadID;
             node.Details.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
@@ -601,12 +602,37 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
+        /// 编辑负载
+        /// </summary>
+        /// <param name="load">负载</param>
+        /// <param name="defaultPhase">项数</param>
+        /// <param name="defaultLoadID">设备编号</param>
+        /// <param name="defaultPower">设备功率</param>
+        /// <param name="defaultDescription">描述信息</param>
+        /// <param name="defaultFireLoad">是否消防</param>
+        public static ThPDSProjectGraphNode EditorLoad(ThPDSProjectGraphNode node, ThPDSPhase defaultPhase = ThPDSPhase.三相, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "", bool defaultFireLoad = false)
+        {
+            node.Load.Phase = defaultPhase;
+            node.Details.PhaseSequence = defaultPhase == ThPDSPhase.三相 ? Circuit.PhaseSequence.L123 : Circuit.PhaseSequence.L1;
+            node.Load.KV = node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22;
+            node.Load.ID.LoadID = defaultLoadID;
+            node.Details.HighPower = defaultPower;
+            node.Load.ID.Description = defaultDescription;
+            node.Load.SetFireLoad(defaultFireLoad);
+            node.Type = node.Load.LoadTypeCat_1 == ThPDSLoadTypeCat_1.DistributionPanel ? PDSNodeType.DistributionBox : PDSNodeType.Load;
+
+            CheckCascadeWithNode(PDSProject.Instance.graphData.Graph, node);
+            return node;
+        }
+
+
+        /// <summary>
         /// 新建回路
         /// </summary>
         public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
             if (node.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 target.Load.Phase = ThPDSPhase.一相;
@@ -633,7 +659,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
-            var target = CreatNewLoad(node.Load.Phase == ThPDSPhase.三相 ? 0.38 : 0.22, node.Details.PhaseSequence);
+            var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
             //Step 2:新建回路
             var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
             //Step 3:获取对应的CircuitFormOutType

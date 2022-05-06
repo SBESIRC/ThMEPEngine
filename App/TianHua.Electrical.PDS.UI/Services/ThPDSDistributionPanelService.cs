@@ -939,7 +939,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                 {
-                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                    ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                 }
                                             };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
@@ -1523,7 +1523,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                             {
                                                                 if (e.PropertyName == nameof(ThPDSCPSModel.RatedCurrent))
                                                                 {
-                                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                                    ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                                 }
                                                             };
                                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
@@ -2236,7 +2236,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                 {
-                                                    ThPDSProjectGraphService.UpdateWithMiniBusbar(vertice);
+                                                    ThPDSProjectGraphService.CheckCascadeWithMiniBusbar(vertice);
                                                 }
                                             };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
@@ -2483,7 +2483,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 {
                                                     if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                     {
-                                                        ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                        ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                     }
                                                 };
                                                 blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });

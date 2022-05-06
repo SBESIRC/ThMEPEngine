@@ -53,6 +53,10 @@ namespace TianHua.Electrical.PDS.Project
             {
                 return;
             }
+            if(node.Load.ID.LoadID == "S-2APdl2")
+            {
+
+            }
             node.CalculateCircuitFormInType();
             var edges = _projectGraph.OutEdges(node).ToList();
             edges.ForEach(e =>
@@ -81,7 +85,7 @@ namespace TianHua.Electrical.PDS.Project
             else
             {
                 var count = _projectGraph.InDegree(node);
-                if (count == 1)
+                if (count <= 1)
                 {
                     node.Details.CircuitFormType = new OneWayInCircuit();
                 }
@@ -89,7 +93,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     node.Details.CircuitFormType = new TwoWayInCircuit();
                 }
-                else if (count == 3)
+                else if (count >= 3)
                 {
                     node.Details.CircuitFormType = new ThreeWayInCircuit();
                 }
@@ -406,6 +410,7 @@ namespace TianHua.Electrical.PDS.Project
             SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
             if (edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源 || edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
             {
+                edge.Target.Details.PhaseSequence = PhaseSequence.L;
                 //消防应急照明回路
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
@@ -890,7 +895,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     edge.Target.Details.PhaseSequence = PhaseSequence.L123;
                 }
-                else if (edge.Target.Load.Phase == ThPDSPhase.一相)
+                else if (edge.Target.Load.Phase == ThPDSPhase.一相 && edge.Target.Details.PhaseSequence != PhaseSequence.L)
                 {
                     onePhase.Add(edge.Target);
                 }
