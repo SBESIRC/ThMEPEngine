@@ -93,6 +93,10 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     blockInfo.FireLoad = ThPDSFireLoad.Unknown;
                 }
+
+                // Defult Description
+                column++;
+                blockInfo.DefaultDescription = StringFilter(table.Rows[row][column].ToString());
                 blockInfos.Add(blockInfo);
             }
             return blockInfos;

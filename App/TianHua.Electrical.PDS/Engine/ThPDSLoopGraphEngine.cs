@@ -1243,6 +1243,37 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
+        public void AssignDefaultDescription()
+        {
+            PDSGraph.Graph.Vertices.ForEach(e =>
+            {
+                if(e.NodeType == PDSNodeType.Unkown)
+                {
+                    switch(e.Loads[0].CircuitType)
+                    {
+                        case ThPDSCircuitType.Lighting:
+                            e.Loads[0].ID.DefaultDescription = "正常照明";
+                            break;
+                        case ThPDSCircuitType.Socket:
+                            e.Loads[0].ID.DefaultDescription = "插座";
+                            break;
+                        case ThPDSCircuitType.PowerEquipment:
+                            e.Loads[0].ID.DefaultDescription = "动力负载";
+                            break;
+                        case ThPDSCircuitType.EmergencyLighting:
+                            e.Loads[0].ID.DefaultDescription = "消防备用照明";
+                            break;
+                        case ThPDSCircuitType.EmergencyPowerEquipment:
+                            e.Loads[0].ID.DefaultDescription = "消防动力负载";
+                            break;
+                        case ThPDSCircuitType.FireEmergencyLighting:
+                            e.Loads[0].ID.DefaultDescription = "应急照明/疏散指示";
+                            break;
+                    }
+                }
+            });
+        }
+
         public void UnionEdge()
         {
             var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();

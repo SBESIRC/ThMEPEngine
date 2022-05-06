@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var thPDSDistBox = new ThPDSLoad
             {
-                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
+                ID = CreateDistBoxID(marks, distBoxKey, distBoxData),
                 InstalledCapacity = AnalysisPower(marks, out _, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
@@ -35,7 +35,6 @@ namespace TianHua.Electrical.PDS.Service
             {
                 BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
             });
-            thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
             foreach (var str in marks)
             {
                 thPDSDistBox.ID.Description += StringClean(str);
@@ -67,7 +66,7 @@ namespace TianHua.Electrical.PDS.Service
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
             {
-                ID = CreateLoadID(marks, distBoxKey, loadData.EffectiveName, searchedString),
+                ID = CreateLoadID(marks, distBoxKey, loadData, searchedString),
                 InstalledCapacity = AnalysisPower(marks, out var needCopy, out var frequencyConversion),
                 LoadTypeCat_1 = loadData.Cat_1,
                 LoadTypeCat_2 = loadData.Cat_2,
@@ -175,6 +174,7 @@ namespace TianHua.Electrical.PDS.Service
                         ? distBoxData.Attributes[ThPDSCommon.LOAD_ID] : "",
                     Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
                         ? distBoxData.Attributes[ThPDSCommon.DESCRIPTION] : "",
+                    DefaultDescription = distBoxData.DefaultDescription,
                     // 电动机及负载标注 直接存块Id
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
@@ -234,11 +234,12 @@ namespace TianHua.Electrical.PDS.Service
             return thPDSLoad;
         }
 
-        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
+        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, ThPDSBlockReferenceData blockData)
         {
             var id = new ThPDSID
             {
-                BlockName = blockName
+                BlockName = blockData.EffectiveName,
+                DefaultDescription = blockData.DefaultDescription,
             };
             var idMarks = new List<string>();
             var circuitMarks = new List<string>();
@@ -309,11 +310,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         private ThPDSID CreateLoadID(List<string> infos, List<string> distBoxKey,
-            string blockName, List<string> searchedString)
+            ThPDSBlockReferenceData blockData, List<string> searchedString)
         {
             var id = new ThPDSID
             {
-                BlockName = blockName,
+                BlockName = blockData.EffectiveName,
+                DefaultDescription = blockData.DefaultDescription,
             };
             var panelIDs = new List<string>();
             var circuitIDs = new List<string>();

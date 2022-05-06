@@ -12,6 +12,7 @@ namespace TianHua.Electrical.PDS.Model
             BlockName = "";
             LoadID = "";
             Description = "";
+            DefaultDescription = "";
             CircuitID = new List<string> { "" };
             SourcePanelID = new List<string> { "" };
         }
@@ -30,6 +31,11 @@ namespace TianHua.Electrical.PDS.Model
         /// 用户自定义描述
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// 默认负载描述
+        /// </summary>
+        public string DefaultDescription { get; set; }
 
         /// <summary>
         /// 上级配电箱编号
