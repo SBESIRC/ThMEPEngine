@@ -103,6 +103,8 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         public FireEmergencyLightingModel fireEmergencyLightingModel = FireEmergencyLightingModel.A型;
         public FireEmergencyLightingType fireEmergencyLightingType = FireEmergencyLightingType.集中电源;
         public CircuitSystem circuitSystem = CircuitSystem.双线制;
+        public int ACChargerPower;
+        public int DCChargerPower;
         #endregion
     }
     public enum FireEmergencyLightingModel

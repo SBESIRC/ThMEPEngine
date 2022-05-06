@@ -51,7 +51,30 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
+        public int ACChargerPower
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.ACChargerPower;
+            set
+            {
+                if (value != ACChargerPower)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.ACChargerPower = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public int DCChargerPower
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DCChargerPower;
+            set
+            {
+                if (value != DCChargerPower)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DCChargerPower = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
         public double CurrentOfTrunkDistribution
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent;
