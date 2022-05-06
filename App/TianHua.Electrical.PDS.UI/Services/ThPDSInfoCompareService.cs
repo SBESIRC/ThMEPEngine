@@ -59,7 +59,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                         UpdateView(panel);
                     }, () => !hasDataError),
                     AcceptCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
-                    CreateCmd = new RelayCommand(() => { }, () => !hasDataError || regenCount > 1),
+                    CreateCmd = new RelayCommand(() =>
+                    {
+                        ThPDSProjectGraphService.CreatNewLoad();
+                    }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
                         new ThPDSUpdateToDwgService().Update();
