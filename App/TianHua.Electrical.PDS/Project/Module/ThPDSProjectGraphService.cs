@@ -353,11 +353,22 @@ namespace TianHua.Electrical.PDS.Project.Module
             var MotorSelection = PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise;
             var edges = PDSProject.Instance.graphData.Graph.Edges;
             var type = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS : CircuitFormOutType.电动机_分立元件;
+            var typeStar = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS星三角启动 : CircuitFormOutType.电动机_分立元件星三角启动;
+            var typeYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSYY : CircuitFormOutType.双速电动机_分立元件YY;
+            var typedetailYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSdetailYY : CircuitFormOutType.双速电动机_分立元件detailYY;
             foreach (var edge in edges)
             {
-                if (edge.Details.CircuitForm.CircuitFormType == type)
+                if (edge.Details.CircuitForm.CircuitFormType == type || edge.Details.CircuitForm.CircuitFormType == typeStar)
                 {
                     SwitchFormOutType(edge, "电动机配电回路");
+                }
+                else if (edge.Details.CircuitForm.CircuitFormType == typeYY)
+                {
+                    SwitchFormOutType(edge, "双速电机Y-Y");
+                }
+                else if (edge.Details.CircuitForm.CircuitFormType == typedetailYY)
+                {
+                    SwitchFormOutType(edge, "双速电机D-YY");
                 }
             }
         }
