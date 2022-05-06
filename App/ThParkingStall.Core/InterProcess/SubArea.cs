@@ -29,17 +29,20 @@ namespace ThParkingStall.Core.InterProcess
             Ramps = ramps;
             BoundingBoxes = boundingBoxes;
         }
+        static object lockObj = new object(); 
         public void UpdateParkingCnts(bool Calculate)
         {
-            if (SubAreaParkingCnt.Contains(this) && !Calculate)
+            lock (lockObj)
             {
-                Count = SubAreaParkingCnt.GetParkingNumber(this);
-            }
-            else
-            {
-                mParkingPartitionPro = this.ConvertSubAreaToMParkingPartitionPro();
-                try
+                if (SubAreaParkingCnt.Contains(this) && !Calculate)
                 {
+                    Count = SubAreaParkingCnt.GetParkingNumber(this);
+                }
+                else
+                {
+                    //mParkingPartitionPro = this.ConvertSubAreaToMParkingPartitionPro();
+                    try
+                    {
 #if DEBUG
                     var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
                     string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -49,21 +52,22 @@ namespace ThParkingStall.Core.InterProcess
                     sw.Close();
                     fs.Close();
 #endif
-                    //mParkingPartitionPro.GenerateParkingSpaces();
-                    mParkingPartitionPro.Process();
+                        //mParkingPartitionPro.GenerateParkingSpaces();
+                        mParkingPartitionPro.Process();
+                    }
+                    catch (Exception ex)
+                    {
+                        MCompute.Logger?.Information(ex.Message);
+                        MCompute.Logger?.Information("----------------------------------");
+                        MCompute.Logger?.Information(ex.StackTrace);
+                        MCompute.Logger?.Information("##################################");
+                        MPGAData.Save();
+                    }
+                    Count = mParkingPartitionPro.CarSpots.Count;
+                    SubAreaParkingCnt.UpdateParkingNumber(this, Count);
                 }
-                catch (Exception ex)
-                {
-                    MCompute.Logger?.Information(ex.Message);
-                    MCompute.Logger?.Information("----------------------------------");
-                    MCompute.Logger?.Information(ex.StackTrace);
-                    MCompute.Logger?.Information("##################################");
-                    MPGAData.Save();
-                }
-                Count= mParkingPartitionPro.CarSpots.Count;
-                SubAreaParkingCnt.UpdateParkingNumber(this, Count);
-            }
         }
+    }
 
     }
 

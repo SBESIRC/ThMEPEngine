@@ -15,7 +15,7 @@ namespace ThParkingStall.Core.MPartitionLayout
     public static class MCompute
     {
         public static Serilog.Core.Logger Logger;
-        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros,ref MParkingPartitionPro mParkingPartition, bool display = false)
+        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, bool display = false)
         {
             if (subAreas.Count == 0)
             {
@@ -35,8 +35,9 @@ namespace ThParkingStall.Core.MPartitionLayout
             foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
 
+            subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             if (InterParameter.MultiThread)
-            {
+            {        
                 Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display));
             }
             else
@@ -65,7 +66,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
                 mParkingPartition = new MParkingPartitionPro();
                 mParkingPartition.Cars = cars;
-                mParkingPartition.Pillars=pillars;
+                mParkingPartition.Pillars = pillars;
                 mParkingPartition.OutputLanes = lanes;
                 return cars.Count;
             }
@@ -78,14 +79,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             //return subAreas.Sum(sa => sa.Count);
         }
         public static MParkingPartitionPro ConvertSubAreaToMParkingPartitionPro(this SubArea subArea)
-        {         
+        {
             var bound = new Polygon(subArea.Area.Shell);
-            bound= bound.Simplify();
+            bound = bound.Simplify();
             var inilanes = new List<LineSegment>();
             foreach (var lane in subArea.SegLines)
             {
-                inilanes.Add(SplitLine(lane,bound.Coordinates.ToList())
-                    .Where(e => bound.ClosestPoint(e.MidPoint).Distance(e.MidPoint)<1)
+                inilanes.Add(SplitLine(lane, bound.Coordinates.ToList())
+                    .Where(e => bound.ClosestPoint(e.MidPoint).Distance(e.MidPoint) < 1)
                     .OrderByDescending(e => e.Length).First());
             }
             var obs = subArea.Buildings;
@@ -100,15 +101,18 @@ namespace ThParkingStall.Core.MPartitionLayout
             points = RemoveDuplicatePts(points);
             var linestring = new LineString(bound.Coordinates);
             var walls = linestring.GetSplitCurves(points)
-                .Where(e => e.Length > 1).Where(e => ClosestPointInCurvesFast(e.GetMidPoint(), inilanes.Select(f => f.ToLineString()).ToList()) > 10)
-                .Select(e => new LineString(RemoveDuplicatePts(e.Coordinates.ToList()).ToArray())).ToList();
+                .Where(e => e.Length > 1).ToList();
+            if (walls.Count > 0)
+            {
+                walls = walls.Where(e => ClosestPointInCurvesFast(e.GetMidPoint(), inilanes.Select(f => f.ToLineString()).ToList()) > 10)
+                    .Select(e => new LineString(RemoveDuplicatePts(e.Coordinates.ToList()).ToArray())).ToList();
+            }
             MParkingPartitionPro mParkingPartitionPro = new MParkingPartitionPro(
            walls, inilanes, obs, bound);
             mParkingPartitionPro.OutBoundary = bound;
             mParkingPartitionPro.BuildingBoxes = box;
             mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.RampList = subArea.Ramps.Where(e => bound.Contains(e.InsertPt)).ToList();
-
             return mParkingPartitionPro;
         }
         public static bool IsValidatedSolutions(List<SubArea> subAreas)
@@ -124,9 +128,9 @@ namespace ThParkingStall.Core.MPartitionLayout
             for (int i = 0; i < lanes.Count; i++)
             {
                 var buffer = lanes[i].Buffer(2750 - 1);
-                var splits = SplitCurve(boundary,buffer);
+                var splits = SplitCurve(boundary, buffer);
                 if (splits.Count() == 1) continue;
-                splits = splits.Where(e => buffer.Contains(e.GetMidPoint())).Where(e => e.Length> 1).ToArray();
+                splits = splits.Where(e => buffer.Contains(e.GetMidPoint())).Where(e => e.Length > 1).ToArray();
                 if (splits.Count() == 0) continue;
                 var split = splits.First();
                 var ps = lanes[i].ClosestPoint(split.StartPoint.Coordinate);

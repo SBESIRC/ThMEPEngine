@@ -620,6 +620,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static double ClosestPointInCurvesFast(Coordinate pt, List<LineString> crvs)
         {
+            if (crvs.Count == 0) return 0;
             var pl = crvs.OrderBy(t => t.ClosestPoint(pt).Distance(pt)).First();
             return pl.ClosestPoint(pt).Distance(pt);
         }
