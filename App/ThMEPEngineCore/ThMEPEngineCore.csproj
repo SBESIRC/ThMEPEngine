@@ -189,6 +189,9 @@
     <Compile Include="Engine\ThCircleVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThCircleVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircleVPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDrainageVPipeExtractionEngine.cs" />
+    <Compile Include="Engine\ThDrainageVPipeExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDrainageVPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractionEngine.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractor.cs" />
