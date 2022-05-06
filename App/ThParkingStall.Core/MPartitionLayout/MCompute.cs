@@ -37,22 +37,29 @@ namespace ThParkingStall.Core.MPartitionLayout
 
             if (InterParameter.MultiThread)
             {
-                Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display,
-                     ref Walls, ref Cars, ref Pillars, ref IniPillars, ref ObsVertices, ref Lanes));
+                Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display));
             }
             else
             {
-                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display,
-                     ref Walls, ref Cars, ref Pillars, ref IniPillars, ref ObsVertices, ref Lanes));
+                subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display));
             }
             if (display)
             {
-                var walls = Walls.ToList();
-                var cars = Cars.ToList();
-                var pillars = Pillars.ToList();
-                var iniPillars = IniPillars.ToList();
-                var obsVertices = ObsVertices.ToList();
-                var lanes = Lanes.ToList();
+                var walls = new List<LineString>();
+                var cars = new List<InfoCar>();
+                var pillars = new List<Polygon>();
+                var iniPillars = new List<Polygon>();
+                var obsVertices = new List<Coordinate>();
+                var lanes = new List<LineSegment>();
+                foreach (var subArea in subAreas)
+                {
+                    walls.AddRange(subArea.mParkingPartitionPro.Walls);
+                    cars.AddRange(subArea.mParkingPartitionPro.Cars);
+                    pillars.AddRange(subArea.mParkingPartitionPro.Pillars);
+                    iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
+                    obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
+                    lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
+                }
                 RemoveDuplicatedLines(lanes);
                 MLayoutPostProcessing.DealWithCarsOntheEndofLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
