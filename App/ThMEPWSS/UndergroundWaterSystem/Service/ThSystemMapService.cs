@@ -42,7 +42,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
     }
     public class Dim
     {
-        public Dim(Point3d point, string text,Point3d iniPoint)
+        public Dim(Point3d point, string text, Point3d iniPoint)
         {
             Point = point;
             Text = text;
@@ -118,7 +118,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         {
             var vp = point + Vector3d.YAxis * 400;
             var vline = new Line(point, vp);
-            var length= GetMarkLength(StartMarkInfo);
+            var length = GetMarkLength(StartMarkInfo);
             var leftpoint = vp - Vector3d.XAxis * length - Vector3d.XAxis * 300;
             var hline = new Line(leftpoint, vp);
             PreLines.Add(new PreLine(vline, "W-WSUP-DIMS"));
@@ -138,12 +138,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             DrawRootNode(startPt, pipeTree.RootNode, pipeTree.FloorIndex);
             //打断横管线
             InterruptAndDisplayPipeLines();
-            //HelpLines.ForEach(e =>
-            //{
-            //    e.Layer = "AI-辅助";
-            //    e.ColorIndex = 30;
-            //    e.AddToCurrentSpace();
-            //});
+            HelpLines.ForEach(e =>
+            {
+                e.Layer = "AI-辅助";
+                e.ColorIndex = 30;
+                e.AddToCurrentSpace();
+            });
             CrossedlayerDims.ForEach(e =>
             {
                 DrawText("W-WSUP-DIMS", e.Text, e.Point, 0.0);
@@ -351,7 +351,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             endPoint = new Point3d(endPoint.X, rootPt1.Y, 0);
             var rLine = new Line(rootPt1, endPoint);
             //绘制主干线
-            if (rootNode.Children.Count > 0)
+            if (rootNode.Children.Count > 0 || ValveRecs.Count > 0)
             {
                 //如果主干线后面有阀门但没其它东西的情况
                 var cond = false;
@@ -462,7 +462,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var hascrossedpipe = false;
             var _riserPoint = hLinePt2;
             DrawRisePipe(ref _pointList, ref _riserPoint, ref height, ref vvector, ref hvector,
-                ref floorIndex, ref mvector, hasFlushPoint, markLoc, ref hascrossedpipe);
+                ref floorIndex, ref mvector, hasFlushPoint, markLoc, ref hascrossedpipe, null);
             cuLength += _riserPoint.DistanceTo(hLinePt2);
             var endPoint = PreLines.Where(e => CreateVector(e.Line).IsParallelTo(Vector3d.YAxis))
                 .Select(e => e.Line)
@@ -496,7 +496,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     flushpointFound = true;
                     var flushPoint = node.Item.FlushPoint;
-                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, isInChild,rootLine);
+                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, isInChild, rootLine);
                     hasFlushPoint = true;
                     break;
                 }
@@ -520,7 +520,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 }
             }
             var dimPt1 = point - hvector * 1000.0;
-            return new Dim(dimPt1, dimMark1,p);
+            return new Dim(dimPt1, dimMark1, p);
         }
         private void DrawDim(Dim dim)
         {
@@ -544,7 +544,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, ref Point3d markLoc, bool isInChild, Line rootLine = null)
         {
             var vertLength = 400.0;
-            var vertdist= rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
+            var vertdist = rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
             if (rootLine != null)
                 vertLength += vertdist;
             var vDownPt1 = basePt;
@@ -677,6 +677,126 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
         }
         public void DrawRisePipe(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
+           , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
+           , bool hasFlushPoint, Point3d markloc, ref bool hascrossedpipe, Line rootLine = null)
+        {
+            var iniriserPoint = riserPoint;
+            List<Point3d> riserStartPoints = new List<Point3d>();
+            for (int j = 0; j < pointList.Count; j++)
+            {
+                var node = pointList[j];
+                if (node.Item.Riser == null) continue;
+                if (node.Item.Riser.RiserPts.Count == 0)
+                {
+                    string riser_dim = "";
+                    if (node.Item.Break != null && node.Item.Break.BreakName != "")
+                    {
+                        riser_dim = node.Item.Break.BreakName;
+                        var iniloc = riserPoint;
+                        var uploc = iniloc + Vector3d.YAxis * 1600;
+                        var vertline = new Line(iniloc, uploc);
+                        var leftuploc = vertline.GetCenter() - Vector3d.XAxis * (GetMarkLength(riser_dim) + 200);
+                        var horline = new Line(leftuploc, vertline.GetCenter());
+                        PreLines.Add(new PreLine(vertline, "W-WSUP-DIMS"));
+                        PreLines.Add(new PreLine(horline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", riser_dim, leftuploc, 0.0);
+                        continue;
+                    }
+                    else continue;
+                }
+                double curRiserLength = 0;
+                bool hasNode = false;
+                string crossLayerDims = "";
+                if (node.Item.Break != null)
+                    crossLayerDims = node.Item.Break.BreakName;
+
+                hasNode = true;
+                var vertLocPoint = riserPoint;
+                riserStartPoints.Add(vertLocPoint);
+                //double vlength = FloorHeight / 2.0 - height - 200.0;
+                //if (vlength < 400)
+                //{
+                //    vlength = 400;
+                //}
+
+                while (node.Item.Riser.RiserPts.Count != 0)
+                {
+                    var firstPt = node.Item.Riser.RiserPts.First();
+                    node.Item.Riser.RiserPts.Remove(firstPt);
+                    var otherIndex = GetFloorIndex(firstPt, FloorList);
+                    if (otherIndex != floorIndex)
+                    {
+                        hascrossedpipe = true;
+                        bool isToCurFloor = false;
+                        HelpLines.Add(new Line(vertLocPoint, firstPt));
+                        var compare_ini_lines = PreLines.Select(e => e.Line).ToList();
+                        curRiserLength = DrawOtherFloor(vertLocPoint, firstPt, floorIndex, otherIndex, ref isToCurFloor, crossLayerDims);
+                        crossLayerDims = "";
+                        //跨层立管太长，同层后面立管位置往前挪排版紧凑些
+                        var compare_out_lines = PreLines.Select(e => e.Line).ToList();
+                        var generated_lines = compare_out_lines.Except(compare_ini_lines);
+                        var points = generated_lines.Select(e => e.GetCenter())
+                            .Where(p => Math.Abs(p.Y - vertLocPoint.Y) < 3000).OrderByDescending(p => p.X);
+                        var point = vertLocPoint;
+                        if (points.Count() > 0) point = points.First();
+                        curRiserLength = point.X - vertLocPoint.X;
+                        curRiserLength = curRiserLength >= 0 ? curRiserLength : 0;
+                    }
+                }
+
+                var cond = CrossedlayerDims.Count > 0 ? !CrossedlayerDims[CrossedlayerDims.Count - 1].Text.Equals(crossLayerDims) : true;
+                if (node.Item.Break != null && crossLayerDims != "" && cond)
+                {
+                    //如果是断线，绘制断线标注
+                    crossLayerDims = node.Item.Break.BreakName;
+                    if (!hasFlushPoint)
+                    {
+                        var iniloc = riserPoint;
+                        var uploc = iniloc + Vector3d.YAxis * 1600;
+                        var vertline = new Line(iniloc, uploc);
+                        var leftuploc = vertline.GetCenter() - Vector3d.XAxis * (GetMarkLength(crossLayerDims) + 200);
+                        var horline = new Line(leftuploc, vertline.GetCenter());
+                        PreLines.Add(new PreLine(vertline, "W-WSUP-DIMS"));
+                        PreLines.Add(new PreLine(horline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftuploc, 0.0);
+                    }
+                    else
+                    {
+                        var iniloc = markloc;
+                        var leftloc = markloc - Vector3d.XAxis * (GetMarkLength(crossLayerDims) + 200);
+                        var flushline = new Line(leftloc, iniloc);
+                        PreLines.Add(new PreLine(flushline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftloc, 0.0);
+                    }
+                }
+
+                if (hasNode)
+                {
+                    riserPoint += hvector.GetNormal() * (curRiserLength + 1000);
+                }
+            }
+            if (riserStartPoints.Count > 1)
+            {
+                for (int i = 0; i < riserStartPoints.Count - 1; i++)
+                {
+                    var cond_a = rootLine == null;
+                    var cond_b = true;
+                    if (!cond_a)
+                    {
+                        cond_b = rootLine.GetClosestPointTo(riserStartPoints[i], true).DistanceTo(riserStartPoints[i]) < 1
+                            && rootLine.GetClosestPointTo(riserStartPoints[i + 1], true).DistanceTo(riserStartPoints[i + 1]) < 1;
+                    }
+                    var cond_c = CreateVector(riserStartPoints[i], riserStartPoints[i + 1]).IsParallelTo(Vector3d.XAxis);
+                    var cond = cond_a && cond_b && cond_c;
+                    if (cond)
+                    {
+                        PreLines.Add(new PreLine(new Line(riserStartPoints[i], riserStartPoints[i + 1]), PipeLayerName, 0));
+                    }
+                }
+            }
+        }
+
+        public void DrawRisePipeOld(ref List<ThTreeNode<ThPointModel>> pointList, ref Point3d riserPoint
             , ref double height, ref Vector3d vvector, ref Vector3d hvector, ref int floorIndex, ref Vector3d mvector
             , bool hasFlushPoint, Point3d markloc, ref bool hascrossedpipe, Line rootLine = null)
         {
@@ -742,7 +862,31 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     }
                 }
                 var cond = CrossedlayerDims.Count > 0 ? !CrossedlayerDims[CrossedlayerDims.Count - 1].Text.Equals(crossLayerDims) : true;
-                if (node.Item.Break != null && crossLayerDims != "" && cond)
+                if (node.Item.Break != null && crossLayerDims != "" && cond /*&& isinSubEnd*/)
+                {
+                    //如果是断线，绘制断线标注
+                    crossLayerDims = node.Item.Break.BreakName;
+                    if (!hasFlushPoint)
+                    {
+                        var iniloc = riserPoint;
+                        var uploc = iniloc + Vector3d.YAxis * 1600;
+                        var vertline = new Line(iniloc, uploc);
+                        var leftuploc = vertline.GetCenter() - Vector3d.XAxis * (GetMarkLength(crossLayerDims) + 200);
+                        var horline = new Line(leftuploc, vertline.GetCenter());
+                        PreLines.Add(new PreLine(vertline, "W-WSUP-DIMS"));
+                        PreLines.Add(new PreLine(horline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftuploc, 0.0);
+                    }
+                    else
+                    {
+                        var iniloc = markloc;
+                        var leftloc = markloc - Vector3d.XAxis * (GetMarkLength(crossLayerDims) + 200);
+                        var flushline = new Line(leftloc, iniloc);
+                        PreLines.Add(new PreLine(flushline, "W-WSUP-DIMS"));
+                        DrawText("W-WSUP-DIMS", crossLayerDims, leftloc, 0.0);
+                    }
+                }
+                else if (node.Item.Break != null && crossLayerDims != "" && cond)
                 {
                     //如果是断线，绘制断线标注
                     crossLayerDims = node.Item.Break.BreakName;
