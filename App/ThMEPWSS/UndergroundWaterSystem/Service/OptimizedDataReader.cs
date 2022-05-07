@@ -57,6 +57,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var pipeExtractionService = new ThPipeExtractionService();
             PipeLines = pipeExtractionService.GetPipeLines();
             var originalLine = ThUndergroundWaterSystemUtils.FindStartLine(StartPoint, PipeLines);
+            if (originalLine == null) return;
             PipeLines = PipeLines.Where(e => e.ColorIndex.Equals(originalLine.ColorIndex)).ToList();
             if (LogInfo) LogInfos("横管提取完成");
             //提取立管

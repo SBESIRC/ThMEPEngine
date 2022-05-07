@@ -45,6 +45,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             //var cleanedLines = pipeHandleService.CleanLines(seriesLines, mt);
             var points = new List<Point3d>();
             riserInfo.ForEach(e => points.AddRange(e.RiserPts));
+            seriesLines.ForEach(e => { points.Add(e.StartPoint); points.Add(e.EndPoint); });
+            points = RemoveDuplicatePts(points);
             InterrptLineByPoints(seriesLines, points);
             RemoveDuplicatedLines(seriesLines);
             //todo3:在立管处打断cleanedLines
@@ -54,7 +56,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             var valveList = floorList[FloorIndex].FloorInfo.ValveList;
             var flushpointList = floorList[FloorIndex].FloorInfo.FlushPointList;
             //构建PointTree
-            var pointTree = new ThPointTree(startPt, seriesLines, riserInfo, markList, dimList,valveList, flushpointList);
+            var pointTree = new ThPointTree(startPt, seriesLines, riserInfo, ref markList, ref dimList, ref valveList, ref flushpointList);
+            floorList[FloorIndex].FloorInfo.MarkList = markList;
+            floorList[FloorIndex].FloorInfo.DimList = dimList;
+            floorList[FloorIndex].FloorInfo.ValveList = valveList;
+            floorList[FloorIndex].FloorInfo.FlushPointList = flushpointList;
             //构建RootNode
             RootNode = CreateRootNode(pointTree);
         }

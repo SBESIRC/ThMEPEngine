@@ -339,7 +339,9 @@
     <Compile Include="UndergroundWaterSystem\Model\ThFlushPointModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThMarkModel.cs" />
     <Compile Include="UndergroundWaterSystem\Model\ThValveModel.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\SystemMapEssentialClass.cs" />
     <Compile Include="UndergroundWaterSystem\Service\OptimizedDataReader.cs" />
+    <Compile Include="UndergroundWaterSystem\Service\SystemMapFuncs.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThDrawSystemMapService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThImportService.cs" />
     <Compile Include="UndergroundWaterSystem\Service\ThLayerInitializeService.cs" />
