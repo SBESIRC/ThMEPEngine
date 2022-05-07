@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         /// <summary>
         /// 坑位4: 隔离开关3
         /// </summary>
-        public IsolatingSwitch isolatingSwitch3 { get; set; }
+        public PDSBaseComponent isolatingSwitch3 { get; set; }
 
         /// <summary>
         /// 坑位5: 转换开关2

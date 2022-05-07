@@ -272,7 +272,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             thirdIsolatingSwitch.Erase();
                         }
                         var thirdQLText = QLTexts[2];
-                        thirdQLText.TextString = circuit.isolatingSwitch3.Content();
+                        thirdQLText.TextString = (circuit.isolatingSwitch3 as IsolatingSwitch).Content();
 
                         // 转换开关1
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
