@@ -321,6 +321,147 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
             return tmp;
         }
+        public static int FindClosePoint(List<Point3d> pts, int idx1, int idx2, int closeidx)
+        {
+            //选出更靠近closeidx的点的坐标
+
+            //idx1，idx2竖直情况
+            int tmp = -1;
+            double mindist = 1000000;
+            if (Math.Abs(pts[idx1].X - pts[idx2].X) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].Y < Math.Max(pts[idx1].Y, pts[idx2].Y) && pts[i].Y > Math.Min(pts[idx1].Y, pts[idx2].Y) && Math.Abs(pts[i].X - pts[idx1].X) < 50 && Math.Abs(pts[i].X - pts[idx2].X) < 50)
+                    {
+                        if (TwoPointDist(pts[i], pts[closeidx]) < mindist)
+                        {
+                            mindist = TwoPointDist(pts[i], pts[closeidx]);
+                            tmp = i;
+                        }
+                    }
+
+
+                }
+            }
+
+            //idx1,idx2水平的情况
+            if (Math.Abs(pts[idx1].Y - pts[idx2].Y) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].X < Math.Max(pts[idx1].X, pts[idx2].X) && pts[i].X > Math.Min(pts[idx1].X, pts[idx2].X) && Math.Abs(pts[i].Y - pts[idx1].Y) < 50 && Math.Abs(pts[i].Y - pts[idx2].Y) < 50)
+                    {
+                        if (TwoPointDist(pts[i], pts[closeidx]) < mindist)
+                        {
+                            mindist = TwoPointDist(pts[i], pts[closeidx]);
+                            tmp = i;
+                        }
+                    }
+
+
+                }
+            }
+
+            return tmp;
+        }
+
+        public static int NumOfTwoPoint(List<Point3d> pts, int idx1, int idx2)
+        {
+            //得到两个坐标之间的点的数量
+            int num = 0;
+            //idx1，idx2竖直情况                 
+            if (Math.Abs(pts[idx1].X - pts[idx2].X) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].Y < Math.Max(pts[idx1].Y, pts[idx2].Y) && pts[i].Y > Math.Min(pts[idx1].Y, pts[idx2].Y) && Math.Abs(pts[i].X - pts[idx1].X) < 50 && Math.Abs(pts[i].X - pts[idx2].X) < 50)
+                    {
+                        num++;
+                    }
+
+
+                }
+            }
+
+            //idx1,idx2水平的情况
+            if (Math.Abs(pts[idx1].Y - pts[idx2].Y) < 50)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx1 || i == idx2)
+                    {
+                        continue;
+                    }
+                    if (pts[i].X < Math.Max(pts[idx1].X, pts[idx2].X) && pts[i].X > Math.Min(pts[idx1].X, pts[idx2].X) && Math.Abs(pts[i].Y - pts[idx1].Y) < 50 && Math.Abs(pts[i].Y - pts[idx2].Y) < 50)
+                    {
+                        num++;
+                    }
+
+
+                }
+            }
+
+            return num;
+        }
+
+        public static int FindPairPoint(List<Point3d> pts, int idx, int type)
+        {
+            //type=1,寻找水平点，type=2,寻找竖直点
+            int res = -1;
+            if (type == 1)
+            {
+                //寻找水平方向
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (Math.Abs(pts[i].Y - pts[idx].Y) < 50)
+                        {
+                            res = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (type == 2)
+            {
+                //寻找竖直方向
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    if (i == idx)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        if (Math.Abs(pts[i].X - pts[idx].X) < 50)
+                        {
+                            res = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+
         public static double TwoPointDist(Point3d A, Point3d B)
         {
             return Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
