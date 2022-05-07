@@ -131,7 +131,7 @@
                                     <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterialAndStructure, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
+                                                <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding ConductorMaterialAndStructure, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>

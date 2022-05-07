@@ -57,6 +57,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.ConductorMaterialAndStructure;
             set
             {
+                if (value == ConductorMaterialAndStructure) return;
                 _conductorUse.ConductorMaterialAndStructure = value;
                 OnPropertyChanged(null);
             }
@@ -73,6 +74,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.HalogenFree;
             set
             {
+                if (value == HalogenFree) return;
                 _conductorUse.HalogenFree = value;
                 OnPropertyChanged(null);
             }
@@ -82,6 +84,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.LowSmoke;
             set
             {
+                if (value == LowSmoke) return;
                 _conductorUse.LowSmoke = value;
                 OnPropertyChanged(null);
             }
@@ -91,6 +94,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.LowToxicity;
             set
             {
+                if (value == LowToxicity) return;
                 _conductorUse.LowToxicity = value;
                 OnPropertyChanged(null);
             }
@@ -100,6 +104,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.FlameRetardant;
             set
             {
+                if (value == FlameRetardant) return;
                 _conductorUse.FlameRetardant = value;
                 OnPropertyChanged(null);
             }
@@ -109,6 +114,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.Refractory;
             set
             {
+                if (value == Refractory) return;
                 _conductorUse.Refractory = value;
                 OnPropertyChanged(null);
             }
@@ -118,6 +124,7 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
             get => _conductorUse.Level;
             set
             {
+                if (value == Level) return;
                 _conductorUse.Level = value;
                 OnPropertyChanged(null);
             }
