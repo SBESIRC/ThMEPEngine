@@ -158,6 +158,7 @@
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="Config\ThExtractBeamConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />
@@ -182,6 +183,8 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThMEPLoggingService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
+    <Compile Include="Engine\ThBeamAreaBuilderEngine.cs" />
+    <Compile Include="Engine\ThBeamAreaBuilder.cs" />
     <Compile Include="Engine\ThBlockVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThBlockVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThBlockVPipeRecognitionEngine.cs" />
@@ -196,6 +199,7 @@
     <Compile Include="Engine\ThFlowSegmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFlowSegmentExtractor.cs" />
     <Compile Include="Engine\ThFlowSegmentRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRawBeamExtractionSecondVisitor.cs" />
     <Compile Include="Engine\ThRawBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThRawPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThRawPipeExtractionVisitor.cs" />
@@ -228,6 +232,7 @@
     <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
     <Compile Include="IO\SVG\ThSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
+    <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
