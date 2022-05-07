@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Colors;
-
+using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
@@ -19,7 +19,7 @@ using ThMEPWSS.DrainageADPrivate.Model;
 
 namespace ThMEPWSS.DrainageADPrivate.Service
 {
-    class ThInsertOutputService
+    public class ThInsertOutputService
     {
         public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
         {
@@ -100,6 +100,25 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     linkLine.Color = Color.FromColorIndex(ColorMethod.ByLayer, (short)ColorIndex.BYLAYER);
                     acadDatabase.ModelSpace.Add(linkLine);
                 }
+            }
+        }
+
+        public static void LayoutWaterHeater()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blkList = new List<string> { ThDrainageADCommon.BlkName_WaterHeater };
+                var layerList = new List<string> { ThDrainageADCommon.Layer_EQPM };
+                LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
+                var layerId = acadDatabase.Layers.ElementOrDefault(ThDrainageADCommon.Layer_EQPM);
+                Active.Database.Clayer = layerId.ObjectId;
+
+#if ACAD_ABOVE_2014
+
+                Active.Editor.Command("_.INSERT", ThDrainageADCommon.BlkName_WaterHeater, Autodesk.AutoCAD.EditorInput.Editor.PauseToken, 1, 1, 0);
+
+#endif
             }
         }
     }

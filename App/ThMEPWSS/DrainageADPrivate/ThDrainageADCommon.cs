@@ -10,6 +10,7 @@ namespace ThMEPWSS.DrainageADPrivate
     {
         public static string Layer_EQPM_D = "W-DRAI-EQPM";
         public static string Layer_EQPM = "W-WSUP-EQPM";
+        public static string Layer_NOTE = "W-WSUP-NOTE";
         public static string Layer_DIMS_D = "W-DRAI-DIMS";
         public static string Layer_DIMS = "W-WSUP-DIMS";
         public static string Layer_Bush = "W-BUSH";

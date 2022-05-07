@@ -60,6 +60,9 @@
                 <ColumnDefinition Width="6*"></ColumnDefinition>
                 <ColumnDefinition Width="4*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
+            <StackPanel  Grid.Column="0" Margin="10 0 20 0">
+                <Button  Content="放置热水器" Click="btnLayoutWaterHeater_Click" ></Button>
+            </StackPanel>
             <StackPanel  Grid.Column="1">
                 <Button  Content="确定" Click="btnLayout_Click" ></Button>
             </StackPanel>

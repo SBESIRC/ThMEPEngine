@@ -62,6 +62,16 @@ namespace ThMEPWSS
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThDrainageLayoutWaterHeater", CommandFlags.Modal)]
+        public void ThDrainageTestInsertBlk()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThInsertOutputService.LayoutWaterHeater();
+            }
+        }
+
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThDrainageADPData", CommandFlags.Modal)]
         public void ThDrainageADPData()
