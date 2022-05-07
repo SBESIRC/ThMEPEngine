@@ -534,7 +534,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 RenderTransform = tr
                             };
                             Action cb = null;
-                            IsolatingSwitch isolatingSwitch = null;
                             IEnumerable<MenuItem> getInputMenus()
                             {
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
@@ -617,7 +616,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 var isolatingSwitches = item.brInfos.Where(x => x.BlockName == info.BlockName).ToList();
                                 var idx = isolatingSwitches.IndexOf(info);
-                                IsolatingSwitch isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                 {
                                     isolatingSwitch = oneway.isolatingSwitch;
@@ -827,6 +826,33 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "切换为断路器",
                                         Command = new RelayCommand(() =>
                                         {
+                                            var isolatingSwitches = item.brInfos.Where(x => x.BlockName == info.BlockName).ToList();
+                                            var idx = isolatingSwitches.IndexOf(info);
+                                            IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                            if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                            {
+                                                isolatingSwitch = oneway.isolatingSwitch;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                            {
+                                                isolatingSwitch1 = twoWayInCircuit.isolatingSwitch1;
+                                                isolatingSwitch2 = twoWayInCircuit.isolatingSwitch2;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                            {
+                                                isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1;
+                                                isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2;
+                                                isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                            {
+                                                isolatingSwitch = centralizedPowerCircuit.isolatingSwitch;
+                                            }
+
+                                            if (isolatingSwitches.Count > 1)
+                                                isolatingSwitch = idx == 0 ? isolatingSwitch1 : (idx == 1 ? isolatingSwitch2 : isolatingSwitch3);
+
+                                            if (isolatingSwitch is null) return;
                                             //田工check
                                             ThPDSProjectGraphService.ComponentSwitching(vertice, isolatingSwitch, ComponentType.CB);
                                             UpdateCanvas();
