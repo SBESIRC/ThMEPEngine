@@ -1,34 +1,30 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using QuikGraph;
-using Dreambuild.AutoCAD;
-
+using System.Linq;
 using ThCADExtension;
-using TianHua.Electrical.PDS.Diagram;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using TianHua.Electrical.PDS.Service;
 using ProjectGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
-namespace TianHua.Electrical.PDS.Command
+namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSSystemDiagramEngine
+    public class ThPDSSystemDiagramService
     {
-        public ProjectGraph Graph { get; set; }
-        public List<ThPDSProjectGraphNode> NodeList { get; set; }
-
-        public ThPDSSystemDiagramEngine()
+        private ProjectGraph Graph { get; set; }
+        private List<ThPDSProjectGraphNode> Nodes { get; set; }
+        public ThPDSSystemDiagramService()
         {
 
         }
@@ -41,7 +37,7 @@ namespace TianHua.Electrical.PDS.Command
         public void Draw(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             Graph = graph;
-            NodeList = new List<ThPDSProjectGraphNode> { node };
+            Nodes = new List<ThPDSProjectGraphNode> { node };
             Draw();
         }
 
@@ -53,7 +49,7 @@ namespace TianHua.Electrical.PDS.Command
         public void Draw(ProjectGraph graph, List<ThPDSProjectGraphNode> nodes)
         {
             Graph = graph;
-            NodeList = nodes;
+            Nodes = nodes;
             Draw();
         }
 
@@ -64,7 +60,7 @@ namespace TianHua.Electrical.PDS.Command
         public void Draw(ProjectGraph graph)
         {
             Graph = graph;
-            NodeList = Graph.Vertices.ToList();
+            Nodes = Graph.Vertices.ToList();
             Draw();
         }
 
@@ -97,7 +93,7 @@ namespace TianHua.Electrical.PDS.Command
 
                 foreach (var thisNode in Graph.Vertices)
                 {
-                    if (!NodeList.Contains(thisNode))
+                    if (!Nodes.Contains(thisNode))
                     {
                         continue;
                     }

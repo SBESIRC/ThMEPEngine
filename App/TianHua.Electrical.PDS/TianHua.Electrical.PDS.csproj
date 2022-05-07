@@ -45,7 +45,7 @@
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
     <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />
     <Compile Include="Service\ThPDSSecondaryPushDataService.cs" />
-    <Compile Include="Command\ThPDSSystemDiagramEngine.cs" />
+    <Compile Include="Service\ThPDSSystemDiagramService.cs" />
     <Compile Include="Diagram\ThPDSBlockInsertEngine.cs" />
     <Compile Include="Extension\ThPDSComponentContentExtension.cs" />
     <Compile Include="Diagram\ThPDSComponentMap.cs" />

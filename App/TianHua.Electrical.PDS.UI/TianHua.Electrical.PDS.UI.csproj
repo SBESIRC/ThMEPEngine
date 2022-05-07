@@ -93,6 +93,7 @@
     <Compile Include="Services\GeoExtensions.cs" />
     <Compile Include="Services\PDSItemInfo.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
+    <Compile Include="Services\ThPDSCADService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
     <Compile Include="Services\ThPDSComponentBlockInfoService.cs" />
     <Compile Include="Services\ThPDSDistributionPanelConfig.cs" />

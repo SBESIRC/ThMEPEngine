@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -54,7 +55,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             treeCMenu ??= tv.ContextMenu;
             var config = new ThPDSDistributionPanelConfig();
             treeCMenu.DataContext = config;
-            var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
+            var builder = new ThPDSCircuitGraphTreeBuilder();
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
@@ -74,48 +75,43 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 dfs(tree);
             }
             var selectAllCmd = new RelayCommand(() =>
-           {
-               if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-               void dfs(ThPDSCircuitGraphTreeModel node)
-               {
-                   node.IsChecked = true;
-                   foreach (var n in node.DataList)
-                   {
-                       dfs(n);
-                   }
-               }
-               dfs(tree);
-           });
+            {
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    node.IsChecked = true;
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            });
             var batchGenCmd = new RelayCommand(() =>
             {
-                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-                try
+                // 获取勾选的节点
+                var vertices = graph.Vertices.ToList();
+                var nodes = new List<ThPDSProjectGraphNode>();
+                void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                    var vertices = graph.Vertices.ToList();
-                    var nodes = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    if (node.IsChecked == true)
                     {
-                        if (node.IsChecked == true)
-                        {
-                            var nd = vertices[node.Id];
-                            if (!nodes.Any(x => new ThPDSDistributionBoxModel(x).ID == new ThPDSDistributionBoxModel(nd).ID))
-                            {
-                                nodes.Add(nd);
-                            }
-                        }
-                        foreach (var n in node.DataList) dfs(n);
+                        nodes.Add(vertices[node.Id]);
                     }
-                    dfs(tree);
-                    if (nodes.Count == 0) return;
-                    var drawEngine = new Command.ThPDSSystemDiagramEngine();
-                    drawEngine.Draw(graph, nodes);
-                    AcHelper.Active.Editor.Regen();
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
                 }
-                finally
-                {
-                    UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-                }
+                dfs(tree);
+                if (nodes.Count == 0) return;
+
+                // 切回CAD画布
+                ThPDSCADService.FocusToCAD();
+
+                // 绘制到图纸上
+                var drawEngine = new ThPDSSystemDiagramService();
+                drawEngine.Draw(graph, nodes);
             });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
@@ -332,20 +328,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
                     {
-                        Header = "单独生成",
+                        Header = "生成系统图",
                         Command = new RelayCommand(() =>
                         {
-                            UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-                            try
-                            {
-                                var drawEngine = new Command.ThPDSSystemDiagramEngine();
-                                drawEngine.Draw(graph, vertice);
-                                AcHelper.Active.Editor.Regen();
-                            }
-                            finally
-                            {
-                                UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-                            }
+                            // 切回CAD画布
+                            ThPDSCADService.FocusToCAD();
+
+                            // 绘制到图纸上
+                            var drawEngine = new ThPDSSystemDiagramService();
+                            drawEngine.Draw(graph, vertice);
                         }),
                     });
                     canvas.ContextMenu = cmenu;
