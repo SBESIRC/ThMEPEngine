@@ -161,25 +161,25 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
-                    oneWayInCircuit.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    oneWayInCircuit.Component = componentFactory.CreatIsolatingSwitch();
                 }
                 else if(node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
-                    twoWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    twoWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.Component1 = componentFactory.CreatIsolatingSwitch();
+                    twoWayInCircuit.Component2 = componentFactory.CreatIsolatingSwitch();
                     twoWayInCircuit.transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
                 }
                 else if(node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
-                    threeWayInCircuit.isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.Component1 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.Component2 = componentFactory.CreatIsolatingSwitch();
+                    threeWayInCircuit.Component3 = componentFactory.CreatIsolatingSwitch();
                     threeWayInCircuit.transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
                     threeWayInCircuit.transferSwitch2 = componentFactory.CreatManualTransferSwitch();
                 }
                 else if(node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
-                    centralized.isolatingSwitch = componentFactory.CreatIsolatingSwitch();
+                    centralized.Component = componentFactory.CreatIsolatingSwitch();
                 }
                 else
                 {
@@ -1208,15 +1208,15 @@ namespace TianHua.Electrical.PDS.Project
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
                     var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
-                    oneWayInCircuit.isolatingSwitch = oneWayInCircuit.isolatingSwitch.ComponentChange(isolatingSwitch);
+                    oneWayInCircuit.Component = oneWayInCircuit.Component.ComponentChange(isolatingSwitch);
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
                     var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    twoWayInCircuit.isolatingSwitch1 =twoWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+                    twoWayInCircuit.Component1 =twoWayInCircuit.Component1.ComponentChange(isolatingSwitch1);
 
                     var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
-                    twoWayInCircuit.isolatingSwitch2 =twoWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+                    twoWayInCircuit.Component2 =twoWayInCircuit.Component2.ComponentChange(isolatingSwitch2);
 
                     TransferSwitch transferSwitch;
                     if (twoWayInCircuit.transferSwitch is ManualTransferSwitch MTSE)
@@ -1232,13 +1232,13 @@ namespace TianHua.Electrical.PDS.Project
                 else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
                     var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+                    threeWayInCircuit.Component1 = threeWayInCircuit.Component1.ComponentChange(isolatingSwitch1);
 
                     var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+                    threeWayInCircuit.Component2 = threeWayInCircuit.Component2.ComponentChange(isolatingSwitch2);
 
                     var isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3.ComponentChange(isolatingSwitch3);
+                    threeWayInCircuit.Component3 = threeWayInCircuit.Component3.ComponentChange(isolatingSwitch3);
 
                     TransferSwitch transferSwitch1;
                     if (threeWayInCircuit.transferSwitch1 is ManualTransferSwitch)
@@ -1265,7 +1265,7 @@ namespace TianHua.Electrical.PDS.Project
                 else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
                     var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
-                    centralized.isolatingSwitch = centralized.isolatingSwitch.ComponentChange(isolatingSwitch);
+                    centralized.Component = centralized.Component.ComponentChange(isolatingSwitch);
                 }
                 else
                 {
@@ -1286,15 +1286,15 @@ namespace TianHua.Electrical.PDS.Project
                 if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
                 {
                     var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
-                    oneWayInCircuit.isolatingSwitch = oneWayInCircuit.isolatingSwitch.ComponentChange(isolatingSwitch);
+                    oneWayInCircuit.Component = oneWayInCircuit.Component.ComponentChange(isolatingSwitch);
                 }
                 else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
                     var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    twoWayInCircuit.isolatingSwitch1 =twoWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+                    twoWayInCircuit.Component1 =twoWayInCircuit.Component1.ComponentChange(isolatingSwitch1);
 
                     var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
-                    twoWayInCircuit.isolatingSwitch2 =twoWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+                    twoWayInCircuit.Component2 =twoWayInCircuit.Component2.ComponentChange(isolatingSwitch2);
 
                     TransferSwitch transferSwitch;
                     if (twoWayInCircuit.transferSwitch is ManualTransferSwitch MTSE)
@@ -1310,13 +1310,13 @@ namespace TianHua.Electrical.PDS.Project
                 else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
                     var isolatingSwitch1 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1.ComponentChange(isolatingSwitch1);
+                    threeWayInCircuit.Component1 = threeWayInCircuit.Component1.ComponentChange(isolatingSwitch1);
 
                     var isolatingSwitch2 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2.ComponentChange(isolatingSwitch2);
+                    threeWayInCircuit.Component2 = threeWayInCircuit.Component2.ComponentChange(isolatingSwitch2);
 
                     var isolatingSwitch3 = componentFactory.CreatIsolatingSwitch();
-                    threeWayInCircuit.isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3.ComponentChange(isolatingSwitch3);
+                    threeWayInCircuit.Component3 = threeWayInCircuit.Component3.ComponentChange(isolatingSwitch3);
 
                     TransferSwitch transferSwitch1;
                     if (threeWayInCircuit.transferSwitch1 is ManualTransferSwitch)
@@ -1343,7 +1343,7 @@ namespace TianHua.Electrical.PDS.Project
                 else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
                     var isolatingSwitch = componentFactory.CreatIsolatingSwitch();
-                    centralized.isolatingSwitch = centralized.isolatingSwitch.ComponentChange(isolatingSwitch);
+                    centralized.Component = centralized.Component.ComponentChange(isolatingSwitch);
                 }
                 else
                 {

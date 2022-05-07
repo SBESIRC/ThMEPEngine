@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new OneWayInCircuit()
                             {
-                                isolatingSwitch = componentFactory.CreatIsolatingSwitch(),
+                                Component = componentFactory.CreatIsolatingSwitch(),
                             };
                             break;
                         }
@@ -48,8 +48,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new TwoWayInCircuit()
                             {
-                                isolatingSwitch1 = componentFactory.CreatIsolatingSwitch(),
-                                isolatingSwitch2 = componentFactory.CreatIsolatingSwitch(),
+                                Component1 = componentFactory.CreatIsolatingSwitch(),
+                                Component2 = componentFactory.CreatIsolatingSwitch(),
                                 transferSwitch = componentFactory.CreatAutomaticTransferSwitch(),
                             };
                             break;
@@ -58,9 +58,9 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new ThreeWayInCircuit()
                             {
-                                isolatingSwitch1 = componentFactory.CreatIsolatingSwitch(),
-                                isolatingSwitch2 = componentFactory.CreatIsolatingSwitch(),
-                                isolatingSwitch3 = componentFactory.CreatIsolatingSwitch(),
+                                Component1 = componentFactory.CreatIsolatingSwitch(),
+                                Component2 = componentFactory.CreatIsolatingSwitch(),
+                                Component3 = componentFactory.CreatIsolatingSwitch(),
                                 transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch(),
                                 transferSwitch2 = componentFactory.CreatManualTransferSwitch(),
                             };
@@ -70,7 +70,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                         {
                             node.Details.CircuitFormType = new CentralizedPowerCircuit()
                             {
-                                isolatingSwitch = componentFactory.CreatIsolatingSwitch(),
+                                Component = componentFactory.CreatIsolatingSwitch(),
                             };
                             break;
                         }

@@ -557,29 +557,29 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                 {
-                                    isolatingSwitch = oneway.isolatingSwitch as IsolatingSwitch;
-                                    breaker = oneway.isolatingSwitch as Breaker;
+                                    isolatingSwitch = oneway.Component as IsolatingSwitch;
+                                    breaker = oneway.Component as Breaker;
                                 }
                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
                                 {
-                                    isolatingSwitch1 = twoWayInCircuit.isolatingSwitch1 as IsolatingSwitch;
-                                    breaker1 = twoWayInCircuit.isolatingSwitch1 as Breaker;
-                                    isolatingSwitch2 = twoWayInCircuit.isolatingSwitch2 as IsolatingSwitch;
-                                    breaker2 = twoWayInCircuit.isolatingSwitch2 as Breaker;
+                                    isolatingSwitch1 = twoWayInCircuit.Component1 as IsolatingSwitch;
+                                    breaker1 = twoWayInCircuit.Component1 as Breaker;
+                                    isolatingSwitch2 = twoWayInCircuit.Component2 as IsolatingSwitch;
+                                    breaker2 = twoWayInCircuit.Component2 as Breaker;
                                 }
                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
                                 {
-                                    isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1 as IsolatingSwitch;
-                                    breaker1 = threeWayInCircuit.isolatingSwitch1 as Breaker;
-                                    isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2 as IsolatingSwitch;
-                                    breaker2 = threeWayInCircuit.isolatingSwitch2 as Breaker;
-                                    isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3 as IsolatingSwitch;
-                                    breaker3 = threeWayInCircuit.isolatingSwitch3 as Breaker;
+                                    isolatingSwitch1 = threeWayInCircuit.Component1 as IsolatingSwitch;
+                                    breaker1 = threeWayInCircuit.Component1 as Breaker;
+                                    isolatingSwitch2 = threeWayInCircuit.Component2 as IsolatingSwitch;
+                                    breaker2 = threeWayInCircuit.Component2 as Breaker;
+                                    isolatingSwitch3 = threeWayInCircuit.Component3 as IsolatingSwitch;
+                                    breaker3 = threeWayInCircuit.Component3 as Breaker;
                                 }
                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
                                 {
-                                    isolatingSwitch = centralizedPowerCircuit.isolatingSwitch as IsolatingSwitch;
-                                    breaker = centralizedPowerCircuit.isolatingSwitch as Breaker;
+                                    isolatingSwitch = centralizedPowerCircuit.Component as IsolatingSwitch;
+                                    breaker = centralizedPowerCircuit.Component as Breaker;
                                 }
                                 if (isolatingSwitch != null)
                                 {
@@ -623,22 +623,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
                                             if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                             {
-                                                isolatingSwitch = oneway.isolatingSwitch as IsolatingSwitch;
+                                                isolatingSwitch = oneway.Component as IsolatingSwitch;
                                             }
                                             else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
                                             {
-                                                isolatingSwitch1 = twoWayInCircuit.isolatingSwitch1 as IsolatingSwitch;
-                                                isolatingSwitch2 = twoWayInCircuit.isolatingSwitch2 as IsolatingSwitch;
+                                                isolatingSwitch1 = twoWayInCircuit.Component1 as IsolatingSwitch;
+                                                isolatingSwitch2 = twoWayInCircuit.Component2 as IsolatingSwitch;
                                             }
                                             else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
                                             {
-                                                isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1 as IsolatingSwitch;
-                                                isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2 as IsolatingSwitch;
-                                                isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3 as IsolatingSwitch;
+                                                isolatingSwitch1 = threeWayInCircuit.Component1 as IsolatingSwitch;
+                                                isolatingSwitch2 = threeWayInCircuit.Component2 as IsolatingSwitch;
+                                                isolatingSwitch3 = threeWayInCircuit.Component3 as IsolatingSwitch;
                                             }
                                             else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
                                             {
-                                                isolatingSwitch = centralizedPowerCircuit.isolatingSwitch as IsolatingSwitch;
+                                                isolatingSwitch = centralizedPowerCircuit.Component as IsolatingSwitch;
                                             }
 
                                             if (comps.Count > 1)
@@ -665,22 +665,22 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
                                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                                 {
-                                                    breaker = oneway.isolatingSwitch as Breaker;
+                                                    breaker = oneway.Component as Breaker;
                                                 }
                                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
                                                 {
-                                                    breaker1 = twoWayInCircuit.isolatingSwitch1 as Breaker;
-                                                    breaker2 = twoWayInCircuit.isolatingSwitch2 as Breaker;
+                                                    breaker1 = twoWayInCircuit.Component1 as Breaker;
+                                                    breaker2 = twoWayInCircuit.Component2 as Breaker;
                                                 }
                                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
                                                 {
-                                                    breaker1 = threeWayInCircuit.isolatingSwitch1 as Breaker;
-                                                    breaker2 = threeWayInCircuit.isolatingSwitch2 as Breaker;
-                                                    breaker3 = threeWayInCircuit.isolatingSwitch3 as Breaker;
+                                                    breaker1 = threeWayInCircuit.Component1 as Breaker;
+                                                    breaker2 = threeWayInCircuit.Component2 as Breaker;
+                                                    breaker3 = threeWayInCircuit.Component3 as Breaker;
                                                 }
                                                 else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
                                                 {
-                                                    breaker = centralizedPowerCircuit.isolatingSwitch as Breaker;
+                                                    breaker = centralizedPowerCircuit.Component as Breaker;
                                                 }
 
                                                 if (comps.Count > 1)

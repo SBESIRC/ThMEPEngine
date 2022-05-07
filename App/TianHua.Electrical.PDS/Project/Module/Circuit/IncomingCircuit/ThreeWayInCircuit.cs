@@ -15,14 +15,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         }
 
         /// <summary>
-        /// 坑位1: 隔离开关1
+        /// 坑位1：隔离开关/断路器
         /// </summary>
-        public PDSBaseComponent isolatingSwitch1 { get; set; }
+        public PDSBaseComponent Component1 { get; set; }
 
         /// <summary>
-        /// 坑位3: 隔离开关2
+        /// 坑位2：隔离开关/断路器
         /// </summary>
-        public PDSBaseComponent isolatingSwitch2 { get; set; }
+        public PDSBaseComponent Component2 { get; set; }
 
         /// <summary>
         /// 坑位3: 转换开关1
@@ -30,9 +30,9 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit
         public TransferSwitch transferSwitch1 { get; set; }
 
         /// <summary>
-        /// 坑位4: 隔离开关3
+        /// 坑位4：隔离开关/断路器
         /// </summary>
-        public PDSBaseComponent isolatingSwitch3 { get; set; }
+        public PDSBaseComponent Component3 { get; set; }
 
         /// <summary>
         /// 坑位5: 转换开关2
