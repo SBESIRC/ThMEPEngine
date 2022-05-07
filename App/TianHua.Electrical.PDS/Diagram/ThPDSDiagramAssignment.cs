@@ -111,7 +111,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcIsolatingSwitch.Erase();
                         }
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
-                        QLText.TextString = (circuit.isolatingSwitch as IsolatingSwitch).Content();
+                        if(circuit.isolatingSwitch is IsolatingSwitch isolatingSwitch)
+                        {
+                            QLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if(circuit.isolatingSwitch is Breaker breaker)
+                        {
+                            QLText.TextString = breaker.Content();
+                        }
 
                         // 电能表
                         // To do
@@ -149,7 +156,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstIsolatingSwitch.Erase();
                         }
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = (circuit.isolatingSwitch1 as IsolatingSwitch).Content();
+                        if(circuit.isolatingSwitch1 is IsolatingSwitch isolatingSwitch)
+                        {
+                            firstQLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if (circuit.isolatingSwitch1 is Breaker breaker)
+                        {
+                            firstQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
@@ -211,7 +225,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstIsolatingSwitch.Erase();
                         }
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = (circuit.isolatingSwitch1 as IsolatingSwitch).Content();
+                        if (circuit.isolatingSwitch1 is IsolatingSwitch isolatingSwitch)
+                        {
+                            firstQLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if (circuit.isolatingSwitch1 is Breaker breaker)
+                        {
+                            firstQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
