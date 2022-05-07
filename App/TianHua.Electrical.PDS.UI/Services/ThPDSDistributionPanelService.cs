@@ -108,8 +108,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     dfs(tree);
                     if (nodes.Count == 0) return;
-                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, nodes);
-                    drawCmd.Execute();
+                    var drawEngine = new Command.ThPDSSystemDiagramEngine();
+                    drawEngine.Draw(graph, nodes);
                     AcHelper.Active.Editor.Regen();
                 }
                 finally
@@ -338,8 +338,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
                             try
                             {
-                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, new List<ThPDSProjectGraphNode>() { vertice, });
-                                drawCmd.Execute();
+                                var drawEngine = new Command.ThPDSSystemDiagramEngine();
+                                drawEngine.Draw(graph, vertice);
                                 AcHelper.Active.Editor.Regen();
                             }
                             finally

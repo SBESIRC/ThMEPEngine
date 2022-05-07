@@ -226,7 +226,15 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var objs = new DBObjectCollection();
                 o.Entity.Explode(objs);
-                var basePoint = objs.OfType<Line>().First().GetCenter();
+                var basePoint = new Point3d();
+                if (ThMEPTCHService.IsTCHWireDim2(o.Entity))
+                {
+                    basePoint = objs.OfType<Line>().First().GetCenter();
+                }
+                else if(ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
+                {
+                    basePoint = objs.OfType<Polyline>().First().GetCenter();
+                }
                 var textList = new List<string>();
                 objs.OfType<Entity>().ForEach(e =>
                 {

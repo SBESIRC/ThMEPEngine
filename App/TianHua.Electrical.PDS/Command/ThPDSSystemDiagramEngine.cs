@@ -10,7 +10,6 @@ using QuikGraph;
 using Dreambuild.AutoCAD;
 
 using ThCADExtension;
-using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
@@ -18,22 +17,58 @@ using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
+using ProjectGraph = QuikGraph.BidirectionalGraph<
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
 namespace TianHua.Electrical.PDS.Command
 {
-    public class ThPDSSystemDiagramCommand : ThMEPBaseCommand, IDisposable
+    public class ThPDSSystemDiagramEngine
     {
-        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
+        public ProjectGraph Graph { get; set; }
         public List<ThPDSProjectGraphNode> NodeList { get; set; }
 
-        public ThPDSSystemDiagramCommand(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
-            List<ThPDSProjectGraphNode> nodeList)
+        public ThPDSSystemDiagramEngine()
         {
-            Graph = graph;
-            NodeList = nodeList;
+
         }
 
-        public override void SubExecute()
+        /// <summary>
+        /// 单独生成
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        public void Draw(ProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            Graph = graph;
+            NodeList = new List<ThPDSProjectGraphNode> { node };
+            Draw();
+        }
+
+        /// <summary>
+        /// 批量生成
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="nodes"></param>
+        public void Draw(ProjectGraph graph, List<ThPDSProjectGraphNode> nodes)
+        {
+            Graph = graph;
+            NodeList = nodes;
+            Draw();
+        }
+
+        /// <summary>
+        /// 全部生成
+        /// </summary>
+        /// <param name="graph"></param>
+        public void Draw(ProjectGraph graph)
+        {
+            Graph = graph;
+            NodeList = Graph.Vertices.ToList();
+            Draw();
+        }
+
+        private void Draw()
         {
             using (var docLock = Active.Document.LockDocument())
             using (var activeDb = AcadDatabase.Active())
@@ -60,8 +95,13 @@ namespace TianHua.Electrical.PDS.Command
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
                 var residue = ThPDSCommon.INNER_TOLERANCE - 1000.0;
 
-                foreach (var thisNode in NodeList)
+                foreach (var thisNode in Graph.Vertices)
                 {
+                    if (!NodeList.Contains(thisNode))
+                    {
+                        continue;
+                    }
+
                     if (thisNode.Type != PDSNodeType.DistributionBox)
                     {
                         continue;
