@@ -176,7 +176,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             secondIsolatingSwitch.Erase();
                         }
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = (circuit.isolatingSwitch2 as IsolatingSwitch).Content();
+                        if (circuit.isolatingSwitch2 is IsolatingSwitch isolatingSwitch2)
+                        {
+                            secondQLText.TextString = isolatingSwitch2.Content();
+                        }
+                        else if (circuit.isolatingSwitch2 is Breaker breaker)
+                        {
+                            secondQLText.TextString = breaker.Content();
+                        }
 
                         // 转换开关
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
@@ -245,7 +252,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             secondIsolatingSwitch.Erase();
                         }
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = (circuit.isolatingSwitch2 as IsolatingSwitch).Content();
+                        if (circuit.isolatingSwitch2 is IsolatingSwitch isolatingSwitch2)
+                        {
+                            secondQLText.TextString = isolatingSwitch2.Content();
+                        }
+                        else if (circuit.isolatingSwitch2 is Breaker breaker)
+                        {
+                            secondQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关3
                         var thirdIsolatingSwitch = srcIsolatingSwitchs[2];
@@ -626,17 +640,18 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
                             var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            CTText.TextString = meter.Content();
+                            if (meter is CurrentTransformer ct)
+                            {
+                                MTText.TextString = ct.Content();
+                            }
                         }
 
                         // 元器件3
@@ -756,17 +771,18 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
                             var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            CTText.TextString = meter.Content();
+                            if(meter is CurrentTransformer ct)
+                            {
+                                MTText.TextString = ct.Content();
+                            }
                         }
 
                         // 元器件2
