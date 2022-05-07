@@ -80,6 +80,7 @@ namespace ThParkingStall.Core.Tools
         }
         public static bool PartInCommon(this LineString lstr1, LineString lstr2)
         {
+            if(lstr1 == null || lstr2 == null) return false;
             var intSection = lstr1.Intersection(lstr2);
             if (intSection.Length >0 ) return true;
             else return false;
@@ -126,7 +127,7 @@ namespace ThParkingStall.Core.Tools
             var geos = LSTR_Union.Polygonize();
             return geos.ToList();
         }
-        public static List<Polygon> GetPolygons(this LineString linestring, List<LineString> others)
+        public static List<Polygon> GetPolygons(this LineString linestring, IEnumerable<LineString> others)
         {
             var list = new List<LineString> { linestring };
             list.AddRange(others);

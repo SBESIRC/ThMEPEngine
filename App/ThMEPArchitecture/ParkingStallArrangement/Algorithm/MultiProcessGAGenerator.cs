@@ -17,6 +17,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ViewModel;
 using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.IO;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
@@ -241,7 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var currentMutexList = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "0", "0");
+                var proc = CreateSubProcess(idx, "1", "0");
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
@@ -430,8 +431,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Logger?.Information($"写入数据用时: {stopWatch.Elapsed.TotalSeconds -t_pre}秒");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
 
-                currentMutexList.Reverse();
-                currentMutexList.ForEach(mutex => mutex.ReleaseMutex());//起始锁解锁，子进程开始计算
+                for(int idx = currentMutexList.Count -1; idx >= 0; idx--)
+                {
+                    currentMutexList[idx].ReleaseMutex();
+                    if (idx % 5 == 0) Thread.Sleep(1);
+                }
+                //currentMutexList.Reverse();
+
+                //currentMutexList.ForEach(mutex => { mutex.ReleaseMutex(); Thread.Sleep(1); });//起始锁解锁，子进程开始计算
                 //Thread.Sleep(100);
                 currentMutexList.ForEach(mutex => mutex.WaitOne(-1,true));//等待结束
                 currentMutexList.ForEach(mutex => mutex.Dispose());
@@ -477,19 +484,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //Logger?.Information("mutex status:"+mutexCreated.ToString());
             return mutex;
         }
-        private void UpdateParkingNumber(int idx,List<MPChromosome> inputSolution, (List<int>, List<List<(double, double)>>, List<int>) subProcResult)
-        {
+        //private void UpdateParkingNumber(int idx,List<MPChromosome> inputSolution, (List<int>, List<List<(double, double)>>, List<int>) subProcResult)
+        //{
 
-            var parkingCnts = subProcResult.Item1;
-            for(int i = 0; i < parkingCnts.Count; i++)
-            {
-                inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
-            }
-            SubAreaParkingCnt.Update(subProcResult.Item2, subProcResult.Item3);//更新子进程记录
+        //    var parkingCnts = subProcResult.Item1;
+        //    for(int i = 0; i < parkingCnts.Count; i++)
+        //    {
+        //        inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
+        //    }
+        //    SubAreaParkingCnt.Update(subProcResult.Item2, subProcResult.Item3);//更新子进程记录
 
-        }
+        //}
 
-        private void UpdateParkingNumber(int idx, List<MPChromosome> inputSolution, List<int> parkingCnts, Dictionary<LinearRing, int> subProcResult)
+        //private void UpdateParkingNumber(int idx, List<MPChromosome> inputSolution, List<int> parkingCnts, Dictionary<LinearRing, int> subProcResult)
+        //{
+
+        //    for (int i = 0; i < parkingCnts.Count; i++)
+        //    {
+        //        inputSolution[i * ProcessCount + idx].ParkingStallCount = parkingCnts[i];
+        //    }
+        //    SubAreaParkingCnt.Update(subProcResult);//更新子进程记录
+
+        //}
+        private void UpdateParkingNumber(int idx, List<MPChromosome> inputSolution, List<int> parkingCnts, Dictionary<SubAreaKey, int> subProcResult)
         {
 
             for (int i = 0; i < parkingCnts.Count; i++)

@@ -100,8 +100,8 @@ namespace ThParkingStall.Core.InterProcess
             //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
             var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
             if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return subAreas;//判断是否满足车道宽
-            var SegLineStrings = newSegLines.ToLineStrings();
-            var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
+            var SegLineStrings = newSegLines.ToLineStrings(false);
+            var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr!=null));//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             var vaildSegSpatialIndex = new MNTSSpatialIndex(vaildSeg.ToLineStrings().Cast<Geometry>().ToList());
             // 创建子区域列表
@@ -125,10 +125,26 @@ namespace ThParkingStall.Core.InterProcess
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 var subRamps = Ramps.Where(ramp => area.Contains(ramp.InsertPt)).ToList();
                 var subBoundingBoxes = BoundingBoxSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
-                var subArea = new SubArea(area, subSegLines, subBuildings, subRamps, subBoundingBoxes);
+                var key = GetSubAreaKey(area, chromosome, SegLineStrings);
+                var subArea = new SubArea(area, subSegLines, subBuildings, subRamps, subBoundingBoxes, key);
                 subAreas.Add(subArea);
             }
             return subAreas;
+        }
+
+        public static SubAreaKey GetSubAreaKey(Polygon area,Chromosome chromosome, List<LineString> SegLineStrings)
+        {
+            var GeneIdxs = new List<int>();
+            var GeneVals = new List<double>();
+            for(int idx = 0; idx < SegLineStrings.Count; idx++)
+            {
+                var SegLineString = SegLineStrings[idx];
+                if(area.Shell.PartInCommon(SegLineString)) GeneIdxs.Add(idx);
+            }
+            var center = area.Centroid;
+            var ValIncreaseDir = center.OnIncreaseDirectionOf( chromosome.Genome[GeneIdxs.First()].ToLineSegment());
+            GeneIdxs.ForEach(idx => GeneVals.Add(chromosome.Genome[idx].Value));
+            return new SubAreaKey(GeneIdxs, GeneVals, ValIncreaseDir);
         }
     }
 }

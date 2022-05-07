@@ -10,7 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using ThParkingStall.Core.MPartitionLayout;
 using System.Runtime.Serialization;
 using System.Reflection;
-
+using ThParkingStall.Core.IO;
 namespace ThParkingStall.Core.InterProcess
 {
     [Serializable]
@@ -190,13 +190,129 @@ namespace ThParkingStall.Core.InterProcess
             return str;
         }
     }
+    //[Serializable]
+    //public class ChromosomeCollection
+    //{
+    //    public List<Chromosome> Chromosomes = new List<Chromosome>();//染色体列表
+
+    //    private Dictionary<LinearRing, int> _newcachedPartitionCnt = new Dictionary<LinearRing, int>();
+    //    public Dictionary<LinearRing, int> NewCachedPartitionCnt//上一代新出现的
+    //    {
+    //        get { return _newcachedPartitionCnt; }
+    //        set { _newcachedPartitionCnt = value; }
+    //    }
+    //    public void Append(Chromosome chromosome)
+    //    {
+    //        Chromosomes.Add(chromosome);
+    //    }
+    //    public static ChromosomeCollection ReadFromStream(Stream stream)
+    //    {
+    //        BinaryReader reader = new BinaryReader(stream);
+    //        var chromosomes = ReadWriteEx.ReadChromosomes(reader);
+    //        var newcachedPartitionCnt = ReadWriteEx.ReadCached(reader);
+    //        return new ChromosomeCollection { Chromosomes = chromosomes, NewCachedPartitionCnt = newcachedPartitionCnt };
+    //    }
+    //    public void WriteToStream(Stream stream)
+    //    {
+    //        BinaryWriter writer = new BinaryWriter(stream);
+    //        Chromosomes.WriteToStream(writer);
+    //        NewCachedPartitionCnt.WriteToStream(writer);
+    //    }
+    //}
+
+    //public static class SubAreaParkingCnt
+    //{
+    //    static private Dictionary<LinearRing, int> _cachedPartitionCnt = new Dictionary<LinearRing, int>();
+    //    static public Dictionary<LinearRing, int> CachedPartitionCnt
+    //    {
+    //        get { return _cachedPartitionCnt; }
+    //        set { _cachedPartitionCnt = value; }
+    //    }
+
+    //    static private Dictionary<LinearRing, int> _newcachedPartitionCnt = new Dictionary<LinearRing, int>();
+    //    static public Dictionary<LinearRing, int> NewCachedPartitionCnt//新出现的子区域
+    //    {
+    //        get { return _newcachedPartitionCnt; }
+    //        set { _newcachedPartitionCnt = value; }
+    //    }
+    //    public static bool Contains(SubArea subArea)
+    //    {
+    //        return CachedPartitionCnt.ContainsKey(subArea.Area.Shell);
+    //    }
+    //    public static int GetParkingNumber(SubArea subArea)
+    //    {
+    //        if (CachedPartitionCnt.ContainsKey(subArea.Area.Shell)) return CachedPartitionCnt[subArea.Area.Shell];
+    //        else return -999999;
+    //    }
+    //    public static void UpdateParkingNumber(SubArea subArea,int cnt)
+    //    {
+    //        if (CachedPartitionCnt.ContainsKey(subArea.Area.Shell)) return;
+    //        CachedPartitionCnt.Add(subArea.Area.Shell, cnt);
+    //        NewCachedPartitionCnt.Add(subArea.Area.Shell, cnt);
+    //    }
+
+    //    public static void Update(Dictionary<LinearRing, int> subProcCachedPartitionCnt,bool updateNewCached = true)
+    //    {
+    //        foreach(var pair in subProcCachedPartitionCnt)
+    //        {
+    //            if(!CachedPartitionCnt.ContainsKey(pair.Key))
+    //            {
+    //                CachedPartitionCnt.Add(pair.Key, pair.Value);
+    //                if(updateNewCached)
+    //                    NewCachedPartitionCnt.Add(pair.Key, pair.Value);
+    //            }
+    //        }
+    //    }
+
+    //    public static (List<List<(double, double)>>, List<int>) GetNewUpdated()
+    //    {
+    //        List<int> Cnts = new List<int> ();
+    //        List<List<(double,double)>> coordinates = new List<List<(double, double)>>();
+
+    //        foreach(var pair in NewCachedPartitionCnt)
+    //        {
+    //            var coorvalues = new List<(double,double)>();
+    //            foreach(var coor in pair.Key.Coordinates)
+    //            {
+    //                coorvalues.Add((coor.X, coor.Y));
+    //            }
+    //            coordinates.Add(coorvalues);
+    //            Cnts.Add(pair.Value);
+    //        }
+    //        return (coordinates, Cnts);
+    //    }
+
+    //    public static void Update(List<List<(double, double)>> coordinates, List<int> Cnts)
+    //    {
+    //        var dict = new Dictionary<LinearRing, int>();
+    //        for(int i = 0; i < Cnts.Count; i++)
+    //        {
+    //            var key =new LinearRing( coordinates[i].Select(val => new Coordinate(val.Item1,val.Item2)).ToArray());
+    //            dict.Add(key,Cnts[i]);
+    //        }
+    //        Update(dict);
+    //    }
+    //    public static void Update(ChromosomeCollection chromosomeCollection)
+    //    {
+    //        Update(chromosomeCollection.NewCachedPartitionCnt,false);
+    //    }
+    //    public static void Clear()
+    //    {
+    //        _cachedPartitionCnt.Clear();
+    //        _newcachedPartitionCnt.Clear();
+    //    }
+    //    public static void ClearNewAdded()
+    //    {
+    //        _newcachedPartitionCnt.Clear();
+    //    }
+    //}
     [Serializable]
     public class ChromosomeCollection
     {
         public List<Chromosome> Chromosomes = new List<Chromosome>();//染色体列表
 
-        private Dictionary<LinearRing, int> _newcachedPartitionCnt = new Dictionary<LinearRing, int>();
-        public Dictionary<LinearRing, int> NewCachedPartitionCnt//上一代新出现的
+        private Dictionary<SubAreaKey, int> _newcachedPartitionCnt = new Dictionary<SubAreaKey, int>();
+        public Dictionary<SubAreaKey, int> NewCachedPartitionCnt//上一代新出现的
         {
             get { return _newcachedPartitionCnt; }
             set { _newcachedPartitionCnt = value; }
@@ -219,91 +335,52 @@ namespace ThParkingStall.Core.InterProcess
             NewCachedPartitionCnt.WriteToStream(writer);
         }
     }
-    [Serializable]
-    public class NewCachedPartitionCnt
-    {
-        private Dictionary<LinearRing, int> _newcachedPartitionCnt = new Dictionary<LinearRing, int>();
-        public Dictionary<LinearRing, int> Data
-        {
-            get { return _newcachedPartitionCnt; }
-            set { _newcachedPartitionCnt = value; }
-        }
-    }
     public static class SubAreaParkingCnt
     {
-        static private Dictionary<LinearRing, int> _cachedPartitionCnt = new Dictionary<LinearRing, int>();
-        static public Dictionary<LinearRing, int> CachedPartitionCnt
+        static private Dictionary<SubAreaKey, int> _cachedPartitionCnt = new Dictionary<SubAreaKey, int>();
+        static public Dictionary<SubAreaKey, int> CachedPartitionCnt
         {
             get { return _cachedPartitionCnt; }
             set { _cachedPartitionCnt = value; }
         }
 
-        static private Dictionary<LinearRing, int> _newcachedPartitionCnt = new Dictionary<LinearRing, int>();
-        static public Dictionary<LinearRing, int> NewCachedPartitionCnt//新出现的子区域
+        static private Dictionary<SubAreaKey, int> _newcachedPartitionCnt = new Dictionary<SubAreaKey, int>();
+        static public Dictionary<SubAreaKey, int> NewCachedPartitionCnt//新出现的子区域
         {
             get { return _newcachedPartitionCnt; }
             set { _newcachedPartitionCnt = value; }
         }
         public static bool Contains(SubArea subArea)
         {
-            return CachedPartitionCnt.ContainsKey(subArea.Area.Shell);
+            return CachedPartitionCnt.ContainsKey(subArea.Key);
         }
         public static int GetParkingNumber(SubArea subArea)
         {
-            if (CachedPartitionCnt.ContainsKey(subArea.Area.Shell)) return CachedPartitionCnt[subArea.Area.Shell];
+            if (CachedPartitionCnt.ContainsKey(subArea.Key)) return CachedPartitionCnt[subArea.Key];
             else return -999999;
         }
-        public static void UpdateParkingNumber(SubArea subArea,int cnt)
+        public static void UpdateParkingNumber(SubArea subArea, int cnt)
         {
-            if (CachedPartitionCnt.ContainsKey(subArea.Area.Shell)) return;
-            CachedPartitionCnt.Add(subArea.Area.Shell, cnt);
-            NewCachedPartitionCnt.Add(subArea.Area.Shell, cnt);
+            if (CachedPartitionCnt.ContainsKey(subArea.Key)) return;
+            CachedPartitionCnt.Add(subArea.Key, cnt);
+            NewCachedPartitionCnt.Add(subArea.Key, cnt);
         }
 
-        public static void Update(Dictionary<LinearRing, int> subProcCachedPartitionCnt,bool updateNewCached = true)
+        public static void Update(Dictionary<SubAreaKey, int> subProcCachedPartitionCnt, bool updateNewCached = true)
         {
-            foreach(var pair in subProcCachedPartitionCnt)
+            foreach (var pair in subProcCachedPartitionCnt)
             {
-                if(!CachedPartitionCnt.ContainsKey(pair.Key))
+                if (!CachedPartitionCnt.ContainsKey(pair.Key))
                 {
                     CachedPartitionCnt.Add(pair.Key, pair.Value);
-                    if(updateNewCached)
+                    if (updateNewCached)
                         NewCachedPartitionCnt.Add(pair.Key, pair.Value);
                 }
             }
         }
-
-        public static (List<List<(double, double)>>, List<int>) GetNewUpdated()
-        {
-            List<int> Cnts = new List<int> ();
-            List<List<(double,double)>> coordinates = new List<List<(double, double)>>();
-
-            foreach(var pair in NewCachedPartitionCnt)
-            {
-                var coorvalues = new List<(double,double)>();
-                foreach(var coor in pair.Key.Coordinates)
-                {
-                    coorvalues.Add((coor.X, coor.Y));
-                }
-                coordinates.Add(coorvalues);
-                Cnts.Add(pair.Value);
-            }
-            return (coordinates, Cnts);
-        }
-
-        public static void Update(List<List<(double, double)>> coordinates, List<int> Cnts)
-        {
-            var dict = new Dictionary<LinearRing, int>();
-            for(int i = 0; i < Cnts.Count; i++)
-            {
-                var key =new LinearRing( coordinates[i].Select(val => new Coordinate(val.Item1,val.Item2)).ToArray());
-                dict.Add(key,Cnts[i]);
-            }
-            Update(dict);
-        }
         public static void Update(ChromosomeCollection chromosomeCollection)
         {
-            Update(chromosomeCollection.NewCachedPartitionCnt,false);
+            Update(chromosomeCollection.NewCachedPartitionCnt, false);
         }
         public static void Clear()
         {
@@ -386,88 +463,5 @@ namespace ThParkingStall.Core.InterProcess
         }
     }
 
-    public static class ReadWriteEx
-    {
-        public static void WriteToStream(this LinearRing linearRing, BinaryWriter writer)
-        {
-            var coordinates = linearRing.Coordinates;
-            writer.Write(coordinates.Count());
-            foreach(var coordinate in coordinates)
-            {
-                writer.Write(coordinate.X);
-                writer.Write(coordinate.Y);
-            }
-        }
-        public static LinearRing ReadLinearRing( BinaryReader reader)
-        {
-            var CoorCnt = reader.ReadInt32();
-            var coordinates = new Coordinate[CoorCnt];
-            for (int i = 0; i < CoorCnt; i++)
-            {
-                {
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    coordinates[i] = new Coordinate(x, y);
-                }
-            }
-            return new LinearRing(coordinates);
-        }
-        public static void WriteToStream(this Dictionary<LinearRing, int> CachedCnts , BinaryWriter writer)
-        {
-            var dicCnt = CachedCnts.Count;
-            writer.Write(dicCnt);
-            foreach (var kv in CachedCnts)
-            {
-                kv.Key.WriteToStream(writer);
-                writer.Write(kv.Value);
-            }
-        }
-        public static Dictionary<LinearRing, int> ReadCached(BinaryReader reader)
-        {
-            var cached = new Dictionary<LinearRing, int>();
-            var keyCnt = reader.ReadInt32();
-            for (int i = 0; i < keyCnt; ++i)
-            {
-                var key = ReadLinearRing(reader);
-                var value = reader.ReadInt32();
-                cached.Add(key, value);
-            }
-            return cached;
-        }
-
-        public static void WriteToStream(this List<Chromosome> chromosomes, BinaryWriter writer)
-        {
-            var Cnts = chromosomes.Count;
-            writer.Write(Cnts);
-            chromosomes.ForEach(chromosome => chromosome.WriteToStream(writer));
-        }
-        public static List<Chromosome> ReadChromosomes(BinaryReader reader)
-        {
-            List<Chromosome> chromosomes = new List<Chromosome>();
-            var Cnts = reader.ReadInt32();
-            for (int i = 0; i < Cnts; ++i)
-            {
-                chromosomes.Add(Chromosome.ReadFromStream(reader));
-            }
-            return chromosomes;
-        }
-
-        public static void WriteToStream(this List<int> intgers, BinaryWriter writer)
-        {
-            writer.Write(intgers.Count);
-            intgers.ForEach(i => writer.Write(i));
-        }
-        public static List<int> ReadInts(BinaryReader reader)
-        {
-            var Cnt = reader.ReadInt32();
-            var Ints = new List<int>();
-            for (int i = 0; i < Cnt; i++)
-            {
-                Ints.Add(reader.ReadInt32());
-
-            }
-            return Ints;
-        }
-    }
 }
 

@@ -16,13 +16,14 @@ namespace ThParkingStall.Core.Tools
             var coors = new Coordinate[] { line.P0.Copy(), line.P1.Copy()};
             return new LineString(coors);
         }
-        public static List<LineString> ToLineStrings(this List<LineSegment> lines)
+        public static List<LineString> ToLineStrings(this List<LineSegment> lines,bool IgnoreNull = true)
         {
             var LineStrings = new List<LineString>();
             foreach (var line in lines)
             {
                 var lstr = line.GetLineString();
-                if (lstr != null) LineStrings.Add(lstr);
+                if (IgnoreNull && lstr == null) continue;
+                LineStrings.Add(lstr);
             }
             return LineStrings;
         }

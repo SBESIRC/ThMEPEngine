@@ -46,5 +46,16 @@ namespace ThParkingStall.Core.Tools
         {
             return new Point(coor);
         }
+        public static bool OnIncreaseDirectionOf(this Point pt,LineSegment lineSegment)
+        {
+            if (lineSegment.IsVertical())//比较水平坐标
+            {
+                return pt.X > lineSegment.P0.X;
+            }
+            else//比较垂直坐标
+            {
+                return pt.Y > lineSegment.P0.Y;
+            }
+        }
     }
 }
