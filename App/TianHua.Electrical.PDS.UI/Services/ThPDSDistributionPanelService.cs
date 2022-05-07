@@ -534,6 +534,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 RenderTransform = tr
                             };
                             Action cb = null;
+                            IsolatingSwitch isolatingSwitch = null;
                             IEnumerable<MenuItem> getInputMenus()
                             {
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
@@ -616,7 +617,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 }
                                 var isolatingSwitches = item.brInfos.Where(x => x.BlockName == info.BlockName).ToList();
                                 var idx = isolatingSwitches.IndexOf(info);
-                                IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                IsolatingSwitch isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
                                 {
                                     isolatingSwitch = oneway.isolatingSwitch;
@@ -819,6 +820,19 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             {
                                 var cmenu = cvs.ContextMenu ?? new ContextMenu();
+                                if (info.IsIsolator())
+                                {
+                                    cmenu.Items.Add(new MenuItem()
+                                    {
+                                        Header = "切换为断路器",
+                                        Command = new RelayCommand(() =>
+                                        {
+                                            //田工check
+                                            ThPDSProjectGraphService.ComponentSwitching(vertice, isolatingSwitch, ComponentType.CB);
+                                            UpdateCanvas();
+                                        }),
+                                    });
+                                }
                                 foreach (var m in getInputMenus())
                                 {
                                     cmenu.Items.Add(m);
@@ -1139,6 +1153,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                     IEnumerable<MenuItem> GetBreakerMenus(Breaker breaker)
                                     {
+                                        if (vertice.Details.AllowBreakerSwitch)
+                                            yield return new MenuItem()
+                                            {
+                                                Header = "切换为隔离开关",
+                                                Command = new RelayCommand(() =>
+                                                {
+                                                    ThPDSProjectGraphService.ComponentSwitching(vertice, breaker, ComponentType.QL);
+                                                    UpdateCanvas();
+                                                }),
+                                            };
                                         var types = new ComponentType[] { ComponentType.CB, ComponentType.一体式RCD, ComponentType.组合式RCD, };
                                         foreach (var type in types)
                                         {
@@ -1719,11 +1743,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                 var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
                                                                 vm = o;
                                                                 {
-                                                                    var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
-                                                                    if (m != null)
+                                                                    var m1 = glyphs.FirstOrDefault(x => x.Tag as string is "CT");
+                                                                    var m2 = glyphs.FirstOrDefault(x => x.Tag as string is "MT");
+                                                                    if (m1 is not null && m2 is not null)
                                                                     {
-                                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                        m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                        m1.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                        m2.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
+                                                                        if (m != null)
+                                                                        {
+                                                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                            m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                        }
                                                                     }
                                                                 }
                                                             }
