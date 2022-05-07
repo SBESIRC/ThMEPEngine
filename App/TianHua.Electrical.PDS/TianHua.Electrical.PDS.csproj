@@ -32,11 +32,15 @@
     <Compile Include="Model\ThPDSFireLoad.cs" />
     <Compile Include="Model\ThPDSPoint3d.cs" />
     <Compile Include="Project\GlobalConfiguration\FolderSetting.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphEdgeCompositeTag.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphEdgeValidateTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />
     <Compile Include="Project\PDSProjectUBinder.cs" />
+    <Compile Include="Project\Module\ThPDSProjectGraphEdgeTag.cs" />
     <Compile Include="Service\ThPDSEdgeContainsService.cs" />
+    <Compile Include="Service\ThPDSGraphVerifyService.cs" />
     <Compile Include="Service\ThPDSPoint3dService.cs" />
     <Compile Include="Service\ThPDSPushDataService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />

@@ -3,16 +3,9 @@
 namespace TianHua.Electrical.PDS.Project.Module
 {
     [Serializable]
-    public abstract class ThPDSProjectGraphEdgeCompareTag
+    public abstract class ThPDSProjectGraphEdgeCompareTag : ThPDSProjectGraphEdgeTag
     {
         //
-    }
-
-    [Serializable]
-    public class ThPDSProjectGraphEdgeCompositeTag : ThPDSProjectGraphEdgeCompareTag
-    {
-        public ThPDSProjectGraphEdgeCompareTag Tag { get; set; }
-        public ThPDSProjectGraphEdgeDataTag DataTag { get; set; }
     }
 
     [Serializable]

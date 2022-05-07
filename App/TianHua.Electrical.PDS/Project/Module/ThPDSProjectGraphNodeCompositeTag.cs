@@ -7,6 +7,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         public ThPDSProjectGraphNodeDataTag DataTag { get; set; }
         public ThPDSProjectGraphNodeCompareTag CompareTag { get; set; }
+        public ThPDSProjectGraphNodeDuplicateTag DupTag { get; set; }
         public ThPDSProjectGraphNodeValidateTag ValidateTag { get; set; }
     }
 }
