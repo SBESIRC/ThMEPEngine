@@ -57,6 +57,18 @@ namespace ThMEPEngineCore.Service
             roomData.Transform();
             Transformer.Transform(Bounaries);
         }
+        public void Process(DBObjectCollection roomDatas)
+        {
+            // 初始化
+            roomData = new ThRoomdata(false); // Useless
+
+            // 将数据移动到近原点处
+            Transformer = new ThMEPOriginTransformer(roomDatas); // 房间数据的Transformer是用frame创建的,这儿保持一致，无需再创建
+            Transformer.Transform(roomDatas);
+
+            // 造面
+            Bounaries = BuildRoomBounaries(roomDatas);
+        }
         public void Run()
         {
             var ppo = new PromptPointOptions("\n选择房间内的一点")
@@ -202,7 +214,7 @@ namespace ThMEPEngineCore.Service
             else
             {
                 results = ThCADCoreNTSEntityExtension.Difference(originArea, objs, true);
-                results = Process(results);
+                results = Clean(results);
             }
             return results;
         }
@@ -225,7 +237,7 @@ namespace ThMEPEngineCore.Service
             var bufferService = new ThNTSBufferService();
             return bufferService.Buffer(polygon, length);
         }
-        private DBObjectCollection Process(DBObjectCollection polygons)
+        private DBObjectCollection Clean(DBObjectCollection polygons)
         {
             // 处理Polygons
             var results = Rebuild(polygons); // 处理狭长线
@@ -389,17 +401,24 @@ namespace ThMEPEngineCore.Service
 
             // 用围合房间的数据造面
             var totalDatas = data.MergeData(); // 传入的数据
-            var builder = new ThRoomOutlineBuilderEngine();
-            builder.Build(totalDatas);
-            var results = builder.Areas;
-            results = Rebuild(results);
-            results = builder.PostProcess(results);
+            var results = BuildRoomBounaries(totalDatas);
 
             // 将生产的面恢复到原位置
             data.Transformer.Reset(results);
             data.Reset();
             return results;
         }
+
+        private DBObjectCollection BuildRoomBounaries(DBObjectCollection roomDatas)
+        {
+            var builder = new ThRoomOutlineBuilderEngine();
+            builder.Build(roomDatas);
+            var results = builder.Areas;
+            results = Rebuild(results);
+            results = builder.PostProcess(results);
+            return results;
+        }
+
         private Entity CreateHatch(Database database, Entity entity, int colorIndex = 21)
         {
             // 填充

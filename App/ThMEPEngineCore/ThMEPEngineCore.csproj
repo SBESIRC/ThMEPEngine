@@ -157,6 +157,7 @@
     <Compile Include="CAD\ThMEPPolylineEntityJig.cs" />
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
+    <Compile Include="Command\ThPickRoomCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="Engine\ThCircleVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThCircleVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircleVPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThPCArchitectureWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageVPipeRecognitionEngine.cs" />
