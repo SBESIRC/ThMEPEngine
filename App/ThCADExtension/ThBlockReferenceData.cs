@@ -29,7 +29,13 @@ namespace ThCADExtension
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            CustomProperties = blockRef.GetDynProperties();
+            try
+            {
+                CustomProperties = blockRef.GetDynProperties();
+            }
+            catch
+            {
+            }
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();
             OwnerSpace2WCS = Matrix3d.Identity;
