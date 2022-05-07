@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AcHelper;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -73,7 +74,7 @@ namespace TianHua.Electrical.PDS.Service
                 using (var docLock = doc.LockDocument())
                 using (var activeDb = AcadDatabase.Use(doc.Database))
                 {
-                    //Application.DocumentManager.MdiActiveDocument = doc;
+                    // Application.DocumentManager.MdiActiveDocument = doc;
 
                     var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
                     var nodeMap = NodeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
@@ -125,7 +126,7 @@ namespace TianHua.Electrical.PDS.Service
                             {
                                 sourceNode[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(activeDb, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString());
+                                    InfoModify(activeDb, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString(), true);
                                 });
                             }
 
@@ -134,7 +135,7 @@ namespace TianHua.Electrical.PDS.Service
                             {
                                 sourceNode[0].Value.ForEach(id =>
                                 {
-                                    InfoModify(activeDb, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString());
+                                    InfoModify(activeDb, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString(), true);
                                 });
                             }
                         }
@@ -203,7 +204,7 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
-        private void InfoModify(AcadDatabase activeDb, ObjectId id, string sourceInfo, string targetInfo)
+        private void InfoModify(AcadDatabase activeDb, ObjectId id, string sourceInfo, string targetInfo, bool isPower = false)
         {
             if (string.IsNullOrEmpty(sourceInfo) || sourceInfo.Equals(targetInfo))
             {
@@ -212,7 +213,7 @@ namespace TianHua.Electrical.PDS.Service
             var entity = activeDb.Element<Entity>(id, true);
             if (entity is DBText text)
             {
-                if (text.TextString.Contains(sourceInfo))
+                if ((!isPower || MatchPower(text.TextString)) && text.TextString.Contains(sourceInfo))
                 {
                     text.TextString = StringReplace(text.TextString, sourceInfo, targetInfo);
                     Revclouds.Add(text.GeometricExtents.ToRectangle());
@@ -221,7 +222,7 @@ namespace TianHua.Electrical.PDS.Service
             else if (entity is MText mText)
             {
                 var results = new List<Entity>();
-                if (MTextInfoModify(mText, sourceInfo, targetInfo, results))
+                if (MTextInfoModify(mText, sourceInfo, targetInfo, results, isPower))
                 {
                     Revclouds.Add(mText.GeometricExtents.ToRectangle());
                     mText.Erase();
@@ -230,11 +231,11 @@ namespace TianHua.Electrical.PDS.Service
             }
             else if (entity is MLeader mLeader)
             {
-                MutiEntityInfoModify(activeDb, mLeader, sourceInfo, targetInfo);
+                MutiEntityInfoModify(activeDb, mLeader, sourceInfo, targetInfo, isPower);
             }
             else if (entity is Table table)
             {
-                MutiEntityInfoModify(activeDb, table, sourceInfo, targetInfo);
+                MutiEntityInfoModify(activeDb, table, sourceInfo, targetInfo, isPower);
             }
             else if (ThMEPTCHService.IsTCHWireDim2(entity) || ThMEPTCHService.IsTCHMULTILEADER(entity))
             {
@@ -292,14 +293,14 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
-        private bool MTextInfoModify(MText mText, string sourceInfo, string targetInfo, List<Entity> results)
+        private bool MTextInfoModify(MText mText, string sourceInfo, string targetInfo, List<Entity> results, bool isPower)
         {
             var contains = false;
             var texts = new DBObjectCollection();
             mText.Explode(texts);
             foreach (DBText t in texts)
             {
-                if (t.TextString.Contains(sourceInfo))
+                if ((!isPower || MatchPower(t.TextString)) && t.TextString.Contains(sourceInfo))
                 {
                     contains = true;
                     t.TextString = StringReplace(t.TextString, sourceInfo, targetInfo);
@@ -336,7 +337,7 @@ namespace TianHua.Electrical.PDS.Service
             return contains;
         }
 
-        private void MutiEntityInfoModify(AcadDatabase activeDb, Entity entity, string sourceInfo, string targetInfo)
+        private void MutiEntityInfoModify(AcadDatabase activeDb, Entity entity, string sourceInfo, string targetInfo, bool isPower)
         {
             var contains = false;
             var results = new List<Entity>();
@@ -365,7 +366,7 @@ namespace TianHua.Electrical.PDS.Service
                 mTexts.ForEach(mt =>
                 {
                     var texts = new List<Entity>();
-                    if (MTextInfoModify(mt, sourceInfo, targetInfo, texts))
+                    if (MTextInfoModify(mt, sourceInfo, targetInfo, texts, isPower))
                     {
                         contains = true;
                     }
@@ -430,6 +431,21 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             return textString;
+        }
+
+        private bool MatchPower(string str)
+        {
+            var check = "[kK]?[wW]";
+            var regex = new Regex(@check);
+            var match = regex.Match(str);
+            if (match.Success)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
