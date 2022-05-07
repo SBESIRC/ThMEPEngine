@@ -306,7 +306,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     node.Details.AllowBreakerSwitch = true;
                 }
                 var Componenttype = componentType.GetComponentType();
-                if (Componenttype.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(Componenttype.BaseType))
+                if (component.GetType().BaseType.Equals(Componenttype.BaseType))
                 {
                     node.Details.CircuitFormType.SetCircuitComponentValue(component, node.ComponentSelection(Componenttype));
                 }

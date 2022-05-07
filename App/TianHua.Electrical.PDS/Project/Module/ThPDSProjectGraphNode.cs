@@ -24,8 +24,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodeHighPower(double power)
         {
-            this.Details.HighPower = power;
-            this.UpdateWithNode(false);
+            if (this.Details.HighPower != power)
+            {
+                this.Details.HighPower = power;
+                this.UpdateWithNode(false);
+            }
         }
 
         /// <summary>
@@ -33,8 +36,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodeLowPower(double power)
         {
-            this.Details.LowPower = power;
-            this.UpdateWithNode(false);
+            if (this.Details.LowPower != power)
+            {
+                this.Details.LowPower = power;
+                this.UpdateWithNode(false);
+            }
         }
 
         /// <summary>
@@ -42,27 +48,30 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public void SetNodePhaseSequence(PhaseSequence phase)
         {
-            this.Details.PhaseSequence = phase;
-            switch (phase)
+            if (this.Details.PhaseSequence != phase)
             {
-                case PhaseSequence.L1:
-                case PhaseSequence.L2:
-                case PhaseSequence.L3:
-                    {
-                        this.Load.Phase = ThPDSPhase.一相;
-                        break;
-                    }
-                case PhaseSequence.L123:
-                    {
-                        this.Load.Phase = ThPDSPhase.三相;
-                        break;
-                    }
-                default:
-                    {
-                        throw new NotSupportedException();
-                    }
+                this.Details.PhaseSequence = phase;
+                switch (phase)
+                {
+                    case PhaseSequence.L1:
+                    case PhaseSequence.L2:
+                    case PhaseSequence.L3:
+                        {
+                            this.Load.Phase = ThPDSPhase.一相;
+                            break;
+                        }
+                    case PhaseSequence.L123:
+                        {
+                            this.Load.Phase = ThPDSPhase.三相;
+                            break;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
+                this.UpdateWithNode(true);
             }
-            this.UpdateWithNode(true);
         }
 
         /// <summary>
@@ -71,8 +80,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="powerFactor"></param>
         public void SetPowerFactor(double powerFactor)
         {
-            Load.PowerFactor = powerFactor;
-            this.UpdateWithNode(false);
+            if (Load.PowerFactor != powerFactor)
+            {
+                Load.PowerFactor = powerFactor;
+                this.UpdateWithNode(false);
+            }
         }
 
         /// <summary>
@@ -81,8 +93,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="powerFactor"></param>
         public void SetDemandFactor(double demandFactor)
         {
-            Load.DemandFactor = demandFactor;
-            this.UpdateWithNode(false);
+            if (Load.DemandFactor != demandFactor)
+            {
+                Load.DemandFactor = demandFactor;
+                this.UpdateWithNode(false);
+            }
         }
 
         #region
