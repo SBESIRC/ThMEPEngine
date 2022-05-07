@@ -37,5 +37,16 @@ namespace TianHua.Mep.UI
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(roomOutlineUI);
         }
+        /// <summary>
+        /// 梁配置
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "ThEBAC", CommandFlags.Modal)]
+        public void ThExtractBeamAreaConfig()
+        {
+            var config = new ExtractBeamConfigUI();
+            config.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(config);
+        }
     }
 }

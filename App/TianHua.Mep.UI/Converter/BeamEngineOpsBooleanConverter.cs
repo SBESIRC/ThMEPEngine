@@ -3,7 +3,7 @@ using System.Windows.Data;
 using System.Globalization;
 using ThMEPEngineCore.Config;
 
-namespace TianHua.Plumbing.WPF.UI.Converter
+namespace TianHua.Mep.UI.Converter
 {
     public class BeamEngineOpsBooleanConverter : IValueConverter
     {

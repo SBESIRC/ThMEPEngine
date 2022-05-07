@@ -1,7 +1,7 @@
 ﻿using ThControlLibraryWPF.CustomControl;
-using ThMEPWSS.ViewModel;
+using TianHua.Mep.UI.ViewModel;
 
-namespace TianHua.Plumbing.WPF.UI.UI
+namespace TianHua.Mep.UI.UI
 {
     public partial class ExtractBeamConfigUI : ThCustomWindow
     {

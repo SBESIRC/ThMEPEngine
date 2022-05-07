@@ -10,7 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model.Common;
 
-namespace ThMEPWSS.ViewModel
+namespace TianHua.Mep.UI.ViewModel
 {
     public class ThExtractBeamConfigVM:INotifyPropertyChanged
     {
