@@ -228,6 +228,14 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatManualTransferSwitch();
                 }
+                else if(type.Equals(typeof(IsolatingSwitch)))
+                {
+                    return componentFactory.CreatIsolatingSwitch();
+                }
+                else if (type.Equals(typeof(Breaker)))
+                {
+                    return componentFactory.CreatBreaker();
+                }
                 else
                 {
                     //暂未支持的元器件类型

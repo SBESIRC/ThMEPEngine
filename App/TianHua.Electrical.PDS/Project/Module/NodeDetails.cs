@@ -42,6 +42,11 @@ namespace TianHua.Electrical.PDS.Project.Module
         public bool ElectricalFireMonitoring { get; set; }
 
         /// <summary>
+        /// 允许断路器切换成隔离开关
+        /// </summary>
+        public bool AllowBreakerSwitch { get; set; }
+
+        /// <summary>
         /// 相序
         /// </summary>
         public PhaseSequence PhaseSequence { get; set; }
@@ -75,6 +80,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             PhaseSequence = PhaseSequence.L123;
             SurgeProtection = SurgeProtectionDeviceType.None;
             BoxSize = BoxSize.Non_Standard;
+            AllowBreakerSwitch = false;
             MiniBusbars = new Dictionary<MiniBusbar, List<ThPDSProjectGraphEdge>>();
             SecondaryCircuits = new Dictionary<SecondaryCircuit, List<ThPDSProjectGraphEdge>>();
             if (Convert.ToUInt32(BoxSize) > 6)

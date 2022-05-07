@@ -301,10 +301,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (component.ComponentType != componentType && node.Details.CircuitFormType.Contains(component))
             {
-                var ComponentType = componentType.GetComponentType();
-                if (ComponentType.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(ComponentType.BaseType))
+                if(componentType == ComponentType.CB)
                 {
-                    node.Details.CircuitFormType.SetCircuitComponentValue(component, node.ComponentSelection(ComponentType));
+                    node.Details.AllowBreakerSwitch = true;
+                }
+                var Componenttype = componentType.GetComponentType();
+                if (Componenttype.BaseType != typeof(PDSBaseComponent) && component.GetType().BaseType.Equals(Componenttype.BaseType))
+                {
+                    node.Details.CircuitFormType.SetCircuitComponentValue(component, node.ComponentSelection(Componenttype));
                 }
             }
         }
