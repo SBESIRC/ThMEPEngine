@@ -141,10 +141,10 @@ namespace ThParkingStall.Core.InterProcess
                 var SegLineString = SegLineStrings[idx];
                 if(area.Shell.PartInCommon(SegLineString)) GeneIdxs.Add(idx);
             }
-            var center = area.Centroid;
-            var ValIncreaseDir = center.OnIncreaseDirectionOf( chromosome.Genome[GeneIdxs.First()].ToLineSegment());
+            var center = area.GetCenter();
+            //var ValIncreaseDir = center.OnIncreaseDirectionOf( chromosome.Genome[GeneIdxs.First()].ToLineSegment());
             GeneIdxs.ForEach(idx => GeneVals.Add(chromosome.Genome[idx].Value));
-            return new SubAreaKey(GeneIdxs, GeneVals, ValIncreaseDir);
+            return new SubAreaKey(GeneIdxs, GeneVals, center);
         }
     }
 }

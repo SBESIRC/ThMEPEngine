@@ -22,5 +22,11 @@ namespace ThParkingStall.Core.Tools
             polygons.ForEach(p => lineStrings.Add(p.Shell));
             return lineStrings.GetPolygons();
         }
+        public static Coordinate GetCenter(this Polygon polygon)
+        {
+            var x = polygon.Coordinates.Average(coor => coor.X);
+            var y = polygon.Coordinates.Average(coor => coor.Y);
+            return new Coordinate(x, y);
+        }
     }
 }

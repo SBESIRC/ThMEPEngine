@@ -32,21 +32,22 @@ namespace ThParkingStall.Core.InterProcess
             BoundingBoxes = boundingBoxes;
             Key = key;
         }
-        static object lockObj = new object(); 
+        static object lockObj = new object();
         public void UpdateParkingCnts(bool Calculate)
         {
-            lock (lockObj)
+            if (SubAreaParkingCnt.Contains(this) && !Calculate)
             {
-                if (SubAreaParkingCnt.Contains(this) && !Calculate)
+                Count = SubAreaParkingCnt.GetParkingNumber(this);
+                lock (lockObj)
                 {
-                    Count = SubAreaParkingCnt.GetParkingNumber(this);
                     MCompute.CatchedTimes += 1;
                 }
-                else
+            }
+            else
+            {
+                //mParkingPartitionPro = this.ConvertSubAreaToMParkingPartitionPro();
+                try
                 {
-                    //mParkingPartitionPro = this.ConvertSubAreaToMParkingPartitionPro();
-                    try
-                    {
 #if DEBUG
                     var s = MDebugTools.AnalysisPolygon(mParkingPartitionPro.Boundary);
                     string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -56,85 +57,98 @@ namespace ThParkingStall.Core.InterProcess
                     sw.Close();
                     fs.Close();
 #endif
-                        //mParkingPartitionPro.GenerateParkingSpaces();
-                        mParkingPartitionPro.Process();
-                    }
-                    catch (Exception ex)
-                    {
-                        MCompute.Logger?.Information(ex.Message);
-                        MCompute.Logger?.Information("----------------------------------");
-                        MCompute.Logger?.Information(ex.StackTrace);
-                        MCompute.Logger?.Information("##################################");
-                        MPGAData.Save();
-                    }
-                    Count = mParkingPartitionPro.CarSpots.Count;
+                    //mParkingPartitionPro.GenerateParkingSpaces();
+                    mParkingPartitionPro.Process();
+                }
+                catch (Exception ex)
+                {
+                    MCompute.Logger?.Information(ex.Message);
+                    MCompute.Logger?.Information("----------------------------------");
+                    MCompute.Logger?.Information(ex.StackTrace);
+                    MCompute.Logger?.Information("##################################");
+                    MPGAData.Save();
+                }
+                Count = mParkingPartitionPro.CarSpots.Count;
+                lock (lockObj)
+                {
                     SubAreaParkingCnt.UpdateParkingNumber(this, Count);
                 }
+            }
         }
-    }
     }
 
     public class SubAreaKey : IEquatable<SubAreaKey>
     {
         public List<Int16> GeneIdxs;
         public List<double> GeneVals;
-        public bool ValIncreaseDir;
+        //public bool ValIncreaseDir;
+        public (double, double) Center;
         private static readonly double Tol = 1e-10;
-        public SubAreaKey(List<int> geneIdxs, List<double> geneVals,bool valIncreaseDir)
+        public SubAreaKey(List<int> geneIdxs, List<double> geneVals, Coordinate center)
         {
             if (geneIdxs.Count != geneVals.Count) throw new ArgumentException("Index and Value Counts are different!");
             GeneIdxs = geneIdxs.Select(i => Convert.ToInt16(i)).ToList();
             GeneVals = geneVals;
-            ValIncreaseDir = valIncreaseDir;
+            //ValIncreaseDir = valIncreaseDir;
+            Center = (center.X, center.Y);
         }
-        public SubAreaKey(List<Int16> geneIdxs, List<double> geneVals, bool valIncreaseDir)
+        public SubAreaKey(List<Int16> geneIdxs, List<double> geneVals, (double, double) center)
         {
             if (geneIdxs.Count != geneVals.Count) throw new ArgumentException("Index and Value Counts are different!");
             GeneIdxs = geneIdxs;
             GeneVals = geneVals;
-            ValIncreaseDir = valIncreaseDir;
+            //ValIncreaseDir = valIncreaseDir;
+            Center = center;
         }
         public override int GetHashCode()
         {
             int res = 0x2D2816FE;
-            res = res * 31 + ValIncreaseDir.GetHashCode();
+            //res = res * 31 + ValIncreaseDir.GetHashCode();
+            res = res * 31 + Center.Item1.GetHashCode();
+            res = res * 31 + Center.Item2.GetHashCode();
             foreach (var item in GeneIdxs)
             {
-                res = res * 31 +  item.GetHashCode();
+                res = res * 31 + item.GetHashCode();
             }
-            //foreach (var item in GeneVals)
-            //{
-            //    res = res * 31 + item.GetHashCode();
-            //}
+            foreach (var item in GeneVals)
+            {
+                res = res * 31 + item.GetHashCode();
+            }
             return res;
         }
         public bool Equals(SubAreaKey other)
         {
-            
+
             //return this.PlanKey.SetEquals(other.PlanKey);
-            if(ValIncreaseDir != other.ValIncreaseDir) return false;
-            if(GeneIdxs.Count != other.GeneIdxs.Count) return false;
-            for(int i = 0; i < GeneIdxs.Count; i++)
+            //if(ValIncreaseDir != other.ValIncreaseDir) return false;
+            //if(Math.Abs(Center.Item1 - other.Center.Item1) >= Tol || 
+            //    Math.Abs(Center.Item2 - other.Center.Item2) >= Tol) return false;
+            if (Center.Item1 != other.Center.Item1 || Center.Item2 != other.Center.Item2) return false;
+            if (GeneIdxs.Count != other.GeneIdxs.Count) return false;
+            for (int i = 0; i < GeneIdxs.Count; i++)
             {
-                if(GeneIdxs[i] != other.GeneIdxs[i]) return false;
-                //if(GeneVals[i] != other.GeneVals[i]) return false;
-                if (Math.Abs(GeneVals[i]- other.GeneVals[i]) >= Tol) return false;
+                if (GeneIdxs[i] != other.GeneIdxs[i]) return false;
+                if (GeneVals[i] != other.GeneVals[i]) return false;
+                //if (Math.Abs(GeneVals[i] - other.GeneVals[i]) >= Tol) return false;
             }
             return true;
         }
         public void WriteToStream(BinaryWriter writer)
         {
-            writer.Write(ValIncreaseDir);
+            //writer.Write(ValIncreaseDir);
+            writer.Write(Center.Item1);
+            writer.Write(Center.Item2);
             GeneIdxs.WriteToStream(writer);
             GeneVals.WriteToStream(writer);
         }
 
         public static SubAreaKey ReadFromStream(BinaryReader reader)
         {
-            var valIncreaseDir = reader.ReadBoolean();
+            //var valIncreaseDir = reader.ReadBoolean();
+            var center = (reader.ReadDouble(), reader.ReadDouble());
             var geneIdxs = ReadWriteEx.ReadInt16s(reader);
             var geneVals = ReadWriteEx.ReadDoubles(reader);
-            return new SubAreaKey (  geneIdxs,  geneVals ,  valIncreaseDir );
+            return new SubAreaKey(geneIdxs, geneVals, center);
         }
     }
 }

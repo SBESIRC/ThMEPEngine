@@ -36,7 +36,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         {
             get 
             {
-                var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
+                //var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
 #if (DEBUG)
                 if (File.Exists(path))// 读取
                 {
@@ -54,10 +54,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 #else
                 //Release 只执行写入
                 _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
-                using (var tw = new StreamWriter(path, false))
-                {
-                    tw.WriteLine(_Seed.ToString());
-                }
+                //using (var tw = new StreamWriter(path, false))
+                //{
+                //    tw.WriteLine(_Seed.ToString());
+                //}
 #endif
                 return _Seed;
             }

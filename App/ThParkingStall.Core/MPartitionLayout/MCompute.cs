@@ -39,7 +39,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             if (InterParameter.MultiThread)
             {        
-                Parallel.ForEach(subAreas, subarea => subarea.UpdateParkingCnts(display));
+                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = 3 }, subarea => subarea.UpdateParkingCnts(display));
             }
             else
             {

@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -463,36 +464,21 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false, bool accurate = false)
         {
-            int fast_take_count = 10;
-            if (boxes.Count == 0) return false;
-            if (true_on_edge)
-            {
-                if (ClosestPointInCurves(pt, boxes) < 10) return true;
-            }
-            var recs = boxes.OrderBy(e => e.ClosestPoint(pt).Distance(pt)).ToArray();
-            if (!accurate && recs.Count() > fast_take_count) recs = recs.Take(fast_take_count).ToArray();
-            foreach (var rec in recs)
-            {
-                if (rec.Area < 1) continue;
-                if (rec.Contains(pt))
-                {
-                    var r = rec.Scale(0.99999);
-                    if (r.Contains(pt)) return true;
-                }
-            }
-            return false;
-            //for (int i=0;i< boxes.Count;i++)
+            var ntsPt = new Point(pt.X, pt.Y);
+            STRtree<Polygon> polygonStrTree = new STRtree<Polygon>();
+            boxes.ForEach(polygon => polygonStrTree.Insert(polygon.EnvelopeInternal, polygon));
+            //if (true_on_edge)
             //{
-            //    if (boxes[i].Area < 1) continue;
-            //    boxes[i] = boxes[i].Scale(0.99999);
-            //    if (boxes[i].Contains(pt))
-            //    {
-            //        boxes[i]=boxes[i].Scale(1 / 0.99999);
-            //        return true;
-            //    }
-            //    boxes[i] = boxes[i].Scale(1 / 0.99999);
+            //    boxes.ForEach(polygon => polygonStrTree.Insert(polygon.EnvelopeInternal, polygon));
             //}
-            //return false;
+            //else boxes.Select(b => b.Scale(0.99999)).ToList().ForEach(polygon => polygonStrTree.Insert(polygon.EnvelopeInternal, polygon));
+
+            var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
+            polygonStrTree = null;
+            if (selectedBoxes.Count == 0) return false;
+
+            if (true_on_edge) return true;
+            else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static double ClosestPointInVertLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
         {
@@ -509,6 +495,9 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static bool IsInAnyPolys(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false, bool accurate = false)
         {
+            var isInAnyBox = IsInAnyBoxes(pt,pls,allowOnEdge,accurate);
+            if(!isInAnyBox) return false;
+
             if (pls.Count == 0) return false;
             var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.Envelope.Centroid.Coordinate.Distance(pt)).ToArray();
             var bigpolys = pls.OrderByDescending(e => e.Area).ToArray();

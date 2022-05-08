@@ -242,7 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var currentMutexList = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "1", "0");
+                var proc = CreateSubProcess(idx, "1", "1");
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
@@ -312,6 +312,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<MPChromosome> Selection2(List<MPChromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
+            Logger?.Information("已计算SubArea个数："+ SubAreaParkingCnt.CachedPartitionCnt.Count.ToString());
 #if DEBUG
             CalculateParkingSpacesSP(inputSolution);
 #else
