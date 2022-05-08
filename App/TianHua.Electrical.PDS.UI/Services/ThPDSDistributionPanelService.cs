@@ -74,12 +74,25 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
-            var selectAllCmd = new RelayCommand(() =>
+            var selAllCmd = new RelayCommand(() =>
             {
                 if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                 void dfs(ThPDSCircuitGraphTreeModel node)
                 {
                     node.IsChecked = true;
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            });
+            var unselAllCmd = new RelayCommand(() =>
+            {
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    node.IsChecked = false;
                     foreach (var n in node.DataList)
                     {
                         dfs(n);
@@ -120,23 +133,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             });
             var treeCmenu = new ContextMenu()
             {
-                ItemsSource = new MenuItem[] {
-                    new MenuItem()
-                    {
-                        Header="批量生成",
-                        Command=batchGenCmd,
-                    },
-                    new MenuItem()
-                    {
-                        Header = "全部勾选",
-                        Command = selectAllCmd,
-                    },
-                      new MenuItem()
-                    {
-                        Header = "创建备用回路",
-                        Command = createBackupCircuitCmd,
-                    },
-                },
+                ItemsSource = GetCommonMenuItems(),
             };
             tv.ContextMenu = treeCmenu;
             var canvas = panel.canvas;
@@ -146,6 +143,34 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
+            IEnumerable<MenuItem> GetCommonMenuItems()
+            {
+                yield return new()
+                {
+                    Header = "全选",
+                    Command = selAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "全不选",
+                    Command = unselAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "批量生成",
+                    Command = batchGenCmd,
+                };
+            }
+            {
+                var i = 0;
+                foreach (var m in GetCommonMenuItems())
+                {
+                    if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == m.Header as string))
+                    {
+                        treeCMenu.Items.Insert(i++, m);
+                    }
+                }
+            }
             {
                 var h = "平衡相序";
                 if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
@@ -157,17 +182,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         {
                             ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
                         }),
-                    });
-                }
-            }
-            {
-                var h = "全部勾选";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
-                {
-                    treeCMenu.Items.Add(new MenuItem()
-                    {
-                        Header = h,
-                        Command = selectAllCmd,
                     });
                 }
             }
@@ -195,6 +209,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
                     {
                         var cm = new ContextMenu();
+                        foreach (var m in GetCommonMenuItems())
+                        {
+                            cm.Items.Add(m);
+                        }
                         tv.ContextMenu = cm;
                         cm.Items.Add(new MenuItem()
                         {
@@ -203,16 +221,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             {
                                 ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
                             }),
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "批量生成",
-                            Command = batchGenCmd,
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "全部勾选",
-                            Command = selectAllCmd,
                         });
                         cm.Items.Add(new MenuItem()
                         {
