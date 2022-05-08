@@ -36,8 +36,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         {
             get 
             {
-                //var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
 #if (DEBUG)
+                var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
                 if (File.Exists(path))// 读取
                 {
                     _Seed = int.Parse(File.ReadLines(path).First());
