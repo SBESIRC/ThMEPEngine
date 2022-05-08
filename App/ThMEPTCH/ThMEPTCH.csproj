@@ -69,7 +69,10 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="Engine\ThTCHArchWallExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHArchWallExtractionVisitor.cs" />
     <Compile Include="Model\ThTCHSprinkler.cs" />
+    <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
   </ItemGroup>

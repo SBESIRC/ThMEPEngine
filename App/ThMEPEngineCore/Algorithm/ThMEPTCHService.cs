@@ -137,6 +137,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否为天正建筑墙
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHArchWall(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("WALL");
+        }
+
+        /// <summary>
         /// 炸天正单行文字为CAD单行文字
         /// </summary>
         /// <param name="entity"></param>
