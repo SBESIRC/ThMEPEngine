@@ -69,7 +69,7 @@
     </When>
   </Choose>
   <ItemGroup>
-    <Compile Include="Engine\ThTCHArchWallExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHArchWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThTCHArchWallExtractionVisitor.cs" />
     <Compile Include="Model\ThTCHSprinkler.cs" />
     <Compile Include="Model\ThTCHWall.cs" />
