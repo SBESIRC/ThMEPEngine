@@ -1,8 +1,15 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using Linq2Acad;
+using System.Linq;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPTCH.Model;
+using ThMEPTCH.Engine;
 
 namespace ThMEPTCH
 {
-    class ThMEPTCHApp : IExtensionApplication
+    public class ThMEPTCHApp : IExtensionApplication
     {
         public void Initialize()
         {
@@ -23,6 +30,20 @@ namespace ThMEPTCH
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+
+        [CommandMethod("TIANHUACAD", "THTCHWALL", CommandFlags.Modal)]
+        public void THTCHWALL()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var engine = new ThTCHArchWallRecognitionEngine())
+            {
+                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                engine.Elements.OfType<ThTCHWall>().ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
+            }
         }
     }
 }
