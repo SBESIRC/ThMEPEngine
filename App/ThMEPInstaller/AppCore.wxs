@@ -29,6 +29,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" Guid="{5E66590A-F205-44AE-95C8-BB6B9044C888}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPIdentity.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" Guid="{CD1D09A6-2310-4C3D-814A-FB1FDA8A2A64}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Mep.UI.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -56,6 +59,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" Guid="{AD69BB3C-DC52-4DD7-B1B1-AC011ECD48DB}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPIdentity.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Debug" Guid="{212C3F0B-55F9-40DD-BA85-B0C3172A0D48}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPUi_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Mep.UI.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -82,6 +88,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" Guid="{9466B697-F749-4281-841F-A4A6BAEBBEFA}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPIdentity.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Debug" Guid="{948D3C08-FD21-47FE-ACFE-1CC5592D9372}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPUi_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Mep.UI.dll" />
         </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
@@ -111,6 +120,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" Guid="{86DE8D9F-01D2-4E74-966F-06EF4113C3FC}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPIdentity.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" Guid="{C6A91313-E65C-4028-909D-66D440852AEE}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Mep.UI.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -138,6 +150,10 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" Guid="{4F150AF3-433A-478F-AD8D-7A334D4F3F6F}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPIdentity.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Release" Guid="{CB593DFE-F6F7-4CA5-8259-6374E54DFBC1}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPUi_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Mep.UI.dll" />
+        </Component>
+
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -164,6 +180,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" Guid="{1EE334D5-429E-4090-A4DC-17103AA44C12}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPIdentity.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Release" Guid="{4472E4A8-4D1A-447E-BC99-4063BE33E27A}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPUi_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Mep.UI.dll" />
         </Component>
     </DirectoryRef>
     <?endif?>
@@ -195,6 +214,9 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Debug" />
         <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" />
@@ -220,6 +242,9 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPIdentity_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPIdentity_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPIdentity_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPUi_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPUi_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPUi_Release" />
         <?endif?>
     </ComponentGroup>
   </Fragment>
