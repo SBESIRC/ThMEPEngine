@@ -1,6 +1,6 @@
 ﻿using ThMEPEngineCore.Model.Plumbing;
 
-namespace ThMEPTCH.Moel
+namespace ThMEPTCH.Model
 {
     public class ThTCHSprinkler : ThIfcSprinkler
     {
