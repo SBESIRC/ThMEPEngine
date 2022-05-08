@@ -60,7 +60,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             HelpLines.ForEach(e =>
             {
                 e.Layer = "AI-辅助";
-                e.ColorIndex = 30;
+                e.ColorIndex = 13;
                 e.AddToCurrentSpace();
             });
             CrossedlayerDims.ForEach(e => { DrawText(DIMLAYER, e.Text, e.Point, 0.0); });
@@ -132,11 +132,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 .Select(e => e.GetCenter())
                 .OrderByDescending(e => e.X);
             var endPoint = rootPt2;
-            if (endPoints.Count() > 0) endPoint = endPoints.First();
-            endPoint = new Point3d(endPoint.X, rootPt1.Y, 0);
+            //if (rootNode.Children.Count > 0)
+            //{
+            //    if (endPoints.Count() > 0) endPoint = endPoints.First();
+            //    endPoint = new Point3d(endPoint.X, rootPt1.Y, 0);
+            //}
+            if (hasFlushPoint)
+            {
+                endPoint = endPoint - Vector3d.XAxis * 1000;
+            }
             var rLine = new Line(rootPt1, endPoint);
             //绘制主干线
-            if (rootNode.Children.Count > 0 || ValveRecs.Where(e => Math.Abs(e.GetCenter().Y - rootPt1.Y) < 1000).Count() > 0)
+            if (/*rootNode.Children.Count > 0 || ValveRecs.Where(e => Math.Abs(e.GetCenter().Y - rootPt1.Y) < 1000).Count() > 0*/false)
             {
                 //如果主干线后面有阀门但没其它东西的情况
                 var cond = false;
@@ -151,12 +158,12 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 if (cond)
                 {
                     PreLines.Add(new PreLine(new Line(rootPt1, rootPt2), PipeLayerName, 0));
-                    if (!isUnnececcsaryBreakDot && !hasFlushPoint && rootNode.Children.Count==0)
+                    if (!isUnnececcsaryBreakDot && !hasFlushPoint && rootNode.Children.Count == 0)
                     {
                         var break_angle = Math.PI / 2;
                         if (rootPt2.DistanceTo(basePt) < 1) break_angle = 0;
                         DrawBreakDot(rootPt2, break_angle);
-                        DrawBreakName(_pointList, rootPt2,false);
+                        DrawBreakName(_pointList, rootPt2, false);
                     }
                     //DrawBreakDot(rootPt2, Math.PI / 2);
                     if (dim.Point.X < rootPt2.X - 10)
@@ -178,15 +185,30 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             else
             {
-                if (!isUnnececcsaryBreakDot && !hasFlushPoint && rootNode.Children.Count == 0)
+                if (!isUnnececcsaryBreakDot && !hasFlushPoint /*&& rootNode.Children.Count == 0*/)
                 {
                     var break_angle = Math.PI / 2;
                     if (endPoint.DistanceTo(basePt) < 1) break_angle = 0;
-                    DrawBreakDot(endPoint, break_angle);
+                    if (break_angle == Math.PI / 2)
+                    {
+                        var end_p = endPoint;
+                        var end_p_down = end_p - Vector3d.YAxis * 400;
+                        var end_p_down_right = end_p_down + Vector3d.XAxis * 1000;
+                        var pipe_vert = new Line(end_p, end_p_down);
+                        var pipr_hor = new Line(end_p_down, end_p_down_right);
+                        PreLines.Add(new PreLine(pipe_vert, PipeLayerName, 1));
+                        PreLines.Add(new PreLine(pipr_hor, PipeLayerName, 0));
+                        DrawBreakDot(end_p_down_right, break_angle);
+                        endPoint = end_p_down_right;
+                    }
+                    else
+                    {
+                        DrawBreakDot(endPoint, break_angle);
+                    }
                     DrawBreakName(_pointList, endPoint, false);
                 }
                 PreLines.Add(new PreLine(rLine, PipeLayerName, 0));
-                if (dim.Point.X < rootPt2.X - 10)
+                if (dim.Point.X < endPoint.X - 10)
                     DrawDim(dim);
             }
             rootPt2 = _riserPoint;
@@ -280,8 +302,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 .Select(e => e.GetCenter())
                 .OrderByDescending(e => e.X);
             var endPoint = hLinePt2;
-            if (endPoints.Count() > 0) endPoint = endPoints.First();
-            endPoint = new Point3d(endPoint.X, hLinePt2.Y, 0);
+            //if (subNode.Children.Count > 0)
+            //{
+            //    if (endPoints.Count() > 0) endPoint = endPoints.First();
+            //    endPoint = new Point3d(endPoint.X, hLinePt2.Y, 0);
+            //}
             //绘制当前节点干线
             var line = new Line(hLinePt1, hLinePt2);
             if (hasFlushPoint)
@@ -291,17 +316,36 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             }
             else if (!isUnnececcsaryBreakDot)
             {
-                DrawBreakDot(hLinePt2, Math.PI / 2);
                 var upward = false;
-                if (hLinePt2.Y > basePt.Y) upward = true;
-                DrawBreakName(_pointList, hLinePt2, upward);
+                if (line.Length != 1000)
+                {
+                    var vertlengh = 800.0;
+                    if (rootLine != null)
+                        vertlengh += rootLine.GetClosestPointTo(basePt, false).DistanceTo(basePt);
+                    var end_p = hLinePt2;
+                    var end_p_down = end_p - Vector3d.YAxis * vertlengh;
+                    var end_p_down_right = end_p_down + Vector3d.XAxis * 1000;
+                    var pipe_vert = new Line(end_p, end_p_down);
+                    var pipr_hor = new Line(end_p_down, end_p_down_right);
+                    PreLines.Add(new PreLine(pipe_vert, PipeLayerName, 1));
+                    PreLines.Add(new PreLine(pipr_hor, PipeLayerName, 0));
+                    DrawBreakDot(end_p_down_right, Math.PI / 2);
+                    hLinePt2 = end_p_down_right;
+                    cuLength += 1000;
+                }
+                else
+                {
+                    DrawBreakDot(hLinePt2, Math.PI / 2);
+                    if (hLinePt2.Y > basePt.Y) upward = true;
+                }
+                DrawBreakName(_pointList, hLinePt2, false);
             }
             PreLines.Add(new PreLine(line, PipeLayerName, 0));
             if (dim.Point.X < endPoint.X - 10)
                 DrawDim(dim);
             hLinePt2 = _riserPoint;
             return cuLength;
-        }      
+        }
         public double DrawOtherFloor(Point3d basePt, Point3d startPt, int curFloorIndex, int otherFloorIndex, ref bool isToCurFloor, string crossLayerDims)
         {
             Point3d otherPt = GetMapStartPoint(MapPostion, FloorList, otherFloorIndex);
@@ -431,7 +475,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                         bool isToCurFloor = false;
                         HelpLines.Add(new Line(vertLocPoint, firstPt));
                         var compare_ini_lines = PreLines.Select(e => e.Line).ToList();
-                        if(crossLayerDims.Length>0) pointList[j].Item.Break.Used = true;
+                        if (crossLayerDims.Length > 0) pointList[j].Item.Break.Used = true;
                         curRiserLength = DrawOtherFloor(vertLocPoint, firstPt, floorIndex, otherIndex, ref isToCurFloor, crossLayerDims);
                         crossLayerDims = "";
                         //跨层立管太长，同层后面立管位置往前挪排版紧凑些

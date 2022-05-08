@@ -37,7 +37,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var line = new Line(l.StartPoint, l.EndPoint);
                 line.Linetype = l.Linetype;
                 tmpLine.Add(line);
-            }           
+            }
             //处理横管数据
             var pipeHandleService = new ThPipeHandleService();
             var seriesLines = pipeHandleService.FindSeriesLine(startPt, tmpLine);
@@ -76,11 +76,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         }
         public void InsertToNode(ThTreeNode<ThPipeModel> node, List<ThTreeNode<ThPointModel>> nodes)
         {
-            foreach(var n in nodes)
+            foreach (var n in nodes)
             {
-                foreach(var c in n.Children)
+                foreach (var c in n.Children)
                 {
-                    if(!c.Item.IsTraversal)
+                    if (!c.Item.IsTraversal)
                     {
                         //插入一个
                         var lastNode = FindLastNode(c);
@@ -101,15 +101,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public ThTreeNode<ThPointModel> FindLastNode(ThTreeNode<ThPointModel> startNode)
         {
             ThTreeNode<ThPointModel> retNode = null;
-            if(startNode.Children.Count == 0)
+            if (startNode.Children.Count == 0)
             {
                 retNode = startNode;
                 return retNode;
             }
             int teeCount = 0;
-            foreach(var child in startNode.Children)
+            foreach (var child in startNode.Children)
             {
-                if(teeCount <= child.Item.TeeCount)
+                if (teeCount <= child.Item.TeeCount)
                 {
                     teeCount = child.Item.TeeCount;
                     retNode = child;
@@ -120,13 +120,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public List<ThTreeNode<ThPointModel>> GetPointList(ThTreeNode<ThPointModel> rootNode, ThTreeNode<ThPointModel> lastNode)
         {
             var retNodes = new List<ThTreeNode<ThPointModel>>();
-            if(lastNode.Parent == null || lastNode == rootNode)
+            if (lastNode.Parent == null || lastNode == rootNode)
             {
                 lastNode.Item.IsTraversal = true;
                 retNodes.Add(lastNode);
                 return retNodes;
             }
-            if(lastNode.Parent == rootNode)
+            if (lastNode.Parent == rootNode)
             {
                 lastNode.Item.IsTraversal = true;
                 rootNode.Item.IsTraversal = true;

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.UndergroundWaterSystem.Model;
 using ThMEPWSS.UndergroundWaterSystem.Tree;
 using static ThMEPWSS.UndergroundWaterSystem.Utilities.GeoUtils;
@@ -168,6 +169,62 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 e.Line.AddToCurrentSpace();
             });
         }
+        private void RemoveValveForSpecially(ref List<ThValveModel> valves,string br_a,string br_b,string br_toRemove)
+        {
+            var existedvalvegroup = false;
+            foreach (var br in valves)
+            {
+                try
+                {
+                    var cond = (br.Valve.Database != null && br.Valve.GetEffectiveName().Contains(br_a))
+                        || br.Valve.Name.Contains(br_a);
+                    cond = cond || (br.Valve.Database != null && br.Valve.GetEffectiveName().Contains(br_b))
+                        || br.Valve.Name.Contains(br_b);
+                    if (cond)
+                    {
+                        existedvalvegroup = true;
+                    }
+                }
+                catch
+                {
+                    /*防止拿去块名出错*/
+                    var cond = br.Valve.Name.Contains(br_a);
+                    cond = cond || br.Valve.Name.Contains(br_b);
+                    if (cond)
+                    {
+                        existedvalvegroup = true;
+                    }
+                }
+            }
+            if (existedvalvegroup)
+            {
+                for (int i = 0; i < valves.Count; i++)
+                {
+                    try
+                    {
+                        if ((valves[i].Valve != null && valves[i].Valve.GetEffectiveName().Contains(br_toRemove)) || valves[i].Valve.Name.Contains(br_toRemove))
+                        {
+                            valves.RemoveAt(i);
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        /*防止拿去块名出错*/
+                        if (valves[i].Valve.Name.Contains(br_toRemove))
+                        {
+                            valves.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        private void HandleSpecially(ref List<ThValveModel> valves)
+        {
+            RemoveValveForSpecially(ref valves, "防污隔断阀组", "U437", "闸阀");
+            RemoveValveForSpecially(ref valves, "室内水表详图", "U297", "电动阀");
+        }
         private void DrawValves(List<ThTreeNode<ThPointModel>> pointList, ref Point3d point, ref double sumLength,
            Vector3d vector)
         {
@@ -186,6 +243,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     }
                 }
             }
+            HandleSpecially(ref valves);
             if (valves.Count > 0)
             {
                 double length = 0;
@@ -377,18 +435,32 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     //var sc_y = sc.Y > 0 ? 1 : -1;
                     //sc = new Scale3d(sc_x, sc_y,1);
                     var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
-                        layer, name, position, new Scale3d(1), Math.PI);
+                        layer, name, position, new Scale3d(1), 0);
                     var br = adb.Element<BlockReference>(blId);
-                    if (Math.Abs(position.X - br.GeometricExtents.CenterPoint().X) > 1)
+                    if (Math.Abs(position.X - br.GeometricExtents.CenterPoint().X) > 1 && !br.Name.Contains("U297"))
                     {
                         br.TransformBy(Matrix3d.Displacement(new Vector3d(position.X - br.GeometricExtents.CenterPoint().X, 0, 0)));
                     }
-                    if(name.Contains("752"))//不翻转方向的阀门
-                        br.Rotation=0;
+                    else if (br.Name.Contains("U297"))
+                    {
+                        br.TransformBy(Matrix3d.Displacement(-Vector3d.XAxis * 900));
+                    }
+                    if (name.Contains("656"))//不翻转方向的阀门
+                        br.Rotation = Math.PI;
                     br.Layer = layer;
                     position += vector.GetNormal() * 400;
-                    var rec = br.GeometricExtents.ToRectangle();
-                    ValveRecs.Add(rec);
+                    //var rec = br.GeometricExtents.ToRectangle();
+                    //if(!br.Name.Contains("U297"))
+                    //    ValveRecs.Add(rec);
+                    if (br.ExplodeToDBObjectCollection().OfType<BlockReference>().Any())
+                    {
+                        var blks = br.ExplodeToDBObjectCollection().OfType<BlockReference>();
+                        foreach (var block in blks)
+                        {
+                            ValveRecs.Add(block.GeometricExtents.ToRectangle());
+                        }
+                    }
+                    else ValveRecs.Add(br.GeometricExtents.ToRectangle());
                 }
             }
         }

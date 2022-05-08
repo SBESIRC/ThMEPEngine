@@ -78,18 +78,33 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var box = line.Buffer(tol);
                 foreach (var valve in valveList)
                 {
-                    if (box.Contains(valve.Point))
+                    try
                     {
-                        node.Item.Valves.Add(valve);
-                        //break;
+                        var rec = valve.Valve.GeometricExtents.ToRectangle();
+                        var seg = rec.GetEdges().OrderByDescending(e => e.Length).First();
+                        if (!IsParallelLine(line, seg)) continue;
+                        if (box.IsIntersects(rec))
+                        {
+                            node.Item.Valves.Add(valve);
+                        }
+                    }
+                    catch
+                    {
+                        //防止块读取GeometricExtents报错
+                        if (box.Contains(valve.Point))
+                        {
+                            node.Item.Valves.Add(valve);
+                            //break;
+                        }
                     }
                 }
                 node.Item.Valves = node.Item.Valves.OrderBy(e => e.Point.DistanceTo(line.StartPoint)).ToList();
             }
             //查找当前节点是否有立管
+            var markloc_p = point;
             foreach (var riser in riserList)
             {
-                if (MatchRiser(point, riser))
+                if (MatchRiser(point, riser, ref markloc_p))
                 {
                     node.Item.Riser = riser;
                     break;
@@ -101,7 +116,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 for (int i = 0; i < markList.Count; i++)
                 {
                     var mark = markList[i];
-                    if (MatchMark(point, mark))
+                    if (MatchMark(markloc_p, mark))
                     {
                         var breakModel = new ThBreakModel();
                         breakModel.BreakName = mark.MarkText;
@@ -182,7 +197,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 startNode.Item.TeeCount = teeCount + 1;
             }
         }
-        public bool MatchRiser(Point3d pt, ThRiserInfo riser)
+        public bool MatchRiser(Point3d pt, ThRiserInfo riser, ref Point3d riserPt)
         {
             bool isMatch = false;
             double tol = 80;//老版本:50
@@ -191,6 +206,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 if (p.DistanceTo(pt) < tol)
                 {
                     isMatch = true;
+                    riserPt = p;
                     riser.RiserPts.Remove(p);
                     break;
                 }
@@ -200,7 +216,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public bool MatchMark(Point3d pt, ThMarkModel mark)
         {
             bool isMatch = false;
-            double tol = 80;
+            double tol = 40;
             if (pt.DistanceTo(mark.Poistion) <= tol)
             {
                 isMatch = true;

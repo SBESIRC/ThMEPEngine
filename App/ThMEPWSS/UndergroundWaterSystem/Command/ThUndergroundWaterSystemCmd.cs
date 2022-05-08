@@ -69,7 +69,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     ThImportService thImportService = new ThImportService();
                     thImportService.Import();
                     //
-                    if(LogInfo) LogInfos("计算开始", true);
+                    if (LogInfo) LogInfos("计算开始", true);
                     //楼层框定定位点
                     var StoryFrameBasePoint = new List<Point3d>();
                     var frames = FramedReadUtil.ReadAllFloorFramed();
@@ -89,7 +89,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                             InfoModel.FloorList[i].FloorArea.Vertices().Cast<Point3d>().ToArray());
                         ext.AddExtents(pl.GeometricExtents);
                     }
-                    OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt,LogInfo);
+                    OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt, LogInfo);
                     StartMarkInfo = dataReader.StartMarkInfo;
                     if (LogInfo) LogInfos("数据提取完成");
                     for (int i = 0; i < InfoModel.FloorList.Count; i++)
