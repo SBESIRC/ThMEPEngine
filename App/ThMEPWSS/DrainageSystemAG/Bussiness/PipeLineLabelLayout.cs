@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ThMEPWSS.Assistant;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
@@ -15,9 +14,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     /// </summary>
     class PipeLineLabelLayout
     {
-        private double _textHeight1_50 = 175;//文字高度 在图纸比例 1：50
-        private double _textHeight1_100 = 350;//文字高度 在图纸比例 1：100
-        private double _textHeight1_150 = 525;//文字高度 在图纸比例 1：150
 
         private double _pipeYAxisGroupDistance = 500;//Y轴方向上立管分组距离
         private double _pipeXAxisGroupDistance = 10;//Y轴分组是X轴方向上允许的误差范围
@@ -257,11 +253,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         textStartPoint = textStartPoint + yAxis.MultiplyBy(textHeight / 2);
                     }
                     var textCreatePoint = textStartPoint + Vector3d.YAxis.MultiplyBy(_labelTextYSpace/3) +Vector3d.XAxis.MultiplyBy(_labelTextXSpace/2);
-                    var text = CreateDBText(pipe.UpText, textCreatePoint, txtLineLayer, ThWSSCommon.Layout_TextStyle);
+                    var text = DrainSysAGCommon.CreateDBText(pipe.UpText, textCreatePoint, txtLineLayer, ThWSSCommon.Layout_TextStyle);
                     DBText btText = null;
                     if (!string.IsNullOrEmpty(pipe.BottomText))
                     {
-                        btText = CreateDBText(pipe.BottomText, textCreatePoint - yAxis.MultiplyBy(textHeight / 2 + 50), txtLineLayer, ThWSSCommon.Layout_TextStyle);
+                        btText = DrainSysAGCommon.CreateDBText(pipe.BottomText, textCreatePoint - yAxis.MultiplyBy(textHeight / 2 + 50), txtLineLayer, ThWSSCommon.Layout_TextStyle);
                     }
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
                     var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.BelongId, "LG_BSLJX");
@@ -310,7 +306,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             {
                 if (!string.IsNullOrEmpty(item.UpText)) 
                 {
-                    var text = CreateDBText(item.UpText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
+                    var text = DrainSysAGCommon.CreateDBText(item.UpText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
                     var maxPoint = text.GeometricExtents.MaxPoint;
                     var minPoint = text.GeometricExtents.MinPoint;
                     var xDis = Math.Abs(maxPoint.X - minPoint.X);
@@ -320,7 +316,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
                 if (!string.IsNullOrEmpty(item.BottomText)) 
                 {
-                    var text = CreateDBText(item.BottomText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
+                    var text = DrainSysAGCommon.CreateDBText(item.BottomText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
                     var maxPoint = text.GeometricExtents.MaxPoint;
                     var minPoint = text.GeometricExtents.MinPoint;
                     var xDis = Math.Abs(maxPoint.X - minPoint.X);
@@ -402,44 +398,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             return polyline;
         }
         
-
-        DBText CreateDBText(string str, Point3d position,string layerName,string styleName)
-        {
-            double height = _textHeight1_50;
-            switch (SetServicesModel.Instance.drawingScale)
-            {
-                case EnumDrawingScale.DrawingScale1_50:
-                    height = _textHeight1_50;
-                    break;
-                case EnumDrawingScale.DrawingScale1_100:
-                    height = _textHeight1_100;
-                    break;
-                case EnumDrawingScale.DrawingScale1_150:
-                    height = _textHeight1_150;
-                    break;
-            }
-            DBText infotext = new DBText()
-            {
-                TextString = str,
-                Height = height,
-                WidthFactor = 0.7,
-                HorizontalMode = TextHorizontalMode.TextLeft,
-                Oblique = 0,
-                Position = position,
-                Rotation = 0,
-            };
-            if (!string.IsNullOrEmpty(layerName))
-                infotext.Layer = layerName;
-            if (!string.IsNullOrEmpty(styleName)) 
-            {
-                var styleId = DrawUtils.GetTextStyleId(styleName);
-                if (null != styleId && styleId.IsValid) 
-                {
-                    infotext.TextStyleId = styleId;
-                }
-            }
-            return infotext;
-        }
 
         List<PointLabelInfo> GetLinePipe(Point3d basePoint,List<PointLabelInfo> areaAllPipe,Vector3d orderDir,double dirTolerance,double outTolerance)
         {

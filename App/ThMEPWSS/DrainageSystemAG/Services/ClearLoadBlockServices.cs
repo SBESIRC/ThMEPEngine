@@ -27,6 +27,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             ThWSSCommon.Layout_PipeWastDrainTextLayerName,
             ThWSSCommon.Layout_PipeRainTextLayerName,
             ThWSSCommon.Layout_PipeCasingLayerName,
+            ThWSSCommon.Layout_PipeCasingTextLayerName,
         };
         static List<string> textStyleNames = new List<string>
         {

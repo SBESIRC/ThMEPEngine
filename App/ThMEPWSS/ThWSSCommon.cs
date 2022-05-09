@@ -44,6 +44,7 @@
         public const string Layout_PipeWastDrainConnectLayerName = "W-DRAI-WAST-PIPE";                 //图层名称 连线图层-废水地漏连接立管图层
         public const string Layout_PipeRainTextLayerName = "W-RAIN-NOTE";                              //图层名称 连线图层-编号图层
         public const string Layout_PipeWastDrainTextLayerName = "W-DRAI-NOTE";                         //图层名称 连线图层-编号图层
+        public const string Layout_PipeCasingTextLayerName = "W-BUSH-NOTE";                            //图层名称 套管标注图层
         public const string Layout_PipeCasingBlockName = "套管-AI";
         public const string Layout_PipeCasingLayerName = "W-BUSH";
 
