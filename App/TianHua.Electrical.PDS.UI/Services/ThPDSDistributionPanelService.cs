@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
-        ContextMenu treeCMenu;
+        ContextMenu ctxMenu;
         QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
@@ -52,9 +52,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var details = graph.Edges.Select(x => x.Details).ToList();
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
-            treeCMenu ??= tv.ContextMenu;
+            ctxMenu ??= panel.canvas.ContextMenu;
+            var menuItems = new List<MenuItem>();
+            foreach (MenuItem m in ctxMenu.Items)
+            {
+                menuItems.Add(m);
+            }
             var config = new ThPDSDistributionPanelConfig();
-            treeCMenu.DataContext = config;
+            panel.canvas.DataContext = config;
             var builder = new ThPDSCircuitGraphTreeBuilder();
             var tree = builder.Build(graph);
             static string FixString(string text)
@@ -155,45 +160,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     Header = "全不选",
                     Command = unselAllCmd,
                 };
-                yield return new()
-                {
-                    Header = "批量生成",
-                    Command = batchGenCmd,
-                };
             }
             {
                 var i = 0;
                 foreach (var m in GetCommonMenuItems())
                 {
-                    if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == m.Header as string))
+                    if (!ctxMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == m.Header as string))
                     {
-                        treeCMenu.Items.Insert(i++, m);
+                        ctxMenu.Items.Insert(i++, m);
                     }
-                }
-            }
-            {
-                var h = "平衡相序";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
-                {
-                    treeCMenu.Items.Add(new MenuItem()
-                    {
-                        Header = h,
-                        Command = new RelayCommand(() =>
-                        {
-                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                        }),
-                    });
-                }
-            }
-            {
-                var h = "创建备用回路";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
-                {
-                    treeCMenu.Items.Add(new MenuItem()
-                    {
-                        Header = h,
-                        Command = createBackupCircuitCmd,
-                    });
                 }
             }
             tv.DataContext = tree;
@@ -206,32 +181,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is not null)
                 {
-                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
-                    {
-                        var cm = new ContextMenu();
-                        foreach (var m in GetCommonMenuItems())
-                        {
-                            cm.Items.Add(m);
-                        }
-                        tv.ContextMenu = cm;
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "平衡相序",
-                            Command = new RelayCommand(() =>
-                            {
-                                ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                            }),
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "创建备用回路",
-                            Command = createBackupCircuitCmd,
-                        });
-                    }
-                    else
-                    {
-                        tv.ContextMenu = treeCMenu;
-                    }
+                    tv.ContextMenu = treeCmenu;
                     var boxVM = new ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
@@ -327,13 +277,32 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 canvas.Children.Clear();
                 clear?.Invoke();
                 dccbs = null;
+                canvas.ContextMenu?.Items?.Clear();
                 canvas.ContextMenu = null;
+                ctxMenu.Items.Clear();
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 config.Current = new(vertice);
                 config.BatchGenerate = batchGenCmd;
                 {
                     var cmenu = new ContextMenu();
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "平衡相序",
+                        Command = new RelayCommand(() =>
+                        {
+                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                        }),
+                    });
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "创建备用回路",
+                        Command = createBackupCircuitCmd,
+                    });
+                    foreach (var m in menuItems)
+                    {
+                        cmenu.Items.Add(m);
+                    }
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "生成系统图",
