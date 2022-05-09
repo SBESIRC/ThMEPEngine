@@ -12,10 +12,14 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSGraphVerifyService
     {
-        public void Verify(PDSGraph graph)
+        private bool HaveChange { get; set; }   
+
+        public bool Verify(PDSGraph graph)
         {
+            HaveChange = false;
             NodeVerify(graph);
             EdgeVerify(graph);
+            return HaveChange;
         }
 
         public void NodeVerify(PDSGraph graph)
@@ -129,6 +133,7 @@ namespace TianHua.Electrical.PDS.Service
         //Tags
         private void TagNodeDuplicate(ThPDSProjectGraphNode node)
         {
+            HaveChange = true;
             var dupTag = new ThPDSProjectGraphNodeDuplicateTag();
             if(node.Tag.IsNull())
             {
@@ -145,6 +150,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagNodeSingle(ThPDSProjectGraphNode node)
         {
+            HaveChange = true;
             var singleTag = new ThPDSProjectGraphNodeSingleTag();
             if (node.Tag.IsNull())
             {
@@ -162,6 +168,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagNodeFire(ThPDSProjectGraphNode node)
         {
+            HaveChange = true;
             var fireTag = new ThPDSProjectGraphNodeFireTag();
             if (node.Tag.IsNull())
             {
@@ -179,6 +186,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagEdgeDuplicate(ThPDSProjectGraphEdge edge)
         {
+            HaveChange = true;
             var dupTag = new ThPDSProjectGraphEdgeDuplicateTag();
             if (edge.Tag.IsNull())
             {
@@ -196,6 +204,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagEdgeSingle(ThPDSProjectGraphEdge edge)
         {
+            HaveChange = true;
             var singleTag = new ThPDSProjectGraphEdgeSingleTag();
             if (edge.Tag.IsNull())
             {
