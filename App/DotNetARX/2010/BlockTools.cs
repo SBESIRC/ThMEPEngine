@@ -423,7 +423,7 @@ namespace DotNetARX
         {
             string blockName;//存储块名
             if (bref == null) return null;//如果块参照不存在，则返回
-            if (bref.IsDynamicBlock) //如果是动态块
+            if (bref.IsDynamicBlockEx()) //如果是动态块
             {
                 //获取动态块所属的动态块表记录
                 ObjectId idDyn = bref.DynamicBlockTableRecord;
@@ -434,6 +434,18 @@ namespace DotNetARX
             else //非动态块
                 blockName = bref.Name; //获取块名
             return blockName;//返回块名
+        }
+
+        /// <summary>
+        /// 判断块参照是否是动态块
+        /// </summary>
+        /// <param name="bref"></param>
+        /// <returns></returns>
+        private static bool IsDynamicBlockEx(this BlockReference bref)
+        {
+            // 有BlockReference.IsDynamicBlock，为什么要实现一个新的？
+            // 主要原因是，由于未知的原因，BlockReference.IsDynamicBlock有时候会崩溃
+            return bref.Name.StartsWith("*U");
         }
 
         /// <summary>
@@ -500,7 +512,7 @@ namespace DotNetARX
             //获取块参照
             BlockReference br = blockId.GetObject(OpenMode.ForRead) as BlockReference;
             //如果不是动态块，则返回
-            if (br == null && !br.IsDynamicBlock) return null;
+            if (br == null && !br.IsDynamicBlockEx()) return null;
             //返回动态块的动态属性
             return br.DynamicBlockReferencePropertyCollection;
         }
