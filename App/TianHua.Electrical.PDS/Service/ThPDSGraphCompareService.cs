@@ -408,6 +408,7 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         throw new NotImplementedException(); //两条边同一个id不同起点
                     }
+                    DataChangeForEdge(edgeA, edgeB);
                     if (edgeA.Target.Load.ID.LoadID != edgeB.Target.Load.ID.LoadID)
                     {
                         StructureForMoveEdge(edgeA, edgeB, graphA);
@@ -619,6 +620,18 @@ namespace TianHua.Electrical.PDS.Service
             }
             return false;
         }
+
+        private bool DataChangeForEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB)
+        {
+            var dataTagA = new ThPDSProjectGraphEdgeDataTag();
+            if (edgeA.Circuit.ID.CircuitID.Last() != edgeB.Circuit.ID.CircuitID.Last())
+            {
+                dataTagA.ToLastCircuitID = edgeB.Circuit.ID.CircuitID.Last();
+                AddEdgeTag(edgeA, dataTagA);
+                return true;
+            }
+            return false;
+        }
         #endregion
 
         private ThPDSProjectGraphEdge CreatEdge(ThPDSProjectGraphNode source, ThPDSProjectGraphNode target, List<string> circuitId, string circuitNumber)
@@ -718,6 +731,29 @@ namespace TianHua.Electrical.PDS.Service
             {
                 edge.Tag = cmpareTag;
             }
+            else if(cmpareTag is ThPDSProjectGraphEdgeDataTag dataCmpTag)
+            {
+                if (edge.Tag is ThPDSProjectGraphEdgeDuplicateTag dupTag)
+                {
+                    edge.Tag = new ThPDSProjectGraphEdgeCompositeTag()
+                    {
+                        DataTag = dataCmpTag,
+                        DupTag = dupTag
+                    };
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeSingleTag singleTag)
+                {
+                    edge.Tag = new ThPDSProjectGraphEdgeCompositeTag()
+                    {
+                        DataTag = dataCmpTag,
+                        SingleTag = singleTag
+                    };
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+                {
+                    compositeTag.DataTag = dataCmpTag;
+                }
+            }
             else
             {
                 if (edge.Tag is ThPDSProjectGraphEdgeDuplicateTag dupTag)
@@ -734,6 +770,14 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         CompareTag = cmpareTag,
                         SingleTag = singleTag
+                    };
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeDataTag dataTag)
+                {
+                    edge.Tag = new ThPDSProjectGraphEdgeCompositeTag
+                    {
+                        CompareTag = cmpareTag,
+                        DataTag = dataTag
                     };
                 }
                 else if (edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
