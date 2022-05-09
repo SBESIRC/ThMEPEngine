@@ -19,6 +19,7 @@
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding ValidateCmd}">绘图标准校核</cus:ImageButton>
             <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CompareCmd}">对比平面信息</cus:ImageButton>
             <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding AcceptCmd}">接收所有对比结果</cus:ImageButton>
             <cus:ImageButton Height="25" Style="{x:Null}" Margin="3" Command="{Binding CreateCmd}">创建非平面负载</cus:ImageButton>

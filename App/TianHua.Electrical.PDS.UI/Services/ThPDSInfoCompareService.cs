@@ -5,7 +5,6 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Windows.Data;
 using System.Windows.Media;
-using System.Globalization;
 using System.ComponentModel;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -17,6 +16,9 @@ using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using Microsoft.Toolkit.Mvvm.Input;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using PDSGraph = QuikGraph.BidirectionalGraph<
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
@@ -39,13 +41,14 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class ThPDSInfoCompareService
     {
+        private PDSGraph Graph => Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
+
         public void Init(ThPDSInfoCompare panel)
         {
             {
                 var hasDataError = false;
                 var regenCount = 0L;
-                var vm = new
-                ThPDSInfoCompareViewModel()
+                var vm = new ThPDSInfoCompareViewModel()
                 {
                     CompareCmd = new RelayCommand(() =>
                     {
@@ -69,6 +72,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                         new ThPDSUpdateToDwgService().Update();
                     }, () => !hasDataError || regenCount > 1),
                 };
+                vm.ValidateCmd = new RelayCommand(() =>
+                {
+                    new ThPDSGraphVerifyService().Verify(Graph);
+                    UpdateView(panel);
+                });
                 vm.ReadAndRegenCmd = new RelayCommand(() =>
                 {
                     if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
@@ -114,10 +122,9 @@ namespace TianHua.Electrical.PDS.UI.Services
 
         public void UpdateView(ThPDSInfoCompare panel)
         {
-            var g = Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
             {
                 var items = new List<CircuitDiffItem>();
-                foreach (var edge in g.Edges)
+                foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
                     if (tag is ThPDSProjectGraphEdgeCompositeTag)
@@ -172,6 +179,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Background = PDSColorBrushes.Safe,
                             Img = PDSImageSources.Safe,
                             Hint = projectGraphEdgeDataTag.ToLastCircuitID,
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeDuplicateTag)
+                    {
+                        items.Add(new()
+                        {
+                            Edge = edge,
+                            Background = PDSColorBrushes.Mild,
+                            Img = PDSImageSources.Mild,
+                            Hint = "回路编号重复",
                         });
                     }
                     else
@@ -252,7 +269,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             }
             {
                 var items = new List<LoadDiffItem>();
-                foreach (var node in g.Vertices)
+                foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
                     if (tag is ThPDSProjectGraphNodeCompositeTag)
@@ -342,6 +359,36 @@ namespace TianHua.Electrical.PDS.UI.Services
                             });
                         }
                     }
+                    else if (tag is ThPDSProjectGraphNodeDuplicateTag)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "负载编号重复",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeSingleTag)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "这是一个孤立的负载",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeFireTag)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "不满足消防供电要求",
+                        });
+                    }
                     else
                     {
                         items.Add(new()
@@ -390,6 +437,7 @@ namespace TianHua.Electrical.PDS.UI.Services
 
         private class ThPDSInfoCompareViewModel
         {
+            public RelayCommand ValidateCmd { get; set; }
             public RelayCommand CompareCmd { get; set; }
             public RelayCommand AcceptCmd { get; set; }
             public RelayCommand CreateCmd { get; set; }
