@@ -44,9 +44,10 @@ namespace ThMEPArchitecture.MultiProcess
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
 
-        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+        //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+        //    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
 
+        public Serilog.Core.Logger Logger = null;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;

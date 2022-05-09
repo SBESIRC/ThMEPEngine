@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,10 +25,15 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var line = iniLanes[i];
                 var pl = line.Buffer(DisLaneWidth / 2 - 1);
                 var points = new List<Coordinate>();
+                STRtree<Polygon> strTree = new STRtree<Polygon>();
+                foreach (var cutter in Obstacles) strTree.Insert(cutter.EnvelopeInternal, cutter);
+                var selectedGeos = strTree.Query(pl.EnvelopeInternal);
+                foreach(var obj in selectedGeos)
+                    points.AddRange(obj.IntersectPoint(pl));
                 foreach (var obj in Obstacles)
                 {
                     points.AddRange(obj.Coordinates);
-                    points.AddRange(obj.IntersectPoint(pl));
+                    //points.AddRange(obj.IntersectPoint(pl));
                 }
                 points = points.Where(e => pl.Contains(e) || pl.ClosestPoint(e).Distance(e) < 0.001)
                     .Select(e => line.ClosestPoint(e)).ToList();
@@ -304,20 +310,22 @@ namespace ThParkingStall.Core.MPartitionLayout
                 /*.Where(e => IsConnectedToLane(e))*/;
             bool generate = false;
             var quitcycle = false;
+            STRtree<Polygon> carBoxesStrTree = new STRtree<Polygon>();
+            CarBoxes.ForEach(polygon => carBoxesStrTree.Insert(polygon.EnvelopeInternal, polygon));
             foreach (var linesplitbound in linesplitbounds)
             {
                 //与车道模块相交
                 var linesplitboundback = new LineSegment(linesplitbound);
                 linesplitboundback = linesplitboundback.Translation((-vec * (DisVertCarLength + DisLaneWidth / 2)));
                 var plcarbox = PolyFromLines(linesplitbound, linesplitboundback);
-                plcarbox=plcarbox.Scale(ScareFactorForCollisionCheck);
+                plcarbox = plcarbox.Scale(ScareFactorForCollisionCheck);
                 var linesplitcarboxes = SplitLineBySpacialIndexInPoly(linesplitbound, plcarbox, CarBoxesSpatialIndex, false)
-                    .Where(e => !IsInAnyBoxes(e.MidPoint/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, CarBoxes, true))
                     //.Where(e =>
                     //{
                     //    return !IsInAnyBoxes(AveragePoint(e.GetCenter(), linesplitboundback.GetClosestPointTo(e.GetCenter(), true)), CarBoxes);
                     //})
                     .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
+                    .Where(e => !IsInAnyBoxes(e.MidPoint/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, carBoxesStrTree, true))
                     .Where(e => IsConnectedToLane(e));
                 //解决车道线与车道模块短边平行长度不够的情况
                 var fixlinesplitcarboxes = new List<LineSegment>();
@@ -340,10 +348,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                     }).Select(box => box.Clone()).ToList();
                     var spindex = new MNTSSpatialIndex(boxs);
                     var plcarboxfix = PolyFromLines(k, linesplitboundback);
-                    plcarboxfix=plcarboxfix.Scale(ScareFactorForCollisionCheck);
+                    plcarboxfix = plcarboxfix.Scale(ScareFactorForCollisionCheck);
                     fixlinesplitcarboxes.AddRange(SplitLineBySpacialIndexInPoly(k, plcarboxfix, spindex, false)
-                        .Where(e => !IsInAnyBoxes(e.MidPoint, boxs, true))
                         .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
+                        .Where(e => !IsInAnyBoxes(e.MidPoint, boxs, true))
                         .Where(e =>
                         {
                             var ep = new LineSegment(e);
@@ -382,7 +390,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                     plbound=plbound.Scale(ScareFactorForCollisionCheck);
                     var obsplits = SplitLineBySpacialIndexInPoly(linesplit, plbound, ObstaclesSpatialIndex, false)
                         .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
-                        .Where(e => !IsInAnyPolys(e.MidPoint, Obstacles))
+                        //.Where(e => !IsInAnyPolys(e.MidPoint, Obstacles))
+                        .Where(e =>
+                        {
+                            var tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(new Point(e.MidPoint)).Cast<Polygon>().ToList();
+                            return !IsInAnyPolys(e.MidPoint, tmpobs);
+                        })
                         .Where(e =>
                         {
                             //与原始车道线模块不相接
@@ -408,7 +421,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         if (((lane.ClosestPoint(splitori.P0).Distance(splitori.P0) >/* 5000*/splitori.Length / 3
                             || lane.ClosestPoint(splitori.P1).Distance(splitori.P1) > splitori.Length / 3)
                             && ObstaclesSpatialIndex.SelectCrossingGeometry(ploritolane).Cast<Polygon>().Where(e => Boundary.Contains(e.Envelope.Centroid) || Boundary.IntersectPoint(e).Count() > 0).Count() > 0)
-                            || IsInAnyBoxes(splitori.MidPoint, CarBoxes))
+                            || IsInAnyBoxes(splitori.MidPoint, carBoxesStrTree))
                         {
                             //生成模块与车道线错开且原车道线碰障碍物
                             continue;
@@ -471,7 +484,14 @@ namespace ThParkingStall.Core.MPartitionLayout
                         {
                             paras.CarBoxPlusToAdd[paras.CarBoxPlusToAdd.Count - 1].IsSingleForParallelExist = true;
                             var existBoxes = CarBoxesPlus.Where(e => e.IsSingleForParallelExist).Select(e => e.Box);
-                            foreach (var box in existBoxes)
+                            var selectedGeos = existBoxes;
+                            if (existBoxes.Count() > STRTreeCount)
+                            {
+                                STRtree<Polygon> strTree = new STRtree<Polygon>();
+                                foreach (var cutter in existBoxes) strTree.Insert(cutter.EnvelopeInternal, cutter);
+                                selectedGeos = strTree.Query(perpLine.ToLineString().EnvelopeInternal);
+                            }
+                            foreach (var box in selectedGeos)
                             {
                                 if (perpLine.IntersectPoint(box).Count() > 0)
                                 {
@@ -611,20 +631,27 @@ namespace ThParkingStall.Core.MPartitionLayout
             var ptestvec = ps.Translation(gvec);
             if (ptestvec.Distance(pt) < (DisCarAndHalfLane + CollisionD - CollisionTOP)) gvec = -gvec;
             var distnearbuilding = IsEssentialToCloseToBuilding(line, gvec);
+            STRtree<Polygon> carBoxesStrTree = new STRtree<Polygon>();
+            CarBoxes.ForEach(polygon => carBoxesStrTree.Insert(polygon.EnvelopeInternal, polygon));
             if (distnearbuilding != -1)
             {
                 //贴近建筑物生成
                 line=line.Translation(gvec * distnearbuilding);
                 //与车道模块相交
                 var linesplitcarboxes = SplitLine(line, CarBoxes).Where(e => e.Length > 1).First();
-                if (IsInAnyBoxes(linesplitcarboxes.MidPoint, CarBoxes) || linesplitcarboxes.Length < LengthCanGAdjLaneConnectSingle)
+                if (IsInAnyBoxes(linesplitcarboxes.MidPoint, carBoxesStrTree) || linesplitcarboxes.Length < LengthCanGAdjLaneConnectSingle)
                     return generate_lane_length;
                 //与障碍物相交
                 var plsplitbox = linesplitcarboxes.Buffer(DisLaneWidth / 2);
-                plsplitbox=plsplitbox.Scale(ScareFactorForCollisionCheck);
+                plsplitbox = plsplitbox.Scale(ScareFactorForCollisionCheck);
                 var obsplit = SplitLineBySpacialIndexInPoly(linesplitcarboxes, plsplitbox, ObstaclesSpatialIndex, false)
                     .Where(e => e.Length > 1).First();
-                if (IsInAnyPolys(obsplit.MidPoint, Obstacles) || obsplit.Length < LengthCanGAdjLaneConnectSingle)
+                if (obsplit.Length < LengthCanGAdjLaneConnectSingle)
+                    return generate_lane_length;
+                //if (IsInAnyPolys(obsplit.MidPoint, Obstacles))
+                //    return generate_lane_length;
+                var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(new Point(obsplit.MidPoint)).Cast<Polygon>().ToList();
+                if (IsInAnyPolys(obsplit.MidPoint, _tmpobs))
                     return generate_lane_length;
 
                 if (isStart) paras.SetGStartAdjLane = index;
@@ -639,7 +666,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             //与车道模块相交
             var inilinesplitcarboxes = SplitLine(line, CarBoxes).Where(e => e.Length > 1).First();
-            if (IsInAnyBoxes(inilinesplitcarboxes.MidPoint, CarBoxes) || inilinesplitcarboxes.Length < LengthCanGAdjLaneConnectSingle)
+            if (IsInAnyBoxes(inilinesplitcarboxes.MidPoint, carBoxesStrTree) || inilinesplitcarboxes.Length < LengthCanGAdjLaneConnectSingle)
                 return generate_lane_length;
             var inilinesplitcarboxesaction = new LineSegment(inilinesplitcarboxes);
             inilinesplitcarboxesaction.Translation(-gvec.Normalize() * (DisVertCarLength + DisLaneWidth));
@@ -664,8 +691,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             iniplsplitbox=iniplsplitbox.Scale(ScareFactorForCollisionCheck);
             var iniobsplit = SplitLineBySpacialIndexInPoly(inilinesplitcarboxes, iniplsplitbox, ObstaclesSpatialIndex, false)
                 .Where(e => e.Length > 1).First();
-            if (IsInAnyPolys(iniobsplit.MidPoint, Obstacles) || iniobsplit.Length < LengthCanGAdjLaneConnectSingle)
+            if (iniobsplit.Length < LengthCanGAdjLaneConnectSingle)
                 return generate_lane_length;
+            //if (IsInAnyPolys(iniobsplit.MidPoint, Obstacles))
+            //    return generate_lane_length;
+            var tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(new Point(iniobsplit.MidPoint)).Cast<Polygon>().ToList();
+            if (IsInAnyPolys(iniobsplit.MidPoint, tmpobs))
+                return generate_lane_length;
+
             double dis_to_move = 0;
             var perpLine = new LineSegment();
             if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine)) return generate_lane_length;
@@ -673,7 +706,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var offsetline = new LineSegment(iniobsplit);
             offsetline=offsetline.Translation(-gvec * DisCarAndHalfLane);
             var pl = PolyFromLines(iniobsplit, offsetline);
-            if (IsInAnyBoxes(pl.Envelope.Centroid.Coordinate, CarBoxes)) return generate_lane_length;
+            if (IsInAnyBoxes(pl.Envelope.Centroid.Coordinate, carBoxesStrTree)) return generate_lane_length;
             if (isStart) paras.SetGStartAdjLane = index;
             else paras.SetGEndAdjLane = index;
             Lane inilan = new Lane(iniobsplit, gvec);
@@ -740,8 +773,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                         .OrderBy(e => e.ClosestPoint(ps).Distance(ps));
                     if (glines.Count() == 0) continue;
                     gline = glines.First();
-                    glines = SplitLine(gline, CarBoxes).Where(e => !IsInAnyBoxes(e.MidPoint, CarBoxes))
+                    glines = SplitLine(gline, CarBoxes)
                         .Where(e => e.Length > 1)
+                        .Where(e => !IsInAnyBoxes(e.MidPoint, CarBoxes))
                         .OrderBy(e => e.ClosestPoint(ps).Distance(ps));
                     if (glines.Count() == 0) continue;
                     gline = glines.First();

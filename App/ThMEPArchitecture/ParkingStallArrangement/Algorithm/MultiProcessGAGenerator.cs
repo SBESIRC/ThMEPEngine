@@ -159,7 +159,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 if (RndFlag)//之前找到合理解
                 {
                     FoundVaild = RandomCreateChromosome(out MPChromosome solution);//尝试找一下
-                    ReclaimMemory();
+                    //ReclaimMemory();
                     if (FoundVaild) solutions.Add(solution);
                 }
                 if (!FoundVaild)//没有合理解
@@ -242,7 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var currentMutexList = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "1", "1");
+                var proc = CreateSubProcess(idx, "0", "1");
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
@@ -293,6 +293,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 pop.AddRange(rstLM);
                 Logger?.Information($"当前代用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
+                if (CurIteration % 3 == 0)
+                    ReclaimMemory();
             }
             if(CurIteration-1 != IterationCount) ProcList.ForEach(x => x.Kill());
             ProcList.ForEach(x => x.Dispose());
@@ -320,7 +322,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 #endif
             //CalculateParkingSpacesSP(inputSolution);
             //CalculateParkingSpacesMP(inputSolution);
-            ReclaimMemory();
+            //ReclaimMemory();
 
             var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
             maxNums = sorted.First().ParkingStallCount;

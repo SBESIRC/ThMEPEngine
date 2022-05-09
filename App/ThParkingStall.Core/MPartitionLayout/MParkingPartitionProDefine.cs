@@ -119,6 +119,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
         public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3;
         public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8;
+        public static double STRTreeCount = 10;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
         public enum LayoutDirection : int
         {

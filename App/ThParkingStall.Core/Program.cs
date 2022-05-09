@@ -144,7 +144,8 @@ namespace ThParkingStall.Core
                     t_pre = stopWatch.Elapsed.TotalSeconds;
                 }
                 SubAreaParkingCnt.ClearNewAdded();
-                ReclaimMemory();
+                if (IterationCount % 3 == 0)
+                    ReclaimMemory();
             }
             if (LogAllInfo)
             {
