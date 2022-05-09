@@ -507,12 +507,14 @@ namespace TianHua.Electrical.PDS.Service
             var moveTagA = new ThPDSProjectGraphNodeMoveTag
             {
                 MoveFrom = true,
+                AnotherNode = nodeB,
             };
             AddNodeTag(nodeA, moveTagA);
 
             var moveTagB = new ThPDSProjectGraphNodeMoveTag
             {
                 MoveFrom = false,
+                AnotherNode = nodeA,
             };
             AddNodeTag(nodeB, moveTagB);
             graphA.AddVertex(nodeB);

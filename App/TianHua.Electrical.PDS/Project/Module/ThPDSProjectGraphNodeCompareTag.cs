@@ -38,6 +38,7 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class ThPDSProjectGraphNodeMoveTag : ThPDSProjectGraphNodeCompareTag
     {
         public bool MoveFrom { get; set; }
+        public ThPDSProjectGraphNode AnotherNode { get; set; }
 
         public ThPDSProjectGraphNodeMoveTag()
         {
