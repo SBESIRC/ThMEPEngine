@@ -17,7 +17,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var ouvpPicks = OUVPConfiguration.OUVPComponentInfos.Where(o => o.Poles.Equals(polesNum) && o.Amps > calculateCurrent).ToList();
             if (ouvpPicks.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException("设备库内找不到对应规格的元器件");
             }
             this.OUVPPicks = ouvpPicks;
             var ouvp = ouvpPicks.First();

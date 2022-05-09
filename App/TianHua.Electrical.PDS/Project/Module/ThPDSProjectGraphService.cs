@@ -12,6 +12,7 @@ using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 using Dreambuild.AutoCAD;
+using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -24,7 +25,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="node"></param>
         /// <param name="type"></param>
         /// <exception cref="NotSupportedException"></exception>
-        public static void UpdateFormInType(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+        public static void UpdateFormInType(ProjectGraph graph,
             ThPDSProjectGraphNode node, CircuitFormInType type)
         {
             if (node.Load.LoadTypeCat_1 == Model.ThPDSLoadTypeCat_1.DistributionPanel && node.Details.CircuitFormType.CircuitFormType != type && type != CircuitFormInType.None)
@@ -89,7 +90,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="edge"></param>
-        public static void DeleteCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+        public static void DeleteCircuit(ProjectGraph graph,
             ThPDSProjectGraphEdge edge)
         {
             //删除回路只删除这个连接关系，前后节点都还保留
@@ -102,41 +103,52 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="node"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        public static void InsertUndervoltageProtector(
-            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static bool InsertUndervoltageProtector(ProjectGraph graph, ThPDSProjectGraphNode node, out string msg)
         {
+            msg = "";
             var edges = graph.OutEdges(node).ToList();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, CascadeCurrent);
+            OUVP ouvp;
+            try
+            {
+                ouvp = componentFactory.CreatOUVP();
+            }
+            catch (Exception ex)
+            {
+                msg = ex.Message;
+                return false;
+            }
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
                 if (oneWayInCircuit.reservedComponent.IsNull() || oneWayInCircuit.reservedComponent is Meter)
                 {
-                    oneWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                    oneWayInCircuit.reservedComponent = ouvp;
                 }
             }
             else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
             {
                 if (twoWayInCircuit.reservedComponent.IsNull() || twoWayInCircuit.reservedComponent is Meter)
                 {
-                    twoWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                    twoWayInCircuit.reservedComponent = ouvp;
                 }
             }
             else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
             {
                 if (threeWayInCircuit.reservedComponent.IsNull() || threeWayInCircuit.reservedComponent is Meter)
                 {
-                    threeWayInCircuit.reservedComponent = componentFactory.CreatOUVP();
+                    threeWayInCircuit.reservedComponent = ouvp;
                 }
             }
             else
             {
                 //业务逻辑：别的回路不允许插入该元器件
-                throw new NotSupportedException();
+                msg = "集中电源无法插入OUVP";
+                return false;
             }
+            return true;
         }
 
         /// <summary>
@@ -182,7 +194,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="node"></param>
         /// <exception cref="NotImplementedException"></exception>
         public static void InsertEnergyMeter(
-            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+            ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.OutEdges(node).ToList();
             //统计节点级联电流
@@ -258,7 +270,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="node"></param>
-        public static void CheckCascadeWithNode(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static void CheckCascadeWithNode(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.InEdges(node);
             foreach (var edge in edges)
@@ -405,7 +417,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 平衡相序
         /// </summary>
-        public static void BalancedPhaseSequence(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static void BalancedPhaseSequence(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.OutEdges(node).ToList();
             edges.BalancedPhaseSequence();
@@ -414,7 +426,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 创建备用回路
         /// </summary>
-        public static void CreatBackupCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static void CreatBackupCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = graph.OutEdges(node);
             var OnePhaseCB = new List<ThPDSProjectGraphEdge>();
@@ -563,7 +575,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="FilterEdged">是否过滤已分配回路的负载</param>
         /// <returns></returns>
         public static List<ThPDSProjectGraphNode> GetUndistributeLoad(
-            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+            ProjectGraph graph,
             bool FilterEdged = false)
         {
             //分配负载 就是拿到所有的 未知负载
@@ -577,7 +589,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 分配负载
         /// </summary>
         public static void DistributeLoad(
-            BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
+            ProjectGraph graph,
             ThPDSProjectGraphNode source,
             ThPDSProjectGraphNode target)
         {
@@ -645,7 +657,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
+        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, CircuitFormOutType type , ThPDSPhase defaultPhase = ThPDSPhase.三相)
         {
             //Step 1:新建空负载
             var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
@@ -672,7 +684,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建回路
         /// </summary>
-        public static ThPDSProjectGraphEdge AddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, string type)
+        public static ThPDSProjectGraphEdge AddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, string type)
         {
             //Step 1:新建空负载
             var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
@@ -698,7 +710,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// (包含在小母排和控制回路上的分支)
         /// </summary>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphEdge> GetCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static List<ThPDSProjectGraphEdge> GetCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             return graph.OutEdges(node).ToList();
         }
@@ -708,7 +720,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// (不在小母排/控制回路上的分支)
         /// </summary>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphEdge> GetOrdinaryCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static List<ThPDSProjectGraphEdge> GetOrdinaryCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             //所有分支 - 小母排所属分支 - 控制回路所属分支
             return graph.OutEdges(node).Except(node.Details.MiniBusbars.SelectMany(o => o.Value)).Except(node.Details.SecondaryCircuits.SelectMany(o => o.Value)).ToList();
@@ -717,7 +729,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 获取小母排节下分支
         /// </summary>
-        public static List<ThPDSProjectGraphEdge> GetSmallBusbarCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
+        public static List<ThPDSProjectGraphEdge> GetSmallBusbarCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
         {
             if (node.Details.MiniBusbars.ContainsKey(smallBusbar))
             {
@@ -733,7 +745,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// 获取控制回路节下所有分支
         /// </summary>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphEdge> GetControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit)
+        public static List<ThPDSProjectGraphEdge> GetControlCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, SecondaryCircuit secondaryCircuit)
         {
             if (node.Details.SecondaryCircuits.ContainsKey(secondaryCircuit))
             {
@@ -748,7 +760,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 新建小母排
         /// </summary>
-        public static void AddSmallBusbar(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static void AddSmallBusbar(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var miniBusbar = new MiniBusbar();
             node.Details.MiniBusbars.Add(miniBusbar, new List<ThPDSProjectGraphEdge>());
@@ -770,7 +782,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 小母排新建母排分支
         /// </summary>
-        public static void SmallBusbarAddCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
+        public static void SmallBusbarAddCircuit(ProjectGraph graph, ThPDSProjectGraphNode node, MiniBusbar smallBusbar)
         {
             if (node.Details.MiniBusbars.ContainsKey(smallBusbar))
             {
@@ -785,7 +797,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphEdge> GetSuitableSmallBusbarCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphNode node)
+        public static List<ThPDSProjectGraphEdge> GetSuitableSmallBusbarCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
             var edges = GetOrdinaryCircuit(graph, node);
             return edges.Where(o => o.Details.CircuitForm.CircuitFormType == CircuitFormOutType.常规).ToList();
@@ -832,7 +844,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 添加控制回路
         /// </summary>
-        public static SecondaryCircuit AddControlCircuit(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph, ThPDSProjectGraphEdge edge, SecondaryCircuitInfo secondaryCircuitInfo)
+        public static SecondaryCircuit AddControlCircuit(ProjectGraph graph, ThPDSProjectGraphEdge edge, SecondaryCircuitInfo secondaryCircuitInfo)
         {
             int index = edge.Source.Details.SecondaryCircuits.Count > 0 ? edge.Source.Details.SecondaryCircuits.Sum(o => o.Value.Count) + 1 : 1;
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);

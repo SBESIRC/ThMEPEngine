@@ -730,7 +730,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加过欠电压保护",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice);
+                                            if (!ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice, out string msg))
+                                            {
+                                                MessageBox.Show(msg);
+                                            }
                                             UpdateCanvas();
                                         }),
                                     };
