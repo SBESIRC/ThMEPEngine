@@ -35,7 +35,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //--管道延长到立管--
             ThPipePreProcessService.ConnectPipeToNearVerticalPipe(dataPass, out var ptDict, out var ptCoolHotDict);
             //ptCoolHotDict.ForEach(x => DrawUtils.ShowGeometry(x.Key, "l0coolhotpt", (x.Value == true ? 142 : 32), r: 30));
-           
+
 
             //--树--
             var treeEngine = new ThDraingeTreeEngine(dataPass, ptDict, ptCoolHotDict);
@@ -47,17 +47,17 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             }
 
             ///////////
-           // treeEngine.MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
-           //{
-           //    if (l.Terminal != null)
-           //    {
-           //        DrawUtils.ShowGeometry(l.Pt, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
-           //    }
-           //    if (l.TerminalPair != null)
-           //    {
-           //        DrawUtils.ShowGeometry(new Line(l.Pt, l.TerminalPair.Pt), "l0leafterminalPair", 3);
-           //    }
-           //});
+            // treeEngine.MergedRootList.SelectMany(x => x.GetLeaf()).ForEach(l =>
+            //{
+            //    if (l.Terminal != null)
+            //    {
+            //        DrawUtils.ShowGeometry(l.Pt, l.Terminal.Type.ToString(), "l0leafterminal", 3, hight: 50);
+            //    }
+            //    if (l.TerminalPair != null)
+            //    {
+            //        DrawUtils.ShowGeometry(new Line(l.Pt, l.TerminalPair.Pt), "l0leafterminalPair", 3);
+            //    }
+            //});
             treeEngine.MergedRootList.ForEach(x => PrintTree(x, String.Format("l0tree{0}", treeEngine.MergedRootList.IndexOf(x))));
             /////////
 
@@ -97,7 +97,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1DimText", 191, hight: 180));
 
             //--摆放终端阀门--
-            var endValve = ThLayoutAngleValveService.LayoutAngleValve(dimEngine.RootList, treeEngine.PtTerminal);
+            var endValve = ThLayoutAngleValveService.LayoutAngleValve(dimEngine.RootList, treeEngine.PtTerminal, dataPass.AngleValve);
             //endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1EndValve", 40, lineWeightNum: 30, l: 150));
             //endValve.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Visibility[ThDrainageADCommon.VisiName_valve], "l1EndValveVisi", 40, hight: 180));
 

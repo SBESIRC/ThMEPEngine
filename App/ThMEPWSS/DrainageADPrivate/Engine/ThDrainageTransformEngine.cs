@@ -24,28 +24,6 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         }
 
-        private static void TransPtNormalZOri(List<ThDrainageTreeNode> rootList)
-        {
-            //rootlist已经根据冷热排序
-            rootList = rootList.OrderByDescending(x => x.IsCool).ToList();
-            var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
-
-            //change cool first
-            foreach (var root in rootList)
-            {
-                if (root.IsCool == false)
-                {
-                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
-                    if (pairCool.Count() > 0)
-                    {
-                        var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
-                    }
-                }
-                ThTransformTopToADService.TransPtNormalZ(root);
-            }
-        }
-
         private static void TransPtNormalZ(List<ThDrainageTreeNode> rootList)
         {
             //rootlist已经根据冷热排序
@@ -97,83 +75,6 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             return zBase;
         }
 
-
-        private static void TransPtNormalZ2(List<ThDrainageTreeNode> rootList)
-        {
-            //rootlist根据冷热排序,子节点个数
-            var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
-            rootList = rootList.OrderByDescending(x => x.IsCool).ThenByDescending(x => rootListDict[x].Count()).ToList();
-
-
-            for (int i = 0; i < rootList.Count; i++)
-            {
-                var root = rootList[i];
-                if (root.IsCool == true && i > 0)
-                {
-                    //找最近的校准
-                    var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == true).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
-                    root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
-                }
-                if (root.IsCool == false)
-                {
-                    //找到热水起点的对应冷水点位。热水不能直接校准，冷水最终点位已经变了
-                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
-                    if (pairCool.Count() > 0)
-                    {
-                        var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
-                    }
-                    else
-                    {
-                        var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == false).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
-                    }
-                }
-
-                ThTransformTopToADService.TransPtNormalZ(root);
-
-            }
-        }
-
-        private static void TransPtNormalZ3(List<ThDrainageTreeNode> rootList)
-        {
-            //rootlist根据冷热排序,子节点个数
-            var allEnd = rootList.SelectMany(x => x.GetLeaf()).ToList();
-            allEnd.AddRange(rootList);
-            var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
-            rootList = rootList.OrderByDescending(x => x.IsCool).ThenByDescending(x => rootListDict[x].Count()).ToList();
-
-
-            for (int i = 0; i < rootList.Count; i++)
-            {
-                var root = rootList[i];
-                if (root.IsCool == true && i > 0)
-                {
-                    //找最近的校准
-                    var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == true).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
-                    root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
-                }
-                if (root.IsCool == false)
-                {
-                    //找到热水起点的对应冷水点位。热水不能直接校准，冷水最终点位已经变了
-                    var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
-                    if (pairCool.Count() > 0)
-                    {
-                        var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
-                    }
-                    else
-                    {
-                        var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == false).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
-                        root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
-                    }
-                }
-
-                ThTransformTopToADService.TransPtNormalZ(root);
-                ThDrainageADEngine.PrintZ(root, string.Format("l0TransZ{0}", i));
-            }
-        }
-
         private static void TransTreeList(List<ThDrainageTreeNode> rootList)
         {
             var transService = new ThTransformTopToADService();
@@ -198,6 +99,104 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
                 node.TransPt = node.TransPt.TransformBy(moveTrans);
             }
         }
+
+        //private static void TransPtNormalZOri(List<ThDrainageTreeNode> rootList)
+        //{
+        //    //rootlist已经根据冷热排序
+        //    rootList = rootList.OrderByDescending(x => x.IsCool).ToList();
+        //    var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
+
+        //    //change cool first
+        //    foreach (var root in rootList)
+        //    {
+        //        if (root.IsCool == false)
+        //        {
+        //            var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
+        //            if (pairCool.Count() > 0)
+        //            {
+        //                var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
+        //            }
+        //        }
+        //        ThTransformTopToADService.TransPtNormalZ(root);
+        //    }
+        //}
+
+        //private static void TransPtNormalZ2(List<ThDrainageTreeNode> rootList)
+        //{
+        //    //rootlist根据冷热排序,子节点个数
+        //    var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
+        //    rootList = rootList.OrderByDescending(x => x.IsCool).ThenByDescending(x => rootListDict[x].Count()).ToList();
+
+
+        //    for (int i = 0; i < rootList.Count; i++)
+        //    {
+        //        var root = rootList[i];
+        //        if (root.IsCool == true && i > 0)
+        //        {
+        //            //找最近的校准
+        //            var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == true).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
+        //            root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
+        //        }
+        //        if (root.IsCool == false)
+        //        {
+        //            //找到热水起点的对应冷水点位。热水不能直接校准，冷水最终点位已经变了
+        //            var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
+        //            if (pairCool.Count() > 0)
+        //            {
+        //                var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
+        //            }
+        //            else
+        //            {
+        //                var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == false).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
+        //            }
+        //        }
+
+        //        ThTransformTopToADService.TransPtNormalZ(root);
+
+        //    }
+        //}
+
+        //private static void TransPtNormalZ3(List<ThDrainageTreeNode> rootList)
+        //{
+        //    //rootlist根据冷热排序,子节点个数
+        //    var allEnd = rootList.SelectMany(x => x.GetLeaf()).ToList();
+        //    allEnd.AddRange(rootList);
+        //    var rootListDict = rootList.ToDictionary(x => x, x => x.GetLeaf());
+        //    rootList = rootList.OrderByDescending(x => x.IsCool).ThenByDescending(x => rootListDict[x].Count()).ToList();
+
+
+        //    for (int i = 0; i < rootList.Count; i++)
+        //    {
+        //        var root = rootList[i];
+        //        if (root.IsCool == true && i > 0)
+        //        {
+        //            //找最近的校准
+        //            var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == true).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
+        //            root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
+        //        }
+        //        if (root.IsCool == false)
+        //        {
+        //            //找到热水起点的对应冷水点位。热水不能直接校准，冷水最终点位已经变了
+        //            var pairCool = rootListDict.Where(x => x.Value.Where(o => o.Terminal == root.Terminal).Any());
+        //            if (pairCool.Count() > 0)
+        //            {
+        //                var coolPair = pairCool.First().Value.Where(x => x.Terminal == root.Terminal).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, coolPair.TransPt.Z);
+        //            }
+        //            else
+        //            {
+        //                var nearestNode = rootListDict.Where(x => x.Key != root && x.Key.IsCool == false).SelectMany(x => x.Value).OrderBy(x => x.Pt.DistanceTo(root.Pt)).First();
+        //                root.TransPt = new Point3d(root.TransPt.X, root.TransPt.Y, nearestNode.TransPt.Z);
+        //            }
+        //        }
+
+        //        ThTransformTopToADService.TransPtNormalZ(root);
+        //        ThDrainageADEngine.PrintZ(root, string.Format("l0TransZ{0}", i));
+        //    }
+        //}
 
     }
 }

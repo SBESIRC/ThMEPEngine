@@ -30,7 +30,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
     internal class ThDraingeTreeEngine
     {
         private List<ThSaniterayTerminal> Terminal { get; set; }
-        private List<ThValve> AngleValve { get; set; }
+        //private List<ThValve> AngleValve { get; set; }
         private Dictionary<Point3d, List<Line>> PtDict { get; set; }
         private Dictionary<Point3d, bool> PtCoolHotDict { get; set; }
         public Dictionary<Point3d, ThSaniterayTerminal> PtTerminal { get; set; }
@@ -40,7 +40,7 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
         public ThDraingeTreeEngine(ThDrainageADPDataPass dataPass, Dictionary<Point3d, List<Line>> ptDict, Dictionary<Point3d, bool> ptCoolHotDict)
         {
             Terminal = dataPass.Terminal;
-            AngleValve = dataPass.AngleValve;
+            //AngleValve = dataPass.AngleValve;
             PtDict = ptDict;
             PtCoolHotDict = ptCoolHotDict;
 
@@ -63,8 +63,8 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             Terminal.ForEach(x => x.Boundary = x.Boundary.Buffer(1).OfType<Polyline>().OrderByDescending(x => x.Area).First());
             ThDrainageADTreeService.GetEndTerminal(PtDict, Terminal, out var ptTerminalTemp, out var ptStart);
             this.PtTerminal = ptTerminalTemp;
-            //利用给水角阀方向给末端洁具方向
-            SetTerminalDir();
+            ////利用给水角阀方向给末端洁具方向
+            //SetTerminalDir();
 
             //确定冷热水末端点位组
             this.TerminalPairDict = ThDrainageADTreeService.GetTerminalPairDict(PtTerminal);
@@ -92,25 +92,25 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
 
         }
 
-        private void SetTerminalDir()
-        {
-            var tol = new Tolerance(1, 1);
-            for (int i = 0; i < PtTerminal.Count(); i++)
-            {
-                var item = PtTerminal.ElementAt(i);
-                if (item.Value.Dir != default(Vector3d))
-                {
-                    //冷热水同时有的已经做过一次的跳过
-                    continue;
-                }
-                var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
-                var angleValve = AngleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
-                if (angleValve != null)
-                {
-                    item.Value.Dir = angleValve.Dir;
-                }
-            }
-        }
+        //private void SetTerminalDir()
+        //{
+        //    var tol = new Tolerance(1, 1);
+        //    for (int i = 0; i < PtTerminal.Count(); i++)
+        //    {
+        //        var item = PtTerminal.ElementAt(i);
+        //        if (item.Value.Dir != default(Vector3d))
+        //        {
+        //            //冷热水同时有的已经做过一次的跳过
+        //            continue;
+        //        }
+        //        var projPt = new Point3d(item.Key.X, item.Key.Y, 0);
+        //        var angleValve = AngleValve.Where(x => x.InsertPt.IsEqualTo(projPt, tol)).FirstOrDefault();
+        //        if (angleValve != null)
+        //        {
+        //            item.Value.Dir = angleValve.Dir;
+        //        }
+        //    }
+        //}
 
     }
 }

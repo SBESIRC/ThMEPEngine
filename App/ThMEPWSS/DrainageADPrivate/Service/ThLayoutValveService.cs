@@ -169,7 +169,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             foreach (var valve in valveList)
             {
                 var transNodeDir = (valve.ConnectNode.TransPt - valve.ConnectNode.Parent.TransPt).GetNormal();
-                var visiDir = ThLayoutAngleValveService.CalculateVisibilityDir(transNodeDir, ThDrainageADCommon.BlkName_Casing_AD);
+                var visiDir = ThLayoutAngleValveService.CalculateVisibilityDir(transNodeDir, ThDrainageADCommon.BlkName_Casing_AD, out var dirIndx);
 
                 var oriNodeDir = (valve.ConnectNode.Pt - valve.ConnectNode.Parent.Pt).GetNormal();
                 var rotateAngle = oriNodeDir.GetAngleTo(transNodeDir, Vector3d.ZAxis);
@@ -177,7 +177,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
                 if (visiDir.Contains(ThDrainageADCommon.EndValve_dir_name[ThDrainageADCommon.BlkName_Casing_AD][1]))
                 {
-                    //向前向后，角度减45
+                    //向前向后，角度减45（13都是垂直）
                     printDir = printDir.RotateBy(45 * Math.PI / 180, -Vector3d.ZAxis);
                 }
 
