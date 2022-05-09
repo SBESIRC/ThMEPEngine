@@ -289,7 +289,7 @@
                                 <Label>kW</Label>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label>只留非车载充电机除标注外额定功率均为</Label>
+                                <Label>直流非车载充电机除标注外额定功率均为</Label>
                                 <cus:InputTextBox Text="{Binding DCChargerPower}" Width="60" CornerRadius="0" TextBoxInputType="InputInteger" NumCanMinus="False" Height="22"></cus:InputTextBox>
                                 <Label>kW</Label>
                             </StackPanel>
