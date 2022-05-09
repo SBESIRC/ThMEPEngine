@@ -39,6 +39,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
 
         public List<CreateBasicElement> createBasicElements = new List<CreateBasicElement>();
         public List<CreateBlockInfo> createBlockInfos = new List<CreateBlockInfo>();
+        public List<CreateDBTextElement> createDBTextElements = new List<CreateDBTextElement>();
 
         private string _floorId;
         public BalconyCorridorEquPlatform(string floorId,List<RoomModel> balconyRooms, List<RoomModel> corridorRooms, List<RoomModel> otherRooms, List<EquipmentBlockSpace> balcCoorEqus, List<Polyline> allWalls, List<Polyline> allColumns)
@@ -513,6 +514,33 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 addBlock.dymBlockAttr.Add("可见性", "普通套管");
                 addBlock.dymBlockAttr.Add("距离", _pipeCasingLength);
                 createBlockInfos.Add(addBlock);
+
+                //套管处增加标注
+                var lineDri = Vector3d.YAxis.Negate();
+                var lineSp = crossPoint + outDir.MultiplyBy(_pipeCasingLength / 2);
+                var lineEp = lineSp + lineDri.MultiplyBy(500);
+                var upText = DrainSysAGCommon.CreateDBText("DN100", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
+                var btText = DrainSysAGCommon.CreateDBText("h1-0.30", lineEp, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle);
+                var upMaxPoint = upText.GeometricExtents.MaxPoint;
+                var upMinPoint = upText.GeometricExtents.MinPoint;
+                var btMaxPoint = btText.GeometricExtents.MaxPoint;
+                var btMinPoint = btText.GeometricExtents.MinPoint;
+                var upWidth = upMaxPoint.X - upMinPoint.X;
+                var upHeight = upMaxPoint.Y - upMinPoint.Y;
+                var btWidth = btMaxPoint.X - btMinPoint.X;
+                var btHeight = btMaxPoint.Y - btMinPoint.Y;
+                var maxWidth = Math.Max(upWidth, btWidth);
+                var leftDir = Vector3d.XAxis;
+
+                createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, "",""));
+                createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp+ leftDir.MultiplyBy(maxWidth+100)), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
+                var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(10);
+                upText.Position = upTextPt;
+                var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
+                btText.Position = btTextPt;
+                createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+
                 tempPoints = tempPoints.Where(c => !points.Any(x => x.DistanceTo(c) < 5)).ToList();
             }
             
