@@ -12,14 +12,14 @@ namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSGraphVerifyService
     {
-        private bool HaveChange { get; set; }   
+        private bool BeSuccess { get; set; }   
 
         public bool Verify(PDSGraph graph)
         {
-            HaveChange = false;
+            BeSuccess = true;
             NodeVerify(graph);
             EdgeVerify(graph);
-            return HaveChange;
+            return BeSuccess;
         }
 
         public void NodeVerify(PDSGraph graph)
@@ -133,7 +133,7 @@ namespace TianHua.Electrical.PDS.Service
         //Tags
         private void TagNodeDuplicate(ThPDSProjectGraphNode node)
         {
-            HaveChange = true;
+            BeSuccess = false;
             var dupTag = new ThPDSProjectGraphNodeDuplicateTag();
             if(node.Tag.IsNull())
             {
@@ -150,7 +150,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagNodeSingle(ThPDSProjectGraphNode node)
         {
-            HaveChange = true;
+            BeSuccess = false;
             var singleTag = new ThPDSProjectGraphNodeSingleTag();
             if (node.Tag.IsNull())
             {
@@ -168,7 +168,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagNodeFire(ThPDSProjectGraphNode node)
         {
-            HaveChange = true;
+            BeSuccess = false;
             var fireTag = new ThPDSProjectGraphNodeFireTag();
             if (node.Tag.IsNull())
             {
@@ -186,7 +186,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagEdgeDuplicate(ThPDSProjectGraphEdge edge)
         {
-            HaveChange = true;
+            BeSuccess = false;
             var dupTag = new ThPDSProjectGraphEdgeDuplicateTag();
             if (edge.Tag.IsNull())
             {
@@ -204,7 +204,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private void TagEdgeSingle(ThPDSProjectGraphEdge edge)
         {
-            HaveChange = true;
+            BeSuccess = false;
             var singleTag = new ThPDSProjectGraphEdgeSingleTag();
             if (edge.Tag.IsNull())
             {
