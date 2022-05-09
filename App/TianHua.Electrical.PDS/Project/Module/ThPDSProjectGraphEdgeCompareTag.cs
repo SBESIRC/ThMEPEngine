@@ -40,14 +40,4 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         //
     }
-
-    public class ThPDSProjectGraphEdgeDataTag : ThPDSProjectGraphEdgeCompareTag
-    {
-        public string ToLastCircuitID { get; set; }
-
-        public ThPDSProjectGraphEdgeDataTag()
-        {
-            ToLastCircuitID = null;
-        }
-    }
 }

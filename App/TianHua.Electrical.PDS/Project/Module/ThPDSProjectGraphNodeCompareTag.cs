@@ -69,11 +69,21 @@ namespace TianHua.Electrical.PDS.Project.Module
         public bool TagP { get; set; }
         public ThInstalledCapacity TarP { get; set; }
 
+        //Type 类型变化
+        public bool TagType { get; set; }
+        public PDSNodeType TarType { get; set; }
+
+        //Phase 相数变化
+        public bool TagPhase { get; set; }
+        public ThPDSPhase TarPhase { get; set; }
+
         public ThPDSProjectGraphNodeDataTag()
         {
             TagD = false;
             TagF = false;
             TagP = false;
+            TagType = false;
+            TagPhase = false;
         }
     }
 }

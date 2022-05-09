@@ -171,16 +171,6 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Hint = "此回路被删除",
                         });
                     }
-                    else if (tag is ThPDSProjectGraphEdgeDataTag projectGraphEdgeDataTag)
-                    {
-                        items.Add(new()
-                        {
-                            Edge = edge,
-                            Background = PDSColorBrushes.Safe,
-                            Img = PDSImageSources.Safe,
-                            Hint = projectGraphEdgeDataTag.ToLastCircuitID,
-                        });
-                    }
                     else if (tag is ThPDSProjectGraphEdgeDuplicateTag)
                     {
                         items.Add(new()
