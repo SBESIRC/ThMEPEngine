@@ -1,6 +1,5 @@
 ﻿using Linq2Acad;
 using System.Linq;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -195,7 +194,7 @@ namespace ThCADExtension
                 }
 
                 // 再检查非常量（可见）属性
-                foreach (ObjectId attRefId in blockReference.AttributeCollection)
+                foreach (ObjectId attRefId in blockReference.AttributeCollection.OfType<ObjectId>().Where(o=>!o.IsNull && o.IsValid))
                 {
                     var attRef = acadDatabase.Element<AttributeReference>(attRefId);
                     if (!attRef.Invisible)
