@@ -9,12 +9,12 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPortMark
     {
-        private double textAngle;
+        private double ucsAngle;
         private string portMarkName;
         private string portMarkLayer;
-        public ThDuctPortsDrawPortMark(double textAngle, string portMarkName, string portMarkLayer)
+        public ThDuctPortsDrawPortMark(double ucsAngle, string portMarkName, string portMarkLayer)
         {
-            this.textAngle = textAngle;
+            this.ucsAngle = ucsAngle;
             this.portMarkName = portMarkName;
             this.portMarkLayer = portMarkLayer;
         }
@@ -38,8 +38,6 @@ namespace ThMEPHVAC.Model
                     av = (Math.Ceiling(av / 10)) * 10;
                     strVolume = av.ToString("0.") + "/" + strVolume;
                 }
-                if (textAngle >= Math.PI)
-                    textAngle -= Math.PI;
                 var num = portParam.verticalPipeEnable ? param.portBottomEle : param.elevation;
                 var ele = param.portRange.Contains("侧") ? ("风口底边距地" + num.ToString("0.00") + "m") : " ";
                 var attr = new Dictionary<string, string> { { "风口名称", param.portName },
@@ -47,9 +45,11 @@ namespace ThMEPHVAC.Model
                                                             { "数量", portNum.ToString() },
                                                             { "风量", strVolume},
                                                             { "安装属性", ele} };
+                // 设置框的角度
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), textAngle, attr);
-                ThMEPHVACService.SetAttr(obj, attr, textAngle);
+                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), -ucsAngle, attr);
+                // 设置框内字的角度
+                ThMEPHVACService.SetAttr(obj, attr, -ucsAngle);
             }
         }
         public void InsertLeader(Point3d srtP, Point3d endP)

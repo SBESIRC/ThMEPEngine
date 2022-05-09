@@ -87,7 +87,7 @@ namespace TianHua.Hvac.UI.Command
         {
             var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
             var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
-            DrawPortService.textAngle = angle;
+            DrawPortService.ucsAngle = angle;
             for (int i=0;i< AirPortParameter.AirPortNum;i++)
             {
                 var basePt = position + vec.MultiplyBy(i * AirPortParameter.Length);

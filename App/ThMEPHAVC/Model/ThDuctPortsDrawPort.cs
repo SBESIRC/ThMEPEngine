@@ -10,13 +10,13 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPort
     {
-        public double textAngle;
+        public double ucsAngle;
         public string portName;
         public string portLayer;
-        public ThDuctPortsDrawPort(string portLayer, string portName, double textAngle)
+        public ThDuctPortsDrawPort(string portLayer, string portName, double ucsAngle)
         {
             this.portName = portName;
-            this.textAngle = textAngle;
+            this.ucsAngle = ucsAngle;
             this.portLayer = portLayer;
         }
         public void DrawVerticalPipePorts(EndlineSegInfo info,
@@ -113,8 +113,8 @@ namespace ThMEPHVAC.Model
                 var attr = new Dictionary<string, string> { { "风量", portAirVolume.ToString() + "m3/h" } };
                 var obj = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attr);
                 ThMEPHVACService.SetAttr(obj, attr, 0);
-                textAngle = angle <= (1.5 * Math.PI) ? angle - Math.PI : angle;
-                ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange, textAngle, attr);
+                ucsAngle = angle <= (1.5 * Math.PI) ? angle - Math.PI : angle;
+                ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange, ucsAngle, attr);
             }
         }
         public static void GetSidePortInsertPos(Vector3d dirVec, Point3d pos, double ductWidth, out Point3d pL, out Point3d pR)
