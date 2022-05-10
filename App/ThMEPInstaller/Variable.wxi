@@ -7,7 +7,7 @@
   <!-- The manufacturer, for setup package publisher and folder info -->
   <?define Manufacturer = "天华AI研究中心" ?>
   <!-- The version number of this setup package-->
-  <?define Version = "1.9.20" ?>
+  <?define Version = "1.9.21" ?>
   <!-- Bundle logo-->
   <?define Logo = "Resources\Logo.ico" ?>
   <!-- Bundle EULA rtf document-->
@@ -15,7 +15,7 @@
   <!-- Product code -->
   <?define ProductCode = "2408CF8E-B511-4339-9FB0-ED1BCAA7CE45" ?>
   <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
-  <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
+  <?define UpgradeCode = "0FBEED4C-803E-419F-A13D-5E08937905BD" ?>
   <!-- Autoloader path. -->
   <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
   <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
