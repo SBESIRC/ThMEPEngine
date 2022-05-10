@@ -13,9 +13,9 @@
   <!-- Bundle EULA rtf document-->
   <?define Eula = "Resources\License_zh-CN.rtf" ?>
   <!-- Product code -->
-  <?define ProductCode = "2408CF8E-B511-4339-9FB0-ED1BCAA7CE45" ?>
+  <?define ProductCode = "4ED5471B-94FF-47EA-B2F5-4A3405C873DD" ?>
   <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
-  <?define UpgradeCode = "0FBEED4C-803E-419F-A13D-5E08937905BD" ?>
+  <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
   <!-- Autoloader path. -->
   <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
   <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
