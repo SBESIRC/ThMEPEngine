@@ -278,10 +278,6 @@ namespace TianHua.Electrical.PDS.Engine
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
                                 var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey, true);
-                                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
-                                {
-                                    return;
-                                }
                                 PDSGraph.Graph.AddEdge(newEdge);
                                 // 此时节点需要和桥架建立多条回路，由于在dictionary中是通过判断两个节点是否都相同，
                                 // 进而判断两个edge是否相同的，所以此时dictionary认为它们是同一个key
@@ -565,7 +561,14 @@ namespace TianHua.Electrical.PDS.Engine
                         }
                         else if (item.Key is BlockReference block)
                         {
-                            nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
+                            if(GeometryMap.ContainsKey(block))
+                            {
+                                nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
+                            }
+                            else
+                            {
+                                nextLoops = FindNext(block, ThPDSBufferService.Buffer(block, Database));
+                            }
                         }
                         if (item.Value.Count > 0)
                         {
@@ -692,7 +695,7 @@ namespace TianHua.Electrical.PDS.Engine
                     if (DistBoxes.Contains(sourceEntity) || CableTrays.Contains(sourceEntity))
                     {
                         //配电箱搭着配电箱
-                        var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos.Texts, DistBoxKey);
+                        var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos.Texts, DistBoxKey, true);
                         if (item.Value.Count > 0)
                         {
                             newEdge.Circuit.ViaConduit = true;
@@ -917,12 +920,12 @@ namespace TianHua.Electrical.PDS.Engine
                             if (curve.EndPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint)
                                 < ThPDSCommon.ALLOWABLE_TOLERANCE)
                             {
-                                return FindRootNextPath(sharedPath, curve, true, out _);
+                                return FindRootNextPath(sharedPath, curve, true, out IsBranch);
                             }
                             else if (curve.StartPoint.DistanceTo(IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint)
                                 < ThPDSCommon.ALLOWABLE_TOLERANCE)
                             {
-                                return FindRootNextPath(sharedPath, curve, false, out _);
+                                return FindRootNextPath(sharedPath, curve, false, out IsBranch);
                             }
                             else if (sourceElement is Line sourceLine && probeResults[0] is Line targetLine)
                             {
@@ -1236,6 +1239,37 @@ namespace TianHua.Electrical.PDS.Engine
                             e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
                         }
                     });
+                }
+            });
+        }
+
+        public void AssignDefaultDescription()
+        {
+            PDSGraph.Graph.Vertices.ForEach(e =>
+            {
+                if(e.NodeType == PDSNodeType.Unkown)
+                {
+                    switch(e.Loads[0].CircuitType)
+                    {
+                        case ThPDSCircuitType.Lighting:
+                            e.Loads[0].ID.DefaultDescription = "正常照明";
+                            break;
+                        case ThPDSCircuitType.Socket:
+                            e.Loads[0].ID.DefaultDescription = "插座";
+                            break;
+                        case ThPDSCircuitType.PowerEquipment:
+                            e.Loads[0].ID.DefaultDescription = "动力负载";
+                            break;
+                        case ThPDSCircuitType.EmergencyLighting:
+                            e.Loads[0].ID.DefaultDescription = "消防备用照明";
+                            break;
+                        case ThPDSCircuitType.EmergencyPowerEquipment:
+                            e.Loads[0].ID.DefaultDescription = "消防动力负载";
+                            break;
+                        case ThPDSCircuitType.FireEmergencyLighting:
+                            e.Loads[0].ID.DefaultDescription = "应急照明/疏散指示";
+                            break;
+                    }
                 }
             });
         }

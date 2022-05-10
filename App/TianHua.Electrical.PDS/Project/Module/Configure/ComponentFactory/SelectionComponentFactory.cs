@@ -101,6 +101,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
                     _specialPolesNum = "3P";
                 }
             }
+            _characteristics = "";//瞬时脱扣器类型
+            _tripDevice = node.Load.LoadTypeCat_1.GetTripDevice(node.Load.FireLoad, out _characteristics);//脱扣器类型
         }
 
         public override Breaker CreatBreaker()

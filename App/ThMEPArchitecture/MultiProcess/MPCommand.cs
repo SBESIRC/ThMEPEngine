@@ -36,6 +36,7 @@ using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
 using MPGene = ThParkingStall.Core.InterProcess.Gene;
 using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -43,9 +44,10 @@ namespace ThMEPArchitecture.MultiProcess
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
 
-        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+        //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+        //    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
 
+        public Serilog.Core.Logger Logger = null;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
@@ -77,11 +79,12 @@ namespace ThMEPArchitecture.MultiProcess
                 if(_CommandMode == CommandMode.WithoutUI)
                 {
                     Logger?.Information($"############################################");
-                    Logger?.Information($"DEbug速排");
+                    Logger?.Information($"DEbug--读取复现");
+                    //RunDebug();
                     using (var docLock = Active.Document.LockDocument())
                     using (AcadDatabase currentDb = AcadDatabase.Active())
                     {
-                        RunDebug(currentDb);
+                        RunDebug();
                     }
                 }
                 else
@@ -126,8 +129,7 @@ namespace ThMEPArchitecture.MultiProcess
             Logger?.Information($"总运行时间: {_stopwatch.Elapsed.TotalSeconds}秒 \n");
             base.AfterExecute();
         }
-
-        public void RunDebug(AcadDatabase acadDatabase)
+        public void RunDebug()
         {
             MPGAData.Load();
             var dataWraper = MPGAData.dataWraper;
@@ -148,9 +150,12 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public void RunDirect(AcadDatabase acadDatabase)
         {
-            var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (!getouterBorderFlag) return;
-            Converter.GetDataWraper(outerBrder, ParameterViewModel);
+            //var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
+            //if (!getouterBorderFlag) return;
+            var layoutData = new LayoutData();
+            var inputvaild = layoutData.Init(acadDatabase, Logger);
+            if (!inputvaild) return;
+            Converter.GetDataWraper(layoutData, ParameterViewModel);
             InterParameter.MultiThread = true;
 #if DEBUG
             InterParameter.MultiThread = false;
@@ -173,7 +178,10 @@ namespace ThMEPArchitecture.MultiProcess
 #endif
             List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
             MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            var strBest = $"车位数{ParkingStallCount}\n";
+            Logger?.Information(strBest);
+            Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             subAreas.ForEach(area => area.ShowText());
         }
@@ -184,10 +192,14 @@ namespace ThMEPArchitecture.MultiProcess
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
             int fileSize = 128; // 128Mb
             var nbytes = fileSize * 1024 * 1024;
-            var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (!getouterBorderFlag) return;
-            var dataWraper = Converter.GetDataWraper(outerBrder, ParameterViewModel);
+            //var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
+            //if (!getouterBorderFlag) return;
+            //var dataWraper = Converter.GetDataWraper(outerBrder, ParameterViewModel);
 
+            var layoutData = new LayoutData();
+            var inputvaild = layoutData.Init(acadDatabase, Logger);
+            if (!inputvaild) return;
+            var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
 #if DEBUG
             InterParameter.InitSegLines.ShowLowerUpperBound();
 #endif
@@ -217,7 +229,10 @@ namespace ThMEPArchitecture.MultiProcess
 #endif
                     List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                     MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                    CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition, true);
+                    var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition, true);
+                    var strBest = $"最大车位数{ParkingStallCount}\n";
+                    Logger?.Information(strBest);
+                    Active.Editor.WriteMessage(strBest);
                     MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
                     subAreas.ForEach(area => area.ShowText());
                     SubAreaParkingCnt.Clear();

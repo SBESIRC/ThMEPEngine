@@ -131,7 +131,7 @@
                                     <DataGridTemplateColumn Header="材料特征及结构" Width="100"  CanUserSort="False" IsReadOnly="True">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <ComboBox IsEditable="True" HorizontalAlignment="Stretch" Text="{Binding ConductorMaterialAndStructure, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
+                                                <ComboBox HorizontalAlignment="Stretch" SelectedItem="{Binding ConductorMaterialAndStructure, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ConductorMaterialAndStructureItemsSource}"></ComboBox>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -264,14 +264,14 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="消防电动机功率小于"></Label>
-                                <cus:InputTextBox  Background="White" Text="{Binding FireMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
+                                <cus:InputTextBox  Background="White" Text="{Binding FireMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="60" Height="22"></cus:InputTextBox>
                                 <Label Content="kW时直接启动，超过此功率时采用"></Label>
                                 <ComboBox ItemsSource="{Binding FireMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireMotorPowerMore}"></ComboBox>
                                 <Label Content="方式启动"></Label>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="普通电动机功率小于"></Label>
-                                <cus:InputTextBox Background="White" Text="{Binding CommonMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="80" Height="22"></cus:InputTextBox>
+                                <cus:InputTextBox Background="White" Text="{Binding CommonMotorPowerLess}" TextBoxInputType="InputDouble" NumCanMinus="False" Width="60" Height="22"></cus:InputTextBox>
                                 <Label Content="kW时直接启动，超过此功率时采用"></Label>
                                 <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
                                 <Label Content="方式启动"></Label>
@@ -282,6 +282,16 @@
                                 <ComboBox ItemsSource="{Binding FireEmergencyLightingType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireEmergencyLightingType}"></ComboBox>
                                 <Label>供电，线路采用</Label>
                                 <ComboBox ItemsSource="{Binding CircuitSystem,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding CircuitSystem}"></ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>交流充电桩除标注外单枪的额定功率均为</Label>
+                                <cus:InputTextBox Text="{Binding ACChargerPower}" Width="60" CornerRadius="0" TextBoxInputType="InputInteger" NumCanMinus="False" Height="22"></cus:InputTextBox>
+                                <Label>kW</Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>直流非车载充电机除标注外额定功率均为</Label>
+                                <cus:InputTextBox Text="{Binding DCChargerPower}" Width="60" CornerRadius="0" TextBoxInputType="InputInteger" NumCanMinus="False" Height="22"></cus:InputTextBox>
+                                <Label>kW</Label>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

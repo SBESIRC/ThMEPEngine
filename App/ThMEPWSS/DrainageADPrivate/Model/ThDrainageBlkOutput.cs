@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.DrainageADPrivate.Model
 {
-    internal class ThDrainageBlkOutput
+    public class ThDrainageBlkOutput
     {
         public Point3d Position { get; private set; }
 

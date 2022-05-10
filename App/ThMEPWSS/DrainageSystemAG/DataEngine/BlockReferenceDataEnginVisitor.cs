@@ -58,7 +58,10 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
                 elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
             }
         }
-
+        public override bool CheckLayerValid(Entity e)
+        {
+            return true;
+        }
         public override bool IsDistributionElement(Entity entity)
         {
             if (blockNames == null || blockNames.Count < 1)
@@ -143,8 +146,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
 
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
-            if (!isModelSpace)
-                return base.IsBuildElementBlock(blockTableRecord);
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+                return false;
             // 忽略不可“炸开”的块
             if (!blockTableRecord.Explodable)
                 return false;

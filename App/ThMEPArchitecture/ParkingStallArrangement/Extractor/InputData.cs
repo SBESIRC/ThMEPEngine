@@ -9,12 +9,12 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.ApplicationServices;
 using System.IO;
-
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {
     public static class InputData
     {
-        private static BlockReference SelectBlock(AcadDatabase acadDatabase)
+        public static BlockReference SelectBlock(AcadDatabase acadDatabase)
         {
             var entOpt = new PromptEntityOptions("\n请选择地库:");
             var entityResult = Active.Editor.GetEntity(entOpt);

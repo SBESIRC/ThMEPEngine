@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override bool IsAnnotationElement(Entity entity)
         {
-            return ThMEPTCHService.IsTCHWireDim2(entity);
+            return ThMEPTCHService.IsTCHWireDim2(entity) || ThMEPTCHService.IsTCHMULTILEADER(entity);
         }
 
         public override bool CheckLayerValid(Entity e)

@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -39,7 +40,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
-        ContextMenu treeCMenu;
+        ContextMenu ctxMenu;
         QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
@@ -51,10 +52,15 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var details = graph.Edges.Select(x => x.Details).ToList();
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
-            treeCMenu ??= tv.ContextMenu;
+            ctxMenu ??= panel.canvas.ContextMenu;
+            var menuItems = new List<MenuItem>();
+            foreach (MenuItem m in ctxMenu.Items)
+            {
+                menuItems.Add(m);
+            }
             var config = new ThPDSDistributionPanelConfig();
-            treeCMenu.DataContext = config;
-            var builder = new ViewModels.ThPDSCircuitGraphTreeBuilder();
+            panel.canvas.DataContext = config;
+            var builder = new ThPDSCircuitGraphTreeBuilder();
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
@@ -73,49 +79,57 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 dfs(tree);
             }
-            var selectAllCmd = new RelayCommand(() =>
-           {
-               if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-               void dfs(ThPDSCircuitGraphTreeModel node)
-               {
-                   node.IsChecked = true;
-                   foreach (var n in node.DataList)
-                   {
-                       dfs(n);
-                   }
-               }
-               dfs(tree);
-           });
+            var selAllCmd = new RelayCommand(() =>
+            {
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    node.IsChecked = true;
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            });
+            var unselAllCmd = new RelayCommand(() =>
+            {
+                if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    node.IsChecked = false;
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+            });
             var batchGenCmd = new RelayCommand(() =>
             {
-                UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-                try
+                // 获取勾选的节点
+                var vertices = graph.Vertices.ToList();
+                var nodes = new List<ThPDSProjectGraphNode>();
+                void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (tv.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
-                    var vertices = graph.Vertices.ToList();
-                    var nodes = new List<PDS.Project.Module.ThPDSProjectGraphNode>();
-                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    if (node.IsChecked == true)
                     {
-                        if (node.IsChecked == true)
-                        {
-                            var nd = vertices[node.Id];
-                            if (!nodes.Any(x => new ThPDSDistributionBoxModel(x).ID == new ThPDSDistributionBoxModel(nd).ID))
-                            {
-                                nodes.Add(nd);
-                            }
-                        }
-                        foreach (var n in node.DataList) dfs(n);
+                        nodes.Add(vertices[node.Id]);
                     }
-                    dfs(tree);
-                    if (nodes.Count == 0) return;
-                    var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, nodes);
-                    drawCmd.Execute();
-                    AcHelper.Active.Editor.Regen();
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
                 }
-                finally
-                {
-                    UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-                }
+                dfs(tree);
+                if (nodes.Count == 0) return;
+
+                // 切回CAD画布
+                ThPDSCADService.FocusToCAD();
+
+                // 绘制到图纸上
+                var drawEngine = new ThPDSSystemDiagramService();
+                drawEngine.Draw(graph, nodes);
             });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
@@ -124,23 +138,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             });
             var treeCmenu = new ContextMenu()
             {
-                ItemsSource = new MenuItem[] {
-                    new MenuItem()
-                    {
-                        Header="批量生成",
-                        Command=batchGenCmd,
-                    },
-                    new MenuItem()
-                    {
-                        Header = "全部勾选",
-                        Command = selectAllCmd,
-                    },
-                      new MenuItem()
-                    {
-                        Header = "创建备用回路",
-                        Command = createBackupCircuitCmd,
-                    },
-                },
+                ItemsSource = GetCommonMenuItems(),
             };
             tv.ContextMenu = treeCmenu;
             var canvas = panel.canvas;
@@ -150,40 +148,27 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var fontUri = new Uri(System.IO.Path.Combine(Environment.GetEnvironmentVariable("windir"), @"Fonts\simHei.ttf"));
             var glyphsUnicodeStrinConverter = new GlyphsUnicodeStringConverter();
             Action clear = null;
+            IEnumerable<MenuItem> GetCommonMenuItems()
             {
-                var h = "平衡相序";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                yield return new()
                 {
-                    treeCMenu.Items.Add(new MenuItem()
-                    {
-                        Header = h,
-                        Command = new RelayCommand(() =>
-                        {
-                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                        }),
-                    });
-                }
+                    Header = "全选",
+                    Command = selAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "全不选",
+                    Command = unselAllCmd,
+                };
             }
             {
-                var h = "全部勾选";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
+                var i = 0;
+                foreach (var m in GetCommonMenuItems())
                 {
-                    treeCMenu.Items.Add(new MenuItem()
+                    if (!ctxMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == m.Header as string))
                     {
-                        Header = h,
-                        Command = selectAllCmd,
-                    });
-                }
-            }
-            {
-                var h = "创建备用回路";
-                if (!treeCMenu.Items.SourceCollection.OfType<MenuItem>().Any(x => x.Header as string == h))
-                {
-                    treeCMenu.Items.Add(new MenuItem()
-                    {
-                        Header = h,
-                        Command = createBackupCircuitCmd,
-                    });
+                        ctxMenu.Items.Insert(i++, m);
+                    }
                 }
             }
             tv.DataContext = tree;
@@ -196,38 +181,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is not null)
                 {
-                    if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
-                    {
-                        var cm = new ContextMenu();
-                        tv.ContextMenu = cm;
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "平衡相序",
-                            Command = new RelayCommand(() =>
-                            {
-                                ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                            }),
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "批量生成",
-                            Command = batchGenCmd,
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "全部勾选",
-                            Command = selectAllCmd,
-                        });
-                        cm.Items.Add(new MenuItem()
-                        {
-                            Header = "创建备用回路",
-                            Command = createBackupCircuitCmd,
-                        });
-                    }
-                    else
-                    {
-                        tv.ContextMenu = treeCMenu;
-                    }
+                    tv.ContextMenu = treeCmenu;
                     var boxVM = new ThPDSDistributionBoxModel(vertice);
                     UpdatePropertyGrid(boxVM);
                 }
@@ -323,7 +277,9 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 canvas.Children.Clear();
                 clear?.Invoke();
                 dccbs = null;
+                canvas.ContextMenu?.Items?.Clear();
                 canvas.ContextMenu = null;
+                ctxMenu.Items.Clear();
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 config.Current = new(vertice);
@@ -332,20 +288,32 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
                     {
-                        Header = "单独生成",
+                        Header = "平衡相序",
                         Command = new RelayCommand(() =>
                         {
-                            UI.ElecSandboxUI.TryGetCurrentWindow()?.Hide();
-                            try
-                            {
-                                var drawCmd = new Command.ThPDSSystemDiagramCommand(graph, new List<ThPDSProjectGraphNode>() { vertice, });
-                                drawCmd.Execute();
-                                AcHelper.Active.Editor.Regen();
-                            }
-                            finally
-                            {
-                                UI.ElecSandboxUI.TryGetCurrentWindow()?.Show();
-                            }
+                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
+                        }),
+                    });
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "创建备用回路",
+                        Command = createBackupCircuitCmd,
+                    });
+                    foreach (var m in menuItems)
+                    {
+                        cmenu.Items.Add(m);
+                    }
+                    cmenu.Items.Add(new MenuItem()
+                    {
+                        Header = "生成系统图",
+                        Command = new RelayCommand(() =>
+                        {
+                            // 切回CAD画布
+                            ThPDSCADService.FocusToCAD();
+
+                            // 绘制到图纸上
+                            var drawEngine = new ThPDSSystemDiagramService();
+                            drawEngine.Draw(graph, vertice);
                         }),
                     });
                     canvas.ContextMenu = cmenu;
@@ -527,6 +495,182 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         }
                         foreach (var info in item.brInfos)
                         {
+                            var cmenu = new ContextMenu();
+                            Action cb = null;
+                            if (info.IsIsolator())
+                            {
+                                void reg(PDSBaseComponent comp, string templateStr)
+                                {
+                                    if (comp is IsolatingSwitch isolatingSwitch)
+                                    {
+                                        var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
+                                        cb += () => UpdatePropertyGrid(vm);
+                                        {
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
+                                            if (m != null)
+                                            {
+                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        }
+                                    }
+                                    else if (comp is Breaker breaker)
+                                    {
+                                        var vm = new Project.Module.Component.ThPDSBreakerModel(breaker);
+                                        cb += () => UpdatePropertyGrid(vm);
+                                        {
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
+                                            if (m != null)
+                                            {
+                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        }
+                                    }
+                                }
+                                var comps = item.brInfos.Where(x => x.IsIsolator() || x.IsBreaker()).ToList();
+                                var idx = comps.IndexOf(info);
+                                IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
+                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                {
+                                    isolatingSwitch = oneway.Component as IsolatingSwitch;
+                                    breaker = oneway.Component as Breaker;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                {
+                                    isolatingSwitch1 = twoWayInCircuit.Component1 as IsolatingSwitch;
+                                    breaker1 = twoWayInCircuit.Component1 as Breaker;
+                                    isolatingSwitch2 = twoWayInCircuit.Component2 as IsolatingSwitch;
+                                    breaker2 = twoWayInCircuit.Component2 as Breaker;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                {
+                                    isolatingSwitch1 = threeWayInCircuit.Component1 as IsolatingSwitch;
+                                    breaker1 = threeWayInCircuit.Component1 as Breaker;
+                                    isolatingSwitch2 = threeWayInCircuit.Component2 as IsolatingSwitch;
+                                    breaker2 = threeWayInCircuit.Component2 as Breaker;
+                                    isolatingSwitch3 = threeWayInCircuit.Component3 as IsolatingSwitch;
+                                    breaker3 = threeWayInCircuit.Component3 as Breaker;
+                                }
+                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                {
+                                    isolatingSwitch = centralizedPowerCircuit.Component as IsolatingSwitch;
+                                    breaker = centralizedPowerCircuit.Component as Breaker;
+                                }
+                                if (isolatingSwitch != null)
+                                {
+                                    reg(isolatingSwitch, "QL");
+                                }
+                                else if (breaker != null)
+                                {
+                                    reg(breaker, "QL");
+                                }
+                                else if (comps.Count > 1)
+                                {
+                                    isolatingSwitch = idx == 0 ? isolatingSwitch1 : (idx == 1 ? isolatingSwitch2 : isolatingSwitch3);
+                                    breaker = idx == 0 ? breaker1 : (idx == 1 ? breaker2 : breaker3);
+                                    if (isolatingSwitch != null)
+                                    {
+                                        reg(isolatingSwitch, "QL" + (idx + 1));
+                                    }
+                                    else if (breaker != null)
+                                    {
+                                        reg(breaker, "QL" + (idx + 1));
+                                    }
+                                    else
+                                    {
+
+                                        cb += () => UpdatePropertyGrid(null);
+                                    }
+                                }
+                                else
+                                {
+                                    cb += () => UpdatePropertyGrid(null);
+                                }
+                                if (isolatingSwitch != null)
+                                {
+                                    cmenu.Items.Add(new MenuItem()
+                                    {
+                                        Header = "切换为断路器",
+                                        Command = new RelayCommand(() =>
+                                        {
+                                            var comps = item.brInfos.Where(x => x.IsIsolator() || x.IsBreaker()).ToList();
+                                            var idx = comps.IndexOf(info);
+                                            IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
+                                            if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                            {
+                                                isolatingSwitch = oneway.Component as IsolatingSwitch;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                            {
+                                                isolatingSwitch1 = twoWayInCircuit.Component1 as IsolatingSwitch;
+                                                isolatingSwitch2 = twoWayInCircuit.Component2 as IsolatingSwitch;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                            {
+                                                isolatingSwitch1 = threeWayInCircuit.Component1 as IsolatingSwitch;
+                                                isolatingSwitch2 = threeWayInCircuit.Component2 as IsolatingSwitch;
+                                                isolatingSwitch3 = threeWayInCircuit.Component3 as IsolatingSwitch;
+                                            }
+                                            else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                            {
+                                                isolatingSwitch = centralizedPowerCircuit.Component as IsolatingSwitch;
+                                            }
+
+                                            if (comps.Count > 1)
+                                                isolatingSwitch = idx == 0 ? isolatingSwitch1 : (idx == 1 ? isolatingSwitch2 : isolatingSwitch3);
+
+                                            if (isolatingSwitch is null) return;
+                                            ThPDSProjectGraphService.ComponentSwitching(vertice, isolatingSwitch, ComponentType.CB);
+                                            UpdateCanvas();
+                                        }),
+                                    });
+                                }
+                                if (breaker != null)
+                                {
+                                    info.BlockName = "CircuitBreaker";
+                                    if (vertice.Details.AllowBreakerSwitch)
+                                    {
+                                        cmenu.Items.Add(new MenuItem()
+                                        {
+                                            Header = "切换为隔离开关",
+                                            Command = new RelayCommand(() =>
+                                            {
+                                                var comps = item.brInfos.Where(x => x.IsIsolator() || x.IsBreaker()).ToList();
+                                                var idx = comps.IndexOf(info);
+                                                Breaker breaker = null, breaker1 = null, breaker2 = null, breaker3 = null;
+                                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
+                                                {
+                                                    breaker = oneway.Component as Breaker;
+                                                }
+                                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
+                                                {
+                                                    breaker1 = twoWayInCircuit.Component1 as Breaker;
+                                                    breaker2 = twoWayInCircuit.Component2 as Breaker;
+                                                }
+                                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
+                                                {
+                                                    breaker1 = threeWayInCircuit.Component1 as Breaker;
+                                                    breaker2 = threeWayInCircuit.Component2 as Breaker;
+                                                    breaker3 = threeWayInCircuit.Component3 as Breaker;
+                                                }
+                                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
+                                                {
+                                                    breaker = centralizedPowerCircuit.Component as Breaker;
+                                                }
+
+                                                if (comps.Count > 1)
+                                                    breaker = idx == 0 ? breaker1 : (idx == 1 ? breaker2 : breaker3);
+
+                                                if (breaker is null) return;
+                                                ThPDSProjectGraphService.ComponentSwitching(vertice, breaker, ComponentType.QL);
+                                                UpdateCanvas();
+                                            }),
+                                        });
+                                    }
+                                }
+                            }
                             foreach (var el in CreateDrawingObjects(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red))
                             {
                                 yield return el;
@@ -542,7 +686,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 Background = Brushes.Transparent,
                                 RenderTransform = tr
                             };
-                            Action cb = null;
                             IEnumerable<MenuItem> getInputMenus()
                             {
                                 if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
@@ -556,7 +699,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         Header = "增加过欠电压保护",
                                         Command = new RelayCommand(() =>
                                         {
-                                            ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice);
+                                            if (!ThPDSProjectGraphService.InsertUndervoltageProtector(graph, vertice, out string msg))
+                                            {
+                                                MessageBox.Show(msg);
+                                            }
                                             UpdateCanvas();
                                         }),
                                     };
@@ -601,64 +747,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
                                             m.SetBinding(Glyphs.UnicodeStringProperty, bd);
                                         }
-                                    }
-                                }
-                                else
-                                {
-                                    cb += () => UpdatePropertyGrid(null);
-                                }
-                            }
-                            else if (info.IsIsolator())
-                            {
-                                void reg(IsolatingSwitch isolatingSwitch, string templateStr)
-                                {
-                                    var vm = new Project.Module.Component.ThPDSIsolatingSwitchModel(isolatingSwitch);
-                                    cb += () => UpdatePropertyGrid(vm);
-                                    {
-                                        var m = leftTemplates.FirstOrDefault(x => x.Tag as string == templateStr);
-                                        if (m != null)
-                                        {
-                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(vm.Content)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                            m.SetBinding(Glyphs.UnicodeStringProperty, bd);
-                                        }
-                                    }
-                                }
-                                var isolatingSwitches = item.brInfos.Where(x => x.BlockName == info.BlockName).ToList();
-                                var idx = isolatingSwitches.IndexOf(info);
-                                IsolatingSwitch isolatingSwitch = null, isolatingSwitch1 = null, isolatingSwitch2 = null, isolatingSwitch3 = null;
-                                if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.OneWayInCircuit oneway)
-                                {
-                                    isolatingSwitch = oneway.isolatingSwitch;
-                                }
-                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.TwoWayInCircuit twoWayInCircuit)
-                                {
-                                    isolatingSwitch1 = twoWayInCircuit.isolatingSwitch1;
-                                    isolatingSwitch2 = twoWayInCircuit.isolatingSwitch2;
-                                }
-                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.ThreeWayInCircuit threeWayInCircuit)
-                                {
-                                    isolatingSwitch1 = threeWayInCircuit.isolatingSwitch1;
-                                    isolatingSwitch2 = threeWayInCircuit.isolatingSwitch2;
-                                    isolatingSwitch3 = threeWayInCircuit.isolatingSwitch3;
-                                }
-                                else if (vertice.Details.CircuitFormType is PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit centralizedPowerCircuit)
-                                {
-                                    isolatingSwitch = centralizedPowerCircuit.isolatingSwitch;
-                                }
-                                if (isolatingSwitch != null)
-                                {
-                                    reg(isolatingSwitch, "QL");
-                                }
-                                else if (isolatingSwitches.Count > 1)
-                                {
-                                    isolatingSwitch = idx == 0 ? isolatingSwitch1 : (idx == 1 ? isolatingSwitch2 : isolatingSwitch3);
-                                    if (isolatingSwitch != null)
-                                    {
-                                        reg(isolatingSwitch, "QL" + (idx + 1));
-                                    }
-                                    else
-                                    {
-                                        cb += () => UpdatePropertyGrid(null);
                                     }
                                 }
                                 else
@@ -812,8 +900,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         }
                                     }
                                     cb += () => UpdatePropertyGrid(vm);
-                                    var cmenu = new ContextMenu();
-                                    cvs.ContextMenu = cmenu;
                                     foreach (var menu in getMeterMenus(meter))
                                     {
                                         cmenu.Items.Add(menu);
@@ -822,18 +908,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 else
                                 {
                                     cb += () => UpdatePropertyGrid(null);
-                                    var cmenu = new ContextMenu();
-                                    cvs.ContextMenu = cmenu;
                                 }
                             }
+                            foreach (var m in getInputMenus())
                             {
-                                var cmenu = cvs.ContextMenu ?? new ContextMenu();
-                                foreach (var m in getInputMenus())
-                                {
-                                    cmenu.Items.Add(m);
-                                }
-                                cvs.ContextMenu = cmenu;
+                                cmenu.Items.Add(m);
                             }
+                            cvs.ContextMenu = cmenu;
                             cvs.MouseUp += (s, e) =>
                             {
                                 void Update()
@@ -863,6 +944,79 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     {
                         var edgeName = (ThCADExtension.ThEnumExtension.GetDescription(edge.Details.CircuitForm?.CircuitFormType ?? default) ?? "常规").Replace("(", "（").Replace(")", "）");
+
+
+
+                        {
+                            Meter meter = null;
+                            if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motorCircuit_DiscreteComponents)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsStarTriangleStartCircuit motor_DiscreteComponentsStarTriangleStartCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsDYYCircuit twoSpeedMotor_DiscreteComponentsDYYCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_DiscreteComponentsYYCircuit twoSpeedMotor_DiscreteComponentsYYCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ContactorControlCircuit contactorControlCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInBehindCircuit distributionMetering_MTInBehindCircuit)
+                            {
+                                meter = distributionMetering_MTInBehindCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInFrontCircuit distributionMetering_CTInFrontCircuit)
+                            {
+                                meter = distributionMetering_CTInFrontCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_CTInBehindCircuit distributionMetering_CTInBehindCircuit)
+                            {
+                                meter = distributionMetering_CTInBehindCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_MTInFrontCircuit distributionMetering_MTInFrontCircuit)
+                            {
+                                meter = distributionMetering_MTInFrontCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiCTCircuit distributionMetering_ShanghaiCTCircuit)
+                            {
+                                meter = distributionMetering_ShanghaiCTCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.DistributionMetering_ShanghaiMTCircuit distributionMetering_ShanghaiMTCircuit)
+                            {
+                                meter = distributionMetering_ShanghaiMTCircuit.meter;
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.FireEmergencyLighting fireEmergencyLighting)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.LeakageCircuit leakageCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSCircuit motor_CPSCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_CPSStarTriangleStartCircuit motor_CPSStarTriangleStartCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.Motor_DiscreteComponentsCircuit motor_DiscreteComponentsCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.ThermalRelayProtectionCircuit thermalRelayProtectionCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSDYYCircuit twoSpeedMotor_CPSDYYCircuit)
+                            {
+                            }
+                            else if (edge.Details.CircuitForm is PDS.Project.Module.Circuit.TwoSpeedMotor_CPSYYCircuit twoSpeedMotor_CPSYYCircuit)
+                            {
+                            }
+                            if (meter is CurrentTransformer currentTransformer)
+                            {
+                                edgeName = edgeName.Replace("直接表", "CT表").Replace("上海CT表", "上海CT");
+                            }
+                        }
                         var item = PDSItemInfo.Create(edgeName, new Point(busStart.X, dy + 10));
                         if (item is null) throw new NotSupportedException(edgeName);
                         var circuitVM = new Project.Module.Component.ThPDSCircuitModel(edge);
@@ -939,7 +1093,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                 {
-                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                    ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                 }
                                             };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
@@ -1523,7 +1677,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                             {
                                                                 if (e.PropertyName == nameof(ThPDSCPSModel.RatedCurrent))
                                                                 {
-                                                                    ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                                    ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                                 }
                                                             };
                                                             var m = glyphs.FirstOrDefault(x => x.Tag as string == templateStr);
@@ -1655,11 +1809,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                                 var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
                                                                 vm = o;
                                                                 {
-                                                                    var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
-                                                                    if (m != null)
+                                                                    var m1 = glyphs.FirstOrDefault(x => x.Tag as string is "CT");
+                                                                    var m2 = glyphs.FirstOrDefault(x => x.Tag as string is "MT");
+                                                                    if (m1 is not null && m2 is not null)
                                                                     {
-                                                                        var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
-                                                                        m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                        m1.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                        m2.SetBinding(Glyphs.UnicodeStringProperty, new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, });
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        var m = glyphs.FirstOrDefault(x => x.Tag as string is "MT" or "CT");
+                                                                        if (m != null)
+                                                                        {
+                                                                            var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                                            m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -2236,7 +2400,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                 {
-                                                    ThPDSProjectGraphService.UpdateWithMiniBusbar(vertice);
+                                                    ThPDSProjectGraphService.CheckCascadeWithMiniBusbar(vertice);
                                                 }
                                             };
                                             blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });
@@ -2483,7 +2647,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                                 {
                                                     if (e.PropertyName == nameof(ThPDSBreakerModel.RatedCurrent))
                                                     {
-                                                        ThPDSProjectGraphService.UpdateWithEdge(edge);
+                                                        ThPDSProjectGraphService.CheckCascadeWithEdge(edge);
                                                     }
                                                 };
                                                 blkVm.UpdatePropertyGridCommand = new RelayCommand(() => { UpdatePropertyGrid(vm); });

@@ -18,6 +18,7 @@ namespace ThParkingStall.Core.InterProcess
         public Polygon TotalArea;//总区域
         public List<LineSegment> SegLines;//初始分割线
         public List<Polygon> Buildings;//建筑物，包含坡道
+        public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
         public List<Polygon> BoundingBoxes;//建筑外包框
         public List<Ramp> Ramps;//坡道
 

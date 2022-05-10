@@ -19,14 +19,16 @@ namespace ThMEPWSS.Service
     public class ThVerticalPipeExtractService
     {
         //---input
-        public List<string> LayerFilter { get; set; } = new List<string>();
+        public List<string> LayerFilterTch { get; set; } = new List<string>();
+        public List<string> LayerFilterBlk { get; set; } = new List<string>();
+        public List<string> LayerFilterCircle { get; set; } = new List<string>();
         public List<double> Radius { get; set; } = new List<double>();
 
         //public List<string> LayerName { get; set; } = new List<string>();
         //public ThMEPOriginTransformer Transformer { get; set; }
         //---output
         public List<ThIfcVirticalPipe> VerticalPipe { get; protected set; }
- 
+
         public ThVerticalPipeExtractService()
         {
             VerticalPipe = new List<ThIfcVirticalPipe>();
@@ -48,7 +50,7 @@ namespace ThMEPWSS.Service
             {
                 var TCHPipeRecognize = new ThTCHVPipeRecognitionEngine()
                 {
-                    LayerFilter = LayerFilter,
+                    LayerFilter = LayerFilterTch,
                 };
                 TCHPipeRecognize.RecognizeMS(acadDatabase.Database, pts);
                 var TCHResult = TCHPipeRecognize.Elements.OfType<ThIfcVirticalPipe>().ToList();
@@ -62,7 +64,7 @@ namespace ThMEPWSS.Service
             {
                 var blkPipeRecognize = new ThBlockVPipeRecognitionEngine()
                 {
-                    LayerFilter = LayerFilter,
+                    LayerFilter = LayerFilterBlk,
                 };
                 blkPipeRecognize.RecognizeMS(acadDatabase.Database, pts);
                 var blkResult = blkPipeRecognize.Elements.OfType<ThIfcVirticalPipe>().ToList();
@@ -77,7 +79,7 @@ namespace ThMEPWSS.Service
             {
                 var cPipeRecognize = new ThCircleVPipeRecognitionEngine()
                 {
-                    LayerFilter = LayerFilter,
+                    LayerFilter = LayerFilterCircle,
                     Radius = Radius,
                 };
                 cPipeRecognize.RecognizeMS(acadDatabase.Database, pts);

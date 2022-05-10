@@ -1,8 +1,10 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Mep.UI.UI;
 
 namespace TianHua.Mep.UI
 {
-    class ThMepUIApp : IExtensionApplication
+    public class ThMepUIApp : IExtensionApplication
     {
         public void Initialize()
         {
@@ -23,6 +25,28 @@ namespace TianHua.Mep.UI
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+        /// <summary>
+        /// 提取房间框线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THEROC", CommandFlags.Modal)]
+        public void ThExtractRoomOutlineConfig()
+        {
+            var roomOutlineUI = new ExtractRoomOutlineUI();
+            roomOutlineUI.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(roomOutlineUI);
+        }
+        /// <summary>
+        /// 梁配置
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "ThEBAC", CommandFlags.Modal)]
+        public void ThExtractBeamAreaConfig()
+        {
+            var config = new ExtractBeamConfigUI();
+            config.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(config);
         }
     }
 }

@@ -61,18 +61,12 @@ namespace TianHua.Electrical.PDS.Project
                 this.graphData = new ProjectGraph().CreatPDSProjectGraph();
                 PDSProjectExtend.CalculateProjectInfo();
                 this.projectGlobalConfiguration = new ProjectGlobalConfiguration();
-                if (!instance.DataChanged.IsNull())
-                {
-                    instance.DataChanged();//推送消息告知VM刷新
-                }
+                instance.DataChanged?.Invoke();
             }
             else
             {
                 ImportProject(url);
-                if (!instance.DataChanged.IsNull())
-                {
-                    instance.DataChanged();//推送消息告知VM刷新
-                }
+                instance.DataChanged?.Invoke();
             }
         }
 
@@ -89,10 +83,7 @@ namespace TianHua.Electrical.PDS.Project
                 ));
             this.graphData = ProjectGraph.CreatPDSProjectGraph();
             PDSProjectExtend.CalculateProjectInfo();
-            if (!instance.DataChanged.IsNull())
-            {
-                instance.DataChanged();//推送消息告知VM刷新
-            }
+            instance.DataChanged?.Invoke();
         }
 
         /// <summary>
@@ -116,10 +107,7 @@ namespace TianHua.Electrical.PDS.Project
                 });
                 ThPDSGraphCompareService compareService = new ThPDSGraphCompareService();
                 compareService.Diff(this.graphData.Graph, ProjectGraph);
-                if (!instance.DataChanged.IsNull())
-                {
-                    instance.DataChanged();//推送消息告知VM刷新
-                }
+                instance.DataChanged?.Invoke();
             }
             else
             {

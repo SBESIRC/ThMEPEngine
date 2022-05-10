@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -130,8 +131,19 @@ namespace ThParkingStall.Core.MPartitionLayout
             bool allow_split_similar_car = false)
         {
             List<Coordinate> points = new List<Coordinate>();
-            foreach (var cutter in cutters)
-                points.AddRange(curve.IntersectPoint(cutter));
+            if (cutters.Count > 10)
+            {
+                STRtree<Polygon> strTree = new STRtree<Polygon>();
+                foreach (var cutter in cutters) strTree.Insert(cutter.EnvelopeInternal, cutter);
+                var selectedGeos = strTree.Query(curve.ToLineString().EnvelopeInternal);
+                foreach (var cutter in selectedGeos)
+                    points.AddRange(curve.IntersectPoint(cutter));
+            }
+            else
+            {
+                foreach (var cutter in cutters)
+                    points.AddRange(curve.IntersectPoint(cutter));
+            }
             if (allow_split_similar_car)
             {
                 //在处理车道末端时候，出现一个特殊case，车位与车道之间有10容差距离，以此加强判断。
@@ -461,38 +473,24 @@ namespace ThParkingStall.Core.MPartitionLayout
                 points.Add(points[0]);
             return new Polygon(new LinearRing(points.ToArray()));
         }
-        public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false, bool accurate = false)
+        public static bool IsInAnyBoxes(Coordinate pt, STRtree<Polygon> polygonStrTree, bool true_on_edge = false)
         {
-            int fast_take_count = 10;
-            if (boxes.Count == 0) return false;
-            if (true_on_edge)
-            {
-                if (ClosestPointInCurves(pt, boxes) < 10) return true;
-            }
-            var recs = boxes.OrderBy(e => e.ClosestPoint(pt).Distance(pt)).ToArray();
-            if (!accurate && recs.Count() > fast_take_count) recs = recs.Take(fast_take_count).ToArray();
-            foreach (var rec in recs)
-            {
-                if (rec.Area < 1) continue;
-                if (rec.Contains(pt))
-                {
-                    var r = rec.Scale(0.99999);
-                    if (r.Contains(pt)) return true;
-                }
-            }
-            return false;
-            //for (int i=0;i< boxes.Count;i++)
-            //{
-            //    if (boxes[i].Area < 1) continue;
-            //    boxes[i] = boxes[i].Scale(0.99999);
-            //    if (boxes[i].Contains(pt))
-            //    {
-            //        boxes[i]=boxes[i].Scale(1 / 0.99999);
-            //        return true;
-            //    }
-            //    boxes[i] = boxes[i].Scale(1 / 0.99999);
-            //}
-            //return false;
+            var ntsPt = new Point(pt.X, pt.Y);
+            var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
+            if (selectedBoxes.Count == 0) return false;
+            if (true_on_edge) return true;
+            else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
+        }
+        public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false)
+        {
+            var ntsPt = new Point(pt.X, pt.Y);
+            STRtree<Polygon> polygonStrTree = new STRtree<Polygon>();
+            boxes.ForEach(polygon => polygonStrTree.Insert(polygon.EnvelopeInternal, polygon));
+            var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
+            polygonStrTree = null;
+            if (selectedBoxes.Count == 0) return false;
+            if (true_on_edge) return true;
+            else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static double ClosestPointInVertLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
         {
@@ -510,46 +508,32 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static bool IsInAnyPolys(Coordinate pt, List<Polygon> pls, bool allowOnEdge = false, bool accurate = false)
         {
             if (pls.Count == 0) return false;
-            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.Envelope.Centroid.Coordinate.Distance(pt)).ToArray();
-            var bigpolys = pls.OrderByDescending(e => e.Area).ToArray();
+            var isInAnyBox = IsInAnyBoxes(pt, pls, allowOnEdge);
+            if (!isInAnyBox) return false;
+            //MultiPolygon multiPolygon = new MultiPolygon(pls.ToArray());
+            //if (allowOnEdge) return multiPolygon.Covers(new Point(pt));
+            //return multiPolygon.Contains(new Point(pt));
+
+            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.Envelope.Centroid.Coordinate.Distance(pt)).Select(e => e);
+            var bigpolys = pls.OrderByDescending(e => e.Area).Select(e => e);
             int fast_cal_count = 20;
-            if (!accurate && ps.Count() > fast_cal_count) ps = ps.Take(fast_cal_count).ToArray();
-            if (!accurate && ps.Count() > fast_cal_count) bigpolys = bigpolys.Take(fast_cal_count).ToArray();
+            if (!accurate && ps.Count() > fast_cal_count) ps = ps.Take(fast_cal_count);
+            if (!accurate && ps.Count() > fast_cal_count) bigpolys = bigpolys.Take(fast_cal_count);
             if (!allowOnEdge)
             {
                 foreach (var p in ps)
-                {
-                    if (p.Coordinates.Count() == 5)
-                        if (p.Envelope.Contains(new Point(pt)) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
                     if (p.Contains(pt) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
-                }
                 if (!accurate && ps.Count() > fast_cal_count)
-                {
                     foreach (var p in bigpolys)
-                    {
-                        if (p.Coordinates.Count() == 5)
-                            if (p.Envelope.Contains(new Point(pt)) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
                         if (p.Contains(pt) && p.ClosestPoint(pt).Distance(pt) > 10) return true;
-                    }
-                }
             }
             else
             {
                 foreach (var p in ps)
-                {
-                    if (p.Coordinates.Count() == 5)
-                        if (p.Envelope.Contains(new Point(pt))) return true;
                     if (p.Contains(pt)) return true;
-                }
                 if (!accurate && ps.Count() > fast_cal_count)
-                {
                     foreach (var p in bigpolys)
-                    {
-                        if (p.Coordinates.Count() == 5)
-                            if (p.Envelope.Contains(new Point(pt))) return true;
                         if (p.Contains(pt)) return true;
-                    }
-                }
             }
             return false;
         }
@@ -620,6 +604,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static double ClosestPointInCurvesFast(Coordinate pt, List<LineString> crvs)
         {
+            if (crvs.Count == 0) return 0;
             var pl = crvs.OrderBy(t => t.ClosestPoint(pt).Distance(pt)).First();
             return pl.ClosestPoint(pt).Distance(pt);
         }

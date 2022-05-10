@@ -1,39 +1,70 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using QuikGraph;
-using Dreambuild.AutoCAD;
-
+using System.Linq;
 using ThCADExtension;
-using ThMEPEngineCore.Command;
-using TianHua.Electrical.PDS.Diagram;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Diagram;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Component;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
-using TianHua.Electrical.PDS.Service;
+using ProjectGraph = QuikGraph.BidirectionalGraph<
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
+    TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
-namespace TianHua.Electrical.PDS.Command
+namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSSystemDiagramCommand : ThMEPBaseCommand, IDisposable
+    public class ThPDSSystemDiagramService
     {
-        public BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> Graph { get; set; }
-        public List<ThPDSProjectGraphNode> NodeList { get; set; }
-
-        public ThPDSSystemDiagramCommand(BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph,
-            List<ThPDSProjectGraphNode> nodeList)
+        private ProjectGraph Graph { get; set; }
+        private List<ThPDSProjectGraphNode> Nodes { get; set; }
+        public ThPDSSystemDiagramService()
         {
-            Graph = graph;
-            NodeList = nodeList;
+
         }
 
-        public override void SubExecute()
+        /// <summary>
+        /// 单独生成
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node"></param>
+        public void Draw(ProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            Graph = graph;
+            Nodes = new List<ThPDSProjectGraphNode> { node };
+            Draw();
+        }
+
+        /// <summary>
+        /// 批量生成
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="nodes"></param>
+        public void Draw(ProjectGraph graph, List<ThPDSProjectGraphNode> nodes)
+        {
+            Graph = graph;
+            Nodes = nodes;
+            Draw();
+        }
+
+        /// <summary>
+        /// 全部生成
+        /// </summary>
+        /// <param name="graph"></param>
+        public void Draw(ProjectGraph graph)
+        {
+            Graph = graph;
+            Nodes = Graph.Vertices.ToList();
+            Draw();
+        }
+
+        private void Draw()
         {
             using (var docLock = Active.Document.LockDocument())
             using (var activeDb = AcadDatabase.Active())
@@ -60,8 +91,13 @@ namespace TianHua.Electrical.PDS.Command
                 var anotherStartPoint = new Point3d(basePoint.X + 36300 * scaleFactor, basePoint.Y, 0);
                 var residue = ThPDSCommon.INNER_TOLERANCE - 1000.0;
 
-                foreach (var thisNode in NodeList)
+                foreach (var thisNode in Graph.Vertices)
                 {
+                    if (!Nodes.Contains(thisNode))
+                    {
+                        continue;
+                    }
+
                     if (thisNode.Type != PDSNodeType.DistributionBox)
                     {
                         continue;
@@ -211,7 +247,9 @@ namespace TianHua.Electrical.PDS.Command
                     {
                         var surgeProtection = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SURGE_PROTECTION, basePoint, scale);
                         assignment.SurgeProtectionAssign(activeDb, surgeProtection, tableObjs, thisNode.Details.SurgeProtection.ToString());
+                        insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
                         basePoint = new Point3d(basePoint.X, basePoint.Y - 1000 * scaleFactor, 0);
+                        edgeCount++;
                     }
 
                     if (edgeCount < blankLineCount)

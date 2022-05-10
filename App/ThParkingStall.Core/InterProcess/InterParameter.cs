@@ -19,6 +19,8 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Polygon> _Buildings;// 所有障碍物，包含坡道
         private static List<Polygon> Buildings { get { return _Buildings; } }// 所有障碍物，包含坡道
 
+        public  static List<int> _OuterBuildingIdxs; 
+        public  static List<int> OuterBuildingIdxs { get { return _OuterBuildingIdxs; } } //可穿建筑物（外围障碍物）的index,包含坡道
         private static List<Polygon> _BoundingBoxes;// 所有的建筑物的边框
         private static List<Polygon> BoundingBoxes { get { return _BoundingBoxes; } }// 所有的建筑物的边框
 
@@ -28,38 +30,21 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Ramp> _Ramps;//坡道
         private static List<Ramp> Ramps { get { return _Ramps; } }//坡道
 
-        private static MNTSSpatialIndex _ObstacleSpatialIndex;//所有障碍物，包含坡道的spatialindex
-        private static MNTSSpatialIndex ObstacleSpatialIndex { get { return _ObstacleSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
-
+        private static MNTSSpatialIndex _BuildingSpatialIndex;//所有障碍物，包含坡道的spatialindex
+        private static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
+        private static MNTSSpatialIndex _BoundaryObjectsSPIDX;
+        private static MNTSSpatialIndex BoundaryObjectsSPIDX { get { return _BoundaryObjectsSPIDX; } }//边界打成断线+可忽略障碍物的spatialindex；
         private static MNTSSpatialIndex _BoundingBoxSpatialIndex;//建筑物块的外包框的spatialindex
         private static MNTSSpatialIndex BoundingBoxSpatialIndex { get { return _BoundingBoxSpatialIndex; } }//建筑物块的外包框的spatialindex
 
         private static MNTSSpatialIndex _BoundarySpatialIndex;// 所有边界，包含边界线，坡道，以及障碍物
         private static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }// 所有边界，包含边界线，坡道，以及障碍物
 
+
         private static List<(double, double)> _LowerUpperBound;
         public static List<(double, double)> LowerUpperBound { get { return _LowerUpperBound; } } // 基因的上下边界，绝对值
 
         public static bool MultiThread = false;//是否使用进程内多线程
-        //public static void Init(Polygon totalArea, List<LineSegment> segLines, List<Polygon> buildings, List<Polygon> boundingBoxes,
-        //    List<Ramp> ramps)
-        //{
-        //    _TotalArea = totalArea;//总区域
-        //    _TotalArea.RemoveHoles();
-        //    _InitSegLines = segLines;//初始分割线
-        //    _Buildings = buildings.GetPolygons();//所有障碍物，包含坡道
-        //    _Buildings.ForEach(build => build.RemoveHoles());
-        //    _BoundingBoxes = boundingBoxes;// 所有的建筑物的边框
-        //    _BoundingBoxes.ForEach(box => box.RemoveHoles());
-        //    _Ramps = ramps;//坡道
-        //    _Ramps.ForEach(ramp => ramp.Area.RemoveHoles());
-        //    _ObstacleSpatialIndex = new MNTSSpatialIndex(buildings);
-        //    _BoundingBoxSpatialIndex = new MNTSSpatialIndex(boundingBoxes);
-        //    var boundaries = new List<Geometry> { totalArea.Shell };
-        //    boundaries.AddRange(buildings);
-        //    _BoundarySpatialIndex = new MNTSSpatialIndex(boundaries);
-        //    _SegLineIntsecDic = segLines.GetSegLineIntsecDic();
-        //}
         public static void Init(DataWraper dataWraper)
         {
             _TotalArea = dataWraper.TotalArea;//总区域
@@ -70,11 +55,16 @@ namespace ThParkingStall.Core.InterProcess
 
             _Ramps = dataWraper.Ramps;//坡道
 
-            _ObstacleSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
+            _BuildingSpatialIndex = new MNTSSpatialIndex(dataWraper.Buildings);
             _BoundingBoxSpatialIndex = new MNTSSpatialIndex(dataWraper.BoundingBoxes);
             var boundaries = new List<Geometry> { dataWraper.TotalArea.Shell };
             boundaries.AddRange(dataWraper.Buildings);
             _BoundarySpatialIndex = new MNTSSpatialIndex(boundaries);
+            _OuterBuildingIdxs = dataWraper.OuterBuildingIdxs;
+            var ignorableBuildings = new List<Geometry>();
+            foreach (int idx in OuterBuildingIdxs) ignorableBuildings.Add(Buildings[idx]);
+            ignorableBuildings.AddRange(TotalArea.Shell.ToLineStrings().ToList());
+            _BoundaryObjectsSPIDX = new MNTSSpatialIndex(ignorableBuildings);
             _SegLineIntsecDic = dataWraper.SegLineIntsecDic;
             _LowerUpperBound = dataWraper.LowerUpperBound;
         }
@@ -89,7 +79,8 @@ namespace ThParkingStall.Core.InterProcess
             newSegLines.SeglinePrecut(TotalArea);//预切割
             newSegLines.Clean();//过滤孤立的线
             if (!newSegLines.Allconnected()) return false;//判断是否全部相连
-            var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
             if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return false;//判断是否满足车道宽
             return true;
         }
@@ -106,12 +97,13 @@ namespace ThParkingStall.Core.InterProcess
             newSegLines.SeglinePrecut(TotalArea);//预切割
             newSegLines.Clean();//过滤孤立的线
             if (!newSegLines.Allconnected()) return subAreas;//判断是否全部相连
-            var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
-            if(!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return subAreas;//判断是否满足车道宽
-            var SegLineStrings = newSegLines.ToLineStrings();
-            var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
+            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
+            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return subAreas;//判断是否满足车道宽
+            var SegLineStrings = newSegLines.ToLineStrings(false);
+            var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr!=null));//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
-            var SegLineSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
+            var vaildSegSpatialIndex = new MNTSSpatialIndex(vaildSeg.ToLineStrings().Cast<Geometry>().ToList());
             // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
@@ -125,16 +117,34 @@ namespace ThParkingStall.Core.InterProcess
                 //List<Polygon> subBoundingBoxes;//该区域所有建筑物的bounding box
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                var subSegLineStrings = SegLineSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分割线
-                subSegLineStrings = subSegLineStrings.Where(lstr => area.Shell.PartInCommon(lstr));//去除未构成边界的
-                var subSegLines = subSegLineStrings.ToLineSegments().Select(l => l.GetVaildPart(area)).ToList();
-                var subBuildings = ObstacleSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                var subSegLineStrings = vaildSegSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分割线
+                var subSegLines = subSegLineStrings.GetVaildParts(area);
+                //subSegLineStrings = subSegLineStrings.Where(lstr => area.Shell.PartInCommon(lstr));//去除未构成边界的
+                //var subSegLines = subSegLineStrings.ToLineSegments().Select(l => l.GetVaildPart(area)).ToList();
+
+                var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 var subRamps = Ramps.Where(ramp => area.Contains(ramp.InsertPt)).ToList();
                 var subBoundingBoxes = BoundingBoxSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
-                var subArea = new SubArea(area, subSegLines, subBuildings, subRamps, subBoundingBoxes);
+                var key = GetSubAreaKey(area, chromosome, SegLineStrings);
+                var subArea = new SubArea(area, subSegLines, subBuildings, subRamps, subBoundingBoxes, key);
                 subAreas.Add(subArea);
             }
             return subAreas;
+        }
+
+        public static SubAreaKey GetSubAreaKey(Polygon area,Chromosome chromosome, List<LineString> SegLineStrings)
+        {
+            var GeneIdxs = new List<int>();
+            var GeneVals = new List<double>();
+            for(int idx = 0; idx < SegLineStrings.Count; idx++)
+            {
+                var SegLineString = SegLineStrings[idx];
+                if(area.Shell.PartInCommon(SegLineString)) GeneIdxs.Add(idx);
+            }
+            var center = area.GetCenter();
+            //var ValIncreaseDir = center.OnIncreaseDirectionOf( chromosome.Genome[GeneIdxs.First()].ToLineSegment());
+            GeneIdxs.ForEach(idx => GeneVals.Add(chromosome.Genome[idx].Value));
+            return new SubAreaKey(GeneIdxs, GeneVals, center);
         }
     }
 }

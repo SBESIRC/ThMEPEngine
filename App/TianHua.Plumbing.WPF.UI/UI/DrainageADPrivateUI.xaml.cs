@@ -20,6 +20,7 @@ using ThControlLibraryWPF.CustomControl;
 
 using ThMEPWSS.DrainageADPrivate.Cmd;
 using ThMEPWSS.DrainageADPrivate.Model;
+using ThMEPWSS.DrainageADPrivate.Service;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -53,8 +54,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 cmd.Execute();
             }
         }
+        private void btnLayoutWaterHeater_Click(object sender, RoutedEventArgs e)
+        {
+            FocusToCAD();
+            
+            AcHelper.Commands.CommandHandlerBase.ExecuteFromCommandLine(false, "ThDrainageLayoutWaterHeater");
 
-        public static void Save(ThDrainageADPViewModel VM)
+        }
+
+        private static void Save(ThDrainageADPViewModel VM)
         {
             ThDrainageADSetting.Instance.qL = VM.qL;
             ThDrainageADSetting.Instance.m = VM.m;

@@ -238,6 +238,8 @@ namespace ThMEPWSS.Command
                 } 
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
                     createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
+                if (balconyCorridorEqu.createDBTextElements != null && balconyCorridorEqu.createDBTextElements.Count > 0)
+                    createTextElems.AddRange(balconyCorridorEqu.createDBTextElements);
                 //卫生间PL添加清扫口
                 List<string> pipeTags = new List<string> { "PL", "FL", "TL", "DL" };
                 var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();

@@ -425,6 +425,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             config.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(config);
-        }
+        }        
     }
 }

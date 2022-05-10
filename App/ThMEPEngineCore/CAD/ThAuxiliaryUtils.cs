@@ -6,6 +6,7 @@ using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -186,6 +187,12 @@ namespace ThMEPEngineCore.CAD
             var maxLength = maxPair.Item1.DistanceTo(maxPair.Item2);
             var sum = newSp.DistanceTo(newEp) + second.Length;
             return maxLength >= sum ? 0.0 : sum - maxLength;
+        }
+        public static void MDispose(this DBObjectCollection objs)
+        {
+            objs.OfType<Entity>()
+                .Where(e => !e.IsDisposed)
+                .ForEach(e => e.Dispose());
         }
     }
 }

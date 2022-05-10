@@ -343,16 +343,20 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
+                    if (nodeA.Tag is ThPDSProjectGraphNodeIdChangeTag)
+                    {
+                        continue;
+                    }
                     if (nodeA.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
                     {
                         if (compositeTag.CompareTag is ThPDSProjectGraphNodeExchangeTag)
                         {
                             continue;
                         }
-                    }
-                    if (nodeA.Tag is ThPDSProjectGraphNodeIdChangeTag)
-                    {
-                        continue;
+                        if (compositeTag.CompareTag is ThPDSProjectGraphNodeIdChangeTag)
+                        {
+                            continue;
+                        }
                     }
                     DataChangeForNode(nodeA, nodeB);
                     if (NodeStructureMove(nodeA, nodeB, graphA, graphB))
@@ -393,11 +397,17 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
+                    if (edgeA.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+                    {
+                        if (compositeTag.CompareTag is ThPDSProjectGraphEdgeIdChangeTag)
+                        {
+                            continue;
+                        }
+                    }
                     if (edgeA.Source.Load.ID.LoadID != edgeB.Source.Load.ID.LoadID)
                     {
                         throw new NotImplementedException(); //两条边同一个id不同起点
                     }
-                    DataChangeForEdge(edgeA, edgeB);
                     if (edgeA.Target.Load.ID.LoadID != edgeB.Target.Load.ID.LoadID)
                     {
                         StructureForMoveEdge(edgeA, edgeB, graphA);
@@ -459,16 +469,19 @@ namespace TianHua.Electrical.PDS.Service
         #region NODE_STRUCTURE
         private void StructureForChangeNodeID(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
-            nodeA.Tag = new ThPDSProjectGraphNodeIdChangeTag
+            var idChangeTagA = new ThPDSProjectGraphNodeIdChangeTag
             {
                 ChangeFrom = true,
                 ChangedID = nodeB.Load.ID.LoadID,
             };
-            nodeB.Tag = new ThPDSProjectGraphNodeIdChangeTag
+            AddNodeTag(nodeA, idChangeTagA);
+
+            var idChangeTagB = new ThPDSProjectGraphNodeIdChangeTag
             {
                 ChangeFrom = false,
                 ChangedID = nodeA.Load.ID.LoadID,
             };
+            nodeB.Tag = idChangeTagB;
             graphA.AddVertex(nodeB);
         }
 
@@ -479,37 +492,14 @@ namespace TianHua.Electrical.PDS.Service
                 ExchangeToID = nodeB.Load.ID.LoadID,
                 ExchangeToNode = nodeB
             };
-            if (nodeA.Tag is ThPDSProjectGraphNodeDataTag dataTagA)
-            {
-                var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
-                {
-                    CompareTag = exTagA,
-                    DataTag = dataTagA
-                };
-                nodeA.Tag = compositeTagA;
-            }
-            else
-            {
-                nodeA.Tag = exTagA;
-            }
+            AddNodeTag(nodeA, exTagA);
+
             var exTagB = new ThPDSProjectGraphNodeExchangeTag
             {
                 ExchangeToID = nodeA.Load.ID.LoadID,
                 ExchangeToNode = nodeA
             };
-            if (nodeB.Tag is ThPDSProjectGraphNodeDataTag dataTagB)
-            {
-                var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
-                {
-                    CompareTag = exTagB,
-                    DataTag = dataTagB
-                };
-                nodeB.Tag = compositeTagB;
-            }
-            else
-            {
-                nodeB.Tag = exTagB;
-            }
+            AddNodeTag(nodeB, exTagB);
         }
 
         private void StructureForMoveNode(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB, PDSGraph graphA)
@@ -517,51 +507,30 @@ namespace TianHua.Electrical.PDS.Service
             var moveTagA = new ThPDSProjectGraphNodeMoveTag
             {
                 MoveFrom = true,
-                MoveTo = false
+                AnotherNode = nodeB,
             };
-            if (nodeA.Tag is ThPDSProjectGraphNodeDataTag dataTagA)
-            {
-                var compositeTagA = new ThPDSProjectGraphNodeCompositeTag
-                {
-                    CompareTag = moveTagA,
-                    DataTag = dataTagA
-                };
-                nodeA.Tag = compositeTagA;
-            }
-            else
-            {
-                nodeA.Tag = moveTagA;
-            }
+            AddNodeTag(nodeA, moveTagA);
+
             var moveTagB = new ThPDSProjectGraphNodeMoveTag
             {
                 MoveFrom = false,
-                MoveTo = true
+                AnotherNode = nodeA,
             };
-            if (nodeB.Tag is ThPDSProjectGraphNodeDataTag dataTagB)
-            {
-                var compositeTagB = new ThPDSProjectGraphNodeCompositeTag
-                {
-                    CompareTag = moveTagB,
-                    DataTag = dataTagB
-                };
-                nodeB.Tag = compositeTagB;
-            }
-            else
-            {
-                nodeB.Tag = moveTagB;
-            }
+            AddNodeTag(nodeB, moveTagB);
             graphA.AddVertex(nodeB);
         }
 
         private void StructureForAddNode(ThPDSProjectGraphNode nodeB, PDSGraph graphA)
         {
-            nodeB.Tag = new ThPDSProjectGraphNodeAddTag();
+            var addTag = new ThPDSProjectGraphNodeAddTag();
+            AddNodeTag(nodeB, addTag);
             graphA.AddVertex(nodeB);
         }
 
         private void StructureForDeleteNode(ThPDSProjectGraphNode nodeA)
         {
-            nodeA.Tag = new ThPDSProjectGraphNodeDeleteTag();
+            var delTag = new ThPDSProjectGraphNodeDeleteTag();
+            AddNodeTag(nodeA, delTag);
         }
         #endregion
 
@@ -570,11 +539,13 @@ namespace TianHua.Electrical.PDS.Service
         {
             var newEdge = CreatEdge(IdToNodes[edgeB.Source.Load.ID.LoadID].First().Item2, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
                 edgeB.Circuit.ID.CircuitID, edgeB.Circuit.ID.CircuitNumber.Last());
-            edgeA.Tag = new ThPDSProjectGraphEdgeIdChangeTag
+            var changIdTagA = new ThPDSProjectGraphEdgeIdChangeTag
             {
                 ChangeFrom = true,
                 ChangedLastCircuitID = newEdge.Circuit.ID.CircuitNumber.Last(),
             };
+            AddEdgeTag(edgeA, changIdTagA);
+
             newEdge.Tag = new ThPDSProjectGraphEdgeIdChangeTag
             {
                 ChangeFrom = false,
@@ -589,19 +560,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 MoveFrom = true,
             };
-            if (edgeA.Tag is ThPDSProjectGraphEdgeDataTag dataTagA)
-            {
-                var compositeTagA = new ThPDSProjectGraphEdgeCompositeTag
-                {
-                    Tag = moveTagA,
-                    DataTag = dataTagA
-                };
-                edgeA.Tag = compositeTagA;
-            }
-            else
-            {
-                edgeA.Tag = moveTagA;
-            }
+            AddEdgeTag(edgeA, moveTagA);
             var newEdge = CreatEdge(IdToNodes[edgeA.Source.Load.ID.LoadID].First().Item1, IdToNodes[edgeB.Target.Load.ID.LoadID].First().Item2,
                 edgeB.Circuit.ID.CircuitID, edgeB.Circuit.ID.CircuitNumber.Last());
             newEdge.Tag = new ThPDSProjectGraphEdgeMoveTag
@@ -621,7 +580,8 @@ namespace TianHua.Electrical.PDS.Service
 
         private void StructureForDeleteEdge(ThPDSProjectGraphEdge edgeA)
         {
-            edgeA.Tag = new ThPDSProjectGraphEdgeDeleteTag();
+            var delTagA = new ThPDSProjectGraphEdgeDeleteTag();
+            AddEdgeTag(edgeA, delTagA);
         }
         #endregion
 
@@ -632,36 +592,31 @@ namespace TianHua.Electrical.PDS.Service
             if (nodeA.Load.ID.Description != nodeB.Load.ID.Description)
             {
                 dataTagA.TagD = true;
-                //dataTagA.SouD = nodeA.Load.ID.Description;
                 dataTagA.TarD = nodeB.Load.ID.Description;
             }
             if (nodeA.Load.FireLoad != nodeB.Load.FireLoad)
             {
                 dataTagA.TagF = true;
-                //dataTagA.SouF = nodeA.Load.FireLoad;
                 dataTagA.TarF = nodeB.Load.FireLoad;
             }
             if (!nodeA.Load.InstalledCapacity.EqualsTo(nodeB.Load.InstalledCapacity))
             {
                 dataTagA.TagP = true;
-                //dataTagA.SouP = nodeA.Load.InstalledCapacity;
                 dataTagA.TarP = nodeB.Load.InstalledCapacity;
             }
-            nodeA.Tag = dataTagA;
-            if (dataTagA.TagD || dataTagA.TagF || dataTagA.TagP)
+            if (!nodeA.Type.Equals(nodeB.Type))
             {
-                return true;
+                dataTagA.TagType = true;
+                dataTagA.TarType = nodeB.Type;
             }
-            return false;
-        }
-
-        private bool DataChangeForEdge(ThPDSProjectGraphEdge edgeA, ThPDSProjectGraphEdge edgeB)
-        {
-            var dataTagA = new ThPDSProjectGraphEdgeDataTag();
-            if (edgeA.Circuit.ID.CircuitID.Last() != edgeB.Circuit.ID.CircuitID.Last())
+            if (nodeA.Load.Phase != nodeB.Load.Phase)
             {
-                dataTagA.ToLastCircuitID = edgeB.Circuit.ID.CircuitID.Last();
-                edgeA.Tag = dataTagA;
+                dataTagA.TagPhase = true;
+                dataTagA.TarPhase = nodeB.Load.Phase;
+            }
+            if (dataTagA.TagD || dataTagA.TagF || dataTagA.TagP || dataTagA.TagType || dataTagA.TagPhase)
+            {
+                AddNodeTag(nodeA, dataTagA);
                 return true;
             }
             return false;
@@ -679,5 +634,116 @@ namespace TianHua.Electrical.PDS.Service
             newEdge.Circuit.ID.CircuitNumber.Add(circuitNumber);
             return newEdge;
         }
+
+        #region ADDTAG
+        private void AddNodeTag(ThPDSProjectGraphNode node, ThPDSProjectGraphNodeCompareTag cmpareTag)
+        {
+            if (node.Tag.IsNull())
+            {
+                node.Tag = cmpareTag;
+            }
+            else if(cmpareTag is ThPDSProjectGraphNodeDataTag dataCmpTag)
+            {
+                if (node.Tag is ThPDSProjectGraphNodeDuplicateTag dupTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        DataTag = dataCmpTag,
+                        DupTag = dupTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeSingleTag sigTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        DataTag = dataCmpTag,
+                        ValidateTag = sigTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeFireTag fireTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        DataTag = dataCmpTag,
+                        ValidateTag = fireTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                {
+                    compositeTag.DataTag = dataCmpTag;
+                }
+            }
+            else
+            {
+                if (node.Tag is ThPDSProjectGraphNodeDuplicateTag dupTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        CompareTag = cmpareTag,
+                        DupTag = dupTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeSingleTag sigTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        CompareTag = cmpareTag,
+                        ValidateTag = sigTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeFireTag fireTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag()
+                    {
+                        CompareTag = cmpareTag,
+                        ValidateTag = fireTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeDataTag dataTag)
+                {
+                    node.Tag = new ThPDSProjectGraphNodeCompositeTag
+                    {
+                        CompareTag = cmpareTag,
+                        DataTag = dataTag
+                    };
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                {
+                    compositeTag.CompareTag = cmpareTag;
+                }
+            }
+        }
+
+        private void AddEdgeTag(ThPDSProjectGraphEdge edge, ThPDSProjectGraphEdgeCompareTag cmpareTag)
+        {
+            if (edge.Tag.IsNull())
+            {
+                edge.Tag = cmpareTag;
+            }
+            else
+            {
+                if (edge.Tag is ThPDSProjectGraphEdgeDuplicateTag dupTag)
+                {
+                    edge.Tag = new ThPDSProjectGraphEdgeCompositeTag()
+                    {
+                        CompareTag = cmpareTag,
+                        DupTag = dupTag
+                    };
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeSingleTag singleTag)
+                {
+                    edge.Tag = new ThPDSProjectGraphEdgeCompositeTag()
+                    {
+                        CompareTag = cmpareTag,
+                        SingleTag = singleTag
+                    };
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+                {
+                    compositeTag.CompareTag = cmpareTag;
+                }
+            }
+        }
+        #endregion
     }
 }

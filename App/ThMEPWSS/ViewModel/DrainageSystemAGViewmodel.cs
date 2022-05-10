@@ -98,7 +98,7 @@ namespace ThMEPWSS.ViewModel
                 MRSPipeDiameterListItems.Add(c);
             });
             MRGPipeDiameterSelectItem = MRGPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
-            MRSPipeDiameterSelectItem = MRSPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN75).FirstOrDefault();
+            MRSPipeDiameterSelectItem = MRSPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
 
             //设置小屋面上的重力流雨水斗和侧排水雨水斗的规格。选项为DN75、DN100、DN125和DN150，初始选项为DN100。
             var minRoofValues = new List<int>
@@ -114,7 +114,7 @@ namespace ThMEPWSS.ViewModel
                 MIRGPipeDiameterListItems.Add(c);
                 MIRSPipeDiameterListItems.Add(c);
             });
-            MIRGPipeDiameterSelectItem = MIRGPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
+            MIRGPipeDiameterSelectItem = MIRGPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN75).FirstOrDefault();
             MIRSPipeDiameterSelectItem = MIRSPipeDiameterListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN75).FirstOrDefault();
         }
         /// <summary>

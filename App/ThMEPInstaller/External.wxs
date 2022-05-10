@@ -38,6 +38,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" Guid="{A14FD45E-1BDC-48AE-BB95-94FD6A9DF234}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" Guid="{DDC373DB-491B-4609-9D35-91B85C30F9FA}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\QuikGraph.Serialization.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" Guid="{5B689620-B2C7-4D1B-A16D-E8072889B76A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\RestSharp.dll" />
             </Component>
@@ -145,6 +148,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" Guid="{B8D1B2EC-C8E0-4E69-B9D6-B1523BC2EABE}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\QuikGraph.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Debug" Guid="{4A96A3A8-0D9F-43BF-9F88-5AF677518DB5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\QuikGraph.Serialization.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" Guid="{C12A5181-7DB1-4A08-A67F-311B8FD0DC31}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\RestSharp.dll" />
@@ -255,6 +261,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" Guid="{D3C3F5ED-72D5-408C-91FA-D941F0AC07C8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\QuikGraph.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Debug" Guid="{E1A20DA4-284E-47B0-A918-4F6C695A7FBA}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\QuikGraph.Serialization.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" Guid="{31F3CF65-CC06-42B5-BAEF-9A722C034F78}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\RestSharp.dll" />
             </Component>
@@ -364,6 +373,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" Guid="{4F7A3338-2713-4F30-B8FA-D38B181EAAD8}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" Guid="{95A5560D-FA4A-4C98-A831-1A9A034D3935}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\QuikGraph.Serialization.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_RestSharp_Release" Guid="{1766ED68-7672-477C-8353-178F681C179D}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\RestSharp.dll" />
             </Component>
@@ -472,6 +484,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" Guid="{0733FE9D-B92A-45D6-A3FD-710695F1A03F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\QuikGraph.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Release" Guid="{E4741BA4-012B-45A0-8302-7DA809BD6C2A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\QuikGraph.Serialization.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_RestSharp_Release" Guid="{2C960364-40B3-4D5F-AA33-4CFF750B40B2}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\RestSharp.dll" />
             </Component>
@@ -579,6 +594,9 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" Guid="{6F50C334-472D-4CC0-9998-0CA04845B6FF}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\QuikGraph.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Release" Guid="{04C9F3EC-0C41-4BF0-A40D-1CA7200EA52E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\QuikGraph.Serialization.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_RestSharp_Release" Guid="{0CA94593-1388-485E-9E0D-8EC29AF85F2C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_RestSharp_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\RestSharp.dll" />
@@ -761,6 +779,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -865,6 +886,9 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Fizzler_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Fizzler_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Fizzler_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_QuikGraph_Serialization_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_QuikGraph_Serialization_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_QuikGraph_Serialization_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

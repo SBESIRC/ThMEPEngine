@@ -228,7 +228,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         IsWire =true;
                     }
                     else
-                        this.ConductorUse = config.FireDistributionTrunk;
+                        this.ConductorUse = config.FireDistributionBranchCircuiCables;
                 }
                 else
                 {

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.DrainageSystemAG.Models;
 using ThMEPWSS.Model;
 
@@ -329,6 +330,47 @@ namespace ThMEPWSS.DrainageSystemAG
                 }
             }
             return resList;
+        }
+    
+        public static DBText CreateDBText(string str, Point3d position, string layerName, string styleName)
+        {
+            double _textHeight1_50 = 175;//文字高度 在图纸比例 1：50
+            double _textHeight1_100 = 350;//文字高度 在图纸比例 1：100
+            double _textHeight1_150 = 525;//文字高度 在图纸比例 1：150
+            double height = _textHeight1_50;
+            switch (SetServicesModel.Instance.drawingScale)
+            {
+                case EnumDrawingScale.DrawingScale1_50:
+                    height = _textHeight1_50;
+                    break;
+                case EnumDrawingScale.DrawingScale1_100:
+                    height = _textHeight1_100;
+                    break;
+                case EnumDrawingScale.DrawingScale1_150:
+                    height = _textHeight1_150;
+                    break;
+            }
+            DBText infotext = new DBText()
+            {
+                TextString = str,
+                Height = height,
+                WidthFactor = 0.7,
+                HorizontalMode = TextHorizontalMode.TextLeft,
+                Oblique = 0,
+                Position = position,
+                Rotation = 0,
+            };
+            if (!string.IsNullOrEmpty(layerName))
+                infotext.Layer = layerName;
+            if (!string.IsNullOrEmpty(styleName))
+            {
+                var styleId = DrawUtils.GetTextStyleId(styleName);
+                if (null != styleId && styleId.IsValid)
+                {
+                    infotext.TextStyleId = styleId;
+                }
+            }
+            return infotext;
         }
     }
 }

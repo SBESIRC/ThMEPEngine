@@ -7,6 +7,7 @@ using Linq2Acad;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -22,7 +23,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var thPDSDistBox = new ThPDSLoad
             {
-                ID = CreateDistBoxID(marks, distBoxKey, distBoxData.EffectiveName),
+                ID = CreateDistBoxID(marks, distBoxKey, distBoxData),
                 InstalledCapacity = AnalysisPower(marks, out _, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
@@ -35,7 +36,6 @@ namespace TianHua.Electrical.PDS.Service
             {
                 BasePoint = ThPDSPoint3dService.ToPDSPoint3d(distBoxData.Position),
             });
-            thPDSDistBox.ID.BlockName = distBoxData.EffectiveName;
             foreach (var str in marks)
             {
                 thPDSDistBox.ID.Description += StringClean(str);
@@ -67,7 +67,7 @@ namespace TianHua.Electrical.PDS.Service
             var searchedString = new List<string>();
             var thPDSLoad = new ThPDSLoad
             {
-                ID = CreateLoadID(marks, distBoxKey, loadData.EffectiveName, searchedString),
+                ID = CreateLoadID(marks, distBoxKey, loadData, searchedString),
                 InstalledCapacity = AnalysisPower(marks, out var needCopy, out var frequencyConversion),
                 LoadTypeCat_1 = loadData.Cat_1,
                 LoadTypeCat_2 = loadData.Cat_2,
@@ -108,6 +108,38 @@ namespace TianHua.Electrical.PDS.Service
                 });
             }
 
+            if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger)
+            {
+                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                {
+                    var N = 0;
+                    switch (thPDSLoad.ID.BlockName)
+                    {
+                        case "E-BDB111":
+                        case "＄equip_U＄00000102":
+                        case "＄equip_U＄00000109":
+                            N = 1;
+                            break;
+                        case "E-BDB112":
+                        case "＄equip_U＄00000103":
+                            N = 2;
+                            break;
+                        case "E-BDB114":
+                        case "＄equip_U＄00000104":
+                            N = 4;
+                            break;
+                    }
+                    thPDSLoad.InstalledCapacity.HighPower = N * PDSProject.Instance.projectGlobalConfiguration.ACChargerPower;
+                }
+            }
+            else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
+            {
+                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                {
+                    thPDSLoad.InstalledCapacity.HighPower = PDSProject.Instance.projectGlobalConfiguration.DCChargerPower;
+                }
+            }
+
             if (needCopy)
             {
                 attributesCopy = loadData.EffectiveName;
@@ -133,7 +165,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     else
                     {
-                        thPDSLoad.ID.LoadID = str;
+                        thPDSLoad.ID.LoadID = StringFilter(str);
                     }
                 }
                 else
@@ -175,6 +207,7 @@ namespace TianHua.Electrical.PDS.Service
                         ? distBoxData.Attributes[ThPDSCommon.LOAD_ID] : "",
                     Description = distBoxData.Attributes.ContainsKey(ThPDSCommon.DESCRIPTION)
                         ? distBoxData.Attributes[ThPDSCommon.DESCRIPTION] : "",
+                    DefaultDescription = distBoxData.DefaultDescription,
                     // 电动机及负载标注 直接存块Id
                 },
                 InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
@@ -234,11 +267,12 @@ namespace TianHua.Electrical.PDS.Service
             return thPDSLoad;
         }
 
-        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, string blockName)
+        private ThPDSID CreateDistBoxID(List<string> infos, List<string> distBoxKey, ThPDSBlockReferenceData blockData)
         {
             var id = new ThPDSID
             {
-                BlockName = blockName
+                BlockName = blockData.EffectiveName,
+                DefaultDescription = blockData.DefaultDescription,
             };
             var idMarks = new List<string>();
             var circuitMarks = new List<string>();
@@ -309,11 +343,12 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         private ThPDSID CreateLoadID(List<string> infos, List<string> distBoxKey,
-            string blockName, List<string> searchedString)
+            ThPDSBlockReferenceData blockData, List<string> searchedString)
         {
             var id = new ThPDSID
             {
-                BlockName = blockName,
+                BlockName = blockData.EffectiveName,
+                DefaultDescription = blockData.DefaultDescription,
             };
             var panelIDs = new List<string>();
             var circuitIDs = new List<string>();
@@ -722,6 +757,20 @@ namespace TianHua.Electrical.PDS.Service
                     return ThPDSFireLoad.Unknown;
                 }
             }
+        }
+
+        private string StringFilter(string str)
+        {
+            str = str.Replace(" ", "");
+            str = str.Replace("(", "");
+            str = str.Replace("（", "");
+            str = str.Replace(")", "");
+            str = str.Replace("）", "");
+            if (str.Equals("E"))
+            {
+                str = "";
+            }
+            return str;
         }
     }
 }

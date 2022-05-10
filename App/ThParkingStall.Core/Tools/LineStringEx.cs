@@ -80,9 +80,24 @@ namespace ThParkingStall.Core.Tools
         }
         public static bool PartInCommon(this LineString lstr1, LineString lstr2)
         {
+            if(lstr1 == null || lstr2 == null) return false;
             var intSection = lstr1.Intersection(lstr2);
             if (intSection.Length >0 ) return true;
             else return false;
+        }
+        public static List<LineSegment> GetVaildParts(this IEnumerable<LineString> lstrs,Polygon area)
+        {
+            var VaildParts = new List<LineSegment>();
+            foreach(var lstr in lstrs)
+            {
+                var intSection = lstr.Intersection(area.Shell);
+                if (intSection.Length > 0)
+                {
+                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
+                }
+            }
+            return VaildParts;
         }
         // 合并一堆linestring
         public static Geometry Union(this List<LineString> linestrings)
@@ -112,7 +127,7 @@ namespace ThParkingStall.Core.Tools
             var geos = LSTR_Union.Polygonize();
             return geos.ToList();
         }
-        public static List<Polygon> GetPolygons(this LineString linestring, List<LineString> others)
+        public static List<Polygon> GetPolygons(this LineString linestring, IEnumerable<LineString> others)
         {
             var list = new List<LineString> { linestring };
             list.AddRange(others);

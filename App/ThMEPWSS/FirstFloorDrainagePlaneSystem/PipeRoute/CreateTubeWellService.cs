@@ -14,6 +14,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
     public class CreateTubeWellService
     {
+        public double scale = 1;
         double routeDis = 1500;
         double shortedDis = 400;
         List<RouteModel> routes;
@@ -27,13 +28,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var usefulRoutes = routes.Where(x => x.connecLine != null).ToList();
             var routeDic = GroupRoutes(usefulRoutes);
             var resLst = ClassifyRoutes(routeDic);
-            var tubeWellPts = new List<Point3d>();
+            var tubeWellPts = new List<KeyValuePair<VerticalPipeType, Point3d>>();
             foreach (var routeLst in resLst)
             {
-                tubeWellPts.Add(CalTubeWellPt(usefulRoutes));
+                tubeWellPts.Add(new KeyValuePair<VerticalPipeType, Point3d>(routeLst.First().verticalPipeType, CalTubeWellPt(usefulRoutes)));
             }
             Print(tubeWellPts);
-            usefulRoutes.ForEach(x => GeometryUtils.ShortenPolyline(x.route, shortedDis));
+            usefulRoutes.ForEach(x => x.route = GeometryUtils.ShortenPolyline(x.route, shortedDis));
 
             return usefulRoutes;
         }
@@ -50,16 +51,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     x.route.ReverseCurve();
                 return x.route.EndPoint;
             }).ToList();
-            if (routeEndPts.Count == 1)
-            {
-                return routeEndPts.First();
-            }
-            else
+            var pt = routeEndPts.First();
+            if (routeEndPts.Count >= 1)
             {
                 var firPt = routeEndPts.First();
                 var secPt = routeEndPts.Last();
-                return new Point3d((firPt.X + secPt.X) / 2, (firPt.Y + secPt.Y) / 2, 0);
+                pt = new Point3d((firPt.X + secPt.X) / 2, (firPt.Y + secPt.Y) / 2, 0);
             }
+            var polyline = routes.First().route;
+            var dir = (polyline.GetPoint3dAt(polyline.NumberOfVertices - 1) - polyline.GetPoint3dAt(polyline.NumberOfVertices - 2)).GetNormal();
+            pt = pt + dir * shortedDis;
+            return pt;
         }
 
         /// <summary>
@@ -122,6 +124,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
+            routeLst.Add(new List<RouteModel>(resLst));
             return routeLst;
         }
 
@@ -153,10 +156,26 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 打印管井
         /// </summary>
         /// <param name="layoutPts"></param>
-        private void Print(List<Point3d> layoutPts)
+        private void Print(List<KeyValuePair<VerticalPipeType, Point3d>> layoutPts)
         {
-            var layoutInfos = layoutPts.Select(x => new KeyValuePair<Point3d, Vector3d>(x, Vector3d.YAxis)).ToList();
-            InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
+            foreach (var pt in layoutPts)
+            {
+                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(pt.Value, Vector3d.YAxis) };
+                InsertBlockService.scaleNum = scale;
+                string layer = "";
+                string blockName = "";
+                if (pt.Key == VerticalPipeType.CondensatePipe || pt.Key == VerticalPipeType.rainPipe)
+                {
+                    layer = ThWSSCommon.OutdoorRainWellLayerName;
+                    blockName = ThWSSCommon.OutdoorRainWellBlockName;
+                }
+                else if (pt.Key == VerticalPipeType.SewagePipe || pt.Key == VerticalPipeType.ConfluencePipe || pt.Key == VerticalPipeType.WasteWaterPipe)
+                {
+                    layer = ThWSSCommon.OutdoorWasteWellLayerName;
+                    blockName = ThWSSCommon.OutdoorWasteWellBlockName;
+                }
+                InsertBlockService.InsertBlock(layoutInfos, layer, blockName);
+            }
         }
     }
 }

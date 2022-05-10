@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -758,7 +759,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var k = e.Clone();
                 k=k.Scale( ScareFactorForCollisionCheck);
                 var conda = Boundary.Contains(k.Envelope.Centroid.Coordinate);
-                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();
+                _tmpobs = _tmpobs.Where(t => t.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, _tmpobs);
                 //var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
                 //if (conda && condb && condc) tmps.Add(e);
                 if (conda && condb)
@@ -776,7 +780,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var k = e.Polyline.Clone();
                 k=k.Scale( ScareFactorForCollisionCheck);
                 var conda = Boundary.Contains(k.Envelope.Centroid);
-                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                //var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, obspls);
+                var _tmpobs = ObstaclesSpatialIndex.SelectCrossingGeometry(k.Envelope.Centroid).Cast<Polygon>().ToList();
+                _tmpobs = _tmpobs.Where(t => t.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+                var condb = !IsInAnyPolys(k.Envelope.Centroid.Coordinate, _tmpobs);
                 //var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
                 //if (conda && condb && condc) tmps.Add(e);
                 if (conda && condb)

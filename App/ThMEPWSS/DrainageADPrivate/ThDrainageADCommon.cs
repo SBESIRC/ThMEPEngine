@@ -10,6 +10,7 @@ namespace ThMEPWSS.DrainageADPrivate
     {
         public static string Layer_EQPM_D = "W-DRAI-EQPM";
         public static string Layer_EQPM = "W-WSUP-EQPM";
+        public static string Layer_NOTE = "W-WSUP-NOTE";
         public static string Layer_DIMS_D = "W-DRAI-DIMS";
         public static string Layer_DIMS = "W-WSUP-DIMS";
         public static string Layer_Bush = "W-BUSH";
@@ -38,6 +39,8 @@ namespace ThMEPWSS.DrainageADPrivate
         public static string BlkName_Casing_AD = "套管系统";
 
         public static string BlkName_Dim = "给水管径50";
+        public static List<double> Radius_Vertical = new List<double> { 25, 50 };
+
         public static string DiameterDN_visi_pre = "DN";
         public static int DiameterDim_move_x = 25;
         public static int DiameterDim_move_y = 30;

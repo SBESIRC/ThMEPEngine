@@ -11,6 +11,7 @@
         public double DemandFactor { get; set; }
         public double PowerFactor { get; set; }
         public ThPDSFireLoad FireLoad { get; set; }
+        public string DefaultDescription{ get; set; }
 
         public ThPDSBlockInfo()
         {

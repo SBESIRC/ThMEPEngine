@@ -61,12 +61,17 @@ namespace ThMEPHVAC.CAD
                 var holeEle = ((mmElevation - 50) / 1000).ToString("0.00");
                 var attr = new Dictionary<string, string> { { "洞口尺寸", "留洞：" + HoleModel.Width.ToString() + "x" + HoleModel.Length.ToString() + "(H)"},
                                                             { "标高", "洞底标高：h+" + holeEle }};
+                // 设置框的角度
                 var obj = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                    layerName, blockName, HoleModel.ValvePosition + holeSelfEleVec, new Scale3d(1, 1, 1), 0, attr);
+                    layerName, blockName, HoleModel.ValvePosition + holeSelfEleVec, new Scale3d(1, 1, 1), -service.ucsAngle, attr);
+                // 设置框内字的角度
+                ThMEPHVACService.SetAttr(obj, attr, -service.ucsAngle);
                 obj.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
                 obj.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
                 obj.SetValveModel(HoleModel.ValveVisibility);
-                obj.SetValveTextRotate(HoleModel.RotationAngle, ThHvacCommon.AI_HOLE_ROTATION);
+                // 洞口块本身问题：
+                // 洞口标注的旋转角度会影响洞口块本身的旋转角度，所以此处插洞口块时需要减去洞口标注的旋转角度
+                obj.SetValveTextRotate(HoleModel.RotationAngle + service.ucsAngle, ThHvacCommon.AI_HOLE_ROTATION);
                 obj.SetValveTextHeight(GetTextHeight(service.dimService.scale), ThHvacCommon.AI_HOLE_TEXT_HEIGHT);
 
                 // 返回图块

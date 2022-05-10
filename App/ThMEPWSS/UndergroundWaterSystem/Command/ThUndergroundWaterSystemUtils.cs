@@ -30,37 +30,24 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
         /// <returns></returns>
         public static Line FindStartLine(Point3d startPt, List<Line> lines)
         {
-            foreach (var l in lines)
-            {
-                if (l.StartPoint.DistanceTo(startPt) < 10)
-                {
-                    return l;
-                }
-                else if (l.EndPoint.DistanceTo(startPt) < 10)
-                {
-                    var tmpPt = l.StartPoint;
-                    l.StartPoint = l.EndPoint;
-                    l.EndPoint = tmpPt;
-                    return l;
-                }
-            }
-            //扩大搜索范围
+            var reslines = new List<Line>();
             double tol = 100;
             foreach (var l in lines)
             {
                 if (l.StartPoint.DistanceTo(startPt) <= tol)
                 {
-                    return l;
+                    reslines.Add(l);
                 }
                 else if (l.EndPoint.DistanceTo(startPt) <= tol)
                 {
                     var tmpPt = l.StartPoint;
                     l.StartPoint = l.EndPoint;
                     l.EndPoint = tmpPt;
-                    return l;
+                    reslines.Add(l);
                 }
             }
-            return null;
+            if (reslines.Count > 0) return reslines.OrderBy(e => e.GetClosestPointTo(startPt, false).DistanceTo(startPt)).First();
+            else return null;
         }
         public static Point3d SelectPoint(string tips)
         {

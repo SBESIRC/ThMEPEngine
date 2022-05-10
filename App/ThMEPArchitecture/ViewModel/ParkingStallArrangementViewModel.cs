@@ -175,6 +175,20 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("RoadWidth");
             }
         }
+        // 建筑物判断容差。将所有建筑物外扩3000做并集，在内缩3000即为建筑外包框
+        private int _BuildingTolerance = 3000;
+        public int BuildingTolerance
+        {
+            get
+            {
+                return _BuildingTolerance;
+            }
+            set
+            {
+                _BuildingTolerance = value;
+                RaisePropertyChanged("BuildingTolerance");
+            }
+        }
 
         //平行于车道方向柱子尺寸
         private int _ColumnSizeOfParalleToRoad = 500; //mm
@@ -498,6 +512,16 @@ namespace ThMEPArchitecture.ViewModel
                 return _D2;
             }
         }
+
+        private static int _BuildingTolerance = 3000;
+        public static int BuildingTolerance
+        {
+            get
+            {
+                if (Setted)return _BuildingTolerance;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -506,6 +530,7 @@ namespace ThMEPArchitecture.ViewModel
             _ParallelSpotWidth = vm.ParallelSpotWidth;
             _VerticalSpotLength = vm.VerticalSpotLength;
             _VerticalSpotWidth = vm.VerticalSpotWidth;
+            _BuildingTolerance = vm.BuildingTolerance;
             Setted = true;
         }
     }

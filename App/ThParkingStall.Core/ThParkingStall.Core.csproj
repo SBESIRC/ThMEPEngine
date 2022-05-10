@@ -32,6 +32,16 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-NET45|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-NET46|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="System" />
@@ -51,6 +61,7 @@
     <Compile Include="InterProcess\SubArea.cs" />
     <Compile Include="InterProcess\InterParameter.cs" />
     <Compile Include="InterProcess\Gene.cs" />
+    <Compile Include="IO\ReadWriteEx.cs" />
     <Compile Include="MPartitionLayout\MCompute.cs" />
     <Compile Include="MPartitionLayout\MDebugTools.cs" />
     <Compile Include="MPartitionLayout\MNTSExtensions.cs" />

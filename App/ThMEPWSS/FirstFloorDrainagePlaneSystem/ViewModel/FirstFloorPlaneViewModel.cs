@@ -10,6 +10,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
 {
     public class FirstFloorPlaneViewModel : NotifyPropertyChangedBase
     {
+        public FirstFloorPlaneViewModel()
+        {
+            SetDirvepipeDimensionType();
+            SetBlockScaleListType();
+        }
+
         /// <summary>
         /// 套管标高
         /// </summary>
@@ -25,6 +31,40 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
                 _drivepipeLevel = value;
                 this.RaisePropertyChanged();
             }
+        }
+
+        /// <summary>
+        /// 出图比例
+        /// </summary>
+        private UListItemData _blockScale { get; set; }
+        public UListItemData BlockScale
+        {
+            get { return _blockScale; }
+            set
+            {
+                _blockScale = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<UListItemData> _blockScaleList = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> BlockScaleList
+        {
+            get { return _blockScaleList; }
+            set
+            {
+                _blockScaleList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private void SetBlockScaleListType()
+        {
+            BlockScaleList.Add(new UListItemData("1:50", 0, 0.5));
+            BlockScaleList.Add(new UListItemData("1:100", 1, 1));
+            BlockScaleList.Add(new UListItemData("1:150", 2, 1.5));
+            BlockScaleList.Add(new UListItemData("1:200", 3, 2));
+            BlockScale = BlockScaleList[1];
         }
 
         /// <summary>
@@ -50,11 +90,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
                 _dirvepipeDimensionList = value;
                 this.RaisePropertyChanged();
             }
-        }
-
-        public FirstFloorPlaneViewModel()
-        {
-            SetDirvepipeDimensionType();
         }
 
         private void SetDirvepipeDimensionType()

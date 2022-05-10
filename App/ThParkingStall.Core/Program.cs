@@ -14,7 +14,7 @@ using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 using Serilog;
 using System.Threading;
-
+using ThParkingStall.Core.IO;
 namespace ThParkingStall.Core
 {
     internal class Program
@@ -73,6 +73,7 @@ namespace ThParkingStall.Core
             }
             for (int iter = 0; iter < IterationCount; iter++)
             {
+                MCompute.CatchedTimes = 0;
                 var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
                 StartSignal.WaitOne();
                 if (LogAllInfo)
@@ -81,7 +82,7 @@ namespace ThParkingStall.Core
                     t_pre = stopWatch.Elapsed.TotalSeconds;
                 }
                 ChromosomeCollection chromosomeCollection;
-                using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("ChromosomeCollection"))//读取
+                using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("ChromosomeCollection", MemoryMappedFileRights.Read))//读取
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
                     {
@@ -116,11 +117,13 @@ namespace ThParkingStall.Core
                     if (LogAllInfo)
                     {
                         Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                        Logger?.Information("Catched:" + MCompute.CatchedTimes.ToString() + "/" + subAreas.Count.ToString());
                         t_pre = stopWatch.Elapsed.TotalSeconds;
                     }
                     ParkingCnts.Add(ParkingCount);
                 }
-                if (LogAllInfo) Logger?.Information("计算完成");
+                //if (LogAllInfo) Logger?.Information("计算完成");
+                    
                 using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("CachedPartitionCnt" + ProcessIndex.ToString()))
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
@@ -133,6 +136,7 @@ namespace ThParkingStall.Core
                         SubAreaParkingCnt.NewCachedPartitionCnt.WriteToStream(writer);
                     }
                 }
+                StartSignal.ReleaseMutex();//发出信号确认完成
                 if (LogAllInfo)
                 {
                     Logger?.Information("输出完成");
@@ -140,8 +144,8 @@ namespace ThParkingStall.Core
                     t_pre = stopWatch.Elapsed.TotalSeconds;
                 }
                 SubAreaParkingCnt.ClearNewAdded();
-                
-                StartSignal.ReleaseMutex();//发出信号确认完成
+                if (IterationCount % 3 == 0)
+                    ReclaimMemory();
             }
             if (LogAllInfo)
             {
@@ -149,6 +153,12 @@ namespace ThParkingStall.Core
                 Logger?.Information($"总用时用时: {stopWatch.Elapsed.TotalSeconds}秒\n");
             }
             stopWatch.Stop();
+        }
+        private static void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
         }
         static int YMain(string[] parameter)
         {

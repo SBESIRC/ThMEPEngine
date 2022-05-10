@@ -45,6 +45,7 @@
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCodeLevelPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorWireNumbersPropertyEditor.cs" />
@@ -84,15 +85,15 @@
     <Compile Include="Project\Module\ThPDSCircuitModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSDistributionBoxModel.cs" />
     <Compile Include="Project\Module\Component\ThPDSTransferSwitchBaseModel.cs" />
-    <Compile Include="Project\Module\Component\ThPDSUESandboxParameterModel.cs" />
+    <Compile Include="Project\ThPDSUESandboxParameterModel.cs" />
     <Compile Include="Project\Module\ThPDSMiniBusbarModel.cs" />
     <Compile Include="Project\PDSProjectVM.cs" />
-    <Compile Include="Project\ThPDSProjectVMGraphInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Converters\RadioUiValueConverter.cs" />
     <Compile Include="Services\GeoExtensions.cs" />
     <Compile Include="Services\PDSItemInfo.cs" />
     <Compile Include="Services\ThPDSCadElementsConvertService.cs" />
+    <Compile Include="Services\ThPDSCADService.cs" />
     <Compile Include="Services\ThPDSCircuitGraphComponentGenerator.cs" />
     <Compile Include="Services\ThPDSComponentBlockInfoService.cs" />
     <Compile Include="Services\ThPDSDistributionPanelConfig.cs" />
@@ -101,6 +102,9 @@
     <Compile Include="ThElectricalPDSUIApp.cs" />
     <Compile Include="UI\ElecSandboxUI.xaml.cs">
       <DependentUpon>ElecSandboxUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserContorls\ThPDSCreateLoad.xaml.cs">
+      <DependentUpon>ThPDSCreateLoad.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml.cs">
       <DependentUpon>ThPDSAssignCircuit2SmallBusbar.xaml</DependentUpon>
@@ -172,6 +176,10 @@
     <Page Include="UI\ElecSandboxUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserContorls\ThPDSCreateLoad.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UserContorls\ThPDSAssignCircuit2SmallBusbar.xaml">
       <Generator>MSBuild:Compile</Generator>

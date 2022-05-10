@@ -17,9 +17,10 @@ namespace ThParkingStall.Core.Tools
             for (int i = 0; i < segLines.Count; i++)
             {
                 seglineIntsecDic.Add(i, new List<int>());
-                for (int j = i; j < segLines.Count; j++)
+                for (int j = 0; j < segLines.Count; j++)
                 {
                     if (i == j) continue;
+                    if (segLines[i].IsVertical() == segLines[j].IsVertical()) continue;
                     if (segLines[i].Intersection(segLines[j]) != null)
                     {
                         seglineIntsecDic[i].Add(j);
@@ -260,7 +261,7 @@ namespace ThParkingStall.Core.Tools
             List<LineSegment> SegLines2 = new List<LineSegment>();
             foreach (var l in SegLines)
             {
-                if (Area.Shell.Intersects(l.ToLineString())) SegLines2.Add(l);
+                if (Area.Shell.Intersects(l.GetLineString())) SegLines2.Add(l);
             }
             return SegLines2;
         }
@@ -270,15 +271,22 @@ namespace ThParkingStall.Core.Tools
             var vaildSegLines = new List<LineSegment>();
             for (int i = 0; i < seglines.Count; ++i)
             {
-                var pts = GetAllIntSecPs(i, seglines, Area, tolProp);
-                var vaildSegLine = new LineSegment(pts.First().Coordinate, pts.Last().Coordinate);
-                if(vaildSegLine.Length > 0) vaildSegLines.Add(vaildSegLine);
+                var vaildSegLine = GetVaildSegLine(i, seglines,Area, tolProp);
+                if(vaildSegLine != null) vaildSegLines.Add(vaildSegLine);
             }
             return vaildSegLines;
         }
+        // tolProp 保留的车位宽的数量
+        public static LineSegment GetVaildSegLine(int idx, List<LineSegment> seglines, Polygon Area, double tolProp )
+        {
+            var pts = GetAllIntSecPs(idx, seglines, Area, tolProp);
+            var vaildSegLine = new LineSegment(pts.First().Coordinate, pts.Last().Coordinate);
+            if (vaildSegLine.Length > 0) return vaildSegLine;
+            else return null;
+        }
         //获取segline中某一跟全部的交点
         //跟外边框的交点选取最外的交点-有效长度
-        private static List<Point> GetAllIntSecPs(int idx, List<LineSegment> segline, Polygon Area,double tolProp = 2)
+        public static List<Point> GetAllIntSecPs(int idx, List<LineSegment> segline, Polygon Area,double tolProp = 2)
         {
             double tol = VMStock.VerticalSpotWidth * tolProp;// 与边界连接线忽略的长度
             var IntSecPoints = new List<Point>();//交点列表
@@ -338,12 +346,126 @@ namespace ThParkingStall.Core.Tools
             else return IntSecPoints.OrderBy(i => i.X).ToList();
         }
         //有效分割线是否满足车道宽
+
+        //有效分割线的准确计算方法
+        public static List<LineSegment> GetVaildLanes(this List<LineSegment> seglines, Polygon Area, MNTSSpatialIndex BoundaryObjectsSPIDX)
+        {
+            var vaildLanes = new List<LineSegment>();
+            for (int i = 0; i < seglines.Count; ++i)
+            {
+                var vaildSegLine = GetVaildLane(i, seglines, Area, BoundaryObjectsSPIDX);
+                vaildLanes.Add(vaildSegLine);
+            }
+            return vaildLanes;
+        }
+        // spIndex 墙线转化为线段，+ 可穿障碍物的spatialindex
+        public static LineSegment GetVaildLane(int idx, List<LineSegment> seglines, Polygon Area, MNTSSpatialIndex BoundaryObjectsSPIDX)
+        {
+            // 获取和地库边界的最远两个交点
+            var segline = seglines[idx];
+            var VerticalDirection = segline.IsVertical();
+            var pts = segline.GetIntSecPointWithWall(Area);
+            var IntSecPoints = GetAllIntSecPs(idx, seglines);
+            var BasePt = new Point(seglines[idx].MidPoint);
+            Point Spt =null;
+            Point Ept = null;
+            LineSegment vaildLane;
+            if (IntSecPoints.Count != 0)
+            {
+                Spt = IntSecPoints.First();
+                Ept = IntSecPoints.Last();
+            }
+            if (pts.Item1!= null)//坐标减少方向有区域交点
+            {
+                if (IntSecPoints.Count != 0) BasePt = IntSecPoints.First();
+                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth-0.05) / 2, segline);
+                var buffer = baseLine.GetHalfBuffer(segline, false);
+                var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
+                var distance = baseLine.ToLineString().Distance(objs)-0.1;
+                if (VerticalDirection) Spt = BasePt.Move(distance, 1);
+                else Spt = BasePt.Move(distance, 2);
+            }
+            if (pts.Item2 != null)//坐标增加方向有区域交点
+            {
+                if (IntSecPoints.Count != 0) BasePt = IntSecPoints.Last();
+                var baseLine = BasePt.LineBuffer((VMStock.RoadWidth - 0.05) / 2, segline);
+                var buffer = baseLine.GetHalfBuffer(segline, true);
+                var objs = new GeometryCollection(BoundaryObjectsSPIDX.SelectCrossingGeometry(buffer).ToArray()).Intersection(buffer);
+                var distance = baseLine.ToLineString().Distance(objs)-0.1;
+                if (VerticalDirection) Ept = BasePt.Move(distance, 0);
+                else Ept = BasePt.Move(distance, 3);
+            }
+            if(Spt!= null && Ept != null)
+            {
+                vaildLane = new LineSegment(Spt.Coordinate, Ept.Coordinate);
+                if (vaildLane.Length > 1) return vaildLane;
+            }
+            return null;
+        }
+
+        public static (Point,Point) GetIntSecPointWithWall(this LineSegment segline, Polygon Area)
+        {
+            var templ = Area.Shell.GetIntersectPts(segline);
+            var VerticalDirection = segline.IsVertical();
+            var midPoint = new Point(segline.MidPoint);
+            Point pt1 = null;//X或者Y坐标比中点小的点
+            Point pt2 = null;//X或者Y坐标比中点大的点
+            if (templ.Count != 0)//初始线和外包框有交点
+            {
+                if (templ.Count == 1)
+                {
+                    var pt = templ.First();
+                    if (VerticalDirection)
+                    {
+                        if (!(midPoint.Y > pt.Y ^ Area.Contains(midPoint))) pt1 = pt;
+                        else pt2 = pt;
+                    }
+                    else
+                    {
+                        if (!(midPoint.X > pt.X ^ Area.Contains(midPoint))) pt1 = pt;
+                        else pt2 = pt;
+                    }
+                }
+                else
+                {
+                    if (VerticalDirection)
+                    {
+                        templ = templ.OrderBy(i => i.Y).ToList();// 垂直order by Y
+                        pt1 = templ.First();
+                        pt2 = templ.Last();
+                    }
+                    else
+                    {
+                        templ = templ.OrderBy(i => i.X).ToList();//水平orderby X
+                        pt1 = templ.First();
+                        pt2 = templ.Last();
+                    }
+                }
+            }
+            return (pt1, pt2);
+        }
+        public static List<Point> GetAllIntSecPs(int idx, List<LineSegment> seglines)//获取分割线交点
+        {
+            var segline = seglines[idx];
+            var VerticalDirection = segline.IsVertical();
+            var IntSecPoints = new List<Point>();//交点列表
+            for (int i = 0; i < seglines.Count; ++i)
+            {
+                if (i == idx) continue;
+                var line2 = seglines[i];
+                var pt = segline.Intersection(line2);
+                if (pt != null) IntSecPoints.Add(new Point(pt));
+            }
+            if (VerticalDirection) return IntSecPoints.OrderBy(i => i.Y).ToList();
+            else return IntSecPoints.OrderBy(i => i.X).ToList();
+        }
         public static bool VaildLaneWidthSatisfied(this List<LineSegment> VaildSegLines, MNTSSpatialIndex BoundarySpatialIndex)
         {
             double tol = VMStock.RoadWidth  -0.1;// 5500 -0.1
             for (int i = 0; i < VaildSegLines.Count; i++)
             {
                 var segline = VaildSegLines[i];
+                if (segline == null) continue;
                 var rect = segline.GetRect(tol);
                 var rst = BoundarySpatialIndex.SelectCrossingGeometry(rect);
                 if (rst.Count > 0)
@@ -403,5 +525,21 @@ namespace ThParkingStall.Core.Tools
             }
         }
 
+        public static Polygon GetHalfBuffer(this LineSegment segline, LineSegment segline2, bool positive)
+        {
+            if (segline.IsVertical() == segline2.IsVertical()) throw (new ArgumentException("Two Line must be perpendicular"));
+            double distance;
+            if (segline.IsVertical())
+            {
+                if (!(segline2.P0.X < segline.P0.X ^ positive)) distance = segline.Distance(segline2.P1);
+                else distance = segline.Distance(segline2.P0);
+            }
+            else
+            {
+                if (!(segline2.P0.Y < segline.P0.Y ^ positive)) distance = segline.Distance(segline2.P1);
+                else distance = segline.Distance(segline2.P0);
+            }
+            return segline.GetHalfBuffer(distance, positive);
+        }
     }
 }

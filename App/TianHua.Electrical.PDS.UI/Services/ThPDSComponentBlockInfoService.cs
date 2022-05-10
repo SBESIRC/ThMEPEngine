@@ -26,7 +26,7 @@ namespace TianHua.Electrical.PDS.UI.Services
 
         public static bool IsMeter(this BlockInfo info)
         {
-            return info.BlockName  is "Meter" or "直接表" or "间接表";
+            return info.BlockName is "Meter" or "直接表" or "间接表" or "CT";
         }
 
         public static bool IsMotor(this BlockInfo info)

@@ -126,6 +126,7 @@ namespace TianHua.Electrical.PDS.Service
             blockData.DemandFactor = row.DemandFactor;
             blockData.PowerFactor = row.PowerFactor;
             blockData.FireLoad = row.FireLoad;
+            blockData.DefaultDescription = row.DefaultDescription;
         }
     }
 }

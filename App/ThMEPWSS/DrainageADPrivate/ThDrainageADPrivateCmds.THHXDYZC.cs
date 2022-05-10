@@ -62,6 +62,16 @@ namespace ThMEPWSS
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThDrainageLayoutWaterHeater", CommandFlags.Modal)]
+        public void ThDrainageTestInsertBlk()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThInsertOutputService.LayoutWaterHeater();
+            }
+        }
+
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThDrainageADPData", CommandFlags.Modal)]
         public void ThDrainageADPData()
@@ -216,6 +226,31 @@ namespace ThMEPWSS
                 var layerNameList = new List<string> { "" };
 
                 ThInsertOutputService.LoadBlockLayerToDocument(acadDatabase.Database, blkNameList, layerNameList);
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThDrainageVpipeData", CommandFlags.Modal)]
+        public void ThDrainageVpipeData()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //画框，提数据，转数据
+                var selectPtsTop = ThSelectFrameUtil.SelectFramePointCollection("框选俯视", "框选俯视");
+                if (selectPtsTop.Count == 0)
+                {
+                    return;
+                }
+
+                var recognize = new ThMEPEngineCore.Engine.ThDrainageVPipeRecognitionEngine()
+                {
+
+                };
+                recognize.RecognizeMS(acadDatabase.Database, selectPtsTop);
+                var result = recognize.Elements.OfType<ThMEPEngineCore.Model.Hvac.ThIfcVirticalPipe>().ToList();
+
+                result.ForEach(x => DrawUtils.ShowGeometry((x.Outline as DBPoint).Position, "l0test", r: 50));
             }
         }
 

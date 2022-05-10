@@ -38,12 +38,11 @@ namespace TianHua.Electrical.PDS.Project.Module
     public class ThPDSProjectGraphNodeMoveTag : ThPDSProjectGraphNodeCompareTag
     {
         public bool MoveFrom { get; set; }
-        public bool MoveTo { get; set; }
+        public ThPDSProjectGraphNode AnotherNode { get; set; }
 
         public ThPDSProjectGraphNodeMoveTag()
         {
             MoveFrom = false;
-            MoveTo = false;
         }
     }
 
@@ -61,24 +60,31 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         //D 描述变化
         public bool TagD { get; set; }
-        //public string SouD { get; set; }
         public string TarD { get; set; }
 
         //F 消防变化
         public bool TagF { get; set; }
-        //public bool SouF { get; set; }
         public bool TarF { get; set; }
 
         //P 功率变化
         public bool TagP { get; set; }
-        //public ThInstalledCapacity SouP { get; set; }
         public ThInstalledCapacity TarP { get; set; }
+
+        //Type 类型变化
+        public bool TagType { get; set; }
+        public PDSNodeType TarType { get; set; }
+
+        //Phase 相数变化
+        public bool TagPhase { get; set; }
+        public ThPDSPhase TarPhase { get; set; }
 
         public ThPDSProjectGraphNodeDataTag()
         {
             TagD = false;
             TagF = false;
             TagP = false;
+            TagType = false;
+            TagPhase = false;
         }
     }
 }

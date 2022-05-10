@@ -6,7 +6,7 @@ using TianHua.Electrical.PDS.Model;
 namespace TianHua.Electrical.PDS.Project.Module
 {
     [Serializable]
-    public class ThPDSProjectGraphEdge : EquatableTaggedEdge<ThPDSProjectGraphNode, ThPDSProjectGraphEdgeCompareTag>
+    public class ThPDSProjectGraphEdge : EquatableTaggedEdge<ThPDSProjectGraphNode, ThPDSProjectGraphEdgeTag>
     {
         public ThPDSCircuit Circuit { get; set; }
         public CircuitDetails Details { get; set; }

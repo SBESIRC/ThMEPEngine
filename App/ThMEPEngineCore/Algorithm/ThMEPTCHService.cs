@@ -126,6 +126,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否为天正引出标注
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHMULTILEADER(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("MULTILEADER");
+        }
+
+        /// <summary>
         /// 炸天正单行文字为CAD单行文字
         /// </summary>
         /// <param name="entity"></param>

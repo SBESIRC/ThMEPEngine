@@ -74,6 +74,30 @@ namespace TianHua.Electrical.PDS.Extension
             }
         }
 
+        public static string Content(this Meter meter)
+        {
+            if (meter.PolesNum == "1P")
+            {
+                return meter.MeterParameter + "A";
+            }
+            else
+            {
+                return "3×" + meter.MeterParameter + "A";
+            }
+        }
+        
+        public static string ContentMT(this CurrentTransformer meter)
+        {
+            if (meter.PolesNum == "1P")
+            {
+                return meter.MeterSwitchType + "A";
+            }
+            else
+            {
+                return "3×" + meter.MeterSwitchType + "A";
+            }
+        }
+
         public static string Content(this TransferSwitch transferSwitch)
         {
             return $"{transferSwitch.Model} {transferSwitch.RatedCurrent}A {transferSwitch.PolesNum}";

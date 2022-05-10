@@ -364,6 +364,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             PRValveDetailSite = new Point3d(pt1.X - 5000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
             WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
             CheckValveSite = new List<Point3d>();//截止阀位置列表
+            PRValveSite = new List<Point3d>();
             WaterMeterSite = new List<Point3d>();//水表位置列表
 
             if (NoValve)

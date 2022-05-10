@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using ThCADExtension;
+using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
 using TianHua.Electrical.PDS.Extension;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 using TianHua.Electrical.PDS.UI.ViewModels;
 
-namespace TianHua.Electrical.PDS.UI.Project.Module.Component
+namespace TianHua.Electrical.PDS.UI.Project
 {
     public class ThPDSUESandboxParameterModel : NotifyPropertyChangedBase
     {
@@ -51,7 +47,30 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
                 }
             }
         }
-
+        public int ACChargerPower
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.ACChargerPower;
+            set
+            {
+                if (value != ACChargerPower)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.ACChargerPower = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public int DCChargerPower
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DCChargerPower;
+            set
+            {
+                if (value != DCChargerPower)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.DCChargerPower = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
         public double CurrentOfTrunkDistribution
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.TreeTrunkDistributionCurrent;

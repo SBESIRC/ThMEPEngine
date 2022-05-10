@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
                     Title="参数设置" SizeToContent="Manual" 
-                    Height="420" Width="180" MaxWidth="180" MaxHeight="420"
+                    Height="430" Width="180" MaxWidth="180" MaxHeight="430"
              mc:Ignorable="d">
     <Window.Resources>
         <converters:SewageWasteWaterConvert x:Key="sewageWasteRadioCheckd"/>

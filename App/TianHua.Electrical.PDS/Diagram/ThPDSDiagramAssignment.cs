@@ -97,12 +97,12 @@ namespace TianHua.Electrical.PDS.Diagram
                         var circuit = node.Details.CircuitFormType as OneWayInCircuit;
 
                         // 隔离开关
-                        if (circuit.isolatingSwitch == null)
+                        if (circuit.Component == null)
                         {
                             break;
                         }
                         var srcIsolatingSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_ISOLATING_SWITCH).First();
-                        var componentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()];
+                        var componentName = ThPDSComponentMap.ComponentMap[circuit.Component.ComponentType.GetDescription()];
                         var firstPosition = srcIsolatingSwitch.Position;
                         if (!componentName.Equals(srcIsolatingSwitch.BlockName))
                         {
@@ -111,7 +111,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcIsolatingSwitch.Erase();
                         }
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
-                        QLText.TextString = circuit.isolatingSwitch.Content();
+                        if(circuit.Component is IsolatingSwitch isolatingSwitch)
+                        {
+                            QLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if(circuit.Component is Breaker breaker)
+                        {
+                            QLText.TextString = breaker.Content();
+                        }
 
                         // 电能表
                         // To do
@@ -140,7 +147,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // 隔离开关1
                         var firstIsolatingSwitch = srcIsolatingSwitchs[0];
-                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch1.ComponentType.GetDescription()];
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.Component1.ComponentType.GetDescription()];
                         if (!firstComponentName.Equals(firstIsolatingSwitch.BlockName))
                         {
                             var firstPosition = firstIsolatingSwitch.Position;
@@ -149,11 +156,18 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstIsolatingSwitch.Erase();
                         }
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = circuit.isolatingSwitch1.Content();
+                        if(circuit.Component1 is IsolatingSwitch isolatingSwitch)
+                        {
+                            firstQLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if (circuit.Component1 is Breaker breaker)
+                        {
+                            firstQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
-                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch2.ComponentType.GetDescription()];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.Component2.ComponentType.GetDescription()];
                         if (!secondComponentName.Equals(secondIsolatingSwitch.BlockName))
                         {
                             var secondPosition = secondIsolatingSwitch.Position;
@@ -162,7 +176,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             secondIsolatingSwitch.Erase();
                         }
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = circuit.isolatingSwitch2.Content();
+                        if (circuit.Component2 is IsolatingSwitch isolatingSwitch2)
+                        {
+                            secondQLText.TextString = isolatingSwitch2.Content();
+                        }
+                        else if (circuit.Component2 is Breaker breaker)
+                        {
+                            secondQLText.TextString = breaker.Content();
+                        }
 
                         // 转换开关
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
@@ -202,7 +223,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // 隔离开关1
                         var firstIsolatingSwitch = srcIsolatingSwitchs[0];
-                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch1.ComponentType.GetDescription()];
+                        var firstComponentName = ThPDSComponentMap.ComponentMap[circuit.Component1.ComponentType.GetDescription()];
                         if (!firstComponentName.Equals(firstIsolatingSwitch.BlockName))
                         {
                             var firstPosition = firstIsolatingSwitch.Position;
@@ -211,11 +232,18 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstIsolatingSwitch.Erase();
                         }
                         var firstQLText = QLTexts[0];
-                        firstQLText.TextString = circuit.isolatingSwitch1.Content();
+                        if (circuit.Component1 is IsolatingSwitch isolatingSwitch)
+                        {
+                            firstQLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if (circuit.Component1 is Breaker breaker)
+                        {
+                            firstQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关2
                         var secondIsolatingSwitch = srcIsolatingSwitchs[1];
-                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch2.ComponentType.GetDescription()];
+                        var secondComponentName = ThPDSComponentMap.ComponentMap[circuit.Component2.ComponentType.GetDescription()];
                         if (!secondComponentName.Equals(secondIsolatingSwitch.BlockName))
                         {
                             var secondPosition = secondIsolatingSwitch.Position;
@@ -224,11 +252,18 @@ namespace TianHua.Electrical.PDS.Diagram
                             secondIsolatingSwitch.Erase();
                         }
                         var secondQLText = QLTexts[1];
-                        secondQLText.TextString = circuit.isolatingSwitch2.Content();
+                        if (circuit.Component2 is IsolatingSwitch isolatingSwitch2)
+                        {
+                            secondQLText.TextString = isolatingSwitch2.Content();
+                        }
+                        else if (circuit.Component2 is Breaker breaker)
+                        {
+                            secondQLText.TextString = breaker.Content();
+                        }
 
                         // 隔离开关3
                         var thirdIsolatingSwitch = srcIsolatingSwitchs[2];
-                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch3.ComponentType.GetDescription()];
+                        var thirdComponentName = ThPDSComponentMap.ComponentMap[circuit.Component3.ComponentType.GetDescription()];
                         if (!thirdComponentName.Equals(thirdIsolatingSwitch.BlockName))
                         {
                             var thirdPosition = thirdIsolatingSwitch.Position;
@@ -237,7 +272,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             thirdIsolatingSwitch.Erase();
                         }
                         var thirdQLText = QLTexts[2];
-                        thirdQLText.TextString = circuit.isolatingSwitch3.Content();
+                        if (circuit.Component3 is IsolatingSwitch isolatingSwitch3)
+                        {
+                            thirdQLText.TextString = isolatingSwitch3.Content();
+                        }
+                        else if (circuit.Component3 is Breaker breaker)
+                        {
+                            thirdQLText.TextString = breaker.Content();
+                        }
 
                         // 转换开关1
                         var srcTransferSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_TRANSFER_SWITCH).First();
@@ -286,7 +328,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
                         // 隔离开关
                         var srcIsolatingSwitch = components.Where(c => c.Name == ThPDSCommon.DEFAULT_ISOLATING_SWITCH_1).First();
-                        var componentName = ThPDSComponentMap.ComponentMap[circuit.isolatingSwitch.ComponentType.GetDescription()];
+                        var componentName = ThPDSComponentMap.ComponentMap[circuit.Component.ComponentType.GetDescription()];
                         if (!componentName.Equals(srcIsolatingSwitch.BlockName))
                         {
                             var firstPosition = srcIsolatingSwitch.Position;
@@ -295,7 +337,14 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcIsolatingSwitch.Erase();
                         }
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL_25_1P).First();
-                        QLText.TextString = circuit.isolatingSwitch.Content();
+                        if (circuit.Component is IsolatingSwitch isolatingSwitch)
+                        {
+                            QLText.TextString = isolatingSwitch.Content();
+                        }
+                        else if (circuit.Component is Breaker breaker)
+                        {
+                            QLText.TextString = breaker.Content();
+                        }
 
                         break;
                     }
@@ -605,17 +654,18 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
                             var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            CTText.TextString = meter.Content();
+                            if (meter is CurrentTransformer ct)
+                            {
+                                MTText.TextString = ct.Content();
+                            }
                         }
 
                         // 元器件3
@@ -735,17 +785,18 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
                             var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            CTText.TextString = meter.Content();
+                            if(meter is CurrentTransformer ct)
+                            {
+                                MTText.TextString = ct.Content();
+                            }
                         }
 
                         // 元器件2

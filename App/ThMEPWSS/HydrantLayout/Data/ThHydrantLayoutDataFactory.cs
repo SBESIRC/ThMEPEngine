@@ -153,9 +153,13 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
         {
+            var layer = new List<string>() { ThHydrantCommon.Layer_Vertical };
+
             var vertical = new ThVerticalPipeExtractService()
             {
-                LayerFilter = new List<string>() { ThHydrantCommon.Layer_Vertical },
+                LayerFilterTch = layer,
+                LayerFilterBlk = layer,
+                LayerFilterCircle = layer,
                 Radius = ThHydrantCommon.Radius_Vertical,
             };
             vertical.Extract(database, framePts);

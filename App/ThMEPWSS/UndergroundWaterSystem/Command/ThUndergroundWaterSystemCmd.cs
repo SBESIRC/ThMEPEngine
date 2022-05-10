@@ -69,7 +69,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     ThImportService thImportService = new ThImportService();
                     thImportService.Import();
                     //
-                    if(LogInfo) LogInfos("计算开始", true);
+                    if (LogInfo) LogInfos("计算开始", true);
                     //楼层框定定位点
                     var StoryFrameBasePoint = new List<Point3d>();
                     var frames = FramedReadUtil.ReadAllFloorFramed();
@@ -89,7 +89,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                             InfoModel.FloorList[i].FloorArea.Vertices().Cast<Point3d>().ToArray());
                         ext.AddExtents(pl.GeometricExtents);
                     }
-                    OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt,LogInfo);
+                    OptimizedDataReader dataReader = new OptimizedDataReader(ext, startPt, LogInfo);
                     StartMarkInfo = dataReader.StartMarkInfo;
                     if (LogInfo) LogInfos("数据提取完成");
                     for (int i = 0; i < InfoModel.FloorList.Count; i++)
@@ -118,7 +118,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Command
                     }
                     //构造树
                     var pipeTree = new ThPipeTree(startPt, InfoModel.FloorList, risers, mt);
-                    if (pipeTree.RootNode == null) return;
+                    if (pipeTree.RootNode == null)
+                    {
+                        Active.Editor.WriteLine("请输入有效数据：请检测横管等元素图层是否正确，请确认横管是否为天正元素，请确认是否有其它数据格式问题……");
+                        return;
+                    }
                     if (LogInfo) LogInfos("开始绘图");
                     //通过树绘制系统图 
                     var systemMapeService = new ThSystemMapService();

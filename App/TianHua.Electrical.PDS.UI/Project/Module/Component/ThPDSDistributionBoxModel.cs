@@ -32,13 +32,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [DisplayName("功率")]
         [Category("配电箱参数")]
-        public double InstallCapacity
+        public double Power
         {
             get => _node.Details.HighPower;
             set
             {
                 _node.Details.HighPower = value;
-                OnPropertyChanged(nameof(InstallCapacity));
+                OnPropertyChanged(nameof(Power));
             }
         }
 
@@ -61,6 +61,7 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _node.SetDemandFactor(value);
                 OnPropertyChanged(nameof(DemandFactor));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
@@ -74,15 +75,16 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             {
                 _node.SetPowerFactor(value);
                 OnPropertyChanged(nameof(PowerFactor));
+                OnPropertyChanged(nameof(CalculateCurrent));
             }
         }
 
         [ReadOnly(true)]
         [Category("配电箱参数")]
         [DisplayName("计算电流")]
-        public double CalculateCurrent
+        public string CalculateCurrent
         {
-            get => _node.Load.CalculateCurrent;
+            get => string.Format("{0}", _node.Load.CalculateCurrent);
         }
 
         [Category("配电箱参数")]

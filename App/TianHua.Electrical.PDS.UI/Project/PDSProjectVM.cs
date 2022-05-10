@@ -1,8 +1,5 @@
-﻿using QuikGraph;
+﻿using System;
 using TianHua.Electrical.PDS.UI.ViewModels;
-using TianHua.Electrical.PDS.Project.Module;
-using System;
-using TianHua.Electrical.PDS.UI.Project.Module.Component;
 
 namespace TianHua.Electrical.PDS.UI.Project
 {
@@ -21,8 +18,6 @@ namespace TianHua.Electrical.PDS.UI.Project
         internal PDSProjectVM() { }
         public static PDSProjectVM Instance { get { return instance; } }
         //-------------SINGLETON-----------------
-
-        public ThPDSProjectVMGraphInfo graphInfo;
 
         public Action ProjectViewModelChanged;
 

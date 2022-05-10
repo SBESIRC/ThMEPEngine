@@ -194,14 +194,14 @@ namespace ThMEPHVAC.Model
         private static HoleModifyParam GetHoleParam(ObjectId id, string holeName)
         {
             var param = new HoleModifyParam();
-            ThDuctPortsDrawService.GetHoleDynBlockProperity(id, out Point3d insertP, out double len, out double width, out double rotate_angle);
+            ThDuctPortsDrawService.GetHoleDynBlockProperity(id, out Point3d insertP, out double len, out double width, out double rotateAngle);
             param.handle = id.Handle;
             param.holeName = holeName;
             param.holeLayer = id.GetBlockLayer();
             param.insertP = insertP;
             param.len = len;
             param.width = width;
-            param.rotateAngle = rotate_angle;
+            param.rotateAngle = rotateAngle;
             return param;
         }
         private static MufflerModifyParam GetMufflerParam(ObjectId id, string mufflerName)

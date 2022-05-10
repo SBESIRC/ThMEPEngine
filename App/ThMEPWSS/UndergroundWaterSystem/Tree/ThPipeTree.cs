@@ -37,7 +37,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
                 var line = new Line(l.StartPoint, l.EndPoint);
                 line.Linetype = l.Linetype;
                 tmpLine.Add(line);
-            }           
+            }
             //处理横管数据
             var pipeHandleService = new ThPipeHandleService();
             var seriesLines = pipeHandleService.FindSeriesLine(startPt, tmpLine);
@@ -45,6 +45,8 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             //var cleanedLines = pipeHandleService.CleanLines(seriesLines, mt);
             var points = new List<Point3d>();
             riserInfo.ForEach(e => points.AddRange(e.RiserPts));
+            seriesLines.ForEach(e => { points.Add(e.StartPoint); points.Add(e.EndPoint); });
+            points = RemoveDuplicatePts(points);
             InterrptLineByPoints(seriesLines, points);
             RemoveDuplicatedLines(seriesLines);
             //todo3:在立管处打断cleanedLines
@@ -54,7 +56,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
             var valveList = floorList[FloorIndex].FloorInfo.ValveList;
             var flushpointList = floorList[FloorIndex].FloorInfo.FlushPointList;
             //构建PointTree
-            var pointTree = new ThPointTree(startPt, seriesLines, riserInfo, markList, dimList,valveList, flushpointList);
+            var pointTree = new ThPointTree(startPt, seriesLines, riserInfo, ref markList, ref dimList, ref valveList, ref flushpointList);
+            floorList[FloorIndex].FloorInfo.MarkList = markList;
+            floorList[FloorIndex].FloorInfo.DimList = dimList;
+            floorList[FloorIndex].FloorInfo.ValveList = valveList;
+            floorList[FloorIndex].FloorInfo.FlushPointList = flushpointList;
             //构建RootNode
             RootNode = CreateRootNode(pointTree);
         }
@@ -70,11 +76,11 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         }
         public void InsertToNode(ThTreeNode<ThPipeModel> node, List<ThTreeNode<ThPointModel>> nodes)
         {
-            foreach(var n in nodes)
+            foreach (var n in nodes)
             {
-                foreach(var c in n.Children)
+                foreach (var c in n.Children)
                 {
-                    if(!c.Item.IsTraversal)
+                    if (!c.Item.IsTraversal)
                     {
                         //插入一个
                         var lastNode = FindLastNode(c);
@@ -95,15 +101,15 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public ThTreeNode<ThPointModel> FindLastNode(ThTreeNode<ThPointModel> startNode)
         {
             ThTreeNode<ThPointModel> retNode = null;
-            if(startNode.Children.Count == 0)
+            if (startNode.Children.Count == 0)
             {
                 retNode = startNode;
                 return retNode;
             }
             int teeCount = 0;
-            foreach(var child in startNode.Children)
+            foreach (var child in startNode.Children)
             {
-                if(teeCount <= child.Item.TeeCount)
+                if (teeCount <= child.Item.TeeCount)
                 {
                     teeCount = child.Item.TeeCount;
                     retNode = child;
@@ -114,13 +120,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Tree
         public List<ThTreeNode<ThPointModel>> GetPointList(ThTreeNode<ThPointModel> rootNode, ThTreeNode<ThPointModel> lastNode)
         {
             var retNodes = new List<ThTreeNode<ThPointModel>>();
-            if(lastNode.Parent == null || lastNode == rootNode)
+            if (lastNode.Parent == null || lastNode == rootNode)
             {
                 lastNode.Item.IsTraversal = true;
                 retNodes.Add(lastNode);
                 return retNodes;
             }
-            if(lastNode.Parent == rootNode)
+            if (lastNode.Parent == rootNode)
             {
                 lastNode.Item.IsTraversal = true;
                 rootNode.Item.IsTraversal = true;

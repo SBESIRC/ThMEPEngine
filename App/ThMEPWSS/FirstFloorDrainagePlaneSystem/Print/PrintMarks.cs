@@ -9,13 +9,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
 {
     public static class PrintMarks
     {
-        public static void PrintNoteLines(List<Polyline> lines)
+        public static void PrintNoteLines(List<Polyline> lines, double scale)
         {
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertConnectPipe(lines, ThWSSCommon.DrivepipeNoteLayerName, null);
         }
 
-        public static void PrintText(List<DBText> txts)
+        public static void PrintText(List<DBText> txts, double scale)
         {
+            InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertText(txts, ThWSSCommon.DrivepipeNoteLayerName, null);
         }
     }

@@ -4,21 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Mathematics;
 
 namespace ThParkingStall.Core.Tools
 {
     public static class LineSegmentEx
     {
-        public static LineString ToLineString(this LineSegment line)
+        public static LineString GetLineString(this LineSegment line)
         {
+            if (line == null) return null;
             var coors = new Coordinate[] { line.P0.Copy(), line.P1.Copy()};
             return new LineString(coors);
         }
-        public static List<LineString> ToLineStrings(this List<LineSegment> lines)
+        public static List<LineString> ToLineStrings(this List<LineSegment> lines,bool IgnoreNull = true)
         {
             var LineStrings = new List<LineString>();
-            lines.ForEach(line => LineStrings.Add(line.ToLineString()));
+            foreach (var line in lines)
+            {
+                var lstr = line.GetLineString();
+                if (IgnoreNull && lstr == null) continue;
+                LineStrings.Add(lstr);
+            }
             return LineStrings;
+        }
+        public static Vector2D GetVector(this LineSegment line)
+        {
+            return new Vector2D(line.P0, line.P1);
         }
         public static LineSegment Clone(this LineSegment line)
         {
@@ -97,7 +108,7 @@ namespace ThParkingStall.Core.Tools
         public static List<Polygon> GetPolygons(this List<LineSegment> lineSegments,List<LineString> rest = null)
         {
             var linestrings = new List<LineString>();
-            lineSegments.ForEach(line => linestrings.Add(line.ToLineString()));
+            lineSegments.ForEach(line => linestrings.Add(line.GetLineString()));
             if(rest != null)
             {
                 linestrings.AddRange(rest);
@@ -109,6 +120,23 @@ namespace ThParkingStall.Core.Tools
             return lineSegments.GetPolygons(new List<LineString> { rest });
         }
 
+        public static LineSegment Move(this LineSegment lineSegment,double distance)
+        {
+            var newlineSeg = new LineSegment();
+            var P0 = lineSegment.P0;
+            var P1 = lineSegment.P1;
+            if (lineSegment.IsVertical())
+            {
+                newlineSeg.P0 = new Coordinate(P0.X + distance, P0.Y);
+                newlineSeg.P1 = new Coordinate(P1.X + distance, P1.Y);
+            }
+            else
+            {
+                newlineSeg.P0 = new Coordinate(P0.X , P0.Y + distance);
+                newlineSeg.P1 = new Coordinate(P1.X , P1.Y + distance);
+            }
+            return newlineSeg;
+        }
         public static LineSegment GetVaildPart(this LineSegment lineSegment,Polygon subArea)
         {
             double tol = 0.1;
