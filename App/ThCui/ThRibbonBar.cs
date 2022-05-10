@@ -722,6 +722,16 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THJSZC_SMALL",
                     "IDI_THCAD_THJSZC_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 户型详图
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("户型详图",
+                    "天华户型详图",
+                    "THHXDYZC",
+                    "天华户型详图",
+                    "IDI_THCAD_THHXDYZC_SMALL",
+                    "IDI_THCAD_THHXDYZC_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
         }
 

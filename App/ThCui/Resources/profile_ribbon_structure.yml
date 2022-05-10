@@ -124,6 +124,8 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "给水轴测"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "户型详图"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACCALCULATION"
     name: "HVACCALCULATION"
