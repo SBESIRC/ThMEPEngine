@@ -240,9 +240,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             stopWatch.Start();
             List<MPChromosome> selected = new List<MPChromosome>();
             var currentMutexList = new List<Mutex>();
+            string logSubProcess = "0";
+            if (ParameterStock.LogSubProcess) logSubProcess = "1";
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "0", "1");
+                var proc = CreateSubProcess(idx, logSubProcess, "1");
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));

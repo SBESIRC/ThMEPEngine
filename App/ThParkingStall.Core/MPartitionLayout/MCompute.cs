@@ -15,6 +15,7 @@ namespace ThParkingStall.Core.MPartitionLayout
     public static class MCompute
     {
         public static int CatchedTimes = 0;
+        public static bool LogInfo = false;
         public static Serilog.Core.Logger Logger;
         public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, bool display = false)
         {

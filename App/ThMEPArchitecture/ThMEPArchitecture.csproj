@@ -89,6 +89,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPArchitectureApp.cs" />
     <Compile Include="ThParkingStallArrangement.THDXQYFG.cs" />
+    <Compile Include="ViewModel\CommandSetParam.cs" />
     <Compile Include="ViewModel\ParkingStallArrangementViewModel.cs" />
   </ItemGroup>
   <ItemGroup>

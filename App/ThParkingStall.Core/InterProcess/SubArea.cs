@@ -38,10 +38,13 @@ namespace ThParkingStall.Core.InterProcess
             if (SubAreaParkingCnt.Contains(this) && !Calculate)
             {
                 Count = SubAreaParkingCnt.GetParkingNumber(this);
-                //lock (lockObj)
-                //{
-                //    MCompute.CatchedTimes += 1;
-                //}
+                if (MCompute.LogInfo)
+                {
+                    lock (lockObj)
+                    {
+                        MCompute.CatchedTimes += 1;
+                    }
+                }
             }
             else
             {

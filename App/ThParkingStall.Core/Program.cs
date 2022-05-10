@@ -46,6 +46,7 @@ namespace ThParkingStall.Core
             var Logger = new Serilog.LoggerConfiguration().WriteTo
                                 .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
             MCompute.Logger = Logger;
+            MCompute.LogInfo = LogAllInfo;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var t_pre = 0.0;

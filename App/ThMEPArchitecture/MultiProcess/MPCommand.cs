@@ -44,6 +44,8 @@ namespace ThMEPArchitecture.MultiProcess
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "MPLog.txt");
 
+        
+
         //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
         //    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
 
@@ -73,6 +75,11 @@ namespace ThMEPArchitecture.MultiProcess
         public override void SubExecute()
         {
             ParameterStock.Set(ParameterViewModel);
+            if (ParameterStock.LogMainProcess)
+            {
+                Logger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+            }
             Utils.SetSeed();
             try
             {

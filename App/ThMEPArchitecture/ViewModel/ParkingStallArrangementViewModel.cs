@@ -522,6 +522,9 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
+
+        public static bool LogMainProcess = false;
+        public static bool LogSubProcess = false;
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
