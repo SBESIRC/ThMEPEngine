@@ -250,7 +250,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var ObstacleBounds = buffered.Union().Get<Polygon>(true);
             var ObstacleBoundsGeo = new MultiPolygon(ObstacleBounds.ToArray());
             TightBoundaries = ObstacleBoundsGeo.Buffer(-(ParameterStock.RoadWidth / 2)).Get<Polygon>(true);
-            BoundingBoxes = TightBoundaries.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
+            BoundingBoxes = ObstacleBounds.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
                 Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
             var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2));//边界内缩
             wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值
