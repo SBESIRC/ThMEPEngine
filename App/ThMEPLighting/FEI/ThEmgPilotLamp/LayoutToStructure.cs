@@ -229,7 +229,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             //计算排布点
             var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
-
+            var lineDir = (ePt - sPt).GetNormal();
             //计算排布方向
             var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
             var compareDir = (pt - layoutPt).GetNormal();
@@ -239,7 +239,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             if (!CheckLayoutPointInMaxPolyline(layoutPt, outDir))
                 return null;
-            if (!CheckLayoutLineCanLayout(layoutPt, layoutLine, outDir, layoutDir))
+            if (!CheckLayoutLineCanLayout(layoutPt, layoutLine, outDir, lineDir))
                 return null;
             return (layoutPt, layoutDir);
         }
