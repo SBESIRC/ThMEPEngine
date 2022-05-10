@@ -41,7 +41,7 @@ namespace TianHua.Electrical.PDS.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
                 curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            curves.OfType<Curve>().Where(o => o.GetLength() > 1.0).ForEach(o =>
+            curves.OfType<Curve>().Where(o => o.Bounds.HasValue && o.GetLength() > 1.0).ForEach(o =>
             {
                 if (o is Line || o is Arc || o is Polyline)
                 {

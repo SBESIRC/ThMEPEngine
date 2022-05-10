@@ -108,6 +108,7 @@ namespace TianHua.Electrical.PDS.Service
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
             TextIndex = new ThCADCoreNTSSpatialIndex(TextDic.Keys.ToCollection());
 
+            var removeLines = new List<Line>();
             // 多回路标注情形
             lines.OfType<Line>().ForEach(l =>
             {
@@ -119,6 +120,8 @@ namespace TianHua.Electrical.PDS.Service
                     .ToList();
                 if (obliqueLines.Count > 1)
                 {
+                    removeLines.AddRange(obliqueLines);
+                    removeLines.Add(l);
                     var crossPoints = new List<Point3d>();
                     obliqueLines.ForEach(o =>
                     {
@@ -151,9 +154,11 @@ namespace TianHua.Electrical.PDS.Service
                             return;
                         }
 
-                        if (info.Contains("/"))
+                        var charRegex = new Regex(@"[W].{1,5}[/].{0,2}[W]");
+                        var charMatch = charRegex.Match(info);
+                        if (charMatch.Success)
                         {
-                            info = info.Replace("/", "~");
+                            info = ThPDSReplaceStringService.ReplaceLastChar(info, "/", "~");
                         }
                         if (info.Contains("~"))
                         {
@@ -187,7 +192,14 @@ namespace TianHua.Electrical.PDS.Service
                         circuitNumbers.Add(Tuple.Create(info, TextDic[o]));
                     });
 
-                    crossPoints = crossPoints.OrderBy(x => (x - startPoint).DotProduct(direction)).ToList();
+                    if((crossPoints.First() - crossPoints.Last()).GetNormal().DotProduct(direction) < 0.1)
+                    {
+                        crossPoints = crossPoints.OrderByDescending(x => x.Y).ToList();
+                    }
+                    else
+                    {
+                        crossPoints = crossPoints.OrderBy(x => (x - startPoint).DotProduct(direction)).ToList();
+                    }
                     for (var j = 0; j < crossPoints.Count && j < circuitNumbers.Count; j++)
                     {
                         PointDic.Add(ToDbPoint(crossPoints[j]),
@@ -195,6 +207,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             });
+            LineIndex.Update(new DBObjectCollection(), removeLines.ToCollection());
 
             markBlocks.ForEach(o =>
             {

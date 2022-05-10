@@ -121,10 +121,16 @@ namespace TianHua.Electrical.PDS.Engine
                             block.Explode(objs);
                             var motor = objs.OfType<BlockReference>().First();
                             GeometryMap.Add(block, motor);
-                            return;
+                        }
+                        else
+                        {
+                            GeometryMap.Add(block, block.BlockOBB());
                         }
                     }
-                    GeometryMap.Add(x, x);
+                    else
+                    {
+                        GeometryMap.Add(x, x);
+                    }
                 });
                 LoadIndex = new ThCADCoreNTSSpatialIndex(GeometryMap.Values.ToCollection());
 
@@ -609,7 +615,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (!string.IsNullOrEmpty(attributesCopy))
                     {
-                        node.Loads[0].AttributesCopy = attributesCopy;
+                        newNode.Loads[0].AttributesCopy = attributesCopy;
                     }
 
                     var newEdge = ThPDSGraphService.CreateEdge(node, newNode, tuple.Item3.Texts, DistBoxKey);

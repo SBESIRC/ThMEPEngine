@@ -88,22 +88,22 @@ namespace TianHua.Electrical.PDS.Engine
                     var attributes = br.ObjectId.GetAttributesInBlockReference();
                     attributes.Values.ForEach(o =>
                     {
-                        if (!checker)
+                        if (!checker && !string.IsNullOrEmpty(o))
                         {
                             for (var i = 0; i < PropertyFilter.Count; i++)
                             {
                                 if (DistBoxKey.Contains(PropertyFilter[i]))
                                 {
-                                    // 对配电箱进行首字匹配
-                                    if (o.IndexOf(PropertyFilter[i]) == 0)
+                                    // 匹配配电箱
+                                    if (o.Contains(PropertyFilter[i]))
                                     {
                                         checker = true;
                                     }
                                 }
                                 else
                                 {
-                                    // 对其余负载进行完全匹配
-                                    if (o == PropertyFilter[i])
+                                    // 匹配负载
+                                    if (o.Contains(PropertyFilter[i]))
                                     {
                                         checker = true;
                                     }

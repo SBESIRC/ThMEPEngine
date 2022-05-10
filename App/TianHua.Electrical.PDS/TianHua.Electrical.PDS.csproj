@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
+    <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />
     <Compile Include="Extension\ThPDSCircuitExtension.cs" />
     <Compile Include="Model\ThPDSControlCircuitData.cs" />
     <Compile Include="Model\ThPDSFireLoad.cs" />
@@ -43,8 +44,9 @@
     <Compile Include="Service\ThPDSGraphVerifyService.cs" />
     <Compile Include="Service\ThPDSPoint3dService.cs" />
     <Compile Include="Service\ThPDSPushDataService.cs" />
+    <Compile Include="Service\ThPDSReplaceStringService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />
-    <Compile Include="Engine\ThPDSZoomEngine.cs" />
+    <Compile Include="Engine\ThPDSZoomService.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
     <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />

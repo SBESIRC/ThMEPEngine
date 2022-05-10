@@ -45,7 +45,7 @@ namespace TianHua.Electrical.PDS.Service
             var engine = new ThPDSCreateGraphEngine();
             var unionGraph = engine.Execute();
             var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
-            var zoomEngine = new ThPDSZoomEngine();
+            var zoomEngine = new ThPDSZoomService();
             zoomEngine.Zoom(node, projectGraph);
         }
 
@@ -57,15 +57,15 @@ namespace TianHua.Electrical.PDS.Service
             var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
             if (projectGraph.Vertices.Count() > 0)
             {
-                var zoomEngine = new ThPDSZoomEngine();
+                var zoomEngine = new ThPDSZoomService();
                 zoomEngine.Zoom(projectGraph.Vertices.First(), projectGraph);
             }
         }
 
-        public void ImmediateZoom(ThPDSProjectGraphNode node)
+        public void ImmediatelyZoom(ThPDSProjectGraphNode node)
         {
-            var zoomEngine = new ThPDSZoomEngine();
-            zoomEngine.Zoom(node);
+            var zoomEngine = new ThPDSZoomService();
+            zoomEngine.ImmediatelyZoom(node);
         }
 
         public void AddLoadDimension(ThPDSProjectGraphNode node)

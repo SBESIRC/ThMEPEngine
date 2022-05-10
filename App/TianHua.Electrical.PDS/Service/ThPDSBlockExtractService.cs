@@ -70,11 +70,16 @@ namespace TianHua.Electrical.PDS.Service
                     }
 
                     var checker = false;
-                    foreach (var value in blockData.Attributes.Values)
+                    foreach (var item in blockData.Attributes)
                     {
+                        if(!item.Key.Equals("BOX"))
+                        {
+                            continue;
+                        }
+                        var value = item.Value;
                         for (var i = 0; i < distBoxKey.Count; i++)
                         {
-                            if (value.IndexOf(distBoxKey[i]) == 0 && !checker)
+                            if (value.Contains(distBoxKey[i]) && !checker)
                             {
                                 if(value.Contains("APE") && !distBoxKey[i].Equals("APE"))
                                 {

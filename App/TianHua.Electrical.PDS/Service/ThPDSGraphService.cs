@@ -125,6 +125,7 @@ namespace TianHua.Electrical.PDS.Service
             var service = new ThPDSMarkAnalysisService();
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
+            AssignCircuitNumber(edge, circuitAssign);
 
             if (source.NodeType != PDSNodeType.CableCarrier
                 && target.NodeType != PDSNodeType.Load
@@ -135,6 +136,7 @@ namespace TianHua.Electrical.PDS.Service
                 if (!string.IsNullOrEmpty(anotherSrcPanelID))
                 {
                     anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                    AssignCircuitNumber(anotherEdge, circuitAssign);
                     if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber.Last()))
                     {
                         edge = anotherEdge;
@@ -160,6 +162,23 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
+            if (edge.Source.Loads.Count > 0
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
+                && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
+            {
+                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
+            }
+
+            if (edge.Target.NodeType == PDSNodeType.Unkown)
+            {
+                ThPDSLayerService.Assign(edge.Target.Loads[0]);
+            }
+            return edge;
+        }
+
+        private static void AssignCircuitNumber(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, bool circuitAssign)
+        {
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
             if (circuitAssign && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
@@ -177,20 +196,6 @@ namespace TianHua.Electrical.PDS.Service
                     edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
                 }
             }
-
-            if (edge.Source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
-                && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
-            {
-                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
-            }
-
-            if (edge.Target.NodeType == PDSNodeType.Unkown)
-            {
-                ThPDSLayerService.Assign(edge.Target.Loads[0]);
-            }
-            return edge;
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,

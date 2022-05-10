@@ -110,7 +110,7 @@ namespace TianHua.Electrical.PDS.Service
 
             if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ACCharger)
             {
-                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                if (thPDSLoad.InstalledCapacity.HighPower == 0)
                 {
                     var N = 0;
                     switch (thPDSLoad.ID.BlockName)
@@ -134,7 +134,7 @@ namespace TianHua.Electrical.PDS.Service
             }
             else if (thPDSLoad.LoadTypeCat_2 == ThPDSLoadTypeCat_2.DCCharger)
             {
-                if(thPDSLoad.InstalledCapacity.HighPower == 0)
+                if (thPDSLoad.InstalledCapacity.HighPower == 0)
                 {
                     thPDSLoad.InstalledCapacity.HighPower = PDSProject.Instance.projectGlobalConfiguration.DCChargerPower;
                 }
@@ -297,12 +297,19 @@ namespace TianHua.Electrical.PDS.Service
                             if (match1.Success || match2.Success)
                             {
                                 circuitMarks.Add(m.Value);
+                                infos[i] = infos[i].Replace(m.Value, "");
                             }
                             else
                             {
-                                idMarks.Add(m.Value);
+                                if (blockData.Attributes.ContainsKey("BOX"))
+                                {
+                                    if (m.Value.Contains(blockData.Attributes["BOX"]))
+                                    {
+                                        idMarks.Add(m.Value);
+                                    }
+                                    infos[i] = infos[i].Replace(m.Value, "");
+                                }
                             }
-                            infos[i] = infos[i].Replace(m.Value, "");
                         }
                         break;
                     }
@@ -321,20 +328,21 @@ namespace TianHua.Electrical.PDS.Service
                     return;
                 }
 
+                var value = ThPDSReplaceStringService.ReplaceLastChar(o, "/", "-");
                 var check1 = "-W[a-zA-Z]+[-0-9]+";
                 var regex1 = new Regex(@check1);
-                var match1 = regex1.Match(o);
+                var match1 = regex1.Match(value);
                 var check2 = "-[0-9]W[0-9]{3}[-][0-9]";
                 var regex2 = new Regex(@check2);
-                var match2 = regex2.Match(o);
+                var match2 = regex2.Match(value);
                 if (match1.Success)
                 {
-                    id.SourcePanelID.Add(o.Replace(match1.Value, ""));
+                    id.SourcePanelID.Add(value.Replace(match1.Value, ""));
                     id.CircuitID.Add(match1.Value.Replace("-", ""));
                 }
                 else if (match2.Success)
                 {
-                    id.SourcePanelID.Add(o.Replace(match2.Value, ""));
+                    id.SourcePanelID.Add(value.Replace(match2.Value, ""));
                     id.CircuitID.Add(match2.Value.Remove(0, 1));
                 }
             });
@@ -427,7 +435,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     if (str.Contains(key))
                     {
-                        var value = str.Replace("/", "-");
+                        var value = ThPDSReplaceStringService.ReplaceLastChar(str, "/", "-");
                         var check1 = "-W[a-zA-Z]+[-0-9]+";
                         var regex1 = new Regex(@check1);
                         var match1 = regex1.Match(value);
