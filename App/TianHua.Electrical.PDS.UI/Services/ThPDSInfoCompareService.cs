@@ -127,7 +127,17 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
-                    if (tag is ThPDSProjectGraphEdgeCompositeTag)
+                    if (tag is null)
+                    {
+                        items.Add(new()
+                        {
+                            Edge = edge,
+                            Background = PDSColorBrushes.None,
+                            Img = PDSImageSources.None,
+                            Hint = "无变化",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeCompositeTag)
                     {
                         //throw new NotSupportedException();
                     }
@@ -138,7 +148,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Edge = edge,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = "回路编号变化，原编号" + projectGraphEdgeIdChangeTag.ChangedLastCircuitID,
+                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID), 
                         });
                     }
                     else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)
@@ -148,7 +158,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Edge = edge,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = "此回路被移动",
+                            Hint = "此回路连接的负载变化",
                         });
                     }
                     else if (tag is ThPDSProjectGraphEdgeAddTag)
@@ -183,13 +193,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                     else
                     {
-                        items.Add(new()
-                        {
-                            Edge = edge,
-                            Background = PDSColorBrushes.None,
-                            Img = PDSImageSources.None,
-                            Hint = "无变化",
-                        });
+                        throw new NotSupportedException();
                     }
                 }
 
@@ -262,7 +266,17 @@ namespace TianHua.Electrical.PDS.UI.Services
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
-                    if (tag is ThPDSProjectGraphNodeCompositeTag)
+                    if (tag is null)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.None,
+                            Img = PDSImageSources.None,
+                            Hint = "无变化",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphNodeCompositeTag)
                     {
                         //throw new NotSupportedException();
                     }
@@ -273,7 +287,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Node = node,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = $"负载编号变化，原编号{projectGraphNodeIdChangeTag.ChangedID}",
+                            Hint = string.Format("负载编号变化，原编号{0}", projectGraphNodeIdChangeTag.ChangedID),
                         });
                     }
                     else if (tag is ThPDSProjectGraphNodeExchangeTag projectGraphNodeExchangeTag)
@@ -283,18 +297,31 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Node = node,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = $"此负载与{projectGraphNodeExchangeTag.ExchangeToID}交换",
+                            Hint = string.Format("此负载与{0}交换", projectGraphNodeExchangeTag.ExchangeToID),
                         });
                     }
                     else if (tag is ThPDSProjectGraphNodeMoveTag projectGraphNodeMoveTag)
                     {
-                        items.Add(new()
+                        if (projectGraphNodeMoveTag.MoveFrom)
                         {
-                            Node = node,
-                            Background = PDSColorBrushes.Moderate,
-                            Img = PDSImageSources.Moderate,
-                            Hint = $"此负载由{projectGraphNodeMoveTag}移动至此",
-                        });
+                            items.Add(new()
+                            {
+                                Node = node,
+                                Background = PDSColorBrushes.Moderate,
+                                Img = PDSImageSources.Moderate,
+                                Hint = string.Format("此负载已移动至{0}", projectGraphNodeMoveTag.AnotherNode.Load.ID.LoadID),
+                            });
+                        }
+                        else
+                        {
+                            items.Add(new()
+                            {
+                                Node = node,
+                                Background = PDSColorBrushes.Moderate,
+                                Img = PDSImageSources.Moderate,
+                                Hint = string.Format("此负载由{0}移动至此", projectGraphNodeMoveTag.AnotherNode.Load.ID.LoadID),
+                            });
+                        }
                     }
                     else if (tag is ThPDSProjectGraphNodeAddTag)
                     {
@@ -323,29 +350,73 @@ namespace TianHua.Electrical.PDS.UI.Services
                             items.Add(new()
                             {
                                 Node = node,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "描述变化",
+                                Background = PDSColorBrushes.Safe,
+                                Img = PDSImageSources.Safe,
+                                Hint = "描述文本变化",
                             });
                         }
                         if (dataTag.TagF)
                         {
+                            if (node.Load.FireLoad)
+                            {
+                                items.Add(new()
+                                {
+                                    Node = node,
+                                    Background = PDSColorBrushes.Servere,
+                                    Img = PDSImageSources.Servere,
+                                    Hint = "负载变为消防负荷",
+                                });
+                            }
+                            else
+                            {
+                                items.Add(new()
+                                {
+                                    Node = node,
+                                    Background = PDSColorBrushes.Mild,
+                                    Img = PDSImageSources.Mild,
+                                    Hint = "负载变为非消防负荷",
+                                });
+                            }
+                        }
+                        if (dataTag.TagP)
+                        {
+                            string hint = string.Empty;
+                            if (!node.Details.IsDualPower && !dataTag.TarP.IsDualPower)
+                            {
+                                hint = string.Format("功率由{0}kW调整到{1}kW", dataTag.TarP.HighPower, node.Details.HighPower);
+                            }
+                            else
+                            {
+                                hint = string.Format("功率由{0}kW调整到{1}kW；功率由{2}kW调整到{3}kW",
+                                    dataTag.TarP.HighPower, node.Details.HighPower,
+                                    dataTag.TarP.LowPower, node.Details.LowPower);
+                            }
                             items.Add(new()
                             {
                                 Node = node,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "消防变化",
+                                Background = PDSColorBrushes.Moderate,
+                                Img = PDSImageSources.Moderate,
+                                Hint = hint,
                             });
                         }
-                        if (dataTag.TagP)
+                        if (dataTag.TagType)
                         {
                             items.Add(new()
                             {
                                 Node = node,
-                                Background = PDSColorBrushes.Servere,
-                                Img = PDSImageSources.Servere,
-                                Hint = "功率变化",
+                                Background = PDSColorBrushes.Mild,
+                                Img = PDSImageSources.Mild,
+                                Hint = string.Format("负载类型由{0}变化为{1}", dataTag.TarType.GetDescription(), node.Type.GetDescription()),
+                            });
+                        }
+                        if (dataTag.TagPhase)
+                        {
+                            items.Add(new()
+                            {
+                                Node = node,
+                                Background = PDSColorBrushes.Mild,
+                                Img = PDSImageSources.Mild,
+                                Hint = "负载相数发生变化",
                             });
                         }
                     }
@@ -381,13 +452,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                     else
                     {
-                        items.Add(new()
-                        {
-                            Node = node,
-                            Background = PDSColorBrushes.None,
-                            Img = PDSImageSources.None,
-                            Hint = "无变化",
-                        });
+                        throw new NotSupportedException();
                     }
                 }
 
