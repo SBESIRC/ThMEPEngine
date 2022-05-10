@@ -124,7 +124,15 @@ namespace TianHua.Electrical.PDS.Engine
                         }
                         else
                         {
-                            GeometryMap.Add(block, block.BlockOBB());
+                            var obb = block.BlockOBB();
+                            if(!obb.Bounds.HasValue)
+                            {
+                                GeometryMap.Add(block, block);
+                            }
+                            else
+                            {
+                                GeometryMap.Add(block, block.BlockOBB());
+                            }
                         }
                     }
                     else
