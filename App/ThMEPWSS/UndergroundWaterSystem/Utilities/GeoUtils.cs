@@ -29,6 +29,10 @@ namespace ThMEPWSS.UndergroundWaterSystem.Utilities
             sw.Close();
             fs.Close();
         }
+        public static Line GetProjectLine(this Line line)
+        {
+            return new Line(new Point3d(line.StartPoint.X, line.StartPoint.Y, 0), new Point3d(line.EndPoint.X, line.EndPoint.Y, 0));
+        }
         private static void TraverseConnectedLinesWithHinderpts(
             ref List<Line> emilinatedSelfLines,Point3d point,double tolBrokenLine,Vector3d SelfLine,
             ref List<Line> lines,int i,double toldegree, ref List<Line> connectedLines)

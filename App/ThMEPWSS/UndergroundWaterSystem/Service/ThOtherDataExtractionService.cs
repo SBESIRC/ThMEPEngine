@@ -142,7 +142,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
 
                 foreach (var blk in complexed_blocks)
                 {
-                    var pt = blk.GeometricExtents.CenterPoint();
                     var entities = blk.ExplodeToDBObjectCollection().OfType<Entity>();
                     foreach (var ent in entities)
                     {
@@ -166,9 +165,18 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
         private List<BlockReference> RecognizeTianZhengValve(Entity entity,string[]names)
         {
             var results = new List<BlockReference>();
-            var brs = entity.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
-            foreach (var br in brs)
+            var brs = new List<BlockReference>();
+            try
             {
+                brs = entity.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList();
+            }
+            catch
+            {
+                /*有的天正元素炸开报错*/
+                return results;
+            }
+            foreach (var br in brs)
+            {           
                 string blkname = br.Database == null ? br.Name : br.GetEffectiveName();
                 foreach (var name in names)
                 {

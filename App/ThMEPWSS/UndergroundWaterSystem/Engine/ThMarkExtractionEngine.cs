@@ -67,16 +67,16 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
                                 if (ts.TextString.Length == 0) ts = t;
                                 else ts.TextString += t.TextString;
                             }
-                            else if (ent is Line l) textLines.Add(new Line(l.StartPoint, l.EndPoint));
-                            else if (ent is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => new Line(e.StartPoint, e.EndPoint)));
+                            else if (ent is Line l) textLines.Add(l.GetProjectLine());
+                            else if (ent is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
                         }
                         if (ts.TextString.Length > 0) textList.Add(ts);
                     }
                     else
                     {
                         if (entity is DBText t) textList.Add(t);
-                        else if (entity is Line l) textLines.Add(new Line(l.StartPoint, l.EndPoint));
-                        else if (entity is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => new Line(e.StartPoint, e.EndPoint)));
+                        else if (entity is Line l) textLines.Add(l.GetProjectLine());
+                        else if (entity is Polyline pl) textLines.AddRange(pl.ToLines().Select(e => e.GetProjectLine()));
                     }
                 }
                 results.AddRange(CombMarkList(textList, textLines));
@@ -237,16 +237,19 @@ namespace ThMEPWSS.UndergroundWaterSystem.Engine
         }
         public ThMarkModel CombMark(DBText text, List<Line> lines)
         {
+            double tol = 1000;
             var retMark = new ThMarkModel();
             var textPt = new Point3d(text.Position.X, text.Position.Y, 0.0);
             Line tmpLine = null;
+            var foundlines = new List<Line>();
             foreach (var l in lines)
             {
-                if (l.GetClosestPointTo(textPt, false).DistanceTo(textPt) < 200.0)
+                if (l.GetClosestPointTo(textPt, false).DistanceTo(textPt) < tol)
                 {
-                    tmpLine = l;
+                    foundlines.Add(l);
                 }
             }
+            if (foundlines.Count > 0) tmpLine = foundlines.OrderBy(e => e.GetClosestPointTo(textPt, false).DistanceTo(textPt)).First();
             retMark.MarkText = text.TextString;
             retMark.Poistion = textPt;
             if (tmpLine != null)
