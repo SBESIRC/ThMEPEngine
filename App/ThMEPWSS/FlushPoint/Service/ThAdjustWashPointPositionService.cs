@@ -3,11 +3,11 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -18,6 +18,12 @@ namespace ThMEPWSS.FlushPoint.Service
         private ThCADCoreNTSSpatialIndex ParkingStallSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex ObstacleSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex RoomSpatialIndex { get; set; }
+        // 用于查询柱子旁边的墙
+        private const double MaximumWallThickness = 2000;
+        // 用于过滤面积很小的Polygon
+        private const double SmallAreaTolerance = 1.0;
+        // 用于过滤点位布在柱子上最小边的长度
+        private const double CanLayoutEdgeMinimumLength = 20.0;
         /// <summary>
         /// 车位宽度 2.5m
         /// </summary>
@@ -57,14 +63,202 @@ namespace ThMEPWSS.FlushPoint.Service
                 if (objs.Count > 0)
                 {
                     var column = objs.Cast<Polyline>().OrderBy(o => o.Distance(pt)).First();
-                    washPoints[i] = Adjust(column); 
+                    // 获取柱子所有边的朝向
+                    var outerEdgeDirs = BuildEdgeOuterDirection(column);                    
+                    washPoints[i] = Adjust(outerEdgeDirs); 
                 }
             }
         }
-        private Point3d Adjust(Polyline column)
+
+        private List<Tuple<string, Point3d, Point3d, Vector3d>> BuildEdgeOuterDirection(Polyline column)
         {
-            // 获取柱子所有边的朝向
-            var outerEdgeDirs = BuildEdgeOuterDirection(column);
+            var results = new List<Tuple<string, Point3d, Point3d, Vector3d>>();
+            var walls = GetNeibourWalls(column);
+            var objs = GetCanLayoutAreas(column, walls);
+            var polys = GetPolylines(objs);
+            polys.ForEach(p =>
+            {
+                for (int i = 0; i < p.NumberOfVertices; i++)
+                {
+                    var lineSegment = p.GetLineSegmentAt(i);
+                    if (lineSegment.Length < CanLayoutEdgeMinimumLength)
+                    {
+                        continue;
+                    }
+                    var dir = lineSegment.StartPoint.GetVectorTo(lineSegment.EndPoint).GetPerpendicularVector();
+                    if (dir.IsCodirectionalTo(Vector3d.ZAxis) || dir.IsCodirectionalTo(Vector3d.ZAxis.Negate()))
+                    {
+                        continue;
+                    }
+                    var position = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
+                    var extendPt = position + dir.GetNormal().MultiplyBy(5.0);
+                    if(!column.Contains(extendPt) && !IsIn(extendPt,walls) &&!IsOnWalls(extendPt,2.0))
+                    {
+                        // 布置点不能在柱子里，不能在墙里，不能在墙线上
+                        results.Add(Tuple.Create(Guid.NewGuid().ToString(), lineSegment.StartPoint, lineSegment.EndPoint, dir));
+                        continue;
+                    }
+                    // 换个方向
+                    extendPt = position + dir.Negate().GetNormal().MultiplyBy(5.0);
+                    if (!column.Contains(extendPt) && !IsIn(extendPt, walls) && !IsOnWalls(extendPt, 2.0))
+                    {
+                        // 布置点不能在柱子里，不能在墙里，不能在墙线上
+                        results.Add(Tuple.Create(Guid.NewGuid().ToString(), lineSegment.StartPoint, lineSegment.EndPoint, dir));
+                        continue;
+                    }
+                }
+            });
+            polys.ForEach(p => p.Dispose());
+            return results.OrderByDescending(o=>o.Item2.DistanceTo(o.Item3)).ToList();
+        }
+
+        private List<Polyline> GetPolylines(DBObjectCollection objs)
+        {
+            return objs.OfType<Entity>().SelectMany(o =>
+            {
+                var results = new List<Polyline>();
+                if (o is Polyline polyline)
+                {
+                    results.Add(polyline);
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    results.Add(mPolygon.Shell());
+                    results.AddRange(mPolygon.Holes());
+                }
+                return results;
+            }).ToList();
+        }
+
+        private DBObjectCollection GetCanLayoutAreas(Polyline column,DBObjectCollection walls)
+        {
+            if(walls.Count>0)
+            {
+                return Subtraction(column, walls);
+            }
+            else
+            {
+                var results = new DBObjectCollection();
+                results.Add(column.Clone() as Polyline);
+                return results;
+            }
+        }
+
+        private DBObjectCollection GetNeibourWalls(Polyline column)
+        {
+            var length = GetMaximumLengthSegment(column);
+            var bufferL = Math.Max(length, MaximumWallThickness);
+            var objs = column.Buffer(bufferL, false);
+            var polys = objs.OfType<Polyline>().Where(o => o.Area > 1.0).OrderBy(o => o.Area);
+            return polys.Count() > 0 ? QueryWalls(polys.First()) : QueryWalls(column);
+        }
+
+        private DBObjectCollection Subtraction(Entity entity, DBObjectCollection objs)
+        {
+            var garbages = new DBObjectCollection();
+            var polygon1s = Difference(entity, objs, false);
+            garbages = garbages.Union(polygon1s);
+
+            var polygon2s = MakeValid(polygon1s); //解决自交的Case
+            garbages = garbages.Union(polygon2s);
+
+            var polygon3s = Simplify(polygon2s); //合并重复线
+            garbages = garbages.Union(polygon2s);
+
+            var results = Normalize(polygon3s); //合并重复线
+
+            garbages = garbages.Difference(results);
+            garbages.MDispose();
+            return results;
+        }
+
+        private DBObjectCollection Difference(Entity polygon,
+            DBObjectCollection polygons,bool keepHole)
+        {
+            var results = ThCADCoreNTSEntityExtension.Difference(
+                polygon, polygons, keepHole);            
+            return Clean(results);
+        }
+
+        private DBObjectCollection Simplify(DBObjectCollection polygons)
+        {            
+            var simplifer = new ThPolygonalElementSimplifier();
+            var results = simplifer.Simplify(polygons);            
+            return Clean(results);
+        }
+
+        private DBObjectCollection Normalize(DBObjectCollection polygons)
+        {
+            var simplifer = new ThPolygonalElementSimplifier();
+            var results = simplifer.Normalize(polygons);
+            return Clean(results);
+        }
+
+        private DBObjectCollection Clean(DBObjectCollection objs)
+        {
+            var garbages = new DBObjectCollection();
+            garbages = garbages.Union(objs);
+            var results = RemoveDBpoints(objs); // 过滤 DBPoint
+            results = results.FilterSmallArea(SmallAreaTolerance); //清除面积为零
+            results = DuplicatedRemove(results); //去重
+            garbages = garbages.Difference(results);
+            garbages.MDispose();
+            return results;
+        }
+
+        private DBObjectCollection MakeValid(DBObjectCollection polygons)
+        {
+            var simplifer = new ThPolygonalElementSimplifier();            
+            var results =  simplifer.MakeValid(polygons);            
+            return Clean(results);
+        }
+
+        private DBObjectCollection RemoveDBpoints(DBObjectCollection objs)
+        {
+            return objs.OfType<Entity>().Where(e => !(e is DBPoint)).ToCollection();
+        }
+
+        private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
+        {
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
+        }
+
+        private DBObjectCollection QueryWalls(Entity polygon)
+        {
+            return WallSpatialIndex.SelectCrossingPolygon(polygon);
+        }
+
+        private double GetMaximumLengthSegment(Polyline poly)
+        {
+            double maxLength = 0.0;
+            for(int i=0;i<poly.NumberOfVertices-1;i++)
+            {
+                var segmentType = poly.GetSegmentType(i);
+                if (segmentType == SegmentType.Line)
+                {
+                    var lineSeg = poly.GetLineSegmentAt(i);
+                    if(lineSeg.Length> maxLength)
+                    {
+                        maxLength = lineSeg.Length;
+                    }
+                }                
+            }
+            return maxLength;
+        }      
+        
+        private bool IsIn(Point3d pt ,DBObjectCollection polygons)
+        {
+            return polygons.OfType<Entity>().Where(e => e.EntityContains(pt)).Any();
+        }
+
+        private bool IsOnWalls(Point3d pt,double length=1.0)
+        {
+            var outline = pt.CreateSquare(length);
+            return QueryWalls(outline).Count>0;
+        }
+
+        private Point3d Adjust(List<Tuple<string, Point3d, Point3d, Vector3d>> outerEdgeDirs)
+        {            
             // step1: 过滤没有与车位碰撞的边
             var noConflictParkingStalls = GetNotConflictToParkintStallEdges(outerEdgeDirs);
             if(noConflictParkingStalls.Count==1)
@@ -146,28 +340,7 @@ namespace ThMEPWSS.FlushPoint.Service
             // 按照距离柱子边的长度，从小到大排序
             return edges.OrderBy(o => DistanceToNearestWallEdge(o.Item2.GetMidPt(o.Item3), o.Item4, detectLength)).ToList();
         }
-
-        private List<Tuple<string,Point3d, Point3d, Vector3d>> BuildEdgeOuterDirection(Polyline column)
-        {
-            var results = new List<Tuple<string, Point3d, Point3d, Vector3d>>();
-            for (int i = 0; i < column.NumberOfVertices; i++)
-            {
-                var lineSegment = column.GetLineSegmentAt(i);
-                if (lineSegment.Length < 1e-4)
-                {
-                    continue;
-                }
-                var dir = lineSegment.StartPoint.GetVectorTo(lineSegment.EndPoint).GetPerpendicularVector();
-                var position = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
-                var extendPt = position + dir.GetNormal().MultiplyBy(5.0);
-                if (column.Contains(extendPt))
-                {
-                    dir = dir.Negate();
-                }
-                results.Add(Tuple.Create(Guid.NewGuid().ToString(),lineSegment.StartPoint, lineSegment.EndPoint, dir));
-            }
-            return results;
-        }
+        
         private List<Tuple<string, Point3d, Point3d, Vector3d>> Query(List<Tuple<string, Point3d, Point3d, Vector3d>> edges,List<string> ids)
         {
             return edges.Where(o => ids.Contains(o.Item1)).ToList();
