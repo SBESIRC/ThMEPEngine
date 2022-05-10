@@ -7,6 +7,8 @@
         public readonly static string IsolatePropertyName = "Isolated";
         public readonly static string CategoryPropertyName = "Category";
         public readonly static string SwitchPropertyName = "Switch";
+        public readonly static string InstallMethodPropertyName = "LayoutType";
+        public readonly static string DensityPropertyName = "Weight";
         /// <summary>
         /// 布置属性：可布/不可布/必布
         /// </summary>

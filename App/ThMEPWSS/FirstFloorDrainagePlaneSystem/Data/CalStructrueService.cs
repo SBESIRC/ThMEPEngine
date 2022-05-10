@@ -396,6 +396,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             var dxfNames = new string[]
             {
                  RXClass.GetClass(typeof(Polyline)).DxfName,
+                 RXClass.GetClass(typeof(Line)).DxfName,
             };
             var layerNames = new string[] { ThWSSCommon.OutdoorSewagePipeLayerName };
             var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
@@ -405,9 +406,21 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    var pipe = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
-                    originTransformer.Transform(pipe);
-                    pipeLst.Add(pipe);
+                    var ent = acadDatabase.Element<Entity>(obj);
+                    if (ent is Polyline)
+                    {
+                        var pipe = ent.Clone() as Polyline;
+                        originTransformer.Transform(pipe);
+                        pipeLst.Add(pipe);
+                    }
+                    else if (ent is Line)
+                    {
+                        var linePipe = ent.Clone() as Line;
+                        Polyline pipe = new Polyline();
+                        pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
+                        pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);
+                        pipeLst.Add(pipe);
+                    }
                 }
             }
 
@@ -426,6 +439,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             var dxfNames = new string[]
             {
                  RXClass.GetClass(typeof(Polyline)).DxfName,
+                 RXClass.GetClass(typeof(Line)).DxfName,
             };
             var layerNames = new string[] { ThWSSCommon.OutdoorRainPipeLayerName };
             var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
@@ -435,9 +449,21 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    var pipe = acadDatabase.Element<Polyline>(obj).Clone() as Polyline;
-                    originTransformer.Transform(pipe);
-                    pipeLst.Add(pipe);
+                    var ent = acadDatabase.Element<Entity>(obj);
+                    if (ent is Polyline)
+                    {
+                        var pipe = ent.Clone() as Polyline;
+                        originTransformer.Transform(pipe);
+                        pipeLst.Add(pipe);
+                    }
+                    else if (ent is  Line)
+                    {
+                        var linePipe = ent.Clone() as Line;
+                        Polyline pipe = new Polyline();
+                        pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
+                        pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);
+                        pipeLst.Add(pipe);
+                    }
                 }
             }
 
