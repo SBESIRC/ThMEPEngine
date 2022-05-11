@@ -118,6 +118,15 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         // circuitAssign参数是否是必须的，存疑
+        /// <summary>
+        /// circuitAssign为true表示可以通过节点身上的回路编号给回路赋值
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="infos"></param>
+        /// <param name="distBoxKey"></param>
+        /// <param name="circuitAssign"></param>
+        /// <returns></returns>
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey, bool circuitAssign = false)
         {

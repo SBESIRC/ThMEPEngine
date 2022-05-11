@@ -24,7 +24,7 @@ namespace TianHua.Electrical.PDS.Service
             var thPDSDistBox = new ThPDSLoad
             {
                 ID = CreateDistBoxID(marks, distBoxKey, distBoxData),
-                InstalledCapacity = AnalysisPower(marks, out _, out _),
+                InstalledCapacity = AnalysePower(marks, out _, out _),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
@@ -42,6 +42,12 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
+
+            if(thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel
+                && thPDSDistBox.InstalledCapacity.HighPower == 0.0)
+            {
+                thPDSDistBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
+            }
 
             // 处理无标注时识别ACa不准确的情况
             if (thPDSDistBox.ID.LoadID.Contains("ACa")
@@ -68,7 +74,7 @@ namespace TianHua.Electrical.PDS.Service
             var thPDSLoad = new ThPDSLoad
             {
                 ID = CreateLoadID(marks, distBoxKey, loadData, searchedString),
-                InstalledCapacity = AnalysisPower(marks, out var needCopy, out var frequencyConversion),
+                InstalledCapacity = AnalysePower(marks, out var needCopy, out var frequencyConversion),
                 LoadTypeCat_1 = loadData.Cat_1,
                 LoadTypeCat_2 = loadData.Cat_2,
                 CircuitType = loadData.DefaultCircuitType,
@@ -210,7 +216,7 @@ namespace TianHua.Electrical.PDS.Service
                     DefaultDescription = distBoxData.DefaultDescription,
                     // 电动机及负载标注 直接存块Id
                 },
-                InstalledCapacity = AnalysisPower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
+                InstalledCapacity = AnalysePower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                         ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
@@ -508,7 +514,7 @@ namespace TianHua.Electrical.PDS.Service
             return thisCircuitID;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos, out bool needCopy,
+        private ThInstalledCapacity AnalysePower(List<string> infos, out bool needCopy,
             out bool frequencyConversion)
         {
             var powers = new List<double>();
@@ -567,7 +573,7 @@ namespace TianHua.Electrical.PDS.Service
             return results;
         }
 
-        private ThInstalledCapacity AnalysisPower(List<string> infos)
+        private ThInstalledCapacity AnalysePower(List<string> infos)
         {
             var powers = new List<double>();
             var check = "[0-9]*[.]?[0-9]*[/]?[0-9]+[.]?[0-9]*[kK]?[wW]{1}";
@@ -612,6 +618,27 @@ namespace TianHua.Electrical.PDS.Service
                 results.HighPower = powers[0];
             }
             return results;
+        }
+
+        private double AnalyseResidentialPower(List<string> infos)
+        {
+            var highPower = 0.0;
+            var regex = new Regex(@"AR-[0-9]+");
+            foreach(var info in infos)
+            {
+                var match = regex.Match(info);
+                if (match.Success)
+                {
+                    var numberRegex = new Regex(@"[0-9]+");
+                    var numberMatch = numberRegex.Match(match.Value);
+                    if(numberMatch.Success)
+                    {
+                        highPower = Convert.ToDouble(numberMatch.Value);
+                        break;
+                    }
+                }
+            }
+            return highPower;
         }
 
         private Tuple<bool, int, int> AnalysisStandbyRelationship(List<string> infos, List<string> searchedString)

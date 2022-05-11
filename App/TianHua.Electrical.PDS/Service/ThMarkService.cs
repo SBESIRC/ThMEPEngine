@@ -192,7 +192,7 @@ namespace TianHua.Electrical.PDS.Service
                         circuitNumbers.Add(Tuple.Create(info, TextDic[o]));
                     });
 
-                    if((crossPoints.First() - crossPoints.Last()).GetNormal().DotProduct(direction) < 0.1)
+                    if ((crossPoints.First() - crossPoints.Last()).GetNormal().DotProduct(direction) < 0.1)
                     {
                         crossPoints = crossPoints.OrderByDescending(x => x.Y).ToList();
                     }
@@ -244,7 +244,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     basePoint = objs.OfType<Line>().First().GetCenter();
                 }
-                else if(ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
+                else if (ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
                 {
                     basePoint = objs.OfType<Polyline>().First().GetCenter();
                 }
@@ -449,6 +449,50 @@ namespace TianHua.Electrical.PDS.Service
                 result.Add(info);
             });
             return result;
+        }
+
+        public void InfosClean(List<ThPDSTextInfo> markList)
+        {
+            for (var i = 0; i < markList.Count; i++)
+            {
+                for (var j = 0; j < markList[i].Texts.Count; j++)
+                {
+                    if (markList[i].Texts[j].Contains("~"))
+                    {
+                        var numberRegex = new Regex(@"[0-9]+~[A-Z]*[0-9]+");
+                        var numberMatch = numberRegex.Match(markList[i].Texts[j]);
+                        if (numberMatch.Success)
+                        {
+                            var loadId = markList[i].Texts[j].Replace(numberMatch.Value, "");
+                            var first = new Regex(@"[0-9]+");
+                            var firstMatch = first.Match(numberMatch.Value);
+                            var secondMatch = firstMatch.NextMatch();
+                            if (firstMatch.Success && secondMatch.Success)
+                            {
+                                var start = Convert.ToInt32(firstMatch.Value);
+                                var end = Convert.ToInt32(secondMatch.Value);
+                                markList[i].Texts[j] = JointString(loadId, start);
+                                for (var k = start + 1; k <= end; k++)
+                                {
+                                    markList.Add(new ThPDSTextInfo(new List<string> { JointString(loadId, k) }, markList[i].ObjectIds));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private string JointString(string str, int num)
+        {
+            if (num > 9)
+            {
+                return str + num.ToString();
+            }
+            else
+            {
+                return str + "0" + num.ToString();
+            }
         }
 
         private DBPoint ToDbPoint(Point3d point)

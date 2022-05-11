@@ -14,5 +14,11 @@ namespace TianHua.Electrical.PDS.Model
             Texts = new List<string>();
             ObjectIds = new List<ObjectId>();
         }
+
+        public ThPDSTextInfo(List<string> texts, List<ObjectId> objectIds)
+        {
+            Texts = texts;
+            ObjectIds = objectIds;
+        }
     }
 }
