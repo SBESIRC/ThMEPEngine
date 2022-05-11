@@ -95,7 +95,7 @@ namespace ThMEPWSS.Hydrant.Service
                     var context = BuildHydrantParam(o);
                     var hydrant = new ThHydrantEngineMgd();
                     var regions = hydrant.Validate(geoContent, context);
-                    Covers = ThHydrantResultParseService.Parse(regions);
+                    Covers.AddRange(ThHydrantResultParseService.Parse(regions));
                 }
             });
 
