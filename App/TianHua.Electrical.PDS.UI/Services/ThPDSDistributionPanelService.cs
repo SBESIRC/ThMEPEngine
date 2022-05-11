@@ -40,6 +40,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
+        List<MenuItem> menuItems;
         ContextMenu ctxMenu;
         QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
@@ -53,7 +54,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
             ctxMenu ??= panel.canvas.ContextMenu;
-            var menuItems = new List<MenuItem>();
+            menuItems ??= new List<MenuItem>();
             foreach (MenuItem m in ctxMenu.Items)
             {
                 menuItems.Add(m);
@@ -159,6 +160,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     Header = "全不选",
                     Command = unselAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "生成系统图",
+                    Command = batchGenCmd,
                 };
             }
             {
@@ -303,19 +309,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     {
                         cmenu.Items.Add(m);
                     }
-                    cmenu.Items.Add(new MenuItem()
-                    {
-                        Header = "生成系统图",
-                        Command = new RelayCommand(() =>
-                        {
-                            // 切回CAD画布
-                            ThPDSCADService.FocusToCAD();
-
-                            // 绘制到图纸上
-                            var drawEngine = new ThPDSSystemDiagramService();
-                            drawEngine.Draw(graph, vertice);
-                        }),
-                    });
                     canvas.ContextMenu = cmenu;
                 }
                 var hoverDict = new Dictionary<object, object>();
