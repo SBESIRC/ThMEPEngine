@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         {
             InitializeComponent();
             defaultKV.SelectedItem = "0.38";
-            defaultKV.ItemsSource = new List<string>() { "0.38" };
+            defaultKV.ItemsSource = new List<string>() { "0.38", "0.22" };
         }
 
         private void btnInsert(object sender, RoutedEventArgs e)

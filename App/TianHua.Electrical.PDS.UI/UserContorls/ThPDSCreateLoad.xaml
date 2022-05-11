@@ -34,12 +34,12 @@
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock>设备额定电压:</TextBlock>
-                <ComboBox x:Name="defaultKV"></ComboBox>
-                <TextBlock>kV</TextBlock>
+                <TextBlock VerticalAlignment="Center">设备额定电压:</TextBlock>
+                <ComboBox x:Name="defaultKV" VerticalAlignment="Center"></ComboBox>
+                <TextBlock VerticalAlignment="Center">kV</TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="defaultFireLoad">是否为消防设备</CheckBox>
+                <CheckBox x:Name="defaultFireLoad">消防设备</CheckBox>
             </StackPanel>
         </StackPanel>
     </DockPanel>
