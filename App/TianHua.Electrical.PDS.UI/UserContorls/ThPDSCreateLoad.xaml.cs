@@ -34,6 +34,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnSave(object sender, RoutedEventArgs e)
         {
+            Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph.AddVertex(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: double.Parse(defaultPower.Text), defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true));
             Close();
         }
     }

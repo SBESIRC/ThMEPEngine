@@ -66,6 +66,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     {
                         var w = new ThPDSCreateLoad() { Width = 250, Height = 250, WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen, };
                         w.ShowDialog();
+                        UpdateView(panel);
                     }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
