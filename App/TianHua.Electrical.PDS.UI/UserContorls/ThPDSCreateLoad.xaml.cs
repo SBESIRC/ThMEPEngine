@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TianHua.Electrical.PDS.Project.Module;
+using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.UI.UserContorls
 {
@@ -27,7 +28,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
 
         private void btnInsert(object sender, RoutedEventArgs e)
         {
-            ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: double.Parse(defaultPower.Text), defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true);
+            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: double.Parse(defaultPower.Text), defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true));
             Close();
         }
 

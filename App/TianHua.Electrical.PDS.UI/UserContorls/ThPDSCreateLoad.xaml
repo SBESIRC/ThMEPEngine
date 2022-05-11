@@ -30,7 +30,6 @@
                     <TextBox Width="150" x:Name="defaultLoadID">*请输入设备编号</TextBox>
                     <TextBox Width="150" x:Name="defaultPower">*请输入设备功率</TextBox>
                     <TextBox Width="150" x:Name="defaultDescription">在此输入描述信息</TextBox>
-                    <TextBlock Margin="5">设备位置</TextBlock>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
