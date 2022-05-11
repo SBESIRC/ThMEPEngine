@@ -39,6 +39,10 @@ namespace ThMEPWSS.Engine
         }
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
+            if (!blkref.Bounds.HasValue)
+            {
+                return;
+            }
             if (IsDistributionElement(blkref) && CheckLayerValid(blkref))
             {
                 if(BlockObbSwitch)
@@ -58,8 +62,7 @@ namespace ThMEPWSS.Engine
                         Data = blkref.GetEffectiveName(),
                         Geometry = blkref.GetTransformedCopy(matrix),
                     });
-                }
-               
+                }               
             }
         }
 
