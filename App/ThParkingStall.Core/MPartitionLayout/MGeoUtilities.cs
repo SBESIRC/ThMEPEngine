@@ -488,7 +488,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static Polygon PolyFromPoints(List<Coordinate> points)
         {
-            if (points[0].Distance(points[points.Count - 1]) > 0.001)
+            if (points[0].Distance(points[points.Count - 1]) > 1e-10)
                 points.Add(points[0]);
             return new Polygon(new LinearRing(points.ToArray()));
         }
