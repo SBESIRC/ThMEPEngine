@@ -28,8 +28,7 @@
             <Rectangle Margin="0,5,5,5" Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="1 1" SnapsToDevicePixels="True"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2">
-            <Button x:Name="btnMarkStartPt" Content="标记起点" Width ="70" Margin="0,0,15,0" TabIndex="4"/>
-            <Button x:Name="btnCreateSystemMap" Content="生成" Width ="70" TabIndex="5" Click="btnCreateSystemMap_Click"/>
+            <Button x:Name="btnCreateSystemMap" Content="生成" Width ="85" Margin="70,5,15,0" TabIndex="5" Click="btnCreateSystemMap_Click"/>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>
