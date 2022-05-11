@@ -305,9 +305,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         Header = "创建备用回路",
                         Command = createBackupCircuitCmd,
                     });
-                    foreach (var m in menuItems)
+                    if (vertice.Details.CircuitFormType is not PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit)
                     {
-                        cmenu.Items.Add(m);
+                        foreach (var m in menuItems)
+                        {
+                            cmenu.Items.Add(m);
+                        }
                     }
                     canvas.ContextMenu = cmenu;
                 }
