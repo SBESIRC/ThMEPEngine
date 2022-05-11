@@ -16,6 +16,7 @@ namespace ThParkingStall.Core.MPartitionLayout
     {
         public static int CatchedTimes = 0;
         public static bool LogInfo = false;
+        public static int ThreadCnt = 1;
         public static Serilog.Core.Logger Logger;
         public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, bool display = false)
         {
@@ -40,7 +41,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             if (InterParameter.MultiThread)
             {        
-                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = 3 }, subarea => subarea.UpdateParkingCnts(display));
+                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));
             }
             else
             {

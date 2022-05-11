@@ -40,13 +40,15 @@ namespace ThParkingStall.Core
             var ProcessIndex = Int32.Parse(ProcessInfo[1]);
             var IterationCount = Int32.Parse(ProcessInfo[2]);
             var LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
-            var MultiThread = ProcessInfo[4] == "1";// 是否使用进程内多线程
-            InterParameter.MultiThread = MultiThread;
+            var ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
+            if(ThreadCnt >2) InterParameter.MultiThread = true;
+            else InterParameter.MultiThread = false;
             string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
             var Logger = new Serilog.LoggerConfiguration().WriteTo
                                 .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
             MCompute.Logger = Logger;
             MCompute.LogInfo = LogAllInfo;
+            MCompute.ThreadCnt = ThreadCnt;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var t_pre = 0.0;
@@ -54,7 +56,7 @@ namespace ThParkingStall.Core
             {
                 Logger?.Information("#####################################");
                 Logger?.Information("子进程启动");
-                Logger?.Information("使用多线程：" + MultiThread.ToString());
+                Logger?.Information("线程数量：" + ThreadCnt.ToString());
             }
             using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("DataWraper"))
             {
