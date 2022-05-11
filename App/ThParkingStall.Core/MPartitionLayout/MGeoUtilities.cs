@@ -337,9 +337,28 @@ namespace ThParkingStall.Core.MPartitionLayout
                 lstring = new LineString(((Polygon)curve).Coordinates);
             else if (curve is LineString) lstring = (LineString)curve;
             else return;
-            var comparer = new PointAlongLineStringComparer(lstring);
-            points.Sort(comparer);
+            points.OrderBy(p =>
+            {
+                var para = lstring.ClosestPoint(p);
+                int index = 0;
+                for (int i = 0; i < lstring.Coordinates.Count() - 1; i++)
+                {
+                    var seg = new LineSegment(lstring.Coordinates.ToList()[i], lstring.Coordinates.ToList()[i + 1]);
+                    if (seg.ClosestPoint(para).Distance(para) < 0.1)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                var lines = new LineString(lstring.Coordinates.Take(index + 1).ToArray());
+                var line = new LineSegment(lstring.Coordinates.ToList()[index], lstring.Coordinates.ToList()[index + 1]);
+                var line_dist = line.P0.Distance(para);
+                return lines.Length + line_dist;
+            });
             return;
+            //var comparer = new PointAlongLineStringComparer(lstring);
+            //points.Sort(comparer);
+            //return;
         }
         private class PointAlongLineStringComparer : IComparer<Coordinate>
         {
