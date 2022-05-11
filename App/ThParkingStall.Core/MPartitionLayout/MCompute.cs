@@ -99,7 +99,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 points.Add(e.P0);
                 points.Add(e.P1);
             });
-            SortAlongCurve(points, bound);
+            points = points.Select(p => bound.Coordinates.OrderBy(t => t.Distance(p)).First()).ToList();
+            points=SortAlongCurve(points, bound);
             points = RemoveDuplicatePts(points);
             var linestring = new LineString(bound.Coordinates);
             var walls = linestring.GetSplitCurves(points)

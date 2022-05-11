@@ -104,7 +104,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             List<Coordinate> points = new List<Coordinate>();
             points.AddRange(curve.IntersectPoint(splitter));
             points = RemoveDuplicatePts(points, 1);
-            SortAlongCurve(points, curve);
+            points=SortAlongCurve(points, curve);
             if (points.Count > 0 && curve.Length > 1)
             {
                 var ps = points.Select(e => curve.ClosestPoint(e)).ToList();
@@ -330,32 +330,34 @@ namespace ThParkingStall.Core.MPartitionLayout
         /// </summary>
         /// <param name="points"></param>
         /// <param name="curve"></param>
-        public static void SortAlongCurve(List<Coordinate> points, Geometry curve)
+        public static List<Coordinate> SortAlongCurve(List<Coordinate> points, Geometry curve)
         {
             LineString lstring;
             if (curve is Polygon)
                 lstring = new LineString(((Polygon)curve).Coordinates);
             else if (curve is LineString) lstring = (LineString)curve;
-            else return;
-            points.OrderBy(p =>
-            {
-                var para = lstring.ClosestPoint(p);
-                int index = 0;
-                for (int i = 0; i < lstring.Coordinates.Count() - 1; i++)
-                {
-                    var seg = new LineSegment(lstring.Coordinates.ToList()[i], lstring.Coordinates.ToList()[i + 1]);
-                    if (seg.ClosestPoint(para).Distance(para) < 0.1)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                var lines = new LineString(lstring.Coordinates.Take(index + 1).ToArray());
-                var line = new LineSegment(lstring.Coordinates.ToList()[index], lstring.Coordinates.ToList()[index + 1]);
-                var line_dist = line.P0.Distance(para);
-                return lines.Length + line_dist;
-            });
-            return;
+            else return points;
+            points = points.OrderBy(p =>
+              {
+                  var para = lstring.ClosestPoint(p);
+                  int index = 0;
+                  for (int i = 0; i < lstring.Coordinates.Count() - 1; i++)
+                  {
+                      var seg = new LineSegment(lstring.Coordinates.ToList()[i], lstring.Coordinates.ToList()[i + 1]);
+                      if (seg.ClosestPoint(para).Distance(para) < 0.1)
+                      {
+                          index = i;
+                          break;
+                      }
+                  }
+                  var lines = new LineString(new Coordinate[0] { });
+                  if(index>0)
+                    lines = new LineString(lstring.Coordinates.Take(index + 1).ToArray());
+                  var line = new LineSegment(lstring.Coordinates.ToList()[index], lstring.Coordinates.ToList()[index + 1]);
+                  var line_dist = line.P0.Distance(para);
+                  return lines.Length + line_dist;
+              }).ToList();
+            return points;
             //var comparer = new PointAlongLineStringComparer(lstring);
             //points.Sort(comparer);
             //return;
