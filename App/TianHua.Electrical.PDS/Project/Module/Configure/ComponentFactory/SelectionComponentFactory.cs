@@ -117,12 +117,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if(_IsEmptyLoad)
                 return null;
-            return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
+            return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2);
         }
 
         public Conductor GetSecondaryCircuitConductor(SecondaryCircuitInfo secondaryCircuitInfo)
         {
-            return new Conductor(secondaryCircuitInfo.Conductor, secondaryCircuitInfo.ConductorCategory, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber);
+            return new Conductor(secondaryCircuitInfo.Conductor, secondaryCircuitInfo.ConductorCategory, _edge.Target.Load.Phase, ThPDSCircuitType.Control, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber, LayingSite.CC, LayingSite.None);
         }
 
         public override Contactor CreatContactor()

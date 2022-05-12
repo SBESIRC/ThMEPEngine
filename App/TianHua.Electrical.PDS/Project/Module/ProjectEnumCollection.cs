@@ -148,6 +148,21 @@ namespace TianHua.Electrical.PDS.Project.Module
     }
 
     /// <summary>
+    /// 敷设路径
+    /// </summary>
+    public enum ConductorLayingPath
+    {
+        [Description("无敷设路径")]
+        None,
+        [Description("桥架")]
+        ViaCableTray,
+        [Description("穿管")]
+        ViaConduit,
+        [Description("桥架/穿管")]
+        ViaCableTrayAndViaConduit,
+    }
+
+    /// <summary>
     /// 穿管敷设
     /// </summary>
     public enum Pipelaying
