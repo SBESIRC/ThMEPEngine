@@ -86,7 +86,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var bound = new Polygon(subArea.Area.Shell);
             bound = bound.Simplify();
             var inilanes = new List<LineSegment>();
-            foreach (var lane in subArea.SegLines)
+            foreach (var lane in subArea.VaildLanes)
             {
                 inilanes.Add(SplitLine(lane, bound.Coordinates.ToList())
                     .Where(e => bound.ClosestPoint(e.MidPoint).Distance(e.MidPoint) < 1)
@@ -125,7 +125,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var boundary = subAreas[0].OutBound;
             for (int k = 0; k < subAreas.Count; k++)
             {
-                lanes.AddRange(subAreas[k].SegLines);
+                lanes.AddRange(subAreas[k].VaildLanes);
             }
             var tmplanes = new List<LineSegment>();
             //与边界邻近的无效车道线剔除

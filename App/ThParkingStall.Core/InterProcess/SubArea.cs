@@ -14,7 +14,8 @@ namespace ThParkingStall.Core.InterProcess
     {
         public Polygon OutBound { get { return InterParameter.TotalArea; } }//原始边界
         public readonly Polygon Area;//该区域的面域
-        public readonly List<LineSegment> SegLines;//该区域全部分割线
+        public readonly List<LineString> Walls;
+        public readonly List<LineSegment> VaildLanes;//该区域全部分割线
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
         public readonly List<Ramp> Ramps;//该区域全部的坡道
         public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box
@@ -22,11 +23,12 @@ namespace ThParkingStall.Core.InterProcess
         public int Count = -3;//车位总数
         public MParkingPartitionPro mParkingPartitionPro;
 
-        public SubArea(Polygon area, List<LineSegment> segLines,
+        public SubArea(Polygon area, List<LineSegment> vaildLanes, List<LineString> walls,
             List<Polygon> buildings, List<Ramp> ramps, List<Polygon> boundingBoxes, SubAreaKey key)
         {
             Area = area;
-            SegLines = segLines;
+            VaildLanes = vaildLanes;
+            Walls = walls;
             Buildings = buildings;
             Ramps = ramps;
             BoundingBoxes = boundingBoxes;

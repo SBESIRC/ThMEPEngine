@@ -183,14 +183,14 @@ namespace ThMEPArchitecture.MultiProcess
                 subArea.Display("MPDebug");
             }
 #endif
-            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-            var strBest = $"车位数{ParkingStallCount}\n";
-            Logger?.Information(strBest);
-            Active.Editor.WriteMessage(strBest);
-            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-            subAreas.ForEach(area => area.ShowText());
+            //List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+            //MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+            //var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            //var strBest = $"车位数{ParkingStallCount}\n";
+            //Logger?.Information(strBest);
+            //Active.Editor.WriteMessage(strBest);
+            //MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+            //subAreas.ForEach(area => area.ShowText());
         }
         public void Run(AcadDatabase acadDatabase)
         {
@@ -276,11 +276,19 @@ namespace ThMEPArchitecture.MultiProcess
             var entities = new List<Entity>();
             entities.Add(subArea.Area.ToDbMPolygon());
             entities[0].Layer = layer;
-            entities.AddRange(subArea.SegLines.Select(l => l.ToDbLine(2,layer)));
-            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(0, layer)));
+            entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2,layer)));
+            entities.AddRange(subArea.Walls.Select(wall => wall.ToDbPolyline(1, layer)));
+            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(5, layer)));
             entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon(3, layer)));
             entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon(4, layer)));
             entities.ShowBlock(blockName, layer);
+        }
+        private static Polyline ToDbPolyline(this LineString lstr, int coloridx, string layer)
+        {
+            var pline = lstr.ToDbPolyline();
+            pline.Layer = layer;
+            pline.ColorIndex = coloridx;
+            return pline;
         }
         private static Line ToDbLine(this LineSegment segment, int coloridx, string layer)
         {
