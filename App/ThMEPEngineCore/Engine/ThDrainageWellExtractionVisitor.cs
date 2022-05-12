@@ -1,9 +1,10 @@
 ﻿using System;
-using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -72,10 +73,25 @@ namespace ThMEPEngineCore.Engine
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        private ThBlockReferenceObbService BlkObbService { get; set; }
         public ThDrainageWellBlkExtractionVisitor()
         {
             CheckQualifiedLayer = base.CheckLayerValid;
             CheckQualifiedBlockName = (Entity entity) => true;
+            BlkObbService = new ThBlockReferenceObbService()
+            {
+                ArcTesslateLength = 50.0,
+                ChordHeight = 20.0,
+            };
+        }
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+            return true;
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -101,10 +117,15 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcDistributionElementData>();
             if (IsDistributionElement(br) && CheckLayerValid(br))
             {
-                results.Add(new ThRawIfcDistributionElementData()
+                var obb = BlkObbService.ToObb(br);
+                if(obb!=null)
                 {
-                    Geometry = br.GetTransformedCopy(matrix),
-                });
+                    obb.TransformBy(matrix);
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = obb,
+                    });
+                }
             }
             return results;
         }
@@ -113,6 +134,10 @@ namespace ThMEPEngineCore.Engine
             if (ent is BlockReference br)
             {
                 return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else if(ent is Polyline polyline)
+            {
+                return xclip.Contains(polyline);
             }
             else
             {
