@@ -3389,6 +3389,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             Canvas.SetLeft(cvs2, pt.X);
                                             Canvas.SetTop(cvs2, pt.Y - offsetY);
                                             cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
+                                            var cmenu = new ContextMenu();
+                                            cvs.ContextMenu = cmenu;
+                                            {
+                                                var mi = new MenuItem();
+                                                cmenu.Items.Add(mi);
+                                                mi.Header = "删除";
+                                                mi.Command = new RelayCommand(() =>
+                                                {
+                                                    ThPDSProjectGraphService.DeleteControlCircuit(vertice, sc);
+                                                    UpdateCanvas();
+                                                });
+                                            }
                                             cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
                                             var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
                                             cvs.MouseUp += (s, e) =>
