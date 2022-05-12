@@ -132,6 +132,8 @@ namespace TianHua.Electrical.PDS.Service
             blockData.PowerFactor = row.PowerFactor;
             blockData.FireLoad = row.FireLoad;
             blockData.DefaultDescription = row.DefaultDescription;
+            blockData.CableLayingMethod1 = row.CableLayingMethod1;
+            blockData.CableLayingMethod2 = row.CableLayingMethod2;
         }
     }
 }

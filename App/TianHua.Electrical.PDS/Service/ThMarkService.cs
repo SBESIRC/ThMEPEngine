@@ -116,7 +116,8 @@ namespace TianHua.Electrical.PDS.Service
                 var filter = LineIndex.SelectCrossingPolygon(lineFrame).OfType<Line>().ToList();
                 var obliqueLines = filter.Except(new List<Line> { l })
                     .Where(o => o.Length < 1000.0)
-                    .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1)
+                    .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1
+                        && Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) < 0.9)
                     .ToList();
                 if (obliqueLines.Count > 1)
                 {
@@ -127,6 +128,10 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         crossPoints.AddRange(l.Intersect(o, Intersect.OnBothOperands));
                     });
+                    if (crossPoints.Count < 2)
+                    {
+                        return;
+                    }
 
                     var textSearchFrame = filter.Except(obliqueLines).ToCollection()
                         .Buffer(10 * ThPDSCommon.ALLOWABLE_TOLERANCE)

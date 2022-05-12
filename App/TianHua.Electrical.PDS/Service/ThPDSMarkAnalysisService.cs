@@ -31,6 +31,8 @@ namespace TianHua.Electrical.PDS.Service
                 Phase = distBoxData.Phase,
                 DemandFactor = distBoxData.DemandFactor,
                 PowerFactor = distBoxData.PowerFactor,
+                CableLayingMethod1 = distBoxData.CableLayingMethod1,
+                CableLayingMethod2 = distBoxData.CableLayingMethod2,
             };
             thPDSDistBox.SetLocation(new ThPDSLocation
             {
@@ -43,7 +45,7 @@ namespace TianHua.Electrical.PDS.Service
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
 
-            if(thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel
+            if (thPDSDistBox.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel
                 && thPDSDistBox.InstalledCapacity.HighPower == 0.0)
             {
                 thPDSDistBox.InstalledCapacity.HighPower = AnalyseResidentialPower(marks);
@@ -82,6 +84,8 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = loadData.DemandFactor,
                 PowerFactor = loadData.PowerFactor,
                 FrequencyConversion = frequencyConversion,
+                CableLayingMethod1 = loadData.CableLayingMethod1,
+                CableLayingMethod2 = loadData.CableLayingMethod2,
             };
             thPDSLoad.SetLocation(new ThPDSLocation
             {
@@ -165,7 +169,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if (!r.Match(str).Success)
                 {
-                    var value = ThPDSReplaceStringService.ReplaceLastChar( str,"/", "-");
+                    var value = ThPDSReplaceStringService.ReplaceLastChar(str, "/", "-");
                     var check1 = "W[a-zA-Z]+[-0-9]+";
                     var regex1 = new Regex(@check1);
                     var match1 = regex1.Match(value);
@@ -180,13 +184,13 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         var assign = true;
                         foreach (var key in distBoxKey)
-                        { 
-                            if(str.Contains(key))
+                        {
+                            if (str.Contains(key))
                             {
                                 assign = false;
                             }
                         }
-                        if(assign)
+                        if (assign)
                         {
                             thPDSLoad.ID.LoadID = StringFilter(str);
                         }
@@ -244,6 +248,8 @@ namespace TianHua.Electrical.PDS.Service
                 PowerFactor = distBoxData.PowerFactor,
                 FrequencyConversion = distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
                     && distBoxData.Attributes[ThPDSCommon.ELECTRICITY].Contains(ThPDSCommon.FREQUENCY_CONVERSION),
+                CableLayingMethod1 = distBoxData.CableLayingMethod1,
+                CableLayingMethod2 = distBoxData.CableLayingMethod2,
             };
             thPDSLoad.SetLocation(new ThPDSLocation
             {
@@ -328,7 +334,7 @@ namespace TianHua.Electrical.PDS.Service
                                 if (blockData.Attributes.ContainsKey("BOX"))
                                 {
                                     if (m.Value.Contains(blockData.Attributes["BOX"])
-                                        || blockData.Attributes["BOX"].Contains("K") 
+                                        || blockData.Attributes["BOX"].Contains("K")
                                         || blockData.Attributes["BOX"].Contains("INT"))
                                     {
                                         idMarks.Add(m.Value);
@@ -528,9 +534,11 @@ namespace TianHua.Electrical.PDS.Service
 
         private ThPDSID CreateCircuitID(List<string> srcPanelID, List<string> circuitID)
         {
-            var thisCircuitID = new ThPDSID();
-            thisCircuitID.SourcePanelID = srcPanelID;
-            thisCircuitID.CircuitID = circuitID;
+            var thisCircuitID = new ThPDSID
+            {
+                SourcePanelID = srcPanelID,
+                CircuitID = circuitID
+            };
             return thisCircuitID;
         }
 
@@ -644,14 +652,14 @@ namespace TianHua.Electrical.PDS.Service
         {
             var highPower = 0.0;
             var regex = new Regex(@"AR-[0-9]+");
-            foreach(var info in infos)
+            foreach (var info in infos)
             {
                 var match = regex.Match(info);
                 if (match.Success)
                 {
                     var numberRegex = new Regex(@"[0-9]+");
                     var numberMatch = numberRegex.Match(match.Value);
-                    if(numberMatch.Success)
+                    if (numberMatch.Success)
                     {
                         highPower = Convert.ToDouble(numberMatch.Value);
                         break;

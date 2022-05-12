@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 
 using ThCADExtension;
+using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -60,6 +61,16 @@ namespace TianHua.Electrical.PDS.Model
         /// </summary>
         public string DefaultDescription { get; set; }
 
+        /// <summary>
+        /// Cable laying method 1
+        /// </summary>
+        public LayingSite CableLayingMethod1 { get; set; }
+
+        /// <summary>
+        /// Cable laying method 2
+        /// </summary>
+        public LayingSite CableLayingMethod2 { get; set; }
+
         public ThPDSBlockReferenceData(ObjectId blockRef)
         {
             ObjId = blockRef;
@@ -77,6 +88,8 @@ namespace TianHua.Electrical.PDS.Model
             PowerFactor = 0.85;
             FireLoad = ThPDSFireLoad.Unknown;
             DefaultDescription = "";
+            CableLayingMethod1 = LayingSite.CC;
+            CableLayingMethod2 = LayingSite.None;
         }
 
         public ThPDSBlockReferenceData(ObjectId blockRef, Matrix3d transfrom)
@@ -97,6 +110,8 @@ namespace TianHua.Electrical.PDS.Model
             OwnerSpace2WCS = transfrom;
             FireLoad = ThPDSFireLoad.Unknown;
             DefaultDescription = "";
+            CableLayingMethod1 = LayingSite.CC;
+            CableLayingMethod2 = LayingSite.None;
         }
     }
 }
