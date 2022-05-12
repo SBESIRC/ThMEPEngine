@@ -97,8 +97,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             WallLine = WallLine.RemoveHoles();//初始墙线
             UpdateSegLines();
-            var RampPolgons = GetRamps();
-            UpdateWallLine(RampPolgons);
+            var RampPolgons = UpdateWallLine();
+            UpdateRamps(RampPolgons);
             UpdateObstacles();
             Buildings = RampPolgons;
             Buildings.AddRange(Obstacles);
@@ -194,8 +194,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Obstacles = UnionedObstacles.Get<Polygon>(true);
         }
 
-        private void UpdateWallLine(List<Polygon> RampPolgons)//墙线合并
+        private List<Polygon> UpdateWallLine()//墙线合并
         {
+            List<Polygon> RampPolgons = new List<Polygon>();
+            if (CAD_Ramps.Count > 0)
+            {
+                var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
+                RampPolgons = UnionedRamps.Get<Polygon>(true);
+            }
             Geometry tempWallLine = WallLine;
             tempWallLine = tempWallLine.Difference(new MultiPolygon(RampPolgons.ToArray()));
             if (tempWallLine is Polygon poly)
@@ -204,19 +210,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else if (tempWallLine is MultiPolygon mpoly)
                 WallLine = mpoly.Geometries.Cast<Polygon>().Select(p => p.RemoveHoles()).OrderBy(p => p.Area).Last();
             WallLine = WallLine.RemoveHoles();
+            return RampPolgons;
         }
-        private List<Polygon> GetRamps()
+        private void UpdateRamps(List<Polygon> RampPolgons)
         {
-            if (CAD_Ramps.Count == 0) return new List<Polygon>();
             //移除和内坡道连接的只有一个交点的线
-            var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
-            var RampPolgons = UnionedRamps.Get<Polygon>(true);
-
             RampSpatialIndex = new MNTSSpatialIndex(RampPolgons);
+
+            var InnerRampSpatialIndex = new MNTSSpatialIndex(RampPolgons.Where(p =>WallLine.Contains(p.Centroid)));
+
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];
-                var ramp = RampSpatialIndex.SelectCrossingGeometry(new LineString(new Coordinate[] { segLine.P0, segLine.P1 })).Cast<Polygon>();
+                var ramp = InnerRampSpatialIndex.SelectCrossingGeometry(new LineString(new Coordinate[] { segLine.P0, segLine.P1 })).Cast<Polygon>();
                 if (ramp.Count() > 0)
                 {
                     var insertpt = ramp.First().Shell.GetIntersectPts(segLine).First();
@@ -224,7 +230,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if (SegLineEx.GetAllIntSecPs(i, SegLines, WallLine).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
                 }
             }
-            return RampPolgons.ToList();
         }
         #endregion
         #region 预处理
