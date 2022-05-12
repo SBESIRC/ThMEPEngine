@@ -73,6 +73,10 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "布潜水泵"
             attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "给水系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "排水系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }

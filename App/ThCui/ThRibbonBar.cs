@@ -545,6 +545,20 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THSJSB_SMALL",
                     "IDI_THCAD_THSJSB_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 给水系统
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("给水系统",
+                    "天华给水系统",
+                    "THDXJSXT",
+                    "天华给水系统",
+                    "IDI_THCAD_THDXJSXT_SMALL",
+                    "IDI_THCAD_THDXJSXT_LARGE",
+                    RibbonButtonStyle.SmallWithText);
 
                 // 排水系统
                 subRow = subPanel.AddNewRibbonRow();
