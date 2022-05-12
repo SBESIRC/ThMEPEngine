@@ -69,8 +69,6 @@ namespace TianHua.Electrical.PDS.Project
             return;
         }
 
-        public static void 
-
         /// <summary>
         /// 计算进线回路类型
         /// </summary>
