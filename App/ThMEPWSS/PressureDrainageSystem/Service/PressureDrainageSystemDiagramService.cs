@@ -13,6 +13,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using static DotNetARX.UCSTools;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
+using static ThMEPWSS.PressureDrainageSystem.Service.DrwaingServiesAssistant;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public class PressureDrainageSystemDiagramService
@@ -64,7 +65,22 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         double diameter_horizontalpipe = 0;
         List<double> total_diameter_horizontalpipe = new List<double>();
         List<Point3d> ptloc_diameter_horizontalpipe = new List<Point3d>();
-
+        private class DrawUnit
+        {
+            public DrawUnit(List<Entity> entities, List<BlockReference> blocks, List<Line> testLines, Extents3d extents, double serialOrder)
+            {
+                Entities = entities;
+                Blocks = blocks;
+                TestLines = testLines;
+                SerialOrder = serialOrder;
+                Extent = extents;
+            }
+            public List<Entity> Entities = new List<Entity>();
+            public List<BlockReference> Blocks = new List<BlockReference>();
+            public List<Line> TestLines = new List<Line>();
+            public Extents3d Extent;
+            public double SerialOrder = 0;
+        }
 
         /// <summary>
         /// 绘制系统图主函数
@@ -258,6 +274,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             DefinePropertiesOfCADObjects(br1, "W-NOTE");
                             blocks.Add(br1);
                         }
+
                         entities.ForEach(o => comparedEntity.Add(o));
                         blocks.ForEach(o => comparedEntity.Add(o));
                         comparedEntitys.Add(comparedEntity);
@@ -432,9 +449,62 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 }
                 for (int i = 0; i < allEntities.Count; i++)
                 {
+                    allBlocks[i] = SimplifyUnitsByRemovingUnusedTexts(allEntities[i],allBlocks[i]);
+                }
+                List<DrawUnit> units = new List<DrawUnit>();
+                for (int i = 0; i < allEntities.Count; i++)
+                {
+                    double serial = 0.0;
+                    var ext = maxExts[i];
+                    foreach (var text in allEntities[i].Where(e => e is DBText).Select(e => (DBText)e))
+                    {
+                        if (text.TextString.Contains("#集水井"))
+                        {
+                            var split=text.TextString.Split('#').First();
+                            if (split.Length >= 2)
+                            {
+                                var letter = split[0].ToString().ToUpper();
+                                byte[] array = new byte[1]; 
+                                array = System.Text.Encoding.ASCII.GetBytes(letter); 
+                                int asciicode = (short)(array[0])-64;
+                                serial += (double)asciicode;
+                                var num = double.Parse(split[1].ToString());
+                                serial += num / 10;
+                            }
+                            break;
+                        }
+                    }
+                    DrawUnit unit = new DrawUnit(allEntities[i], allBlocks[i], testLines[i], ext, serial);
+                    units.Add(unit);
+                }
+                units = units.OrderBy(e => e.SerialOrder).ToList();
+                allEntities = units.Select(e => e.Entities).ToList();
+                allBlocks = units.Select(e => e.Blocks).ToList();
+                testLines = units.Select(e => e.TestLines).ToList();
+                maxExts = units.Select(e => e.Extent).ToList();
+                for (int i = 0; i < allBlocks.Count; i++)
+                {
+                    var found = false;
+                    foreach (var br in allBlocks[i])
+                        if (br.GetEffectiveName().Contains("套管系统"))
+                        {
+                            found = true;
+                            break;
+                        }
+                    if (!found)
+                    {
+                        allBlocks.RemoveAt(i);
+                        allEntities.RemoveAt(i);
+                        testLines.RemoveAt(i);
+                        maxExts.RemoveAt(i);
+                        i--;
+                    }
+                }
+                for (int i = 0; i < allEntities.Count; i++)
+                {
                     Matrix3d mat = Matrix3d.Displacement(new Vector3d(totalspacine, 0, 0));
                     foreach (var ent in allEntities[i])
-                    {               
+                    {
                         if (ent is DBText text)
                         {
                             text.TextStyleId = textStyle;
@@ -1236,11 +1306,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         //绘制潜水泵立管细节
                         PlotPumpVerticalPipe(ref pipeLineSystemUnit, pump, floorLines, ptLocPumpRec, frameHeigth, frameWidth, frameRec, curLayer, curIndex, curPoint, parLayers, parIndexes);
                         //完善具有特殊用途的潜水泵立管
-                        if (pump.Location.Contains("梯") || pump.Location.Contains("电缆沟"))
+                        var contains_cond = pump.Location.Contains("梯") || pump.Location.Contains("电缆沟");
+                        contains_cond = contains_cond && !pump.Location.Equals("开敞楼梯");
+                        if (contains_cond)
                         {
                             CompletePumpVerticalPipeForSpecialUse(pump, ptLocPumpRec, frameRec, frameHeigth, frameWidth);
                         }
-                        IsSpecialParPump = pump.Location.Contains("梯") || pump.Location.Contains("电缆沟") ? true : false;
+                        IsSpecialParPump = contains_cond ? true : false;
                         var brId_elv = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "排水管径100", ptlocelv_pump, new Scale3d(1), Math.PI / 2);
                         brId_elv.SetDynBlockValue("可见性", "DN" + diameter.ToString());
                         var br_elv = adb.Element<BlockReference>(brId_elv);
