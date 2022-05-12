@@ -56,6 +56,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return objs;
         }
+
+        public static List<BlockReference> SelectBlocks(AcadDatabase acadDatabase)
+        {
+            var entOpt = new PromptSelectionOptions { MessageForAdding = "\n请选择地库:" };
+            var result = Active.Editor.GetSelection(entOpt);
+            if (result.Status != PromptStatus.OK)
+            {
+                return null;
+            }
+            var objs = new List<BlockReference>();
+            foreach (var id in result.Value.GetObjectIds())
+            {
+
+                var obj = acadDatabase.Element<Entity>(id);
+                if (obj is BlockReference blk)
+                {
+                    objs.Add(blk);
+                }
+            }
+            return objs;
+        }
         public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null)
         {
             outerBrder = new OuterBrder();

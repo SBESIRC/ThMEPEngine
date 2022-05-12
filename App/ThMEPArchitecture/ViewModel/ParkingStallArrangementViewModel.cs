@@ -49,6 +49,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
+        private bool _UseMultiSelection = false;//是否多选
+
+        public bool UseMultiSelection
+        {
+            get { return _UseMultiSelection; }
+            set
+            {
+                _UseMultiSelection = value;
+                RaisePropertyChanged("UseMultiSelection");
+            }
+        }
 
         //只生成分割线
         private bool _JustCreateSplittersChecked = true;
@@ -567,6 +578,17 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
+        private static bool _UseMultiSelection = false;//是否多选
+
+        public static bool UseMultiSelection
+        {
+            get
+            {
+                if (Setted) return _UseMultiSelection;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -578,6 +600,7 @@ namespace ThMEPArchitecture.ViewModel
             _BuildingTolerance = vm.BuildingTolerance;
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
+            _UseMultiSelection = vm.UseMultiSelection;
             Setted = true;
         }
     }

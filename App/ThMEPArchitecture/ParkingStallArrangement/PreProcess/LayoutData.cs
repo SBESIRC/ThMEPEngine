@@ -62,6 +62,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  Dictionary<int, List<int>> SeglineIndexDic;//分割线连接关系
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
+        public bool Init(BlockReference block, Serilog.Core.Logger logger)
+        {
+            Logger = logger;
+
+            if (!TryInit(block)) return false;
+            //Show();
+            if (SegLines.Count != 0)
+            {
+                bool Isvaild = SegLineVaild();
+                //VaildLanes.ShowInitSegLine();
+                if (!Isvaild) return false;
+            }
+            GetLowerUpperBound();
+            //ShowLowerUpperBound();
+            return true;
+        }
         public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
@@ -74,6 +90,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
             string drawingName = Path.GetFileName(doc.Name);
             Logger?.Information("文件名：" + drawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
             if (!TryInit(block)) return false;
             //Show();
             if (SegLines.Count != 0)

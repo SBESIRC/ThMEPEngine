@@ -37,6 +37,7 @@ using MPGene = ThParkingStall.Core.InterProcess.Gene;
 using ThMEPArchitecture.ParkingStallArrangement.PostProcess;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -109,13 +110,22 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     else
                     {
-                        Logger?.Information($"############################################");
-                        Logger?.Information($"多线程迭代");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                        using (var docLock = Active.Document.LockDocument())
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        if (ParameterViewModel.UseMultiSelection)
                         {
-                            Run(currentDb);
+                            using (var docLock = Active.Document.LockDocument())
+                            using (AcadDatabase currentDb = AcadDatabase.Active())
+                                RunWithMultiSelect(currentDb);
+                        }
+                        else
+                        {
+                            Logger?.Information($"############################################");
+                            Logger?.Information($"多线程迭代");
+                            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                            using (var docLock = Active.Document.LockDocument())
+                            using (AcadDatabase currentDb = AcadDatabase.Active())
+                            {
+                                Run(currentDb);
+                            }
                         }
                     }
                 }
@@ -243,6 +253,7 @@ namespace ThMEPArchitecture.MultiProcess
                     MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
                     subAreas.ForEach(area => area.ShowText());
                     SubAreaParkingCnt.Clear();
+                    Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 }
                 catch (Exception ex)
                 {
@@ -255,7 +266,91 @@ namespace ThMEPArchitecture.MultiProcess
                     GA.MutexLists.ForEach(l => l.ForEach(mutex => mutex.Dispose()));
                 }
             }
+        }
 
+        public void RunWithMultiSelect(AcadDatabase acadDatabase)
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            foreach(var blk in blks)
+            {
+                try
+                {
+                    var blkName = blk.GetEffectiveName();
+                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+                    var drawingName = Path.GetFileName(doc.Name);
+                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
+                    Logger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    int fileSize = 128; // 128Mb
+                    var nbytes = fileSize * 1024 * 1024;
+                    var layoutData = new LayoutData();
+                    Logger?.Information("块名：" + blkName);
+                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("用户名：" + Environment.UserName);
+                    
+                    var inputvaild = layoutData.Init(blk, Logger);
+                    if (!inputvaild) return;
+                    var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
+#if DEBUG
+            InterParameter.InitSegLines.ShowLowerUpperBound();
+#endif
+                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                        {
+                            IFormatter formatter = new BinaryFormatter();
+                            formatter.Serialize(stream, dataWraper);
+                        }
+                        ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
+                        var GA = new MultiProcessGAGenerator(ParameterViewModel);
+                        Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                        GA.Logger = Logger;
+                        List<SubArea> subAreas;
+                        try
+                        {
+                            var res = GA.Run2();
+                            var best = res.First();
+                            subAreas = InterParameter.GetSubAreas(best);
+#if DEBUG
+                    for (int i = 0; i < subAreas.Count; i++)
+                    {
+                        var subArea = subAreas[i];
+                        subArea.Display("MPDebug");
+                    }
+#endif
+                            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+                            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+                            var strBest = $"最大车位数{ParkingStallCount}\n";
+                            Logger?.Information(strBest);
+                            Active.Editor.WriteMessage(strBest);
+                            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+                            subAreas.ForEach(area => area.ShowText());
+                            SubAreaParkingCnt.Clear();
+                            Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger?.Information(ex.Message);
+                            Logger?.Information("##################################");
+                            Logger?.Information(ex.StackTrace);
+                            Active.Editor.WriteMessage(ex.Message);
+                            GA.ProcList.Where(proc => !proc.HasExited).ForEach(proc => proc.Kill());
+                            GA.ProcList.ForEach(x => x.Dispose());
+                            GA.MutexLists.ForEach(l => l.ForEach(mutex => mutex.Dispose()));
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("##################################");
+                    Logger?.Information(ex.StackTrace);
+                    Active.Editor.WriteMessage(ex.Message);
+                }
+            }
         }
     }
     public static class MPEX

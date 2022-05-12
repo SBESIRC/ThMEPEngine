@@ -21,6 +21,7 @@
                 <StackPanel Orientation="Horizontal">
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
                 <CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiProcess}">多核心加速(beta)</CheckBox>
+                    <CheckBox FontSize="16" Margin="10,0,0,0" Height="20" FontWeight="Bold" IsChecked="{Binding UseMultiSelection}">多选</CheckBox>
                 </StackPanel >
                 <StackPanel Orientation="Vertical">
                     <RadioButton GroupName="ModeGroup" Margin="5,5,5,5" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">手动设置分区线，无迭代速排</RadioButton>
