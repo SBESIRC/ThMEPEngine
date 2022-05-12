@@ -1,6 +1,7 @@
 ﻿using System;
 using AcHelper;
 using NFox.Cad;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,7 +15,6 @@ using ThMEPEngineCore.CAD;
 #if (ACAD2016 || ACAD2018)
 using CLI;
 using Linq2Acad;
-using System.Linq;
 using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPWSS.FlushPoint;
@@ -143,7 +143,7 @@ namespace ThMEPWSS.Command
                 Rooms = rooms.Select(o => o.Boundary).ToList(),
                 Db = db,
                 WashPoints = layOutPts,
-                PtRange = 10.0,               
+                PtRange = 10.0,
             };
 
             var layoutService = new ThLayoutWashPointBlockService(layoutData);
