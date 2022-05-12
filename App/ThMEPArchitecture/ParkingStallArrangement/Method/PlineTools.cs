@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
@@ -83,6 +84,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return res;
         }
 
+        public static Polyline GetClosed(this Polyline pline)
+        {
+            var obj = pline.WashClone();
+            var clone = obj as Polyline;
+            if (clone == null)
+            {
+                return new Polyline();
+            }
+            clone.Closed = true;
+            return clone;
+        }
     }
 }
 

@@ -24,6 +24,8 @@ using ThParkingStall.Core.Tools;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
+using ThMEPEngineCore.Algorithm;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
     public  class LayoutData
@@ -62,6 +64,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  Dictionary<int, List<int>> SeglineIndexDic;//分割线连接关系
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
+        private double CloseTol = 5.0;
         public bool Init(BlockReference block, Serilog.Core.Logger logger)
         {
             Logger = logger;
@@ -143,7 +146,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 if (ent is Polyline pline)
                 {
-                    if (pline.Closed) CAD_WallLines.Add(pline);
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_WallLines.Add(pline.GetClosed());
+                    }
                 }
             }
             if (ent.Layer.ToUpper().Contains("障碍物"))
@@ -156,11 +162,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (pline.Closed) CAD_Obstacles.Add(pline);
+                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            {
+                                CAD_Obstacles.Add(pline.GetClosed());
+                            }
                         }
                     }
                 }
-                else if (ent is Polyline pline) CAD_Obstacles.Add(pline);
+                else if (ent is Polyline pline)
+                {
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_Obstacles.Add(pline.GetClosed());
+                    }
+                }
             }
             if (ent.Layer.ToUpper().Contains("坡道"))
             {
@@ -172,11 +187,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (pline.Closed) CAD_Ramps.Add(pline);
+                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            {
+                                CAD_Ramps.Add(pline.GetClosed());
+                            }
                         }
                     }
                 }
-                else if (ent is Polyline pline) CAD_Ramps.Add(pline);
+                else if (ent is Polyline pline)
+                {
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_Ramps.Add(pline.GetClosed());
+                    }
+                }
             }
             if (ent.Layer.ToUpper().Contains("分割线"))
             {
