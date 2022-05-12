@@ -26,7 +26,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             faceSize = _faceSize;
         }
 
-        public Dictionary<Point3d, HashSet<Point3d>> Genterate(PreProcess preProcessData)
+        public void Genterate(PreProcess preProcessData, ref Dictionary<Point3d, HashSet<Point3d>> earthGrid)
         {
             //1、生成连接结构
             CreateCenterLineRelation();
@@ -39,9 +39,20 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             RangeConfine rangeConfine = new RangeConfine(preProcessData, lineToCenter, centerToFace, centerGrid);
             rangeConfine.RemoveExteriorAndInteriorLines(ref lineToCenter, ref centerToFace, ref centerGrid);
 
-            //4、进行网格合并
-            MergeGrid mergeGrid = new MergeGrid(lineToCenter, centerToFace, centerGrid, faceSize);
-            return mergeGrid.Merge();
+            bool beMerge = false;
+            if(beMerge == true)
+            {
+                //4、进行网格合并
+                MergeGrid mergeGrid = new MergeGrid(lineToCenter, centerToFace, centerGrid, faceSize);
+                earthGrid = mergeGrid.Merge();
+            }
+            else
+            {
+                foreach (var line in lineToCenter.Keys)
+                {
+                    GraphDealer.AddLineToGraph(line.Item1, line.Item2, ref earthGrid);
+                }
+            }
         }
 
         /// <summary>
@@ -161,7 +172,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                     var plB = LineDealer.LinesToConvexHull(faceLinesB);
                     if(plA.Area < 1000 || plB.Area < 1000)
                     {
-                        continue;////////////////////////////////
+                        continue;
                     }
                     //5.2、重建结构
                     //获取两个面的中点
