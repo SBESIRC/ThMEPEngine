@@ -327,7 +327,9 @@ namespace TianHua.Electrical.PDS.Service
                             {
                                 if (blockData.Attributes.ContainsKey("BOX"))
                                 {
-                                    if (m.Value.Contains(blockData.Attributes["BOX"]))
+                                    if (m.Value.Contains(blockData.Attributes["BOX"])
+                                        || blockData.Attributes["BOX"].Contains("K") 
+                                        || blockData.Attributes["BOX"].Contains("INT"))
                                     {
                                         idMarks.Add(m.Value);
                                     }

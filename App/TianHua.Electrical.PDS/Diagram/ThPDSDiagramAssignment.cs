@@ -356,14 +356,14 @@ namespace TianHua.Electrical.PDS.Diagram
             return Tuple.Create(false, new Polyline());
         }
 
-        public void TableTailAssign(AcadDatabase activeDb, BlockReference tail, ThPDSProjectGraphNode node, List<Entity> tableObjs)
+        public void TableTailAssign(AcadDatabase activeDb, BlockReference tail, ThPDSProjectGraphNode node, List<Entity> tableObjs, double power)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, tail);
             objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
             var table = objs.OfType<Table>().First();
 
             // Pn
-            CellAssign(table.Cells[0, 1], node.Details.HighPower);
+            CellAssign(table.Cells[0, 1], power);
             // Kx
             CellAssign(table.Cells[0, 5], node.Load.DemandFactor);
             // cos(\Phi)

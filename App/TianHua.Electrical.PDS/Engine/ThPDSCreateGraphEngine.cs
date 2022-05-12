@@ -122,6 +122,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                         ThPDSGraphService.DistBoxBlocks = loadExtractService.DistBoxBlocks;
                         ThPDSGraphService.LoadBlocks = loadExtractService.LoadBlocks;
+                        ThPDSGraphService.Transformer = transformer;
 
                         for (var i = 0; i < storeysEngine.Elements.Count; i++)
                         {
@@ -177,8 +178,8 @@ namespace TianHua.Electrical.PDS.Engine
                             graphEngine.UnionLightingEdge();
                             graphEngine.CopyAttributes();
                             graphEngine.AssignDefaultDescription();
-                            var storeyBasePoint = new Point3d(storey.Data.Position.X - (double)storey.Data.CustomProperties.GetValue("基点 X"),
-                                storey.Data.Position.Y - (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
+                            var storeyBasePoint = new Point3d(storey.Data.Position.X + (double)storey.Data.CustomProperties.GetValue("基点 X"),
+                                storey.Data.Position.Y + (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
                             graphEngine.AssignStorey(doc.Database, storey.StoreyNumber, storeyBasePoint);
 
                             var graph = graphEngine.GetGraph();

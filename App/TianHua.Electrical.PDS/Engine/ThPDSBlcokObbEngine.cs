@@ -12,7 +12,7 @@ namespace TianHua.Electrical.PDS.Engine
         public static Polyline BlockOBB(this BlockReference br)
         {
             var entities = new DBObjectCollection();
-            ThBlockReferenceExtensions.Burst(br, entities);
+            br.Explode(entities);
             var filters = entities.OfType<Entity>()
                 .Where(e => e is Curve || e is BlockReference)
                 .Where(e => e.Visible && e.Bounds.HasValue).ToCollection();

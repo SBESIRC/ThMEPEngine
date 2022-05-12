@@ -4,6 +4,7 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 
+using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -12,6 +13,7 @@ namespace TianHua.Electrical.PDS.Service
     {
         public static Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
         public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
+        public static ThMEPOriginTransformer Transformer { get; set; }
 
         public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
             List<string> distBoxKey, List<ObjectId> objectIds)
@@ -51,11 +53,12 @@ namespace TianHua.Electrical.PDS.Service
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
             var noneLoad = true;
+            var endPoint = new ThPDSPoint3d();
             foreach (var e in entities)
             {
                 if (e is Line line)
                 {
-                    //
+                    endPoint = Transformer.Reset(line.EndPoint).ToPDSPoint3d();
                 }
                 else
                 {
@@ -80,7 +83,10 @@ namespace TianHua.Electrical.PDS.Service
             if (loads.Count == 0)
             {
                 loads.Add(new ThPDSLoad());
-                loads[0].SetLocation(new ThPDSLocation());
+                loads[0].SetLocation(new ThPDSLocation
+                {
+                    BasePoint = endPoint,
+                });
             }
 
             node.Loads = loads;
