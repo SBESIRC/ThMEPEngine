@@ -160,18 +160,36 @@ namespace TianHua.Electrical.PDS.Service
                 thPDSLoad.SpareAvail = standbyRelationship.Item3;
             }
 
-            var r = new Regex(@"[a-zA-Z]");
+            var r = new Regex(@"[\u4e00-\u9fa5]");
             foreach (var str in markStrings.Except(searchedString))
             {
-                if (r.Match(str).Success)
+                if (!r.Match(str).Success)
                 {
-                    if (loadData.EffectiveName.IndexOf(ThPDSCommon.LIGHTING_LOAD) == 0)
+                    var value = ThPDSReplaceStringService.ReplaceLastChar( str,"/", "-");
+                    var check1 = "W[a-zA-Z]+[-0-9]+";
+                    var regex1 = new Regex(@check1);
+                    var match1 = regex1.Match(value);
+                    var check2 = "[0-9]W[0-9]{3}[-][0-9]";
+                    var regex2 = new Regex(@check2);
+                    var match2 = regex2.Match(value);
+                    if (match1.Success || match2.Success)
                     {
                         thPDSLoad.ID.CircuitID.Add(str);
                     }
                     else
                     {
-                        thPDSLoad.ID.LoadID = StringFilter(str);
+                        var assign = true;
+                        foreach (var key in distBoxKey)
+                        { 
+                            if(str.Contains(key))
+                            {
+                                assign = false;
+                            }
+                        }
+                        if(assign)
+                        {
+                            thPDSLoad.ID.LoadID = StringFilter(str);
+                        }
                     }
                 }
                 else

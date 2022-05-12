@@ -57,6 +57,15 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="location"></param>
         public void ImmediatelyZoom(ThPDSLocation location)
         {
+            if (location == null)
+            {
+                return;
+            }
+            if(location.BasePoint.EqualsTo(new ThPDSPoint3d(0.01,0.01)))
+            {
+                Active.Editor.WriteLine("无法Zoom至指定负载");
+                return;
+            }
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();

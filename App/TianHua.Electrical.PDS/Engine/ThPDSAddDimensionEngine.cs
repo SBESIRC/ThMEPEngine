@@ -32,6 +32,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="node"></param>
         public void AddDimension(ThPDSProjectGraphNode node)
         {
+            if (node.Load.Location == null)
+            {
+                return;
+            }
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();
@@ -154,6 +158,10 @@ namespace TianHua.Electrical.PDS.Engine
         /// <param name="edge"></param>
         public void AddDimension(ThPDSProjectGraphEdge edge)
         {
+            if (edge.Target.Load.Location == null)
+            {
+                return;
+            }
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();

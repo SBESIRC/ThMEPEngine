@@ -438,7 +438,14 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                return LocationList[0];
+                if(LocationList.Count > 0)
+                {
+                    return LocationList[0];
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 

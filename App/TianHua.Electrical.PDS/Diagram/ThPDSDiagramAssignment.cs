@@ -397,7 +397,7 @@ namespace TianHua.Electrical.PDS.Diagram
             var power = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_POWER).ToList();
             if (power.Count == 1)
             {
-                power[0].TextString = edge.Target.Details.LowPower == 0 ? "" : edge.Target.Details.LowPower.ToString();
+                power[0].TextString = edge.Target.Details.HighPower == 0 ? "" : edge.Target.Details.HighPower.ToString();
             }
             else
             {

@@ -7,8 +7,8 @@ namespace TianHua.Electrical.PDS.Model
     {
         public ThPDSPoint3d()
         {
-            this.X = 0;
-            this.Y = 0;
+            this.X = 0.01;
+            this.Y = 0.01;
         }
 
         public ThPDSPoint3d(double X, double Y)
@@ -19,5 +19,10 @@ namespace TianHua.Electrical.PDS.Model
 
         public double X;
         public double Y;
+
+        public bool EqualsTo(ThPDSPoint3d other)
+        {
+            return this.X == other.X && this.Y == other.Y;
+        }
     }
 }
