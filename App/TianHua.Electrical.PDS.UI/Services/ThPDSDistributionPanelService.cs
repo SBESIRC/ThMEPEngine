@@ -2192,7 +2192,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             foreach (var node in tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<ThPDSProjectGraphNode>())
                                             {
-                                                ThPDSProjectGraphService.DistributeLoad(graph, node, vertice);
+                                                ThPDSProjectGraphService.DistributeLoad(graph, edge, vertice);
                                             }
                                             UpdateCanvas();
                                         }

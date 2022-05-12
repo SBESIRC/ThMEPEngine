@@ -453,6 +453,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                 }
             }
+            else
+            {
+                this.BridgeLaying = BridgeLaying.None;
+                //Add LayingSite Type
+            }
             if (viaConduit)
             {
                 if (!ConductorUse.IsNull() && ConductorUse.IsSpecialConductorType)

@@ -94,7 +94,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
             AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
-            AlternativeTripDevice = tripDevice;
+            AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
             AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
             Appendix = AppendixType.无;
             AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };

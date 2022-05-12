@@ -8,5 +8,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         public ThPDSProjectGraphEdgeCompareTag CompareTag { get; set; }
         public ThPDSProjectGraphEdgeSingleTag SingleTag { get; set; }
         public ThPDSProjectGraphEdgeDuplicateTag DupTag { get; set; }
+        public ThPDSProjectGraphEdgeCascadingErrorTag CascadingErrorTag { get; set; }
     }
 }

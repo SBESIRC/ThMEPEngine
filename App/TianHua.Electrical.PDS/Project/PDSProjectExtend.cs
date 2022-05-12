@@ -53,10 +53,6 @@ namespace TianHua.Electrical.PDS.Project
             {
                 return;
             }
-            if(node.Load.ID.LoadID == "S-2APdl2")
-            {
-
-            }
             node.CalculateCircuitFormInType();
             var edges = _projectGraph.OutEdges(node).ToList();
             edges.ForEach(e =>
@@ -72,6 +68,8 @@ namespace TianHua.Electrical.PDS.Project
             node.Details.IsStatistical = true;
             return;
         }
+
+        public static void 
 
         /// <summary>
         /// 计算进线回路类型
@@ -416,7 +414,7 @@ namespace TianHua.Electrical.PDS.Project
             edge.Details = new CircuitDetails();
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
             SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
-            if (edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源 || edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLuminaire)
+            if (edge.Source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 edge.Target.Details.PhaseSequence = PhaseSequence.L;
                 //消防应急照明回路
@@ -1087,7 +1085,12 @@ namespace TianHua.Electrical.PDS.Project
             CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
             node.ComponentCheck(CascadeCurrent);
 
-            node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            var cascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+            if (node.Details.CascadeCurrent > cascadeCurrent)
+            {
+                return;
+            }
+            node.Details.CascadeCurrent = cascadeCurrent;
             edges = _projectGraph.InEdges(node).ToList();
             edges.ForEach(e => e.CheckWithEdge());
         }
@@ -1118,9 +1121,18 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="edge"></param>
         public static void CheckWithEdge(this ThPDSProjectGraphEdge edge)
         {
+            if(edge.Details.CircuitLock)
+            {
+                return;
+            }
             edge.ComponentCheck();
             //统计回路级联电流
-            edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            var cascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+            if(edge.Details.CascadeCurrent > cascadeCurrent)
+            {
+                return;
+            }
+            edge.Details.CascadeCurrent = cascadeCurrent;
 
             var node = edge.Source;
             var miniBusbar = node.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge)).Key;

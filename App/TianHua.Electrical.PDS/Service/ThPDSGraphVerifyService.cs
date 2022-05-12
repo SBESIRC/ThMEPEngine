@@ -56,6 +56,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
             NodeFire(graph);
+            NodeCascadingErrorCheck(graph);
         }
 
         public void EdgeVerify(PDSGraph graph)
@@ -84,6 +85,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             }
+            EdgeCascadingErrorCheck(graph);
         }
 
         private void NodeFire(PDSGraph graph)
@@ -106,6 +108,17 @@ namespace TianHua.Electrical.PDS.Service
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        private void NodeCascadingErrorCheck(PDSGraph graph)
+        {
+            foreach (var node in graph.Vertices)
+            {
+                if (graph.OutEdges(node).Any(o => o.Details.CascadeCurrent > node.Details.CascadeCurrent))
+                {
+                    TagNodeCascadingError(node);
                 }
             }
         }
@@ -184,6 +197,36 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
+        private void TagNodeCascadingError(ThPDSProjectGraphNode node)
+        {
+            BeSuccess = false;
+            var CascadingError = new ThPDSProjectGraphNodeCascadingErrorTag();
+            if (node.Tag.IsNull())
+            {
+                node.Tag = CascadingError;
+            }
+            else if (node.Tag is ThPDSProjectGraphNodeDuplicateTag dupTag)
+            {
+                node.Tag = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    DupTag = dupTag,
+                    CascadingErrorTag= CascadingError,
+                };
+            }
+            else if (node.Tag is ThPDSProjectGraphNodeValidateTag validateTag)
+            {
+                node.Tag = new ThPDSProjectGraphNodeCompositeTag
+                {
+                    ValidateTag = validateTag,
+                    CascadingErrorTag= CascadingError,
+                };
+            }
+            else if (node.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+            {
+                compositeTag.CascadingErrorTag= CascadingError;
+            }
+        }
+
         private void TagEdgeDuplicate(ThPDSProjectGraphEdge edge)
         {
             BeSuccess = false;
@@ -202,6 +245,17 @@ namespace TianHua.Electrical.PDS.Service
             }
         }
 
+        private void EdgeCascadingErrorCheck(PDSGraph graph)
+        {
+            foreach (var edge in graph.Edges)
+            {
+                if(edge.Details.CascadeCurrent <= edge.Target.Details.CascadeCurrent)
+                {
+                    TagEdgeCascadingError(edge);
+                }
+            }    
+        }
+
         private void TagEdgeSingle(ThPDSProjectGraphEdge edge)
         {
             BeSuccess = false;
@@ -217,6 +271,36 @@ namespace TianHua.Electrical.PDS.Service
                     DupTag = dupTag,
                     SingleTag = singleTag
                 };
+            }
+        }
+
+        private void TagEdgeCascadingError(ThPDSProjectGraphEdge edge)
+        {
+            BeSuccess = false;
+            var cascadingError = new ThPDSProjectGraphEdgeCascadingErrorTag();
+            if (edge.Tag.IsNull())
+            {
+                edge.Tag = cascadingError;
+            }
+            else if (edge.Tag is ThPDSProjectGraphEdgeSingleTag singleTag)
+            {
+                edge.Tag = new ThPDSProjectGraphEdgeCompositeTag
+                {
+                    CascadingErrorTag = cascadingError,
+                    SingleTag = singleTag
+                };
+            }
+            else if (edge.Tag is ThPDSProjectGraphEdgeDuplicateTag dupTag)
+            {
+                edge.Tag = new ThPDSProjectGraphEdgeCompositeTag
+                {
+                    CascadingErrorTag = cascadingError,
+                    DupTag = dupTag
+                };
+            }
+            else if(edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+            {
+                compositeTag.CascadingErrorTag = cascadingError;
             }
         }
     }

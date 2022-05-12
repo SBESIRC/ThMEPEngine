@@ -588,18 +588,17 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 分配负载
         /// </summary>
-        public static void DistributeLoad(
-            ProjectGraph graph,
-            ThPDSProjectGraphNode source,
-            ThPDSProjectGraphNode target)
+        public static void DistributeLoad(ProjectGraph graph, ThPDSProjectGraphEdge edge, ThPDSProjectGraphNode target)
         {
-            //本身在别的边的负载还不知道怎么处理
-            if (graph.InDegree(target) == 0 && graph.OutDegree(target) == 0)
+            var oldLoad = edge.Target;
+            if (!oldLoad.Equals(target))
             {
-                var newEdge = new ThPDSProjectGraphEdge(source, target) { Circuit = new ThPDSCircuit() };
-                newEdge.ComponentSelection();
+                //新建回路
+                var newEdge = new ThPDSProjectGraphEdge(edge.Source, target) { Circuit = edge.Circuit, Details = edge.Details, Tag = edge.Tag };
                 graph.AddEdge(newEdge);
-                source.CheckWithNode();
+                graph.RemoveEdge(edge);
+                graph.RemoveVertex(oldLoad);
+                newEdge.CheckWithEdge();
             }
         }
 
@@ -1091,6 +1090,348 @@ namespace TianHua.Electrical.PDS.Project.Module
         public static void ImportGlobalConfiguration(string filePath)
         {
             PDSProject.Instance.ImportGlobalConfiguration(filePath);
+        }
+
+        /// <summary>
+        /// 自动编号
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node">Source</param>
+        public static void AutoNumbering(ProjectGraph graph, ThPDSProjectGraphNode node)
+        {
+            var edges = graph.OutEdges(node);
+            var emergencyPowerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyPowerEquipment);//WPE
+            var powerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.PowerEquipment);//WP
+            var lighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Lighting);//WL
+            var emergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyLighting);//WLE
+            var fireEmergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.FireEmergencyLighting);//WFEL
+            var socket = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Socket);//WS
+            var otherEdges = edges.Except(emergencyPowerEquipment).Except(powerEquipment).Except(lighting).Except(emergencyLighting).Except(fireEmergencyLighting).Except(socket);
+            var otherOnePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.一相);
+            var otherThreePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.三相);
+
+            //WPE
+            {
+                var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WPE"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WP
+            {
+                var powerEquipmentNo = powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WL
+            {
+                var lightingNo = lighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                lighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WLE
+            {
+                var emergencyLightingNo = emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WLE"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WFEL
+            {
+                var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WFEL"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WS
+            {
+                var socketNo = socket.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                socket.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WS"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WL
+            {
+                var otherOnePhaseNo = otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+
+            //WP
+            {
+                var otherThreePhaseNo = otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
+                var maxNo = otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                {
+                    o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
+                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
+                });
+            }
+        }
+
+        /// <summary>
+        /// 接受全部Tag
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns> 
+        public static bool AcceptAllTag(ProjectGraph graph)
+        {
+            return graph.Vertices.All(node => AcceptNodeTag(node)) && graph.Edges.All(edge => AcceptEdgeTag(edge));
+        }
+        
+        /// <summary>
+        /// 拒绝全部Tag
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static bool RefuseAllTag(ProjectGraph graph)
+        {
+            return graph.Vertices.All(node => RefuseNodeTag(node)) && graph.Edges.All(edge => RefuseEdgeTag(edge));
+        }
+
+        /*
+         * 20220510，通过和张皓以及泽林的沟通，现在暂时只先支持全部支持/全部拒绝，其他的单个节点和回路的拒绝和接受暂不支持
+         * 并且，支持和拒绝操作，目前也仅支持Data Change的Accept/Refuse，节点的位置变化则默认为这个一定是用户想要的改变，暂时不允许拒绝
+         */
+        /// <summary>
+        /// 拒绝Node Tag
+        /// </summary>
+        private static bool RefuseNodeTag(ThPDSProjectGraphNode node)
+        {
+            try
+            {
+                // 节点负载数据更新
+                if (node.Tag is ThPDSProjectGraphNodeIdChangeTag idTag)
+                {
+                    if (idTag.ChangeFrom)
+                    {
+                        node.Load.ID.LoadID = idTag.ChangedID;
+                    }
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeExchangeTag exchangeTag)
+                {
+                    //交换ID，暂时不知道怎么玩
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeDataTag dataTag)
+                {
+                    if (dataTag.TagP)
+                    {
+                        node.Load.InstalledCapacity = dataTag.TarP;
+                    }
+                    if (dataTag.TagD)
+                    {
+                        node.Load.ID.Description = dataTag.TarD;
+                    }
+                    if (dataTag.TagF)
+                    {
+                        node.Load.SetFireLoad(dataTag.TarF);
+                    }
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeDeleteTag deleteTag)
+                {
+                    //删除节点
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeMoveTag moveTag)
+                {
+                    //移动节点
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeAddTag addTag)
+                {
+                    //增加节点
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                {
+                    var DataTag = compositeTag?.DataTag;
+                    if (DataTag != null)
+                    {
+                        if (DataTag.TagP)
+                        {
+                            node.Load.InstalledCapacity = DataTag.TarP;
+                        }
+                        if (DataTag.TagD)
+                        {
+                            node.Load.ID.Description = DataTag.TarD;
+                        }
+                        if (DataTag.TagF)
+                        {
+                            node.Load.SetFireLoad(DataTag.TarF);
+                        }
+                    }
+                }
+                node.Tag = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 拒绝Edge Tag
+        /// </summary>
+        private static bool RefuseEdgeTag(ThPDSProjectGraphEdge edge)
+        {
+            try
+            {
+                var graph = PDSProject.Instance.graphData.Graph;
+                // 节点负载数据更新
+                if (edge.Tag is ThPDSProjectGraphEdgeIdChangeTag idTag)
+                {
+                    if (idTag.ChangeFrom)
+                    {
+                        var index = edge.Circuit.ID.CircuitID.Count;
+                        edge.Circuit.ID.CircuitID[index - 1] = idTag.ChangedLastCircuitID.Substring(edge.Circuit.ID.SourcePanelID[index].Length + 1);
+                    }
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeDeleteTag deleteTag)
+                {
+                    //删除回路
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeMoveTag moveTag)
+                {
+                    //移动回路
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeAddTag addTag)
+                {
+                    //增加回路
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+                {
+                    //回路复合Tag
+                    //2022/05/10 张皓讲此类Tag无法拒绝/接受
+                    //do not
+                }
+                edge.Tag = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 接受Node Tag
+        /// </summary>
+        private static bool AcceptNodeTag(ThPDSProjectGraphNode node)
+        {
+            try
+            {
+                // 节点负载数据更新
+                if (node.Tag is ThPDSProjectGraphNodeCompareTag idTag)
+                {
+                    node.Tag = null;
+                }
+                else if (node.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                {
+                    if(compositeTag.DupTag.IsNull() && compositeTag.ValidateTag.IsNull())
+                    {
+                        node.Tag = null;
+                    }
+                    else if(compositeTag.DupTag.IsNull())
+                    {
+                        node.Tag = compositeTag.ValidateTag;
+                    }
+                    else if(compositeTag.ValidateTag.IsNull())
+                    {
+                        node.Tag = compositeTag.DupTag;
+                    }
+                    else
+                    {
+                        compositeTag.DataTag = null;
+                        compositeTag.CompareTag = null;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 接受Edge Tag
+        /// </summary>
+        private static bool AcceptEdgeTag(ThPDSProjectGraphEdge edge)
+        {
+            try
+            {
+                // 节点负载数据更新
+                if (edge.Tag is ThPDSProjectGraphEdgeCompareTag)
+                {
+                    edge.Tag = null;
+                }
+                else if (edge.Tag is ThPDSProjectGraphEdgeCompositeTag compositeTag)
+                {
+                    if (compositeTag.DupTag.IsNull() && compositeTag.SingleTag.IsNull())
+                    {
+                        edge.Tag = null;
+                    }
+                    else if (compositeTag.DupTag.IsNull())
+                    {
+                        edge.Tag = compositeTag.SingleTag;
+                    }
+                    else if (compositeTag.SingleTag.IsNull())
+                    {
+                        edge.Tag = compositeTag.DupTag;
+                    }
+                    else
+                    {
+                        compositeTag.CompareTag = null;
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

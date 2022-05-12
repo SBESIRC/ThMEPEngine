@@ -96,18 +96,55 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum BridgeLaying
     {
-        [Description("None")]
+        [Description("仅穿管敷设")]
         None,
-        [Description("金属槽盒")]
-        MR,
-        [Description("塑料槽盒")]
-        PR,
         [Description("电缆托盘")]
         CT,
+        [Description("金属槽盒")]
+        MR,
         [Description("电缆梯架")]
         CL,
         [Description("电缆支架")]
         CR,
+        [Description("塑料槽盒")]
+        PR,
+        [Description("直埋")]
+        DB,
+        [Description("电缆沟")]
+        TC,
+        [Description("混凝土排管")]
+        CE,
+    }
+
+    /// <summary>
+    /// 敷设部位
+    /// </summary>
+    public enum LayingSite
+    {
+        [Description("无敷设部位")]
+        None,
+        [Description("沿吊顶明敷")]
+        CE,
+        [Description("吊顶内明敷")]
+        SCE,
+        [Description("沿墙面明敷")]
+        WS,
+        [Description("沿屋面明敷")]
+        RS,
+        [Description("顶板内暗敷")]
+        CC,
+        [Description("墙内暗敷")]
+        WC,
+        [Description("柱内暗敷")]
+        CLC,
+        [Description("梁内暗敷")]
+        BC,
+        [Description("地板下暗敷")]
+        FC,
+        [Description("沿柱明敷")]
+        AC,
+        [Description("沿梁明敷")]
+        AB,
     }
 
     /// <summary>

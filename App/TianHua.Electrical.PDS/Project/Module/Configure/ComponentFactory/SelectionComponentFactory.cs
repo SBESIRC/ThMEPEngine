@@ -188,9 +188,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override ThermalRelay CreatThermalRelay()
         {
-            var thermalRelay = new ThermalRelay(_calculateCurrent);
-            var ratedCurrent = thermalRelay.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
-            thermalRelay.SetRatedCurrent(ratedCurrent);
+            var thermalRelay = new ThermalRelay(_calculateCurrentMagnification);
             return thermalRelay;
         }
 
