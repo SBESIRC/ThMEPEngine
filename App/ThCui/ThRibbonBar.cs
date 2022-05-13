@@ -74,7 +74,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("风机选型",
                     "天华风机选型",
-                    "THFJ",
+                    "THFJXX",
                     "天华风机选型",
                     "IDI_THCAD_THFJ_SMALL",
                     "IDI_THCAD_THFJ_LARGE",
