@@ -19,6 +19,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
+            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -39,6 +40,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.LayingSite2 = layingSite2;
             this.IsMotor = true;
             this.Phase = phase;
+            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -55,6 +57,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.Conductor;
+            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
             this.Phase = phase;
@@ -76,6 +79,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.ControlConductor;
+            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
             this.IsMotor = true;
