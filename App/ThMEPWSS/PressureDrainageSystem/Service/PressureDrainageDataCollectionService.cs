@@ -26,7 +26,7 @@ using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
-    public class PressureDrainageSystemDiagramService
+    public class PressureDrainageDataCollectionService
     {
         public List<Entity> Entities;
         public PressureDrainageGeoData CollectedData = new PressureDrainageGeoData();

@@ -13,7 +13,6 @@ using ThMEPEngineCore.CAD;
 using ThMEPWSS.PressureDrainageSystem.Model;
 using static DotNetARX.UCSTools;
 using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
-using static ThMEPWSS.PressureDrainageSystem.Service.DrwaingServiesAssistant;
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
     public partial class PressureDrainageSystemDiagramService
