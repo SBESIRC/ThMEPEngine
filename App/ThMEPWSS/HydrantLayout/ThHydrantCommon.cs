@@ -20,7 +20,7 @@ namespace ThMEPWSS.HydrantLayout
         public const string BlkVisibility_Att = "可见性";
         public const string BlkVisibility_Att_1 = "可见性1";
         public const string BlkVisibility_Turn = "翻转";
-        public const string BlkVisibility_Att_1_Value = "DN100";
+        public const string BlkVisibility_Att_1_Value = "DN65";
         public const string BlkVisibility_Angle = "角度1";
 
         public const double DistTol = 1500;

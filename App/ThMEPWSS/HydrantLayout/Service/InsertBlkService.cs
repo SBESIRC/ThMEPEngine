@@ -121,7 +121,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         // 0:立柱 1:消防栓 2：灭火器
                         if (ptInfo.Type == 0)
                         {
-                            blkName = ThHydrantCommon.BlkName_Vertical;
+                            blkName = ThHydrantCommon.BlkName_Vertical150;
                             inputPt = ptInfo.CenterPoint;
                             rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
                             layerName = ThHydrantCommon.Layer_Vertical;
