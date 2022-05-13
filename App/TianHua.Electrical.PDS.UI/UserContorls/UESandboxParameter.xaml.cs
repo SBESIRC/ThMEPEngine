@@ -28,7 +28,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         private void btnSaveSetting(object sender, RoutedEventArgs e)
         {
-            ThPDSProjectGraphService.MotorChoiseChange();
+            ThPDSProjectGraphService.GlobalConfigurationUpdate();
         }
         private void btnExportSetting(object sender, RoutedEventArgs e)
         {

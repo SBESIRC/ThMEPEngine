@@ -86,12 +86,14 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         #region 管材铺设原则
         //通用要求
         public PipeMaterial UndergroundMaterial = PipeMaterial.SC;
-        public PipeDiameterType PipeDiameter = PipeDiameterType.Diameter32;
+        public int UniversalPipeDiameter = 32;
         //消防线路
         public PipeMaterial FireOnTheGroundSmallDiameterMaterial = PipeMaterial.JDG;
+        public int FirePipeDiameter = 50;
         public PipeMaterial FireOnTheGroundLargeDiameterMaterial = PipeMaterial.SC;
         //非消防线路
         public PipeMaterial NonFireOnTheGroundSmallDiameterMaterial = PipeMaterial.JDG;
+        public int NonFirePipeDiameter = 50;
         public PipeMaterial NonFireOnTheGroundLargeDiameterMaterial = PipeMaterial.SC;
         #endregion
 
@@ -145,16 +147,6 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
     {
         分立元件,
         CPS,
-    }
-    
-    public enum PipeDiameterType
-    {
-        [Description("25")]
-        Diameter25,
-        [Description("32")]
-        Diameter32,
-        [Description("40")]
-        Diameter40
     }
 
     /// <summary>

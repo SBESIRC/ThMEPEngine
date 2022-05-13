@@ -1433,5 +1433,15 @@ namespace TianHua.Electrical.PDS.Project.Module
                 return false;
             }
         }
+
+        /// <summary>
+        /// 全局配置保存
+        /// </summary>
+        /// <returns></returns>
+        public static bool GlobalConfigurationUpdate()
+        {
+            MotorChoiseChange();
+            return true;
+        }
     }
 }

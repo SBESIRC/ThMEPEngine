@@ -512,7 +512,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                     }
                 }
-                if (this.PipeDiameter > int.Parse(config.PipeDiameter.GetEnumDescription()))
+                if (this.PipeDiameter > config.UniversalPipeDiameter)
                 {
                     this.LayingSite1 = AdjustmentLayingSite(LayingSite1);
                     this.LayingSite2 = AdjustmentLayingSite(LayingSite2);
