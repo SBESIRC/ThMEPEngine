@@ -2182,7 +2182,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             tree.DataList.Clear();
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
-                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.Load.ID.LoadID, Tag = node });
+                                                string name;
+                                                name = node.Load.ID.LoadID;
+                                                if (string.IsNullOrEmpty(name))
+                                                {
+                                                    name = node.Load.ID.Description;
+                                                }
+                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = name, Tag = node });
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -2207,7 +2213,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             foreach (var node in tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<ThPDSProjectGraphNode>())
                                             {
-                                                ThPDSProjectGraphService.DistributeLoad(graph, edge, vertice);
+                                                ThPDSProjectGraphService.DistributeLoad(graph, edge, node);
                                             }
                                             UpdateCanvas();
                                         }
