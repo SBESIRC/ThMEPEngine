@@ -26,7 +26,7 @@ using static ThMEPWSS.PressureDrainageSystem.Utils.PressureDrainageUtils;
 
 namespace ThMEPWSS.PressureDrainageSystem.Service
 {
-    public class PressureDrainageDataCollectionService
+    public class PressureDrainageSystemDiagramService
     {
         public List<Entity> Entities;
         public PressureDrainageGeoData CollectedData = new PressureDrainageGeoData();
@@ -587,12 +587,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
+                double tol = 600;
                 foreach (var j in this.CollectedData.SubmergedPumps)
                 {
                     int dd = 0;
                     foreach (var k in this.CollectedData.VerticalPipes)
                     {
-                        if (j.Extents.ToRectangle().GetClosePoint(k.Center).DistanceTo(k.Center) < 300 || j.Extents.IsPointIn(k.Center))
+                        if (j.Extents.ToRectangle().GetClosePoint(k.Center).DistanceTo(k.Center) < tol || j.Extents.IsPointIn(k.Center))
                         {
                             dd = 1;
                             break;

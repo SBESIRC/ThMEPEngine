@@ -88,13 +88,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 linesTest.RemoveAt(0);
                 linesOri.Add(lines[0]);
                 linesOri = AppendIntersectedLinesToSelf(linesOri, linesTest, verticalPipes, submergedPumps);
-                foreach (var l in linesOri)
-                {
-                    if (l.GetClosestPointTo(new Point3d(68867.2, 705067, 0), false).DistanceTo(new Point3d(68867.2, 705067, 0)) < 1)
-                    {
-                        ;
-                    }
-                }
                 groupedlines.Add(linesOri);
                 linesOri.ForEach(o => lines.Remove(o));
             }
@@ -295,13 +288,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 var objs = new DBObjectCollection();
                 unit.HorizontalPipes.ForEach(o => objs.Add(o));
-                foreach (var l in unit.HorizontalPipes)
-                {
-                    if (l.GetClosestPointTo(new Point3d(68867.2, 705067, 0), false).DistanceTo(new Point3d(68867.2, 705067, 0)) < 1)
-                    {
-                        ;
-                    }
-                }
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
                 unit.HorizontalPipes.Clear();
                 processedLines.ForEach(o => unit.HorizontalPipes.Add(o));
@@ -372,10 +358,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             foreach (var pump in submergedPumps)
             {
-                if (pump.Extents.MaxPoint.DistanceTo(new Point3d(72562.7484198888, 667237.960626838, 0)) < 10)
-                {
-                    ;
-                }
                 bool cond_VertPipeFound = false;
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
                 {
