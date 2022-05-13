@@ -386,7 +386,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     else if (GetInputMeter() != null)
                     {
-                        item = PDSItemInfo.Create(left.Contains("进线") ? left + "（带电表）" : left, default);
+                        item = PDSItemInfo.Create(left.Contains("进线") ? left + $"（带{   (GetInputMeter() is CurrentTransformer ? "间接表" : "电表")}）" : left, default);
                     }
                     else
                     {
