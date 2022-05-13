@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.Command;
+using ThMEPWSS.UndergroundSpraySystem.Command;
 
 namespace ThMEPWSS
 {
@@ -14,6 +15,15 @@ namespace ThMEPWSS
         public void ThTestFireHydrant()
         {
             using (var cmd = new ThFireHydrantCmd(null))
+            {
+                cmd.Test();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "-THDXPLXTT", CommandFlags.Modal)]
+        public void ThTestSpraySystem()
+        {
+            using (var cmd = new ThSpraySystemCmd(null))
             {
                 cmd.Test();
             }

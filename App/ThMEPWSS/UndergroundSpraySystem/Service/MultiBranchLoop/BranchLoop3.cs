@@ -34,12 +34,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                         int fireAreaIndex = 0;//当前支管的防火分区index
                         int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
-                        GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
-                        AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
+                        BranchLoop1.GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
+                        var pts = BranchLoop1.AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
 
-                        Point3d ePt1 = ePt.OffsetX(-2 * valveGapX - valveSize);
-                        Point3d ePt12 = ePt1.OffsetY(3300 - floorHeight);
-                        Point3d ePt2 = ePt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
+                        Point3d ePt1 = pts[0];
+                        Point3d ePt12 = pts[1];
+                        Point3d ePt2 = pts[2];
 
                         Point3d nextPt = ePt12; //起始点
                         Point3d curPt = ePt12;

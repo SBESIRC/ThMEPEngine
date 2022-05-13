@@ -7,6 +7,7 @@ using ThMEPWSS.UndergroundSpraySystem.ViewModel;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Command;
 using ThMEPWSS.UndergroundSpraySystem.Method;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Command
 {
@@ -44,16 +45,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
+        public void Test()
+        {
+            var selectedArea = Common.Utils.SelectAreas();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var pipe = new SprayPipe();
+                pipe.Extract(acadDatabase.Database, selectedArea);//提取管道
+                var pipeLines = pipe.CreateSprayLines();//生成管道线
+                var sprayIn = new SprayIn(null);//输入参数
+                pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
+            }
+        }
+
         public void CreateSpraySystem(AcadDatabase curDb)
         {
             var rstPipeMarkPt = SpraySys.GetPipeMarkPt(curDb, out Point3d startPt);
             if (!rstPipeMarkPt) return;
-            //Point3d startPt = new Point3d(3656.846, 691217.2053,0);
             var selectArea = _UiConfigs.SelectedArea;
 
             var rstGetInsertPt = SpraySys.GetInsertPoint(out Point3d insertPt);
             if (!rstGetInsertPt) return;
-            //Point3d insertPt = new Point3d(20739.8895, 458919.9202, 0);
             var sprayOut = new SprayOut(insertPt);//输出参数
             var sprayIn = new SprayIn(_UiConfigs);//输入参数
             var spraySystem = new SpraySystem();//系统参数

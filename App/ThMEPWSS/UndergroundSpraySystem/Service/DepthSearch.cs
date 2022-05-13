@@ -135,8 +135,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             if (cur.Equals(sprayIn.LoopEndPt))//找到目标点，返回最终路径
             {
-                var rstPath = new List<Point3dEx>(tempPath);
-                rstPaths.Add(rstPath);//把当前路径加入
+                if(tempPath.Count > 10)
+                {
+                    var rstPath = new List<Point3dEx>(tempPath);
+                    rstPaths.Add(rstPath);//把当前路径加入
+                }
+                
                 return;
             }
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
@@ -229,6 +233,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
+            if (cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1598961.3, 390022, 0)) < 10)
+                ;
             foreach (Point3dEx p in neighbors)
             {
                 if (cur.Equals(startPt) && p.Equals(targetPt)) continue;//起点和终点相邻

@@ -13,7 +13,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
     {
         public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
         {
-            double tolerance = 100;
+            double tolerance = 120;
             if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
             if(objs.Count != 2)
             {

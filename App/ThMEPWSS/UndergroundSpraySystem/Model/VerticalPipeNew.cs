@@ -82,7 +82,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool IsCircleLayer(string layer)
         {
-            var rst1 = layer.Contains("W-FRPT") && layer.Contains("SPRL-EQPM");
+            var rst1 = layer.Contains("W-FRPT") && layer.Contains("-EQPM");
             return rst1;
         }
 

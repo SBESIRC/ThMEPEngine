@@ -16,11 +16,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
     public class LeadLineNew
     {
-        public DBObjectCollection DBObjs { get; set; }
+        public List<Line> DBObjs { get; set; }
         public DBObjectCollection TextDbObjs { get; set; }//存放提取的文字，避免二次操作
         public LeadLineNew()
         {
-            DBObjs = new DBObjectCollection();
+            DBObjs = new List<Line>();
             TextDbObjs = new DBObjectCollection();
         }
         public void Extract(Database database, Point3dCollection polygon)
@@ -61,20 +61,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         }
                     }
                 }
-                dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(e));
+                dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(e as Line));
             }
         }
 
         public List<Line> GetLines()
         {
             var leadLines = new List<Line>();
-            foreach (var db in DBObjs)
+            foreach(var obj in DBObjs)
             {
-                var line = db as Line;
-                if (line is not null)
+                if(!(obj is Line))
                 {
-                    leadLines.Add(line);
+                    continue;
                 }
+                var line = obj as Line;
+                leadLines.Add(line);
             }
             leadLines = PipeLineList.CleanLaneLines3(leadLines);
             Draw.LeadLines(leadLines);
@@ -83,7 +84,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool IsTargetLayer(string layer)
         {
-            return layer.Contains("W-FRPT-SPRL-DIMS");
+            var rst1 = layer.Contains("W-") && !layer.Contains("PIPE") 
+                && !layer.Contains("POST") && !layer.Contains("修改提资");//以上两条是对于图纸 FLA01VL4_W10-lyw 添加的限制
+            return rst1;
         }
 
         private void ExplodeTCHNote(Entity entity)
@@ -99,13 +102,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
                 if(ent is Polyline pline)
                 {
-                    DBObjs.AddList(pline.Pline2Lines());
+                    var lines = pline.Pline2Lines();
+                    lines.ForEach(l => DBObjs.Add(l));
                 }
                 if(ent is DBText || ent.IsTCHText())
                 {
                     TextDbObjs.Add(ent);
                 }
-
             }
         }
 
