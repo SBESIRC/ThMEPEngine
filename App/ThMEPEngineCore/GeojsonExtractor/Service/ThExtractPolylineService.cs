@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
@@ -21,13 +22,16 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
         public override void Extract(Database db, Point3dCollection pts)
         {
             using (var acadDatabase = AcadDatabase.Use(db))
-            {
+            {                
                 Polys = acadDatabase.ModelSpace
                     .OfType<Polyline>()
                     .Where(o => IsElementLayer(o.Layer))
                     .Select(o => o.Clone())
                     .OfType<Polyline>()
                     .ToList();
+
+                var garbages = new DBObjectCollection();
+                Polys.ForEach(p => garbages.Add(p));
 
                 if (Polys.Count > 0)
                 {
@@ -58,6 +62,9 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
                         Polys.ForEach(o => transformer.Reset(o));
                     }
                 }
+
+                Polys.ForEach(p => garbages.Remove(p));
+                garbages.MDispose();
             }
         }
     }

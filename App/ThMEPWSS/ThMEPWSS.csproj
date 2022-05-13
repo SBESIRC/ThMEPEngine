@@ -575,7 +575,6 @@
     <Compile Include="Hydrant\Service\ThCheckRegionService.cs" />
     <Compile Include="Hydrant\Service\ThDivideRoomService.cs" />
     <Compile Include="Hydrant\Service\ThFireTypeDataManager.cs" />
-    <Compile Include="Hydrant\Service\ThHydrantExtractLayerManager.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPrintService.cs" />
     <Compile Include="Hydrant\Service\ThHydrantResultParseService.cs" />
     <Compile Include="Hydrant\Service\ThJudgeRoomPrivacyService.cs" />

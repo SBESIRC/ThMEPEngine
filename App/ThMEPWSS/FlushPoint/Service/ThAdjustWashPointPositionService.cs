@@ -155,79 +155,36 @@ namespace ThMEPWSS.FlushPoint.Service
 
         private DBObjectCollection Subtraction(Entity entity, DBObjectCollection objs)
         {
-            var garbages = new DBObjectCollection();
+            // init
+            var cleaner = new ThPolygonCleanService();
+
+            // 差集
             var polygon1s = Difference(entity, objs, false);
+            polygon1s = cleaner.Filter(polygon1s);
+
+            // 清洗           
+            var results = cleaner.Clean(polygon1s);
+
+            // 释放
+            var garbages = new DBObjectCollection();
             garbages = garbages.Union(polygon1s);
-
-            var polygon2s = MakeValid(polygon1s); //解决自交的Case
-            garbages = garbages.Union(polygon2s);
-
-            var polygon3s = Simplify(polygon2s); //合并重复线
-            garbages = garbages.Union(polygon2s);
-
-            var results = Normalize(polygon3s); //合并重复线
-
-            garbages = garbages.Difference(results);
+            garbages = garbages.Difference(objs);
+            garbages = garbages.Difference(results);           
             garbages.MDispose();
+
             return results;
         }
 
         private DBObjectCollection Difference(Entity polygon,
             DBObjectCollection polygons,bool keepHole)
-        {
-            var results = ThCADCoreNTSEntityExtension.Difference(
-                polygon, polygons, keepHole);            
-            return Clean(results);
+        {          
+            return ThCADCoreNTSEntityExtension.Difference(
+                polygon, polygons, keepHole);
         }
-
-        private DBObjectCollection Simplify(DBObjectCollection polygons)
-        {            
-            var simplifer = new ThPolygonalElementSimplifier();
-            var results = simplifer.Simplify(polygons);            
-            return Clean(results);
-        }
-
-        private DBObjectCollection Normalize(DBObjectCollection polygons)
-        {
-            var simplifer = new ThPolygonalElementSimplifier();
-            var results = simplifer.Normalize(polygons);
-            return Clean(results);
-        }
-
-        private DBObjectCollection Clean(DBObjectCollection objs)
-        {
-            var garbages = new DBObjectCollection();
-            garbages = garbages.Union(objs);
-            var results = RemoveDBpoints(objs); // 过滤 DBPoint
-            results = results.FilterSmallArea(SmallAreaTolerance); //清除面积为零
-            results = DuplicatedRemove(results); //去重
-            garbages = garbages.Difference(results);
-            garbages.MDispose();
-            return results;
-        }
-
-        private DBObjectCollection MakeValid(DBObjectCollection polygons)
-        {
-            var simplifer = new ThPolygonalElementSimplifier();            
-            var results =  simplifer.MakeValid(polygons);            
-            return Clean(results);
-        }
-
-        private DBObjectCollection RemoveDBpoints(DBObjectCollection objs)
-        {
-            return objs.OfType<Entity>().Where(e => !(e is DBPoint)).ToCollection();
-        }
-
-        private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
-        {
-            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
-        }
-
         private DBObjectCollection QueryWalls(Entity polygon)
         {
             return WallSpatialIndex.SelectCrossingPolygon(polygon);
         }
-
         private double GetMaximumLengthSegment(Polyline poly)
         {
             double maxLength = 0.0;
