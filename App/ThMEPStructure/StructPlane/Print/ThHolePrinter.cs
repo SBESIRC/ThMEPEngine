@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPStructure.Common;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print

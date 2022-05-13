@@ -4690,6 +4690,18 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSDEPLETION), new Vector2d(-THESAURUSEXPERIMENT, -THESAURUSEXPERIMENT), new Vector2d(-DISAFFORESTATION, THESAURUSSTAMPEDE), new Vector2d(-THESAURUSVARIABLE, QUOTATIONZYGOMATIC) };
                                                     var segs = vecs.ToGLineSegments(pt);
                                                     drawDomePipes(segs);
+                                                    {
+                                                        var pt1 = pt.OffsetX(-THESAURUSCOSTLY).ToPoint3d();
+                                                        var pt2 = pt1.OffsetX(THESAURUSFORBIDDEN);
+                                                        var dim = new AlignedDimension();
+                                                        dim.XLine1Point = pt1;
+                                                        dim.XLine2Point = pt2;
+                                                        dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetY(-THESAURUSAROUND);
+                                                        dim.DimensionText = METACOMMUNICATION;
+                                                        dim.Layer = THESAURUSINVOICE;
+                                                        ByLayer(dim);
+                                                        DrawEntityLazy(dim);
+                                                    }
                                                 }
                                                 else
                                                 {
@@ -8696,6 +8708,9 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string CONSTRUCTIONIST = "YIL";
         public const string BROKENHEARTEDNESS = "重";
         public const string PARATHYROIDECTOMY = "地漏-AI";
+        public const int THESAURUSCOSTLY = 2047;
+        public const int THESAURUSFORBIDDEN = 1247;
+        public const int THESAURUSAROUND = 1745;
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;

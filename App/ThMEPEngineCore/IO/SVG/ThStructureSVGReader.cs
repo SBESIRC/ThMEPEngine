@@ -17,12 +17,12 @@ using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.IO.SVG
 {
-    public class ThSVGReader
+    public class ThStructureSVGReader
     {
         public List<ThGeometry> Geos { get; set; }
         public List<ThFloorInfo> FloorInfos { get; set; }
         public Dictionary<string, string> DocProperties { get; set; }
-        public ThSVGReader()
+        public ThStructureSVGReader()
         {
             Geos = new List<ThGeometry>();
             FloorInfos = new List<ThFloorInfo>();

@@ -57,6 +57,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             
             if (entity is DBText dBText)
             {
+
                 AddDbText(dBText);
             }
             if (entity.IsTCHText())
@@ -75,7 +76,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool IsTargetLayer(string layer)
         {
-            return layer.Contains("W-FRPT-SPRL-DIMS");
+            return true;
+            //var rst1 = layer.Contains("W-FRPT-SPRL-DIMS");
+           // var rst2 = layer.Contains("W-DRAI-DIMS");
+            //return rst1||rst2;
         }
 
         private void AddTchText(Entity ent)
@@ -107,13 +111,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         private void AddDbText(DBText dBText)
         {
             var st = dBText.TextString;
+            if(st.Contains("接室外"))
+            {
+                ;
+            }
             if (!st.StartsWith("DN"))
             {
                 if (!st.Contains("水泵接合器"))
                 {
                     st = st.Split('喷')[0];
                 }
-                var dbText = new Block.Text(st.Split('喷')[0], dBText.Position, "W-NOTE").DbText;
+                var dbText = new Block.Text(st, dBText.Position, "W-NOTE").DbText;
                 DBObjs.Add(dbText);
             }
         }

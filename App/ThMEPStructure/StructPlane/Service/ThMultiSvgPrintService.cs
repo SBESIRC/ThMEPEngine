@@ -94,7 +94,7 @@ namespace ThMEPStructure.StructPlane.Service
             var results = new List<ThSvgEntityPrintService>();
             SvgFiles.ForEach(svgFile =>
             {
-                var svg = new ThSVGReader();
+                var svg = new ThStructureSVGReader();
                 svg.ReadFromFile(svgFile);
 
                 var prinService = new ThSvgEntityPrintService(

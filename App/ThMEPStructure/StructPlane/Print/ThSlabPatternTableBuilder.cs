@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPStructure.StructPlane.Service;
+using ThMEPStructure.Model.Printer;
+using ThMEPStructure.Common;
 
 namespace ThMEPStructure.StructPlane.Print
 {

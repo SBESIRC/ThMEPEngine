@@ -15,6 +15,8 @@ namespace ThParkingStall.Core.MPartitionLayout
     public static class MCompute
     {
         public static int CatchedTimes = 0;
+        public static bool LogInfo = false;
+        public static int ThreadCnt = 1;
         public static Serilog.Core.Logger Logger;
         public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, bool display = false)
         {
@@ -39,7 +41,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             if (InterParameter.MultiThread)
             {        
-                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = 3 }, subarea => subarea.UpdateParkingCnts(display));
+                Parallel.ForEach(subAreas, new ParallelOptions {MaxDegreeOfParallelism = ThreadCnt }, subarea => subarea.UpdateParkingCnts(display));
             }
             else
             {
@@ -84,7 +86,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var bound = new Polygon(subArea.Area.Shell);
             bound = bound.Simplify();
             var inilanes = new List<LineSegment>();
-            foreach (var lane in subArea.SegLines)
+            foreach (var lane in subArea.VaildLanes)
             {
                 inilanes.Add(SplitLine(lane, bound.Coordinates.ToList())
                     .Where(e => bound.ClosestPoint(e.MidPoint).Distance(e.MidPoint) < 1)
@@ -98,7 +100,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 points.Add(e.P0);
                 points.Add(e.P1);
             });
-            SortAlongCurve(points, bound);
+            points = points.Select(p => bound.Coordinates.OrderBy(t => t.Distance(p)).First()).ToList();
+            points=SortAlongCurve(points, bound);
             points = RemoveDuplicatePts(points);
             var linestring = new LineString(bound.Coordinates);
             var walls = linestring.GetSplitCurves(points)
@@ -122,7 +125,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var boundary = subAreas[0].OutBound;
             for (int k = 0; k < subAreas.Count; k++)
             {
-                lanes.AddRange(subAreas[k].SegLines);
+                lanes.AddRange(subAreas[k].VaildLanes);
             }
             var tmplanes = new List<LineSegment>();
             //与边界邻近的无效车道线剔除

@@ -231,12 +231,14 @@
     <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="IO\SVG\ThFloorInfo.cs" />
+    <Compile Include="IO\SVG\ThArchitectureSVGReader.cs" />
     <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
-    <Compile Include="IO\SVG\ThSVGReader.cs" />
+    <Compile Include="IO\SVG\ThStructureSVGReader.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
+    <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
@@ -327,7 +329,6 @@
     <Compile Include="GeojsonExtractor\Service\ThExtractLineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractPolylineService.cs" />
     <Compile Include="GeojsonExtractor\Service\ThExtractService.cs" />
-    <Compile Include="GeojsonExtractor\ThAILayerManager.cs" />
     <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThBeamExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
@@ -452,6 +453,7 @@
     <Compile Include="Service\ThNTSSimplifyService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
     <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThPolygonCleanService.cs" />
     <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThRoomOutlineSimplifier.cs" />

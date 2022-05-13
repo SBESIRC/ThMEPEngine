@@ -26,6 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, List<Point3dEx>> SubLoopBranchPtDic { get; set; }//次环上的支路点集
         public Dictionary<Point3dEx, Point3d> SubLoopPtDic { get; set; } //次环起始点
         public Dictionary<Point3dEx, Point3d> BranchLoopPtDic { get; set; } //支环起始点
+        public Dictionary<Point3dEx, Point3d> BranchLoopPtNewDic { get; set; } //支环新画法起始点
         public Dictionary<Point3dEx, Point3d> BranchPtDic { get; set; } //支路起始点
         public Dictionary<Point3dEx, Point3d> FireAreaStPtDic { get; set; } //防火分区起始点
         public Point3d TempSubLoopStartPt { get; set; }//存放次环的起始绘制点
@@ -34,6 +35,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public ThCADCoreNTSSpatialIndex BlockExtents { get; set; }//存放文字和模块的外包框
 
         public double MaxOffSetX { get; set; }//存放最远楼板线边界
+
+        public Dictionary<Point3dEx, Point3dEx> LoopPtPairs { get; set; }//存放环路的起始终止点
 
         public SpraySystem()
         {
@@ -54,12 +57,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             SubLoopBranchPtDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             SubLoopPtDic = new Dictionary<Point3dEx, Point3d>();
             BranchLoopPtDic = new Dictionary<Point3dEx, Point3d>();
+            BranchLoopPtNewDic = new Dictionary<Point3dEx, Point3d>();
             BranchPtDic = new Dictionary<Point3dEx, Point3d>();
             FireAreaStPtDic = new Dictionary<Point3dEx, Point3d>();
             TempSubLoopStartPt = new Point3d();
             TempMainLoopPt = new Point3d();
             BlockExtents = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
             MaxOffSetX = 20000;
+            LoopPtPairs = new Dictionary<Point3dEx, Point3dEx>();
         }
     }
 }

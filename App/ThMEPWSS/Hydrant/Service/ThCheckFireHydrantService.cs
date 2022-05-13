@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -24,7 +25,6 @@ namespace ThMEPWSS.Hydrant.Service
         public List<ThIfcRoom> Rooms { get; set; }
         public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         private ThFireHydrantVM FireHydrantVM { get; set; }
-        private ThAILayerManager AiLayerManager { get; set; }
         private const double RoomOutsideOffsetLength = 50.0;
 
         public ThCheckFireHydrantService(ThFireHydrantVM fireHydrantVM)
@@ -32,7 +32,6 @@ namespace ThMEPWSS.Hydrant.Service
             FireHydrantVM = fireHydrantVM;
             Rooms = new List<ThIfcRoom>();
             Covers = new List<Tuple<Entity, Point3d, List<Entity>>>();
-            AiLayerManager = ThHydrantExtractLayerManager.Config();
         }
 
         public void Check(Database db, Point3dCollection pts, string mode)
@@ -103,20 +102,20 @@ namespace ThMEPWSS.Hydrant.Service
                         UseDb3Engine=true,
                         IsolateSwitch=true,
                         FilterMode = FilterMode.Cross,
-                        ElementLayer=AiLayerManager.ArchitectureWallLayer,
+                        ElementLayer=ThMEPEngineCoreLayerUtils.WALL,
                     },
                     new ThHydrantShearwallExtractor()
                     {
                         UseDb3Engine=true,
                         IsolateSwitch=true,
                         FilterMode = FilterMode.Cross,
-                        ElementLayer=AiLayerManager.ShearWallLayer,
+                        ElementLayer=ThMEPEngineCoreLayerUtils.SHEARWALL,
                     },
                     new ThHydrantDoorOpeningExtractor()
                     {
                         UseDb3Engine=false,
                         FilterMode = FilterMode.Cross,
-                        ElementLayer = "AI-Door,AI-门,门",
+                        ElementLayer = ThMEPEngineCoreLayerUtils.DOOR,
                     },
                     new ThFireHydrantExtractor()
                     {
@@ -130,7 +129,7 @@ namespace ThMEPWSS.Hydrant.Service
                     UseDb3Engine = true,
                     IsolateSwitch = true,
                     FilterMode = FilterMode.Cross,
-                    ElementLayer = AiLayerManager.ColumnLayer,
+                    ElementLayer = ThMEPEngineCoreLayerUtils.COLUMN,
                 });
             }
             extractorsContainer.ForEach(e => e.Extract(db, frame));

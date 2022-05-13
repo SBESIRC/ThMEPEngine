@@ -24,6 +24,8 @@ using ThParkingStall.Core.Tools;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
+using ThMEPEngineCore.Algorithm;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
     public  class LayoutData
@@ -62,6 +64,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  Dictionary<int, List<int>> SeglineIndexDic;//分割线连接关系
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
+        private double CloseTol = 5.0;
+        public bool Init(BlockReference block, Serilog.Core.Logger logger)
+        {
+            Logger = logger;
+
+            if (!TryInit(block)) return false;
+            //Show();
+            if (SegLines.Count != 0)
+            {
+                bool Isvaild = SegLineVaild();
+                //VaildLanes.ShowInitSegLine();
+                if (!Isvaild) return false;
+            }
+            GetLowerUpperBound();
+            //ShowLowerUpperBound();
+            return true;
+        }
         public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
@@ -74,6 +93,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
             string drawingName = Path.GetFileName(doc.Name);
             Logger?.Information("文件名：" + drawingName);
+            Logger?.Information("用户名：" + Environment.UserName);
             if (!TryInit(block)) return false;
             //Show();
             if (SegLines.Count != 0)
@@ -97,8 +117,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             WallLine = WallLine.RemoveHoles();//初始墙线
             UpdateSegLines();
-            var RampPolgons = GetRamps();
-            UpdateWallLine(RampPolgons);
+            var RampPolgons = UpdateWallLine();
+            UpdateRamps(RampPolgons);
             UpdateObstacles();
             Buildings = RampPolgons;
             Buildings.AddRange(Obstacles);
@@ -126,7 +146,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 if (ent is Polyline pline)
                 {
-                    if (pline.Closed) CAD_WallLines.Add(pline);
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_WallLines.Add(pline.GetClosed());
+                    }
                 }
             }
             if (ent.Layer.ToUpper().Contains("障碍物"))
@@ -139,11 +162,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (pline.Closed) CAD_Obstacles.Add(pline);
+                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            {
+                                CAD_Obstacles.Add(pline.GetClosed());
+                            }
                         }
                     }
                 }
-                else if (ent is Polyline pline) CAD_Obstacles.Add(pline);
+                else if (ent is Polyline pline)
+                {
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_Obstacles.Add(pline.GetClosed());
+                    }
+                }
             }
             if (ent.Layer.ToUpper().Contains("坡道"))
             {
@@ -155,11 +187,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (pline.Closed) CAD_Ramps.Add(pline);
+                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            {
+                                CAD_Ramps.Add(pline.GetClosed());
+                            }
                         }
                     }
                 }
-                else if (ent is Polyline pline) CAD_Ramps.Add(pline);
+                else if (ent is Polyline pline)
+                {
+                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    {
+                        CAD_Ramps.Add(pline.GetClosed());
+                    }
+                }
             }
             if (ent.Layer.ToUpper().Contains("分割线"))
             {
@@ -194,8 +235,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             Obstacles = UnionedObstacles.Get<Polygon>(true);
         }
 
-        private void UpdateWallLine(List<Polygon> RampPolgons)//墙线合并
+        private List<Polygon> UpdateWallLine()//墙线合并
         {
+            List<Polygon> RampPolgons = new List<Polygon>();
+            if (CAD_Ramps.Count > 0)
+            {
+                var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
+                RampPolgons = UnionedRamps.Get<Polygon>(true);
+            }
             Geometry tempWallLine = WallLine;
             tempWallLine = tempWallLine.Difference(new MultiPolygon(RampPolgons.ToArray()));
             if (tempWallLine is Polygon poly)
@@ -204,19 +251,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else if (tempWallLine is MultiPolygon mpoly)
                 WallLine = mpoly.Geometries.Cast<Polygon>().Select(p => p.RemoveHoles()).OrderBy(p => p.Area).Last();
             WallLine = WallLine.RemoveHoles();
+            return RampPolgons;
         }
-        private List<Polygon> GetRamps()
+        private void UpdateRamps(List<Polygon> RampPolgons)
         {
-            if (CAD_Ramps.Count == 0) return new List<Polygon>();
             //移除和内坡道连接的只有一个交点的线
-            var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
-            var RampPolgons = UnionedRamps.Get<Polygon>(true);
-
             RampSpatialIndex = new MNTSSpatialIndex(RampPolgons);
+
+            var InnerRampSpatialIndex = new MNTSSpatialIndex(RampPolgons.Where(p =>WallLine.Contains(p.Centroid)));
+
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];
-                var ramp = RampSpatialIndex.SelectCrossingGeometry(new LineString(new Coordinate[] { segLine.P0, segLine.P1 })).Cast<Polygon>();
+                var ramp = InnerRampSpatialIndex.SelectCrossingGeometry(new LineString(new Coordinate[] { segLine.P0, segLine.P1 })).Cast<Polygon>();
                 if (ramp.Count() > 0)
                 {
                     var insertpt = ramp.First().Shell.GetIntersectPts(segLine).First();
@@ -224,7 +271,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if (SegLineEx.GetAllIntSecPs(i, SegLines, WallLine).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
                 }
             }
-            return RampPolgons.ToList();
         }
         #endregion
         #region 预处理
@@ -250,7 +296,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var ObstacleBounds = buffered.Union().Get<Polygon>(true);
             var ObstacleBoundsGeo = new MultiPolygon(ObstacleBounds.ToArray());
             TightBoundaries = ObstacleBoundsGeo.Buffer(-(ParameterStock.RoadWidth / 2)).Get<Polygon>(true);
-            BoundingBoxes = TightBoundaries.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
+            BoundingBoxes = ObstacleBounds.Select(bound => ObstacleSpatialIndex.SelectCrossingGeometry(bound).GetEnvelope()).
                 Where(envelope => envelope != null).ToList();// 用障碍物轮廓获取外包框
             var wallBound = WallLine.Buffer(-(ParameterStock.RoadWidth / 2));//边界内缩
             wallBound = wallBound.Difference(ObstacleBoundsGeo);//取差值

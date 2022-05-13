@@ -25,6 +25,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             foreach (var rstPath in spraySystem.BranchLoops2)
             {
                 var firstPt = rstPath.First();
+                var lastPt = rstPath.Last();
                 var ptType = sprayIn.PtTypeDic[firstPt];
                 var typeNum = Convert.ToInt32(ptType.Last());
                 {
@@ -34,12 +35,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                         int fireAreaIndex = 0;//当前支管的防火分区index
                         int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
-                        GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
-                        AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
+                        BranchLoop1.GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
+                        var pts = BranchLoop1.AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
 
-                        Point3d ePt1 = ePt.OffsetX(-2 * valveGapX - valveSize);
-                        Point3d ePt12 = ePt1.OffsetY(3300 - floorHeight);
-                        Point3d ePt2 = ePt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
+                        Point3d ePt1 = pts[0];
+                        Point3d ePt12 = pts[1];
+                        Point3d ePt2 = pts[2];
 
                         Point3d nextPt = ePt12; //起始点
                         Point3d curPt = ePt12;
@@ -47,6 +48,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                         bool firstAlarmValveVisited = false;//第一个报警阀
                         var lastValveVisited = false;//遍历到最后一个报警阀
                         var visitedAlarmValveNums = 0;//遍历过的报警阀数目
+
+
+                        //新逻辑
+                        var newSpt = ePt12.OffsetX(0);
+                        var newEpt = ePt12.OffsetX(0);
+                        if (spraySystem.BranchLoopPtNewDic.ContainsKey(firstPt))
+                        {
+                            newSpt = spraySystem.BranchLoopPtNewDic[firstPt].OffsetX(1200);
+                            newEpt = spraySystem.BranchLoopPtNewDic[lastPt].OffsetX(1200);
+                        }
+
+
 
                         for (int i = 1; i < rstPath.Count - 1; i++)
                         {
@@ -65,14 +78,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                                 {
                                     if (!firstAlarmValveVisited)
                                     {
-                                        sprayOut.PipeLine.Add(new Line(ePt12, ePt12.OffsetY(-3300)));
-                                        spraySystem.BranchLoopPtDic[pt] = ePt12.OffsetY(-3300);
+                                        BranchLoop1.AddCrossPipe(true, newSpt, floorHeight, sprayOut, spraySystem, pt);
                                     }
                                     if (lastValveVisited)
                                     {
-                                        sprayOut.PipeLine.Add(new Line(ePt2, ePt2.OffsetY(-3300)));
-                                        spraySystem.BranchLoopPtDic[pt] = ePt2.OffsetY(-3300);
+                                        BranchLoop1.AddCrossPipe(false, newEpt, floorHeight, sprayOut, spraySystem, pt);
                                     }
+
                                 }
                                 else if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
                                 {

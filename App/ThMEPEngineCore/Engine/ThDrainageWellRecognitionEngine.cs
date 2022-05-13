@@ -67,16 +67,18 @@ namespace ThMEPEngineCore.Engine
     public class ThDrainageWellBlockExtractionEngine : ThDistributionElementExtractionEngine
     {
         public ThDrainageWellBlkExtractionVisitor Visitor { get; set; }
+        
         public ThDrainageWellBlockExtractionEngine()
         {
             Visitor = new ThDrainageWellBlkExtractionVisitor();
         }
         public override void Extract(Database database)
-        {
-            if(Visitor.LayerFilter.Count==0)
+        {            
+            if (Visitor.LayerFilter.Count==0)
             {
                 Visitor.LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet();
             }
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(Visitor);
             extractor.Extract(database);
@@ -84,11 +86,12 @@ namespace ThMEPEngineCore.Engine
         }
 
         public override void ExtractFromMS(Database database)
-        {
+        {            
             if (Visitor.LayerFilter.Count == 0)
             {
                 Visitor.LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet();
             }
+            Visitor.Results = new List<ThRawIfcDistributionElementData>();
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(Visitor);
             extractor.ExtractFromMS(database);
@@ -111,7 +114,7 @@ namespace ThMEPEngineCore.Engine
             Visitor = new ThDrainageWellBlkExtractionVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
-        {
+        {            
             var engine = new ThDrainageWellBlockExtractionEngine()
             {
                 Visitor = this.Visitor,
@@ -120,7 +123,7 @@ namespace ThMEPEngineCore.Engine
             Recognize(engine.Results, polygon);
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
-        {
+        {            
             var engine = new ThDrainageWellBlockExtractionEngine()
             {
                 Visitor=this.Visitor,
@@ -143,7 +146,7 @@ namespace ThMEPEngineCore.Engine
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 objs = spatialIndex.SelectCrossingPolygon(newPts);
-            }
+            }          
             transformer.Reset(objs);
             objs.Cast<Entity>().ForEach(o => Geos.Add(o));
         }

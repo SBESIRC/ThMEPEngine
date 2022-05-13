@@ -445,11 +445,17 @@ namespace ThParkingStall.Core.MPartitionLayout
             var pl = PolyFromPoints(points.ToList());
             return pl;
         }
-        private bool CloseToWall(Coordinate point)
+        private bool CloseToWall(Coordinate point,LineSegment line)
         {
-            if (Walls.Count == 0) return false;
+            double tol = 10;
+            if (Walls.Count == 0)
+            {
+                if (Boundary.ClosestPoint(point).Distance(point) < tol && ClosestPointInVertLines(point, line, IniLanes.Select(e => e.Line)) > tol)
+                    return true;
+                return false;
+            }
             var dis = ClosestPointInCurvesFast(point, Walls);
-            if (dis < 10) return true;
+            if (dis < tol) return true;
             else return false;
         }
         private bool IsConnectedToLaneDouble(LineSegment line)

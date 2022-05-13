@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Model
 {
@@ -343,6 +344,8 @@ namespace TianHua.Electrical.PDS.Model
             FireLoadWithNull = ThPDSFireLoad.Unknown;
             LocationList = new List<ThPDSLocation> ();
             OnLightingCableTray = false;
+            CableLayingMethod1 = LayingSite.CC;
+            CableLayingMethod2 = LayingSite.None;
         }
 
         /// <summary>
@@ -438,7 +441,14 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                return LocationList[0];
+                if(LocationList.Count > 0)
+                {
+                    return LocationList[0];
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -461,6 +471,16 @@ namespace TianHua.Electrical.PDS.Model
         /// 判断配电箱是否在照明桥架上
         /// </summary>
         private bool OnLightingCableTray { get; set; }
+
+        /// <summary>
+        /// Cable laying method 1
+        /// </summary>
+        public LayingSite CableLayingMethod1 { get; set; }
+
+        /// <summary>
+        /// Cable laying method 2
+        /// </summary>
+        public LayingSite CableLayingMethod2 { get; set; }
 
         #region
         public virtual bool Equals(ThPDSLoad other)

@@ -65,8 +65,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PopulationSize = parameterViewModel == null ? 80 : parameterViewModel.PopulationCount;//种群数量
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             //默认值 核心数 -1,最多为种群数
+            int max_process;
+            if (ParameterStock.ProcessCount == -1)
+            {
+                max_process = Environment.ProcessorCount;
+            }
+            else max_process = ParameterStock.ProcessCount;
             //ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);
-            ProcessCount = Math.Min(180, PopulationSize);//hard code 180
+            ProcessCount = Math.Min(max_process, PopulationSize);
             ProcList = new List<Process>();
             MutexLists = new List<List<Mutex>>();
             MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
@@ -242,7 +248,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var currentMutexList = new List<Mutex>();
             for (int idx = 0; idx < ProcessCount; idx++)
             {
-                var proc = CreateSubProcess(idx, "0", "1");
+                var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
                 //NextMutexList.Add(CreateMutex("CalculationFinished", idx));
@@ -250,6 +256,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             MutexLists.Add(currentMutexList);
             ProcList.ForEach(proc => proc.Start());
             //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
+            Logger?.Information($"进程数: {ProcessCount }");
             Logger?.Information($"进程启动用时: {stopWatch.Elapsed.TotalSeconds }");
             var t_pre = stopWatch.Elapsed.TotalSeconds;
             var pop = CreateFirstPopulation();
@@ -467,13 +474,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
             }
         }
-        private Process CreateSubProcess(int idx,string LogAllInfo = "0", string UseMultiThread = "0")
+        private Process CreateSubProcess(int idx,bool LogAllInfo, int ThreadCnt)
         {
             var proc = new Process();
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             proc.StartInfo.FileName = System.IO.Path.Combine(currentDllPath, "ThParkingStall.Core.exe");
+            string log_subprocess;
+            if (LogAllInfo) log_subprocess = "1";
+            else log_subprocess = "0";
             proc.StartInfo.Arguments =  ProcessCount.ToString() +' '+ idx.ToString() + ' '+
-                IterationCount.ToString() + ' ' + LogAllInfo + ' '+ UseMultiThread;
+                IterationCount.ToString() + ' ' + log_subprocess + ' '+ ThreadCnt.ToString();
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.UseShellExecute = false;
             //proc.StartInfo.RedirectStandardOutput = true;

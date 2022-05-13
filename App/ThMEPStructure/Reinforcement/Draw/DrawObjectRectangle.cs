@@ -383,6 +383,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             }
         }
 
+        
         public override void DrawCJin()
         {
 
@@ -795,7 +796,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.scale = scale;
             this.number = thRectangleEdgeComponent.Number;
             TableStartPt = position;
-            if (thRectangleEdgeComponent.IsCalculation)
+            if (thRectangleEdgeComponent.IsCalculation && !thRectangleEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
             {
                 this.Reinforce = thRectangleEdgeComponent.EnhancedReinforce;
             }

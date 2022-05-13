@@ -589,7 +589,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             double generate_lane_length = -1;
             var lane = IniLanes[i];
             if (lane.Line.Length <= LengthCanGAdjLaneConnectSingle) return generate_lane_length;
-            if (CloseToWall(lane.Line.P0) && !lane.GStartAdjLine)
+            if (CloseToWall(lane.Line.P0, lane.Line) && !lane.GStartAdjLine)
             {
                 var generated = GenerateAdjacentLanesFunc(ref paras, lane, i, true);
                 if (generated != -1)
@@ -597,7 +597,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     return generated;
                 }
             }
-            else if (CloseToWall(lane.Line.P1) && !lane.GEndAdjLine)
+            else if (CloseToWall(lane.Line.P1, lane.Line) && !lane.GEndAdjLine)
             {
                 var generated = GenerateAdjacentLanesFunc(ref paras, lane, i, false);
                 if (generated != -1)

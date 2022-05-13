@@ -198,7 +198,8 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             {
                 for (int j = 0; j < floorAreaList[0].Count; j++)
                 {
-                    households[i, j] = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]).Count;
+                    var overlapHouse = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]);
+                    households[i, j] = GetDeduplicationHouseCnt( overlapHouse);
                 }
             }
 
@@ -224,6 +225,32 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                 fHouseNumList.Add(house);
             }
             return fHouseNumList;
+        }
+
+        public static int GetDeduplicationHouseCnt(DBObjectCollection overlapHouse)
+        {
+            double tor = 200;
+            var overlapList = new List<int>();
+            if(overlapHouse.Count > 1)
+            {
+                for(int i =0; i < overlapHouse.Count - 1;i++)
+                {
+                    var centerPti = (overlapHouse[i] as Polyline).GetCentroidPoint();
+                    for(int j = i+1; j < overlapHouse.Count;j++)
+                    {
+                        var centerPtj = (overlapHouse[j] as Polyline).GetCentroidPoint();
+                        if (centerPti.DistanceTo(centerPtj) < tor)
+                        {
+                           if(!overlapList.Contains(j))
+                            {
+                                overlapList.Add(j);
+                            }
+                        }
+                    }
+                }
+                return overlapHouse.Count - overlapList.Count;
+            }
+            return overlapHouse.Count;
         }
 
         public static List<int[]> CountToiletNums(List<List<Point3dCollection>> floorAreaList,

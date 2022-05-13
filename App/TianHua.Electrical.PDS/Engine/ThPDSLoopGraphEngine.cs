@@ -121,10 +121,24 @@ namespace TianHua.Electrical.PDS.Engine
                             block.Explode(objs);
                             var motor = objs.OfType<BlockReference>().First();
                             GeometryMap.Add(block, motor);
-                            return;
+                        }
+                        else
+                        {
+                            var obb = block.BlockOBB();
+                            if(!obb.Bounds.HasValue)
+                            {
+                                GeometryMap.Add(block, block);
+                            }
+                            else
+                            {
+                                GeometryMap.Add(block, block.BlockOBB());
+                            }
                         }
                     }
-                    GeometryMap.Add(x, x);
+                    else
+                    {
+                        GeometryMap.Add(x, x);
+                    }
                 });
                 LoadIndex = new ThCADCoreNTSSpatialIndex(GeometryMap.Values.ToCollection());
 
@@ -154,6 +168,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                 // 搜索框线周围的标注
                 var markList = MarkService.GetMultiMarks(bufferFrame);
+                MarkService.InfosClean(markList);
 
                 var cacheDistBoxes = new List<BlockReference>();
                 var cacheMarkList = new List<ThPDSTextInfo>();
@@ -277,7 +292,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                             newNode.Loads[0].ID.CircuitNumber.ForEach(number =>
                             {
-                                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey, true);
+                                var newEdge = ThPDSGraphService.CreateEdge(CableTrayNode, newNode, new List<string> { number }, DistBoxKey);
                                 PDSGraph.Graph.AddEdge(newEdge);
                                 // 此时节点需要和桥架建立多条回路，由于在dictionary中是通过判断两个节点是否都相同，
                                 // 进而判断两个edge是否相同的，所以此时dictionary认为它们是同一个key
@@ -609,7 +624,7 @@ namespace TianHua.Electrical.PDS.Engine
 
                     if (!string.IsNullOrEmpty(attributesCopy))
                     {
-                        node.Loads[0].AttributesCopy = attributesCopy;
+                        newNode.Loads[0].AttributesCopy = attributesCopy;
                     }
 
                     var newEdge = ThPDSGraphService.CreateEdge(node, newNode, tuple.Item3.Texts, DistBoxKey);
@@ -1450,7 +1465,5 @@ namespace TianHua.Electrical.PDS.Engine
             });
             return results;
         }
-
-
     }
 }

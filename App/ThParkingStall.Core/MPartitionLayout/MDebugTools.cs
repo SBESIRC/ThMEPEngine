@@ -24,7 +24,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             string s = "";
             foreach (var line in lines)
             {
-                s += AnalysisLineString(line) + ",";
+                s += AnalysisLineString(line) + ";";
             }
             s = s.Remove(s.Length - 1, 1);
             return s;

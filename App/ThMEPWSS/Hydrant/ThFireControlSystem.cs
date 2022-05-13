@@ -40,6 +40,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
     using System.Diagnostics;
     using Newtonsoft.Json.Linq;
     using Exception = System.Exception;
+    using ThMEPWSS.Pipe.Engine;
+    using ThMEPEngineCore.Model;
+    using ThMEPWSS.Hydrant.Service;
     public static class ThFireControlSystemCmd
     {
         public static void ExecuteTH(FireControlSystemDiagramViewModel vm)
@@ -89,7 +92,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var lineInfos = new List<LineInfo>();
                 var floorGroupData = InputDataConvert.SplitFloor(vm);
                 var floorDatas = InputDataConvert.FloorDataModels(floorGroupData);
-                const double fireOffsetY = 400.0;
+                const double fireOffsetY = 100.0;
                 const double fireHeight = 700.0;
                 var HEIGHT = vm.FaucetFloor;
                 var OFFSET_X1 = 5000.0;
@@ -108,6 +111,14 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var hasFullHalfPlatformLine = false;
                 var refugeFloors = floorDatas.Where(x => x.IsRefugeFloor).Select(x => $"{x.FloorNum}F").ToList();
                 if (refugeFloors.Count == 0) _refugeCount = _generalCount;
+                if (refugeFloors.Count > 6)
+                {
+                    var dm = new ThFireSystemDiagram(vm.Serialnumber, refugeFloors.Count, floorDatas.Count - refugeFloors.Count, 0, new());
+                    for (int i = 0; i < refugeFloors.Count; i++)
+                    {
+                        dm.DrawPipeLine(i, basePoint, vm.FaucetFloor, refugeFloors.Count);
+                    }
+                }
                 var floorRanges = vm.ZoneConfigs.Where(x => x.IsEffective()).Select(x => new ValueTuple<int?, int?>(x.GetIntStartFloor(), x.GetIntEndFloor()))
                     .Where(x => x.Item1.HasValue && x.Item2.HasValue).Select(x => new ValueTuple<int, int>(x.Item1.Value, x.Item2.Value))
                     .OrderBy(x => x.Item1).ToList();
@@ -282,6 +293,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             }
                         }
                     }
+                    var _exP7s = new List<Point3d>();
                     void drawDomePipe(GLineSegment seg)
                     {
                         if (seg.IsValid)
@@ -376,6 +388,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                     {
                         if (vm.CountsGeneral == 1 && j != 0) return false;
                         var pr = vm.SetHighlevelNozzleAndSemiPlatformNozzleParams;
+                        if (i == 0 && pr.AdditionalFireHydrant is SetHighlevelNozzleAndSemiPlatformNozzlesViewModel.AdditionalFireHydrantEnum.YesYes) return false;
                         var arg = pr.Items.First(x => x.PipeId - 1 == getRealJ(j));
                         return i == 0 && arg.HasFireHydrant && arg.IsHalfPlatform;
                     }
@@ -411,25 +424,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 vlines.Add(new GLineSegment(bsPt, bsPt.OffsetY(HEIGHT)).ToLineString());
                             }
                         }
-                    }
-                    {
-                        var p7s = new List<Point3d>();
-                        for (int j = 0; j < _generalCount; j++)
-                        {
-                            var bsPt = getGeneralBsPt(0, j);
-                            var p5 = bsPt;
-                            var p6 = p5.OffsetY(-300);
-                            drawDomePipe(new GLineSegment(p5, p6));
-                            brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p6) { Rotate = Math.PI / 2 });
-                            var p7 = p6.OffsetXY(0, -600);
-                            lineInfos.Add(new LineInfo(new GLineSegment(p6, p7), "W-FRPT-NOTE"));
-                            p7s.Add(p7);
-                        }
-                        var seg = new GLineSegment(p7s[0], p7s.Last());
-                        lineInfos.Add(new LineInfo(seg, "W-FRPT-NOTE"));
-                        var text = "接自地库低区消火栓环管（入口压力X.XXMPa）";
-                        var (w, h) = GetDBTextSize(text, 350, .7, "TH-STYLE3");
-                        textInfos.Add(new DBTextInfo(seg.StartPoint.OffsetXY((seg.Length - w) / 2, -h - 100).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                     }
                     var basementInfos = new List<Tuple<int, Point3d, Point3d>>();
                     {
@@ -478,6 +472,10 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         if (getPipeConnectionType(i, j) == "高位-板下")
                                                         {
                                                             dy = (HEIGHT / 2 - 300 - TEXT_HEIGHT - w) / 2;
+                                                        }
+                                                        if (getPipeConnectionType(i, j) == "高位-板上")
+                                                        {
+                                                            dy = (600 - w) / 2;
                                                         }
                                                     }
                                                     if (getHasHalfPlatform(i, j) && HEIGHT < 2300 && (getPipeConnectionType(i, j) == "低位"))
@@ -867,7 +865,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var px = p1;
                                             var fixY = -1325 + 300 - (HEIGHT - 3000.0);
                                             brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(300, 0)));
-                                            brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500, -250)));
+                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1500 - 150, -250)));
                                             brInfos.Add(new BlockInfo("止回阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1150, -250)));
                                             brInfos.Add(new BlockInfo("截止阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1885, -1125 + fixY)));
                                             brInfos.Add(new BlockInfo("接驳预留", "W-FRPT-HYDT-EQPM", px.OffsetXY(-1685, -1125 + fixY)));
@@ -880,7 +878,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var seg = new GLineSegment(px.OffsetXY(-2500, -250), px.OffsetXY(-1650, -250));
                                             hdrills.Add(new GLineSegment(p1.OffsetX(300), p1.OffsetX(600)).ToLineString().Buffer(.1).ToGRect());
                                             drawDomePipe(seg);
-                                            drawDomePipe(new GLineSegment(px.OffsetXY(-1350, -250), px.OffsetXY(-1150, -250)));
+                                            drawDomePipe(new GLineSegment(px.OffsetXY(-1350 - 60, -250), px.OffsetXY(-1150, -250)));
                                             drawDomePipe(new GLineSegment(px.OffsetXY(-850, -250), px.OffsetXY(-150, -250)));
                                             drawDomePipe(new GLineSegment(px.OffsetXY(-2135, -250), px.OffsetXY(-2135, -1125 + fixY)));
                                             drawDomePipe(new GLineSegment(px.OffsetXY(-365, -250), px.OffsetXY(-365, -1125 + fixY)));
@@ -931,14 +929,15 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                 {
                                                     var i1 = i - 3;
                                                     var dx = -width_HandPumpConnection;
+                                                    var fixY = hasFullHalfPlatformLine ? HEIGHT / 2 : 0;
                                                     if (i1 >= 0)
                                                     {
-                                                        textInfos.Add(new DBTextInfo(new Point2d(p1.X, p0.Y - HEIGHT * 3).OffsetXY(dx - 50, (HEIGHT - w) / 2).ToPoint3d(), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                        textInfos.Add(new DBTextInfo(new Point2d(p1.X, p0.Y - HEIGHT * 3).OffsetXY(dx - 50, (HEIGHT - w) / 2 + fixY).ToPoint3d(), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
                                                     }
                                                     if (i1 != 0)
                                                     {
                                                         var y = getStoreyBsPt(0).Y;
-                                                        textInfos.Add(new DBTextInfo(new Point2d(p1.X, y).OffsetXY(dx - 50, (HEIGHT - w) / 2).ToPoint3d(), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                        textInfos.Add(new DBTextInfo(new Point2d(p1.X, y).OffsetXY(dx - 50, (HEIGHT - w) / 2 + fixY).ToPoint3d(), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
                                                     }
                                                 }
                                             }
@@ -1246,7 +1245,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         if (isLeft) fixX *= -1;
                                     }
                                     {
-                                        var limit = hasHalfPlatform ? HEIGHT / 2 : HEIGHT;
+                                        var limit = hasHalfPlatform ? (hasFullHalfPlatformLine ? HEIGHT : HEIGHT / 2) : HEIGHT;
                                         if (refugeFloors.Contains(storey) || ringStoreys.Contains(storey))
                                         {
                                             limit -= 400;
@@ -1344,127 +1343,79 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     }
                                 }
                                 if (IsNumStorey(storey))
-                                {
-                                    if (getHasOrdinalFire(i, j))
-                                    {
-                                        if (arg.PipeConnectionType == "低位")
                                         {
-                                            drawLow(isLeft, hasHalfPlatform);
-                                        }
-                                        else if (arg.PipeConnectionType == "高位-板上")
-                                        {
-                                            if (hasHalfPlatform)
+                                            if (getHasOrdinalFire(i, j))
                                             {
-                                                if (refugeFloors.Contains(storey) || ringPairFloors.Any(x => x.Item1 == storey))
+                                                if (arg.PipeConnectionType == "低位")
                                                 {
                                                     drawLow(isLeft, hasHalfPlatform);
                                                 }
-                                                else
+                                                else if (arg.PipeConnectionType == "高位-板上")
                                                 {
-                                                    if (ringPairFloors.Any(x => x.Item2 == storey))
+                                                    if (hasHalfPlatform)
                                                     {
-                                                        var p = bsPt.OffsetY(HEIGHT - 700);
-                                                        vsels.Add(p);
-                                                        vkills.Add(p.OffsetY(-.1));
-                                                    }
-                                                    if (storey == maxNumStorey && vm.IsTopLayerRing)
-                                                    {
-                                                        var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - 300 - fireOffsetY)), new Vector2d(300, 0) };
-                                                        if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                        var p1 = bsPt.OffsetY(HEIGHT * 1.5 - 300);
-                                                        var segs = vecs.ToGLineSegments(p1);
-                                                        var pt = segs.Last().EndPoint.ToPoint3d();
-                                                        drawFire(pt);
-                                                        vecs = new List<Vector2d> { new Vector2d(-300, 0), new Vector2d(0, (HEIGHT / 2 - 300 - fireOffsetY)) };
-                                                        if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                        segs = vecs.ToGLineSegments(pt);
-                                                        drawDomePipes(segs);
-                                                        textInfos.Add(new DBTextInfo(bsPt.OffsetY(HEIGHT / 2).OffsetXY(50 + (isLeft ? -600 - 200 : 0), 50), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    }
-                                                    else
-                                                    {
-                                                        var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - 300 - fireOffsetY)), new Vector2d(300, 0) };
-                                                        if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                        var p1 = bsPt.OffsetY(HEIGHT * 1.5 - 300);
-                                                        var segs = vecs.ToGLineSegments(p1);
-                                                        drawDomePipes(segs);
-                                                        drawFire(segs.Last().EndPoint.ToPoint3d());
-                                                        textInfos.Add(new DBTextInfo(bsPt.OffsetY(HEIGHT / 2).OffsetXY(50 + (isLeft ? -600 - 200 : 0), 50), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                var dn = "DN65";
-                                                var (w, h) = GetDBTextSize(dn, 350, .7, "TH-STYLE3");
-                                                var p1 = bsPt.OffsetY(fireOffsetY);
-                                                var p8 = p1.OffsetX(isLeft ? -600 : 600);
-                                                var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
-                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
-                                                var st = bsPt.OffsetY(HEIGHT - 300);
-                                                if (refugeFloors.Contains(storey))
-                                                {
-                                                    st = bsPt.OffsetY(HEIGHT - 800);
-                                                    if (isLeft)
-                                                    {
-                                                        st = st.OffsetXY(-300, 0);
-                                                    }
-                                                    else
-                                                    {
-                                                        st = st.OffsetXY(300, 0);
-                                                    }
-                                                    if (j == _generalCount - 1)
-                                                    {
-                                                        if (isLeft)
+                                                        if (refugeFloors.Contains(storey) || ringPairFloors.Any(x => x.Item1 == storey))
                                                         {
+                                                            drawLow(isLeft, hasHalfPlatform);
                                                         }
                                                         else
                                                         {
-                                                            st = st.OffsetX(-300 - 900);
-                                                        }
-                                                    }
-                                                    vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 800)), new Vector2d(300, 0) };
-                                                    if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                    p8 = vecs.GetLastPoint(st).ToPoint3d();
-                                                    if (isLeft)
-                                                    {
-                                                        p7 = p8.OffsetXY(-w / 2 + 300 / 2, -h - 100);
-                                                    }
-                                                    else
-                                                    {
-                                                        p7 = p8.OffsetXY(-w / 2 - 300 / 2, -h - 100);
-                                                    }
-                                                    drawDomePipes(vecs.ToGLineSegments(st));
-                                                    drawFire(p8);
-                                                    textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                }
-                                                else
-                                                {
-                                                    var _pr = ringPairFloors.FirstOrDefault(x => x.Item2 == storey);
-                                                    if (_pr.Item2 != null)
-                                                    {
-                                                        st = bsPt.OffsetY(HEIGHT - 300 - 400);
-                                                        vsels.Add(st);
-                                                        vkills.Add(st.OffsetY(-.1));
-                                                        vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 400)), new Vector2d(300, 0) };
-                                                        if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                        drawDomePipes(vecs.ToGLineSegments(st));
-                                                        drawFire(p8);
-                                                        textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                    }
-                                                    else
-                                                    {
-                                                        _pr = ringPairFloors.FirstOrDefault(x => x.Item1 == storey);
-                                                        if (_pr.Item1 != null)
-                                                        {
-                                                            st = bsPt.OffsetY(HEIGHT - 300 - 400);
-                                                            if (isLeft)
+                                                            if (ringPairFloors.Any(x => x.Item2 == storey))
                                                             {
-                                                                st = st.OffsetXY(-300, 300);
+                                                                var p = bsPt.OffsetY(HEIGHT - 700);
+                                                                vsels.Add(p);
+                                                                vkills.Add(p.OffsetY(-.1));
+                                                            }
+                                                            if (storey == maxNumStorey && vm.IsTopLayerRing)
+                                                            {
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - 300 - fireOffsetY)), new Vector2d(300, 0) };
+                                                                if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                var p1 = bsPt.OffsetY(HEIGHT * 1.5 - 300);
+                                                                var segs = vecs.ToGLineSegments(p1);
+                                                                var pt = segs.Last().EndPoint.ToPoint3d();
+                                                                drawFire(pt);
+                                                                vecs = new List<Vector2d> { new Vector2d(-300, 0), new Vector2d(0, (HEIGHT / 2 - 300 - fireOffsetY)) };
+                                                                if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                segs = vecs.ToGLineSegments(pt);
+                                                                drawDomePipes(segs);
+                                                                textInfos.Add(new DBTextInfo(bsPt.OffsetY(HEIGHT / 2).OffsetXY(50 + (isLeft ? -600 - 200 : 0), 50), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                             }
                                                             else
                                                             {
-                                                                st = st.OffsetXY(300, 300);
+                                                                var limit = HEIGHT / 2;
+                                                                if (hasFullHalfPlatformLine) limit = HEIGHT;
+                                                                var should = limit <= 1100 + 100;
+                                                                var extendY = should ? fireOffsetY - 100 : 0;
+                                                                var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - 300 - fireOffsetY) - extendY), new Vector2d(300, 0) };
+                                                                if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                var p1 = bsPt.OffsetY(HEIGHT * 1.5 - 300);
+                                                                var segs = vecs.ToGLineSegments(p1);
+                                                                drawDomePipes(segs);
+                                                                drawFire(segs.Last().EndPoint.ToPoint3d());
+                                                                var fixV = should ? (isLeft ? new Vector2d(-366, -421) : new Vector2d(300, -412)) : default;
+                                                                textInfos.Add(new DBTextInfo(bsPt.OffsetY(HEIGHT / 2).OffsetXY(50 + (isLeft ? -600 - 200 : 0), 50) + fixV.ToVector3d(), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        var dn = "DN65";
+                                                        var (w, h) = GetDBTextSize(dn, 350, .7, "TH-STYLE3");
+                                                        var p1 = bsPt.OffsetY(fireOffsetY);
+                                                        var p8 = p1.OffsetX(isLeft ? -600 : 600);
+                                                        var p7 = p1.OffsetXY(50 + (isLeft ? -600 - 200 : 0), -350);
+                                                        var vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300)), new Vector2d(300, 0) };
+                                                        var st = bsPt.OffsetY(HEIGHT - 300);
+                                                        if (refugeFloors.Contains(storey))
+                                                        {
+                                                            st = bsPt.OffsetY(HEIGHT - 800);
+                                                            if (isLeft)
+                                                            {
+                                                                st = st.OffsetXY(-300, 0);
+                                                            }
+                                                            else
+                                                            {
+                                                                st = st.OffsetXY(300, 0);
                                                             }
                                                             if (j == _generalCount - 1)
                                                             {
@@ -1476,7 +1427,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     st = st.OffsetX(-300 - 900);
                                                                 }
                                                             }
-                                                            vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 400)), new Vector2d(300, 0) };
+                                                            vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 800)), new Vector2d(300, 0) };
                                                             if (isLeft) vecs = vecs.GetYAxisMirror();
                                                             p8 = vecs.GetLastPoint(st).ToPoint3d();
                                                             if (isLeft)
@@ -1493,150 +1444,215 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         }
                                                         else
                                                         {
-                                                            if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                            drawDomePipes(vecs.ToGLineSegments(st));
-                                                            drawFire(p8);
-                                                            textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                            var _pr = ringPairFloors.FirstOrDefault(x => x.Item2 == storey);
+                                                            if (_pr.Item2 != null)
+                                                            {
+                                                                st = bsPt.OffsetY(HEIGHT - 300 - 400);
+                                                                vsels.Add(st);
+                                                                vkills.Add(st.OffsetY(-.1));
+                                                                vecs = new List<Vector2d> { new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 400)), new Vector2d(300, 0) };
+                                                                if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                drawDomePipes(vecs.ToGLineSegments(st));
+                                                                drawFire(p8);
+                                                                textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                            }
+                                                            else
+                                                            {
+                                                                _pr = ringPairFloors.FirstOrDefault(x => x.Item1 == storey);
+                                                                if (_pr.Item1 != null)
+                                                                {
+                                                                    st = bsPt.OffsetY(HEIGHT - 300 - 400);
+                                                                    if (isLeft)
+                                                                    {
+                                                                        st = st.OffsetXY(-300, 300);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        st = st.OffsetXY(300, 300);
+                                                                    }
+                                                                    if (j == _generalCount - 1)
+                                                                    {
+                                                                        if (isLeft)
+                                                                        {
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            st = st.OffsetX(-300 - 900);
+                                                                        }
+                                                                    }
+                                                                    vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(300, 0), new Vector2d(0, -(HEIGHT - fireOffsetY - 300 - 400)), new Vector2d(300, 0) };
+                                                                    if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                    p8 = vecs.GetLastPoint(st).ToPoint3d();
+                                                                    if (isLeft)
+                                                                    {
+                                                                        p7 = p8.OffsetXY(-w / 2 + 300 / 2, -h - 100);
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        p7 = p8.OffsetXY(-w / 2 - 300 / 2, -h - 100);
+                                                                    }
+                                                                    drawDomePipes(vecs.ToGLineSegments(st));
+                                                                    drawFire(p8);
+                                                                    textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (isLeft) vecs = vecs.GetYAxisMirror();
+                                                                    drawDomePipes(vecs.ToGLineSegments(st));
+                                                                    drawFire(p8);
+                                                                    textInfos.Add(new DBTextInfo(p7, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
-                                            }
-                                        }
-                                        else if (arg.PipeConnectionType == "高位-板下")
-                                        {
-                                            var ok = false;
-                                            if (!hasHalfPlatform && i != 0)
-                                            {
-                                                if (ringPairInts.Any(x => x.Item2 == i))
+                                                else if (arg.PipeConnectionType == "高位-板下")
                                                 {
-                                                    var px = bsPt;
-                                                    if (isLeft)
+                                                    var ok = false;
+                                                    if (!hasHalfPlatform && i != 0)
                                                     {
-                                                        brInfos.Add(new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-600, 400)));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 400), px.OffsetXY(-600, -200)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -200), px.OffsetXY(-300, -200)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-300, -200), px.OffsetXY(-300, -400)), "W-FRPT-HYDT-PIPE"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-59, 100), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                        if (ringPairInts.Any(x => x.Item2 == i))
+                                                        {
+                                                            var px = bsPt;
+                                                            if (isLeft)
+                                                            {
+                                                                brInfos.Add(new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-600, 400)));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 400), px.OffsetXY(-600, -200)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -200), px.OffsetXY(-300, -200)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-300, -200), px.OffsetXY(-300, -400)), "W-FRPT-HYDT-PIPE"));
+                                                                textInfos.Add(new DBTextInfo(px.OffsetXY(-59, 100), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                            }
+                                                            else
+                                                            {
+                                                                brInfos.Add(new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(600, 400)));
+                                                                textInfos.Add(new DBTextInfo(px.OffsetXY(441, 100), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, 400), px.OffsetXY(600, 0)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, 0), px.OffsetXY(600, -200)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, -200), px.OffsetXY(300, -200)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(300, -200), px.OffsetXY(300, -400)), "W-FRPT-HYDT-PIPE"));
+                                                            }
+                                                            ok = true;
+                                                        }
                                                     }
-                                                    else
+                                                    if (!ok)
                                                     {
-                                                        brInfos.Add(new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(600, 400)));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(441, 100), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, 400), px.OffsetXY(600, 0)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, 0), px.OffsetXY(600, -200)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(600, -200), px.OffsetXY(300, -200)), "W-FRPT-HYDT-PIPE"));
-                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(300, -200), px.OffsetXY(300, -400)), "W-FRPT-HYDT-PIPE"));
+                                                        var dx1 = isLeft ? -600.0 : 600.0;
+                                                        var fixY = .0;
+                                                        var p0 = bsPt;
+                                                        if (hasHalfPlatform)
+                                                        {
+                                                            p0 = p0.OffsetY(HEIGHT / 2);
+                                                            var limit = HEIGHT / 2;
+                                                            if (refugeFloors.Contains(storey))
+                                                            {
+                                                                limit -= 800;
+                                                            }
+                                                            else if (ringPairFloors.Any(x => x.Item1 == storey || x.Item2 == storey))
+                                                            {
+                                                                limit -= 400;
+                                                            }
+                                                            else if (storey == maxNumStorey && vm.IsTopLayerRing)
+                                                            {
+                                                                limit -= 450;
+                                                            }
+                                                            if (fireOffsetY + fireHeight >= limit)
+                                                            {
+                                                                fixY -= fireOffsetY;
+                                                            }
+                                                        }
+                                                        var p1 = p0.OffsetY(fireOffsetY);
+                                                        var p2 = p1.OffsetXY(dx1, fixY);
+                                                        var vecs = new List<Vector2d> { new Vector2d(dx1, 0), new Vector2d(0, 300 + fireOffsetY + fixY) };
+                                                        var st = p0.OffsetY(-300);
+                                                        if (refugeFloors.Contains(allStoreys.TryGet(i - 1)))
+                                                        {
+                                                            vecs = new List<Vector2d> { new Vector2d(dx1, 0), new Vector2d(0, 250 + fireOffsetY) };
+                                                            st = p0.OffsetY(-250);
+                                                        }
+                                                        else if (ringPairFloors.Any(x => x.Item2 == storey))
+                                                        {
+                                                            var seg = new GLineSegment(p0, st);
+                                                            drawDomePipe(seg);
+                                                            obstacles.Add(seg.Buffer(10));
+                                                        }
+                                                        drawFire(p2);
+                                                        if (ringPairFloors.Any(x => x.Item2 == storey))
+                                                        {
+                                                            vsels.Add(st);
+                                                            vkills.Add(st.OffsetY(-.1));
+                                                        }
+                                                        var segs = vecs.ToGLineSegments(st);
+                                                        if (storey == "1F" && !hasHalfPlatform)
+                                                        {
+                                                            segs.RemoveAt(0);
+                                                            var px = segs[0].StartPoint.ToPoint3d();
+                                                            brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", px) { Rotate = Math.PI / 2 });
+                                                            new Action(() =>
+                                                            {
+                                                                var text = "引自地下室";
+                                                                var (w, h) = GetDBTextSize(text, 350, .7, "TH-STYLE3");
+                                                                var py = px.OffsetY(-h - 100);
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px, py), "W-FRPT-NOTE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(py.OffsetX(w + 100), py), "W-FRPT-NOTE"));
+                                                                textInfos.Add(new DBTextInfo(px.OffsetXY(50, -h - 50), text, "W-FRPT-NOTE", "TH-STYLE3"));
+                                                            })();
+                                                        }
+                                                        drawDomePipes(segs);
+                                                        var text = "DN65";
+                                                        var (w, h) = GetDBTextSize(text, 350, .7, "TH-STYLE3");
+                                                        if (hasHalfPlatform)
+                                                        {
+                                                            textInfos.Add(new DBTextInfo(st.OffsetXY(isLeft ? -100 - w : 100, -h - 100), text, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                        }
+                                                        else
+                                                        {
+                                                            textInfos.Add(new DBTextInfo(p0.OffsetXY(h + (dx1 - h) / 2 + (isLeft ? 100 : 0), 100), text, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                        }
+                                                        ok = true;
                                                     }
-                                                    ok = true;
                                                 }
                                             }
-                                            if (!ok)
+                                            if (hasExtraFire)
                                             {
-                                                var dx1 = isLeft ? -600.0 : 600.0;
-                                                var fixY = .0;
-                                                var p0 = bsPt;
-                                                if (hasHalfPlatform)
+                                                if (pr.AdditionalFireHydrant is SetHighlevelNozzleAndSemiPlatformNozzlesViewModel.AdditionalFireHydrantEnum.NoNo)
                                                 {
-                                                    p0 = p0.OffsetY(HEIGHT / 2);
-                                                    var limit = HEIGHT / 2;
-                                                    if (refugeFloors.Contains(storey))
+                                                    var p5 = bsPt.OffsetX(-600);
+                                                    var p6 = bsPt.OffsetX(600);
                                                     {
-                                                        limit -= 800;
+                                                        var px = p5;
+                                                        var p7 = px.OffsetXY(0, -300);
+                                                        var p8 = px.OffsetXY(0, 400);
+                                                        drawDomePipe(new GLineSegment(p7, p8));
+                                                        drawFire(p8);
+                                                        brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p7) { Rotate = Math.PI / 2 });
+                                                        _exP7s.Add(p7);
+                                                        var dn = "DN65";
+                                                        textInfos.Add(new DBTextInfo(p5.OffsetXY(-150, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
                                                     }
-                                                    else if (ringPairFloors.Any(x => x.Item1 == storey || x.Item2 == storey))
                                                     {
-                                                        limit -= 400;
+                                                        var px = p6;
+                                                        var p7 = px.OffsetXY(0, -300);
+                                                        var p8 = px.OffsetXY(0, 400);
+                                                        drawDomePipe(new GLineSegment(p7, p8));
+                                                        drawFire(p8);
+                                                        brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p7) { Rotate = Math.PI / 2 });
+                                                        _exP7s.Add(p7);
+                                                        var dn = "DN65";
+                                                        var (w, h) = GetDBTextSize(dn, 350, .7, "TH-STYLE3");
+                                                        textInfos.Add(new DBTextInfo(p6.OffsetXY(h + 250, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
                                                     }
-                                                    else if (storey == maxNumStorey && vm.IsTopLayerRing)
-                                                    {
-                                                        limit -= 450;
-                                                    }
-                                                    if (fireOffsetY + fireHeight >= limit)
-                                                    {
-                                                        fixY -= fireOffsetY;
-                                                    }
-                                                }
-                                                var p1 = p0.OffsetY(fireOffsetY);
-                                                var p2 = p1.OffsetXY(dx1, fixY);
-                                                var vecs = new List<Vector2d> { new Vector2d(dx1, 0), new Vector2d(0, 300 + fireOffsetY + fixY) };
-                                                var st = p0.OffsetY(-300);
-                                                if (refugeFloors.Contains(allStoreys.TryGet(i - 1)))
-                                                {
-                                                    vecs = new List<Vector2d> { new Vector2d(dx1, 0), new Vector2d(0, 250 + fireOffsetY) };
-                                                    st = p0.OffsetY(-250);
-                                                }
-                                                else if (ringPairFloors.Any(x => x.Item2 == storey))
-                                                {
-                                                    var seg = new GLineSegment(p0, st);
-                                                    drawDomePipe(seg);
-                                                    obstacles.Add(seg.Buffer(10));
-                                                }
-                                                drawFire(p2);
-                                                if (ringPairFloors.Any(x => x.Item2 == storey))
-                                                {
-                                                    vsels.Add(st);
-                                                    vkills.Add(st.OffsetY(-.1));
-                                                }
-                                                var segs = vecs.ToGLineSegments(st);
-                                                if (storey == "1F" && !hasHalfPlatform)
-                                                {
-                                                    segs.RemoveAt(0);
-                                                    brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", segs[0].StartPoint.ToPoint3d()) { Rotate = Math.PI / 2 });
-                                                }
-                                                drawDomePipes(segs);
-                                                var text = "DN65";
-                                                var (w, h) = GetDBTextSize(text, 350, .7, "TH-STYLE3");
-                                                if (hasHalfPlatform)
-                                                {
-                                                    textInfos.Add(new DBTextInfo(st.OffsetXY(isLeft ? -100 - w : 100, -h - 100), text, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                 }
                                                 else
                                                 {
-                                                    textInfos.Add(new DBTextInfo(p0.OffsetXY(h + (dx1 - h) / 2 + (isLeft ? 100 : 0), 100), text, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
+                                                    var beLeft = isLeft;
+                                                    if (getHasHalfPlatform(i, j) || getHasOrdinalFire(i, j))
+                                                    {
+                                                        beLeft = !beLeft;
+                                                    }
+                                                    drawLow(beLeft, false);
                                                 }
-                                                ok = true;
                                             }
                                         }
-                                    }
-                                    if (hasExtraFire)
-                                    {
-                                        if (pr.AdditionalFireHydrant is SetHighlevelNozzleAndSemiPlatformNozzlesViewModel.AdditionalFireHydrantEnum.NoNo)
-                                        {
-                                            var p5 = bsPt.OffsetX(-600);
-                                            var p6 = bsPt.OffsetX(600);
-                                            {
-                                                var px = p5;
-                                                var p7 = px.OffsetXY(0, -300);
-                                                var p8 = px.OffsetXY(0, 400);
-                                                drawDomePipe(new GLineSegment(p7, p8));
-                                                drawFire(p8);
-                                                brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p7) { Rotate = Math.PI / 2 });
-                                                var dn = "DN65";
-                                                textInfos.Add(new DBTextInfo(p5.OffsetXY(-150, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
-                                            }
-                                            {
-                                                var px = p6;
-                                                var p7 = px.OffsetXY(0, -300);
-                                                var p8 = px.OffsetXY(0, 400);
-                                                drawDomePipe(new GLineSegment(p7, p8));
-                                                drawFire(p8);
-                                                brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p7) { Rotate = Math.PI / 2 });
-                                                var dn = "DN65";
-                                                var (w, h) = GetDBTextSize(dn, 350, .7, "TH-STYLE3");
-                                                textInfos.Add(new DBTextInfo(p6.OffsetXY(h + 250, 50), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3") { Rotation = Math.PI / 2 });
-                                            }
-                                        }
-                                        else
-                                        {
-                                            var beLeft = isLeft;
-                                            if (getHasHalfPlatform(i, j) || getHasOrdinalFire(i, j))
-                                            {
-                                                beLeft = !beLeft;
-                                            }
-                                            drawLow(beLeft, false);
-                                        }
-                                    }
-                                }
                             }
                         }
                         {
@@ -1656,6 +1672,30 @@ namespace ThMEPWSS.FireProtectionSystemNs
                             {
                                 item.Item4(item.Item2.Value);
                             }
+                        }
+                        {
+                            var p7s = new List<Point3d>();
+                            for (int j = 0; j < _generalCount; j++)
+                            {
+                                var bsPt = getGeneralBsPt(0, j);
+                                var p5 = bsPt;
+                                var p6 = p5.OffsetY(-300);
+                                drawDomePipe(new GLineSegment(p5, p6));
+                                brInfos.Add(new BlockInfo("水管中断", "W-FRPT-HYDT-EQPM", p6) { Rotate = Math.PI / 2 });
+                                var p7 = p6.OffsetXY(0, -600);
+                                lineInfos.Add(new LineInfo(new GLineSegment(p6, p7), "W-FRPT-NOTE"));
+                                p7s.Add(p7);
+                            }
+                            foreach (var pt in _exP7s)
+                            {
+                                lineInfos.Add(new LineInfo(new GLineSegment(pt, pt.OffsetY(-600)), "W-FRPT-NOTE"));
+                            }
+                            p7s = p7s.Concat(_exP7s.Select(x => x.OffsetY(-600))).OrderBy(x => x.X).ToList();
+                            var seg = new GLineSegment(p7s[0], p7s.Last());
+                            lineInfos.Add(new LineInfo(seg, "W-FRPT-NOTE"));
+                            var text = "接自地库低区消火栓环管（入口压力X.XXMPa）";
+                            var (w, h) = GetDBTextSize(text, 350, .7, "TH-STYLE3");
+                            textInfos.Add(new DBTextInfo(seg.StartPoint.OffsetXY((seg.Length - w) / 2, -h - 100).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                         }
                         if (vsels.Count > 0 && vkills.Count > 0)
                         {
@@ -1961,7 +2001,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                         }
                     }
                 }
-                foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
+                    foreach (var g in GeoFac.GroupParallelLines(vlines.SelectMany(ls => GeoFac.GetLines(ls).Where(x => x.IsValid)).ToList(), 1, .01)) ByLayer(DrawLineSegmentLazy(GeoFac.GetCenterLine(g, work_around: 10e5), "W-FRPT-HYDT-PIPE"));
                 foreach (var info in lineInfos)
                 {
                     var line = DrawLineSegmentLazy(info.Line);

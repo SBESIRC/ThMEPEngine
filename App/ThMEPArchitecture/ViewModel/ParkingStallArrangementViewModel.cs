@@ -49,6 +49,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
+        private bool _UseMultiSelection = false;//是否多选
+
+        public bool UseMultiSelection
+        {
+            get { return _UseMultiSelection; }
+            set
+            {
+                _UseMultiSelection = value;
+                RaisePropertyChanged("UseMultiSelection");
+            }
+        }
 
         //只生成分割线
         private bool _JustCreateSplittersChecked = true;
@@ -441,6 +452,28 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("MaxTimespan");
             }
         }
+        private int _ProcessCount = -1; //自动，设置为核心数量
+        public int ProcessCount
+        {
+            get
+            { return _ProcessCount; }
+            set
+            {
+                _ProcessCount = value;
+                RaisePropertyChanged("ProcessCount");
+            }
+        }
+        private int _ThreadCount = 3; //默认3
+        public int ThreadCount
+        {
+            get
+            { return _ThreadCount; }
+            set
+            {
+                _ThreadCount = value;
+                RaisePropertyChanged("ThreadCount");
+            }
+        }
     }
 
     public static class ParameterStock
@@ -522,6 +555,40 @@ namespace ThMEPArchitecture.ViewModel
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
+
+        public static bool LogMainProcess = true;
+        public static bool LogSubProcess = false;
+
+        private static int _ProcessCount = -1;
+        public static int ProcessCount
+        {
+            get
+            {
+                if (Setted) return _ProcessCount;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
+        private static int _ThreadCount = 3;
+        public static int ThreadCount
+        {
+            get
+            {
+                if (Setted) return _ThreadCount;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+        private static bool _UseMultiSelection = false;//是否多选
+
+        public static bool UseMultiSelection
+        {
+            get
+            {
+                if (Setted) return _UseMultiSelection;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+
         private static bool Setted = false;
         public static void Set(ParkingStallArrangementViewModel vm)
         {
@@ -531,6 +598,9 @@ namespace ThMEPArchitecture.ViewModel
             _VerticalSpotLength = vm.VerticalSpotLength;
             _VerticalSpotWidth = vm.VerticalSpotWidth;
             _BuildingTolerance = vm.BuildingTolerance;
+            _ProcessCount = vm.ProcessCount;
+            _ThreadCount = vm.ThreadCount;
+            _UseMultiSelection = vm.UseMultiSelection;
             Setted = true;
         }
     }

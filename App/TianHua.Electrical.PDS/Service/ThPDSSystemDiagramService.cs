@@ -274,15 +274,22 @@ namespace TianHua.Electrical.PDS.Service
                     // 插入空白行
                     insertEngine.InsertBlankLine(activeDb, configDb, basePoint, scale, tableObjs);
                     basePoint = new Point3d(basePoint.X - 5000 * scaleFactor, basePoint.Y - 500 * scaleFactor, 0);
+                    var tailPoint = PointClone(basePoint);
 
                     // 插入表尾
                     var tableTable = thisNode.Load.Phase == ThPDSPhase.一相
                         ? ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE : ThPDSCommon.SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE;
-                    var tail = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
-                    assignment.TableTailAssign(activeDb, tail, thisNode, tableObjs);
+                    if (thisNode.Details.IsDualPower && thisNode.Details.LowPower > 0)
+                    {
+                        var tailInLow = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
+                        assignment.TableTailAssign(activeDb, tailInLow, thisNode, tableObjs, thisNode.Details.LowPower);
+                        basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
+                    }
+                    var tailInHigh = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
+                    assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.HighPower);
 
                     // 计算表身终点
-                    var bodyEndPoint = new Point3d(basePoint.X + 27900 * scaleFactor, basePoint.Y, 0);
+                    var bodyEndPoint = new Point3d(basePoint.X + 27900 * scaleFactor, tailPoint.Y, 0);
                     var rectangleStartPoint = new Point3d(bodyStartPoint.X, bodyEndPoint.Y, 0);
                     var rectangleEndPoint = new Point3d(bodyEndPoint.X, bodyStartPoint.Y, 0);
                     var body = (new Extents3d(rectangleStartPoint, rectangleEndPoint)).ToRectangle();

@@ -18,7 +18,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
     public class PressureDrainageDataClassifyByStoriesService
     {
         public PressureDrainageDataClassifyByStoriesService()
-        {
+        {         
         }
         public PressureDrainageDataCollectionService CollectDataService { get; set; }
         public PressureDrainageSystemDiagramVieModel Viewmodel { get; set; }

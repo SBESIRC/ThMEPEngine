@@ -87,22 +87,22 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         public static Point3d GetLeftDownPt(HashSet<Point3d> points)
         {
             var ansPt = points.First();
-            //double minSum = double.MaxValue;
-            double maxSum = double.MinValue;
+            double minSum = double.MaxValue;
+            //double maxSum = double.MinValue;
             double curSum;
             foreach(var curPt in points)
             {
                 curSum = curPt.X + curPt.Y;
-                //if(curSum < minSum)
-                //{
-                //    minSum = curSum;
-                //    ansPt = curPt;
-                //}
-                if (curSum > maxSum)
+                if (curSum < minSum)
                 {
-                    maxSum = curSum;
+                    minSum = curSum;
                     ansPt = curPt;
                 }
+                //if (curSum > maxSum)
+                //{
+                //    maxSum = curSum;
+                //    ansPt = curPt;
+                //}
             }
             return ansPt;
         }

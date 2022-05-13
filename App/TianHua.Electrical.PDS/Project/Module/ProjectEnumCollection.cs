@@ -96,53 +96,70 @@ namespace TianHua.Electrical.PDS.Project.Module
     /// </summary>
     public enum BridgeLaying
     {
-        [Description("None")]
-        None,
-        [Description("金属槽盒")]
-        MR,
-        [Description("塑料槽盒")]
-        PR,
+        [Description("仅穿管敷设")]
+        None = 1,
         [Description("电缆托盘")]
-        CT,
+        CT = 2,
+        [Description("金属槽盒")]
+        MR = 3,
         [Description("电缆梯架")]
-        CL,
+        CL = 4,
         [Description("电缆支架")]
-        CR,
+        CR = 5,
+        [Description("塑料槽盒")]
+        PR = 6,
+        [Description("直埋")]
+        DB = 7,
+        [Description("电缆沟")]
+        TC = 8,
+        [Description("混凝土排管")]
+        CE = 9,
     }
 
     /// <summary>
-    /// 穿管敷设
+    /// 敷设部位
     /// </summary>
-    public enum Pipelaying
+    public enum LayingSite
     {
-        [Description("无穿管")]
+        [Description("无敷设部位")]
         None = 1,
-        [Description("穿管明敷")]
-        E = 2,
-        [Description("穿管暗敷")]
-        C = 3,
-        [Description("沿或跨梁（屋架）明敷")]
-        AB = 4,
-        [Description("沿或跨柱明敷")]
-        AC = 5,
-        [Description("沿吊顶或顶板面明敷")]
-        CE = 6,
+        [Description("沿吊顶明敷")]
+        CE = 2,
         [Description("吊顶内明敷")]
-        SCE = 7,
+        SCE = 3,
         [Description("沿墙面明敷")]
-        WS = 8,
+        WS = 4,
         [Description("沿屋面明敷")]
-        RS = 9,
+        RS = 5,
         [Description("顶板内暗敷")]
-        CC = 10,
-        [Description("梁内暗敷")]
-        BC = 11,
-        [Description("柱内暗敷")]
-        CLC = 12,
+        CC = 6,
         [Description("墙内暗敷")]
-        WC = 13,
-        [Description("地板或地面下暗敷")]
-        FC = 14,
+        WC = 7,
+        [Description("柱内暗敷")]
+        CLC = 8,
+        [Description("梁内暗敷")]
+        BC = 9,
+        [Description("地板下暗敷")]
+        FC = 10,
+        [Description("沿柱明敷")]
+        AC = 11,
+        [Description("沿梁明敷")]
+        AB = 12,
+    }
+
+    /// <summary>
+    /// 敷设路径
+    /// </summary>
+    public enum ConductorLayingPath
+    {
+        [Description("无敷设路径")]
+        None = 0,
+        [Description("桥架")]
+        ViaCableTray = 1,
+        [Description("穿管")]
+        ViaConduit = 2,
+        [Description("桥架/穿管")]
+        ViaCableTrayAndViaConduit = 3,
     }
 
     /// <summary>

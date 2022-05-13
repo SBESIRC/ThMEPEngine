@@ -22,8 +22,8 @@ namespace ThMEPWSS.Diagram.ViewModel
             MaxDayQuota = 250;
             MaxDayHourCoefficient = 2.5;
             NumberOfHouseholds = 3.5;
-            _MeterType = WaterMeterLocation.HalfFloor;
-            MeterType = WaterMeterLocation.HalfFloor;
+            _MeterType = WaterMeterLocation.SameFloor;
+            MeterType = WaterMeterLocation.SameFloor;
 
             PartitionDatas = new ObservableCollection<PartitionData>();
             var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1" };
@@ -66,7 +66,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private WaterMeterLocation _MeterType = WaterMeterLocation.HalfFloor;
+        private WaterMeterLocation _MeterType = WaterMeterLocation.SameFloor;
         public WaterMeterLocation MeterType
         {
             get

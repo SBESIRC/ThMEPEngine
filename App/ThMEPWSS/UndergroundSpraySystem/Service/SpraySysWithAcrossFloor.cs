@@ -142,9 +142,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             tempPath.Add(sprayIn.LoopStartPt);
             //主环路提取
             DepthSearch.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
-            DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
             Draw.MainLoop(acadDatabase, mainPathList);
+            DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
+
             BranchLoopDeal.GetWithAcrossFloor(ref visited, sprayIn, spraySystem);
             Draw.BranchLoop(acadDatabase, spraySystem);
             BranchDealWithAcorssFloor.Get(ref visited, sprayIn, spraySystem);
@@ -188,7 +189,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             StoreyLine.Get(sprayOut, spraySystem, sprayIn);
             MainLoopWithAcrossFloor.Get(sprayOut, spraySystem, sprayIn);
-            //BranchLoopAcrossFloor.multibranchLoopGet(sprayOut, spraySystem, sprayIn);
             try
             {
                 BranchLoop1.Get(sprayOut, spraySystem, sprayIn);

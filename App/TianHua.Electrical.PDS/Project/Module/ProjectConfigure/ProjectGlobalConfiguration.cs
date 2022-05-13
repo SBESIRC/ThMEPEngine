@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,11 +86,14 @@ namespace TianHua.Electrical.PDS.Project.Module.ProjectConfigure
         #region 管材铺设原则
         //通用要求
         public PipeMaterial UndergroundMaterial = PipeMaterial.SC;
+        public int UniversalPipeDiameter = 32;
         //消防线路
         public PipeMaterial FireOnTheGroundSmallDiameterMaterial = PipeMaterial.JDG;
+        public int FirePipeDiameter = 50;
         public PipeMaterial FireOnTheGroundLargeDiameterMaterial = PipeMaterial.SC;
         //非消防线路
         public PipeMaterial NonFireOnTheGroundSmallDiameterMaterial = PipeMaterial.JDG;
+        public int NonFirePipeDiameter = 50;
         public PipeMaterial NonFireOnTheGroundLargeDiameterMaterial = PipeMaterial.SC;
         #endregion
 

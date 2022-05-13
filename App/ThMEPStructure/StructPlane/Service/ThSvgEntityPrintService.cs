@@ -12,6 +12,8 @@ using ThMEPEngineCore.Model;
 using ThMEPStructure.StructPlane.Print;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPEngineCore.CAD;
+using ThMEPStructure.Model.Printer;
+using ThMEPStructure.Common;
 
 namespace ThMEPStructure.StructPlane.Service
 {

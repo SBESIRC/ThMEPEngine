@@ -34,7 +34,45 @@ namespace TianHua.Electrical.PDS.UI.Project
         public ThPDSConductorUsageModel NonFireDistributionControlCable => _ConductorUsages[6];
         public ThPDSConductorUsageModel FireControlSignalWire => _ConductorUsages[7];
         public ThPDSConductorUsageModel NonFireControlSignalWire => _ConductorUsages[8];
-
+        public int UniversalPipeDiameter
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UniversalPipeDiameter;
+            set
+            {
+                if (value != UniversalPipeDiameter)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UniversalPipeDiameter = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public int FirePipeDiameter
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FirePipeDiameter;
+            set
+            {
+                if (value != FirePipeDiameter)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.FirePipeDiameter = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public int NonFirePipeDiameter
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFirePipeDiameter;
+            set
+            {
+                if (value != NonFirePipeDiameter)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.NonFirePipeDiameter = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
+        public int[] UniversalPipeDiameterItemsSource { get; } = new int[] { 20, 25, 32, 40 };
+        public int[] FirePipeDiameterItemsSource { get; } = new int[] { 20, 25, 32, 40, 50 };
+        public int[] NonFirePipeDiameterItemsSource { get; } = new int[] { 20, 25, 32, 40, 50 };
         public double DefaultLengthOfMunicipalPowerLine
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MunicipalPowerCircuitDefaultLength;

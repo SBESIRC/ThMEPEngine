@@ -120,100 +120,176 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 else if (typeNum < currentFloor)//跨层，在上层
                 {
-                    try
+                    double valveGapX = 50;
+                    int fireAreaIndex = 0;//当前支管的防火分区index
+                    int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
+
+                    GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
+                    AddPipeLineUpper(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
+
+                    Point3d sPt1 = sPt.OffsetX(2 * valveGapX + valveSize);
+                    Point3d sPt12 = sPt1.OffsetY(1550);
+                    Point3d sPt2 = sPt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
+
+                    Point3d nextPt = sPt12; //起始点
+                    Point3d curPt = sPt12;
+                    bool valveFlag = false;
+                    bool firstAlarmValveVisited = false;//遍历到第一个报警阀
+                    var lastValveVisited = false;//遍历到最后一个报警阀
+                    var visitedAlarmValveNums = 0;//遍历过的报警阀数目
+
+                    for (int i = 1; i < rstPath.Count - 1; i++)
                     {
-                        double valveGapX = 50;
-                        int fireAreaIndex = 0;//当前支管的防火分区index
-                        int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
-
-                        GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
-                        AddPipeLineUpper(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
-
-                        Point3d sPt1 = sPt.OffsetX(2 * valveGapX + valveSize);
-                        Point3d sPt12 = sPt1.OffsetY(1550);
-                        Point3d sPt2 = sPt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
-
-                        Point3d nextPt = sPt12; //起始点
-                        Point3d curPt = sPt12;
-                        bool valveFlag = false;
-                        bool firstAlarmValveVisited = false;//遍历到第一个报警阀
-                        var lastValveVisited = false;//遍历到最后一个报警阀
-                        var visitedAlarmValveNums = 0;//遍历过的报警阀数目
-
-                        for (int i = 1; i < rstPath.Count - 1; i++)
+                        try
                         {
-                            try
+                            var pt = rstPath[i];
+                            var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
+                            var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
+                            var type = sprayIn.PtTypeDic[pt];
+                            var alValveGap = alarmGap;
+                            if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
                             {
-                                var pt = rstPath[i];
-                                var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
-                                var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
-                                var type = sprayIn.PtTypeDic[pt];
-                                var alValveGap = alarmGap;
-                                if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
+                                sprayIn.PtTypeDic[pt] = "Branch";
+                                type = sprayIn.PtTypeDic[pt];
+                            }
+                            if (type.Equals("Branch"))
+                            {
+                                if (spraySystem.BranchPtDic.ContainsKey(pt))
                                 {
-                                    sprayIn.PtTypeDic[pt] = "Branch";
-                                    type = sprayIn.PtTypeDic[pt];
+                                    spraySystem.BranchPtDic.Remove(pt);
                                 }
-                                if (type.Equals("Branch"))
+                                sprayOut.PipeLine.Add(new Line(sPt1, sPt1.OffsetY(1200)));
+                                spraySystem.BranchPtDic.Add(pt, sPt1.OffsetY(1200));
+                            }
+                            if (type.Contains("AlarmValve"))
+                            {
+                                if (!firstAlarmValveVisited)
                                 {
-                                    if (spraySystem.BranchPtDic.ContainsKey(pt))
-                                    {
-                                        spraySystem.BranchPtDic.Remove(pt);
-                                    }
-                                    sprayOut.PipeLine.Add(new Line(sPt1, sPt1.OffsetY(1200)));
-                                    spraySystem.BranchPtDic.Add(pt, sPt1.OffsetY(1200));
+                                    alValveGap = 1700;
+                                    firstAlarmValveVisited = true;
                                 }
-                                if (type.Contains("AlarmValve"))
+                                nextPt = curPt.OffsetX(alValveGap);
+                                AddAlarmValve(sprayOut, spraySystem, sprayIn, fireAreaIndex, sPt2, ref nextPt, ref curPt, ref valveFlag, pt);
+
+                                CountfireAreaNums(pt, spraySystem, sprayIn, ref fireAreaIndex);//统计防火分区的数目
+                                visitedAlarmValveNums++;
+                                if (visitedAlarmValveNums == alarmValveNums)//遍历到最后一个报警阀
                                 {
-                                    if (!firstAlarmValveVisited)
-                                    {
-                                        alValveGap = 1700;
-                                        firstAlarmValveVisited = true;
-                                    }
-                                    nextPt = curPt.OffsetX(alValveGap);
-                                    AddAlarmValve(sprayOut, spraySystem, sprayIn, fireAreaIndex, sPt2, ref nextPt, ref curPt, ref valveFlag, pt);
-
-                                    CountfireAreaNums(pt, spraySystem, sprayIn, ref fireAreaIndex);//统计防火分区的数目
-                                    visitedAlarmValveNums++;
-                                    if (visitedAlarmValveNums == alarmValveNums)//遍历到最后一个报警阀
-                                    {
-                                        lastValveVisited = true;
-                                    }
-                                }
-
-                                if (type.Equals("SignalValve") && firstAlarmValveVisited && !lastValveVisited)
-                                {
-                                    if (preType.Equals("BranchLoop") || nextType.Equals("BranchLoop"))
-                                    {
-                                        continue;
-                                    }
-                                    sprayOut.PipeLine.Add(new Line(curPt, curPt.OffsetX(valveGapX2)));
-                                    curPt = curPt.OffsetX(valveGapX2);
-                                    sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", curPt));
-                                    sprayOut.PipeLine.Add(new Line(curPt.OffsetX(valveSize), curPt.OffsetX(valveGapX2 + valveSize)));
-                                    curPt = curPt.OffsetX(valveGapX2 + valveSize);
-
-                                    valveFlag = true;
+                                    lastValveVisited = true;
                                 }
                             }
-                            catch (Exception ex)
+
+                            if (type.Equals("SignalValve") && firstAlarmValveVisited && !lastValveVisited)
                             {
-                                ;
+                                if (preType.Equals("BranchLoop") || nextType.Equals("BranchLoop"))
+                                {
+                                    continue;
+                                }
+                                sprayOut.PipeLine.Add(new Line(curPt, curPt.OffsetX(valveGapX2)));
+                                curPt = curPt.OffsetX(valveGapX2);
+                                sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", curPt));
+                                sprayOut.PipeLine.Add(new Line(curPt.OffsetX(valveSize), curPt.OffsetX(valveGapX2 + valveSize)));
+                                curPt = curPt.OffsetX(valveGapX2 + valveSize);
+
+                                valveFlag = true;
                             }
                         }
-                        sprayOut.PipeLine.Add(new Line(curPt, sPt2));
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                    }
+                    sprayOut.PipeLine.Add(new Line(curPt, sPt2));
 
-                    }
-                    catch (Exception ex)
+                }
+                else//跨层，在下层
+                {
+                    double valveGapX = 50;
+                    int fireAreaIndex = 0;//当前支管的防火分区index
+                    int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
+
+                    GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
+                    var pts = AddPipeLineDown(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
+
+                    Point3d ePt1 = pts[0];
+                    Point3d ePt12 = pts[1];
+                    Point3d ePt2 = pts[2];
+
+                    Point3d nextPt = ePt12; //起始点
+                    Point3d curPt = ePt12;
+                    bool valveFlag = false;
+                    bool firstAlarmValveVisited = false;//遍历到第一个报警阀
+                    var lastValveVisited = false;//遍历到最后一个报警阀
+                    var visitedAlarmValveNums = 0;//遍历过的报警阀数目
+
+                    for (int i = 1; i < rstPath.Count - 1; i++)
                     {
-                        ;
+                        try
+                        {
+                            var pt = rstPath[i];
+                            var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
+                            var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
+                            var type = sprayIn.PtTypeDic[pt];
+                            var alValveGap = alarmGap;
+                            if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
+                            {
+                                sprayIn.PtTypeDic[pt] = "Branch";
+                                type = sprayIn.PtTypeDic[pt];
+                            }
+                            if (type.Equals("Branch"))
+                            {
+                                if (spraySystem.BranchPtDic.ContainsKey(pt))
+                                {
+                                    spraySystem.BranchPtDic.Remove(pt);
+                                }
+                                sprayOut.PipeLine.Add(new Line(ePt1, ePt1.OffsetY(1200)));
+                                spraySystem.BranchPtDic.Add(pt, ePt1.OffsetY(1200));
+                            }
+                            if (type.Contains("AlarmValve"))
+                            {
+                                if (!firstAlarmValveVisited)
+                                {
+                                    alValveGap = 1700;
+                                    firstAlarmValveVisited = true;
+                                }
+                                nextPt = curPt.OffsetX(alValveGap);
+                                AddAlarmValve(sprayOut, spraySystem, sprayIn, fireAreaIndex, ePt2, ref nextPt, ref curPt, ref valveFlag, pt);
+
+                                CountfireAreaNums(pt, spraySystem, sprayIn, ref fireAreaIndex);//统计防火分区的数目
+                                visitedAlarmValveNums++;
+                                if (visitedAlarmValveNums == alarmValveNums)//遍历到最后一个报警阀
+                                {
+                                    lastValveVisited = true;
+                                }
+                            }
+
+                            if (type.Equals("SignalValve") && firstAlarmValveVisited && !lastValveVisited)
+                            {
+                                if (preType.Equals("BranchLoop") || nextType.Equals("BranchLoop"))
+                                {
+                                    continue;
+                                }
+                                sprayOut.PipeLine.Add(new Line(curPt, curPt.OffsetX(valveGapX2)));
+                                curPt = curPt.OffsetX(valveGapX2);
+                                sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", curPt));
+                                sprayOut.PipeLine.Add(new Line(curPt.OffsetX(valveSize), curPt.OffsetX(valveGapX2 + valveSize)));
+                                curPt = curPt.OffsetX(valveGapX2 + valveSize);
+
+                                valveFlag = true;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
                     }
+                    sprayOut.PipeLine.Add(new Line(curPt, ePt2));
                 }
 
 
             }
         }
-        
+
         /// <summary>
         /// 获取带支环的支环
         /// </summary>
@@ -689,6 +765,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayOut.Texts.Add(new Text("DN150", new Point3d(ePt12.X, sPt12.Y, 0)));
         }
 
+
         private static void AddPipeLineUpper(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, List<Point3dEx> rstPath, Point3d sPt, Point3d ePt)
         {
             double valveGapX = 50;
@@ -718,6 +795,44 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             sprayOut.Texts.Add(new Text("DN150", ePt12));
             sprayOut.Texts.Add(new Text("DN150", new Point3d(ePt12.X, sPt12.Y, 0)));
+        }
+
+        private static List<Point3d> AddPipeLineDown(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, List<Point3dEx> rstPath, Point3d sPt, Point3d ePt)
+        {
+            double valveGapX = 50;
+            double floorHeight = sprayIn.FloorHeight;
+            double valveSize = sprayIn.ValveSize;
+
+            int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
+
+            Point3d ePt1 = ePt.OffsetX(-2 * valveGapX - valveSize);
+            Point3d sPt1 = sPt.OffsetX(2 * valveGapX + valveSize);
+            Point3d sPt12 = sPt1.OffsetY(2700 - floorHeight);
+            Point3d ePt12 = ePt1.OffsetY(3300 - floorHeight);
+            Point3d ePt2 = ePt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
+            Point3d sPt2 = ePt2.OffsetY(-600);
+
+            sprayOut.PipeLine.Add(new Line(sPt, sPt.OffsetX(valveGapX)));
+            sprayOut.PipeLine.Add(new Line(ePt, ePt.OffsetX(-valveGapX)));
+            sprayOut.PipeLine.Add(new Line(sPt.OffsetX(valveGapX + valveSize), sPt1));
+            sprayOut.PipeLine.Add(new Line(ePt.OffsetX(-valveGapX - valveSize), ePt1));
+            sprayOut.PipeLine.Add(new Line(sPt1, sPt12));
+            sprayOut.PipeLine.Add(new Line(ePt1, ePt12));
+            sprayOut.PipeLine.Add(new Line(sPt12, sPt2));
+            sprayOut.PipeLine.Add(new Line(sPt2, ePt2));
+
+            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", sPt.OffsetX(valveGapX)));
+            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", ePt1.OffsetX(valveGapX)));
+
+            sprayOut.Texts.Add(new Text("DN150", ePt12));
+            sprayOut.Texts.Add(new Text("DN150", new Point3d(ePt12.X, sPt12.Y, 0)));
+
+            var pts = new List<Point3d>();
+            pts.Add(ePt1);
+            pts.Add(ePt12);
+            pts.Add(ePt2);
+
+            return pts;
         }
 
         private static void AddAlarmText(SprayOut sprayOut, SprayIn sprayIn, Point3dEx pt, Point3d insertPt)

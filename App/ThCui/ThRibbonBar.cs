@@ -74,7 +74,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("风机选型",
                     "天华风机选型",
-                    "THFJ",
+                    "THFJXX",
                     "天华风机选型",
                     "IDI_THCAD_THFJ_SMALL",
                     "IDI_THCAD_THFJ_LARGE",
@@ -544,6 +544,20 @@ namespace TianHua.AutoCAD.ThCui
                     "天华潜水泵布置",
                     "IDI_THCAD_THSJSB_SMALL",
                     "IDI_THCAD_THSJSB_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 给水系统
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("给水系统",
+                    "天华给水系统",
+                    "THDXJSXT",
+                    "天华给水系统",
+                    "IDI_THCAD_THDXJSXT_SMALL",
+                    "IDI_THCAD_THDXJSXT_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 排水系统

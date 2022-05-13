@@ -18,6 +18,8 @@ namespace ThMEPEngineCore.ConnectWiring.Service
         string xLeft = "X-";
         string yRight = "Y+";
         string yLeft = "Y-";
+        string installMethod = "Install Method";
+        string density = "Density";
 
         /// <summary>
         /// 计算回路信息
@@ -48,6 +50,8 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                         block.XLeft = info.XLeft;
                         block.YRight = info.YRight;
                         block.YLeft = info.YLeft;
+                        block.InstallMethod = GetInstallMethod(info.InstallMethod);
+                        block.Density = info.Density;
                         loopInfo.blocks.Add(block);
                     }
                     loopModel.loopInfoModels.Add(loopInfo);
@@ -104,12 +108,41 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                         {
                             model.YLeft = Int32.Parse(dataRow[j].ToString());
                         }
+                        else if (table.Columns[j].ColumnName == installMethod)
+                        {
+                            model.InstallMethod = dataRow[j].ToString();
+                        }
+                        else if (table.Columns[j].ColumnName == density)
+                        {
+                            model.Density = Int32.Parse(dataRow[j].ToString());
+                        }
                     }
                 }
                 blockModels.Add(model);
             }
 
             return blockModels;
+        }
+
+        /// <summary>
+        /// 获取安装方式
+        /// </summary>
+        /// <param name="install"></param>
+        /// <returns></returns>
+        private string GetInstallMethod(string install)
+        {
+            if (install == "W")
+            {
+                return "WallMounted";
+            }
+            else if (install == "F")
+            {
+                return "Ground";
+            }
+            else
+            {
+                return "Hoisting";
+            }
         }
     }
 }

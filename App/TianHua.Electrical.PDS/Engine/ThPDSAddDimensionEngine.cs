@@ -21,23 +21,21 @@ namespace TianHua.Electrical.PDS.Engine
 {
     public class ThPDSAddDimensionEngine
     {
-        private ProjectGraph ProjectGraph;
-
-        public ThPDSAddDimensionEngine(ProjectGraph projectGraph)
+        public ThPDSAddDimensionEngine()
         {
-            ProjectGraph = projectGraph;
+
         }
 
-        public void AddDimension(ThPDSProjectGraphNode projectNode)
+        /// <summary>
+        /// 创建平面负载标注（无需抓取一遍当前图纸）
+        /// </summary>
+        /// <param name="node"></param>
+        public void AddDimension(ThPDSProjectGraphNode node)
         {
-            var nodeList = ProjectGraph.Vertices
-                .Where(o => o.Load.ID.LoadID.Equals(projectNode.Load.ID.LoadID)).ToList();
-            if (nodeList.Count != 1)
+            if (node.Load.Location == null)
             {
                 return;
             }
-            var node = nodeList[0];
-
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();
@@ -137,16 +135,33 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public void AddDimension(ThPDSProjectGraphEdge projectEdge)
+        /// <summary>
+        /// 创建平面负载标注（需抓取一遍当前图纸，并传入）
+        /// </summary>
+        /// <param name="projectNode"></param>
+        /// <param name="projectGraph"></param>
+        public void AddDimension(ThPDSProjectGraphNode projectNode, ProjectGraph projectGraph)
         {
-            var edgeList = ProjectGraph.Edges
-                .Where(e => e.Equals(projectEdge)).ToList();
-            if (edgeList.Count != 1)
+            var nodeList = projectGraph.Vertices
+                .Where(o => o.Load.ID.LoadID.Equals(projectNode.Load.ID.LoadID)).ToList();
+            if (nodeList.Count != 1)
             {
                 return;
             }
-            var edge = edgeList[0];
+            var node = nodeList[0];
+            AddDimension(node);
+        }
 
+        /// <summary>
+        /// 创建平面回路标注（无需抓取一遍当前图纸）
+        /// </summary>
+        /// <param name="edge"></param>
+        public void AddDimension(ThPDSProjectGraphEdge edge)
+        {
+            if (edge.Target.Load.Location == null)
+            {
+                return;
+            }
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();
@@ -211,6 +226,23 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 创建回路负载标注（需抓取一遍当前图纸，并传入）
+        /// </summary>
+        /// <param name="projectEdge"></param>
+        /// <param name="projectGraph"></param>
+        public void AddDimension(ThPDSProjectGraphEdge projectEdge, ProjectGraph projectGraph)
+        {
+            var edgeList = projectGraph.Edges
+                .Where(e => e.Equals(projectEdge)).ToList();
+            if (edgeList.Count != 1)
+            {
+                return;
+            }
+            var edge = edgeList[0];
+            AddDimension(edge);
         }
 
         private void CircuitDimensionAssign(BlockReference dimension, Point3d secondPoint, Scale3d scale, Dictionary<string, string> dictionary)

@@ -25,6 +25,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             foreach (var rstPath in spraySystem.BranchLoops)
             {
                 var firstPt = rstPath.First();
+                var lastPt = rstPath.Last();
                 var ptType = sprayIn.PtTypeDic[firstPt];
                 var typeNum = Convert.ToInt32(ptType.Last());
                 if (currentFloor == typeNum)
@@ -35,12 +36,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                         int fireAreaIndex = 0;//当前支管的防火分区index
                         int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
-                        GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
-                        AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
+                        BranchLoop1.GetStartEndPt(spraySystem, rstPath, out Point3d sPt, out Point3d ePt);//获取报警阀间的起始终止点
+                        var pts = BranchLoop1.AddPipeLine(sprayOut, spraySystem, sprayIn, rstPath, sPt, ePt);//添加报警阀支环管线
 
-                        Point3d ePt1 = ePt.OffsetX(-2 * valveGapX - valveSize);
-                        Point3d ePt12 = ePt1.OffsetY(3300 - floorHeight);
-                        Point3d ePt2 = ePt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
+                        Point3d ePt1 = pts[0];
+                        Point3d ePt12 = pts[1];
+                        Point3d ePt2 = pts[2];
 
                         Point3d nextPt = ePt12; //起始点
                         Point3d curPt = ePt12;
@@ -49,30 +50,37 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
                         var lastValveVisited = false;//遍历到最后一个报警阀
                         var visitedAlarmValveNums = 0;//遍历过的报警阀数目
 
+
+                        //新逻辑
+                        var newSpt = ePt12.OffsetX(0);
+                        var newEpt = ePt12.OffsetX(0);
+                        if (spraySystem.BranchLoopPtNewDic.ContainsKey(firstPt))
+                        {
+                            newSpt = spraySystem.BranchLoopPtNewDic[firstPt].OffsetX(1200);
+                            newEpt = spraySystem.BranchLoopPtNewDic[lastPt].OffsetX(1200);
+                        }
+   
+
+
                         for (int i = 1; i < rstPath.Count - 1; i++)
                         {
                             try
                             {
                                 var pt = rstPath[i];
-                                if (pt._pt.DistanceTo(new Point3d(48293.6155,696287.2054, 0)) < 10)
-                                    ;
-                                if (pt._pt.DistanceTo(new Point3d(48593.6155,696037.2054, 0)) < 10)
-                                    ;
+
                                 var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
                                 var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                                 var type = sprayIn.PtTypeDic[pt];
                                 var alValveGap = alarmGap;
                                 if(type.Contains("2BranchLoop"))
                                 {
-                                    if(!firstAlarmValveVisited)
+                                    if (!firstAlarmValveVisited)
                                     {
-                                        sprayOut.PipeLine.Add(new Line(ePt12, ePt12.OffsetY(-3300)));
-                                        spraySystem.BranchLoopPtDic[pt] = ePt12.OffsetY(-3300);
+                                        BranchLoop1.AddCrossPipe(true, newSpt, floorHeight, sprayOut, spraySystem, pt,24000);
                                     }
-                                    if(lastValveVisited)
+                                    if (lastValveVisited)
                                     {
-                                        sprayOut.PipeLine.Add(new Line(ePt2, ePt2.OffsetY(-3300)));
-                                        spraySystem.BranchLoopPtDic[pt] = ePt2.OffsetY(-3300);
+                                        BranchLoop1.AddCrossPipe(false, newEpt, floorHeight, sprayOut, spraySystem, pt,24000);
                                     }
                                 }
                                 else if (!type.Contains("AlarmValve") && sprayIn.PtDic[pt].Count == 3)
@@ -137,11 +145,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             }
         }
 
-        private static void GetStartEndPt(SpraySystem spraySystem, List<Point3dEx> rstPath, out Point3d sPt, out Point3d ePt)
+        public static void GetStartEndPt(SpraySystem spraySystem, List<Point3dEx> rstPath, out Point3d sPt, out Point3d ePt)
         {
             var tpt1 = spraySystem.BranchLoopPtDic[rstPath.First()];
             var tpt2 = spraySystem.BranchLoopPtDic[rstPath.Last()];
-            if (tpt1.X < tpt2.X)
+            if (tpt1.Y < tpt2.Y)
             {
                 sPt = tpt1;
                 ePt = tpt2;
@@ -153,7 +161,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
             }
         }
 
-        private static void AddPipeLine(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, List<Point3dEx> rstPath, Point3d sPt, Point3d ePt)
+        public static List<Point3d> AddPipeLine(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, List<Point3dEx> rstPath, Point3d sPt, Point3d ePt)
         {
             double valveGapX = 50;
             double floorHeight = sprayIn.FloorHeight;
@@ -161,27 +169,48 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
 
             int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
-            Point3d ePt1 = ePt.OffsetX(-2 * valveGapX - valveSize);
-            Point3d sPt1 = sPt.OffsetX(2 * valveGapX + valveSize);
-            Point3d sPt12 = sPt1.OffsetY(2700 - floorHeight);
-            Point3d ePt12 = ePt1.OffsetY(3300 - floorHeight);
+            var ePt0 = ePt.OffsetX(valveSize);
+            var sPt0 = sPt.OffsetX(valveSize);
+            Point3d ePt1 = ePt0.OffsetX(400 + valveGapX);
+            Point3d sPt1 = sPt0.OffsetX(valveGapX);
+
+            Point3d sPt12 = sPt1.OffsetY(3200 - floorHeight);
+            Point3d ePt12 = ePt1.OffsetY(3200 - floorHeight);
             Point3d ePt2 = ePt12.OffsetX(1700 + (alarmValveNums - 1) * sprayIn.PipeGap + 1000);
             Point3d sPt2 = ePt2.OffsetY(-600);
 
-            sprayOut.PipeLine.Add(new Line(sPt, sPt.OffsetX(valveGapX)));
-            sprayOut.PipeLine.Add(new Line(ePt, ePt.OffsetX(-valveGapX)));
-            sprayOut.PipeLine.Add(new Line(sPt.OffsetX(valveGapX + valveSize), sPt1));
-            sprayOut.PipeLine.Add(new Line(ePt.OffsetX(-valveGapX - valveSize), ePt1));
+            sprayOut.PipeLine.Add(new Line(sPt0, sPt1));
+            sprayOut.PipeLine.Add(new Line(ePt0, ePt1));
             sprayOut.PipeLine.Add(new Line(sPt1, sPt12));
             sprayOut.PipeLine.Add(new Line(ePt1, ePt12));
             sprayOut.PipeLine.Add(new Line(sPt12, sPt2));
             sprayOut.PipeLine.Add(new Line(sPt2, ePt2));
 
-            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", sPt.OffsetX(valveGapX)));
-            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", ePt1.OffsetX(valveGapX)));
+            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", sPt));
+            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", ePt));
 
             sprayOut.Texts.Add(new Text("DN150", ePt12));
             sprayOut.Texts.Add(new Text("DN150", new Point3d(ePt12.X, sPt12.Y, 0)));
+
+            var pts = new List<Point3d>();
+            pts.Add(ePt1);
+            pts.Add(ePt12);
+            pts.Add(ePt2);
+
+            return pts;
+        }
+        
+        public static void AddCrossPipe(bool isStart, Point3d newSpt, double floorHeight, SprayOut sprayOut, SpraySystem spraySystem, 
+            Point3dEx pt, double pipeLen = 6000)
+        {
+            var pt1 = newSpt.OffsetY(-floorHeight);
+            if (isStart) pipeLen += 1200;
+            var pt2 = pt1.OffsetX(pipeLen);
+            sprayOut.PipeLine.Add(new Line(newSpt, pt1));
+            sprayOut.PipeLine.Add(new Line(pt1, pt2));
+
+            spraySystem.BranchLoopPtDic[pt] = pt2;
+            spraySystem.BranchLoopPtNewDic[pt] = pt1;
         }
         private static void CountfireAreaNums(Point3dEx pt, SpraySystem spraySystem, SprayIn sprayIn, ref int fireAreaIndex)
         {

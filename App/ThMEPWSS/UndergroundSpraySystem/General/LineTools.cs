@@ -37,19 +37,51 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 return ept;
             }
         }
+
+        private static Point3dEx GetPipePt(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex)
+        {
+            var rect = vpt._pt.GetRect(120);
+            var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+            if (objs.Count == 0)
+            {
+                return new Point3dEx();
+            }
+            else if (objs.Count == 1)
+            {
+                var pt = (objs[0] as DBPoint).Position;
+                return new Point3dEx(pt.X, pt.Y, 0);
+            }
+            else
+            {
+                ;
+                foreach (var obj in objs)
+                {
+                    var pt = (obj as DBPoint).Position;
+                    var dist = pt.DistanceTo(vpt._pt);
+                    if (dist > 1)
+                    {
+                        return new Point3dEx(pt);
+                    }
+                }
+                return new Point3dEx();
+            }
+        }
+
         public static List<Line> ConnectVerticalLine(this List<Line> pipeLines, SprayIn sprayIn)
         {
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
+
             var lines = new List<Line>();
             var connectVreticals = new List<Point3dEx>();
             foreach (var ver in sprayIn.Verticals)
             {
-                if (ver._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
+                if (ver._pt.DistanceTo(new Point3d(1602561.7, 390672, 0)) < 10)
                     ;
                 var rect = ver._pt.GetRect(100);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
                 var flag = sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+
                 if (dbObjs.Count >= 2)
                 {
                     connectVreticals.Add(ver);
@@ -59,7 +91,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     var l = dbObjs[0] as Line;
                     var closedPt = l.GetClosedPt(ver);//获取最近点
                     var cl = new Line(closedPt, ver._pt);
-                    if(cl.Length > 1.0 && cl.Length < 100)
+                    if(cl.Length > 1.0 && cl.Length < 120)
                     {
                         pipeLines.Add(cl);
 #if DEBUG
@@ -100,15 +132,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
             pipeLines.AddRange(lines);
 
-            //把单连通立管和横管连起来
-
-
             return pipeLines;
         }
 
         public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
+            //var line111 = new Line(new Point3d(1598961.3, 389022,0),new Point3d(1598961.3, 390022,0));
+            //var line222 = new Line(new Point3d(1598961.3, 388122,0), new Point3d(1598961.3, 388622,0));
+            //var line333 = new Line(new Point3d(1598961.3, 388822, 0), new Point3d(1598758.2, 388822, 0));
+            //lineList.Clear();
+            //lineList.Add(line111);
+            //lineList.Add(line222);
+            //lineList.Add(line333);
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -120,8 +156,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
                 var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                if (pt1.DistanceToEx(pt2) > 763 && pt1.DistanceToEx(pt2) < 764)
-                    ;
+
+                var testPt = new Point3d(1598961.3, 389022,0);
+                var testPt2 = new Point3d(1598961.3, 388622, 0);
+                //if (pt1._pt.DistanceTo(testPt)<10 || pt2._pt.DistanceTo(testPt) < 10)
+                //{
+                //    ;
+                //}
+                //if (pt1._pt.DistanceTo(testPt2) < 10 || pt2._pt.DistanceTo(testPt2) < 10)
+                //{
+                //    ;
+                //}
                 if (pt1.DistanceToEx(pt2) > 1001 || pt1.DistanceToEx(pt2) < 1)
                 {
                     continue;

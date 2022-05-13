@@ -73,7 +73,7 @@ namespace TianHua.Electrical.PDS.Engine
                             var targetMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Target.Loads[0].Location.ReferenceDWG);
                             if (targetMap != null)
                             {
-                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[j]]);
+                                objectIds.AddRange(targetMap.EdgeMap[cabletrayEdgeList[i]]);
                             }
                             var sourceMap = EdgeMapList.FirstOrDefault(e => e.ReferenceDWG == edge.Source.Loads[0].Location.ReferenceDWG);
                             if (targetMap != null && targetMap.ReferenceDWG == sourceMap.ReferenceDWG)
@@ -142,9 +142,21 @@ namespace TianHua.Electrical.PDS.Engine
                     if (vertex.NodeType != PDSNodeType.CableCarrier
                         && graph.OutDegree(vertex) == 0 && graph.InDegree(vertex) == 0)
                     {
-                        unionGraph.AddVertex(vertex);
+                        if(!IsContains(unionGraph, vertex, out var originalSourceNode))
+                        {
+                            unionGraph.AddVertex(vertex);
+                        }
                     }
                 });
+            });
+
+            unionGraph.Edges.ForEach(edge =>
+            {
+                if(edge.Target.Loads[0].InstalledCapacity.IsDualPower
+                && !edge.Source.Loads[0].InstalledCapacity.IsDualPower)
+                {
+                    edge.Source.Loads[0].InstalledCapacity.IsDualPower = true;
+                }
             });
 
             return unionGraph;

@@ -13,6 +13,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
@@ -22,6 +23,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach (var pt in sprayIn.PtDic.Keys)
             {
+                if(pt._pt.DistanceTo(new Point3d(51295.8556, 716075.6242,0))<10)
+                {
+                    ;
+                }
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
@@ -182,9 +187,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void CreateTermPtDicWithAcrossFloor(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
             ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
-            foreach (var pt in sprayIn.Verticals)
+            //var dbPts = new List<DBPoint>();
+            //sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
+            //var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+            foreach (var vpt in sprayIn.Verticals)
             {
-                GetCollectiveLabelDic(pt, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex, true);
+                GetCollectiveLabelDic(vpt, null, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex, true);
             }
             foreach (var pt in sprayIn.PtDic.Keys)
             {
@@ -196,6 +204,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void CreateTermPtDic(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
             ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
+            var dbPts = new List<DBPoint>();
+            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
+            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             foreach (var pt in sprayIn.Verticals)
             {
                 if (sprayIn.PtDic.ContainsKey(pt))
@@ -211,7 +222,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     continue;
                 }
-                GetCollectiveLabelDic(pt, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex);
+                GetCollectiveLabelDic(pt, dbPtSpatialIndex, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex);
             }
             foreach (var pt in sprayIn.PtDic.Keys)
             {
@@ -219,19 +230,38 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
-
-
-        public static void GetCollectiveLabelDic(Point3dEx pt, ref SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
-            ThCADCoreNTSSpatialIndex pipeDNSpatialIndex, bool acrossFloor = false)
+        private static Point3dEx GetClosedPt(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex)
         {
-            if(pt._pt.DistanceTo(new Point3d(56145.856, -297632.8504, 0))<10)
+            var rect = vpt._pt.GetRect(150);
+            var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+            if(objs.Count == 0)
+            {
+                return new Point3dEx();
+            }
+            else if(objs.Count == 1)
+            {
+                var pt = (objs[0] as DBPoint).Position;
+                return new Point3dEx(pt);
+            }
+            else
             {
                 ;
+                return new Point3dEx();
             }
+        }
+
+        public static void GetCollectiveLabelDic(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex, ref SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
+            ThCADCoreNTSSpatialIndex pipeDNSpatialIndex, bool acrossFloor = false)
+        {
+            //var ptex = GetClosedPt(vpt, dbPtSpatialIndex);
+            //if(ptex.Equals(new Point3dEx()))
+            //{
+            //    return;
+            //}
             //集体标注处理
-            if (sprayIn.PtTextDic.ContainsKey(pt))
+            if (sprayIn.PtTextDic.ContainsKey(vpt))
             {
-                if (sprayIn.PtTextDic[pt].First() is null || sprayIn.PtTextDic[pt].First().Equals(""))
+                if (sprayIn.PtTextDic[vpt].First() is null || sprayIn.PtTextDic[vpt].First().Equals(""))
                 {
                     ;
                 }
@@ -240,17 +270,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     return;
                 }
             }
-            var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, pt, textSpatialIndex, pipeDNSpatialIndex);
+            var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, vpt, textSpatialIndex, pipeDNSpatialIndex);
             if (OriginTermStartPtDic.Count == 0)
             {
-
-                var tpt = new TermPoint2(pt);
+                var tpt = new TermPoint2(vpt);
                 tpt.SetLines(sprayIn);
                 tpt.SetPipeNumber(textSpatialIndex);
                 tpt.SetType(sprayIn, acrossFloor);
                 var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
      
-                if(sprayIn.PtTextDic.ContainsKey(pt))
+                if(sprayIn.PtTextDic.ContainsKey(vpt))
                 {
                     ;
 
@@ -258,9 +287,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                 else
                 {
-                    sprayIn.PtTextDic.Add(pt, strs);
-                    sprayIn.TermPtTypeDic.Add(pt, tpt.Type);
-                    sprayIn.TermPtDic.Add(pt, tpt);
+                    sprayIn.PtTextDic.Add(vpt, strs);
+                    sprayIn.TermPtTypeDic.Add(vpt, tpt.Type);
+                    sprayIn.TermPtDic.Add(vpt, tpt);
                 }
             }
             foreach (var pt2 in OriginTermStartPtDic.Keys)

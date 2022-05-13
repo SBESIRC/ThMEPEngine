@@ -141,7 +141,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                     if (res.Count > 1) return true;
                     else return false;
                 }).ToList();
-                var splits = SplitLine(line, cutters).Where(e => e.Length >= 300).ToList();
+                var splits = SplitLine(line, cutters).Where(e => e.Length >= 10).ToList();
                 double tol = 150;
                 if (splits.Count > 1)
                 {
@@ -288,7 +288,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     flushpointFound = true;
                     var flushPoint = node.Item.FlushPoint;
-                    DrawFlushPoint(flushPoint, point, vvector, hvector, ref markLoc, isInChild, rootLine);
+                    DrawFlushPoint(node,flushPoint, point, vvector, hvector, ref markLoc, isInChild, rootLine);
                     hasFlushPoint = true;
                     break;
                 }
@@ -333,7 +333,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
             var dimPt1 = point - hvector * 1000.0;
             DrawText(DIMLAYER, dimMark1, dimPt1, 0.0);
         }
-        public void DrawFlushPoint(ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, ref Point3d markLoc, bool isInChild, Line rootLine = null)
+        public void DrawFlushPoint(ThTreeNode<ThPointModel> node, ThFlushPointModel flushPoint, Point3d basePt, Vector3d vvector, Vector3d hvector, ref Point3d markLoc, bool isInChild, Line rootLine = null)
         {
             var vertLength = 400.0;
             var vertdist = rootLine.GetClosestPointTo(basePt, true).DistanceTo(basePt);
@@ -362,6 +362,9 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 PreLines.Add(new PreLine(vertline, PipeLayerName, 1));
                 markLoc = vertline.GetCenter();
             }
+            //debug
+            var pdwg = node.Item.Position;
+            HelpLines.Add(new Line(markLoc, pdwg));
             using (var adb = AcadDatabase.Active())
             {
                 var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
@@ -370,10 +373,13 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 var br = adb.Element<BlockReference>(blId);
             }
         }
-        public void DrawBreakDot(Point3d point, double angle = 0)
+        public void DrawBreakDot(Point3d point, Point3d dwgpoint, double angle = 0)
         {
             using (var adb = AcadDatabase.Active())
             {
+                //debug
+                if (dwgpoint.DistanceTo(point) > 1)
+                    HelpLines.Add(new Line(point, dwgpoint));
                 var blId = adb.CurrentSpace.ObjectId.InsertBlockReference(
                     DIMLAYER, "断线", point, new Scale3d(1), angle);
                 var br = adb.Element<BlockReference>(blId);

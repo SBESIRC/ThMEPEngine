@@ -365,6 +365,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15.0000000000033, 10.0000000000027), px.OffsetXY(15.0000000000033, -9.99999999999727)), "E-UNIV-Oppo"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(22.7249999998486, -5.50000000050886), "U", "E-UNIV-EL", "TH-STYLE3") { Height = 13, });
                     break;
+                case "1路进线（带间接表）":
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                    r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(180, -60)));
+                    r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(140, -40)) { Rotate = Math.PI / 2 });
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(140, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -40), px.OffsetXY(200, -40)), "E-UNIV-WIRE"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -62), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
+                    break;
                 case "1路进线（带电表）":
                     r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
                     r.brInfos.Add(new BlockInfo("直接表", "E-UNIV-WIRE", px.OffsetXY(140, -40)));
@@ -374,7 +386,25 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -30), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
-
+                    break;
+                case "2路进线ATSE（带间接表）":
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                    r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                    r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(180, -80)));
+                    r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(140, -60)) { Rotate = Math.PI / 2 });
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -60), px.OffsetXY(200, -60)), "E-UNIV-WIRE"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -82), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
                     break;
                 case "2路进线ATSE（带电表）":
                     r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
@@ -394,6 +424,37 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -50), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
+                    break;
+                case "3路进线（带间接表）":
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -80)));
+                    r.brInfos.Add(new BlockInfo("ATSE", "E-UNIV-Oppo", px.OffsetXY(140, -60)));
+                    r.brInfos.Add(new BlockInfo("TSE", "E-UNIV-Oppo", px.OffsetXY(140, -165)));
+                    r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -185)));
+                    r.brInfos.Add(new BlockInfo("Meter", "E-POWR-DEVC", px.OffsetXY(180, -185)));
+                    r.brInfos.Add(new BlockInfo("CT", "E-POWR-DEVC", px.OffsetXY(140, -165)) { Rotate = Math.PI / 2 });
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -40), px.OffsetXY(0, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -80), px.OffsetXY(0, -80)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -40), px.OffsetXY(85, -40)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -80), px.OffsetXY(85, -80)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(140, -60), px.OffsetXY(175, -60)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -60), px.OffsetXY(175, -115)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(175, -115), px.OffsetXY(72, -115)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -115), px.OffsetXY(72, -145)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(72, -145), px.OffsetXY(85, -145)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(20, -185), px.OffsetXY(0, -185)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(70, -185), px.OffsetXY(85, -185)), "E-UNIV-WIRE"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(190, -165), px.OffsetXY(200, -165)), "E-UNIV-WIRE"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -30), "QL1", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -70), "QL2", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -175), "QL3", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -208), "进线回路编号3", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -103), "进线回路编号2", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(20, -15), "进线回路编号1", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -30), "ATSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(85, -135), "MTSE", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -155), "CT", "E-UNIV-NOTE", "TH-STYLE3"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(140, -187), "MT", "E-UNIV-NOTE", "TH-STYLE3"));
                     break;
                 case "3路进线（带电表）":
                     r.brInfos.Add(new BlockInfo("Isolator", "E-UNIV-Oppo", px.OffsetXY(20, -40)));

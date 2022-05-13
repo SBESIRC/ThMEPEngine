@@ -108,6 +108,7 @@ namespace TianHua.Electrical.PDS.Service
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
             TextIndex = new ThCADCoreNTSSpatialIndex(TextDic.Keys.ToCollection());
 
+            var removeLines = new List<Line>();
             // 多回路标注情形
             lines.OfType<Line>().ForEach(l =>
             {
@@ -115,15 +116,22 @@ namespace TianHua.Electrical.PDS.Service
                 var filter = LineIndex.SelectCrossingPolygon(lineFrame).OfType<Line>().ToList();
                 var obliqueLines = filter.Except(new List<Line> { l })
                     .Where(o => o.Length < 1000.0)
-                    .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1)
+                    .Where(o => Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) > 0.1
+                        && Math.Abs(o.LineDirection().DotProduct(l.LineDirection())) < 0.9)
                     .ToList();
                 if (obliqueLines.Count > 1)
                 {
+                    removeLines.AddRange(obliqueLines);
+                    removeLines.Add(l);
                     var crossPoints = new List<Point3d>();
                     obliqueLines.ForEach(o =>
                     {
                         crossPoints.AddRange(l.Intersect(o, Intersect.OnBothOperands));
                     });
+                    if (crossPoints.Count < 2)
+                    {
+                        return;
+                    }
 
                     var textSearchFrame = filter.Except(obliqueLines).ToCollection()
                         .Buffer(10 * ThPDSCommon.ALLOWABLE_TOLERANCE)
@@ -151,9 +159,11 @@ namespace TianHua.Electrical.PDS.Service
                             return;
                         }
 
-                        if (info.Contains("/"))
+                        var charRegex = new Regex(@"[W].{1,5}[/].{0,2}[W]");
+                        var charMatch = charRegex.Match(info);
+                        if (charMatch.Success)
                         {
-                            info = info.Replace("/", "~");
+                            info = ThPDSReplaceStringService.ReplaceLastChar(info, "/", "~");
                         }
                         if (info.Contains("~"))
                         {
@@ -187,7 +197,14 @@ namespace TianHua.Electrical.PDS.Service
                         circuitNumbers.Add(Tuple.Create(info, TextDic[o]));
                     });
 
-                    crossPoints = crossPoints.OrderBy(x => (x - startPoint).DotProduct(direction)).ToList();
+                    if ((crossPoints.First() - crossPoints.Last()).GetNormal().DotProduct(direction) < 0.1)
+                    {
+                        crossPoints = crossPoints.OrderByDescending(x => x.Y).ToList();
+                    }
+                    else
+                    {
+                        crossPoints = crossPoints.OrderBy(x => (x - startPoint).DotProduct(direction)).ToList();
+                    }
                     for (var j = 0; j < crossPoints.Count && j < circuitNumbers.Count; j++)
                     {
                         PointDic.Add(ToDbPoint(crossPoints[j]),
@@ -195,6 +212,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                 }
             });
+            LineIndex.Update(new DBObjectCollection(), removeLines.ToCollection());
 
             markBlocks.ForEach(o =>
             {
@@ -231,7 +249,7 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     basePoint = objs.OfType<Line>().First().GetCenter();
                 }
-                else if(ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
+                else if (ThMEPTCHService.IsTCHMULTILEADER(o.Entity))
                 {
                     basePoint = objs.OfType<Polyline>().First().GetCenter();
                 }
@@ -436,6 +454,50 @@ namespace TianHua.Electrical.PDS.Service
                 result.Add(info);
             });
             return result;
+        }
+
+        public void InfosClean(List<ThPDSTextInfo> markList)
+        {
+            for (var i = 0; i < markList.Count; i++)
+            {
+                for (var j = 0; j < markList[i].Texts.Count; j++)
+                {
+                    if (markList[i].Texts[j].Contains("~"))
+                    {
+                        var numberRegex = new Regex(@"[0-9]+~[A-Z]*[0-9]+");
+                        var numberMatch = numberRegex.Match(markList[i].Texts[j]);
+                        if (numberMatch.Success)
+                        {
+                            var loadId = markList[i].Texts[j].Replace(numberMatch.Value, "");
+                            var first = new Regex(@"[0-9]+");
+                            var firstMatch = first.Match(numberMatch.Value);
+                            var secondMatch = firstMatch.NextMatch();
+                            if (firstMatch.Success && secondMatch.Success)
+                            {
+                                var start = Convert.ToInt32(firstMatch.Value);
+                                var end = Convert.ToInt32(secondMatch.Value);
+                                markList[i].Texts[j] = JointString(loadId, start);
+                                for (var k = start + 1; k <= end; k++)
+                                {
+                                    markList.Add(new ThPDSTextInfo(new List<string> { JointString(loadId, k) }, markList[i].ObjectIds));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private string JointString(string str, int num)
+        {
+            if (num > 9)
+            {
+                return str + num.ToString();
+            }
+            else
+            {
+                return str + "0" + num.ToString();
+            }
         }
 
         private DBPoint ToDbPoint(Point3d point)

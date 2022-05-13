@@ -112,6 +112,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         spraySystem.BranchLoops.Add(branchLoop);
                         sprayIn.PtTypeDic[branchLoop.First()] = "BranchLoop" + floorNumber;
                         sprayIn.PtTypeDic[branchLoop.Last()] = "BranchLoop" + floorNumber;
+                        if(j > i+2)
+                        {
+                            spraySystem.LoopPtPairs.Add(branchLoop.First(), branchLoop.Last());
+                        }
                         break;
                     }
                 }
@@ -129,6 +133,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             for (int i = 1; i < mainLoop.Count - 1; i++)
             {
                 var pt = mainLoop[i];
+                if(pt._pt.Z>1)
+                {
+                    ;
+                }
+                if(pt._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1605061.6, 891772,0))<10)
+                {
+                    ;
+                }
                 visited.Add(pt);
                 if (sprayIn.PtDic[pt].Count == 3)
                 {
@@ -144,9 +156,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     continue;
                 }
                 var pti = pts[i];
+                if(pti._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1605061.6, 890672,0))<10)
+                {
+                    ;
+                }
   
                 for (int j = i + 1; j < pts.Count; j++)
                 {
+                    if (pts[j]._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1605061.6, 891772, 0)) < 10)
+                    {
+                        ;
+                    }
                     if (usedPtNUms.Contains(j))
                     {
                         continue;
@@ -264,6 +284,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         usedPtNUms.Add(i);
                         usedPtNUms.Add(j);
                         BranchLoopAdd(branchLoopIndex, branchLoop, floorNumber, sprayIn, spraySystem);
+                        if (j > i + 2)
+                        {
+                            spraySystem.LoopPtPairs.Add(branchLoop.First(), branchLoop.Last());
+                        }
                         break;
                     }
                 }
@@ -357,7 +381,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         ref flag, pts, ref floorNumber, ref throughoutCnts);//提取跨层主环
                     if(branchLoop.Count > 20)
                     {
-                        ;
                         var rstMainLoop = new List<Point3dEx>();
                         rstMainLoop.AddRange(branchLoop);
                         spraySystem.MainLoopsInOtherFloor.Add(rstMainLoop);
@@ -367,6 +390,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         //spraySystem.BranchLoops.Add(branchLoop);
                         sprayIn.PtTypeDic[branchLoop.First()] = "MainLoopAcross";
                         sprayIn.PtTypeDic[branchLoop.Last()] = "MainLoopAcross";
+                        if (j > i + 2)
+                        {
+                            spraySystem.LoopPtPairs.Add(branchLoop.First(), branchLoop.Last());
+                        }
                         break;
                     }
                     ;

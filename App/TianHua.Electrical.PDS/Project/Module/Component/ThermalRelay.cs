@@ -48,7 +48,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
 
             var thermalRelay = ThermalRelayConfiguration.thermalRelayInfos.
                 FirstOrDefault(o => o.Model == model
-                && o.MinAmps.ToString() == minAmps 
+                && o.MinAmps.ToString() == minAmps
                 && o.MaxAmps.ToString() == maxAmps
                 && o.Poles == poles);
             if (thermalRelay.IsNull())
@@ -109,6 +109,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 修改额定电流
         /// </summary>
         /// <param name="polesNum"></param>
+        [Obsolete]
         public void SetRatedCurrent(string ratedCurrent)
         {
             //暂时先不支持切换，且也无法切换

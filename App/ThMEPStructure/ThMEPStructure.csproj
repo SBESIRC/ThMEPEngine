@@ -25,6 +25,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiecturePlane\Print\ThCommonPrinter.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchSvgEntityPrintService.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchPrintManager.cs" />
+    <Compile Include="ArchiecturePlane\Service\ThArchPlaneUtils.cs" />
+    <Compile Include="Common\Utils.cs" />
     <Compile Include="GirderConnect\BuildBeam\BuildBeamLayoutConfig.cs" />
     <Compile Include="GirderConnect\BuildBeam\ThBuildBeam.cs" />
     <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
@@ -117,13 +122,14 @@
     <Compile Include="Reinforcement\Service\ThShapeAnalysisService.cs" />
     <Compile Include="Reinforcement\Service\ThReinforcementUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StructPlane\Print\PrintConfig.cs" />
+    <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
     <Compile Include="StructPlane\Print\ThColumnPrinter.cs" />
     <Compile Include="StructPlane\Print\ThHolePrinter.cs" />
-    <Compile Include="StructPlane\Print\ThPrintService.cs" />
+    <Compile Include="Common\ThPrintService.cs" />
     <Compile Include="StructPlane\Print\ThShearwallPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThSlabAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
     <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
     <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />

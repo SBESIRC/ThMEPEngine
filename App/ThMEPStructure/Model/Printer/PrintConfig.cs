@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
-namespace ThMEPStructure.StructPlane.Print
+namespace ThMEPStructure.Model.Printer
 {
     internal class PrintConfig
     {

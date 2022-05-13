@@ -37,8 +37,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         {
             var dbPoints = CenterGrid.Keys.Select(p => new DBPoint(p)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
-            Random rd = new Random();
-
             while (UnvisitedPts.Count > 0)
             {
                 //找到起点
@@ -46,7 +44,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 UnvisitedPts.Remove(startPt);
                 var rectangle = OBB(LineDealer.LinesToConvexHull(CenterToFace[startPt]));
                 var firstDirection = rectangle.GetPoint3dAt(2) - rectangle.GetPoint3dAt(1);
-                Point3d lockedPt = GetLockedPt(startPt, firstDirection, spatialIndex, rd.Next(0, 7 - 1));
+                Point3d lockedPt = GetLockedPt(startPt, firstDirection, spatialIndex);
 
                 List<Point3d> horizonPts = new List<Point3d> { lockedPt };
                 //1、向右找 右最下
@@ -80,15 +78,14 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         private void LoopAddFirmPt(Point3d basePt, Vector3d baseDirection, ref List<Point3d> storagePts, ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var prePt = basePt;
-            Random rd = new Random();
             while (true)
             {
-                Point3d curPt = GetUpRightPt(prePt, baseDirection);
+                Point3d curPt = GetUpLeftPt(prePt, baseDirection);
                 if (curPt == prePt)
                 {
                     break;
                 }
-                var lockPt = GetLockedPt(curPt, baseDirection, spatialIndex, rd.Next(0, 7 - 1));
+                var lockPt = GetLockedPt(curPt, baseDirection, spatialIndex);
                 storagePts.Add(lockPt);
                 if (lockPt == curPt)
                 {
@@ -119,11 +116,26 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     minRotate = curRotate;
                     ansPt = curPt;
                 }
-                /////////////////////////////////////////
-                //if ((curPt - basePt).GetAngleTo(baseDirection) < Math.PI / 2 && FirmedPts.Contains(curPt))
-                //{
-                //    return basePt;
-                //}
+            }
+            return ansPt;
+        }
+
+        private Point3d GetUpLeftPt(Point3d basePt, Vector3d baseDirection)
+        {
+            if (!CenterGrid.ContainsKey(basePt))
+            {
+                return basePt;
+            }
+            Point3d ansPt = basePt;
+            double minRotate = double.MaxValue;
+            foreach (var curPt in CenterGrid[basePt])
+            {
+                var curRotate = (curPt - basePt).GetAngleTo(baseDirection, -Vector3d.ZAxis);
+                if (curRotate < Math.PI / 2 && curRotate < minRotate && UnvisitedPts.Contains(curPt))
+                {
+                    minRotate = curRotate;
+                    ansPt = curPt;
+                }
             }
             return ansPt;
         }
@@ -134,45 +146,33 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// <param name="basePt">基准来时点</param>
         /// <param name="baseDirection">基准来时正方向</param>
         /// <returns></returns>
-        private Point3d GetLockedPt(Point3d basePt, Vector3d baseDirection, ThCADCoreNTSSpatialIndex spatialIndex, int color)
+        private Point3d GetLockedPt(Point3d basePt, Vector3d baseDirection, ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var lockedPt = basePt;
             var curDirection = baseDirection;
             for (int i = 0, loopCnt = 0; loopCnt < 4; ++i, curDirection = curDirection.RotateBy(Math.PI / 2, Vector3d.ZAxis))
             {
                 var curPt = GetUpRightPt(lockedPt, curDirection);
-                //ShowInfo.ShowLine(lockedPt, curPt, color);
-                //ShowInfo.ShowPointAsO(lockedPt, color, 300);
                 if (curPt == lockedPt)
                 {
                     ++loopCnt;
                     continue;
                 }
                 var containPoints = new HashSet<Point3d> { lockedPt, curPt };
-                int mergeTest = MergeTestContionCenterPts(spatialIndex, ref containPoints ,color);
-                //bool flag;
+                int mergeTest = MergeTestContionCenterPts(spatialIndex, ref containPoints);
                 if (mergeTest >= 0)
                 {
-                    //flag = true;
-                    //foreach(var pt in containPoints)
-                    //{
-                    //    if(!CenterGrid.ContainsKey(pt))
-                    //    {
-                    //        flag = false;
-                    //        break;
-                    //    }
-                    //}
-                    //if(flag == false)
-                    //{
-                    //    ++loopCnt;
-                    //    continue;
-                    //}
-
+                    var ansPt = MergeFaces(containPoints);
+                    if(ansPt == new Point3d())
+                    {
+                        ++loopCnt;
+                        continue;
+                    }
                     if (mergeTest == 10) //结束合并
                     {
-                        return MergeFaces(containPoints);
+                        return ansPt;
                     }
-                    lockedPt = MergeFaces(containPoints);
+                    lockedPt = ansPt;
                 }
                 else
                 {
@@ -186,24 +186,26 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// <summary>
         /// 测试合并后形成的矩形包含了哪些点，然后加入这些点后生成的图形是否符合规则
         /// </summary>
-        private int MergeTestContionCenterPts(ThCADCoreNTSSpatialIndex spatialIndex, ref HashSet<Point3d> containPoints, int color)
+        private int MergeTestContionCenterPts(ThCADCoreNTSSpatialIndex spatialIndex, ref HashSet<Point3d> containPoints)
         {
             //1、生成当前多边形并集所构成的最小矩形
             var faceLinesA = GetFaceLines(containPoints);
             var rectangle = OBB(LineDealer.LinesToConvexHull(faceLinesA));
+            var pl = LineDealer.Tuples2Polyline(faceLinesA.ToList());
 
             //2、查看此矩形所包含的中点
-            //containPoints =centerPoints.ToHashSet();
-            foreach(var pt in spatialIndex.SelectWindowPolygon(rectangle).OfType<DBPoint>().Select(d => d.Position))
+            foreach (var pt in spatialIndex.SelectWindowPolygon(rectangle).OfType<DBPoint>().Select(d => d.Position))
             {
+                if(pl.Area > 100 && !pl.Contains(pt) && !UnvisitedPts.Contains(pt))
+                {
+                    return -1;
+                }
                 containPoints.Add(pt);
             }
-            //containPoints.AddRange();
-            //foreach (var pt in containPoints) { ShowInfo.ShowPointAsO(pt, color, 200); }
+
             //3、查看矩形包含的中点所在多边形的并集是否符合要求
             var faceLinesB = GetFaceLines(containPoints);
             var plB = LineDealer.LinesToConvexHull(faceLinesB);
-            //ShowInfo.ShowGeometry(plB.ToNTSGeometry(), color);
             return CheckRectangle(OBB(plB));
         }
 
@@ -246,7 +248,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 
             //4、update centerGrid
             HashSet<Point3d> connectPts = new HashSet<Point3d>();
-            foreach(var centerPoint in centerPoints)
+            foreach (var centerPoint in centerPoints)
             {
                 if (CenterGrid.ContainsKey(centerPoint))
                 {
@@ -257,13 +259,17 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                             connectPts.Add(curConnectPt);
                         }
                     }
-                    CenterGrid.Remove(centerPoint);
+                    foreach (var pt in CenterGrid[centerPoint].ToList())
+                    {
+                        DeleteFromGraph(pt, centerPoint);
+                    }
                 }
                 else
                 {
 
                 }
             }
+
             foreach (var connectPt in connectPts)
             {
                 AddLineToGraph(connectPt, centerPt);

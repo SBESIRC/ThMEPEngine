@@ -42,9 +42,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             FloorLength = 80000;
             PipeGap = 1900;
             ValveSize = 300;
-            FloorHeight = _UiConfigs.SetViewModel.FloorLineSpace;
-            FloorRectDic = _UiConfigs.FloorRect;
-            FloorPtDic = _UiConfigs.FloorPt;
+            if(_UiConfigs is null)
+            {
+                FloorHeight = 0;
+                FloorRectDic = null;
+                FloorPtDic = null;
+            }
+            else
+            {
+                FloorHeight = _UiConfigs.SetViewModel.FloorLineSpace;
+                FloorRectDic = _UiConfigs.FloorRect;
+                FloorPtDic = _UiConfigs.FloorPt;
+            }
+            
             LoopStartPt = new Point3dEx();
             LoopEndPt = new Point3dEx();
             PipeLines = new List<Line>();

@@ -40,6 +40,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
     }
     public class ThPDSDistributionPanelService
     {
+        List<MenuItem> menuItems;
         ContextMenu ctxMenu;
         QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
         public void Init(UserContorls.ThPDSDistributionPanel panel)
@@ -53,7 +54,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var ctx = new ThPDSContext() { Vertices = vertices, Souces = srcLst, Targets = dstLst, Circuits = circuitLst, Details = details };
             var tv = panel.tv;
             ctxMenu ??= panel.canvas.ContextMenu;
-            var menuItems = new List<MenuItem>();
+            menuItems ??= new List<MenuItem>();
             foreach (MenuItem m in ctxMenu.Items)
             {
                 menuItems.Add(m);
@@ -160,6 +161,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     Header = "全不选",
                     Command = unselAllCmd,
                 };
+                yield return new()
+                {
+                    Header = "生成系统图",
+                    Command = batchGenCmd,
+                };
             }
             {
                 var i = 0;
@@ -238,6 +244,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 if (vm is ThPDSConductorModel conductor)
                 {
+                    switch (conductor.LayingPath)
+                    {
+                        case ConductorLayingPath.ViaCableTray:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite1", false);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite2", false);
+                            }
+                            break;
+                        case ConductorLayingPath.ViaConduit:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("BridgeLaying", false);
+                            }
+                            break;
+                    }
+
                     if (conductor.ComponentType == ComponentType.Conductor)
                     {
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);
@@ -299,23 +320,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         Header = "创建备用回路",
                         Command = createBackupCircuitCmd,
                     });
-                    foreach (var m in menuItems)
+                    if (vertice.Details.CircuitFormType is not PDS.Project.Module.Circuit.IncomingCircuit.CentralizedPowerCircuit)
                     {
-                        cmenu.Items.Add(m);
-                    }
-                    cmenu.Items.Add(new MenuItem()
-                    {
-                        Header = "生成系统图",
-                        Command = new RelayCommand(() =>
+                        foreach (var m in menuItems)
                         {
-                            // 切回CAD画布
-                            ThPDSCADService.FocusToCAD();
-
-                            // 绘制到图纸上
-                            var drawEngine = new ThPDSSystemDiagramService();
-                            drawEngine.Draw(graph, vertice);
-                        }),
-                    });
+                            cmenu.Items.Add(m);
+                        }
+                    }
                     canvas.ContextMenu = cmenu;
                 }
                 var hoverDict = new Dictionary<object, object>();
@@ -375,7 +386,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     }
                     else if (GetInputMeter() != null)
                     {
-                        item = PDSItemInfo.Create(left.Contains("进线") ? left + "（带电表）" : left, default);
+                        item = PDSItemInfo.Create(left.Contains("进线") ? left + $"（带{   (GetInputMeter() is CurrentTransformer ? "间接表" : "电表")}）" : left, default);
                     }
                     else
                     {
@@ -2171,7 +2182,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             tree.DataList.Clear();
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
-                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.Load.ID.LoadID, Tag = node });
+                                                string name;
+                                                name = node.Load.ID.LoadID;
+                                                if (string.IsNullOrEmpty(name))
+                                                {
+                                                    name = node.Load.ID.Description;
+                                                }
+                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = name, Tag = node });
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -2196,7 +2213,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             foreach (var node in tree.DataList.Where(x => x.IsChecked == true).Select(x => x.Tag).Cast<ThPDSProjectGraphNode>())
                                             {
-                                                ThPDSProjectGraphService.DistributeLoad(graph, node, vertice);
+                                                ThPDSProjectGraphService.DistributeLoad(graph, edge, node);
                                             }
                                             UpdateCanvas();
                                         }
@@ -3393,6 +3410,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             Canvas.SetLeft(cvs2, pt.X);
                                             Canvas.SetTop(cvs2, pt.Y - offsetY);
                                             cvs.MouseEnter += (s, e) => { cvs2.Background = LightBlue3; };
+                                            var cmenu = new ContextMenu();
+                                            cvs.ContextMenu = cmenu;
+                                            {
+                                                var mi = new MenuItem();
+                                                cmenu.Items.Add(mi);
+                                                mi.Header = "删除";
+                                                mi.Command = new RelayCommand(() =>
+                                                {
+                                                    ThPDSProjectGraphService.DeleteControlCircuit(vertice, sc);
+                                                    UpdateCanvas();
+                                                });
+                                            }
                                             cvs.MouseLeave += (s, e) => { cvs2.Background = Brushes.Transparent; };
                                             var rect = new Rect(Canvas.GetLeft(cvs2), Canvas.GetTop(cvs2), cvs2.Width, cvs2.Height);
                                             cvs.MouseUp += (s, e) =>

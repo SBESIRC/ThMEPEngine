@@ -1689,7 +1689,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             }
                             if (run.HasCheckPoint)
                             {
-                                var h = HEIGHT / ACANTHOCEPHALANS * QUOTATIONEDIBLE;
+                                var h = THESAURUSDOMESTIC;
                                 Point2d pt1, pt2;
                                 {
                                     pt1 = info.EndPoint.OffsetY(h);
@@ -1699,7 +1699,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         pt1 = info.EndPoint.OffsetY(DETERMINATENESS + QUINQUARTICULAR);
                                     }
                                 }
-                                _DrawCheckPoint(pt1.OffsetY(PHYSIOLOGICALLY), THESAURUSOBSTINACY);
+                                _DrawCheckPoint(pt1.OffsetY(PHYSIOLOGICALLY-CONSCRIPTIONIST+THESAURUSDOMESTIC), THESAURUSOBSTINACY);
                                 if (storey == THESAURUSREGION)
                                 {
                                     var dx = -POLYOXYMETHYLENE;
@@ -7464,7 +7464,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int VÖLKERWANDERUNG = 30;
         public const string INTERNALIZATION = "≥600";
         public const int THESAURUSGETAWAY = 450;
-        public const int ACANTHOCEPHALANS = 18;
         public const int PHYSIOLOGICALLY = 250;
         public const double THESAURUSDISPASSIONATE = .7;
         public const string CONTROVERSIALLY = "TH-STYLE3";

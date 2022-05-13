@@ -81,8 +81,9 @@ namespace ThMEPElectrical.Command
                 var preProcess = new PreProcess(dataset);
                 preProcess.Process();
 
+                bool beMerge = true;
                 //3、Generate
-                var earthGridLines = GridGenerator.Genterate(preProcess, faceSize);
+                var earthGridLines = GridGenerator.Genterate(preProcess, faceSize, beMerge);
 
                 //4、Display
                 string layerName = "E-GRND-WIRE";

@@ -1,4 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPStructure.Common;
+using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print

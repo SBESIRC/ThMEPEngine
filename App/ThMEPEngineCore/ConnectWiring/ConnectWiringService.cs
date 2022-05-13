@@ -66,8 +66,8 @@ namespace ThMEPEngineCore.ConnectWiring
             var CenterLine = new List<ThGeometry>();
             if (Convert.ToInt16(Application.GetSystemVariable("USERR3")) == 1)
             {
-                CenterLine = GetCenterLinePolylines(out DBObjectCollection objs);
-                //CenterLine.AddRange(GetUCSPolylines(outFrame,objs));
+                //CenterLine = GetCenterLinePolylines(out DBObjectCollection objs);
+                CenterLine.AddRange(GetUCSPolylines(new DBObjectCollection()));
             }
 
             //新增 处理超远问题
@@ -97,7 +97,7 @@ namespace ThMEPEngineCore.ConnectWiring
                         maxNum = 1;
                     }
 
-                    var blockGeos = GetBlockPts(resBlocks);
+                    var blockGeos = GetBlockPts(resBlocks, blockInfos);
                     ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
                     ThCableRouteContextMgd context = new ThCableRouteContextMgd()
                     {
@@ -157,7 +157,6 @@ namespace ThMEPEngineCore.ConnectWiring
                             List<Polyline> resLines = new List<Polyline>();
                             foreach (var line in loop.Value)
                             {
-                                //var wiring = branchConnecting.CreateBranch(line, resBlocks);
                                 var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
                                 if (wiring.NumberOfVertices > 1)
                                 {
@@ -282,7 +281,7 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取连接点位
         /// </summary>
         /// <returns></returns>
-        private List<ThGeometry> GetBlockPts(List<BlockReference> allBlocks)
+        private List<ThGeometry> GetBlockPts(List<BlockReference> allBlocks, List<LoopBlockInfos> loopBlockInfos)
         {
             var geos = new List<ThGeometry>();
             if (allBlocks.Count > 0)
@@ -292,6 +291,12 @@ namespace ThMEPEngineCore.ConnectWiring
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.WiringPosition.ToString());
                     geometry.Boundary = new DBPoint(o.Position);
+                    var blockInfo = loopBlockInfos.FirstOrDefault(x => x.blockName == o.Name);
+                    if (blockInfo != null)
+                    {
+                        geometry.Properties.Add(ThExtractorPropertyNameManager.InstallMethodPropertyName, blockInfo.InstallMethod);
+                        geometry.Properties.Add(ThExtractorPropertyNameManager.DensityPropertyName, blockInfo.Density);
+                    }
                     geos.Add(geometry);
                 });
             }

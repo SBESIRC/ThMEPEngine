@@ -19,6 +19,7 @@ namespace TianHua.Electrical.PDS.Service
             return new List<string>
             {
                 "E-UNIV-NOTE",
+                "E-UNIV-DIAG",
                 "E-*-DIMS",
             };
         }

@@ -15,9 +15,9 @@ using ProjectGraph = QuikGraph.BidirectionalGraph<
 
 namespace TianHua.Electrical.PDS.Engine
 {
-    public class ThPDSZoomEngine
+    public class ThPDSZoomService
     {
-        public ThPDSZoomEngine()
+        public ThPDSZoomService()
         {
 
         }
@@ -30,16 +30,42 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 return;
             }
-            Zoom(nodeList[0]);
+            ImmediatelyZoom(nodeList[0]);
         }
 
-        public void Zoom(ThPDSProjectGraphNode projectNode)
+        /// <summary>
+        /// 即时Zoom到边的下级
+        /// </summary>
+        /// <param name="projectEdge"></param>
+        public void ImmediatelyZoom(ThPDSProjectGraphEdge projectEdge)
         {
-            Zoom(projectNode.Load.Location);
+            ImmediatelyZoom(projectEdge.Target);
         }
 
-        public void Zoom(ThPDSLocation location)
+        /// <summary>
+        /// 即时Zoom到该节点
+        /// </summary>
+        /// <param name="projectNode"></param>
+        public void ImmediatelyZoom(ThPDSProjectGraphNode projectNode)
         {
+            ImmediatelyZoom(projectNode.Load.Location);
+        }
+
+        /// <summary>
+        /// 即时Zoom到某个ThPDSLocation
+        /// </summary>
+        /// <param name="location"></param>
+        public void ImmediatelyZoom(ThPDSLocation location)
+        {
+            if (location == null)
+            {
+                return;
+            }
+            if(location.BasePoint.EqualsTo(new ThPDSPoint3d(0.01,0.01)))
+            {
+                Active.Editor.WriteLine("无法Zoom至指定负载");
+                return;
+            }
             foreach (Document doc in Application.DocumentManager)
             {
                 //var fileName = doc.Name.Split('\\').Last();
@@ -55,7 +81,7 @@ namespace TianHua.Electrical.PDS.Engine
                     if (location.ReferenceDWG.Equals(referenceDWG))
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;
-                        var scaleFactor = 8000;
+                        var scaleFactor = 2500.0;
                         var minPoint = new Point3d(location.BasePoint.X - scaleFactor,
                                                    location.BasePoint.Y - scaleFactor, 0);
                         var maxPoint = new Point3d(location.BasePoint.X + scaleFactor,

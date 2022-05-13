@@ -68,6 +68,16 @@ namespace ThMEPEngineCore.ConnectWiring.Model
         /// Y负方向移动
         /// </summary>
         public double YLeft { get; set; }
+
+        /// <summary>
+        /// 安装方式
+        /// </summary>
+        public string InstallMethod { get; set; }
+
+        /// <summary>
+        /// 块质量
+        /// </summary>
+        public int Density { get; set; }
     }
 
     public class BlockConfigModel
@@ -111,6 +121,16 @@ namespace ThMEPEngineCore.ConnectWiring.Model
         /// Y负方向移动
         /// </summary>
         public double YLeft { get; set; }
+
+        /// <summary>
+        /// 安装方式
+        /// </summary>
+        public string InstallMethod { get; set; }
+
+        /// <summary>
+        /// 块质量
+        /// </summary>
+        public int Density { get; set; }
     }
 
     public enum BlockShape

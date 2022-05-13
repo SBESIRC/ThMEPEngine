@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -92,20 +93,41 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
+        private static bool GetPipePt(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex)
+        {
+            var rect = vpt._pt.GetRect(120);
+            var objs = dbPtSpatialIndex.SelectCrossingPolygon(rect);
+            return objs.Count > 0;
+        }
         public static void CreatePtDic(SprayIn sprayIn)
         {
             double maxDist = 1000;
             double minDist = 400;
             var ptOffsetDic = new Dictionary<Point3dEx, Point3d>();
+
+            var dbPts = new List<DBPoint>();
+            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
+            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+
             foreach(var pt in sprayIn.Verticals)
             {
-                if(ptOffsetDic.ContainsKey(pt))
+                var rstGetPt = GetPipePt(pt, dbPtSpatialIndex);
+                if(!rstGetPt)
+                {
+                    continue;
+                }
+                if (ptOffsetDic.ContainsKey(pt))
                 {
                     continue;
                 }
                 var point = pt._pt;
                 var f1 = pt._pt.GetFloor(sprayIn.FloorRectDic);
                 if (f1.Equals(""))
+                {
+                    continue;
+                }
+                if (f1.Equals("B0")) f1 = "B1M";
+                if(!sprayIn.FloorPtDic.ContainsKey(f1))
                 {
                     continue;
                 }
@@ -258,12 +280,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                                 {
                                     continue;
                                 }
-                                if (sprayIn.PtTypeDic[p2].Contains("PressureValve"))
+                                if (!sprayIn.PtTypeDic.ContainsKey(p2))
                                 {
-                                    sprayIn.PtTypeDic.AddType(pt, "SubLoop");
-                                    typeFlag = true;
-                                    break;
+                                    ;
                                 }
+                                    if (sprayIn.PtTypeDic.ContainsKey(p2))
+                                {
+                                    if (sprayIn.PtTypeDic[p2].Contains("PressureValve"))
+                                    {
+                                        sprayIn.PtTypeDic.AddType(pt, "SubLoop");
+                                        typeFlag = true;
+                                        break;
+                                    }
+                                }
+                                
                             }
                             
                         }

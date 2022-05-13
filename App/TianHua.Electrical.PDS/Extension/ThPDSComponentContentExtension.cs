@@ -29,7 +29,7 @@ namespace TianHua.Electrical.PDS.Extension
 
         public static string Content(this OUVP cps)
         {
-            return "自复式过欠电压保护器";
+            return $"{cps.Model} {cps.RatedCurrent}/{cps.PolesNum}";
         }
 
         public static string Content(this Breaker breaker)

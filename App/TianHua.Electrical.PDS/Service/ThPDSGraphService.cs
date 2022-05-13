@@ -4,6 +4,7 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 
+using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -12,6 +13,7 @@ namespace TianHua.Electrical.PDS.Service
     {
         public static Dictionary<Entity, ThPDSBlockReferenceData> DistBoxBlocks { get; set; }
         public static Dictionary<Entity, ThPDSBlockReferenceData> LoadBlocks { get; set; }
+        public static ThMEPOriginTransformer Transformer { get; set; }
 
         public static ThPDSCircuitGraphNode CreateNode(Entity entity, Database database, ThMarkService markService,
             List<string> distBoxKey, List<ObjectId> objectIds)
@@ -51,11 +53,12 @@ namespace TianHua.Electrical.PDS.Service
             var node = new ThPDSCircuitGraphNode();
             var loads = new List<ThPDSLoad>();
             var noneLoad = true;
+            var endPoint = new ThPDSPoint3d();
             foreach (var e in entities)
             {
                 if (e is Line line)
                 {
-                    //
+                    endPoint = Transformer.Reset(line.EndPoint).ToPDSPoint3d();
                 }
                 else
                 {
@@ -80,7 +83,10 @@ namespace TianHua.Electrical.PDS.Service
             if (loads.Count == 0)
             {
                 loads.Add(new ThPDSLoad());
-                loads[0].SetLocation(new ThPDSLocation());
+                loads[0].SetLocation(new ThPDSLocation
+                {
+                    BasePoint = endPoint,
+                });
             }
 
             node.Loads = loads;
@@ -118,6 +124,15 @@ namespace TianHua.Electrical.PDS.Service
         }
 
         // circuitAssign参数是否是必须的，存疑
+        /// <summary>
+        /// circuitAssign为true表示可以通过节点身上的回路编号给回路赋值
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="infos"></param>
+        /// <param name="distBoxKey"></param>
+        /// <param name="circuitAssign"></param>
+        /// <returns></returns>
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> CreateEdge(ThPDSCircuitGraphNode source,
             ThPDSCircuitGraphNode target, List<string> infos, List<string> distBoxKey, bool circuitAssign = false)
         {
@@ -125,6 +140,7 @@ namespace TianHua.Electrical.PDS.Service
             var service = new ThPDSMarkAnalysisService();
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
+            AssignCircuitNumber(edge, circuitAssign);
 
             if (source.NodeType != PDSNodeType.CableCarrier
                 && target.NodeType != PDSNodeType.Load
@@ -135,6 +151,7 @@ namespace TianHua.Electrical.PDS.Service
                 if (!string.IsNullOrEmpty(anotherSrcPanelID))
                 {
                     anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                    AssignCircuitNumber(anotherEdge, circuitAssign);
                     if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber.Last()))
                     {
                         edge = anotherEdge;
@@ -160,6 +177,23 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
+            if (edge.Source.Loads.Count > 0
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
+                && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
+            {
+                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
+            }
+
+            if (edge.Target.NodeType == PDSNodeType.Unkown)
+            {
+                ThPDSLayerService.Assign(edge.Target.Loads[0]);
+            }
+            return edge;
+        }
+
+        private static void AssignCircuitNumber(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, bool circuitAssign)
+        {
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
             if (circuitAssign && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
             {
@@ -177,20 +211,6 @@ namespace TianHua.Electrical.PDS.Service
                     edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
                 }
             }
-
-            if (edge.Source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
-                && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
-            {
-                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
-            }
-
-            if (edge.Target.NodeType == PDSNodeType.Unkown)
-            {
-                ThPDSLayerService.Assign(edge.Target.Loads[0]);
-            }
-            return edge;
         }
 
         public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> UnionEdge(ThPDSCircuitGraphNode source,

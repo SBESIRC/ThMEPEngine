@@ -98,12 +98,15 @@ namespace ThParkingStall.Core.InterProcess
             newSegLines.Clean();//过滤孤立的线
             if (!newSegLines.Allconnected()) return subAreas;//判断是否全部相连
             //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            var SegLineStrings = newSegLines.ToLineStrings(false);
+
             var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
             if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return subAreas;//判断是否满足车道宽
-            var SegLineStrings = newSegLines.ToLineStrings(false);
+            
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr!=null));//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             var vaildSegSpatialIndex = new MNTSSpatialIndex(vaildSeg.ToLineStrings().Cast<Geometry>().ToList());
+            var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
             // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
@@ -117,8 +120,20 @@ namespace ThParkingStall.Core.InterProcess
                 //List<Polygon> subBoundingBoxes;//该区域所有建筑物的bounding box
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                var subSegLineStrings = vaildSegSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分割线
-                var subSegLines = subSegLineStrings.GetVaildParts(area);
+                var subLaneLineStrings = vaildSegSpatialIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分割线
+                var subLanes = subLaneLineStrings.GetVaildParts(area);
+
+                var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
+                Geometry geoWalls = area.Shell;
+                foreach(var subSegLine in subSegLineStrings)
+                {
+                    if (subSegLine.PartInCommon(geoWalls))
+                    {
+                        geoWalls = geoWalls.Difference(subSegLine);
+                    }
+                }
+                var walls = geoWalls.Get<LineString>();
+
                 //subSegLineStrings = subSegLineStrings.Where(lstr => area.Shell.PartInCommon(lstr));//去除未构成边界的
                 //var subSegLines = subSegLineStrings.ToLineSegments().Select(l => l.GetVaildPart(area)).ToList();
 
@@ -126,7 +141,7 @@ namespace ThParkingStall.Core.InterProcess
                 var subRamps = Ramps.Where(ramp => area.Contains(ramp.InsertPt)).ToList();
                 var subBoundingBoxes = BoundingBoxSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 var key = GetSubAreaKey(area, chromosome, SegLineStrings);
-                var subArea = new SubArea(area, subSegLines, subBuildings, subRamps, subBoundingBoxes, key);
+                var subArea = new SubArea(area, subLanes,walls, subBuildings, subRamps, subBoundingBoxes, key);
                 subAreas.Add(subArea);
             }
             return subAreas;

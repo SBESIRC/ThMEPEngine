@@ -36,6 +36,8 @@ namespace ThMEPWSS.FlushPoint.Data
         public List<Entity> FloorDrains { get; private set; }
         public List<string> DrainageBlkNames { get; set; }
         public List<string> FloorDrainBlkNames { get; set; }
+        //圆弧打散的长度
+        private double ArcTesslateLength = 50.0;
 
         public ThDrainFacilityExtractor()
         {
@@ -100,7 +102,10 @@ namespace ThMEPWSS.FlushPoint.Data
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            RecognizeCollectWellByCurve(database, pts);
+            //目前通过识别和分离算法获取排水沟和集水井的算法不稳
+            //2022.05.11 杨工和设计师沟通先取消掉这种方式
+            //RecognizeCollectWellByCurve(database, pts);
+            //通过块配置的方式，获取集水井的块并获取对应块的OBB
             RecognizeCollectWellByBlock(database, pts);
             RecognizeFloorDrainByBlock(database, pts);
             DuplicatedRemove(); //对集水井去重
@@ -150,32 +155,10 @@ namespace ThMEPWSS.FlushPoint.Data
                 blockEngine.Visitor.CheckQualifiedLayer = (Entity e) => true;
                 blockEngine.Recognize(database, pts);
                 blockEngine.RecognizeMS(database, pts);
-                blockEngine.Geos.Cast<BlockReference>().ForEach(o =>
-                {
-                    var curves = new DBObjectCollection();
-                    ThDrawTool.Explode(o)
-                        .Cast<Entity>()
-                        .Where(p => p is Curve)
-                        .ForEach(p =>
-                        {
-                            var newEnt = Tesslate(p);
-                            if (newEnt.GetLength() > 0.0)
-                            {
-                                curves.Add(newEnt);
-                            }
-                        });
-                    if(curves.Count>0)
-                    {
-                        var transformer = new ThMEPOriginTransformer(curves);
-                        transformer.Transform(curves);
-                        var obb = curves.GetMinimumRectangle();
-                        transformer.Reset(obb);
-                        if (obb.Area > 1.0)
-                        {
-                            CollectingWells.Add(obb);
-                        }
-                    }
-                });
+                blockEngine.Geos
+                    .OfType<Polyline>()              
+                    .Where(p => p.Area > 1.0)
+                    .ForEach(p => CollectingWells.Add(p));
             }
         }
 

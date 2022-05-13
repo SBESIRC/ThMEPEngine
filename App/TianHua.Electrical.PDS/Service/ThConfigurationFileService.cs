@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using ThMEPEngineCore.IO.ExcelService;
 using TianHua.Electrical.PDS.Model;
+using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -97,6 +98,15 @@ namespace TianHua.Electrical.PDS.Service
                 // Defult Description
                 column++;
                 blockInfo.DefaultDescription = StringFilter(table.Rows[row][column].ToString());
+
+                // Cable laying method 1
+                column++;
+                blockInfo.CableLayingMethod1 = CableLayingMethodConvert(StringFilter(table.Rows[row][column].ToString()));
+
+                // Cable laying method 2
+                column++;
+                blockInfo.CableLayingMethod2 = CableLayingMethodConvert(StringFilter(table.Rows[row][column].ToString()));
+
                 blockInfos.Add(blockInfo);
             }
             return blockInfos;
@@ -120,6 +130,37 @@ namespace TianHua.Electrical.PDS.Service
             else
             {
                 return ThPDSPhase.None;
+            }
+        }
+
+        private LayingSite CableLayingMethodConvert(string str)
+        {
+            switch(str)
+            {
+                case "CE":
+                    return LayingSite.CE;
+                case "SCE":
+                    return LayingSite.SCE;
+                case "WS":
+                    return LayingSite.WS;
+                case "RS":
+                    return LayingSite.RS;
+                case "CC":
+                    return LayingSite.CC;
+                case "WC":
+                    return LayingSite.WC;
+                case "CLC":
+                    return LayingSite.CLC;
+                case "BC":
+                    return LayingSite.BC;
+                case "FC":
+                    return LayingSite.FC;
+                case "AC":
+                    return LayingSite.AC;
+                case "AB":
+                    return LayingSite.AB;
+                default:
+                    return LayingSite.None;
             }
         }
     }
