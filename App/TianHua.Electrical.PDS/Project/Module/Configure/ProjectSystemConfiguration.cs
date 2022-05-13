@@ -52,12 +52,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public static char[] NumberArray = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         //All
-        public static List<LayingSite> LayingSiteAll = new List<LayingSite>() { LayingSite.CE, LayingSite.SCE, LayingSite.WS, LayingSite.RS, LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC, LayingSite.AC, LayingSite.AB };
+        public static LayingSite[] LayingSiteAll = new LayingSite[] { LayingSite.CE, LayingSite.SCE, LayingSite.WS, LayingSite.RS, LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC, LayingSite.AC, LayingSite.AB };
 
         //明敷
         public static List<LayingSite> LayingSiteE = new List<LayingSite>() { LayingSite.CE, LayingSite.SCE, LayingSite.WS, LayingSite.RS,  LayingSite.AC, LayingSite.AB };
 
         //暗敷
-        public static List<LayingSite> LayingSiteC = new List<LayingSite>() { LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC };
+        public static LayingSite[] LayingSiteC = new LayingSite[] { LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC };
     }
 }

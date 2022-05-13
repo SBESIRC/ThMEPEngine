@@ -19,7 +19,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.ComponentType = ComponentType.Conductor;
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
-            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -40,7 +39,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             this.LayingSite2 = layingSite2;
             this.IsMotor = true;
             this.Phase = phase;
-            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             if (!ViaConduit && !ViaCableTray)
             {
                 ViaCableTray = true;
@@ -57,7 +55,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(string conductorConfig,MaterialStructure materialStructure, double calculateCurrent, ThPDSPhase phase, ThPDSCircuitType circuitType, ThPDSLoadTypeCat_1 loadType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.Conductor;
-            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
             this.Phase = phase;
@@ -79,7 +76,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public Conductor(string conductorConfig, string conductorType, ThPDSPhase phase, ThPDSCircuitType circuitType, bool FireLoad, bool ViaConduit, bool ViaCableTray, string FloorNumber, LayingSite layingSite1, LayingSite layingSite2)
         {
             this.ComponentType = ComponentType.ControlConductor;
-            AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             this.LayingSite1 = layingSite1;
             this.LayingSite2 = layingSite2;
             this.IsMotor = true;
@@ -416,10 +412,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <exception cref="NotImplementedException"></exception>
         private void ChooseLaying(string floorNumber, ThPDSCircuitType circuitType, ThPDSPhase phase, bool viaConduit, bool viaCableTray, bool fireLoad)
         {
-            this._floorNumber = floorNumber;
-            this._circuitType = circuitType;
-            this._phase = phase;
-            this._fireLoad = fireLoad;
             if (viaCableTray && viaConduit)
             {
                 ConductorLayingPath = ConductorLayingPath.ViaCableTrayAndViaConduit;
@@ -432,71 +424,55 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 ConductorLayingPath = ConductorLayingPath.ViaConduit;
             }
-            ChooseConductorLayingPath();
-        }
-
-        private void ChooseConductorLayingPath()
-        {
             var config = PDSProject.Instance.projectGlobalConfiguration;
-            if (ConductorLayingPath == ConductorLayingPath.ViaCableTray || ConductorLayingPath == ConductorLayingPath.ViaCableTrayAndViaConduit)
+            //ViaCableTray
             {
-                if (IsControlCircuit)
+                switch (circuitType)
                 {
-                    this.BridgeLaying = BridgeLaying.MR;
+                    case ThPDSCircuitType.Lighting:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
+                    case ThPDSCircuitType.Socket:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
+                    case ThPDSCircuitType.EmergencyLighting:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
+                    case ThPDSCircuitType.PowerEquipment:
+                        {
+                            this.BridgeLaying = BridgeLaying.CT;
+                            break;
+                        }
+                    case ThPDSCircuitType.EmergencyPowerEquipment:
+                        {
+                            this.BridgeLaying = BridgeLaying.CT;
+                            break;
+                        }
+                    case ThPDSCircuitType.FireEmergencyLighting:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
+                    case ThPDSCircuitType.Control:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
+                    default:
+                        {
+                            this.BridgeLaying = BridgeLaying.MR;
+                            break;
+                        }
                 }
-                else
-                {
-                    switch (_circuitType)
-                    {
-                        case ThPDSCircuitType.Lighting:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                        case ThPDSCircuitType.Socket:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                        case ThPDSCircuitType.EmergencyLighting:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                        case ThPDSCircuitType.PowerEquipment:
-                            {
-                                this.BridgeLaying = BridgeLaying.CT;
-                                break;
-                            }
-                        case ThPDSCircuitType.EmergencyPowerEquipment:
-                            {
-                                this.BridgeLaying = BridgeLaying.CT;
-                                break;
-                            }
-                        case ThPDSCircuitType.FireEmergencyLighting:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                        case ThPDSCircuitType.Control:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                        default:
-                            {
-                                this.BridgeLaying = BridgeLaying.MR;
-                                break;
-                            }
-                    }
-                }
+                AlternativeConductorLayingPaths = new List<ConductorLayingPath>() { ConductorLayingPath.ViaCableTray, ConductorLayingPath.ViaConduit, ConductorLayingPath.ViaCableTrayAndViaConduit };
             }
-            else
-            {
-                this.BridgeLaying = BridgeLaying.None;
-            }
-
-            if (ConductorLayingPath == ConductorLayingPath.ViaConduit || ConductorLayingPath == ConductorLayingPath.ViaCableTrayAndViaConduit)
+            //PipeDiameter
             {
                 if (!ConductorUse.IsNull() && ConductorUse.IsSpecialConductorType)
                 {
@@ -507,8 +483,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
                 else
                 {
-                    bool IsBasement = _floorNumber.Contains('B');
-                    var phapeNum = _phase == ThPDSPhase.一相 ? "1P" : "3P";
+                    bool IsBasement = floorNumber.Contains('B');
+                    var phapeNum = phase == ThPDSPhase.一相 ? "1P" : "3P";
                     var CableCondiutConfigs = (IsWire ? CableCondiutConfiguration.CondiutInfos : CableCondiutConfiguration.CableInfos).Where(o => (IsWire || o.FireCoating == Refractory) && o.Phase == phapeNum);
                     var CableCondiutConfig = CableCondiutConfigs.First(o => o.WireSphere >= ConductorCrossSectionalArea);
                     if (IsBasement)
@@ -518,8 +494,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     }
                     else
                     {
-                        var SmallDiameterMaterial = _fireLoad ? config.FireOnTheGroundSmallDiameterMaterial : config.NonFireOnTheGroundSmallDiameterMaterial;
-                        var LargeDiameterMaterial = _fireLoad ? config.FireOnTheGroundLargeDiameterMaterial :
+                        var SmallDiameterMaterial = fireLoad ? config.FireOnTheGroundSmallDiameterMaterial : config.NonFireOnTheGroundSmallDiameterMaterial;
+                        var LargeDiameterMaterial = fireLoad ? config.FireOnTheGroundLargeDiameterMaterial :
                             config.NonFireOnTheGroundLargeDiameterMaterial;
                         this.PipeMaterial = SmallDiameterMaterial;
                         if (PipeMaterial == PipeMaterial.JDG && CableCondiutConfig.DIN_JDG > 0)
@@ -536,16 +512,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                             this.PipeDiameter = CableCondiutConfig.DIN_SC;
                         }
                     }
-                    if (this.PipeDiameter > int.Parse(config.PipeDiameter.GetEnumDescription()))
-                    {
-                        this.LayingSite1 = AdjustmentLayingSite(LayingSite1);
-                        AlternativeLayingSites1 = ProjectSystemConfiguration.LayingSiteC.Contains(LayingSite1) ? ProjectSystemConfiguration.LayingSiteC : ProjectSystemConfiguration.LayingSiteAll;
-                        this.LayingSite2 = AdjustmentLayingSite(LayingSite2);
-                        AlternativeLayingSites2 = ProjectSystemConfiguration.LayingSiteC.Contains(LayingSite2) ? ProjectSystemConfiguration.LayingSiteC : ProjectSystemConfiguration.LayingSiteAll;
-                        AlternativeLayingSites2.Insert(0, LayingSite.None);
-
-                    }
-
                     //这部分下次更新要删掉
                     {
                         //计算铺设方式
@@ -553,7 +519,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         if ((this.PipeMaterial == PipeMaterial.SC && this.PipeDiameter <= 20)
                             || (this.PipeMaterial == PipeMaterial.JDG && this.PipeDiameter <= 25)
                             || (this.PipeMaterial == PipeMaterial.PC && this.PipeDiameter <= 25)
-                            && (_circuitType != ThPDSCircuitType.PowerEquipment))
+                            && (circuitType != ThPDSCircuitType.PowerEquipment))
                         {
                             Pipelaying = Pipelaying.C;
                         }
@@ -563,7 +529,14 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                     }
                 }
-                //AlternativeLayingSites1
+                if (this.PipeDiameter > int.Parse(config.PipeDiameter.GetEnumDescription()))
+                {
+                    this.LayingSite1 = AdjustmentLayingSite(LayingSite1);
+                    this.LayingSite2 = AdjustmentLayingSite(LayingSite2);
+                }
+                AlternativeLayingSites1 = (ProjectSystemConfiguration.LayingSiteC.Contains(LayingSite1) ? ProjectSystemConfiguration.LayingSiteC : ProjectSystemConfiguration.LayingSiteAll).ToList();
+                AlternativeLayingSites2 = (ProjectSystemConfiguration.LayingSiteC.Contains(LayingSite1) ? ProjectSystemConfiguration.LayingSiteC : ProjectSystemConfiguration.LayingSiteAll).ToList();
+                AlternativeLayingSites2.Insert(0, LayingSite.None);
             }
         }
 
@@ -733,7 +706,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             if(this.ConductorLayingPath != conductorLayingPath)
             {
                 this.ConductorLayingPath = conductorLayingPath;
-                ChooseConductorLayingPath();
             }
         }
 
@@ -947,11 +919,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// 外护套材质
         /// </summary>
         private MaterialStructure SpecifyMaterialStructure;
-
-        private string _floorNumber { get; set; }
-        private ThPDSCircuitType _circuitType { get; set; }
-        private ThPDSPhase _phase { get; set; }
-        private bool _fireLoad { get; set; }
         #endregion
     }
 }
