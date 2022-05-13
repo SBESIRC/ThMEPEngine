@@ -835,5 +835,22 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
                 else return 1;
             }
         }
+        public static double ClosestPointInCurves(Point3d pt, List<Line> crvs)
+        {
+            if (crvs.Count == 0) return 0;
+            var p = crvs[0].GetClosestPointTo(pt, false);
+            var res = p.DistanceTo(pt);
+            if (crvs.Count == 1) return res;
+            for (int i = 1; i < crvs.Count; i++)
+            {
+                var pc = crvs[i].GetClosestPointTo(pt, false);
+                var d = pc.DistanceTo(pt);
+                if (d < res)
+                {
+                    res = d;
+                }
+            }
+            return res;
+        }
     }
 }

@@ -209,6 +209,7 @@
     <Compile Include="Model\ThFireExtinguisher.cs" />
     <Compile Include="Model\ThFireHydrant.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
+    <Compile Include="PressureDrainageSystem\Service\DrwaingServiesAssistant.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />

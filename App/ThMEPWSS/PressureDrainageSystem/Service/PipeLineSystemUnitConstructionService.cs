@@ -183,7 +183,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             {
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[0])
                 {
-
                     foreach (var pipe in unit.VerticalPipes)
                     {
                         if (pipe.Label != null && pipe.Label.Contains(RoofCrossedId))
@@ -208,7 +207,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     if (unit.DrainMode != 1 && unit.DrainMode != 2)
                     {
-                        var connectedLines = unit.HorizontalPipes;
+                        var connectedLines = unit.HorizontalPipes.Select(e => e.Clone() as Line).ToList();
                         var walls = Modeldatas.WallLines;
                         var boundaries = Modeldatas.Boundaries;
                         foreach (var line in connectedLines)
@@ -373,7 +372,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             hors.Add(hor);
                         }
-                        else if (GetCrossObjsByPtCollection(ptscoll, objs).Count > 0)
+                        //else if (GetCrossObjsByPtCollection(ptscoll, objs).Count > 0)
+                        //{
+                        //    hors.Add(hor);
+                        //}
+                        else if (pump.Extents.ToRectangle().Intersects(hor))
                         {
                             hors.Add(hor);
                         }
