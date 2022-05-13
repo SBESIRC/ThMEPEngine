@@ -97,23 +97,23 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum BridgeLaying
     {
         [Description("仅穿管敷设")]
-        None,
+        None = 1,
         [Description("电缆托盘")]
-        CT,
+        CT = 2,
         [Description("金属槽盒")]
-        MR,
+        MR = 3,
         [Description("电缆梯架")]
-        CL,
+        CL = 4,
         [Description("电缆支架")]
-        CR,
+        CR = 5,
         [Description("塑料槽盒")]
-        PR,
+        PR = 6,
         [Description("直埋")]
-        DB,
+        DB = 7,
         [Description("电缆沟")]
-        TC,
+        TC = 8,
         [Description("混凝土排管")]
-        CE,
+        CE = 9,
     }
 
     /// <summary>
@@ -122,29 +122,29 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum LayingSite
     {
         [Description("无敷设部位")]
-        None,
+        None = 1,
         [Description("沿吊顶明敷")]
-        CE,
+        CE = 2,
         [Description("吊顶内明敷")]
-        SCE,
+        SCE = 3,
         [Description("沿墙面明敷")]
-        WS,
+        WS = 4,
         [Description("沿屋面明敷")]
-        RS,
+        RS = 5,
         [Description("顶板内暗敷")]
-        CC,
+        CC = 6,
         [Description("墙内暗敷")]
-        WC,
+        WC = 7,
         [Description("柱内暗敷")]
-        CLC,
+        CLC = 8,
         [Description("梁内暗敷")]
-        BC,
+        BC = 9,
         [Description("地板下暗敷")]
-        FC,
+        FC = 10,
         [Description("沿柱明敷")]
-        AC,
+        AC = 11,
         [Description("沿梁明敷")]
-        AB,
+        AB = 12,
     }
 
     /// <summary>
@@ -153,48 +153,13 @@ namespace TianHua.Electrical.PDS.Project.Module
     public enum ConductorLayingPath
     {
         [Description("无敷设路径")]
-        None,
+        None = 0,
         [Description("桥架")]
-        ViaCableTray,
+        ViaCableTray = 1,
         [Description("穿管")]
-        ViaConduit,
+        ViaConduit = 2,
         [Description("桥架/穿管")]
-        ViaCableTrayAndViaConduit,
-    }
-
-    /// <summary>
-    /// 穿管敷设
-    /// </summary>
-    public enum Pipelaying
-    {
-        [Description("无穿管")]
-        None = 1,
-        [Description("穿管明敷")]
-        E = 2,
-        [Description("穿管暗敷")]
-        C = 3,
-        [Description("沿或跨梁（屋架）明敷")]
-        AB = 4,
-        [Description("沿或跨柱明敷")]
-        AC = 5,
-        [Description("沿吊顶或顶板面明敷")]
-        CE = 6,
-        [Description("吊顶内明敷")]
-        SCE = 7,
-        [Description("沿墙面明敷")]
-        WS = 8,
-        [Description("沿屋面明敷")]
-        RS = 9,
-        [Description("顶板内暗敷")]
-        CC = 10,
-        [Description("梁内暗敷")]
-        BC = 11,
-        [Description("柱内暗敷")]
-        CLC = 12,
-        [Description("墙内暗敷")]
-        WC = 13,
-        [Description("地板或地面下暗敷")]
-        FC = 14,
+        ViaCableTrayAndViaConduit = 3,
     }
 
     /// <summary>

@@ -477,7 +477,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 if (!ConductorUse.IsNull() && ConductorUse.IsSpecialConductorType)
                 {
                     this.PipeDiameter = 0;
-                    Pipelaying = Pipelaying.E;
                     LayingSite1 = LayingSite.CC;
                     LayingSite2 = LayingSite.None;
                 }
@@ -510,22 +509,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         {
                             this.PipeMaterial = LargeDiameterMaterial;
                             this.PipeDiameter = CableCondiutConfig.DIN_SC;
-                        }
-                    }
-                    //这部分下次更新要删掉
-                    {
-                        //计算铺设方式
-                        //管径不超过20的SC管、管径不超过25的JDG或PC管用于照明回路、插座回路、应急照明回路、消防应急照明回路、控制回路时，默认穿管暗敷，其他情况均为穿管明敷。
-                        if ((this.PipeMaterial == PipeMaterial.SC && this.PipeDiameter <= 20)
-                            || (this.PipeMaterial == PipeMaterial.JDG && this.PipeDiameter <= 25)
-                            || (this.PipeMaterial == PipeMaterial.PC && this.PipeDiameter <= 25)
-                            && (circuitType != ThPDSCircuitType.PowerEquipment))
-                        {
-                            Pipelaying = Pipelaying.C;
-                        }
-                        else
-                        {
-                            Pipelaying = Pipelaying.E;
                         }
                     }
                 }
@@ -627,11 +610,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// PE线导体截面
         /// </summary>
         public double PECrossSectionalArea { get; set; }
-
-        /// <summary>
-        /// 穿管敷设方式（弃用）
-        /// </summary>
-        public Pipelaying Pipelaying { get; set; } = Pipelaying.None;
 
         /// <summary>
         /// 穿管直径

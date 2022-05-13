@@ -45,6 +45,8 @@
     <Compile Include="Editors\ThPDSCircuitPhaseSequenceEnumPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCodeLevelPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSCombinationPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorLayingPathPropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSConductorLayingSitePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />

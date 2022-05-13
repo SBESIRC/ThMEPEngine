@@ -244,6 +244,21 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 if (vm is ThPDSConductorModel conductor)
                 {
+                    switch (conductor.LayingPath)
+                    {
+                        case ConductorLayingPath.ViaCableTray:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite1", false);
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("LayingSite2", false);
+                            }
+                            break;
+                        case ConductorLayingPath.ViaConduit:
+                            {
+                                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("BridgeLaying", false);
+                            }
+                            break;
+                    }
+
                     if (conductor.ComponentType == ComponentType.Conductor)
                     {
                         ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSConductorModel>("ConductorCount", false);

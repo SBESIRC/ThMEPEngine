@@ -96,13 +96,76 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
-        [ReadOnly(true)]
+        [Browsable(true)]
+        [DisplayName("敷设路径")]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorLayingPathPropertyEditor), typeof(PropertyEditorBase))]
+        public ConductorLayingPath LayingPath
+        {
+            get
+            {
+                return _conductor.ConductorLayingPath;
+            }
+            set
+            {
+                _conductor.SetConductorLayingPath(value);
+                OnPropertyChanged(nameof(LayingPath));
+                OnPropertyChanged(nameof(Content));
+            }
+        }
+
+        [Browsable(true)]
         [DisplayName("敷设方式")]
         [Category("电线电缆参数")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<Pipelaying>), typeof(PropertyEditorBase))]
-        public Pipelaying Pipelaying
+        [Editor(typeof(ThPDSEnumPropertyEditor<BridgeLaying>), typeof(PropertyEditorBase))]
+        public BridgeLaying BridgeLaying
         {
-            get => _conductor.Pipelaying;
+            get
+            {
+                return _conductor.BridgeLaying;
+            }
+            set
+            {
+                _conductor.BridgeLaying = value;
+                OnPropertyChanged(nameof(BridgeLaying));
+                OnPropertyChanged(nameof(Content));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("敷设部位1")]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorLayingSitePropertyEditor), typeof(PropertyEditorBase))]
+        public LayingSite LayingSite1
+        {
+            get
+            {
+                return _conductor.LayingSite1;
+            }
+            set
+            {
+                _conductor.SetLayingSite1(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Content));
+            }
+        }
+
+        [Browsable(true)]
+        [DisplayName("敷设部位2")]
+        [Category("电线电缆参数")]
+        [Editor(typeof(ThPDSConductorLayingSitePropertyEditor), typeof(PropertyEditorBase))]
+        public LayingSite LayingSite2
+        {
+            get
+            {
+                return _conductor.LayingSite2;
+            }
+            set
+            {
+                _conductor.SetLayingSite2(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Content));
+            }
         }
 
         [ReadOnly(true)]
@@ -145,6 +208,28 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<double> AlternativeConductorCrossSectionalAreas
         {
             get => _conductor.GetConductorCrossSectionalAreas();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<ConductorLayingPath> AlternativeConductorLayingPaths
+        {
+            get => _conductor.GetConductorLayingPaths();
+        }
+
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<LayingSite> AlternativeLayingSites1
+        {
+            get => _conductor.GetLayingSites1();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<LayingSite> AlternativeLayingSites2
+        {
+            get => _conductor.GetLayingSites2();
         }
 
         [ReadOnly(true)]
