@@ -55,9 +55,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                         if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                         var databases = tree.DataList
                         .Where(x => x.IsChecked == true)
-                        .Select(x => ((Document)x.Tag).Database);
+                        .Select(x => ((Document)x.Tag)?.Database).Where(x => x != null).ToList();
                         if (!databases.Any()) return;
-                        new ThPDSSecondaryPushDataService().Push(databases.ToList());
+                        new ThPDSSecondaryPushDataService().Push(databases);
                         PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                         UpdateView(panel);
                     }, () => !hasDataError),
@@ -83,9 +83,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                     if (panel.lbx.DataContext is not ThPDSCircuitGraphTreeModel tree) return;
                     var databases = tree.DataList
                     .Where(x => x.IsChecked == true)
-                    .Select(x => ((Document)x.Tag).Database);
+                    .Select(x => ((Document)x.Tag)?.Database).Where(x => x != null).ToList();
                     if (!databases.Any()) return;
-                    new ThPDSPushDataService().Push(databases.ToList());
+                    new ThPDSPushDataService().Push(databases);
                     PDS.Project.PDSProject.Instance.DataChanged?.Invoke();
                     UpdateView(panel);
                     vm.CompareCmd.NotifyCanExecuteChanged();
@@ -107,7 +107,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (e.Document.IsNamedDrawing)
                     {
-                        node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(e.Document.Name), Key = e.Document.Name });
+                        node.DataList.Add(new() { Name = Path.GetFileNameWithoutExtension(e.Document.Name), Key = e.Document.Name ,Tag = e.Document, });
                     }
                 };
                 AcadApp.DocumentManager.DocumentDestroyed += (s, e) =>
@@ -149,7 +149,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Edge = edge,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID), 
+                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID),
                         });
                     }
                     else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)
