@@ -1678,7 +1678,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             TReinStr = Helper.StrToRein(thTTypeEdgeComponent.Reinforce);
             List<ZongjinPoint> ZongjinPoints = new List<ZongjinPoint>();
             T_FindCJin(points, TReinStr, ZongjinPoints);
-
+           
             //尝试合并框
             if (thTTypeEdgeComponent.Bf < 300 && thTTypeEdgeComponent.Bw < 300)
             {
@@ -1885,7 +1885,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                             Helper.CreateRectAndLabel(points[7], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                         }
 
-                                        Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                        Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                     }
                                     else
                                     {
@@ -1903,7 +1903,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                             Helper.CreateRectAndLabel(points[7], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                         }
 
-                                        Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                        Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                     }
                                 }
                                 else
@@ -1998,7 +1998,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 leftIdx = Helper.FindClosePoint(points, leftIdx, 1, leftIdx);
-                                LeftNum = LeftNum - 2;
+                                LeftNum = LeftNum - 1;
                             }
                         }
 
@@ -2026,7 +2026,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
-                                RightNum = RightNum - 2;
+                                RightNum = RightNum - 1;
                             }
                         }
 
@@ -2083,8 +2083,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                             {
                                 if (Step == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[9], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                    Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[9], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                    Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 }
                                 else
                                 {
@@ -2096,8 +2096,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[0], points[9], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                Helper.CreateRectAndLabel(points[0], points[9], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[1], points[5], 4, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
 
                             }
 
@@ -2171,7 +2171,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 8, Csize, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 8, Csize, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -2310,7 +2310,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 Topidx = Helper.FindClosePoint(points, 1, Topidx, Topidx);
-                                TopNum = TopNum - 2;
+                                TopNum = TopNum - 1;
                             }
 
                         }
@@ -2339,7 +2339,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 leftIdx = Helper.FindClosePoint(points, leftIdx, 1, leftIdx);
-                                LeftNum = LeftNum - 2;
+                                LeftNum = LeftNum - 1;
                             }
                         }
 
@@ -2367,7 +2367,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
-                                RightNum = RightNum - 2;
+                                RightNum = RightNum - 1;
                             }
                         }
                         //给计算纵筋需要标明的增加纵筋框选
@@ -2462,16 +2462,16 @@ namespace ThMEPStructure.Reinforcement.Draw
                             {
                                 Helper.CreateRectAndLabel(points[2], points[2], 1, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 Helper.CreateRectAndLabel(points[3], points[3], 1, ZongjinPoints[3].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
-                                Helper.CreateRectAndLabel(points[6], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 300);
-                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[6], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
 
                             }
                             else if (enhanceStep == 2)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[2], 2, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[3], points[3], 2, ZongjinPoints[3].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
-                                Helper.CreateRectAndLabel(points[6], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 300);
-                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[2], points[2], 2, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[3], points[3], 2, ZongjinPoints[3].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
+                                Helper.CreateRectAndLabel(points[6], points[6], 2, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
+                                Helper.CreateRectAndLabel(points[7], points[7], 2, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                             }
                             else
                             {
@@ -2534,16 +2534,16 @@ namespace ThMEPStructure.Reinforcement.Draw
                         {
                             if (enhanceStep == 1)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
 
                             }
                             else if (enhanceStep == 2)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                             }
@@ -2551,7 +2551,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             {
                                 if (Step == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     Helper.CreateRectAndLabel(points[6], points[6], 1, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     Helper.CreateRectAndLabel(points[7], points[7], 1, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     int idx = Helper.FindMidPoint(points, 6, 7);
@@ -2580,8 +2580,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                             }
@@ -2590,28 +2590,28 @@ namespace ThMEPStructure.Reinforcement.Draw
                         {
                             if (enhanceStep == 1)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
 
                             }
                             else if (enhanceStep == 2)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                             }
                             else if (isCal == true)
                             {
                                 if (Step == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     Helper.CreateRectAndLabel(points[6], points[6], 1, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     Helper.CreateRectAndLabel(points[7], points[7], 1, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     int idx = Helper.FindMidPoint(points, 6, 7);
@@ -2638,15 +2638,15 @@ namespace ThMEPStructure.Reinforcement.Draw
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 800, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                             }
                         }
                         else if (Cnum == 12)
@@ -2655,24 +2655,24 @@ namespace ThMEPStructure.Reinforcement.Draw
                             Helper.CreateRectAndLabel(points[9], points[9], 1, ZongjinPoints[9].size, LabelAndRect, CJintText, 500, 1000, 7, 200);
                             if (enhanceStep == 1)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
 
 
 
                             }
                             else if (enhanceStep == 2)
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 5, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 5, ZongjinPoints[6].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
 
 
                             }
@@ -2680,7 +2680,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             {
                                 if (Step == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     Helper.CreateRectAndLabel(points[6], points[6], 1, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
                                     Helper.CreateRectAndLabel(points[7], points[7], 1, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     int idx = Helper.FindMidPoint(points, 6, 7);
@@ -2710,15 +2710,15 @@ namespace ThMEPStructure.Reinforcement.Draw
 
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 800, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[2], points[3], 3, ZongjinPoints[2].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[7], points[6], 3, ZongjinPoints[7].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                             }
                         }
                         else if (Cnum == 14)
@@ -2820,7 +2820,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 else
                                 {
                                     Topidx = Helper.FindClosePoint(points, 1, Topidx, Topidx);
-                                    TopNum = TopNum - 2;
+                                    TopNum = TopNum - 1;
                                 }
 
                             }
@@ -2849,7 +2849,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 leftIdx = Helper.FindClosePoint(points, leftIdx, 1, leftIdx);
-                                LeftNum = LeftNum - 2;
+                                LeftNum = LeftNum - 1;
                             }
                         }
 
@@ -2877,7 +2877,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
-                                RightNum = RightNum - 2;
+                                RightNum = RightNum - 1;
                             }
                         }
 
@@ -2913,8 +2913,8 @@ namespace ThMEPStructure.Reinforcement.Draw
                             {
                                 Helper.CreateRectAndLabel(points[4], points[4], 1, ZongjinPoints[4].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 Helper.CreateRectAndLabel(points[5], points[5], 1, ZongjinPoints[5].size, LabelAndRect, CJintText, 1000, 1000, 6, 200);
-                                Helper.CreateRectAndLabel(points[0], points[0], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[9], points[9], 2, ZongjinPoints[9].size, LabelAndRect, CJintText, 400, 1000, 2, 300);
+                                Helper.CreateRectAndLabel(points[0], points[0], 2, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[9], points[9], 2, ZongjinPoints[9].size, LabelAndRect, CJintText, 400, 1000, 2, 200);
                             }
                             else if (enhanceStep == 2)
                             {
@@ -2955,7 +2955,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     {
                                         Helper.CreateRectAndLabel(points[idx], points[idx], 1, ZongjinPoints[idx].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     }
-                                    Helper.CreateRectAndLabel(points[4], points[5], 3, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                    Helper.CreateRectAndLabel(points[4], points[5], 3, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                                 }
                                 else
                                 {
@@ -3011,7 +3011,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     {
                                         Helper.CreateRectAndLabel(points[idx], points[idx], 1, ZongjinPoints[idx].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     }
-                                    Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                    Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
 
                                 }
                                 else
@@ -3031,7 +3031,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     {
                                         Helper.CreateRectAndLabel(points[idx1], points[idx1], 1, ZongjinPoints[idx1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                                     }
-                                    Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
 
                                 }
 
@@ -3051,7 +3051,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 12, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 12, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3066,7 +3066,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 14, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 14, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3144,7 +3144,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 10, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 10, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3163,14 +3163,14 @@ namespace ThMEPStructure.Reinforcement.Draw
                             Helper.CreateRectAndLabel(points[6], points[6], 1, ZongjinPoints[6].size, LabelAndRect, CJintText, 1000, 800, 6, 200);
                             if (enhanceStep == 1)
                             {
-                                Helper.CreateRectAndLabel(points[0], points[9], 5, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                Helper.CreateRectAndLabel(points[0], points[9], 5, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
 
                             }
                             else if (enhanceStep == 2)
                             {
-                                Helper.CreateRectAndLabel(points[0], points[9], 5, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[1], points[5], 7, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                Helper.CreateRectAndLabel(points[0], points[9], 5, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[1], points[5], 7, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
 
                             }
                             else if (isCal == true)
@@ -3185,7 +3185,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     {
                                         Helper.CreateRectAndLabel(points[idx], points[idx], 1, ZongjinPoints[idx].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                     }
-                                    Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                    Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
 
                                 }
                                 else
@@ -3205,15 +3205,15 @@ namespace ThMEPStructure.Reinforcement.Draw
                                     {
                                         Helper.CreateRectAndLabel(points[idx1], points[idx1], 1, ZongjinPoints[idx1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
                                     }
-                                    Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[1], points[8], 2, ZongjinPoints[1].size, LabelAndRect, CJintText, 200, 1000, 1, 200);
 
                                 }
 
                             }
                             else
                             {
-                                Helper.CreateRectAndLabel(points[0], points[9], 3, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
-                                Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 300);
+                                Helper.CreateRectAndLabel(points[0], points[9], 3, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
+                                Helper.CreateRectAndLabel(points[1], points[5], 5, ZongjinPoints[1].size, LabelAndRect, CJintText, 1000, 1000, 5, 200);
                             }
                         }
                         else if (Cnum == 14)
@@ -3227,7 +3227,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 12, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 12, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3242,7 +3242,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 14, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 14, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3320,7 +3320,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                                 int midnum = Helper.NumOfTwoPoint(points, 0, 1);
                                 if (midnum == 1)
                                 {
-                                    Helper.CreateRectAndLabel(points[0], points[5], 10, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 300);
+                                    Helper.CreateRectAndLabel(points[0], points[5], 10, ZongjinPoints[0].size, LabelAndRect, CJintText, 400, 1000, 1, 200);
                                 }
                                 else
                                 {
@@ -3362,7 +3362,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 Topidx = Helper.FindClosePoint(points, 1, Topidx, Topidx);
-                                TopNum = TopNum - 2;
+                                TopNum = TopNum - 1;
                             }
 
                         }
@@ -3391,7 +3391,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 leftIdx = Helper.FindClosePoint(points, leftIdx, 1, leftIdx);
-                                LeftNum = LeftNum - 2;
+                                LeftNum = LeftNum - 1;
                             }
                         }
 
@@ -3419,7 +3419,7 @@ namespace ThMEPStructure.Reinforcement.Draw
                             else
                             {
                                 rightIdx = Helper.FindClosePoint(points, rightIdx, 1, rightIdx);
-                                RightNum = RightNum - 2;
+                                RightNum = RightNum - 1;
                             }
                         }
 
@@ -3502,7 +3502,7 @@ namespace ThMEPStructure.Reinforcement.Draw
             this.scale = scale;
             this.number = thTTypeEdgeComponent.Number;
             TableStartPt = position;
-            if (thTTypeEdgeComponent.IsCalculation)
+            if (thTTypeEdgeComponent.IsCalculation&&!thTTypeEdgeComponent.EnhancedReinforce.IsNullOrEmpty())
             {
                 this.Reinforce = thTTypeEdgeComponent.EnhancedReinforce;
             }
