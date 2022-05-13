@@ -1,8 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Linq2Acad;
-using System.Collections.Generic;
+using ThMEPStructure.Common;
+using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print
@@ -40,32 +38,6 @@ namespace ThMEPStructure.StructPlane.Print
                 WidthFactor = 0.8,
                 TextStyleName = "TH-STYLE2",
             };
-        }
-    }
-    internal class ThSlabAnnotationPrinter
-    { 
-        public ThSlabAnnotationPrinter()
-        {
-        }
-        public ObjectIdCollection Print(Database db, DBText text)
-        {
-            using (var acadDb = AcadDatabase.Use(db))
-            {
-                var results = new ObjectIdCollection();
-                var positon = text.Position;
-                var textString = text.TextString;
-                var attNameValues = new Dictionary<string, string>() { };
-                attNameValues.Add("BTH", textString);
-                var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                                        ThPrintLayerManager.SlabTextLayerName,
-                                        ThPrintBlockManager.BthBlkName,
-                                        positon,
-                                        new Scale3d(1.0),
-                                        0.0,
-                                        attNameValues);
-                results.Add(blkId);
-                return results;
-            }  
         }
     }
 }

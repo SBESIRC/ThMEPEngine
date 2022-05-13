@@ -1,10 +1,11 @@
-﻿using Linq2Acad;
-using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System.Linq;
+﻿using System.Linq;
+using Linq2Acad;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPStructure.Model.Printer;
 
-namespace ThMEPStructure.StructPlane.Print
+namespace ThMEPStructure.Common
 {
     internal static class ThHatchPrintService
     {

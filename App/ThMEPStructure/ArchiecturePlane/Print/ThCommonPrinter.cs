@@ -1,14 +1,14 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.Common;
 using ThMEPStructure.Model.Printer;
-using ThMEPStructure.StructPlane.Service;
+using ThMEPStructure.ArchiecturePlane.Service;
 
-namespace ThMEPStructure.StructPlane.Print
+namespace ThMEPStructure.ArchiecturePlane.Print
 {
-    internal class ThBeamPrinter
+    internal class ThCommonPrinter
     {
         private PrintConfig Config { get; set; }
-        public ThBeamPrinter(PrintConfig config)
+        public ThCommonPrinter(PrintConfig config)
         {
             Config = config;
         }
@@ -19,11 +19,12 @@ namespace ThMEPStructure.StructPlane.Print
             results.Add(beamId);
             return results;
         }
-        public static PrintConfig GetBeamConfig()
+        public static PrintConfig GetCommonConfig()
         {
             return new PrintConfig
             {
-                LayerName = ThPrintLayerManager.BeamLayerName,
+                LayerName = ThArchPrintLayerManager.CommonLayer,
+                LineType = "ByLayer",
             };
         }
     }

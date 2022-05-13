@@ -3,6 +3,8 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
+using ThMEPStructure.Common;
+using ThMEPStructure.Model.Printer;
 using ThMEPStructure.StructPlane.Service;
 
 namespace ThMEPStructure.StructPlane.Print

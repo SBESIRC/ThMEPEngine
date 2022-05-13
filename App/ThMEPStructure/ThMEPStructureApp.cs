@@ -11,6 +11,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
 using ThMEPStructure.Reinforcement.Command;
 using ThMEPStructure.StructPlane.Service;
+using ThMEPStructure.ArchiecturePlane.Service;
 
 namespace ThMEPStructure
 {
@@ -144,10 +145,10 @@ namespace ThMEPStructure
         #endregion
 
         /// <summary>
-        ///  读取SvgFile
+        ///  读取结构SvgFile
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THReadSvg", CommandFlags.Modal)]
-        public void THReadSvg()
+        [CommandMethod("TIANHUACAD", "THReadStruSvg", CommandFlags.Modal)]
+        public void THReadStruSvg()
         {
             var pofo = new PromptOpenFileOptions("\n选择要解析的Svg文件");
             pofo.Filter = "Svg files (*.svg)|*.svg";
@@ -155,7 +156,7 @@ namespace ThMEPStructure
             if (pfnr.Status == PromptStatus.OK)
             {
                 // 解析
-                var svg = new ThMEPEngineCore.IO.SVG.ThSVGReader();
+                var svg = new ThMEPEngineCore.IO.SVG.ThStructureSVGReader();
                 svg.ReadFromFile(pfnr.StringResult);
 
                 //// 沿着X轴镜像
@@ -165,6 +166,31 @@ namespace ThMEPStructure
                 // Print                    
                 var prinService = new ThSvgEntityPrintService(svg.Geos,
                     svg.FloorInfos,svg.DocProperties);
+                prinService.Print(Active.Database);
+            }
+        }
+        /// <summary>
+        ///  读取SvgFile
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THReadArchSvg", CommandFlags.Modal)]
+        public void THReadArchSvg()
+        {
+            var pofo = new PromptOpenFileOptions("\n选择要解析的Svg文件");
+            pofo.Filter = "Svg files (*.svg)|*.svg";
+            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
+            if (pfnr.Status == PromptStatus.OK)
+            {
+                // 解析
+                var svg = new ThMEPEngineCore.IO.SVG.ThArchitectureSVGReader();
+                svg.ReadFromFile(pfnr.StringResult);
+
+                //// 沿着X轴镜像
+                //var mt = Matrix3d.Rotation(System.Math.PI, Vector3d.XAxis, Point3d.Origin);
+                //geometries.ForEach(o => o.Boundary.TransformBy(mt));
+
+                // Print                    
+                var prinService = new ThArchSvgEntityPrintService(svg.Geos,
+                    svg.FloorInfos, svg.DocProperties);
                 prinService.Print(Active.Database);
             }
         }
