@@ -47,7 +47,7 @@ namespace TianHua.Electrical.PDS.Diagram
         public void Insert2(AcadDatabase activeDb, AcadDatabase configDb, string blockName, Point3d basePoint, Scale3d scale, int frameNum)
         {
             var key = "内框名称";
-            var value = "配电箱系统图（" + ((frameNum / 2) + 1).NumberToChinese() + "）";
+            var value = "配电箱系统图（" + NumberToChineseFilter(((frameNum / 2) + 1).NumberToChinese()) + "）";
             var dictionary = new Dictionary<string, string>
             {
                 { key, value },
@@ -104,6 +104,19 @@ namespace TianHua.Electrical.PDS.Diagram
             activeDb.Database.ObjectAppended -= handler;
             sourceDimension.Erase();
             return activeDb.Element<BlockReference>(objID, true); ;
+        }
+
+        private string NumberToChineseFilter(string chineseNumber)
+        {
+            if (chineseNumber.IndexOf("一十") == 0)
+            {
+                chineseNumber = chineseNumber.Substring(1);
+            }
+            if (chineseNumber.LastIndexOf("零") == chineseNumber.Count() - 1)
+            {
+                chineseNumber = chineseNumber.Substring(0, chineseNumber.Count() - 1);
+            }
+            return chineseNumber;
         }
     }
 }
