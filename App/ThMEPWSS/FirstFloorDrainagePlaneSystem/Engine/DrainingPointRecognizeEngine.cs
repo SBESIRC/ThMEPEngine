@@ -20,56 +20,174 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
     public class DrainingPointRecognizeEngine
     {
         Dictionary<string, List<string>> _layerNameConfig;
-        List<EquipmentBlcokVisitorModel> equipmentBlcokVisitors { get; }
-        List<EquipmentBlcokVisitorModel> equipmentBlcokVisitorsModelSpace { get; }
+        protected Dictionary<string, int> blockNames;
+        List<DrainingEquipmentModel> equipmentBlcoks;
+
         public DrainingPointRecognizeEngine(Dictionary<string, List<string>> layerNames)
         {
-            equipmentBlcokVisitors = new List<EquipmentBlcokVisitorModel>();
-            equipmentBlcokVisitorsModelSpace = new List<EquipmentBlcokVisitorModel>();
             ReadUIConfig(layerNames);
             InitBlockNames();
+            equipmentBlcoks = new List<DrainingEquipmentModel>();
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                if (null != this.equipmentBlcokVisitorsModelSpace && this.equipmentBlcokVisitorsModelSpace.Count > 0)
+                var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                foreach (var block in blocks)
                 {
-                    ThDistributionElementExtractor thDistributionMS = new ThDistributionElementExtractor();
-                    foreach (var item in this.equipmentBlcokVisitorsModelSpace)
-                    {
-                        thDistributionMS.Accept(item.equipmentDataVisitor);
-                    }
-                    thDistributionMS.Extract(acdb.Database);
+                    if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                        continue;
+                    var elems = new List<DrainingEquipmentModel>();
+                    var mcs2wcs = block.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                    DoExtract(elems, block, mcs2wcs);
+                    equipmentBlcoks.AddRange(elems);
+                }
+            }
+        }
 
-                    var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
-                    foreach (var block in blocks)
+        private void DoExtract(List<DrainingEquipmentModel> elements, BlockReference blockReference, Matrix3d matrix)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
+            {
+                if (blockReference is BlockReference blkref && IsDistributionElement(blkref))
+                {
+                    HandleBlockReference(elements, blkref, matrix);
+                    return;
+                }
+                if (blockReference.BlockTableRecord.IsValid)
+                {
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    var data = new ThBlockReferenceData(blockReference.ObjectId);
+                    var objs = data.VisibleEntities();
+                    if (objs.Count == 0)
                     {
-                        if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
-                            continue;
-                        foreach (var visitor in equipmentBlcokVisitorsModelSpace)
+                        foreach (var objId in blockTableRecord)
                         {
-                            var elems = new List<ThRawIfcDistributionElementData>();
-                            if (visitor.equipmentDataVisitor.IsBuildElementBlockReference(block))
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj.Visible)
                             {
-                                if (visitor.equipmentDataVisitor.CheckLayerValid(block) && visitor.equipmentDataVisitor.IsDistributionElement(block))
-                                {
-                                    visitor.equipmentDataVisitor.DoExtract(elems, block, Matrix3d.Identity);
-                                }
+                                objs.Add(objId);
                             }
-                            if (null != elems && elems.Count > 0)
-                                visitor.equipmentDataVisitor.Results.AddRange(elems);
+                        }
+                    }
+                    foreach (ObjectId objId in objs)
+                    {
+                        var dbObj = acadDatabase.Element<Entity>(objId);
+                        if (dbObj is BlockReference blockObj)
+                        {
+                            if (blockObj.BlockTableRecord.IsNull)
+                            {
+                                continue;
+                            }
+                            var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                            DoExtract(elements, blockObj, mcs2wcs);
                         }
                     }
                 }
-                if (null != this.equipmentBlcokVisitors && this.equipmentBlcokVisitors.Count > 0)
+            }
+        }
+
+        private void HandleBlockReference(List<DrainingEquipmentModel> elements, BlockReference blkref, Matrix3d matrix)
+        {
+            var name = ThMEPXRefService.OriginalFromXref(blkref.GetEffectiveName());
+            var type = GetEnumEquipmentType(name);
+            var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
+            var obb = blkref.ToOBB();
+            obb.TransformBy(matrix);
+            centerPoint = centerPoint.TransformBy(matrix);
+            elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
+        }
+
+        private bool IsDistributionElement(Entity entity)
+        {
+            if (blockNames == null || blockNames.Count < 1)
+                return false;
+            if (entity is BlockReference blockObj)
+            {
+                bool isAdd = false;
+                var name = ThMEPXRefService.OriginalFromXref(blockObj.GetEffectiveName());
+                foreach (var keyValue in this.blockNames)
                 {
-                    ThDistributionElementExtractor thDistribution = new ThDistributionElementExtractor();
-                    foreach (var item in this.equipmentBlcokVisitors)
+                    if (isAdd)
+                        break;
+                    if (string.IsNullOrEmpty(keyValue.Key))
+                        continue;
+                    string[] allNames = keyValue.Key.Split(',');
+                    isAdd = true;
+                    for (int i = 0; i < allNames.Length; i++)
                     {
-                        thDistribution.Accept(item.equipmentDataVisitor);
+                        if (!isAdd)
+                            break;
+                        string checkName = allNames[i];
+                        if (keyValue.Value == 1)
+                        {
+                            //包含
+                            isAdd = name.Contains(checkName);
+                        }
+                        else if (keyValue.Value == 2)
+                        {
+                            isAdd = name.Equals(checkName);
+                        }
+                        else if (keyValue.Value == 3)
+                        {
+                            isAdd = name.StartsWith(checkName);
+                        }
+                        else if (keyValue.Value == 4)
+                        {
+                            isAdd = name.EndsWith(checkName);
+                        }
                     }
-                    thDistribution.Extract(acdb.Database);
+                }
+                return isAdd;
+            }
+            return false;
+        }
+
+        private void InitBlockNames()
+        {
+            blockNames = new Dictionary<string, int>();
+            //拖布池
+            GetVisitorDictionary(EnumEquipmentType.mopPool, ref blockNames);
+
+            //单盆洗手台
+            GetVisitorDictionary(EnumEquipmentType.singleBasinWashingTable, ref blockNames);
+
+            //获取坐便器
+            GetVisitorDictionary(EnumEquipmentType.toilet, ref blockNames);
+
+            //获取厨房台盆（洗涤盆）
+            GetVisitorDictionary(EnumEquipmentType.kitchenBasin, ref blockNames);
+
+            //获取地漏
+            GetVisitorDictionary(EnumEquipmentType.floorDrain, ref blockNames);
+        }
+
+        private EnumEquipmentType GetEnumEquipmentType(string name)
+        {
+            var thisType = EnumEquipmentType.floorDrain;
+            var matchDic = _layerNameConfig.FirstOrDefault(x => x.Value.Contains(name)).Key;
+            if (matchDic != null)
+            {
+                switch (matchDic)
+                {
+                    case "地漏":
+                        thisType = EnumEquipmentType.floorDrain;
+                        break;
+                    case "拖把池":
+                        thisType = EnumEquipmentType.mopPool;
+                        break;
+                    case "单盆洗手台":
+                        thisType = EnumEquipmentType.singleBasinWashingTable;
+                        break;
+                    case "坐便器":
+                        thisType = EnumEquipmentType.toilet;
+                        break;
+                    case "厨房洗涤盆":
+                        thisType = EnumEquipmentType.kitchenBasin;
+                        break;
                 }
             }
+            
+            return thisType;
         }
 
         public List<DrainingEquipmentModel> Recognize(Polyline polyline, List<Polyline> wall, ThMEPOriginTransformer originTransformer)
@@ -78,7 +196,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             var equipments = GetPolylineEquipmentBlocks(polyline);
             foreach (var equip in equipments)
             {
-                switch (equip.enumEquipmentType)
+                switch (equip.EnumEquipmentType)
                 {
                     case EnumEquipmentType.toilet:                      //坐便器
                         resEquipments.AddRange(CalRectanglePoint(equip, wall, 350));
@@ -102,49 +220,43 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         {
             foreach (var model in models)
             {
-                originTransformer.Transform(model.BlockReference);
                 model.DiranPoint = originTransformer.Transform(model.DiranPoint);
             }
             return models;
         }
 
-        private List<DrainingEquipmentModel> CalRectanglePoint(EquipmentBlcokModel equipModel, List<Polyline> wall, double dis, bool isShortEdge = true)
+        private List<DrainingEquipmentModel> CalRectanglePoint(DrainingEquipmentModel equipModel, List<Polyline> wall, double dis, bool isShortEdge = true)
         {
             List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();
-            foreach (var geom in equipModel.blockReferences)
+            var allLines = equipModel.BlockReferenceGeo.GetAllLineByPolyline().OrderByDescending(x => x.Length).ToList();
+            var edges = new List<Line>() { allLines[0], allLines[1] };
+            if (isShortEdge)
             {
-                var boundary = geom.ToOBB();
-                var allLines = boundary.GetAllLineByPolyline().OrderByDescending(x=>x.Length).ToList();
-                var edges = new List<Line>() { allLines[0], allLines[1] };
-                if (isShortEdge)
-                {
-                    edges = new List<Line>() { allLines[2], allLines[3] };
-                }
-                var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x)).First().Distance(x)).First();
-                edges.Remove(checkEdge);
-                var otherEdge = edges.First();
-
-                var centerPt = new Point3d((checkEdge.EndPoint.X + checkEdge.StartPoint.X) / 2, (checkEdge.EndPoint.Y + checkEdge.StartPoint.Y) / 2, 0);
-                var dir = (otherEdge.GetClosestPointTo(centerPt, false) - centerPt).GetNormal();
-                var pt = centerPt + dir * dis;
-                DrainingEquipmentModel model = new DrainingEquipmentModel(pt, equipModel.enumEquipmentType, geom);
-                resModel.Add(model);
+                edges = new List<Line>() { allLines[2], allLines[3] };
             }
+            var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x)).First().Distance(x)).First();
+            edges.Remove(checkEdge);
+            var otherEdge = edges.First();
+
+            var centerPt = new Point3d((checkEdge.EndPoint.X + checkEdge.StartPoint.X) / 2, (checkEdge.EndPoint.Y + checkEdge.StartPoint.Y) / 2, 0);
+            var dir = (otherEdge.GetClosestPointTo(centerPt, false) - centerPt).GetNormal();
+            var pt = centerPt + dir * dis;
+            equipModel.DiranPoint = pt;
+            resModel.Add(equipModel);
 
             return resModel;
         }
 
-        private List<DrainingEquipmentModel> CalCirclePoint(EquipmentBlcokModel equipModel)
+        private List<DrainingEquipmentModel> CalCirclePoint(DrainingEquipmentModel equipModel)
         {
-            List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();
-            foreach (var geom in equipModel.blockReferences)
+            List<DrainingEquipmentModel> resModel = new List<DrainingEquipmentModel>();            
+            if (equipModel.BlockReferenceGeo != null)
             {
-                var ent = EntityService.GetBasicEntityDic(new List<Entity>() { geom as Entity }).OfType<Circle>().FirstOrDefault();
-                if (ent != null)
-                {
-                    DrainingEquipmentModel model = new DrainingEquipmentModel(ent.Center, equipModel.enumEquipmentType, geom);
-                    resModel.Add(model);
-                }
+                var pt1 = equipModel.BlockReferenceGeo.GetPoint3dAt(0);
+                var pt2 = equipModel.BlockReferenceGeo.GetPoint3dAt(1);
+                var centerPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+                equipModel.DiranPoint = centerPt;
+                resModel.Add(equipModel);
             }
 
             return resModel;
@@ -173,164 +285,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             }
         }
 
-        public List<EquipmentBlcokModel> GetPolylineEquipmentBlocks(Polyline polyline, double disToDist = 30)
+        public List<DrainingEquipmentModel> GetPolylineEquipmentBlocks(Polyline polyline, double disToDist = 30)
         {
-            var equipments = new List<EquipmentBlcokModel>();
-            var tempModel = GetModelSpaceEquipmentBlocks(polyline);
-            if (null != tempModel && tempModel.Count > 0)
-                equipments.AddRange(tempModel);
-            var tempExts = GetExtractEquipmentBlocks(polyline);
-            if (null != tempExts && tempExts.Count > 0)
-                equipments.AddRange(tempExts);
-
-            return Distinct(equipments, disToDist);
-        }
-
-        public List<EquipmentBlcokModel> GetModelSpaceEquipmentBlocks(Polyline polyline)
-        {
-            var equipments = new List<EquipmentBlcokModel>();
-            if (null == polyline || this.equipmentBlcokVisitors == null || this.equipmentBlcokVisitors.Count < 1)
-                return equipments;
-            foreach (var item in this.equipmentBlcokVisitors)
+            var equipments = new List<DrainingEquipmentModel>();
+            foreach (var block in equipmentBlcoks)
             {
-                if (item.equipmentDataVisitor == null || item.equipmentDataVisitor.Results == null || item.equipmentDataVisitor.Results.Count < 1)
-                    continue;
-                var blcokModel = new EquipmentBlcokModel(item.enumEquipmentType);
-                foreach (var obj in item.equipmentDataVisitor.Results)
+                if (polyline.Contains(block.BlockPoint))
                 {
-                    if (null == obj)
-                        continue;
-                    BlockReference block = obj.Geometry as BlockReference;
-
-                    if (null == block)
-                        continue;
-                    if (!block.Bounds.HasValue)
-                        continue;
-                    var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(block);
-                    if (polyline.Contains(centerPoint))
-                    {
-                        blcokModel.blockReferences.Add(block);
-                    }
+                    equipments.Add(block);
                 }
-                if (blcokModel.blockReferences.Count > 0)
-                    equipments.Add(blcokModel);
             }
+            
             return equipments;
-        }
-
-        public List<EquipmentBlcokModel> GetExtractEquipmentBlocks(Polyline polyline)
-        {
-            var equipments = new List<EquipmentBlcokModel>();
-            if (null == polyline || this.equipmentBlcokVisitors == null || this.equipmentBlcokVisitors.Count < 1)
-                return equipments;
-            foreach (var item in this.equipmentBlcokVisitorsModelSpace)
-            {
-                if (item.equipmentDataVisitor == null || item.equipmentDataVisitor.Results == null || item.equipmentDataVisitor.Results.Count < 1)
-                    continue;
-                var blcokModel = new EquipmentBlcokModel(item.enumEquipmentType);
-                foreach (var obj in item.equipmentDataVisitor.Results)
-                {
-                    if (null == obj)
-                        continue;
-                    BlockReference block = obj.Geometry as BlockReference;
-
-                    if (null == block)
-                        continue;
-                    var centerPoint = block.GeometricExtents.CenterPoint();
-                    var pointP = new Point3d(centerPoint.X, centerPoint.Y, 0);
-                    if (polyline.Contains(pointP))
-                    {
-                        blcokModel.blockReferences.Add(block);
-                    }
-                }
-                if (blcokModel.blockReferences.Count > 0)
-                    equipments.Add(blcokModel);
-            }
-            return equipments;
-        }
-
-        private List<EquipmentBlcokModel> Distinct(List<EquipmentBlcokModel> targetBlocks, double disToDist)
-        {
-            //去重，在一定范围内不能有同一类的数据
-            var retBlocks = new List<EquipmentBlcokModel>();
-            foreach (var item in targetBlocks)
-            {
-                if (null == item || item.blockReferences == null || item.blockReferences.Count < 1)
-                    continue;
-                var tempList = new List<BlockReference>();
-                foreach (var block in item.blockReferences)
-                {
-                    var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
-                    bool isAdd = true;
-                    foreach (var checkBlock in tempList)
-                    {
-                        if (!isAdd)
-                            break;
-                        var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
-                        isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
-                    }
-                    if (isAdd)
-                        tempList.Add(block);
-                }
-                bool addType = true;
-                foreach (var retItem in retBlocks)
-                {
-                    if (!addType || retItem.enumEquipmentType != item.enumEquipmentType)
-                        continue;
-                    addType = false;
-                    foreach (var block in tempList)
-                    {
-                        bool isAdd = true;
-                        var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
-                        foreach (var checkBlock in retItem.blockReferences)
-                        {
-                            if (!isAdd)
-                                break;
-                            var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
-                            isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
-                        }
-                        if (isAdd)
-                            retItem.blockReferences.Add(block);
-                    }
-                    break;
-                }
-                if (addType && tempList.Count > 0)
-                    retBlocks.Add(new EquipmentBlcokModel(item.enumEquipmentType, tempList));
-            }
-            return retBlocks;
-        }
-
-        private void InitBlockNames()
-        {
-            //拖布池
-            Dictionary<string, int> mopPoolNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.mopPool, ref mopPoolNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
-            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.mopPool, mopPoolNames));
-
-            //单盆洗手台
-            Dictionary<string, int> singleBasinWashingNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.singleBasinWashingTable, ref singleBasinWashingNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.singleBasinWashingTable, singleBasinWashingNames));
-            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.singleBasinWashingTable, singleBasinWashingNames));
-
-            //获取坐便器
-            Dictionary<string, int> toiletNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
-            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
-
-            //获取厨房台盆（洗涤盆）
-            Dictionary<string, int> kitchenSinkNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.kitchenBasin, ref kitchenSinkNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
-            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
-
-            //获取地漏
-            Dictionary<string, int> floorDrainNames = new Dictionary<string, int>();
-            GetVisitorDictionary(EnumEquipmentType.floorDrain, ref floorDrainNames);
-            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames));
-            this.equipmentBlcokVisitorsModelSpace.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.floorDrain, floorDrainNames));
         }
 
         private void GetVisitorDictionary(EnumEquipmentType type, ref Dictionary<string, int> visirorDict)
@@ -362,7 +328,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 {
                     if (visirorDict.Any(c => c.Key.ToUpper().Equals(name.ToUpper())))
                         continue;
-                    visirorDict.Add(name, 4);
+                    visirorDict.Add(name, 3);
                 }
             }
         }

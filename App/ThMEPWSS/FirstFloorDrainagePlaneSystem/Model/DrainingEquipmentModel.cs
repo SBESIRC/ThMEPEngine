@@ -12,11 +12,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 {
     public class DrainingEquipmentModel
     {
-        public DrainingEquipmentModel(Point3d point, EnumEquipmentType type, BlockReference block)
+        public DrainingEquipmentModel(EnumEquipmentType type, Polyline blockGeo, Point3d pt)
         {
-            DiranPoint = point;
             EnumEquipmentType = type;
-            BlockReference = block;
+            BlockReferenceGeo = blockGeo;
+            BlockPoint = pt;
         }
 
         /// <summary>
@@ -30,8 +30,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         public EnumEquipmentType EnumEquipmentType { get; set; }
 
         /// <summary>
-        /// 块
+        /// 块外包框线（obb）
         /// </summary>
-        public BlockReference BlockReference { get; set; }
+        public Polyline BlockReferenceGeo { get; set; }
+
+        /// <summary>
+        /// 块的几何点位
+        /// </summary>
+        public Point3d BlockPoint { get; set; }
     }
 }
