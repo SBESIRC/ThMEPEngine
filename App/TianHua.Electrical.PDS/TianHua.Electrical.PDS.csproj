@@ -38,6 +38,7 @@
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />
+    <Compile Include="Project\PDSProjectException\NotFoundComponentException.cs" />
     <Compile Include="Project\PDSProjectUBinder.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeTag.cs" />
     <Compile Include="Service\ThPDSEdgeContainsService.cs" />

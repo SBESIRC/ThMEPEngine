@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -121,7 +122,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             }
             else
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的Conductor");
             }
             if (ConductorUse.ConductorMaterial.Contains('N'))
             {
@@ -298,7 +299,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var configs = Allconfigs.Where(o => o.Iset > calculateCurrent).ToList();
             if (configs.Count <= 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的ConductorConfig");
             }
             else
             {

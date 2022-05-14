@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -30,7 +31,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var contactors = ContactorConfiguration.contactorInfos.Where(o => o.Poles == polesNum && o.Amps.ToString() == ratedCurrent && o.Model == model).Take(1).ToList();
             if (contactors.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的Contactor");
             }
             this.Contactors = contactors;
             var contactor = contactors.First();
@@ -53,7 +54,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var contactors = ContactorConfiguration.contactorInfos.Where(o => o.Poles == polesNum && o.Amps > calculateCurrent).ToList();
             if (contactors.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的Contactor");
             }
             this.Contactors = contactors;
             var contactor = contactors.First();
