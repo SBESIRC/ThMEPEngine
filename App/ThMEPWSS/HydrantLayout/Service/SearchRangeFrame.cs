@@ -68,11 +68,20 @@ namespace ThMEPWSS.HydrantLayout.Service
             var selectRooms = ProcessedData.LeanWallIndex.SelectCrossingPolygon(cpolyline);
 
             var overlapArea = new DBObjectCollection();
+            var overlapAreasList = new DBObjectCollection();
 
             //搜索所在房间
             if (selectRooms.Count > 0)
             {
+                //foreach (var selectRoom in selectRooms) 
+                //{
+                //    DBObjectCollection tmp = new DBObjectCollection();
+                //    tmp.Add(selectRoom.T);
+                //    overlapAreas = cpolyline.IntersectionMP(selectRooms);
+                //}
+                
                 overlapArea = cpolyline.IntersectionMP(selectRooms);
+                overlapArea.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1overlap", 2));
 
                 foreach (var a in overlapArea)
                 {

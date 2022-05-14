@@ -56,5 +56,21 @@ namespace ThMEPWSS.HydrantLayout.Service
                 return lengthAgainstWall;
             }
         }
+
+        public static double ComputeOverlapArea(Polyline area ,Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
+        {
+            double overlapArea = 0;
+            var bufferArea = area.Buffer(-10);
+            var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+            //List<Polyline> pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell).OfType<Polyline>().ToList();
+            DBObjectCollection pakings = ProcessedData.ParkingIndex.SelectCrossingPolygon(shell);
+            List<Polyline> obj = pl.Intersection(pakings).OfType<Polyline>().ToList();
+            for (int i = 0; i < obj.Count; i++) 
+            {
+                overlapArea = overlapArea + obj[i].Area;
+            }
+
+            return overlapArea;
+        }
     }
 }
