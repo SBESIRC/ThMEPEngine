@@ -92,8 +92,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             var type = GetEnumEquipmentType(name);
             var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
             var obb = blkref.ToOBB();
-            obb.TransformBy(matrix);
-            centerPoint = centerPoint.TransformBy(matrix);
             elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
         }
 
@@ -105,6 +103,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             {
                 bool isAdd = false;
                 var name = ThMEPXRefService.OriginalFromXref(blockObj.GetEffectiveName());
+                if (name.Contains("C79E66DD7"))
+                {
+                    var s = 0;
+                }
                 foreach (var keyValue in this.blockNames)
                 {
                     if (isAdd)
