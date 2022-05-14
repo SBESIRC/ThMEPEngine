@@ -92,8 +92,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             var type = GetEnumEquipmentType(name);
             var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
             var obb = blkref.ToOBB();
-            obb.TransformBy(matrix);
-            centerPoint = centerPoint.TransformBy(matrix);
             elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
         }
 
