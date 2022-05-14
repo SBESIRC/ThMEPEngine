@@ -103,10 +103,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             {
                 bool isAdd = false;
                 var name = ThMEPXRefService.OriginalFromXref(blockObj.GetEffectiveName());
-                if (name.Contains("C79E66DD7"))
-                {
-                    var s = 0;
-                }
                 foreach (var keyValue in this.blockNames)
                 {
                     if (isAdd)
