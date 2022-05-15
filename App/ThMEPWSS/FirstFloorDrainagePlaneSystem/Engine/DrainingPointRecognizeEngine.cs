@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             equipmentBlcoks = new List<DrainingEquipmentModel>();
 
             using (AcadDatabase acdb = AcadDatabase.Active())
+            using (acdb.Database.GetDocument().LockDocument())
             {
                 var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
                 foreach (var block in blocks)
@@ -38,9 +40,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                         continue;
                     var elems = new List<DrainingEquipmentModel>();
                     var mcs2wcs = block.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                    DoExtract(elems, block, mcs2wcs);
+                    DoExtract(elems, block, Matrix3d.Identity);
                     equipmentBlcoks.AddRange(elems);
                 }
+                //var s = equipmentBlcoks.Where(x => x.EnumEquipmentType == EnumEquipmentType.singleBasinWashingTable).ToList();
+                //foreach (var item in s)
+                //{
+                //    Circle cl = new Circle(item.BlockPoint, Vector3d.ZAxis, 1000);
+                //    acdb.ModelSpace.Add(cl);
+                //}
             }
         }
 
@@ -53,6 +61,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     HandleBlockReference(elements, blkref, matrix);
                     return;
                 }
+                var mcs2wcs = blockReference.BlockTransform.PreMultiplyBy(matrix);
                 if (blockReference.BlockTableRecord.IsValid)
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
@@ -78,7 +87,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                             {
                                 continue;
                             }
-                            var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                             DoExtract(elements, blockObj, mcs2wcs);
                         }
                     }
@@ -92,6 +100,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             var type = GetEnumEquipmentType(name);
             var centerPoint = DrainSysAGCommon.GetBlockGeometricCenter(blkref);
             var obb = blkref.ToOBB();
+            centerPoint = centerPoint.TransformBy(matrix);
+            obb.TransformBy(matrix);
             elements.Add(new DrainingEquipmentModel(type, obb, centerPoint));
         }
 
