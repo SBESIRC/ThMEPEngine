@@ -45,7 +45,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
                 var pt = frameDic.First().Key.StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0));
                 foreach (var dic in frameDic)
                 {
                     var frame = dic.Key.Clone() as Polyline;

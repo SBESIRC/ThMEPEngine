@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using System;
 using System.Collections.Generic;
 using System.Linq;

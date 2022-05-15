@@ -69,8 +69,8 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
             double minY = allPts.First().Y;
             double maxY = allPts.Last().Y;
 
-            columns = Convert.ToInt32(Math.Ceiling(Math.Abs(maxX - minX) / step));
-            rows = Convert.ToInt32(Math.Ceiling(Math.Abs(maxY - minY) / step));
+            columns = Convert.ToInt32(Math.Ceiling(Math.Abs(maxX - minX) / step)) + 1;
+            rows = Convert.ToInt32(Math.Ceiling(Math.Abs(maxY - minY) / step)) + 1;
             startX = minX;
             startY = minY;
 

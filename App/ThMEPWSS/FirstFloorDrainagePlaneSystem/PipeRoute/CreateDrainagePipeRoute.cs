@@ -147,10 +147,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     //allLines = rainLines;
                 }
-                if (allLines.Count <= 0)
+                if (allLines.Count <= 0 || !frame.Contains(pipe.Position))
                 {
                     continue;
                 }
+                
                 var closetLine = CreateRouteHelper.GetClosetLane(allLines, pipe.Position, frame, wallPolys, step);
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, new Dictionary<Vector3d, List<Line>>());
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();

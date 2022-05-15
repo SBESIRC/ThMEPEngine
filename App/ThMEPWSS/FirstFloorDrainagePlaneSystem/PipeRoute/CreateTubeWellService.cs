@@ -26,15 +26,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         public List<RouteModel> Layout()
         {
             var usefulRoutes = routes.Where(x => x.connecLine != null).ToList();
+            var otherRoutes = routes.Except(usefulRoutes).ToList();
             var routeDic = GroupRoutes(usefulRoutes);
             var resLst = ClassifyRoutes(routeDic);
-            var tubeWellPts = new List<KeyValuePair<VerticalPipeType, Point3d>>();
+            var tubeWellPts = new List<KeyValuePair<VerticalPipeType, KeyValuePair<Point3d, Vector3d>>>();
             foreach (var routeLst in resLst)
             {
-                tubeWellPts.Add(new KeyValuePair<VerticalPipeType, Point3d>(routeLst.First().verticalPipeType, CalTubeWellPt(usefulRoutes)));
+                tubeWellPts.Add(new KeyValuePair<VerticalPipeType, KeyValuePair<Point3d, Vector3d>>(routeLst.First().verticalPipeType, CalTubeWellPt(usefulRoutes)));
             }
             Print(tubeWellPts);
             usefulRoutes.ForEach(x => x.route = GeometryUtils.ShortenPolyline(x.route, shortedDis));
+            usefulRoutes.AddRange(otherRoutes);
 
             return usefulRoutes;
         }
@@ -44,7 +46,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="routes"></param>
         /// <returns></returns>
-        private Point3d CalTubeWellPt(List<RouteModel> routes)
+        private KeyValuePair<Point3d, Vector3d> CalTubeWellPt(List<RouteModel> routes)
         {
             var routeEndPts = routes.Select(x => {
                 if (x.route.StartPoint.DistanceTo(x.startPosition) > x.route.EndPoint.DistanceTo(x.startPosition))
@@ -61,7 +63,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var polyline = routes.First().route;
             var dir = (polyline.GetPoint3dAt(polyline.NumberOfVertices - 1) - polyline.GetPoint3dAt(polyline.NumberOfVertices - 2)).GetNormal();
             pt = pt + dir * shortedDis;
-            return pt;
+            return new KeyValuePair<Point3d, Vector3d>(pt, -dir);
         }
 
         /// <summary>
@@ -156,11 +158,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// 打印管井
         /// </summary>
         /// <param name="layoutPts"></param>
-        private void Print(List<KeyValuePair<VerticalPipeType, Point3d>> layoutPts)
+        private void Print(List<KeyValuePair<VerticalPipeType, KeyValuePair<Point3d, Vector3d>>> layoutPts)
         {
             foreach (var pt in layoutPts)
             {
-                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(pt.Value, Vector3d.YAxis) };
+                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(pt.Value.Key, pt.Value.Value) };
                 InsertBlockService.scaleNum = scale;
                 string layer = "";
                 string blockName = "";

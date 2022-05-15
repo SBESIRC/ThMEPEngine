@@ -28,7 +28,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var layoutInfo = CalLayoutInfo(cRoutes.ToList());
                 Print(cRoutes.Key, layoutInfo);
             }
-            
         }
 
         /// <summary>
