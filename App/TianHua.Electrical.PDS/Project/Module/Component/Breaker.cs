@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TianHua.Electrical.PDS.Project.Module.Configure;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -51,7 +52,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics))).ToList();
                 if (breakers.Count == 0)
                 {
-                    throw new NotSupportedException();
+                    throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                 }
                 breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
                 //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
@@ -79,7 +80,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(characteristics))).ToList();
                 if (breakers.Count == 0)
                 {
-                    throw new NotSupportedException();
+                    throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                 }
                 breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
             }
@@ -128,7 +129,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 && o.ResidualCurrent.IsNullOrWhiteSpace()).Take(1).ToList();
             if (breakers.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
             }
             var breaker = breakers.First();
             Model = breaker.Model;
@@ -232,7 +233,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
                         if (breakers.Count == 0)
                         {
-                            throw new NotSupportedException();
+                            throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                         }
                         breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
                         //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
@@ -259,7 +260,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))).ToList();
                         if (breakers.Count == 0)
                         {
-                            throw new NotSupportedException();
+                            throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                         }
                         breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
                         if(componentType == ComponentType.CB)

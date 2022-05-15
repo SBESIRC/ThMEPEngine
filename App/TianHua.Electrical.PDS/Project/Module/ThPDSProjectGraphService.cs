@@ -13,6 +13,7 @@ using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 using Dreambuild.AutoCAD;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -116,10 +117,14 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 ouvp = componentFactory.CreatOUVP();
             }
-            catch (Exception ex)
+            catch (NotFoundComponentException ex)
             {
                 msg = ex.Message;
                 return false;
+            }
+            catch
+            {
+                throw;
             }
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
