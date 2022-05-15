@@ -14,76 +14,97 @@ namespace ThMEPStructure.StructPlane.Service
     internal class ThAdjustBeamMarkService
     {
         private DBObjectCollection BeamLines { get; set; }
-        private DBObjectCollection BeamTexts { get; set; }
+        // 梁标注距离梁线间隔
+        private double BeamMarkInterval = 70;
+        /// <summary>
+        /// 文字，及文字移动的方向
+        /// </summary>
+        private Dictionary<DBText, Vector3d> BeamTexts { get; set; }
         private ThCADCoreNTSSpatialIndex BeamLineSpatialIndex { get; set; }
 
+        public List<Tuple<DBText, DBText, DBText>> DoubleRowTexts { get; set; }
+        private Database database;
+
         public ThAdjustBeamMarkService(
+            Database db,
             DBObjectCollection beamLines,
-            DBObjectCollection beamTexts)
+            Dictionary<DBText, Vector3d> beamTexts)
         {
+            database = db;
             BeamLines = beamLines;
             BeamTexts = beamTexts;
+            DoubleRowTexts = new List<Tuple<DBText, DBText, DBText>>();
             BeamLineSpatialIndex = new ThCADCoreNTSSpatialIndex(BeamLines);
         }
-        public List<Tuple<DBText, DBText, DBText>> Adjust()
+        public void Adjust()
         {
-            var results = new List<Tuple<DBText, DBText, DBText>>();
-            BeamTexts.OfType<DBText>()
-                .Where(o => IsBeamBgMark(o.TextString))
-                .ForEach(o=>
+            using (var acadDb = Linq2Acad.AcadDatabase.Use(database))
+            {
+                // 要把单行文字拆成两行
+                BeamTexts.ForEach(o =>
                 {
-                    var texts = Ajust(o);
-                    if (texts!=null)
+                    var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
+                    if (IsBeamBgMark(text.TextString) || IsBeamSpec(text.TextString))
                     {
-                        results.Add(Tuple.Create(o, texts.Item1, texts.Item2));
+                        Move(text, o.Value);
                     }
-                });            
-            return results;
+                    if (IsBeamBgMark(text.TextString))
+                    {
+                        var texts = Split(text, o.Value);
+                        if (texts != null)
+                        {
+                            DoubleRowTexts.Add(Tuple.Create(text, texts.Item1, texts.Item2));
+                        }
+                    }
+                });
+            }     
         }
 
-        private Tuple<DBText, DBText> Ajust(DBText beamMark)
+        private void Move(DBText beamMark,Vector3d moveVec)
         {
-            var texts = SplitBeamMarkTexts(beamMark.TextString);
-            if(texts.Count!=2)
+            // 让梁标注外包框距离梁线 eg.50mm
+            var textCenter = GetTextCenter(beamMark);
+            if(!textCenter.HasValue)
             {
-                return null;
+                return;
             }
+            var beamSpec = GetBeamWidth(beamMark.TextString);
+            var beamWidth = beamSpec.Item1;
+            var newTextCenter = textCenter.Value + moveVec.GetNormal().MultiplyBy(
+                beamWidth / 2.0 + BeamMarkInterval + beamMark.Height / 2.0);
+            var mt = Matrix3d.Displacement(newTextCenter - textCenter.Value);
+            beamMark.TransformBy(mt);
+        }
+
+        private Tuple<DBText, DBText> Split(DBText beamMark,Vector3d direction)
+        {
+            // 把单行文字拆成两行文字
+            // 往direction方向调整
             var center = GetTextCenter(beamMark);
-            if(!center.HasValue)
+            if (!center.HasValue)
             {
                 return null;
             }
-            var perpendVec = GetTextPerpendVector(beamMark.Rotation);
-            var detectLength = 2.0 * beamMark.Height;
-
-            var oneSideBeamLines = QueryBeamLines(center.Value,
-                center.Value.GetExtentPoint(perpendVec, detectLength), 2.0);
-            var otherSideBeamLines = QueryBeamLines(center.Value,
-                center.Value.GetExtentPoint(perpendVec.Negate(), detectLength), 2.0);
-
-            // 创建文字
+            var texts = SplitBeamMarkTexts(beamMark.TextString);
+            if (texts.Count != 2)
+            {
+                return null;
+            }
             var specText = CreateText(beamMark, texts[0]);
-            var bgText = CreateText(beamMark, texts[1]);
-
-            // 移动
-            if (oneSideBeamLines.Count>0 && otherSideBeamLines.Count==0)
-            {
-                Move(beamMark, specText, bgText, perpendVec.Negate());
-            }
-            else if(oneSideBeamLines.Count == 0 && otherSideBeamLines.Count > 0)
-            {
-                Move(beamMark, specText, bgText, perpendVec);
-            }
-            else if(oneSideBeamLines.Count > 0 && otherSideBeamLines.Count > 0)
-            {
-                return null; // 不调整
-            }
-            else
-            {
-                Move(beamMark, specText, bgText, perpendVec);               
-            }
+            var bgText = CreateText(beamMark, texts[1]);            
+            Move(beamMark, specText, bgText, direction);
             return Tuple.Create(specText, bgText);
         }
+
+
+
+        private Tuple<double, double> GetBeamWidth(string textstring)
+        {
+            // 此规格在外部已检查
+            var values = textstring.GetDoubles();
+            return Tuple.Create(values[0], values[1]);
+        }
+
         private Point3d? GetTextCenter(DBText text)
         {
             var obb = GetTextObb(text);
@@ -124,37 +145,18 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     bgText.TransformBy(mt);
                 }
-            }
-            // 文字中心与beamMark中心对齐
-            var specCenter = GetTextCenter(specText); 
-            var bgCenter = GetTextCenter(bgText);
-            var beamMarkCenter = GetTextCenter(beamMark);
-            if (beamMarkCenter.HasValue && specCenter.HasValue && bgCenter.HasValue)
-            {
-                var specCenterProjectionPt = specCenter.Value.GetProjectPtOnLine(beamMarkCenter.Value,
-                     beamMarkCenter.Value.GetExtentPoint(towardVec, 1000.0));
-                var bgCenterProjectionPt = bgCenter.Value.GetProjectPtOnLine(beamMarkCenter.Value,
-                    beamMarkCenter.Value.GetExtentPoint(towardVec, 1000.0));
-                var mt1 = Matrix3d.Displacement(specCenterProjectionPt- specCenter.Value);
-                var mt2 = Matrix3d.Displacement(bgCenterProjectionPt - bgCenter.Value);
-                specText.TransformBy(mt1);
-                bgText.TransformBy(mt2);
-            }
+            }            
         }
 
-        private DBText CreateText(DBText beamMark,string content)
+        private DBText CreateText(DBText beamMark, string content)
         {
-            return new DBText()
-            {
-                TextString = content,
-                Position = beamMark.Position,
-                Rotation = beamMark.Rotation,
-                WidthFactor = beamMark.WidthFactor,
-                Height = beamMark.Height,
-                TextStyleId= beamMark.TextStyleId,
-            };
+            var clone = beamMark.Clone() as DBText;
+            clone.TextString = content;
+            clone.AlignmentPoint = beamMark.AlignmentPoint;
+            clone.HorizontalMode = TextHorizontalMode.TextCenter;
+            clone.VerticalMode = TextVerticalMode.TextVerticalMid;
+            return clone;
         }
-
 
         private DBObjectCollection Filter(DBObjectCollection beamLines,double rad)
         {
@@ -201,10 +203,16 @@ namespace ThMEPStructure.StructPlane.Service
 
         private bool IsBeamBgMark(string content)
         {
+            // 400x200(Bg-2.5)
             string pattern = @"^\d+\s*[Xx]{1}\s*\d+\s*[(（]{1}[\S\s]*[）)]{1}$";
             return Regex.IsMatch(content.Trim(), pattern);
         }
-
+        private bool IsBeamSpec(string content)
+        {
+            // 400x200
+            string pattern = @"^\d+\s*[Xx]{1}\s*\d+$";
+            return Regex.IsMatch(content.Trim(), pattern);
+        }
         private List<string> SplitBeamMarkTexts(string beamMark)
         {
             // 600x400(BG)

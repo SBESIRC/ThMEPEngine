@@ -292,7 +292,7 @@ namespace ThMEPEngineCore.IO.SVG
                 dbText.Height = 5;
                 dbText.WidthFactor = 1.0;
                 dbText.Position = Point3d.Origin;
-                dbText.HorizontalMode = TextHorizontalMode.TextMid;
+                dbText.HorizontalMode = TextHorizontalMode.TextCenter;
                 dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
                 dbText.AlignmentPoint = dbText.Position;
                 dbText.TransformBy(mt);
@@ -532,10 +532,10 @@ namespace ThMEPEngineCore.IO.SVG
             }
             var floorInfo = new ThFloorInfo();
             bool isFloorName=false, isFloorNo = false, isStdFlrNo = false,
-                isBottomElevation = false, isElevation = false;
+                isBottomElevation = false, isHeight = false;
             foreach (var item in svgCustomAttributes)
             {
-                switch(item.Key.ToUpper())
+                switch (item.Key.ToUpper())
                 {
                     case "FLOORNAME":
                         isFloorName = true;
@@ -553,13 +553,13 @@ namespace ThMEPEngineCore.IO.SVG
                         isBottomElevation = true;
                         floorInfo.Bottom_elevation = item.Value;
                         break;
-                    case "ELEVATION":
-                        isElevation = true;
-                        floorInfo.Elevation = item.Value;
+                    case "HEIGHT": // 存放的是楼层高度
+                        isHeight = true;
+                        floorInfo.Height = item.Value;
                         break;
                 }
             }
-            if(isFloorName && isFloorNo && isStdFlrNo && isBottomElevation && isElevation)
+            if(isFloorName && isFloorNo && isStdFlrNo && isBottomElevation && isHeight)
             {
                 return floorInfo;
             }

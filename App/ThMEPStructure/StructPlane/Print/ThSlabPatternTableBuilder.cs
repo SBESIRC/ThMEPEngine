@@ -176,7 +176,7 @@ namespace ThMEPStructure.StructPlane.Print
         private double GetBGElevation(string elevation)
         {
             double eleValue = double.Parse(elevation);
-            double height = TblParameter.FlrElevation - TblParameter.FlrBottomEle;
+            double height = TblParameter.FlrHeight;
             return Math.Round(eleValue - height, 2);
         }
     
@@ -228,7 +228,7 @@ namespace ThMEPStructure.StructPlane.Print
         public Database Database { get; set; }
         public Point3d RightUpbasePt { get; set; }
         public double FlrBottomEle { get; set; }
-        public double FlrElevation { get; set; }
+        public double FlrHeight { get; set; }
         public Dictionary<string, HatchPrintConfig> HatchConfigs { get; set; }
         public int Rows
         {

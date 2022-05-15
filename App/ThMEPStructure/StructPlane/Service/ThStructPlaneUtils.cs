@@ -1,5 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using NFox.Cad;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
 
 namespace ThMEPStructure.StructPlane.Service
@@ -55,7 +60,7 @@ namespace ThMEPStructure.StructPlane.Service
             }
             return 0.0;
         }
-        public static double GetFloorElevation(this Dictionary<string, string> properties)
+        public static double GetFloorHeight(this Dictionary<string, string> properties)
         {
             if (properties.ContainsKey(ThSvgPropertyNameManager.FloorElevationPropertyName))
             {
@@ -164,6 +169,53 @@ namespace ThMEPStructure.StructPlane.Service
                 }
             }
             return pStrReturnValue;
+        }
+        public static List<double> GetDoubles(this string content)
+        {
+            var datas = new List<double>();
+            string pattern = @"\d+([.]\d+)?";
+            foreach (Match item in Regex.Matches(content, pattern))
+            {
+                datas.Add(double.Parse(item.Value));
+            }
+            return datas;
+        }
+        public static Polyline CreateRectangle(this Point3d center, 
+            Vector3d xVec, Vector3d yVec,
+            double xLength, double yLength)
+        {
+            var pt1 = center + xVec.GetNormal().MultiplyBy(xLength / 2.0) + yVec.GetNormal().MultiplyBy(yLength / 2.0);
+            var pt2 = center - xVec.GetNormal().MultiplyBy(xLength / 2.0) + yVec.GetNormal().MultiplyBy(yLength / 2.0);
+            var pt3 = center - xVec.GetNormal().MultiplyBy(xLength / 2.0) - yVec.GetNormal().MultiplyBy(yLength / 2.0);
+            var pt4 = center + xVec.GetNormal().MultiplyBy(xLength / 2.0) - yVec.GetNormal().MultiplyBy(yLength / 2.0);
+            var pts = new Point3dCollection { pt1, pt2, pt3, pt4 };
+            return pts.CreatePolyline();
+        }
+        public static double GetPolylineMaxSegmentLength(this Polyline polyline)
+        {
+            double result = 0.0;
+            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+            {
+                var segType = polyline.GetSegmentType(i);
+                if (segType == SegmentType.Line)
+                {
+                    var lineSeg = polyline.GetLineSegmentAt(i);
+                    if (lineSeg.Length > result)
+                    {
+                        result = lineSeg.Length;
+                    }
+                }
+                else if (segType == SegmentType.Arc)
+                {
+                    var arc = polyline.GetArcSegmentAt(i).ToArc();
+                    if (arc.Length > result)
+                    {
+                        result = arc.Length;
+                    }
+                    arc.Dispose();
+                }
+            }
+            return result;
         }
     }
 }
