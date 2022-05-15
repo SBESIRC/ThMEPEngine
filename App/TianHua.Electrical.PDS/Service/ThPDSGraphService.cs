@@ -160,7 +160,8 @@ namespace TianHua.Electrical.PDS.Service
             }
 
             // 限制一相配电箱成为三相配电箱的上级
-            if(edge.Source.Loads[0].Phase == ThPDSPhase.一相 && edge.Target.Loads[0].Phase == ThPDSPhase.三相)
+            if(edge.Source.Loads.Count > 0 && edge.Source.Loads[0].Phase == ThPDSPhase.一相 
+                && edge.Target.Loads.Count > 0 && edge.Target.Loads[0].Phase == ThPDSPhase.三相)
             {
                 var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                 var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
