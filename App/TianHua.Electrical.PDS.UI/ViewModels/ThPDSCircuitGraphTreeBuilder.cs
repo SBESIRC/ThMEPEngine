@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels
@@ -50,20 +51,10 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         if (si > 1000) return;
                         var v = vertices[node.Id];
                         if (v.Type != Model.PDSNodeType.DistributionBox) return;
-                        var name = v.Load?.ID?.LoadID;
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            name = v.Load?.ID?.Description;
-                        }
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            name = "未知配电箱";
-                        }
-                        name ??= "";
                         var m = new ThPDSCircuitGraphTreeModel()
                         {
                             Id = idDict[v],
-                            Name = name,
+                            Name = v.LoadIdString(),
                             DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                         };
                         if (parent is null)

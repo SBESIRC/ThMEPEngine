@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.ComponentModel;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.ApplicationServices;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Service;
@@ -139,7 +140,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         public void UpdateView(ThPDSInfoCompare panel)
         {
             {
-                var items = new List<CircuitDiffItem>();
+                var items = new ObservableCollection<CircuitDiffItem>();
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
@@ -278,7 +279,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 //};
             }
             {
-                var items = new List<LoadDiffItem>();
+                var items = new ObservableCollection<LoadDiffItem>();
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
@@ -544,6 +545,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 return Edge.Target.Load.CircuitType.GetDescription();
             }
         }
+        public string CircuitLoad => Edge.Target.LoadIdString();
         public string SourcePanelID
         {
             get
@@ -563,18 +565,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class LoadDiffItem
     {
-        public string LoadId
-        {
-            get
-            {
-                var id = Node.Load.ID.LoadID;
-                if (string.IsNullOrEmpty(id))
-                {
-                    return "未知负载";
-                }
-                return id;
-            }
-        }
+        public string LoadId => Node.LoadIdString();
         public string LoadType
         {
             get
