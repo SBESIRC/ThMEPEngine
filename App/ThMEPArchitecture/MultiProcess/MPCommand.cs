@@ -261,9 +261,6 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("##################################");
                     Logger?.Information(ex.StackTrace);
                     Active.Editor.WriteMessage(ex.Message);
-                    GA.ProcList.Where(proc => !proc.HasExited).ForEach(proc =>proc.Kill());
-                    GA.ProcList.ForEach(x => x.Dispose());
-                    GA.MutexLists.ForEach(l => l.ForEach(mutex => mutex.Dispose()));
                 }
             }
         }
@@ -337,9 +334,10 @@ namespace ThMEPArchitecture.MultiProcess
                             Logger?.Information("##################################");
                             Logger?.Information(ex.StackTrace);
                             Active.Editor.WriteMessage(ex.Message);
-                            GA.ProcList.Where(proc => !proc.HasExited).ForEach(proc => proc.Kill());
-                            GA.ProcList.ForEach(x => x.Dispose());
-                            GA.MutexLists.ForEach(l => l.ForEach(mutex => mutex.Dispose()));
+                        }
+                        finally
+                        {
+                           
                         }
                     }
                 }

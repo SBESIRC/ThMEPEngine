@@ -46,16 +46,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private bool SpecialOnly;
         private List<(double, double)> LowerUpperBound;
         //Inputs
-        
+
         ParkingStallArrangementViewModel ParameterViewModel;
         public Serilog.Core.Logger Logger = null;
 
         public int ProcessCount;
-        public List<Process>  ProcList;//进程列表
+        //public List<Process> ProcList;//进程列表
         public List<List<Mutex>> MutexLists;//进程锁列表的列表
 
         public int CurIteration;
-        public MultiProcessGAGenerator( ParkingStallArrangementViewModel parameterViewModel = null)
+        public MultiProcessGAGenerator(ParkingStallArrangementViewModel parameterViewModel = null)
         {
 
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
@@ -73,7 +73,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             else max_process = ParameterStock.ProcessCount;
             //ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);
             ProcessCount = Math.Min(max_process, PopulationSize);
-            ProcList = new List<Process>();
+            //var ProcList = new List<Process>();
             MutexLists = new List<List<Mutex>>();
             MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
 
@@ -106,7 +106,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<MPGene> ConvertLineToGene()//仅根据分割线生成第一代
         {
             var genome = new List<MPGene>();
-            foreach(var lineSeg in InterParameter.InitSegLines)
+            foreach (var lineSeg in InterParameter.InitSegLines)
             {
                 MPGene gene = new MPGene(lineSeg);
                 genome.Add(gene);
@@ -241,11 +241,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
-            Logger?.Information($"CPU数量："+ Environment.ProcessorCount.ToString());
+            Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             List<MPChromosome> selected = new List<MPChromosome>();
             var currentMutexList = new List<Mutex>();
+            var ProcList = new List<Process>();
+            //var MutexLists = new List<List<Mutex>>();
+
             for (int idx = 0; idx < ProcessCount; idx++)
             {
                 var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
@@ -255,73 +258,93 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             MutexLists.Add(currentMutexList);
             ProcList.ForEach(proc => proc.Start());
-            //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
-            Logger?.Information($"进程数: {ProcessCount }");
-            Logger?.Information($"进程启动用时: {stopWatch.Elapsed.TotalSeconds }");
-            var t_pre = stopWatch.Elapsed.TotalSeconds;
-            var pop = CreateFirstPopulation();
-            Logger?.Information($"初代生成时间: {stopWatch.Elapsed.TotalSeconds - t_pre}");
-            t_pre = stopWatch.Elapsed.TotalSeconds;
 
-            var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
-            Active.Editor.WriteMessage(strFirstPopCnt);
-            Logger?.Information(strFirstPopCnt);
-            CurIteration = 0;
-            int maxCount = 0;
-            int maxNums = 0;
-
-            int lamda; //变异方差，随代数递减
-
-            while (CurIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
+            try
             {
-                var strCurIterIndex = $"迭代次数：{CurIteration}";
-                Logger?.Information(strCurIterIndex);
-                System.Diagnostics.Debug.WriteLine(strCurIterIndex);
-                System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
-                selected = Selection2(pop, out int CurNums);
-                //Logger?.Information($"选择总用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
-                if (maxNums >= CurNums)
-                {
-                    maxCount++;
-                }
-                else
-                {
-                    maxCount = 0;
-                    maxNums = CurNums;
-                }
-                var temp_list = CreateNextGeneration2(selected);
-                // 小变异
-                pop = temp_list[0];
-                lamda = CurIteration + 3;// 小变异系数，随时间推移，变异缩小，从4 开始
-                MutationS(pop, lamda);
-                // 大变异
-                var rstLM = temp_list[1];
-                MutationL(rstLM);
-                pop.AddRange(rstLM);
-                Logger?.Information($"当前代用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
+                //MutexEndList.ForEach(mutex => mutex.ReleaseMutex());
+                Logger?.Information($"进程数: {ProcessCount }");
+                Logger?.Information($"进程启动用时: {stopWatch.Elapsed.TotalSeconds }");
+                var t_pre = stopWatch.Elapsed.TotalSeconds;
+                var pop = CreateFirstPopulation();
+                Logger?.Information($"初代生成时间: {stopWatch.Elapsed.TotalSeconds - t_pre}");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
-                if (CurIteration % 3 == 0)
-                    ReclaimMemory();
+
+                var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
+                Active.Editor.WriteMessage(strFirstPopCnt);
+                Logger?.Information(strFirstPopCnt);
+                CurIteration = 0;
+                int maxCount = 0;
+                int maxNums = 0;
+
+                int lamda; //变异方差，随代数递减
+
+                while (CurIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
+                {
+                    var strCurIterIndex = $"迭代次数：{CurIteration}";
+                    Logger?.Information(strCurIterIndex);
+                    System.Diagnostics.Debug.WriteLine(strCurIterIndex);
+                    System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
+                    selected = Selection2(pop, out int CurNums);
+                    //Logger?.Information($"选择总用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                    if (maxNums >= CurNums)
+                    {
+                        maxCount++;
+                    }
+                    else
+                    {
+                        maxCount = 0;
+                        maxNums = CurNums;
+                    }
+                    var temp_list = CreateNextGeneration2(selected);
+                    // 小变异
+                    pop = temp_list[0];
+                    lamda = CurIteration + 3;// 小变异系数，随时间推移，变异缩小，从4 开始
+                    MutationS(pop, lamda);
+                    // 大变异
+                    var rstLM = temp_list[1];
+                    MutationL(rstLM);
+                    pop.AddRange(rstLM);
+                    Logger?.Information($"当前代用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
+                    t_pre = stopWatch.Elapsed.TotalSeconds;
+                    if (CurIteration % 3 == 0)
+                        ReclaimMemory();
+                }
+
+                string strConverged;
+                if (maxCount < MaxCount) strConverged = $"未收敛";
+                else strConverged = $"已收敛";
+                Active.Editor.WriteMessage(strConverged);
+                Logger?.Information(strConverged);
+                stopWatch.Stop();
+                var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                Logger?.Information(strTotalMins);
             }
-            if(CurIteration-1 != IterationCount) ProcList.ForEach(x => x.Kill());
-            ProcList.ForEach(x => x.Dispose());
-            MutexLists.ForEach(l => l.ForEach(x => x.Dispose()));
-            MutexLists.Clear();
-            string strConverged;
-            if (maxCount < MaxCount) strConverged = $"未收敛";
-            else strConverged = $"已收敛";
-            Active.Editor.WriteMessage(strConverged);
-            Logger?.Information(strConverged);
-            stopWatch.Stop();
-            var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
-            Logger?.Information(strTotalMins);
+            finally
+            {
+                ProcList.ForEach(x =>
+                {
+                    if (!x.HasExited)
+                    {
+                        try
+                        {
+                            x.Kill();
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    //x.Dispose();
+                });
+                MutexLists.ForEach(l => l.ForEach(x => x.Dispose()));
+                MutexLists.Clear();
+            }
             // 返回最后一代选择的比例
             return selected.Take(SelectionSize).ToList();
         }
         private List<MPChromosome> Selection2(List<MPChromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
-            Logger?.Information("已计算SubArea个数："+ SubAreaParkingCnt.CachedPartitionCnt.Count.ToString());
+            Logger?.Information("已计算SubArea个数：" + SubAreaParkingCnt.CachedPartitionCnt.Count.ToString());
 #if DEBUG
             CalculateParkingSpacesSP(inputSolution);
 #else
@@ -406,10 +429,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     if (j >= Result.Count) break;
                 }
             }
-            
-            
+
+
         }
-        private void CalculateParkingSpacesMP(List<MPChromosome> inputSolution,int fileSize1 = 32,int fileSize2 = 2)
+        private void CalculateParkingSpacesMP(List<MPChromosome> inputSolution, int fileSize1 = 32, int fileSize2 = 2)
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -434,14 +457,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var parkingCntFile = MemoryMappedFile.CreateNew("CachedPartitionCnt" + idx.ToString(), nbytes2);
                     ParkingCntFileList.Add(parkingCntFile);
-                    nextMutexList.Add(CreateMutex("Mutex"+  CurIteration.ToString() + "_", idx));
+                    nextMutexList.Add(CreateMutex("Mutex" + CurIteration.ToString() + "_", idx));
                 }
                 MutexLists.Add(nextMutexList);
                 var currentMutexList = MutexLists[CurIteration - 1];
-                Logger?.Information($"写入数据用时: {stopWatch.Elapsed.TotalSeconds -t_pre}秒");
+                Logger?.Information($"写入数据用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
 
-                for(int idx = currentMutexList.Count -1; idx >= 0; idx--)
+                for (int idx = currentMutexList.Count - 1; idx >= 0; idx--)
                 {
                     currentMutexList[idx].ReleaseMutex();
                     if (idx % 5 == 0) Thread.Sleep(1);
@@ -449,10 +472,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 //currentMutexList.Reverse();
 
                 //currentMutexList.ForEach(mutex => { mutex.ReleaseMutex(); Thread.Sleep(1); });//起始锁解锁，子进程开始计算
-                //Thread.Sleep(100);
-                currentMutexList.ForEach(mutex => mutex.WaitOne(-1,true));//等待结束
-                currentMutexList.ForEach(mutex => mutex.Dispose());
-                currentMutexList.Clear();
+                Thread.Sleep(100);
+                currentMutexList.ForEach(mutex => mutex.WaitOne(-1, true));//等待结束
+                //currentMutexList.ForEach(mutex => mutex.Dispose());
+                //currentMutexList.Clear();
 
                 Logger?.Information($"子进程全部计算完成用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
                 t_pre = stopWatch.Elapsed.TotalSeconds;
@@ -467,14 +490,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         BinaryReader reader = new BinaryReader(stream);
                         var ParkingCnts = ReadWriteEx.ReadInts(reader);
                         var subProcCached = ReadWriteEx.ReadCached(reader);
-                        UpdateParkingNumber(idx,inputSolution, ParkingCnts, subProcCached);
+                        UpdateParkingNumber(idx, inputSolution, ParkingCnts, subProcCached);
                     }
                 }
                 ParkingCntFileList.ForEach(submmf => submmf.Dispose());
                 Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
             }
         }
-        private Process CreateSubProcess(int idx,bool LogAllInfo, int ThreadCnt)
+        private Process CreateSubProcess(int idx, bool LogAllInfo, int ThreadCnt)
         {
             var proc = new Process();
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -482,19 +505,34 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             string log_subprocess;
             if (LogAllInfo) log_subprocess = "1";
             else log_subprocess = "0";
-            proc.StartInfo.Arguments =  ProcessCount.ToString() +' '+ idx.ToString() + ' '+
-                IterationCount.ToString() + ' ' + log_subprocess + ' '+ ThreadCnt.ToString();
+            proc.StartInfo.Arguments = ProcessCount.ToString() + ' ' + idx.ToString() + ' ' +
+                IterationCount.ToString() + ' ' + log_subprocess + ' ' + ThreadCnt.ToString();
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.UseShellExecute = false;
             //proc.StartInfo.RedirectStandardOutput = true;
             //proc.Start();
             return proc;
         }
-        private Mutex CreateMutex(string mutexName,int idx,bool initowned = true)
+        private Mutex CreateMutex(string mutexName, int idx, bool initowned = true)
         {
             bool mutexCreated;
             Mutex mutex = new Mutex(initowned, mutexName + idx.ToString(), out mutexCreated);
-            //Logger?.Information("mutex status:"+mutexCreated.ToString());
+            //Logger?.Information("Init mutex status:" + mutexCreated.ToString());
+            if (!mutexCreated)
+            {
+                try
+                {
+                    mutex = Mutex.OpenExisting(mutexName + idx.ToString(), System.Security.AccessControl.MutexRights.FullControl);
+                    mutex.Dispose();
+                    mutex = new Mutex(initowned, mutexName + idx.ToString(), out mutexCreated);
+                    Logger?.Information("second mutex status:" + mutexCreated.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information("still have problem on mutex status:" + mutexCreated.ToString());
+                }
+            }
+           
             return mutex;
         }
         //private void UpdateParkingNumber(int idx,List<MPChromosome> inputSolution, (List<int>, List<List<(double, double)>>, List<int>) subProcResult)
@@ -620,7 +658,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
             }
         }
-#endregion
+        #endregion
         public void Dispose()
         {
 
