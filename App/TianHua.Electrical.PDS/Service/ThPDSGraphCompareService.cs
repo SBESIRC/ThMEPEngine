@@ -236,6 +236,11 @@ namespace TianHua.Electrical.PDS.Service
                 return false;
             }
 
+            if(inEdgesA.Count == 0 && outEdgesA.Count == 0)
+            {
+                return false;
+            }
+
             //入边相等判断
             var inEdgesIdA = new HashSet<string>();
             var inEdgesIdB = new HashSet<string>();
