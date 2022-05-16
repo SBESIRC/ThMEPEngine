@@ -1143,7 +1143,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WPE
                     {
                         var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = emergencyPowerEquipmentNo.Count() > 0 ? emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WPE"+ (++maxNo).ToString("00"));
@@ -1154,7 +1154,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WP
                     {
                         var powerEquipmentNo = powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = powerEquipmentNo.Count() > 0 ? powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty()? "0":o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
@@ -1165,7 +1165,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WL
                     {
                         var lightingNo = lighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = lightingNo.Count() > 0 ? lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         lighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
@@ -1176,7 +1176,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WLE
                     {
                         var emergencyLightingNo = emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = emergencyLighting.Count() > 0 ? emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WLE"+ (++maxNo).ToString("00"));
@@ -1187,7 +1187,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WFEL
                     {
                         var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = fireEmergencyLighting.Count() > 0 ? fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WFEL"+ (++maxNo).ToString("00"));
@@ -1198,7 +1198,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WS
                     {
                         var socketNo = socket.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = socketNo.Count() > 0 ? socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         socket.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WS"+ (++maxNo).ToString("00"));
@@ -1209,7 +1209,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WL
                     {
                         var otherOnePhaseNo = otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = otherOnePhase.Count() > 0 ? otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
@@ -1220,7 +1220,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                     //WP
                     {
                         var otherThreePhaseNo = otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                        var maxNo = otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
+                        var maxNo = otherThreePhase.Count() > 0 ? otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last().IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", ""))) : 0;
                         otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
                         {
                             o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
