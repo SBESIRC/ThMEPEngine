@@ -208,6 +208,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Hint = "回路编号重复",
                         });
                     }
+                    else if (tag is ThPDSProjectGraphEdgeCascadingErrorTag)
+                    {
+                        items.Add(new()
+                        {
+                            Edge = edge,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "断路器选型不具备选择性",
+                        });
+                    }
                     else
                     {
                         throw new NotSupportedException();
