@@ -132,6 +132,28 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var drawEngine = new ThPDSSystemDiagramService();
                 drawEngine.Draw(graph, nodes);
             });
+            var autoNumberingCmd = new RelayCommand(() =>
+            {
+                // 获取勾选的节点
+                var vertices = graph.Vertices.ToList();
+                var nodes = new List<ThPDSProjectGraphNode>();
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    if (node.IsChecked == true)
+                    {
+                        nodes.Add(vertices[node.Id]);
+                    }
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+                if (nodes.Count == 0) return;
+
+                // 自动编号
+                ThPDSProjectGraphService.AutoNumbering(graph, nodes);
+            });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
             {
@@ -160,6 +182,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     Header = "全不选",
                     Command = unselAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "自动编号",
+                    Command = autoNumberingCmd,
                 };
                 yield return new()
                 {
@@ -304,7 +331,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 config.Current = new(vertice);
-                config.BatchGenerate = batchGenCmd;
                 {
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
