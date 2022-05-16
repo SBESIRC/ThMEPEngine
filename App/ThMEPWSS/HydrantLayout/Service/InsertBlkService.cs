@@ -23,10 +23,25 @@ namespace ThMEPWSS.HydrantLayout.Service
     {
         public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
         {
+            //插入模版图块时调用了WblockCloneObjects方法。需要之后做QueueForGraphicsFlush更新transaction。并且最后commit此transaction
+            //参考
+            //https://adndevblog.typepad.com/autocad/2015/01/using-wblockcloneobjects-copied-modelspace-entities-disappear-in-the-current-drawing.html
+
+            using (Transaction transaction = database.TransactionManager.StartTransaction())
+            {
+                InsertBlkService.LoadBlockLayerToDocumentWithoutTrans(database, blockNames, layerNames);
+                transaction.TransactionManager.QueueForGraphicsFlush();
+                transaction.Commit();
+            }
+        }
+
+        private static void LoadBlockLayerToDocumentWithoutTrans(Database database, List<string> blockNames, List<string> layerNames)
+        {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             {
                 //解锁0图层，后面块有用0图层的
                 DbHelper.EnsureLayerOn("0");
+                DbHelper.EnsureLayerOn("DEFPOINTS");
             }
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -51,7 +66,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                 }
             }
         }
-        
+
         public static void InsertWarning(List<OutPutModel> insertBlkInfo, string layerName, double radius, int colorIndex)
         {
             if (insertBlkInfo == null || insertBlkInfo.Count == 0)
