@@ -215,8 +215,22 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if ((!isPower || MatchPower(text.TextString)) && text.TextString.Contains(sourceInfo))
                 {
-                    text.TextString = StringReplace(text.TextString, sourceInfo, targetInfo);
-                    Revclouds.Add(text.GeometricExtents.ToRectangle());
+                    if(string.IsNullOrEmpty( targetInfo))
+                    {
+                        if(text.Bounds.HasValue)
+                        {
+                            Revclouds.Add(text.GeometricExtents.ToRectangle());
+                        }
+                        text.TextString = StringReplace(text.TextString, sourceInfo, targetInfo);
+                    }
+                    else
+                    {
+                        text.TextString = StringReplace(text.TextString, sourceInfo, targetInfo);
+                        if (text.Bounds.HasValue)
+                        {
+                            Revclouds.Add(text.GeometricExtents.ToRectangle());
+                        }
+                    }
                 }
             }
             else if (entity is MText mText)

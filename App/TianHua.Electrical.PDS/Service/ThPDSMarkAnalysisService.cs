@@ -303,7 +303,7 @@ namespace TianHua.Electrical.PDS.Service
             {
                 BlockName = blockData.EffectiveName,
                 DefaultDescription = blockData.DefaultDescription,
-            };
+        };
             var idMarks = new List<string>();
             var circuitMarks = new List<string>();
             for (var i = 0; i < infos.Count; i++)

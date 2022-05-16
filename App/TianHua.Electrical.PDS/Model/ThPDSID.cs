@@ -1,5 +1,4 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace TianHua.Electrical.PDS.Model
@@ -30,7 +29,25 @@ namespace TianHua.Electrical.PDS.Model
         /// <summary>
         /// 用户自定义描述
         /// </summary>
-        public string Description { get; set; }
+        private string _description;
+        public string Description
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_description))
+                {
+                    return _description;
+                }
+                else
+                {
+                    return DefaultDescription;
+                }
+            }
+            set
+            {
+                _description = value;
+            }
+        }
 
         /// <summary>
         /// 默认负载描述
@@ -57,7 +74,7 @@ namespace TianHua.Electrical.PDS.Model
                 var circuitNumber = new List<string>();
                 for (var i = 0; i < CircuitID.Count; i++)
                 {
-                    if(!string.IsNullOrEmpty( SourcePanelID[i]) && !string.IsNullOrEmpty(CircuitID[i]))
+                    if (!string.IsNullOrEmpty(SourcePanelID[i]) && !string.IsNullOrEmpty(CircuitID[i]))
                     {
                         circuitNumber.Add(SourcePanelID[i] + "-" + CircuitID[i]);
                     }

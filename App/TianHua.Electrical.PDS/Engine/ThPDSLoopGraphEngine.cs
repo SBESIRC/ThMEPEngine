@@ -125,7 +125,7 @@ namespace TianHua.Electrical.PDS.Engine
                         else
                         {
                             var obb = block.BlockOBB();
-                            if(!obb.Bounds.HasValue)
+                            if (!obb.Bounds.HasValue)
                             {
                                 GeometryMap.Add(block, block);
                             }
@@ -485,7 +485,7 @@ namespace TianHua.Electrical.PDS.Engine
         {
             var objectIds = new List<ObjectId>();
             var attributesCopy = "";
-            var newNode = ThPDSGraphService.CreateNode(new List<Entity> { load }, Database, MarkService, 
+            var newNode = ThPDSGraphService.CreateNode(new List<Entity> { load }, Database, MarkService,
                 DistBoxKey, objectIds, ref attributesCopy);
             PDSGraph.Graph.AddVertex(newNode);
             NodeMap.Add(newNode, objectIds);
@@ -576,7 +576,7 @@ namespace TianHua.Electrical.PDS.Engine
                         }
                         else if (item.Key is BlockReference block)
                         {
-                            if(GeometryMap.ContainsKey(block))
+                            if (GeometryMap.ContainsKey(block))
                             {
                                 nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
                             }
@@ -1221,12 +1221,20 @@ namespace TianHua.Electrical.PDS.Engine
         {
             PDSGraph.Graph.Vertices.ForEach(o =>
             {
-                if (o.Loads.Count > 0 && !string.IsNullOrEmpty(o.Loads[0].AttributesCopy))
+                if (o.Loads.Count > 0)
                 {
-                    var edgeList = PDSGraph.Graph.Edges
-                        .Where(e => e.Source == o
-                            && e.Target.Loads.Count > 0
-                            && e.Target.Loads[0].ID.BlockName == o.Loads[0].AttributesCopy)
+                    var edgeList = PDSGraph.Graph.OutEdges(o).ToList();
+                    var attributesCopy = edgeList
+                        .Where(e => !string.IsNullOrEmpty(e.Target.Loads[0].AttributesCopy))
+                        .Select(e => e.Target.Loads[0].AttributesCopy)
+                        .FirstOrDefault();
+                    if (attributesCopy.IsNull())
+                    {
+                        return;
+                    }
+                    edgeList = edgeList
+                        .Where(e => e.Target.Loads.Count > 0
+                            && e.Target.Loads[0].ID.BlockName == attributesCopy)
                         .ToList();
                     var targetEdge = edgeList.Where(e => e.Target.Loads[0].InstalledCapacity.HighPower == 0)
                         .ToList();
@@ -1262,29 +1270,31 @@ namespace TianHua.Electrical.PDS.Engine
         {
             PDSGraph.Graph.Vertices.ForEach(e =>
             {
-                if(e.NodeType == PDSNodeType.Unkown)
+                if (e.NodeType == PDSNodeType.Unkown)
                 {
-                    switch(e.Loads[0].CircuitType)
+                    var defaultDescription = "";
+                    switch (e.Loads[0].CircuitType)
                     {
                         case ThPDSCircuitType.Lighting:
-                            e.Loads[0].ID.DefaultDescription = "正常照明";
+                            defaultDescription = "正常照明";
                             break;
                         case ThPDSCircuitType.Socket:
-                            e.Loads[0].ID.DefaultDescription = "插座";
+                            defaultDescription = "插座";
                             break;
                         case ThPDSCircuitType.PowerEquipment:
-                            e.Loads[0].ID.DefaultDescription = "动力负载";
+                            defaultDescription = "动力负载";
                             break;
                         case ThPDSCircuitType.EmergencyLighting:
-                            e.Loads[0].ID.DefaultDescription = "消防备用照明";
+                            defaultDescription = "消防备用照明";
                             break;
                         case ThPDSCircuitType.EmergencyPowerEquipment:
-                            e.Loads[0].ID.DefaultDescription = "消防动力负载";
+                            defaultDescription = "消防动力负载";
                             break;
                         case ThPDSCircuitType.FireEmergencyLighting:
-                            e.Loads[0].ID.DefaultDescription = "应急照明/疏散指示";
+                            defaultDescription = "应急照明/疏散指示";
                             break;
                     }
+                    e.Loads[0].ID.DefaultDescription = defaultDescription;
                 }
             });
         }
@@ -1439,7 +1449,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 o.Loads.ForEach(e =>
                 {
-                    if(e.GetLocationList().Count == 0)
+                    if (e.GetLocationList().Count == 0)
                     {
                         e.SetLocation(new ThPDSLocation());
                     }

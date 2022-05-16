@@ -421,15 +421,15 @@ namespace TianHua.Electrical.PDS.Diagram
                 loadID.TextString = edge.Target.Load.ID.LoadID;
                 description.TextString = edge.Target.Load.ID.Description;
             }
-            else if (string.IsNullOrEmpty(loadID.TextString)
-                && !string.IsNullOrEmpty(description.TextString))
+            else if (string.IsNullOrEmpty(edge.Target.Load.ID.LoadID)
+                && !string.IsNullOrEmpty(edge.Target.Load.ID.Description))
             {
                 loadID.Erase();
                 description.TextString = edge.Target.Load.ID.Description;
                 description.TransformBy(Matrix3d.Displacement(offset));
             }
-            else if (!string.IsNullOrEmpty(loadID.TextString)
-                && string.IsNullOrEmpty(description.TextString))
+            else if (!string.IsNullOrEmpty(edge.Target.Load.ID.LoadID)
+                && string.IsNullOrEmpty(edge.Target.Load.ID.Description))
             {
                 description.Erase();
                 loadID.TextString = edge.Target.Load.ID.LoadID;
