@@ -210,7 +210,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        //throw new NotSupportedException();
                     }
                 }
 
