@@ -86,7 +86,7 @@ namespace ThMEPHVAC.TCH
             {
                 ID = gId,
                 segmentID = gId + segmentID,
-                dimStyle = "_TCH_ARCH",
+                dimStyle = "TH-DIM150",
                 location = firstDimPos,
                 rotation = angle,
                 dist2DimLine = 1800,

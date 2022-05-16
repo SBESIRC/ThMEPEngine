@@ -30,12 +30,12 @@ namespace ThMEPHVAC.Model
                 if (param.portRange.Contains("侧"))
                     portNum *= 2;
                 double avgAirVolume = param.airVolume / portNum;
-                avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
+                avgAirVolume = (int)avgAirVolume;
                 var strVolume = avgAirVolume.ToString();
                 if (param.highAirVolume > 0)
                 {
                     double av = param.highAirVolume / portNum;
-                    av = (Math.Ceiling(av / 10)) * 10;
+                    av = (int)av;
                     strVolume = av.ToString("0.") + "/" + strVolume;
                 }
                 var num = portParam.verticalPipeEnable ? param.portBottomEle : param.elevation;
