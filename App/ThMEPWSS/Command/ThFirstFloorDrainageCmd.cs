@@ -191,7 +191,7 @@ namespace ThMEPWSS.Command
                 }
             }
             var dbObjs = allWalls.ToCollection().UnionPolygons(false).Cast<Entity>().ToList();
-            return StructGeoService.GetWallPolylines(allWalls);
+            return StructGeoService.GetWallPolylines(dbObjs);
         }
 
         public void Dispose()

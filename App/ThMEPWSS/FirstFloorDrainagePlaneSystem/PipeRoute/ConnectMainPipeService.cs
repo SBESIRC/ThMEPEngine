@@ -117,7 +117,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     continue;
                 }
-                var closetLine = CreateRouteHelper.GetClosetLane(allLines, pipeGroup.ToList().First().Key.Position, frame, wallPolys, step);
+                var firPipe = pipeGroup.ToList().First();
+                var closetPt = firPipe.Value.EndPoint;
+                if (closetPt.DistanceTo(firPipe.Key.Position) < firPipe.Value.StartPoint.DistanceTo(firPipe.Key.Position))
+                {
+                    closetPt = firPipe.Value.StartPoint;
+                }
+                var closetLine = CreateRouteHelper.GetClosetLane(allLines, closetPt, frame, wallPolys, step);
                 var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
                 foreach (var dic in pipeGroup)
                 {
