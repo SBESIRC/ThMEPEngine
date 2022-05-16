@@ -204,7 +204,7 @@ namespace TianHua.Electrical.PDS.Engine
                     }
 
                     var insertEngine = new ThPDSBlockInsertEngine();
-                    var circuitNumber = edge.Circuit.ID.CircuitNumber.Last();
+                    var circuitNumber = edge.Circuit.ID.CircuitNumber;
                     var attributes = new Dictionary<string, string>
                     {
                         { ThPDSCommon.ENTER_CIRCUIT_ID, circuitNumber },

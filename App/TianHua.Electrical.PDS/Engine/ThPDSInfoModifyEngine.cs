@@ -170,7 +170,7 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     });
 
-                    EdgeList.ForEach(o =>
+                    EdgeList.ForEach((Action<ThPDSProjectGraphEdge>)(o =>
                     {
                         var sourceEdge = edgeMap.EdgeMap
                                 .Where(edge => edge.Key.Circuit.CircuitUID.Equals(o.Circuit.CircuitUID))
@@ -184,14 +184,14 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             if (sourcePanelTag.ChangeFrom)
                             {
-                                var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber.Last();
+                                var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber;
                                 sourceEdge[0].Value.ForEach(id =>
                                 {
                                     InfoModify(activeDb, id, sourceCircuitNumber, sourcePanelTag.ChangedLastCircuitID);
                                 });
                             }
                         }
-                    });
+                    }));
 
                     if (Revclouds.Count > 0)
                     {

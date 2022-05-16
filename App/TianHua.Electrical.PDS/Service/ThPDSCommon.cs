@@ -72,6 +72,7 @@ namespace TianHua.Electrical.PDS.Service
         public static readonly string SYSTEM_DIAGRAM_TABLE_TITLE = "系统图标题栏";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_SINGLE_PHASE = "单相计算表";
         public static readonly string SYSTEM_DIAGRAM_TABLE_TAIL_THREE_PHASE = "三相计算表";
+        public static readonly string SYSTEM_DIAGRAM_SECONDARY_JUNCTION = "二次结线说明";
 
         public static readonly string DEFAULT_ISOLATING_SWITCH = "E-BQL102";
         public static readonly string DEFAULT_ISOLATING_SWITCH_1 = "E-BQL102-1";
@@ -115,5 +116,12 @@ namespace TianHua.Electrical.PDS.Service
         public static readonly string LOAD_ID_OR_PURPOSE = "设备编号或用途";
         public static readonly string LOAD_POWER = "设备功率"; 
         public static readonly string PRIMARY_AND_SPARE_AVAIL = "主备关系"; 
+
+        public static readonly string SECONDARY_JUNCTION_TEXT1 = "Text1"; 
+        public static readonly string SECONDARY_JUNCTION_TEXT2 = "Text2";
+        public static readonly string SECONDARY_JUNCTION_TEXT3 = "Text3";
+        public static readonly string SECONDARY_JUNCTION_TEXT4 = "Text4";
+        public static readonly string SECONDARY_JUNCTION_TEXT5 = "Text5";
+        public static readonly string SECONDARY_JUNCTION_TEXT6 = "Text6";
     }
 }

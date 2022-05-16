@@ -20,7 +20,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (other is ThPDSProjectGraphEdge edge)
             {
-                return Circuit.ID.CircuitNumber.Last().Equals(edge.Circuit.ID.CircuitNumber.Last());
+                return Circuit.ID.CircuitNumber.Equals(edge.Circuit.ID.CircuitNumber);
             }
             return false;
         }
@@ -29,14 +29,14 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             if (obj is ThPDSProjectGraphEdge edge)
             {
-                return Circuit.ID.CircuitNumber.Last().Equals(edge.Circuit.ID.CircuitNumber.Last());
+                return Circuit.ID.CircuitNumber.Equals(edge.Circuit.ID.CircuitNumber);
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return Circuit.ID.CircuitID.GetHashCode();
+            return Circuit.ID.CircuitIDList.GetHashCode();
         }
         #endregion
     }

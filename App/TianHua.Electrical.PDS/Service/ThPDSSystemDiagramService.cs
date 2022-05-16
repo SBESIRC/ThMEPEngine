@@ -148,10 +148,12 @@ namespace TianHua.Electrical.PDS.Service
                     // 插入出线回路
                     basePoint = new Point3d(firstRowPoint.X, firstRowPoint.Y - 1000.0 * scaleFactor, 0);
                     var edgeCount = 0;
+
                     // 所有不在小母排/控制回路上的分支
                     var ordinaryEdges = CircuitSort(ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode));
                     DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
                     edgeCount += ordinaryEdges.Count;
+
                     // 小母排节下分支
                     thisNode.Details.MiniBusbars.Keys.ForEach(o =>
                     {
@@ -185,7 +187,7 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             var circuitData = new ThPDSControlCircuitData();
                             var controlEdges = CircuitSort(ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o));
-                            circuitData.CircuitNumber = controlEdges[0].Circuit.ID.CircuitNumber.Last();
+                            circuitData.CircuitNumber = controlEdges[0].Circuit.ID.CircuitNumber;
                             var dataList = circuitDatas.Where(data => data.CircuitNumber.Equals(circuitData.CircuitNumber)).ToList();
                             if (dataList.Count > 0)
                             {
@@ -287,6 +289,7 @@ namespace TianHua.Electrical.PDS.Service
                     }
                     var tailInHigh = insertEngine.Insert1(activeDb, configDb, tableTable, basePoint, scale);
                     assignment.TableTailAssign(activeDb, tailInHigh, thisNode, tableObjs, thisNode.Details.HighPower);
+                    basePoint = new Point3d(basePoint.X, basePoint.Y - 936.3333 * scaleFactor, 0);
 
                     // 计算表身终点
                     var bodyEndPoint = new Point3d(basePoint.X + 27900 * scaleFactor, tailPoint.Y, 0);
@@ -297,7 +300,15 @@ namespace TianHua.Electrical.PDS.Service
                     body.Layer = ThPDSLayerService.TableFrameLayer();
                     tableObjs.Add(body);
 
-                    basePoint = new Point3d(basePoint.X, basePoint.Y - 1936.3333 * scaleFactor, 0);
+                    // 二次结线
+                    if (!enterType.Equals(CircuitFormInType.集中电源.GetDescription()))
+                    {
+                        //var secJunction = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_SECONDARY_JUNCTION, basePoint, scale);
+                        //assignment.SecJunctionAssign(activeDb, secJunction, tableObjs, thisNode);
+                        //basePoint = new Point3d(basePoint.X, basePoint.Y - 7000.0 * scaleFactor, 0);
+                    }
+
+                    basePoint = new Point3d(basePoint.X, basePoint.Y - 1000.0 * scaleFactor, 0);
                     var endPoint = PointClone(basePoint);
 
                     residue -= (startPoint.Y - endPoint.Y);
@@ -528,7 +539,7 @@ namespace TianHua.Electrical.PDS.Service
 
         private static List<ThPDSProjectGraphEdge> CircuitSort(List<ThPDSProjectGraphEdge> edges)
         {
-            return edges.OrderBy(e => e.Circuit.ID.CircuitID.Last()).ToList();
+            return edges.OrderBy(e => e.Circuit.ID.CircuitID).ToList();
         }
 
         public void Dispose()

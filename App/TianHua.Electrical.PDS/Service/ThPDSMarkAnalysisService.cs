@@ -178,7 +178,7 @@ namespace TianHua.Electrical.PDS.Service
                     var match2 = regex2.Match(value);
                     if (match1.Success || match2.Success)
                     {
-                        thPDSLoad.ID.CircuitID.Add(str);
+                        thPDSLoad.ID.CircuitIDList.Add(str);
                     }
                     else
                     {
@@ -369,13 +369,13 @@ namespace TianHua.Electrical.PDS.Service
                 var match2 = regex2.Match(value);
                 if (match1.Success)
                 {
-                    id.SourcePanelID.Add(value.Replace(match1.Value, ""));
-                    id.CircuitID.Add(match1.Value.Replace("-", ""));
+                    id.SourcePanelIDList.Add(value.Replace(match1.Value, ""));
+                    id.CircuitIDList.Add(match1.Value.Replace("-", ""));
                 }
                 else if (match2.Success)
                 {
-                    id.SourcePanelID.Add(value.Replace(match2.Value, ""));
-                    id.CircuitID.Add(match2.Value.Remove(0, 1));
+                    id.SourcePanelIDList.Add(value.Replace(match2.Value, ""));
+                    id.CircuitIDList.Add(match2.Value.Remove(0, 1));
                 }
             });
 
@@ -423,8 +423,8 @@ namespace TianHua.Electrical.PDS.Service
                 }
             });
 
-            panelIDs.Distinct().ForEach(o => id.SourcePanelID.Add(o));
-            circuitIDs.Distinct().ForEach(o => id.CircuitID.Add(o));
+            panelIDs.Distinct().ForEach(o => id.SourcePanelIDList.Add(o));
+            circuitIDs.Distinct().ForEach(o => id.CircuitIDList.Add(o));
             return id;
         }
 
@@ -519,13 +519,13 @@ namespace TianHua.Electrical.PDS.Service
                 if (circuitIDs.Count == panelIDs.Count
                     && (panelIDs[0].Equals(srcPanelID) || string.IsNullOrEmpty(srcPanelID)))
                 {
-                    circuitID.SourcePanelID.Add(panelIDs[0]);
-                    circuitID.CircuitID.Add(circuitIDs[0]);
+                    circuitID.SourcePanelIDList.Add(panelIDs[0]);
+                    circuitID.CircuitIDList.Add(circuitIDs[0]);
                 }
                 else if (panelIDs.Count == 0 && !string.IsNullOrEmpty(srcPanelID))
                 {
-                    circuitID.SourcePanelID.Add(srcPanelID);
-                    circuitID.CircuitID.Add(circuitIDs[0]);
+                    circuitID.SourcePanelIDList.Add(srcPanelID);
+                    circuitID.CircuitIDList.Add(circuitIDs[0]);
                 }
             }
 
@@ -536,8 +536,8 @@ namespace TianHua.Electrical.PDS.Service
         {
             var thisCircuitID = new ThPDSID
             {
-                SourcePanelID = srcPanelID,
-                CircuitID = circuitID
+                SourcePanelIDList = srcPanelID,
+                CircuitIDList = circuitID
             };
             return thisCircuitID;
         }

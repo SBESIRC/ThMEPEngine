@@ -387,7 +387,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 回路编号
             var circuitNumber = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CIRCUIT_NUMBER).First();
-            circuitNumber.TextString = edge.Circuit.ID.CircuitID.Last();
+            circuitNumber.TextString = edge.Circuit.ID.CircuitID;
 
             // 相序
             var phaseSequence = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_PHSAE).First();
@@ -1485,6 +1485,49 @@ namespace TianHua.Electrical.PDS.Diagram
             objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
 
             objs.OfType<DBText>().First().TextString = content;
+        }
+
+        public void SecJunctionAssign(AcadDatabase activeDb, BlockReference block, List<Entity> tableObjs, ThPDSProjectGraphNode node)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+            var texts = objs.OfType<DBText>().ToList();
+
+            var text1 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT1).First();
+            text1.TextString = Text1Assign(node);
+
+            var text2 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT2).First();
+
+        }
+
+        private string Text1Assign(ThPDSProjectGraphNode node)
+        {
+            var enterType = node.Details.CircuitFormType.CircuitFormType.GetDescription();
+            if (enterType.Equals(CircuitFormInType.一路进线.GetDescription()))
+            {
+                if(node.Load.FireLoad)
+                {
+                    return "一路电源（上级二路电源，自切自复）";
+                }
+                else
+                {
+                    return "一路电源";
+                }
+            }
+            else if (enterType.Equals(CircuitFormInType.二路进线ATSE.GetDescription()))
+            {
+                return "二路电源，自切自复";
+            }
+            else if (enterType.Equals(CircuitFormInType.三路进线.GetDescription()))
+            {
+                return "二路平时电源，自切自复，战时电源手动切换";
+            }
+            return "";
+        }
+
+        private string Text2Assign(ThPDSProjectGraphNode node)
+        {
+            return "";
         }
 
         private CircuitFormInType FetchDescription(string str)

@@ -533,14 +533,14 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                return Edge.Circuit.ID.CircuitNumber.Last();
+                return Edge.Circuit.ID.CircuitNumber;
             }
         }
         public string CircuitId
         {
             get
             {
-                var id = Edge.Circuit.ID.CircuitID.Last();
+                var id = Edge.Circuit.ID.CircuitID;
                 if (string.IsNullOrEmpty(id))
                 {
                     return "未知编号回路";
@@ -560,7 +560,7 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                var id = Edge.Circuit.ID.SourcePanelID.Last();
+                var id = Edge.Circuit.ID.SourcePanelID;
                 if (string.IsNullOrEmpty(id))
                 {
                     return "未知负载";

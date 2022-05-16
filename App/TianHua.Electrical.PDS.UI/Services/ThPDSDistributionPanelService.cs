@@ -3174,7 +3174,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
-                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID.LastOrDefault(), });
+                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID, });
                                 }
                                 var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;
