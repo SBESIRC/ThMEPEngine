@@ -13,7 +13,7 @@ namespace TianHua.Electrical.PDS.UI.Services
             }
             if (string.IsNullOrWhiteSpace(str))
             {
-                str = "未知配电箱";
+                str = "未知负载";
             }
             return str;
         }
