@@ -46,8 +46,12 @@ namespace ThMEPWSS.HydrantLayout.Engine
         //可倚靠区域
         MPolygon LeanWall;
 
+        //占车位面积
+        Dictionary<FireCompareModel, double> overlappedAreaDoor = new Dictionary<FireCompareModel, double>();
+
         //混排(二、三优先级混排)情况下，可摆放的情况的列表
-        List<FireCompareModel> fireCompareModelsMix = new List<FireCompareModel>();
+        List<FireCompareModel> fireCompareModelsMix1 = new List<FireCompareModel>();
+        List<FireCompareModel> fireCompareModelsMix2 = new List<FireCompareModel>();
 
         public SingleFireHydrant(ThHydrantModel model)
         {
@@ -140,8 +144,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 switch (Mode)
                 {
                     case 2: { start = 0; end = 9; break; }
-                    case 1: { start = 0; end = 5; break; }
-                    case 0: { start = 6; end = 9; break; }
+                    case 1: { start = 0; end = 9; break; }
+                    case 0: { start = 0; end = 9; break; }
                 }
 
                 for (int j = start; j <= end; j++)
@@ -247,10 +251,18 @@ namespace ThMEPWSS.HydrantLayout.Engine
                         int againstWallLength = (int)(againstWallLength0 + againstWallLength1) / 100;
                         //double againstWallLength = 200;
                         againstWallLength = againstWallLength + (int)((3000 - distance) / 100 * Info.DistanceWeight);
+                        if (distance == 0) 
+                        { distance = 0; }
+                        if (searchPoint0.BasePointPosition[i] == 1) { againstWallLength = againstWallLength - 2; }
 
 
                         for (int k = 0; k < doorAreaList.Count; k++)
                         {
+                            // 固定开门方向
+                            if ((k == 0) &&(searchPoint0.BasePointPosition[i] == 2)) continue;
+                            if ((k == 1) &&(searchPoint0.BasePointPosition[i] == 0)) continue;
+
+                            //是否允许在车位上开门
                             if (!Info.AllowDoorInPaking)
                             {
                                 if (!FeasibilityCheck.IsFireFeasible(doorAreaList[k], LeanWall.Shell()))
@@ -264,10 +276,19 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 Point3d fireCenter = new Point3d();
                                 Vector3d fireDir = new Vector3d();
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
+                                double againstWallLengthB = againstWallLength;
+
+                                //检验开门遮挡
                                 bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(),ProcessedData.ParkingIndex);
-                                if (doorGood) againstWallLength = againstWallLength + 2;
-                                FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
-                                fireCompareModelsMix.Add(fireCompareModeltmp);
+                                if (doorGood) againstWallLengthB = againstWallLengthB + 2;
+
+                                double overlappedArea = 0;
+                                if (!doorGood) overlappedArea = IndexCompute.ComputeOverlapArea(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
+                                
+                                FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLengthB, j, doorGood);
+
+                                overlappedAreaDoor.Add(fireCompareModeltmp, overlappedArea);
+                                fireCompareModelsMix1.Add(fireCompareModeltmp);
                             }
                         }
                     }
@@ -313,8 +334,8 @@ namespace ThMEPWSS.HydrantLayout.Engine
                 switch (Mode)
                 {
                     case 2: { start = 0; end = 9; break; }
-                    case 1: { start = 0; end = 5; break; }
-                    case 0: { start = 6; end = 9; break; }
+                    case 1: { start = 0; end = 9; break; }
+                    case 0: { start = 0; end = 9; break; }
                 }
 
                 for (int j = start; j <= end; j++)
@@ -350,7 +371,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 fireHydrant0.SetModel(j, k, out fireCenter, out fireDir);
                                 bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
-                                fireCompareModelsMix.Add(fireCompareModeltmp);
+                                fireCompareModelsMix2.Add(fireCompareModeltmp);
                                 break;
                             }
                         }
@@ -378,11 +399,38 @@ namespace ThMEPWSS.HydrantLayout.Engine
         private void FindBest() 
         {
             //fireCompareModelsMix = fireCompareModelsMix.OrderBy(x => x.doorGood).ThenByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
-            fireCompareModelsMix = fireCompareModelsMix.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
-            if (fireCompareModelsMix.Count > 0)
+            fireCompareModelsMix1 = fireCompareModelsMix1.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+            fireCompareModelsMix2 = fireCompareModelsMix2.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+            List<FireCompareModel> fireCompareModelsMix3 = new List<FireCompareModel>();
+            if (fireCompareModelsMix1.Count > 0)
+            {
+                if (fireCompareModelsMix1.Count >= 2) 
+                {
+                    FireCompareModel fireCompareModelsa = fireCompareModelsMix1[0];
+                    FireCompareModel fireCompareModelsb = fireCompareModelsMix1[1];
+                    if (fireCompareModelsa.fireCenterPoint.DistanceTo(fireCompareModelsb.fireCenterPoint) < 300
+                        && fireCompareModelsa.doorOpenDir + fireCompareModelsb.doorOpenDir == 1
+                        ) 
+                    {
+                        if (overlappedAreaDoor[fireCompareModelsa] > overlappedAreaDoor[fireCompareModelsb]) 
+                        {
+                            fireCompareModelsMix1[0] = fireCompareModelsMix1[1];
+                        }
+                    }
+                }
+                
+                fireCompareModelsMix3.Add(fireCompareModelsMix1[0]);
+            }
+            if (fireCompareModelsMix2.Count > 0)
+            {
+                fireCompareModelsMix3.Add(fireCompareModelsMix2[0]);
+            }
+            fireCompareModelsMix3 = fireCompareModelsMix3.OrderByDescending(x => x.againstWallLength).ThenBy(x => x.distance).ToList();
+
+            if (fireCompareModelsMix3.Count > 0)
             {
                 Done = true;
-                FireCompareModel fireCompareModelbest = fireCompareModelsMix[0];
+                FireCompareModel fireCompareModelbest = fireCompareModelsMix3[0];
                 BestLayOut = fireCompareModelbest;
 
                 Polyline drawFire = CreateBoundaryService.CreateBoundary(fireCompareModelbest.fireCenterPoint, ShortSide, LongSide, fireCompareModelbest.fireDir);

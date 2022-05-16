@@ -38,6 +38,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public static bool IsFireFeasible(Polyline fireArea, Polyline shell) 
         {
             bool flag = false;
+            bool pakingFlag = false;
             var bufferArea = fireArea.Buffer(-10);
             var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
             var objs1 = ProcessedData.ForbiddenIndex.SelectCrossingPolygon(pl);
@@ -45,7 +46,27 @@ namespace ThMEPWSS.HydrantLayout.Engine
             bool NotInPaking = FeasibilityCheck.NotInPaking(fireArea, shell);
             objs1.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1forbidden", 8));
             objs2.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1paking", 9));
-            if (objs1.Count == 0 && objs2.Count == 0 && shell.Contains(pl) && NotInPaking)
+
+            if (objs2.Count == 0)
+            {
+                pakingFlag = true;
+            }
+            else
+            {
+                double overlapArea = 0;
+                List<Polyline> overlapObjs = fireArea.Intersection(objs2).OfType<Polyline>().ToList();
+                for (int i = 0; i < overlapObjs.Count; i++)
+                {
+                    overlapArea = overlapArea + overlapObjs[i].Area;
+                }
+
+                if (overlapArea < Info.CollisionTolerance * fireArea.Area) 
+                {
+                    pakingFlag = true;
+                }
+            }
+
+            if (objs1.Count == 0 && pakingFlag && shell.Contains(pl) && NotInPaking)
             {
                 flag = true;
             }
@@ -72,16 +93,18 @@ namespace ThMEPWSS.HydrantLayout.Engine
         public static bool IsBoundaryOK(Polyline area, Polyline shell, ThCADCoreNTSSpatialIndex forbidden) 
         {
             bool flag = false;
-            var bufferArea = area.Buffer(-10);
+
             //如果是paking则加一步判断
             if (forbidden == ProcessedData.ParkingIndex)
             {
-                if (!FeasibilityCheck.NotInPaking(area,shell)) 
+                if (!FeasibilityCheck.NotInPaking(area, shell))
                 {
                     return false;
                 }
             }
+
             //不是paking则直接走正常流程
+            var bufferArea = area.Buffer(-10);
             var pl = bufferArea.OfType<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
             var obj = forbidden.SelectCrossingPolygon(pl);
             if (obj.Count == 0) 
