@@ -217,15 +217,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     var pt1 = room.GetPoint3dAt(i - 1);
                     var pt2 = room.GetPoint3dAt(i);
-                    var dir = Vector3d.ZAxis.CrossProduct((pt2 - pt1).GetNormal());
-                    var pt3 = pt2 + dir * 100;
-                    var pt4 = pt1 + dir * 100;
-                    Polyline wallPoly = new Polyline() { Closed = true };
-                    wallPoly.AddVertexAt(0, pt1.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(1, pt2.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(2, pt3.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(3, pt4.ToPoint2d(), 0, 0, 0);
-                    roomWallLst.Add(wallPoly);
+                    if (pt1.DistanceTo(pt2) > 10)
+                    {
+                        var dir = Vector3d.ZAxis.CrossProduct((pt2 - pt1).GetNormal());
+                        var pt3 = pt2 + dir * 100;
+                        var pt4 = pt1 + dir * 100;
+                        Polyline wallPoly = new Polyline() { Closed = true };
+                        wallPoly.AddVertexAt(0, pt1.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(1, pt2.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(2, pt3.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(3, pt4.ToPoint2d(), 0, 0, 0);
+                        roomWallLst.Add(wallPoly);
+                    }
                 }
             }
 

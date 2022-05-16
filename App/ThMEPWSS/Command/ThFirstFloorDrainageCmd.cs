@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension;
@@ -67,7 +68,7 @@ namespace ThMEPWSS.Command
                     var sewagePipes = CalStructrueService.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = CalStructrueService.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = CalStructrueService.GetAxis(acad, originTransformer);
-                    if (userOutFrame.Count == 0|| rooms.Count == 0)
+                    if (userOutFrame.Count == 0 || deepRooms.Count == 0)
                     {
                         continue;
                     }
@@ -80,10 +81,6 @@ namespace ThMEPWSS.Command
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
-                        foreach (var item in holeWalls)
-                        {
-                            acad.ModelSpace.Add(item);
-                        }
                         //放置管井
                         CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes);
                         createTubeWellService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
@@ -99,7 +96,7 @@ namespace ThMEPWSS.Command
 
                         //套管标注
                         DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane);
-                        drivepipeDimensionService.scale  = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
+                        drivepipeDimensionService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         drivepipeDimensionService.CreateDim();
 
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
@@ -172,41 +169,28 @@ namespace ThMEPWSS.Command
         /// <returns></returns>
         private List<Polyline> CutWallByUserOutFrame(List<Polyline> userOutFrame, List<Polyline> walls, List<Polyline> roomWalls)
         {
-            var wallCurves = new List<Entity>(walls);
+            var wallCurves = new List<Polyline>(walls);
             wallCurves.AddRange(roomWalls);
-            var dbObjs = wallCurves.ToCollection().UnionPolygons(true);
             var allWalls = new List<Entity>();
-            foreach (Entity obj in dbObjs)
+            foreach (var curve in wallCurves)
             {
-                var interOutFrames = userOutFrame.Where(x => x.Intersects(obj)).ToList();
+                var interOutFrames = userOutFrame.Where(x => x.IsIntersects(curve)).ToList();
                 if (interOutFrames.Count > 0)
                 {
-                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y => {
+                    var bufferFrameDic = interOutFrames.ToDictionary(x => x, y =>
+                    {
                         var tempPoly = y.ExtendByLengthLine(100);
-                        tempPoly = tempPoly.ExtendByLengthLine(-100, false);
+                        //tempPoly = tempPoly.ExtendByLengthLine(-100, false);
                         return tempPoly;
                     });
-                    if (obj is MPolygon mPolygon)
-                    {
-                        allWalls.AddRange(mPolygon.Difference(bufferFrameDic.Values.ToCollection()).Cast<Entity>().ToList());
-                    }
-                    else if (obj is Polyline polyline)
-                    {
-                        allWalls.AddRange(polyline.Difference(bufferFrameDic.Values.ToCollection()).OfType<Entity>().ToList());
-                    }
+                    allWalls.AddRange(curve.Difference(bufferFrameDic.Values.ToCollection()).OfType<Entity>().ToList());
                 }
                 else
                 {
-                    if (obj is MPolygon mPolygon)
-                    {
-                        allWalls.Add(mPolygon.Shell());
-                    }
-                    else if (obj is Polyline polyline)
-                    {
-                        allWalls.Add(polyline);
-                    }
+                    allWalls.Add(curve);
                 }
             }
+            var dbObjs = allWalls.ToCollection().UnionPolygons(false).Cast<Entity>().ToList();
             return StructGeoService.GetWallPolylines(allWalls);
         }
 
