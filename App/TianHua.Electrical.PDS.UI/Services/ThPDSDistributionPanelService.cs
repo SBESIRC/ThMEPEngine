@@ -393,6 +393,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         item = PDSItemInfo.Create(left, default);
                     }
                     if (item is null) throw new NotSupportedException(left);
+                    if (circuitInType != CircuitFormInType.集中电源)
+                    {
+                        item.brInfos.Add(new BlockInfo("PMFE", "E-PMFE-DEVC", new(17, -259)));
+                        item.brInfos.Add(new BlockInfo("EFPU", "E-EFPS-DEVC", new(17, -287)));
+                    }
                     foreach (var fe in CreateDrawingObjects(canvas, trans, item))
                     {
                         canvas.Children.Add(fe);
@@ -417,7 +422,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var figure = new PathFigure();
                                 figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
                                 var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
-                                  new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
+                                  new Size(info.Arc.Radius, info.Arc.Radius), 30, false, info.Arc.IsClockWise ? SweepDirection.Clockwise : SweepDirection.Counterclockwise, true);
                                 figure.Segments.Add(arcSeg);
                                 geo.Figures.Add(figure);
                             }
@@ -684,6 +689,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             foreach (var el in CreateDrawingObjects(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red))
                             {
+                                if (info.BlockName is "PMFE")
+                                {
+                                    el.SetBinding(UIElement.VisibilityProperty, new Binding(nameof(config.Current.FirePowerMonitoring)) { Source = config.Current, Converter = new BooleanToVisibilityConverter(), });
+                                }
+                                else if (info.BlockName is "EFPU")
+                                {
+                                    el.SetBinding(UIElement.VisibilityProperty, new Binding(nameof(config.Current.ElectricalFireMonitoring)) { Source = config.Current, Converter = new BooleanToVisibilityConverter(), });
+                                }
                                 yield return el;
                             }
                             var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
@@ -2194,6 +2207,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             Update(false);
                                         };
+                                        ctrl.cbxFilt.IsChecked = true;
                                         Update(ctrl.cbxFilt.IsChecked.Value);
                                         var ok = false;
                                         ctrl.btnYes.Command = new RelayCommand(() =>
