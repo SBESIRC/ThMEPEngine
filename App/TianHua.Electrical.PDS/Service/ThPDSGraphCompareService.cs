@@ -152,6 +152,10 @@ namespace TianHua.Electrical.PDS.Service
                     {
                         continue;
                     }
+                    if (DataCompare(nodeA, nodeB) == false)
+                    {
+                        continue;
+                    }
                     nodeIdVisit[idA] = true;
                     nodeIdVisit[idB] = true;
                     if (NodesSameEnvironment(IdToNodes[idA].First().Item1, IdToNodes[idB].First().Item2, graphA, graphB)
@@ -620,6 +624,32 @@ namespace TianHua.Electrical.PDS.Service
                 return true;
             }
             return false;
+        }
+
+
+        private bool DataCompare(ThPDSProjectGraphNode nodeA, ThPDSProjectGraphNode nodeB)
+        {
+            if (nodeA.Load.ID.Description != nodeB.Load.ID.Description)
+            {
+                return false;
+            }
+            if (nodeA.Load.FireLoad != nodeB.Load.FireLoad)
+            {
+                return false;
+            }
+            if (!nodeA.Load.InstalledCapacity.EqualsTo(nodeB.Load.InstalledCapacity))
+            {
+                return false;
+            }
+            if (!nodeA.Type.Equals(nodeB.Type))
+            {
+                return false;
+            }
+            if (nodeA.Load.Phase != nodeB.Load.Phase)
+            {
+                return false;
+            }
+            return true;
         }
         #endregion
 
