@@ -127,6 +127,14 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 {
                     pt2Line.Add(middlePt, line);
                 }
+                if (!pt2Line.ContainsKey(line.Item1))
+                {
+                    pt2Line.Add(line.Item1, line);
+                }
+                if (!pt2Line.ContainsKey(line.Item2))
+                {
+                    pt2Line.Add(line.Item2, line);
+                }
             }
 
             var dbPoints = pt2Line.Keys.Select(p => new DBPoint(p)).ToCollection();
@@ -172,9 +180,18 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 foreach (var pt in lines.Value)
                 {
                     var middlePt = new Point3d((pt.X + lines.Key.X) / 2, (pt.Y + lines.Key.Y) / 2, 0);
+                    var curline = new Tuple<Point3d, Point3d>(pt, lines.Key);
                     if (!pt2Line.ContainsKey(middlePt))
                     {
-                        pt2Line.Add(middlePt, new Tuple<Point3d, Point3d>(pt, lines.Key));
+                        pt2Line.Add(middlePt, curline);
+                    }
+                    if (!pt2Line.ContainsKey(pt))
+                    {
+                        pt2Line.Add(pt, curline);
+                    }
+                    if (!pt2Line.ContainsKey(lines.Key))
+                    {
+                        pt2Line.Add(lines.Key, curline);
                     }
                 }
             }

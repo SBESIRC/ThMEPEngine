@@ -9,22 +9,22 @@
              ResizeMode="NoResize"
              mc:Ignorable="d"
              Title="接地平面"
-             Width="155" Height="215" Closed="Window_Closed">
+             Width="180" Height="157" Closed="Window_Closed">
     <Grid Margin="5,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="27"></RowDefinition>
-            <RowDefinition Height="35"></RowDefinition>
-            <RowDefinition Height="27"></RowDefinition>
-            <RowDefinition Height="27"></RowDefinition>
-            <RowDefinition Height="27"></RowDefinition>
-            <RowDefinition Height="27"></RowDefinition>
-            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <!--<RowDefinition Height="35"></RowDefinition>-->
+            <!--<RowDefinition Height="27"></RowDefinition>-->
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="17*"/>
             <ColumnDefinition Width="12*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="是否合并网格：" Grid.RowSpan="2"/>
+        <!--<Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="是否合并网格：" Grid.RowSpan="2"/>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" Width="150" Focusable="False" HorizontalAlignment="Left">
             <RadioButton x:Name="nonSplit"  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"
                             VerticalContentAlignment="Bottom" Margin="5,0,0,0" Checked="NonMerge_Checked">
@@ -34,19 +34,19 @@
                              VerticalContentAlignment="Bottom" Margin="5,5,0,0" Checked="Merge_Checked">
                 <Label VerticalContentAlignment="Bottom" Padding="0" Focusable="False" Content="合并" ></Label>
             </RadioButton>
-        </StackPanel>
+        </StackPanel>-->
 
-        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="网格最大尺寸(m)：" Margin="15,0,0,2"/>
-        <ComboBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,3,0,3" Name="cbEarthSizes" ItemsSource="{Binding EarthGridSizes,Mode=OneWay}"
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="网格最大尺寸(m)：" Margin="0,0,0,2"/>
+        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,3,0,3" Name="cbEarthSizes" ItemsSource="{Binding EarthGridSizes,Mode=OneWay}"
                       Text="{Binding EarthGridSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
         </ComboBox>
-        <Label Grid.Row="4" Grid.Column="0" Content="接地内轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
-        <Button Grid.Row="4" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthInnerOutline" Content="绘  制" Width="60"
+        <Label Grid.Row="2" Grid.Column="0" Content="接地内轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
+        <Button Grid.Row="2" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthInnerOutline" Content="绘  制" Width="60"
                     Click="btnEarthInnerOutline_Click"></Button>
-        <Label Grid.Row="5" Grid.Column="0" Content="接地外轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
-        <Button Grid.Row="5" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthOutterOutline" Content="绘  制" Width="60"
+        <Label Grid.Row="3" Grid.Column="0" Content="接地外轮廓线" Grid.ColumnSpan="2" Margin="0,0,0,2"/>
+        <Button Grid.Row="3" Grid.Column="1" Margin="0,3,0,3" HorizontalAlignment="Center" Name="btnEarthOutterOutline" Content="绘  制" Width="60"
                     Click="btnEarthOutterOutline_Click"></Button>
-        <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"  Margin="0,3,0,3" Name="btnDrawEarthingGrid" Content="绘制接地网" 
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"  Margin="0,3,0,3" Name="btnDrawEarthingGrid" Content="绘制接地网" 
                     Click="btnDrawEarthingGrid_Click"></Button>
     </Grid>
 </Window>

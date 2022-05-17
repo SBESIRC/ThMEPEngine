@@ -133,6 +133,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 Line reducedLine = LineDealer.ReduceLine(wallPt, nearPt, 1000);
                 foreach (var outline in allOutlines)
                 {
+                    outline.Closed = true;
                     var pl = outline.Buffer(500)[0] as Polyline;
                     if (pl.Intersects(reducedLine))
                     {

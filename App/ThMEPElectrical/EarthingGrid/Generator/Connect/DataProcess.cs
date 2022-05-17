@@ -78,7 +78,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 {
                     curOutline.Closed = true;
                 }
-                var shell = curOutline.Buffer(outBufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                var pls = curOutline.Buffer(outBufferLength).OfType<Polyline>().OrderByDescending(p => p.Area);
+                if(pls.Count() <= 0)
+                {
+                    continue;
+                }
+                var shell = pls.First();
                 var holes = curOutline.Buffer(-inBufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());
                 var innerColumnPoints = spatialIndex.SelectWindowPolygon(mPolygon).OfType<DBPoint>().Select(d => d.Position).Distinct().ToHashSet();
@@ -123,7 +128,12 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         {
             foreach(var outline in outlines)
             {
-                var shell = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                var pls = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area);
+                if (pls.Count() <= 0)
+                {
+                    continue;
+                }
+                var shell = pls.First();
                 var holes = outline.Buffer(-bufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());    
                 outlinewithNearPts.Add(outline, spatialIndex.SelectWindowPolygon(mPolygon).OfType<DBPoint>().Select(d => d.Position).Distinct().ToHashSet());
