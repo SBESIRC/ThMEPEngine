@@ -513,6 +513,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     var c = EntityTool.GetCircles(br).Where(x => x.Visible).Select(x => x.ToGCircle()).Where(x => x.Radius > THESAURUSINCOMPLETE).FirstOrDefault();
                     if (c.IsValid)
                     {
+                        geoData.FloorDrains.Add(c.ToCirclePolygon(SUPERLATIVENESS).ToGRect());
                         geoData.FloorDrainRings.Add(c);
                     }
                 }
