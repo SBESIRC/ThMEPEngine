@@ -16,6 +16,7 @@ using ThMEPEngineCore.CAD;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 using DotNetARX;
+using System.IO;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -1465,7 +1466,7 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                     e.Location.FloorNumber = floorNumber;
                     e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
-                    e.Location.ReferenceDWG = database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                    e.Location.ReferenceDWG = Path.GetFileNameWithoutExtension(database.Filename);
                 });
             });
         }

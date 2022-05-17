@@ -17,6 +17,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Electrical;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using System.IO;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -64,11 +65,11 @@ namespace TianHua.Electrical.PDS.Engine
 
                         var nodeMap = new ThPDSNodeMap
                         {
-                            ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                            ReferenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename),
                         };
                         var edgeMap = new ThPDSEdgeMap
                         {
-                            ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                            ReferenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename),
                         };
 
                         var storeysGeometry = new List<Polyline>();

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 
 using AcHelper;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -68,16 +69,10 @@ namespace TianHua.Electrical.PDS.Engine
             }
             foreach (Document doc in Application.DocumentManager)
             {
-                //var fileName = doc.Name.Split('\\').Last();
-                //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
-                //{
-                //    continue;
-                //}
-
                 using (var docLock = doc.LockDocument())
                 using (var activeDb = AcadDatabase.Use(doc.Database))
                 {
-                    var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                    var referenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename);
                     if (location.ReferenceDWG.Equals(referenceDWG))
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;

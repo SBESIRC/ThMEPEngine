@@ -17,6 +17,7 @@ using TianHua.Electrical.PDS.Project.Module;
 using ProjectGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using System.IO;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -65,7 +66,7 @@ namespace TianHua.Electrical.PDS.Service
             using (var docLock = Active.Document.LockDocument())
             using (var activeDb = AcadDatabase.Active())
             {
-                var referenceDWG = activeDb.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                var referenceDWG = Path.GetFileNameWithoutExtension(activeDb.Database.Filename);
                 var nodeMap = NodeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
                 var edgeMap = EdgeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
                 if (nodeMap.IsNull() || ProjectGraph.IsNull())
