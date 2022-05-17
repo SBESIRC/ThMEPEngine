@@ -62,6 +62,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var config = new ThPDSDistributionPanelConfig();
             panel.canvas.DataContext = config;
             var builder = new ThPDSCircuitGraphTreeBuilder();
+            void UpdateTreeView()
+            {
+                var tree = builder.Build(graph);
+                {
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        foreach (var n in node.DataList)
+                        {
+                            n.Parent = node;
+                            n.Root = tree;
+                            dfs(n);
+                        }
+                    }
+                    dfs(tree);
+                    panel.tv.DataContext = tree;
+                }
+            }
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
@@ -2249,6 +2266,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 ThPDSProjectGraphService.DistributeLoad(graph, edge, node);
                                             }
+                                            UpdateTreeView();
                                             UpdateCanvas();
                                         }
                                     });
