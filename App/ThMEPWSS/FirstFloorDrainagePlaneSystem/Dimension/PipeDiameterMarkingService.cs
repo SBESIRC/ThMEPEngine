@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 
@@ -15,9 +16,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         double startDis = 1100;
         double moveDis = 200;
         List<RouteModel> routes;
-        public PipeDiameterMarkingService(List<RouteModel> _routes)
+        ThMEPOriginTransformer originTransformer;
+        public PipeDiameterMarkingService(List<RouteModel> _routes, ThMEPOriginTransformer _originTransformer)
         {
             routes = _routes.Where(x => !x.IsBranchPipe).ToList();
+            originTransformer = _originTransformer;
         }
 
         public void CreateDim()
@@ -46,6 +49,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
                 var sPt = lastPt + dir * startDis;// + moveDir * moveDis;
+                sPt = originTransformer.Reset(sPt);
                 layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -moveDir));
             }
 

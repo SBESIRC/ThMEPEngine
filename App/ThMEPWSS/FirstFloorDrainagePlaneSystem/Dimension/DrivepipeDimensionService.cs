@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
@@ -22,11 +23,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         List<RouteModel> routes;
         List<Polyline> outFrames;
         FirstFloorPlaneViewModel firstFloorPlane;
-        public DrivepipeDimensionService(List<RouteModel> _routes, List<Polyline> _outFrames, FirstFloorPlaneViewModel _firstFloorPlane)
+        ThMEPOriginTransformer originTransformer;
+        public DrivepipeDimensionService(List<RouteModel> _routes, List<Polyline> _outFrames, FirstFloorPlaneViewModel _firstFloorPlane, ThMEPOriginTransformer _originTransformer)
         {
             routes = _routes.Where(x => !x.IsBranchPipe).ToList();
             outFrames = _outFrames;
             firstFloorPlane = _firstFloorPlane;
+            originTransformer = _originTransformer;
         }
 
         public void CreateDim()
@@ -62,7 +65,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             {
                 var dir = lInfo.Value;
                 var pt = lInfo.Key + dir * length;
-                lst.Add(new KeyValuePair<Point3d, Vector3d>(pt, dir));
+                var transPt = originTransformer.Reset(pt);
+                lst.Add(new KeyValuePair<Point3d, Vector3d>(transPt, dir));
             }
             InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(lst, ThWSSCommon.DrivepipeLayerName, ThWSSCommon.DrivepipeBlockName, attri);
@@ -109,12 +113,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             var midPt =new Point3d((connectPt.X + lastPt.X) / 2, (connectPt.Y + lastPt.Y) / 2, 0);
             var txtDir = Vector3d.YAxis;
             var txtPt = midPt + txtMoveLength * txtDir;
+            txtPt = originTransformer.Reset(txtPt);
             var dimtext = new DBText() { Height = 200, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = size, Position = txtPt, AlignmentPoint = txtPt };
             dbTexts.Add(dimtext);
             var levelPt = midPt - txtMoveLength * txtDir;
+            levelPt = originTransformer.Reset(levelPt);
             var leveltext = new DBText() { Height = 200, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = firstFloorPlane.DrivepipeLevel.ToString(), Position = levelPt, AlignmentPoint = levelPt };
             dbTexts.Add(leveltext);
 
+            noteLines.ForEach(x => originTransformer.Reset(x));
             PrintMarks.PrintNoteLines(noteLines, scale);
             PrintMarks.PrintText(dbTexts, scale);
         }

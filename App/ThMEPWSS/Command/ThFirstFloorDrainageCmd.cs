@@ -75,9 +75,6 @@ namespace ThMEPWSS.Command
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
-                    //回退transform
-                    routes = TransResetRouteModels(routes, originTransformer);
-
                     //进行路由倒角
                     ChamferService chamferService = new ChamferService(routes);
                     routes = chamferService.Chamfer();
@@ -85,25 +82,25 @@ namespace ThMEPWSS.Command
                     using (acad.Database.GetDocument().LockDocument())
                     {
                         //放置管井
-                        CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes);
+                        CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes, originTransformer);
                         createTubeWellService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         routes = createTubeWellService.Layout();
 
                         //处理冷凝水管
-                        HandlePipes(routes);
+                        HandlePipes(routes, originTransformer);
 
                         //标注管径
-                        PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes);
+                        PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes, originTransformer);
                         pipeDiameterMarkingService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         pipeDiameterMarkingService.CreateDim();
 
                         //套管标注
-                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane);
+                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane, originTransformer);
                         drivepipeDimensionService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         drivepipeDimensionService.CreateDim();
 
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
-                        PrintPipes.Print(otherPipes, Convert.ToDouble(firstFloorPlane.BlockScale.Tag));
+                        PrintPipes.Print(otherPipes, Convert.ToDouble(firstFloorPlane.BlockScale.Tag), originTransformer);
                     }
                 }
             }
@@ -113,20 +110,20 @@ namespace ThMEPWSS.Command
         /// 冷凝水管间接排水
         /// </summary>
         /// <param name="routes"></param>
-        private void HandlePipes(List<RouteModel> routes)
+        private void HandlePipes(List<RouteModel> routes, ThMEPOriginTransformer originTransformer)
         {
             var condensatePipes = routes.Where(x => x.verticalPipeType == VerticalPipeType.CondensatePipe && !x.IsBranchPipe).ToList();
             DraningSettingService drainningSettingService = null;
             switch (paramSetting.IndirectDrainageSetting)
             {
                 case DrainageSettingEnum.Tagging:
-                    drainningSettingService = new DrainningSettingTaggingService(condensatePipes);
+                    drainningSettingService = new DrainningSettingTaggingService(condensatePipes, originTransformer);
                     break;
                 case DrainageSettingEnum.RainwaterInlet13:
-                    drainningSettingService = new DrainningSettingRainwaterInlet(condensatePipes);
+                    drainningSettingService = new DrainningSettingRainwaterInlet(condensatePipes, originTransformer);
                     break;
                 case DrainageSettingEnum.OutdoorWell:
-                    drainningSettingService = new DrainningSettingSealedWellService(condensatePipes);
+                    drainningSettingService = new DrainningSettingSealedWellService(condensatePipes, originTransformer);
                     break;
                 case DrainageSettingEnum.NotConsidered:
                 default:

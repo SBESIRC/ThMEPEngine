@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -18,9 +19,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         double routeDis = 1500;
         double shortedDis = 400;
         List<RouteModel> routes;
-        public CreateTubeWellService(List<RouteModel> _routes)
+        ThMEPOriginTransformer originTransformer;
+        public CreateTubeWellService(List<RouteModel> _routes, ThMEPOriginTransformer _originTransformer)
         {
             routes = _routes;
+            originTransformer = _originTransformer;
         }
 
         public List<RouteModel> Layout()
@@ -165,7 +168,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         {
             foreach (var pt in layoutPts)
             {
-                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(pt.Value.Key, pt.Value.Value) };
+                var transPt = originTransformer.Reset(pt.Value.Key);
+                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(transPt, pt.Value.Value) };
                 InsertBlockService.scaleNum = scale;
                 string layer = "";
                 string blockName = "";

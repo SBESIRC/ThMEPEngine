@@ -10,7 +10,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
 {
     public static class PrintPipes
     {
-        public static void Print(List<RouteModel> routes, double scale)
+        public static void Print(List<RouteModel> routes, double scale, ThMEPOriginTransformer originTransformer)
         {
             var routeGroup = routes.GroupBy(x => x.verticalPipeType).ToList();
             string layer = ThWSSCommon.DraiLayerName;
@@ -32,8 +32,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                     default:
                         break;
                 }
+                var pipes = group.Select(x => { originTransformer.Reset(x.route); return x.route; }).ToList();
                 InsertBlockService.scaleNum = scale;
-                InsertBlockService.InsertConnectPipe(group.Select(x=>x.route).ToList(), layer, null);
+                InsertBlockService.InsertConnectPipe(pipes, layer, null);
             }
         }
     }

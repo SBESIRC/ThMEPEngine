@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -15,9 +16,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
     {
         double inletWidth = 100;
         double moveLength = 500;
-        public DrainningSettingRainwaterInlet(List<RouteModel> _pipes)
+        public DrainningSettingRainwaterInlet(List<RouteModel> _pipes, ThMEPOriginTransformer _originTransformer)
         {
             pipes = _pipes;
+            originTransformer = _originTransformer;
         }
 
         public override void CreateDraningSetting()
@@ -56,9 +58,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 var firRoute = new Polyline();
                 firRoute.AddVertexAt(0, sp.ToPoint2D(), 0, 0, 0);
                 firRoute.AddVertexAt(1, (sp + dir * moveLength).ToPoint2D(), 0, 0, 0);
+                originTransformer.Reset(firRoute);
                 routes.Add(firRoute);
-                inletPts.Add(new KeyValuePair<Point3d, Vector3d>(sp + dir * (moveLength + inletWidth), dir));
+                var transPt = originTransformer.Reset(sp);
+                inletPts.Add(new KeyValuePair<Point3d, Vector3d>(transPt + dir * (moveLength + inletWidth), dir));
                 pipe.route = GeometryUtils.ShortenPolyline(pipe.route, allLength, true);
+                originTransformer.Reset(pipe.route);
                 routes.Add(pipe.route);
             }
 
