@@ -31,7 +31,7 @@ namespace ThParkingStall.Core
                 MCompute.Logger?.Information("----------------------------------");
                 MCompute.Logger?.Information(ex.StackTrace);
                 MCompute.Logger?.Information("##################################");
-                //MPGAData.Save();
+                MPGAData.Save();
             }
         }
         static void Run(string[] ProcessInfo)
@@ -49,6 +49,7 @@ namespace ThParkingStall.Core
             MCompute.Logger = Logger;
             MCompute.LogInfo = LogAllInfo;
             MCompute.ThreadCnt = ThreadCnt;
+            MPGAData.ProcIndex = ProcessIndex;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var t_pre = 0.0;
@@ -144,8 +145,6 @@ namespace ThParkingStall.Core
                         }
                     }
                 }
-                catch (Exception ex)
-                { }
                 finally
                 {
                     StartSignal.ReleaseMutex();//发出信号确认完成
