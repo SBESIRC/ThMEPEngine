@@ -75,6 +75,9 @@ namespace ThMEPWSS.Command
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting);
                     var routes = createDrainageRoute.Routing();
 
+                    //回退transform
+                    routes = TransResetRouteModels(routes, originTransformer);
+
                     //进行路由倒角
                     ChamferService chamferService = new ChamferService(routes);
                     routes = chamferService.Chamfer();
@@ -192,6 +195,26 @@ namespace ThMEPWSS.Command
             }
             var dbObjs = allWalls.ToCollection().UnionPolygons(false).Cast<Entity>().ToList();
             return StructGeoService.GetWallPolylines(dbObjs);
+        }
+
+        /// <summary>
+        /// 回退transform，打印图纸到世界坐标系
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="originTransformer"></param>
+        /// <returns></returns>
+        private List<RouteModel> TransResetRouteModels(List<RouteModel> routes, ThMEPOriginTransformer originTransformer)
+        {
+            foreach (var route in routes)
+            {
+                originTransformer.Reset(route.route);
+                if (route.printCircle != null)
+                {
+                    originTransformer.Reset(route.printCircle);
+                }
+                route.startPosition = originTransformer.Reset(route.startPosition);
+            }
+            return routes;
         }
 
         public void Dispose()

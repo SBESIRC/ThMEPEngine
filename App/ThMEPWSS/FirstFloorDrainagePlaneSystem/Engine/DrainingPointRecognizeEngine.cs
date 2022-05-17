@@ -39,7 +39,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
                         continue;
                     var elems = new List<DrainingEquipmentModel>();
-                    var mcs2wcs = block.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
                     DoExtract(elems, block, Matrix3d.Identity);
                     equipmentBlcoks.AddRange(elems);
                 }

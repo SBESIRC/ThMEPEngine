@@ -419,6 +419,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     else if (ent is Line)
                     {
                         var linePipe = ent.Clone() as Line;
+                        originTransformer.Transform(linePipe);
                         Polyline pipe = new Polyline();
                         pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
                         pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);

@@ -123,7 +123,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     closetPt = firPipe.Value.StartPoint;
                 }
-                var closetLine = CreateRouteHelper.GetClosetLane(allLines, closetPt, frame, wallPolys, step);
+                var closetLine = CreateRouteHelper.GetClosetLane(allLines, closetPt, frame, wallPolys, 400);
                 var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
                 foreach (var dic in pipeGroup)
                 {

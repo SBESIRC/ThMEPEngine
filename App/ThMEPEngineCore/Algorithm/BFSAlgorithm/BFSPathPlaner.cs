@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
                 return null;
             }
 
-            var resLine = BFSFind(startNode, endLines);
+            var resLine = BFSFind(startNode, endLines, frame);
             return resLine;
         }
 
@@ -85,10 +85,11 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
                 for (int j = 0; j < rows; j++)
                 {
                     Point3d pt = new Point3d(minX + i * step, minY + j * step, 0);
-                    if (polyline.Contains(pt))
-                    {
-                        nodes[i][j] = pt;
-                    }
+                    nodes[i][j] = pt;
+                    //if (polyline.Contains(pt))
+                    //{
+                        
+                    //}
                 }
             }
         }
@@ -129,7 +130,7 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
         /// <param name="startNode"></param>
         /// <param name="endLines"></param>
         /// <returns></returns>
-        private Line BFSFind(BFSNode startNode, List<Line> endLines)
+        private Line BFSFind(BFSNode startNode, List<Line> endLines, Polyline polyline)
         {
             Queue<BFSNode> q = new Queue<BFSNode>();
             nodes[startNode.X][startNode.Y] = null;
@@ -141,7 +142,7 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
                 //遍历
                 foreach (var aNode in adjNodes)
                 {
-                    if (holes == null || !holes.Any(x=>x.Contains(aNode.point)))
+                    if (holes == null || !holes.Any(x=>x.Contains(aNode.point)) || polyline.Contains(aNode.point))
                     {
                         aNode.parent = node;
                         q.Enqueue(aNode);

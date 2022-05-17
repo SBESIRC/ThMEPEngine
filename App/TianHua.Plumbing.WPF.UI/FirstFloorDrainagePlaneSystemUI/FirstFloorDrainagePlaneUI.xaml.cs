@@ -57,6 +57,7 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThWSSCommon.OutFrameLayerName), false);
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutFrameLayerName);
+                currentDb.Database.SetLayerColor(ThWSSCommon.OutFrameLayerName, 2);
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
         }

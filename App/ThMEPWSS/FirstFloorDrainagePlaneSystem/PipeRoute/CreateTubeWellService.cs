@@ -48,11 +48,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <returns></returns>
         private KeyValuePair<Point3d, Vector3d> CalTubeWellPt(List<RouteModel> routes)
         {
-            var routeEndPts = routes.Select(x => {
-                if (x.route.StartPoint.DistanceTo(x.startPosition) > x.route.EndPoint.DistanceTo(x.startPosition))
+            routes.ForEach(x =>
+            {
+                if (x.route.EndPoint.DistanceTo(x.startPosition) < x.route.StartPoint.DistanceTo(x.startPosition))
+                {
                     x.route.ReverseCurve();
-                return x.route.EndPoint;
-            }).ToList();
+                }
+            });
+            var routeEndPts = routes.Select(x => x.route.EndPoint).ToList();
             var pt = routeEndPts.First();
             if (routeEndPts.Count >= 1)
             {
