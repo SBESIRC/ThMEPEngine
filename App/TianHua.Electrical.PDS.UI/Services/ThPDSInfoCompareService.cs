@@ -477,6 +477,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Hint = "不满足消防供电要求",
                         });
                     }
+                    else if (tag is ThPDSProjectGraphNodeCascadingErrorTag)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "进线断路器选型不具备选择性",
+                        });
+                    }
                     else
                     {
                         throw new NotSupportedException();
