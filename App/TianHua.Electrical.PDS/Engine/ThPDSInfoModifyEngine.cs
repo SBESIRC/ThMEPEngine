@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
-
-using ThCADCore.NTS;
+using AcHelper;
+using DotNetARX;
+using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using ProjectGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -63,145 +62,138 @@ namespace TianHua.Electrical.PDS.Service
 
         public void InfoModify()
         {
-            foreach (Document doc in Application.DocumentManager)
+            // TODO：暂时只支持当前文档
+            using (var docLock = Active.Document.LockDocument())
+            using (var activeDb = AcadDatabase.Active())
             {
-                //var fileName = doc.Name.Split('\\').Last();
-                //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
-                //{
-                //    continue;
-                //}
-
-                using (var docLock = doc.LockDocument())
-                using (var activeDb = AcadDatabase.Use(doc.Database))
+                var referenceDWG = activeDb.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                var nodeMap = NodeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
+                var edgeMap = EdgeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
+                if (nodeMap.IsNull() || ProjectGraph.IsNull())
                 {
-                    // Application.DocumentManager.MdiActiveDocument = doc;
+                    return;
+                }
+                Revclouds = new DBObjectCollection();
 
-                    var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
-                    var nodeMap = NodeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
-                    var edgeMap = EdgeMapList.FirstOrDefault(o => o.ReferenceDWG.Equals(referenceDWG));
-                    if (nodeMap.IsNull() || ProjectGraph.IsNull())
+                NodeList.ForEach(o =>
+                {
+                    var sourceNode = nodeMap.NodeMap
+                        .Where(node => node.Key.Loads[0].LoadUID.Equals(o.Load.LoadUID))
+                        .ToList();
+                    if (sourceNode.Count != 1)
                     {
-                        continue;
+                        return;
                     }
-                    Revclouds = new DBObjectCollection();
 
-                    NodeList.ForEach(o =>
+                    if (o.Tag is ThPDSProjectGraphNodeIdChangeTag idTag)
                     {
-                        var sourceNode = nodeMap.NodeMap
-                            .Where(node => node.Key.Loads[0].LoadUID.Equals(o.Load.LoadUID))
-                            .ToList();
-                        if (sourceNode.Count != 1)
+                        if (idTag.ChangeFrom)
                         {
-                            return;
-                        }
-
-                        if (o.Tag is ThPDSProjectGraphNodeIdChangeTag idTag)
-                        {
-                            if (idTag.ChangeFrom)
-                            {
-                                var sourceLoadID = sourceNode[0].Key.Loads[0].ID.LoadID;
-                                sourceNode[0].Value.ForEach(id =>
-                                {
-                                    InfoModify(activeDb, id, sourceLoadID, idTag.ChangedID);
-                                });
-                            }
-                            return;
-                        }
-
-                        // 节点负载数据更新
-                        var dataTag = new ThPDSProjectGraphNodeDataTag();
-                        if (o.Tag is ThPDSProjectGraphNodeDataTag tag)
-                        {
-                            dataTag = tag;
-                        }
-                        else if (o.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
-                        {
-                            dataTag = compositeTag.DataTag;
-                        }
-
-                        if (dataTag.TagP)
-                        {
-                            var sourceHighPower = sourceNode[0].Key.Loads[0].InstalledCapacity.HighPower;
-                            if (sourceHighPower != 0)
-                            {
-                                sourceNode[0].Value.ForEach(id =>
-                                {
-                                    InfoModify(activeDb, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString(), true);
-                                });
-                            }
-
-                            var sourceLowPower = sourceNode[0].Key.Loads[0].InstalledCapacity.LowPower;
-                            if (sourceLowPower != 0)
-                            {
-                                sourceNode[0].Value.ForEach(id =>
-                                {
-                                    InfoModify(activeDb, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString(), true);
-                                });
-                            }
-                        }
-                        if (dataTag.TagD)
-                        {
-                            var sourceDescription = sourceNode[0].Key.Loads[0].ID.Description;
+                            var sourceLoadID = sourceNode[0].Key.Loads[0].ID.LoadID;
                             sourceNode[0].Value.ForEach(id =>
                             {
-                                InfoModify(activeDb, id, sourceDescription, dataTag.TarD);
+                                InfoModify(activeDb, id, sourceLoadID, idTag.ChangedID);
                             });
                         }
-                        if (dataTag.TagF)
+                        return;
+                    }
+
+                    // 节点负载数据更新
+                    var dataTag = new ThPDSProjectGraphNodeDataTag();
+                    if (o.Tag is ThPDSProjectGraphNodeDataTag tag)
+                    {
+                        dataTag = tag;
+                    }
+                    else if (o.Tag is ThPDSProjectGraphNodeCompositeTag compositeTag)
+                    {
+                        dataTag = compositeTag.DataTag;
+                    }
+
+                    if (dataTag.TagP)
+                    {
+                        var sourceHighPower = sourceNode[0].Key.Loads[0].InstalledCapacity.HighPower;
+                        if (sourceHighPower != 0)
                         {
                             sourceNode[0].Value.ForEach(id =>
                             {
-                                var entity = activeDb.Element<Entity>(id, true);
-                                if (entity is BlockReference block)
+                                InfoModify(activeDb, id, sourceHighPower.ToString(), dataTag.TarP.HighPower.ToString(), true);
+                            });
+                        }
+
+                        var sourceLowPower = sourceNode[0].Key.Loads[0].InstalledCapacity.LowPower;
+                        if (sourceLowPower != 0)
+                        {
+                            sourceNode[0].Value.ForEach(id =>
+                            {
+                                InfoModify(activeDb, id, sourceLowPower.ToString(), dataTag.TarP.LowPower.ToString(), true);
+                            });
+                        }
+                    }
+                    if (dataTag.TagD)
+                    {
+                        var sourceDescription = sourceNode[0].Key.Loads[0].ID.Description;
+                        sourceNode[0].Value.ForEach(id =>
+                        {
+                            InfoModify(activeDb, id, sourceDescription, dataTag.TarD);
+                        });
+                    }
+                    if (dataTag.TagF)
+                    {
+                        sourceNode[0].Value.ForEach(id =>
+                        {
+                            var entity = activeDb.Element<Entity>(id, true);
+                            if (entity is BlockReference block)
+                            {
+                                if (block.Name.Contains(ThPDSCommon.LOAD_LABELS))
                                 {
-                                    if (block.Name.Contains(ThPDSCommon.LOAD_LABELS))
+                                    if (dataTag.TarF)
                                     {
-                                        if (dataTag.TarF)
-                                        {
-                                            id.SetDynBlockValue("电源类别", ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
-                                        }
-                                        else
-                                        {
-                                            id.SetDynBlockValue("电源类别", ThPDSCommon.NON_PROPERTY_VALUE_FIRE_POWER);
-                                        }
+                                        id.SetDynBlockValue("电源类别", ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
+                                    }
+                                    else
+                                    {
+                                        id.SetDynBlockValue("电源类别", ThPDSCommon.NON_PROPERTY_VALUE_FIRE_POWER);
                                     }
                                 }
-                            });
-                        }
-                    });
-
-                    EdgeList.ForEach((Action<ThPDSProjectGraphEdge>)(o =>
-                    {
-                        var sourceEdge = edgeMap.EdgeMap
-                                .Where(edge => edge.Key.Circuit.CircuitUID.Equals(o.Circuit.CircuitUID))
-                                .ToList();
-                        if (sourceEdge.Count != 1)
-                        {
-                            return;
-                        }
-
-                        if (o.Tag is ThPDSProjectGraphEdgeIdChangeTag sourcePanelTag)
-                        {
-                            if (sourcePanelTag.ChangeFrom)
-                            {
-                                var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber;
-                                sourceEdge[0].Value.ForEach(id =>
-                                {
-                                    InfoModify(activeDb, id, sourceCircuitNumber, sourcePanelTag.ChangedLastCircuitID);
-                                });
                             }
-                        }
-                    }));
+                        });
+                    }
+                });
 
-                    if (Revclouds.Count > 0)
+                EdgeList.ForEach(o =>
+                {
+                    var sourceEdge = edgeMap.EdgeMap
+                    .Where(edge => edge.Key.Circuit.CircuitUID.Equals(o.Circuit.CircuitUID))
+                    .ToList();
+                    if (sourceEdge.Count != 1)
                     {
-                        Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
-                        ThPDSInsertRevcloudService.InsertRevcloud(activeDb.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
+                        return;
                     }
 
-                    doc.Editor.Regen();
-                }
+                    if (o.Tag is ThPDSProjectGraphEdgeIdChangeTag sourcePanelTag)
+                    {
+                        if (sourcePanelTag.ChangeFrom)
+                        {
+                            var sourceCircuitNumber = sourceEdge[0].Key.Circuit.ID.CircuitNumber;
+                            sourceEdge[0].Value.ForEach(id =>
+                            {
+                                InfoModify(activeDb, id, sourceCircuitNumber, sourcePanelTag.ChangedLastCircuitID);
+                            });
+                        }
+                    }
+                });
             }
+        }
+
+        public void GenerateRevcloud()
+        {
+            // TODO：暂时不生成云线
+            // 由于未知问题，用发送命令方式触发REVCLOUD命令创建云线抛出异常
+            //if (Revclouds.Count > 0)
+            //{
+            //    Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
+            //    ThPDSInsertRevcloudService.InsertRevcloud(doc.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
+            //}
         }
 
         private void InfoModify(AcadDatabase activeDb, ObjectId id, string sourceInfo, string targetInfo, bool isPower = false)

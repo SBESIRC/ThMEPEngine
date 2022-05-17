@@ -71,6 +71,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
+                        // 切回CAD画布
+                        ThPDSCADService.FocusToCAD();
+
+                        // 更新图纸
                         new ThPDSUpdateToDwgService().Update();
                     }, () => !hasDataError || regenCount > 1),
                 };
