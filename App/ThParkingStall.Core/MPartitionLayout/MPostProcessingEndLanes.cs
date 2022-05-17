@@ -241,6 +241,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             List<LineString> Walls, MNTSSpatialIndex obspacialindex, Polygon boundary)
         {
             var carspacialindex = new MNTSSpatialIndex(cars.Select(e => e.Polyline));
+            var laneboxpacialindex = new MNTSSpatialIndex(lanes.Select(e => e.Buffer(MParkingPartitionPro.DisLaneWidth / 2 - 1)));
             var recoglines = new List<LineSegment>();
             for (int i = 0; i < lanes.Count; i++)
             {
@@ -289,7 +290,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                                    VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
                                    , true, false, false, false, true, true, false, false, true, false, false, false, true);
                     var tmpcars = tmpro.Cars;
-                    cars.AddRange(tmpro.Cars.Where(e => boundary.Contains(e.Polyline.Centroid.Coordinate)));
+                    tmpcars = tmpro.Cars.Where(e => boundary.Contains(e.Polyline.Centroid.Coordinate))
+                        .Where(e => laneboxpacialindex.SelectCrossingGeometry(e.Polyline).Count==0)
+                        .ToList();
+                    cars.AddRange(tmpcars);
                 }
             }
         }

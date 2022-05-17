@@ -20,9 +20,9 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void PreProcess()
         {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
-            for (int i = 0; i < iniLanes.Count; i++)
+            for (int i = 0; i < IniLanes.Count; i++)
             {
-                var line = iniLanes[i];
+                var line = IniLanes[i].Line;
                 var pl = line.Buffer(DisLaneWidth / 2 - 1);
                 var points = new List<Coordinate>();
                 STRtree<Polygon> strTree = new STRtree<Polygon>();
