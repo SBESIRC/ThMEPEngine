@@ -241,7 +241,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             List<LineString> Walls, MNTSSpatialIndex obspacialindex, Polygon boundary)
         {
             var carspacialindex = new MNTSSpatialIndex(cars.Select(e => e.Polyline));
-            var laneboxpacialindex = new MNTSSpatialIndex(lanes.Select(e => e.Buffer(MParkingPartitionPro.DisLaneWidth / 2 - 1)));
+            var laneboxpacialindex = new MNTSSpatialIndex(lanes.Select(e => e.Buffer(MParkingPartitionPro.DisLaneWidth / 2 - 1).Scale(0.999)));
             var recoglines = new List<LineSegment>();
             for (int i = 0; i < lanes.Count; i++)
             {
