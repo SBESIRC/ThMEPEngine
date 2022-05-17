@@ -125,5 +125,23 @@
     <Resource Include="Images\Safe.ico" />
     <Resource Include="Images\Servere.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\AC Charger.png" />
+    <Resource Include="Images\DC Charger.png" />
+    <Resource Include="Images\Electrical Control Panel.png" />
+    <Resource Include="Images\Electrical Meter Panel.png" />
+    <Resource Include="Images\Emergency Lighting Distribution Panel.png" />
+    <Resource Include="Images\Emergency Power Distribution Panel.png" />
+    <Resource Include="Images\Fire Emergency Lighting Distribution Panel.png" />
+    <Resource Include="Images\Isolation Switch Panel.png" />
+    <Resource Include="Images\Lighting Distribution Panel.png" />
+    <Resource Include="Images\Luminaire.png" />
+    <Resource Include="Images\Motor.png" />
+    <Resource Include="Images\Power Distribution Panel.png" />
+    <Resource Include="Images\Pump.png" />
+    <Resource Include="Images\Residential Distribution Panel.png" />
+    <Resource Include="Images\Roller Shutter.png" />
+    <Resource Include="Images\Socket.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
