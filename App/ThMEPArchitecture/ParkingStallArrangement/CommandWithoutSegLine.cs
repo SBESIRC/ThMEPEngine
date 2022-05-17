@@ -16,12 +16,20 @@ using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
+using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
 using Serilog;
 using System.IO;
 using Autodesk.AutoCAD.Geometry;
-
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using ThParkingStall.Core.Tools;
+using Dreambuild.AutoCAD;
+using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
+using MPGene = ThParkingStall.Core.InterProcess.Gene;
+using ThParkingStall.Core.InterProcess;
+using Chromosome = ThMEPArchitecture.ParkingStallArrangement.Algorithm.Chromosome;
+using ThMEPArchitecture.MultiProcess;
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
@@ -85,9 +93,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     else//生成二分全部方案
                     {
-                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                        var autogen = new AutoSegGenerator(outerBrder, Logger);
-                        autogen.Run(false);
+                        GenerateAutoSegLine(currentDb);
                     }
                 }
             }
@@ -97,7 +103,39 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+        public void GenerateAutoSegLine(AcadDatabase acadDatabase)
+        {
+            //var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger, false);
+            //if (!rstDataExtract) return;
+            var cutTolmsg = Active.Editor.GetInteger("\n 请输入切割阈值（大于正常车道宽的值）:");
+            if (cutTolmsg.Status != PromptStatus.OK) return;
+            if(cutTolmsg.Value < 5)
+            {
+                Active.Editor.WriteMessage("该值至少为5！");
+            }
+            var layoutData = new LayoutData();
+            var inputvaild = layoutData.Init(acadDatabase, Logger, false);
+            if (!inputvaild) return;
+            Converter.GetDataWraper(layoutData, ParameterViewModel);
+            var autogen = new AutoSegGenerator(layoutData, Logger, cutTolmsg.Value);
+            autogen.Run(false);
+            var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
+            if(girdLines.Count <2)
+            {
+                Active.Editor.WriteMessage("暂不支持！");
+                return;
+            }
+            girdLines.SeglinePrecut(layoutData.WallLine);
+            //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var grouped = girdLines.GroupSegLines().OrderBy(g=>g.Count).Last();
+            //grouped.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var result = grouped;
 
+            result = result.GridLinesRemoveEmptyAreas();
+            result.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            //subareas.ForEach(subarea => subarea.Display("MPDebug"));
+
+        }
         public override void AfterExecute()
         {
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");

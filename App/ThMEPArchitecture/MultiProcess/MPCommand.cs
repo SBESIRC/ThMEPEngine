@@ -369,7 +369,10 @@ namespace ThMEPArchitecture.MultiProcess
             var entities = new List<Entity>();
             entities.Add(subArea.Area.ToDbMPolygon());
             entities[0].Layer = layer;
-            entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2,layer)));
+            if(subArea.VaildLanes != null)
+                entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2,layer)));
+            if (subArea.SegLines != null)
+            entities.AddRange(subArea.SegLines.Select(l => l.ToDbPolyline(2, layer)));
             entities.AddRange(subArea.Walls.Select(wall => wall.ToDbPolyline(1, layer)));
             entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(5, layer)));
             entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon(3, layer)));

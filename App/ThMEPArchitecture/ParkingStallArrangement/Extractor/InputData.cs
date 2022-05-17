@@ -56,7 +56,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return objs;
         }
-
         public static List<BlockReference> SelectBlocks(AcadDatabase acadDatabase)
         {
             var entOpt = new PromptSelectionOptions { MessageForAdding = "\n请选择地库:" };
@@ -77,7 +76,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return objs;
         }
-        public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null)
+        public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger = null,bool CheckSeglines = true)
         {
             outerBrder = new OuterBrder();
             var block = SelectBlock(acadDatabase);//提取地库对象
@@ -101,7 +100,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             {
                 return false;
             }
-            if (!(Logger == null) && outerBrder.SegLines.Count != 0)
+            if (!(Logger == null) && outerBrder.SegLines.Count != 0&& CheckSeglines)
             {
                 bool Isvaild = outerBrder.SegLineVaild(Logger);
                 outerBrder.SegLines.ShowInitSegLine();

@@ -38,7 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
-        public  List<LineSegment> SegLines;// 初始分割线
+        public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
         public  List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public  List<Ramp> Ramps = new List<Ramp>();// 坡道
 
@@ -65,11 +65,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
-        public bool Init(BlockReference block, Serilog.Core.Logger logger)
+        public bool Init(BlockReference block, Serilog.Core.Logger logger, bool extractSegLine = true)
         {
             Logger = logger;
 
-            if (!TryInit(block)) return false;
+            if (!TryInit(block, extractSegLine)) return false;
             //Show();
             if (SegLines.Count != 0)
             {
@@ -81,7 +81,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //ShowLowerUpperBound();
             return true;
         }
-        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger)
+        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger,bool extractSegLine = true)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             if (block is null)
@@ -94,19 +94,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             string drawingName = Path.GetFileName(doc.Name);
             Logger?.Information("文件名：" + drawingName);
             Logger?.Information("用户名：" + Environment.UserName);
-            if (!TryInit(block)) return false;
+            if (!TryInit(block, extractSegLine)) return false;
             //Show();
             if (SegLines.Count != 0)
             {
                 bool Isvaild = SegLineVaild();
                 //VaildLanes.ShowInitSegLine();
                 if (!Isvaild) return false;
+                GetLowerUpperBound();
+                //ShowLowerUpperBound();
             }
-            GetLowerUpperBound();
-            //ShowLowerUpperBound();
             return true;
         }
-        public  bool TryInit(BlockReference basement)
+        public  bool TryInit(BlockReference basement, bool extractSegLine )
         {
             Explode(basement);
             if(CAD_WallLines.Count == 0)
@@ -116,7 +116,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             WallLine = WallLine.RemoveHoles();//初始墙线
-            UpdateSegLines();
+            if(extractSegLine)UpdateSegLines();
             var RampPolgons = UpdateWallLine();
             UpdateRamps(RampPolgons);
             UpdateObstacles();
@@ -146,7 +146,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild(CloseTol))
                     {
                         CAD_WallLines.Add(pline.GetClosed());
                     }
@@ -162,7 +162,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            if (pline.IsVaild(CloseTol))
                             {
                                 CAD_Obstacles.Add(pline.GetClosed());
                             }
@@ -171,7 +171,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
                 else if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild(CloseTol))
                     {
                         CAD_Obstacles.Add(pline.GetClosed());
                     }
@@ -187,7 +187,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            if (pline.IsVaild(CloseTol))
                             {
                                 CAD_Ramps.Add(pline.GetClosed());
                             }
@@ -196,7 +196,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
                 else if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild( CloseTol))
                     {
                         CAD_Ramps.Add(pline.GetClosed());
                     }

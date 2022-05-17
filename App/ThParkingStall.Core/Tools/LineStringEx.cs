@@ -92,6 +92,13 @@ namespace ThParkingStall.Core.Tools
             if (intSection.Length > 0) return true;
             else return false;
         }
+
+        public static bool IsVertical(this LineString lstr)
+        {
+            if (lstr.Coordinates.Count() != 2) throw new Exception("Not supported");
+            if (Math.Abs(lstr[0].X - lstr[1].X) < 1e-4) return true;
+            else return false;
+        }
         public static List<LineSegment> GetVaildParts(this IEnumerable<LineString> lstrs,Polygon area)
         {
             var VaildParts = new List<LineSegment>();
@@ -102,6 +109,22 @@ namespace ThParkingStall.Core.Tools
                 {
                     var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
                     VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
+                }
+            }
+            return VaildParts;
+        }
+
+        public static List<LineString> GetVaildLstrs(this IEnumerable<LineString> lstrs, Polygon area)
+        {
+            var VaildParts = new List<LineString>();
+            foreach (var lstr in lstrs)
+            {
+                var intSection = lstr.Intersection(area.Shell);
+                if (intSection.Length > 0)
+                {
+                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    var coors = new Coordinate[] { pts.First(), pts.Last() };
+                    VaildParts.Add(new LineString(coors));
                 }
             }
             return VaildParts;

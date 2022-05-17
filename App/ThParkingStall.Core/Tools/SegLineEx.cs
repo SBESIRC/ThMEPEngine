@@ -213,6 +213,15 @@ namespace ThParkingStall.Core.Tools
                 }
             }
         }
+        public static void CleanLineWithOneIntSecPt(this List<LineSegment> SegLines, Polygon Area)
+        {
+            for (int i = SegLines.Count - 1; i >= 0; i--)
+            {
+                var segLine = SegLines[i];
+                if (GetAllIntSecPs(i, SegLines, Area).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
+
+            }
+        }
         //判断分割线是否全部相连
         public static bool Allconnected(this List<LineSegment> SegLines)
         {
@@ -220,7 +229,6 @@ namespace ThParkingStall.Core.Tools
             CheckedLines.Add(SegLines[0]);
             var rest_idx = new List<int>();
             for (int i = 1; i < SegLines.Count; ++i) rest_idx.Add(i);
-
             while (rest_idx.Count != 0)
             {
                 var curCount = rest_idx.Count;// 记录列表个数
@@ -243,7 +251,33 @@ namespace ThParkingStall.Core.Tools
             }
             return true;
         }
-
+        public static List<List<LineSegment>> GroupSegLines(this List<LineSegment> SegLines)
+        {
+            var groups = new List<List<LineSegment>>();
+            var rest_idx = new List<int>();
+            for (int i = 0; i < SegLines.Count; ++i) rest_idx.Add(i);
+            while (rest_idx.Count != 0)
+            {
+                bool new_group = true;
+                foreach (var group in groups)
+                {
+                    foreach(var idx in rest_idx)
+                    {
+                        var line = SegLines[idx];
+                        if (line.ConnectWithAny(group))
+                        {
+                            new_group = false;
+                            group.Add(line);
+                            rest_idx.Remove(idx);
+                            break;
+                        }
+                    }
+                    if (!new_group) break;
+                }
+                if (new_group) groups.Add(new List<LineSegment> { SegLines[ rest_idx.First()] });
+            }
+            return groups;
+        }
         //判断idx位置的分割线是否与其他的存在相交关系
         public static bool ConnectWithAny(this List<LineSegment> SegLines, int idx)
         {

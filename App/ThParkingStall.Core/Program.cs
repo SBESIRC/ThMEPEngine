@@ -76,7 +76,7 @@ namespace ThParkingStall.Core
             }
             for (int iter = 0; iter < IterationCount; iter++)
             {
-                MCompute.CatchedTimes = 0;
+                
                 var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
                 StartSignal.WaitOne();
 
@@ -107,6 +107,7 @@ namespace ThParkingStall.Core
                     var Chromosomes = chromosomeCollection.Chromosomes;
                     for (int i = 0; i <= Chromosomes.Count / ProcessCount; i++)//计算
                     {
+                        MCompute.CatchedTimes = 0;
                         int j = i * ProcessCount + ProcessIndex;
                         if (j >= Chromosomes.Count) break;
                         var chromosome = Chromosomes[j];

@@ -144,5 +144,39 @@ namespace ThParkingStall.Core.Tools
             if (pts.Count() ==0) return null;
             return new LineSegment(pts.First(), pts.Last());
         }
+
+        public static bool AlmostEqual(this LineSegment l1, LineSegment l2,double tol = 1)
+        {
+            if (l1.P0.Distance(l2.P0) < tol && l1.P1.Distance(l2.P1) < tol) return true;
+            if (l1.P0.Distance(l2.P1) < tol && l1.P1.Distance(l2.P0) < tol) return true;
+            return false;
+        }
+
+        public static List<LineSegment> Merge(this List<LineSegment> lines,double tol = 1)
+        {
+            bool Finished = false;
+            while (!Finished)
+            {
+                Finished = true;
+                foreach(LineSegment line in lines)
+                {
+                    var lineToMerge = lines.Where(l => !l.Equals(line) && (l.IsVertical() == line.IsVertical()) && (l.Distance(line) < tol)).ToList();
+                    if (lineToMerge.Count() != 0)
+                    {
+                        var pts = new List<Coordinate> { line.P0,line.P1 };
+                        lineToMerge.ForEach(l => { pts.Add(l.P0); pts.Add(l.P1); });
+                        var ordedpts = pts.OrderBy(coor => coor.X + coor.Y);
+                        var mergedLine = new LineSegment(ordedpts.First(), ordedpts.Last());
+                        lines.Remove(line);
+                        lineToMerge.ForEach(l => lines.Remove(l));
+                        lines.Add(mergedLine);
+                        Finished = false;
+                        break;
+                    }
+                }
+            }
+
+            return lines;
+        }
     }
 }

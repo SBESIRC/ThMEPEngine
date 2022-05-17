@@ -57,5 +57,10 @@ namespace ThParkingStall.Core.Tools
                 return pt.Y > lineSegment.P0.Y;
             }
         }
+
+        public static double Distance(this Coordinate coor,List<Coordinate> coordinates)
+        {
+            return coordinates.Min(c => c.Distance(coor));
+        }
     }
 }
