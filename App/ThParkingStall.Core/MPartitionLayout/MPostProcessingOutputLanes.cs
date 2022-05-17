@@ -185,9 +185,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 {
                     var l = lanes[i];
                     var lane = new LineSegment(lanes[i]);
-                    lane=lane.Scale((lane.Length - 2) / lane.Length);
+                    //lane=lane.Scale((lane.Length - 2) / lane.Length);
+                    lanes.RemoveAt(i);
+                    foreach (var ln in lanes) points.AddRange(ln.IntersectPoint(lane));
+                    lanes.Insert(i, lane);
+                    points = points.Where(p => p.Distance(lane.P0) > 1 && p.Distance(lane.P1) > 1).ToList();
                     var buffer = lane.Buffer(dis);
-                    var pts = points.Where(p => buffer.Contains(p)).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P1));
+                    var pts = points.Where(p => buffer.Contains(p) || buffer.ClosestPoint(p).Distance(p) < 1).OrderByDescending(p => l.ClosestPoint(p, false).Distance(l.P1));
                     if (pts.Count() > 0)
                     {
                         var ps = pts.First();

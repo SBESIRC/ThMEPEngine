@@ -32,12 +32,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             var IniPillars = new BlockingCollection<Polygon>();
             var ObsVertices = new BlockingCollection<Coordinate>();
             var Lanes = new BlockingCollection<LineSegment>();
-            var Boundary = new Polygon(subAreas[0].Area.Shell);
+            var Boundary = subAreas[0].OutBound.Clone();
             Boundary = Boundary.Simplify();
             var obs = new List<Polygon>();
             foreach (var subArea in subAreas) obs.AddRange(subArea.Buildings);
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(obs);
-
             subAreas.ForEach(subArea => subArea.mParkingPartitionPro = subArea.ConvertSubAreaToMParkingPartitionPro());
             if (InterParameter.MultiThread)
             {        
@@ -65,8 +64,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                     lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
                 }
                 RemoveDuplicatedLines(lanes);
-                MLayoutPostProcessing.DealWithCarsOntheEndofLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
+                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 mParkingPartition = new MParkingPartitionPro();
                 mParkingPartition.Cars = cars;
                 mParkingPartition.Pillars = pillars;
@@ -104,8 +104,9 @@ namespace ThParkingStall.Core.MPartitionLayout
             points=SortAlongCurve(points, bound);
             points = RemoveDuplicatePts(points);
             var linestring = new LineString(bound.Coordinates);
-            var walls = linestring.GetSplitCurves(points)
-                .Where(e => e.Length > 1).ToList();
+            //var walls = linestring.GetSplitCurves(points)
+            //    .Where(e => e.Length > 1).ToList();
+            var walls = subArea.Walls;
             if (walls.Count > 0)
             {
                 walls = walls.Where(e => ClosestPointInCurvesFast(e.GetMidPoint(), inilanes.Select(f => f.ToLineString()).ToList()) > 10)
@@ -115,7 +116,8 @@ namespace ThParkingStall.Core.MPartitionLayout
            walls, inilanes, obs, bound);
             mParkingPartitionPro.OutBoundary = bound;
             mParkingPartitionPro.BuildingBoxes = box;
-            mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
+            //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
+            mParkingPartitionPro.ObstaclesSpatialIndex = InterParameter.BuildingSpatialIndex;
             mParkingPartitionPro.RampList = subArea.Ramps.Where(e => bound.Contains(e.InsertPt)).ToList();
             return mParkingPartitionPro;
         }
