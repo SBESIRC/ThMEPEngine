@@ -24,7 +24,7 @@ namespace TianHua.Electrical.PDS.UI
         /// 电力系统
         /// </summary>
         [CommandMethod("TIANHUACAD", "THDLXT", CommandFlags.Modal)]
-        public void THDLXT()
+        public static void THDLXT()
         {
             try
             {
@@ -53,33 +53,12 @@ namespace TianHua.Electrical.PDS.UI
         }
 
         /// <summary>
-        /// 电力系统（内部使用）
+        /// 更新平面图
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THPDS", CommandFlags.Modal)]
-        public void THPDS()
+        [CommandMethod("TIANHUACAD", "THPDSUPDATEDWG", CommandFlags.Modal)]
+        public static void THPDSUPDATEDWG()
         {
-            var cmd = new ThPDSCommand();
-            cmd.Execute();
-
-            // 系统图绘制
-            //var graph = Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-            //if (graph == null)
-            //{
-            //    return;
-            //}
-            //var vertices = graph.Vertices.ToList();
-            //var drawCmd = new ThPDSSystemDiagramCommand(graph, vertices);
-            //drawCmd.Execute();
-
-            var modifyCmd = new ThPDSUpdateToDwgService();
-            // 标注修改
-            //modifyCmd.Update();
-
-            // 标注定位
-            //modifyCmd.Zoom();
-
-            // 创建标注
-            //modifyCmd.AddLoadDimension();
+            new ThPDSUpdateToDwgService().Update();
         }
     }
 }

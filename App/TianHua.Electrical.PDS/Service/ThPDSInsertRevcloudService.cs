@@ -1,31 +1,29 @@
 ﻿using System;
 using AcHelper;
-using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSInsertRevcloudService
+    public static class ThPDSInsertRevcloudService
     {
-        public static void InsertRevcloud(Database active, DBObjectCollection objs, Tuple<string, short> tuple)
+        public static void InsertRevcloud(this Editor editor, DBObjectCollection objs, Tuple<string, short> tuple)
         {
             objs.OfType<Polyline>().ForEach(obb =>
             {
-                InsertRevcloud(active, obb, tuple.Item1, tuple.Item2);
+                InsertRevcloud(editor, obb, tuple.Item1, tuple.Item2);
             });
 
         }
 
-        private static void InsertRevcloud(Database active, Polyline obb, string layer, short colorIndex)
+        private static void InsertRevcloud(this Editor editor, Polyline obb, string layer, short colorIndex)
         {
-            // 创建云线
-            using (var db = AcadDatabase.Use(active))
+            using (var db = AcadDatabase.Active())
             {
                 var layerId = db.Database.CreateAILayer(layer, colorIndex);
                 ObjectId revcloud = ObjectId.Null;
@@ -42,15 +40,15 @@ namespace TianHua.Electrical.PDS.Service
 #if ACAD_ABOVE_2014
                 Active.Editor.Command("_.REVCLOUD", "_arc", 300, 300, "_Object", objId, "_No");
 #else
-                    ResultBuffer args = new ResultBuffer(
-                       new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
-                       new TypedValue((int)LispDataType.Text, "_ARC"),
-                       new TypedValue((int)LispDataType.Text, "300"),
-                       new TypedValue((int)LispDataType.Text, "300"),
-                       new TypedValue((int)LispDataType.Text, "_Object"),
-                       new TypedValue((int)LispDataType.ObjectId, objId),
-                       new TypedValue((int)LispDataType.Text, "_No"));
-                    Active.Editor.AcedCmd(args);
+                                ResultBuffer args = new ResultBuffer(
+                                   new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
+                                   new TypedValue((int)LispDataType.Text, "_ARC"),
+                                   new TypedValue((int)LispDataType.Text, "300"),
+                                   new TypedValue((int)LispDataType.Text, "300"),
+                                   new TypedValue((int)LispDataType.Text, "_Object"),
+                                   new TypedValue((int)LispDataType.ObjectId, objId),
+                                   new TypedValue((int)LispDataType.Text, "_No"));
+                                Active.Editor.AcedCmd(args);
 #endif
                 db.Database.ObjectAppended -= handler;
 

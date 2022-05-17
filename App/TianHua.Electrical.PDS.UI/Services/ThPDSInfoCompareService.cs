@@ -2,12 +2,12 @@
 using System.IO;
 using System.Linq;
 using ThCADExtension;
+using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.ComponentModel;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.ApplicationServices;
 using TianHua.Electrical.PDS.Engine;
@@ -74,8 +74,8 @@ namespace TianHua.Electrical.PDS.UI.Services
                         // 切回CAD画布
                         ThPDSCADService.FocusToCAD();
 
-                        // 更新图纸
-                        new ThPDSUpdateToDwgService().Update();
+                        // 发送命令更新图纸
+                        CommandHandlerBase.ExecuteFromCommandLine(false, "THPDSUPDATEDWG");
                     }, () => !hasDataError || regenCount > 1),
                 };
                 vm.ValidateCmd = new RelayCommand(() =>
@@ -120,8 +120,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (e.Document.IsNamedDrawing)
                     {
-                        node.DataList.Add(new() { 
-                            Name = Path.GetFileNameWithoutExtension(e.Document.Name), 
+                        node.DataList.Add(new()
+                        {
+                            Name = Path.GetFileNameWithoutExtension(e.Document.Name),
                             Key = e.Document.Name,
                             Tag = e.Document,
                         });
@@ -169,7 +170,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Edge = edge,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID), 
+                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID),
                         });
                     }
                     else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)

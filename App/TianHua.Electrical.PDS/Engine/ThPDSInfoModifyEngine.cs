@@ -4,20 +4,19 @@ using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Algorithm;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using ProjectGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
-using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.Service
 {
@@ -187,13 +186,11 @@ namespace TianHua.Electrical.PDS.Service
 
         public void GenerateRevcloud()
         {
-            // TODO：暂时不生成云线
-            // 由于未知问题，用发送命令方式触发REVCLOUD命令创建云线抛出异常
-            //if (Revclouds.Count > 0)
-            //{
-            //    Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
-            //    ThPDSInsertRevcloudService.InsertRevcloud(doc.Database, Revclouds, ThPDSCommon.AI_POWR_AUXL1);
-            //}
+            if (Revclouds.Count > 0)
+            {
+                Revclouds = Revclouds.ToNTSMultiPolygon().Union().ToDbCollection();
+                Active.Editor.InsertRevcloud(Revclouds, ThPDSCommon.AI_POWR_AUXL1);
+            }
         }
 
         private void InfoModify(AcadDatabase activeDb, ObjectId id, string sourceInfo, string targetInfo, bool isPower = false)
@@ -207,9 +204,9 @@ namespace TianHua.Electrical.PDS.Service
             {
                 if ((!isPower || MatchPower(text.TextString)) && text.TextString.Contains(sourceInfo))
                 {
-                    if(string.IsNullOrEmpty( targetInfo))
+                    if (string.IsNullOrEmpty(targetInfo))
                     {
-                        if(text.Bounds.HasValue)
+                        if (text.Bounds.HasValue)
                         {
                             Revclouds.Add(text.GeometricExtents.ToRectangle());
                         }
