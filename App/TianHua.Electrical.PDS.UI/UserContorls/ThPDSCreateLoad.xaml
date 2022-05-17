@@ -27,9 +27,9 @@
             <StackPanel Orientation="Horizontal">
                 <ComboBox x:Name="cbx" Width="100" Height="100"></ComboBox>
                 <StackPanel Orientation="Vertical">
-                    <TextBox Width="150" x:Name="defaultLoadID">*请输入设备编号</TextBox>
-                    <TextBox Width="150" x:Name="defaultPower">*请输入设备功率</TextBox>
-                    <TextBox Width="150" x:Name="defaultDescription">在此输入描述信息</TextBox>
+                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" x:Name="defaultLoadID" hc:InfoElement.Placeholder="请输入设备编号" hc:InfoElement.Necessary="True" hc:InfoElement.Title=" " hc:InfoElement.TitlePlacement="Left" ></TextBox>
+                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" x:Name="defaultPower" hc:InfoElement.Placeholder="请输入设备功率" hc:InfoElement.Necessary="True" hc:InfoElement.Title=" " hc:InfoElement.TitlePlacement="Left" ></TextBox>
+                    <TextBox Style="{StaticResource TextBoxExtend}" Width="150" x:Name="defaultDescription" hc:InfoElement.Placeholder="在此输入描述信息"></TextBox>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
