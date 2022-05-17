@@ -31,5 +31,15 @@ namespace TianHua.Electrical.UI.EarthingGrid
         {
             EarthingGridVM.ResetCurrentLayer();
         }
+
+        private void NonMerge_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Merge_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

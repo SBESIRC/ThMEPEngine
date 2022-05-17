@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AcHelper;
 using NFox.Cad;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.EarthingGrid.Generator.Data;
@@ -49,10 +50,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// </summary>
         private void RemoveInneriorLines(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            foreach(var ol in innOutline)
+            foreach (var ol in innOutline)
             {
                 var containPoints = spatialIndex.SelectWindowPolygon(ol).OfType<DBPoint>().Select(d => d.Position).Distinct();
-                foreach(var curCenterPt in containPoints)
+                foreach (var curCenterPt in containPoints)
                 {
                     RemoveAPointFromStructure(curCenterPt);
                 }
@@ -67,7 +68,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             foreach (var ol in extOutline)
             {
                 var containPoints = spatialIndex.SelectWindowPolygon(ol).OfType<DBPoint>().Select(d => d.Position).Distinct().ToHashSet();
-                foreach(var curCenterPt in centerToFace.Keys.ToList())
+                foreach (var curCenterPt in centerToFace.Keys.ToList())
                 {
                     if (containPoints.Contains(curCenterPt))
                     {
@@ -106,9 +107,89 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 }
                 centerToFace.Remove(curCenterPt);
             }
+
             if (centerGrid.ContainsKey(curCenterPt))
             {
-                centerGrid.Remove(curCenterPt);
+                foreach (var pt in centerGrid[curCenterPt].ToList())
+                {
+                    GraphDealer.DeleteFromGraph(pt, curCenterPt, ref centerGrid);
+                }
+            }
+        }
+
+        public static void RemoveOuterForbiddenLines(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, PreProcess preProcessData)
+        {
+            var pt2Line = new Dictionary<Point3d, Tuple<Point3d, Point3d>>();
+            foreach (var line in findPolylineFromLines.Keys)
+            {
+                var middlePt = new Point3d((line.Item1.X + line.Item2.X) / 2, (line.Item1.Y + line.Item2.Y) / 2, 0);
+                if (!pt2Line.ContainsKey(middlePt))
+                {
+                    pt2Line.Add(middlePt, line);
+                }
+            }
+
+            var dbPoints = pt2Line.Keys.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            var containPoints = new HashSet<Point3d>();
+            foreach (var ol in preProcessData.extOutline)
+            {
+                spatialIndex.SelectWindowPolygon(ol.Buffer(50).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
+            }
+            foreach (var pt in pt2Line.Keys)
+            {
+                if (!containPoints.Contains(pt))
+                {
+                    var lineA = pt2Line[pt];
+                    var lineB = new Tuple<Point3d, Point3d>(lineA.Item2, lineA.Item1);
+                    RemoveAPolyline(ref findPolylineFromLines, lineA);
+                    RemoveAPolyline(ref findPolylineFromLines, lineB);
+                }
+            }
+        }
+
+        private static void RemoveAPolyline(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Tuple<Point3d, Point3d> line)
+        {
+            if (!findPolylineFromLines.ContainsKey(line))
+            {
+                return;
+            }
+            var pl = findPolylineFromLines[line];
+            foreach (var l in pl)
+            {
+                if (findPolylineFromLines.ContainsKey(l))
+                {
+                    findPolylineFromLines.Remove(l);
+                }
+            }
+        }
+
+        public static void RemoveInnerForbiddenLines(ref Dictionary<Point3d, HashSet<Point3d>> earthGrid, PreProcess preProcessData)
+        {
+            var pt2Line = new Dictionary<Point3d, Tuple<Point3d, Point3d>>();
+            foreach (var lines in earthGrid)
+            {
+                foreach (var pt in lines.Value)
+                {
+                    var middlePt = new Point3d((pt.X + lines.Key.X) / 2, (pt.Y + lines.Key.Y) / 2, 0);
+                    if (!pt2Line.ContainsKey(middlePt))
+                    {
+                        pt2Line.Add(middlePt, new Tuple<Point3d, Point3d>(pt, lines.Key));
+                    }
+                }
+            }
+
+            var dbPoints = pt2Line.Keys.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            var containPoints = new HashSet<Point3d>();
+            foreach (var ol in preProcessData.innOutline)
+            {
+                spatialIndex.SelectWindowPolygon(ol.Buffer(-50).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
+            }
+            foreach (var pt in pt2Line.Keys)
+            {
+                if (containPoints.Contains(pt))
+                    GraphDealer.DeleteFromGraph(pt2Line[pt].Item1, pt2Line[pt].Item2, ref earthGrid);
             }
         }
     }

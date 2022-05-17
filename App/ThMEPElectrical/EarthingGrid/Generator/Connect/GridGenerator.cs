@@ -14,6 +14,9 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var columnGrid = new ColumnGrid(preProcessData);
             var findPolylineFromLines = columnGrid.Genterate();
 
+            //1.5 删除禁区的线
+            RangeConfine.RemoveOuterForbiddenLines(ref findPolylineFromLines, preProcessData);
+
             var earthGrid = new Dictionary<Point3d, HashSet<Point3d>>();
             if (beMerge == true)
             {
@@ -28,6 +31,9 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                     GraphDealer.AddLineToGraph(line.Item1, line.Item2, ref earthGrid);
                 }
             }
+
+            //2.1 删除禁区的线
+            RangeConfine.RemoveInnerForbiddenLines(ref earthGrid, preProcessData);
 
             //3、后处理
             var postPress = new PostProcess(preProcessData, earthGrid);

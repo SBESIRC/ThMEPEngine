@@ -57,20 +57,18 @@ namespace ThMEPElectrical.Command
                 //    new Tuple<double, double>(5000, 5000)};
                 var faceSize = new List<Tuple<double, double>>();
                 var size = ThEarthingGridDataService.Instance.EarthingGridSize;
-                if (size == "10x10或12x8或20x5")
+                if (size == "10x10或12x8")
                 {
                     faceSize = new List<Tuple<double, double>> {
                         new Tuple<double, double>(10000, 10000),
-                        new Tuple<double, double>(12000, 8000),
-                        new Tuple<double, double>(20000, 5000)
+                        new Tuple<double, double>(12000, 8000)
                     };
                 }
-                else if (size == "20x20或24x16或40x10")
+                else if (size == "20x20或24x16")
                 {
                     faceSize = new List<Tuple<double, double>> {
                         new Tuple<double, double>(20000, 20000),
-                        new Tuple<double, double>(24000, 16000),
-                        new Tuple<double, double>(40000, 10000)
+                        new Tuple<double, double>(24000, 16000)
                     };
                 }
                 //1、Extract data
