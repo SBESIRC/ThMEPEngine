@@ -6,6 +6,8 @@ using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -13,7 +15,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
     {
         #region ---------- 外部传入 ----------       
         public List<Line> FdxLines { get; set; }
-        public List<Line> SingleRowCableTrunking { get; set; }
         public bool YnBuildCableTray { get; set; } = true;
         #endregion
 
@@ -31,7 +32,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             FdxLines = new List<Line>();
             CableTraySides = new List<Line>();
             CableTrayCenters = new List<Line>();
-            SingleRowCableTrunking = new List<Line>();
             CableTrayPorts = new Dictionary<Line, List<Line>>();
             CableTrayGroups = new Dictionary<Line, List<Line>>();
         }
@@ -88,16 +88,40 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private ThCableTrayBuilder BuildCableTray()
         {
+            var lines = new List<Line>();
             var crossLines = BuildCrossLinks();
             var tTypeLines = BuildTTypeLinks();
-            var lines = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.IsDX).Select(o=>o.Edge).ToList();
+            // 修正lines
+            var wireDict = CreateWireDict(Graphs.SelectMany(o=>o.GraphEdges).ToList());
+            var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength);
+
+            lines.AddRange(wires.OfType<Line>());
             lines.AddRange(FdxLines);
             lines.AddRange(crossLines);
             lines.AddRange(tTypeLines);
-            lines.AddRange(SingleRowCableTrunking);
             var cableTrayEngine = new ThCableTrayBuilder(lines, ArrangeParameter.Width);
             cableTrayEngine.Build();
             return cableTrayEngine;
+        }
+
+        private Dictionary<Line,Point3dCollection> CreateWireDict(List<ThLightEdge> edges)
+        {
+            var results = new Dictionary<Line, Point3dCollection>();
+            edges.ForEach(o =>
+            {
+                var pts = new Point3dCollection();
+                o.LightNodes.ForEach(n => pts.Add(n.Position));
+                results.Add(o.Edge, pts);
+            });
+            return results;
+        }
+
+        private DBObjectCollection CutPortUnLinkWires(
+            Dictionary<Line,Point3dCollection> wireDict,
+            double lampLength)
+        {
+            var handler = new ThCutCableTrayUnlinkWireService(wireDict, lampLength);
+            return handler.Cut();
         }
 
         public void Print(Database db)
