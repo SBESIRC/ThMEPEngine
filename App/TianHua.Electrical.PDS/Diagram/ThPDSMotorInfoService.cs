@@ -38,7 +38,7 @@ namespace TianHua.Electrical.PDS.Diagram
                 TypeCat_3 = ThPDSLoadTypeCat_3.ExhaustFan_Smoke,
                 OperationMode = "平时排风，消防时排烟；系统中任一排烟阀或排烟口开启时，排烟风机、补风机自动启动",
                 FaultProtection = "短路保护，接地故障保护，作为消防风机时过载保护只报警不跳闸，平时用风机时过载切断主回路",
-                Signal = "排烟防火阀在280°C时应自行关闭，并应连锁关闭排烟风机和补风机；就地手动启停、火灾报警系统启停、消防控制室手动启停； 排风风机的自动启停信号来自CO浓度探测器，CO浓度超过规定值排风机自动启动",
+                Signal = "排烟防火阀在280°C时应自行关闭，并应连锁关闭排烟风机和补风机；就地手动启停、火灾报警系统启停、消防控制室手动启停；排风风机平时由CO浓度探测器信号控制起停，浓度超过限定值则启动",
             },
             new ThPDSMotorInfo
             {

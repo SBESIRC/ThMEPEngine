@@ -84,7 +84,7 @@ namespace TianHua.Electrical.PDS.Engine
         private ThMarkService MarkService;
         private Database Database;
 
-        private Dictionary<Entity, Entity> GeometryMap;
+        public static Dictionary<Entity, Entity> GeometryMap;
 
         public ThPDSLoopGraphEngine(Database database, List<Entity> distBoxes,
             List<Entity> loads, List<Curve> cabletrays, List<Curve> cables, ThMarkService markService,
@@ -220,7 +220,8 @@ namespace TianHua.Electrical.PDS.Engine
                             distBoxKeyList.Add(distBoxKey);
                         }
                         var thisMark = new ThPDSTextInfo();
-                        var privateMark = MarkService.GetMarks(ThPDSBufferService.Buffer(distBox, database));
+                        var buffer = ThPDSBufferService.Buffer(distBox, database);
+                        var privateMark = MarkService.GetMarks(buffer);
                         privateMark.Texts.ForEach(o =>
                         {
                             if (o.Contains("/W") || o.Contains("-W"))
@@ -279,7 +280,7 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 return;
                             }
-                            var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey);
+                            var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey, buffer);
                             newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
                             cacheDistBoxes.Add(distBox);
                             if (!CacheDistBoxes.ContainsKey(distBox))
@@ -1485,6 +1486,15 @@ namespace TianHua.Electrical.PDS.Engine
                 });
             });
             return results;
+        }
+
+        public Extents3d GetGeometry(Entity entity)
+        {
+            if(GeometryMap.ContainsKey(entity))
+            {
+                return GeometryMap[entity].GeometricExtents;
+            }
+            return new Extents3d();
         }
     }
 }

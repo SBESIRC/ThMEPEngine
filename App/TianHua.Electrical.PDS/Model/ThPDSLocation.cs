@@ -11,6 +11,8 @@ namespace TianHua.Electrical.PDS.Model
             FloorNumber = "";
             RoomType = "";
             BasePoint = new ThPDSPoint3d();
+            MinPoint = new ThPDSPoint3d();
+            MaxPoint = new ThPDSPoint3d();
             StoreyBasePoint = new ThPDSPoint3d();
         }
 
@@ -33,6 +35,16 @@ namespace TianHua.Electrical.PDS.Model
         /// 基点坐标
         /// </summary>
         public ThPDSPoint3d BasePoint { get; set; }
+
+        /// <summary>
+        /// 图元范围最小点
+        /// </summary>
+        public ThPDSPoint3d MinPoint { get; set; }
+
+        /// <summary>
+        /// 图元范围最大点
+        /// </summary>
+        public ThPDSPoint3d MaxPoint { get; set; }
 
         /// <summary>
         /// 楼层基点
