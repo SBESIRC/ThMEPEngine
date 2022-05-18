@@ -22,6 +22,12 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         static string RoomNameControl = "房间名称处理";
         List<RoomTableTree> roomTableConfig = null;
         public List<Polyline> holes = new List<Polyline>();
+        List<string> holeRooms = new List<string>() {
+            "楼梯间",
+            "井道",
+            "人防井道",
+            "天井",
+        };
         public override void Extract(Database database, Point3dCollection pts)
         {
             //读取数据
@@ -32,19 +38,28 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         {
             //读取配置表
             ReadRoomConfigTable();
+            //获取需要当作洞口的房间名
+            var allHoleRooms = roomTableConfig.CalRoomLst(holeRooms);
             //数据处理
             var geos = new List<ThGeometry>();
             foreach (var room in Rooms)
             {
                 var roomInfos = GetMPolygonInfo(room.Boundary);
                 holes.AddRange(roomInfos.Value);
-                var geometry = new ThGeometry();
-                if (room.Tags.Count > 0 && !RoomConfigTreeService.IsPublicRoom(roomTableConfig, room.Tags[0]))
+                if (allHoleRooms.Any(x=> room.Tags.Any(y=> RoomConfigTreeService.CompareRoom(x, y))))
                 {
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, room.Name);
-                    geometry.Boundary = roomInfos.Key;
-                    geos.Add(geometry);
+                    holes.Add(roomInfos.Key);
+                }
+                else
+                {
+                    var geometry = new ThGeometry();
+                    if (room.Tags.Count > 0 && !RoomConfigTreeService.IsPublicRoom(roomTableConfig, room.Tags[0]))
+                    {
+                        geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
+                        geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, room.Name);
+                        geometry.Boundary = roomInfos.Key;
+                        geos.Add(geometry);
+                    }
                 }
             }
 
