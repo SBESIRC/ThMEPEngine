@@ -14,7 +14,7 @@ using ProjectGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 
-namespace TianHua.Electrical.PDS.Engine
+namespace TianHua.Electrical.PDS.Service
 {
     public class ThPDSZoomService
     {
