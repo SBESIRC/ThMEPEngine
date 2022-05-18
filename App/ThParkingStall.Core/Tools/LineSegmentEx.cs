@@ -178,5 +178,24 @@ namespace ThParkingStall.Core.Tools
 
             return lines;
         }
+        public static (LineSegment, LineSegment) Split(this LineSegment line,Coordinate coordinate)
+        {
+            var coors = new List<Coordinate> { line.P0,line.P1,coordinate}.OrderBy(c => c.X+c.Y).ToArray();
+
+            if (line.IsVertical())
+            {
+                var X = line.P0.X;
+                var l1 = new LineSegment(X, coors[0].Y, X, coors[1].Y);
+                var l2 = new LineSegment(X, coors[1].Y, X, coors[2].Y);
+                return (l1, l2);
+            }
+            else
+            {
+                var Y = line.P0.Y;
+                var l1 = new LineSegment( coors[0].X,Y, coors[1].X,Y);
+                var l2 = new LineSegment( coors[1].X,Y, coors[2].X,Y);
+                return (l1, l2);
+            }
+        }
     }
 }

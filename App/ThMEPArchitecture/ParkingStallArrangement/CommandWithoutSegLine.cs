@@ -108,6 +108,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger, false);
             //if (!rstDataExtract) return;
             var cutTolmsg = Active.Editor.GetInteger("\n 请输入切割阈值（大于正常车道宽的值）:");
+            var options = new PromptKeywordOptions("\n是否横向优先合并：");
+            options.Keywords.Add("是", "Y", "是(Y)");
+            options.Keywords.Add("否", "N", "否(N)");
+
+            options.Keywords.Default = "是";
+            var Msg = Active.Editor.GetKeywords(options);
+            if (Msg.Status != PromptStatus.OK) return;
+            var HorizontalFirst = Msg.StringResult.Equals("是");
+
             if (cutTolmsg.Status != PromptStatus.OK) return;
             if(cutTolmsg.Value < 5)
             {
@@ -131,7 +140,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //grouped.ForEach(l => l.ToDbLine().AddToCurrentSpace());
             var result = grouped;
 
-            result = result.GridLinesRemoveEmptyAreas();
+            result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
+            result = result.DefineSegLinePriority();
             result.ForEach(l => l.ToDbLine().AddToCurrentSpace());
             //subareas.ForEach(subarea => subarea.Display("MPDebug"));
 

@@ -23,6 +23,25 @@ namespace ThParkingStall.Core.Tools
             if (Envelope is Polygon polygon) return polygon;
             else return null;
         }
+        public static double GetBound(this List<Polygon> polygons, bool UpperBound, bool Verticle)
+        {
+            return GetBound(polygons.Cast<Geometry>().ToList(), UpperBound, Verticle);
+        }
+        public static double GetBound(this List<Geometry> geos,bool UpperBound,bool Verticle)
+        {
+            var coors = new List<Coordinate>();
+            geos.ForEach(geo => coors.AddRange(geo.Coordinates));
+            if (Verticle)
+            {
+                if(UpperBound) return coors.Max(coor => coor.Y);
+                else return coors.Min(coor => coor.Y);
+            }
+            else
+            {
+                if (UpperBound) return coors.Max(coor => coor.X);
+                else return coors.Min(coor => coor.X);
+            }
+        }
         //removeHoles Only active when T is polygon 
         public static List<T> Get<T>(this Geometry geometry,bool removeHoles = true)
         {
