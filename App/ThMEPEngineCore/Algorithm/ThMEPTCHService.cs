@@ -104,6 +104,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否为天正水流指示器
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHPipeValue(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("PIPEVALVE");
+        }
+
+        /// <summary>
         /// 是否为天正设备
         /// </summary>
         /// <param name="entity"></param>

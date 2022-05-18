@@ -58,6 +58,7 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="Engine\ThTCHWaterIndicatorExtractionVisitor.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\HandleStructService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThPipePreProcessService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
@@ -218,6 +219,9 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
+    <Compile Include="Engine\ThTCHWaterIndicatorRecognitionEngine.cs" />
+    <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
+    <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareRecognitionEngine.cs" />
     <Compile Include="ThHydrantCmds.THXHSYH.cs" />
