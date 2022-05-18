@@ -1557,10 +1557,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 {
                                                                     limit -= 450;
                                                                 }
-                                                                if (fireOffsetY + fireHeight >= limit)
-                                                                {
-                                                                    fixY -= fireOffsetY;
-                                                                }
                                                             }
                                                             var p1 = p0.OffsetY(fireOffsetY);
                                                             var p2 = p1.OffsetXY(dx1, fixY);
@@ -3422,10 +3418,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         limit -= 450;
                                                                     }
-                                                                    if (fireOffsetY + fireHeight >= limit)
-                                                                    {
-                                                                        fixY -= fireOffsetY;
-                                                                    }
                                                                 }
                                                                 var p1 = p0.OffsetY(fireOffsetY);
                                                                 var p2 = p1.OffsetXY(dx1, fixY);
@@ -5266,10 +5258,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                     {
                                                                         limit -= 450;
                                                                     }
-                                                                    if (fireOffsetY + fireHeight >= limit)
-                                                                    {
-                                                                        fixY -= fireOffsetY;
-                                                                    }
                                                                 }
                                                                 var p1 = p0.OffsetY(fireOffsetY);
                                                                 var p2 = p1.OffsetXY(dx1, fixY);
@@ -7109,10 +7097,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                                 else if (storey == maxNumStorey && vm.IsTopLayerRing)
                                                                 {
                                                                     limit -= 450;
-                                                                }
-                                                                if (fireOffsetY + fireHeight >= limit)
-                                                                {
-                                                                    fixY -= fireOffsetY;
                                                                 }
                                                             }
                                                             var p1 = p0.OffsetY(fireOffsetY);
