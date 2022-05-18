@@ -171,9 +171,9 @@ namespace TianHua.Electrical.PDS.Engine
                             var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
                             var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap);
+                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames);
 
-                            graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
+                            graphEngine.MultiDistBoxAnalysis(acad.Database);
                             graphEngine.CreatGraph();
                             graphEngine.UnionEdge();
                             graphEngine.UnionLightingEdge();

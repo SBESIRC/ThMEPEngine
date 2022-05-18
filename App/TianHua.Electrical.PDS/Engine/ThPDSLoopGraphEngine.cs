@@ -76,6 +76,11 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         private List<string> DistBoxKey { get; set; }
 
+        /// <summary>
+        /// 配电箱框线
+        /// </summary>
+        private List<Polyline> DistBoxFrames { get; set; }
+
         private ThCADCoreNTSSpatialIndex DistBoxIndex;
         private ThCADCoreNTSSpatialIndex LoadIndex;
         private ThCADCoreNTSSpatialIndex CableIndex;
@@ -90,7 +95,8 @@ namespace TianHua.Electrical.PDS.Engine
             List<Entity> loads, List<Curve> cabletrays, List<Curve> cables, ThMarkService markService,
             List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode,
             Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
-            Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap)
+            Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap,
+            List<Polyline> distBoxFrames)
         {
             Database = database;
             MarkService = markService;
@@ -107,6 +113,7 @@ namespace TianHua.Electrical.PDS.Engine
                 CacheLoads = new List<Entity>();
                 CableTrays = cabletrays;
                 Cables = cables;
+                DistBoxFrames = distBoxFrames;
 
                 DistBoxIndex = new ThCADCoreNTSSpatialIndex(DistBoxes.ToCollection());
                 CableIndex = new ThCADCoreNTSSpatialIndex(Cables.ToCollection());
@@ -152,9 +159,9 @@ namespace TianHua.Electrical.PDS.Engine
             }
         }
 
-        public void MultiDistBoxAnalysis(Database database, List<Polyline> distBoxFrames)
+        public void MultiDistBoxAnalysis(Database database)
         {
-            distBoxFrames.ForEach(frame =>
+            DistBoxFrames.ForEach(frame =>
             {
                 // 搜索框线中的配电箱
                 var distBoxes = DistBoxIndex.SelectCrossingPolygon(frame);
@@ -321,6 +328,10 @@ namespace TianHua.Electrical.PDS.Engine
         public void CreatGraph()
         {
             foreach (var cabletray in CableTrays)
+            {
+                FindGraph(null, cabletray);
+            }
+            foreach (var cabletray in DistBoxFrames)
             {
                 FindGraph(null, cabletray);
             }
@@ -1324,6 +1335,7 @@ namespace TianHua.Electrical.PDS.Engine
                     .Where(e => e.Source.NodeType == edge.Source.NodeType)
                     .Where(e => e.Target.NodeType == edge.Target.NodeType)
                     .Where(e => e.Circuit.ID.CircuitNumber.Equals(edge.Circuit.ID.CircuitNumber))
+                    .Where(e => e.Target.Loads[0].Location.BasePoint.AlmostEqualsTo(edge.Target.Loads[0].Location.BasePoint))
                     .OrderByDescending(e => e.Target.Loads.Count)
                     .ToList();
                 if (sameEdge.Count > 1)
