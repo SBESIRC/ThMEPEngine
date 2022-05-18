@@ -76,11 +76,17 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     }
                     else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
                     {
-                        var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
-                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
+                        if (pipeTuple.Item1.Count > 0)
+                        {
+                            var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
+                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
+                        }
 
-                        var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
-                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                        if (pipeTuple.Item2 != null)
+                        {
+                            var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
+                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                        }
                     }
                 }
                 else if (paramSetting.SingleRowSetting == SingleRowSettingEnum.ReservedPlug)

@@ -94,6 +94,22 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
+        public static void InsertPipeCircle(Circle circle, string layerName, bool needImport = true)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                if (needImport)
+                {
+                    acadDatabase.Layers.Import(
+                       blockDb.Layers.ElementOrDefault(layerName), false);
+                }
+                circle.Layer = layerName;
+                circle.ColorIndex = 256;
+                acadDatabase.ModelSpace.Add(circle);
+            }
+        }
+
         public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName)
         {
             double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);

@@ -372,15 +372,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 var vModel = new VerticalPipeModel();
                 vModel.Position = model.DiranPoint;
-                vModel.PipeCircle = new Circle(vModel.Position, Vector3d.ZAxis, 100);
+                vModel.PipeCircle = new Circle(vModel.Position, Vector3d.ZAxis, 50);
                 vModel.IsEuiqmentPipe = true;
                 if (model.EnumEquipmentType == EnumEquipmentType.toilet)
                 {
-                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
+                    vModel.PipeType = VerticalPipeType.SewagePipe;
                 }
                 else
                 {
-                    vModel.PipeType = VerticalPipeType.SewagePipe;
+                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
                 }
                 resModels.Add(vModel);
             }

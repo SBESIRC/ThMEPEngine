@@ -201,17 +201,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
         {
             var resEquipments = new List<DrainingEquipmentModel>();
             var equipments = GetPolylineEquipmentBlocks(polyline);
+            var resWalls = new List<Polyline>(wall);
+            resWalls.ForEach(x => originTransformer.Reset(x));
             foreach (var equip in equipments)
             {
                 switch (equip.EnumEquipmentType)
                 {
                     case EnumEquipmentType.toilet:                      //坐便器
-                        resEquipments.AddRange(CalRectanglePoint(equip, wall, 350));
+                        resEquipments.AddRange(CalRectanglePoint(equip, resWalls, 350));
                         break;
                     case EnumEquipmentType.mopPool:                     //拖把池
                     case EnumEquipmentType.kitchenBasin:                //厨房洗涤盆
                     case EnumEquipmentType.singleBasinWashingTable:     //单盆洗手台
-                        resEquipments.AddRange(CalRectanglePoint(equip, wall, 150, false));
+                        resEquipments.AddRange(CalRectanglePoint(equip, resWalls, 150, false));
                         break;
                     case EnumEquipmentType.floorDrain:                  //地漏
                         resEquipments.AddRange(CalCirclePoint(equip));

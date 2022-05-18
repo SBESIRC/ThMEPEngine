@@ -46,8 +46,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     .OrderByDescending(x => x.Value.Value)
                     .ToDictionary(x => x.Key, y => y.Value);
                 var roomEquipementPipes = roomPipeDic.Where(x => x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList(); //洁具点位
-                List<VerticalPipeModel> wasteMainPolys = new List<VerticalPipeModel>();                             //废水主管
-                VerticalPipeModel sewageMainPoly = null;                                                            //污水主管
+                List<VerticalPipeModel> sewageMainPolys = new List<VerticalPipeModel>();                             //污水主管（马桶）
+                VerticalPipeModel wasteMainPoly = null;                                                            //废水主管
                 List<VerticalPipeModel> otherWastePolys = new List<VerticalPipeModel>();                            //其他废水支管
                 List<VerticalPipeModel> otherSewagePolys = new List<VerticalPipeModel>();                           //其他废水支管
                 List<VerticalPipeModel> otherVerPipes = new List<VerticalPipeModel>();                              //其他立管
@@ -56,31 +56,31 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     if (singleRowSettingEnum == SingleRowSettingEnum.ReservedPlug)
                     {
-                        wasteMainPolys = GetReservedPlugMainPipes(dRoom, roomEquipementPipes);
+                        sewageMainPolys = GetReservedPlugMainPipes(dRoom, roomEquipementPipes);
                     }
                     else if (singleRowSettingEnum == SingleRowSettingEnum.DrawDetail)
                     {
-                        wasteMainPolys = new List<VerticalPipeModel>() { roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe).FirstOrDefault() };
+                        sewageMainPolys = new List<VerticalPipeModel>() { roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.SewagePipe).FirstOrDefault() };
                         if (sewageWasteWaterEnum == SewageWasteWaterEnum.Confluence)
                         {
                             roomEquipementPipes.ForEach(x => x.PipeType = VerticalPipeType.ConfluencePipe);
-                            if (wasteMainPolys.Count <= 0)
+                            if (sewageMainPolys.Count <= 0)
                             {
-                                wasteMainPolys = new List<VerticalPipeModel>() { roomEquipementPipes.First() };
+                                sewageMainPolys = new List<VerticalPipeModel>() { roomEquipementPipes.First() };
                             }
                         }
                         else if (sewageWasteWaterEnum == SewageWasteWaterEnum.Diversion)
                         {
-                            sewageMainPoly = roomEquipementPipes.First();
+                            wasteMainPoly = roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe).FirstOrDefault();
                         }
                     }
 
-                    var otherPolys = roomEquipementPipes.Where(x => x != sewageMainPoly && !wasteMainPolys.Contains(x)).ToList();
+                    var otherPolys = roomEquipementPipes.Where(x => x != wasteMainPoly && !sewageMainPolys.Contains(x)).ToList();
                     otherWastePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe || x.PipeType == VerticalPipeType.ConfluencePipe).ToList();
                     otherSewagePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.SewagePipe).ToList();
                 }
                 otherVerPipes = roomPipeDic.Where(x => !x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList();
-                var tuple = new Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>(wasteMainPolys, sewageMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
+                var tuple = new Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>(sewageMainPolys, wasteMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
                 pipeTuples.Add(tuple);
 
                 verticalPipes = verticalPipes.Except(roomPipeDic.Select(x => x.Key)).ToList();
@@ -106,7 +106,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
 
                 var pipes = equipmentPipes.Where(x => room.Key.Key.Contains(x.Position)).ToList();
-                var mainPipe = pipes.Where(x => x.PipeType == VerticalPipeType.WasteWaterPipe).FirstOrDefault();
+                var mainPipe = pipes.Where(x => x.PipeType == VerticalPipeType.SewagePipe).FirstOrDefault();
                 if (mainPipe == null)
                 {
                     mainPipe = pipes.FirstOrDefault();
