@@ -82,23 +82,53 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 {
                     DataList = lst,
                 };
-                void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.DataList != null)
+                    int count = 0;
+                    void dfs(ThPDSCircuitGraphTreeModel node)
                     {
-                        var lst = node.DataList.OrderBy(x => x.Name).ToList();
-                        node.DataList.Clear();
-                        foreach (var n in lst)
-                        {
-                            node.DataList.Add(n);
-                        }
+                        ++count;
                         foreach (var n in node.DataList)
                         {
                             dfs(n);
                         }
                     }
+                    dfs(node);
+                    if (count == 1)
+                    {
+                        var vertices = graph.Vertices.ToList();
+                        var vts = vertices.Where(v => v.Type == Model.PDSNodeType.DistributionBox).ToList();
+                        if (vts.Count == 0) vts = vertices;
+                        foreach (var v in vts)
+                        {
+                            var m = new ThPDSCircuitGraphTreeModel()
+                            {
+                                Id = idDict[v],
+                                Name = v.LoadIdString(),
+                                DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                            };
+                            node.DataList.Add(m);
+                        }
+                    }
                 }
-                dfs(node);
+                {
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        if (node.DataList != null)
+                        {
+                            var lst = node.DataList.OrderBy(x => x.Name).ToList();
+                            node.DataList.Clear();
+                            foreach (var n in lst)
+                            {
+                                node.DataList.Add(n);
+                            }
+                            foreach (var n in node.DataList)
+                            {
+                                dfs(n);
+                            }
+                        }
+                    }
+                    dfs(node);
+                }
                 return node;
             }
         }
