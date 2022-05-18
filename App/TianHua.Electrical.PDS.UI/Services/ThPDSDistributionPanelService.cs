@@ -22,7 +22,6 @@ using TianHua.Electrical.PDS.UI.Converters;
 using TianHua.Electrical.PDS.UI.Project.Module;
 using TianHua.Electrical.PDS.UI.Project.Module.Component;
 using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace TianHua.Electrical.PDS.UI.WpfServices
 {
@@ -44,8 +43,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
         List<MenuItem> menuItems;
         ContextMenu ctxMenu;
         QuikGraph.BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph => Project.PDSProjectVM.Instance?.InformationMatchViewModel?.Graph;
-        bool inited;
-        public void Update(UserContorls.ThPDSDistributionPanel panel)
+        public void Init(UserContorls.ThPDSDistributionPanel panel)
         {
             if (graph is null) return;
             var vertices = graph.Vertices.Select(x => new ThPDSVertex { Detail = x.Details, Type = x.Type }).ToList();
@@ -3904,13 +3902,6 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 clear += () => { clear = null; };
             }
             UpdateCanvas();
-            if (!inited)
-                WeakReferenceMessenger.Default.Register(this, 0, (ThPDSDistributionPanelService r, string m) =>
-                {
-                //MessageBox.Show(m);
-                UpdateCanvas();
-                });
-            inited = true;
         }
         private static Path CreateLine(Transform trans, Brush strockBrush, Point st, Point ed)
         {

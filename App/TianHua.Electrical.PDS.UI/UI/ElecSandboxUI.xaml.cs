@@ -1,5 +1,4 @@
 ﻿using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.Toolkit.Mvvm.Messaging;
 using Newtonsoft.Json;
 using QuikGraph;
 using QuikGraph.Serialization;
@@ -54,15 +53,6 @@ namespace TianHua.Electrical.PDS.UI.UI
         private void ElecSandboxUI_Loaded(object sender, RoutedEventArgs e)
         {
             InitTopTableItem();
-            PreviewKeyDown += ElecSandboxUI_PreviewKeyDown;
-        }
-
-        private void ElecSandboxUI_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == System.Windows.Input.Key.F5)
-            {
-                WeakReferenceMessenger.Default.Send("F5", 0);
-            }
         }
 
         static bool hasInited;
