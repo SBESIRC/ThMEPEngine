@@ -4027,6 +4027,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         {
                             PipeType.Y2L => viewModel?.Params.BalconyRainPipeDN,
                             PipeType.NL => viewModel?.Params.CondensePipeVerticalDN,
+                            PipeType.FL0 => viewModel?.Params.WaterWellPipeVerticalDN,
                             _ => dft,
                         };
                         dn ??= dft;

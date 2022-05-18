@@ -119,6 +119,20 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
+
+        private string _WaterWellPipeVerticalDN = "DN75";
+        public string WaterWellPipeVerticalDN
+        {
+            get
+            {
+                return _WaterWellPipeVerticalDN;
+            }
+            set
+            {
+                _WaterWellPipeVerticalDN = value;
+                RaisePropertyChanged();
+            }
+        }
         private string _CondensePipeDN = "DN50";
         public string CondensePipeVerticalDN
         {

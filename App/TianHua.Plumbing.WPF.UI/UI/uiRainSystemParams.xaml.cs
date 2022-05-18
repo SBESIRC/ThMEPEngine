@@ -36,6 +36,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             cbxWellFD.ItemsSource = cbxBalFD.ItemsSource = cbxCndFD.ItemsSource = new string[] { "DN50", "DN75", };
             cbxLNLG.ItemsSource = cbxYTYS.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
             cbxLNHG.ItemsSource = new string[] { "DN25", "DN32", "DN50" };
+            cbxSJLG.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
