@@ -111,6 +111,34 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                     }
                 }
                 {
+                    var vertices = graph.Vertices.ToList();
+                    var vts = vertices.Where(v => v.Type == Model.PDSNodeType.DistributionBox).ToList();
+                    var nodes = new List<ThPDSProjectGraphNode>();
+                    void dfs(ThPDSCircuitGraphTreeModel nd)
+                    {
+                        if (nd != node) nodes.Add(vertices[nd.Id]);
+                        foreach (var n in nd.DataList)
+                        {
+                            dfs(n);
+                        }
+                    }
+                    dfs(node);
+                    foreach (var v in vts)
+                    {
+                        if (!nodes.Contains(v))
+                        {
+                            nodes.Add(v);
+                            var m = new ThPDSCircuitGraphTreeModel()
+                            {
+                                Id = idDict[v],
+                                Name = v.LoadIdString(),
+                                DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                            };
+                            node.DataList.Add(m);
+                        }
+                    }
+                }
+                {
                     void dfs(ThPDSCircuitGraphTreeModel node)
                     {
                         if (node.DataList != null)
