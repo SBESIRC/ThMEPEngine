@@ -34,10 +34,12 @@ namespace ThMEPLighting.Garage.Engine
             base.Filter(regionBorder);
             regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.DoubleRowOffsetDis / 2.0);
             regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.MinimumEdgeLength);
+            regionBorder.DxCenterLines = ThFilterIsolatedLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.MinimumEdgeLength);
         }
         protected override void Preprocess(ThRegionBorder regionBorder)
         {
             regionBorder.Trim(); // 裁剪
+            regionBorder.TrimOffsetLines(ArrangeParameter.DoubleRowOffsetDis / 2.0);
             regionBorder.Shorten(ThGarageLightCommon.RegionBorderBufferDistance); // 缩短
             regionBorder.Noding(); // 
             Filter(regionBorder); // 过滤
