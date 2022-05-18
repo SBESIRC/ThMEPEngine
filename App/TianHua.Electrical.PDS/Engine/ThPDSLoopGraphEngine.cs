@@ -227,15 +227,16 @@ namespace TianHua.Electrical.PDS.Engine
                             distBoxKeyList.Add(distBoxKey);
                         }
                         var thisMark = new ThPDSTextInfo();
+                        var thisCircuitMark = new ThPDSTextInfo();
                         var buffer = ThPDSBufferService.Buffer(distBox, database);
                         var privateMark = MarkService.GetMarks(buffer);
                         privateMark.Texts.ForEach(o =>
                         {
                             if (o.Contains("/W") || o.Contains("-W"))
                             {
-                                thisMark.Texts.Add(o);
-                                thisMark.ObjectIds.AddRange(privateMark.ObjectIds);
-                                thisMark.ObjectIds = thisMark.ObjectIds.Distinct().ToList();
+                                thisCircuitMark.Texts.Add(o);
+                                thisCircuitMark.ObjectIds.AddRange(privateMark.ObjectIds);
+                                thisCircuitMark.ObjectIds = thisMark.ObjectIds.Distinct().ToList();
                             }
                         });
                         distBoxKeyList.ForEach(key =>
@@ -267,6 +268,10 @@ namespace TianHua.Electrical.PDS.Engine
                                                     strMatch = true;
                                                 }
                                             }
+                                            if(privateMark.Texts.Contains(str) && !str.Contains(key + "E"))
+                                            {
+                                                strMatch = true;
+                                            }
                                         }
                                         else
                                         {
@@ -287,6 +292,8 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 return;
                             }
+                            thisMark.Texts.AddRange(thisCircuitMark.Texts);
+                            thisMark.ObjectIds.AddRange(thisCircuitMark.ObjectIds);
                             var newNode = ThPDSGraphService.CreateNode(distBox, thisMark.Texts, DistBoxKey, buffer);
                             newNode.Loads[0].SetOnLightingCableTray(onLightingCableTray);
                             cacheDistBoxes.Add(distBox);

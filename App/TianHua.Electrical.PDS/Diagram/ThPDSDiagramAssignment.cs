@@ -50,7 +50,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 参考尺寸
             var overallDimensions = texts.Where(t => t.TextString == ThPDSCommon.OVERALL_DIMENSIONS).First();
-            overallDimensions.TextString = "";
+            overallDimensions.TextString = node.Details.BoxSize.GetDescription();
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
@@ -58,7 +58,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
-            installMethod.TextString = "";
+            installMethod.TextString = node.Details.BoxInstallationType.GetDescription();
         }
 
         public Tuple<bool, Polyline> EnterCircuitAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference circuitBlock,

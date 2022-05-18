@@ -40,7 +40,7 @@ namespace TianHua.Electrical.PDS.Service
             });
             foreach (var str in marks)
             {
-                thPDSDistBox.ID.Description += StringClean(str);
+                thPDSDistBox.ID.Description = StringClean(str);
             }
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);
@@ -198,7 +198,7 @@ namespace TianHua.Electrical.PDS.Service
                 }
                 else
                 {
-                    thPDSLoad.ID.Description += str;
+                    thPDSLoad.ID.Description = str;
                 }
             }
 
