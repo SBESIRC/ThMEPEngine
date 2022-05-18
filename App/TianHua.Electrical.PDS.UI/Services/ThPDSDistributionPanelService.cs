@@ -172,6 +172,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
 
                 // 自动编号
                 ThPDSProjectGraphService.AutoNumbering(graph, nodes);
+                UpdateTreeView();
             });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
