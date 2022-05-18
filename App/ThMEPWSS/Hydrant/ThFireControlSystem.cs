@@ -92,9 +92,9 @@ namespace ThMEPWSS.FireProtectionSystemNs
                 var lineInfos = new List<LineInfo>();
                 var floorGroupData = InputDataConvert.SplitFloor(vm);
                 var floorDatas = InputDataConvert.FloorDataModels(floorGroupData);
-                const double fireOffsetY = 100.0;
-                const double fireHeight = 700.0;
                 var HEIGHT = vm.FaucetFloor;
+                var fireOffsetY = (HEIGHT > 3000 ? HEIGHT / 3 : HEIGHT / 2) - 500;
+                const double fireHeight = 700.0;
                 var SPAN_X = 2000.0;
                 if (vm.SetHighlevelNozzleAndSemiPlatformNozzleParams.Items.Any(x => x.IsHalfPlatform))
                 {
