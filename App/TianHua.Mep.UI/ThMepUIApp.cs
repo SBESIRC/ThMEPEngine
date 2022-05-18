@@ -6,6 +6,8 @@ namespace TianHua.Mep.UI
 {
     public class ThMepUIApp : IExtensionApplication
     {
+        private RoomOutlineUI uiRoomOutline;
+
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -26,6 +28,20 @@ namespace TianHua.Mep.UI
             //  Un-subscribing to those events;
             //  Etc.
         }
+
+        /// <summary>
+        /// 房间框线UI
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THFJKX2", CommandFlags.Modal)]
+        public void THFJKX2()
+        {
+            if (uiRoomOutline != null && uiRoomOutline.IsLoaded)
+                return;
+            uiRoomOutline = new RoomOutlineUI();
+            uiRoomOutline.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiRoomOutline);
+        }
+
         /// <summary>
         /// 提取房间框线
         /// </summary>

@@ -857,7 +857,6 @@
     <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
-    <Compile Include="ViewModel\ThRoomOutlineVM.cs" />
     <Compile Include="ViewModel\ThSprinklerCheckerVM.cs" />
     <Compile Include="ViewModel\ThFlushPointVM.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />

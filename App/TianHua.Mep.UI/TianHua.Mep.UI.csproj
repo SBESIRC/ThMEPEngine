@@ -39,8 +39,12 @@
     <Compile Include="UI\ExtractRoomOutlineUI.xaml.cs">
       <DependentUpon>ExtractRoomOutlineUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\RoomOutlineUI.xaml.cs">
+      <DependentUpon>RoomOutlineUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\ThExtractBeamConfigVM.cs" />
     <Compile Include="ViewModel\ThExtractRoomOutlineVM.cs" />
+    <Compile Include="ViewModel\ThRoomOutlineVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\" />
@@ -52,6 +56,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\ExtractRoomOutlineUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\RoomOutlineUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -81,6 +89,11 @@
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.1.2</Version>
+    </PackageReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

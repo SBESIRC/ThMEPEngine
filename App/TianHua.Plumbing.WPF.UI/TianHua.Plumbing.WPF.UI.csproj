@@ -168,9 +168,6 @@
     <Compile Include="UI\uiPipeDrawControl.xaml.cs">
       <DependentUpon>uiPipeDrawControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\RoomOutlineUI.xaml.cs">
-      <DependentUpon>RoomOutlineUI.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
       <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
     </Compile>
@@ -354,10 +351,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiPipeDrawControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\RoomOutlineUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

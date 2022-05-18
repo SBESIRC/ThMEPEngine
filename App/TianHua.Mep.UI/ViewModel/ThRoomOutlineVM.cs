@@ -6,7 +6,7 @@ using System.Windows.Input;
 using Autodesk.AutoCAD.DatabaseServices;
 using Microsoft.Toolkit.Mvvm.Input;
 
-namespace ThMEPWSS.ViewModel
+namespace TianHua.Mep.UI.ViewModel
 {
     public class ThRoomOutlineVM
     {
@@ -62,7 +62,7 @@ namespace ThMEPWSS.ViewModel
         private void PickRoomOutline()
         {
             SetFocusToDwgView();
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THEROC");
         }
 
         private void PickDoorOutline()

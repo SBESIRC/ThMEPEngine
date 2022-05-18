@@ -428,6 +428,33 @@
             </Commands>
         </ComponentEntry>
     </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJKX2" Global="THFJKX2" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJKX2" Global="THFJKX2" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJKX2" Global="THFJKX2" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
     <!--Assembly App, Electrical.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
@@ -534,7 +561,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
@@ -568,7 +594,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
@@ -602,7 +627,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
