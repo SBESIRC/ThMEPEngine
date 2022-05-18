@@ -1,5 +1,6 @@
 ﻿using Dreambuild.AutoCAD;
 using QuikGraph;
+using QuikGraph.Algorithms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,6 +98,44 @@ namespace TianHua.Electrical.PDS.Project
         }
 
         /// <summary>
+        /// 全局配置更新
+        /// </summary>
+        public static void GlobalConfigurationUpdate()
+        {
+            foreach (var node in _projectGraph.TopologicalSort().Reverse())
+            {
+                node.UpdateLoadGlobalConfiguration();
+                var edges = _projectGraph.InEdges(node);
+                edges.ForEach(e => e.UpdateCircuitGlobalConfiguration());
+            }
+        }
+
+        /// <summary>
+        /// 更新负载全局配置
+        /// </summary>
+        public static void UpdateLoadGlobalConfiguration(this ThPDSProjectGraphNode node)
+        {
+            var edges = _projectGraph.OutEdges(node).ToList();
+            //统计节点级联电流
+            var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
+            CascadeCurrent = Math.Max(CascadeCurrent, node.Details.MiniBusbars.Count > 0 ? node.Details.MiniBusbars.Max(o => o.Key.CascadeCurrent) : 0);
+
+            node.ComponentCheck(CascadeCurrent);
+
+            node.Details.CascadeCurrent = Math.Max(CascadeCurrent, node.Details.CircuitFormType.GetCascadeCurrent());
+        }
+
+        /// <summary>
+        /// 更新回路全局配置
+        /// </summary>
+        public static void UpdateCircuitGlobalConfiguration(this ThPDSProjectGraphEdge edge)
+        {
+            edge.ComponentGlobalConfigurationCheck();
+            //统计回路级联电流
+            edge.Details.CascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
+        }
+
+        /// <summary>
         /// 计算电流
         /// </summary>
         public static void CalculateCurrent(this ThPDSProjectGraphNode node)
@@ -137,7 +176,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 var DemandFactor = miniBusbar.DemandFactor;
                 //if (miniBusbar.IsOnlyLoad)
-                    //DemandFactor = 1.0;
+                //DemandFactor = 1.0;
                 var PowerFactor = miniBusbar.PowerFactor;
                 var KV = Phase == ThPDSPhase.一相 ? 0.22 : 0.38;
                 miniBusbar.CalculateCurrent = Math.Round(miniBusbar.Power * DemandFactor / (PowerFactor * Math.Sqrt(3) * KV), 2);
@@ -159,13 +198,13 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     oneWayInCircuit.Component = componentFactory.CreatIsolatingSwitch();
                 }
-                else if(node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
+                else if (node.Details.CircuitFormType is TwoWayInCircuit twoWayInCircuit)
                 {
                     twoWayInCircuit.Component1 = componentFactory.CreatIsolatingSwitch();
                     twoWayInCircuit.Component2 = componentFactory.CreatIsolatingSwitch();
                     twoWayInCircuit.transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
                 }
-                else if(node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
+                else if (node.Details.CircuitFormType is ThreeWayInCircuit threeWayInCircuit)
                 {
                     threeWayInCircuit.Component1 = componentFactory.CreatIsolatingSwitch();
                     threeWayInCircuit.Component2 = componentFactory.CreatIsolatingSwitch();
@@ -173,7 +212,7 @@ namespace TianHua.Electrical.PDS.Project
                     threeWayInCircuit.transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
                     threeWayInCircuit.transferSwitch2 = componentFactory.CreatManualTransferSwitch();
                 }
-                else if(node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
+                else if (node.Details.CircuitFormType is CentralizedPowerCircuit centralized)
                 {
                     centralized.Component = componentFactory.CreatIsolatingSwitch();
                 }
@@ -216,7 +255,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatCPS();
                 }
-                else if(type.Equals(typeof(AutomaticTransferSwitch)))
+                else if (type.Equals(typeof(AutomaticTransferSwitch)))
                 {
                     return componentFactory.CreatAutomaticTransferSwitch();
                 }
@@ -224,7 +263,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatManualTransferSwitch();
                 }
-                else if(type.Equals(typeof(IsolatingSwitch)))
+                else if (type.Equals(typeof(IsolatingSwitch)))
                 {
                     return componentFactory.CreatIsolatingSwitch();
                 }
@@ -248,9 +287,9 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 元器件选型
         /// </summary>
-        public static T ComponentChange<T>(this T component, T newComponent) where T:PDSBaseComponent
+        public static T ComponentChange<T>(this T component, T newComponent) where T : PDSBaseComponent
         {
-            if(component is IsolatingSwitch isolatingSwitch && newComponent is IsolatingSwitch newIsolatingSwitch)
+            if (component is IsolatingSwitch isolatingSwitch && newComponent is IsolatingSwitch newIsolatingSwitch)
             {
                 if (isolatingSwitch.Model!= newIsolatingSwitch.Model &&  newIsolatingSwitch.GetModels().Contains(isolatingSwitch.Model))
                 {
@@ -265,7 +304,7 @@ namespace TianHua.Electrical.PDS.Project
                     newIsolatingSwitch.SetRatedCurrent(isolatingSwitch.RatedCurrent);
                 }
             }
-            else if(component is TransferSwitch transferSwitch && newComponent is TransferSwitch newTransferSwitch)
+            else if (component is TransferSwitch transferSwitch && newComponent is TransferSwitch newTransferSwitch)
             {
                 if (transferSwitch.Model != newTransferSwitch.Model &&  newTransferSwitch.GetModels().Contains(transferSwitch.Model))
                 {
@@ -284,7 +323,7 @@ namespace TianHua.Electrical.PDS.Project
                     newTransferSwitch.SetRatedCurrent(transferSwitch.RatedCurrent);
                 }
             }
-            else if(component is Breaker breaker && newComponent is Breaker newBreaker)
+            else if (component is Breaker breaker && newComponent is Breaker newBreaker)
             {
                 newBreaker.SetBreakerType(breaker.ComponentType);
                 if (newBreaker.Model != breaker.Model &&  newBreaker.GetModels().Contains(breaker.Model))
@@ -308,7 +347,7 @@ namespace TianHua.Electrical.PDS.Project
                     newBreaker.SetRatedCurrent(breaker.RatedCurrent);
                 }
             }
-            else if(component is ThermalRelay thermalRelay && newComponent is ThermalRelay newThermalRelay)
+            else if (component is ThermalRelay thermalRelay && newComponent is ThermalRelay newThermalRelay)
             {
                 //do not
                 //热继电器没有选型范围，固定选型
@@ -328,7 +367,7 @@ namespace TianHua.Electrical.PDS.Project
                     newContactor.SetRatedCurrent(contactor.RatedCurrent);
                 }
             }
-            else if(newComponent is Conductor newConductor)
+            else if (newComponent is Conductor newConductor)
             {
                 if (component is Conductor conductor)
                 {
@@ -341,7 +380,7 @@ namespace TianHua.Electrical.PDS.Project
                         newConductor.SetConductorCrossSectionalArea(conductor.ConductorCrossSectionalArea);
                     }
                 }
-                else if(!component.IsNull())//为了支持空负载没有导体的case
+                else if (!component.IsNull())//为了支持空负载没有导体的case
                 {
                     throw new NotSupportedException();
                 }
@@ -373,7 +412,7 @@ namespace TianHua.Electrical.PDS.Project
                     newCPS.SetResidualCurrent(cps.ResidualCurrent);
                 }
             }
-            else if(component is Meter meter && newComponent is Meter newMeter)
+            else if (component is Meter meter && newComponent is Meter newMeter)
             {
                 if (newMeter.MeterParameter  != meter.MeterParameter &&  newMeter.GetParameters().Contains(meter.MeterParameter))
                 {
@@ -506,12 +545,12 @@ namespace TianHua.Electrical.PDS.Project
             var projectGraph = _projectGraph;
             foreach (ThPDSProjectGraphEdge edge in projectGraph.Edges)
             {
-                if(edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
+                if (edge.Target.Load.LoadTypeCat_3 != ThPDSLoadTypeCat_3.None)
                 {
                     var secondaryCircuitInfos = SecondaryCircuitConfiguration.SecondaryCircuitConfigs[edge.Target.Load.LoadTypeCat_3.ToString()];
                     foreach (SecondaryCircuitInfo item in secondaryCircuitInfos)
                     {
-                        ThPDSProjectGraphService.AddControlCircuit(projectGraph ,edge, item);
+                        ThPDSProjectGraphService.AddControlCircuit(projectGraph, edge, item);
                     }
                 }
             }
@@ -555,7 +594,7 @@ namespace TianHua.Electrical.PDS.Project
                 SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
                 if (type.Equals(typeof(Breaker)))
                 {
-                    if(circuitFormOutType == CircuitFormOutType.漏电)
+                    if (circuitFormOutType == CircuitFormOutType.漏电)
                         return componentFactory.CreatResidualCurrentBreaker();
                     else
                         return componentFactory.CreatBreaker();
@@ -568,7 +607,7 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatContactor();
                 }
-                else if(type.Equals(typeof(Meter)))
+                else if (type.Equals(typeof(Meter)))
                 {
                     if (circuitFormOutType == CircuitFormOutType.配电计量_上海直接表 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在前 || circuitFormOutType == CircuitFormOutType.配电计量_直接表在后)
                     {
@@ -774,26 +813,26 @@ namespace TianHua.Electrical.PDS.Project
         public static double CalculatePower(this ThPDSProjectGraphNode source)
         {
             var edges = _projectGraph.OutEdges(source).ToList();
-            if(source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
+            if (source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
             {
                 return edges.Sum(o => o.Target.Details.HighPower);
             }
-            else if(source.Load.Phase == ThPDSPhase.一相)
+            else if (source.Load.Phase == ThPDSPhase.一相)
             {
                 return edges.Sum(o => o.Target.Details.HighPower);
             }
             double power = 0;
-            double L1Power =0, L2Power =0, L3Power = 0;
+            double L1Power = 0, L2Power = 0, L3Power = 0;
             edges.ForEach(edge =>
             {
                 var node = edge.Target;
                 switch (node.Details.PhaseSequence)
                 {
                     case PhaseSequence.L1:
-                    {
+                        {
                             L1Power += node.Details.HighPower;
                             break;
-                    }
+                        }
                     case PhaseSequence.L2:
                         {
                             L2Power += node.Details.HighPower;
@@ -820,20 +859,20 @@ namespace TianHua.Electrical.PDS.Project
                         }
                 }
             });
-            return power + 3 * Math.Max(Math.Max(L1Power, L2Power),L3Power);
+            return power + 3 * Math.Max(Math.Max(L1Power, L2Power), L3Power);
         }
 
         public static double CalculatePower(this ThPDSProjectGraphNode source, MiniBusbar miniBusbar)
         {
             var edges = source.Details.MiniBusbars[miniBusbar];
             var edge = edges.FirstOrDefault();
-            if(edge.IsNull())
+            if (edge.IsNull())
             {
                 return 0;
             }
             else
             {
-                if(edge.Target.Load.Phase == ThPDSPhase.一相 && edges.All(o => o.Target.Details.PhaseSequence == edge.Target.Details.PhaseSequence))
+                if (edge.Target.Load.Phase == ThPDSPhase.一相 && edges.All(o => o.Target.Details.PhaseSequence == edge.Target.Details.PhaseSequence))
                 {
                     miniBusbar.PhaseSequence = edge.Target.Details.PhaseSequence;
                     miniBusbar.Phase = ThPDSPhase.一相;
@@ -884,7 +923,7 @@ namespace TianHua.Electrical.PDS.Project
                     return power + 3 * Math.Max(Math.Max(L1Power, L2Power), L3Power);
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -893,7 +932,7 @@ namespace TianHua.Electrical.PDS.Project
         public static void BalancedPhaseSequence(this List<ThPDSProjectGraphEdge> edges)
         {
             var onePhase = new List<ThPDSProjectGraphNode>();
-            foreach (var edge in edges)
+            foreach (var edge in edges.GetSortedEdges())
             {
                 if (edge.Target.Load.Phase == ThPDSPhase.三相)
                 {
@@ -923,11 +962,11 @@ namespace TianHua.Electrical.PDS.Project
         /// </summary>
         public static void BalancedPhaseSequence(this List<ThPDSProjectGraphNode> nodes)
         {
-            if(nodes.Count == 1)
+            if (nodes.Count == 1)
             {
                 nodes[0].Details.PhaseSequence = PhaseSequence.L1;
             }
-            else if(nodes.Count == 2)
+            else if (nodes.Count == 2)
             {
                 nodes[0].Details.PhaseSequence = PhaseSequence.L1;
                 nodes[1].Details.PhaseSequence = PhaseSequence.L2;
@@ -943,13 +982,13 @@ namespace TianHua.Electrical.PDS.Project
                 var powerSum = nodes.Sum(x => x.Details.HighPower);
                 var averagePower = powerSum/3;
                 var HighPowerNodes = nodes.Where(o => o.Details.HighPower > averagePower).ToList();
-                if(HighPowerNodes.Count == 2)
+                if (HighPowerNodes.Count == 2)
                 {
                     HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L2;
                     HighPowerNodes[1].Details.PhaseSequence = PhaseSequence.L3;
                     nodes.Except(HighPowerNodes).ForEach(o => o.Details.PhaseSequence = PhaseSequence.L1);
                 }
-                else if(HighPowerNodes.Count == 1)
+                else if (HighPowerNodes.Count == 1)
                 {
                     HighPowerNodes[0].Details.PhaseSequence = PhaseSequence.L3;
                     nodes.Remove(HighPowerNodes[0]);
@@ -977,13 +1016,13 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="nodes"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public static List<ThPDSProjectGraphNode> ChoisePhaseSequence(this List<ThPDSProjectGraphNode> nodes,double target)
+        public static List<ThPDSProjectGraphNode> ChoisePhaseSequence(this List<ThPDSProjectGraphNode> nodes, double target)
         {
             List<ThPDSProjectGraphNode> result = new List<ThPDSProjectGraphNode>();
             var target_int = (int)Math.Ceiling(target);
             int multiple = (int)Math.Ceiling(target / 100);
             int[] vs = new int[nodes.Count];
-            for(int i = 0; i < vs.Length; i++)
+            for (int i = 0; i < vs.Length; i++)
             {
                 vs[i] = (int)Math.Ceiling(nodes[i].Details.HighPower/multiple);
             }
@@ -1005,13 +1044,13 @@ namespace TianHua.Electrical.PDS.Project
                 }
             }
             int x = nodes.Count, y = capacity;
-            while(x > 0 && y > 0)
+            while (x > 0 && y > 0)
             {
-                if(dp[x,y] != dp[x - 1 ,y])
+                if (dp[x, y] != dp[x - 1, y])
                 {
                     result.Add(nodes[x-1]);
                     y -= vs[x - 1];
-                    x --;
+                    x--;
                 }
                 else
                 {
@@ -1099,7 +1138,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="graph"></param>
         /// <param name="node"></param>
         /// <param name="miniBusbar"></param>
-        public static void CheckWithMiniBusbar(this ThPDSProjectGraphNode node , MiniBusbar miniBusbar)
+        public static void CheckWithMiniBusbar(this ThPDSProjectGraphNode node, MiniBusbar miniBusbar)
         {
             var edges = node.Details.MiniBusbars[miniBusbar];
             miniBusbar.Power = Math.Max(miniBusbar.Power, node.CalculatePower(miniBusbar));
@@ -1107,7 +1146,7 @@ namespace TianHua.Electrical.PDS.Project
 
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
-            node.ComponentCheck(miniBusbar , CascadeCurrent);
+            node.ComponentCheck(miniBusbar, CascadeCurrent);
 
             miniBusbar.CascadeCurrent = Math.Max(CascadeCurrent, miniBusbar.GetCascadeCurrent());
         }
@@ -1119,14 +1158,14 @@ namespace TianHua.Electrical.PDS.Project
         /// <param name="edge"></param>
         public static void CheckWithEdge(this ThPDSProjectGraphEdge edge)
         {
-            if(edge.Details.CircuitLock)
+            if (edge.Details.CircuitLock)
             {
                 return;
             }
             edge.ComponentCheck();
             //统计回路级联电流
             var cascadeCurrent = Math.Max(edge.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
-            if(edge.Details.CascadeCurrent > cascadeCurrent)
+            if (edge.Details.CascadeCurrent > cascadeCurrent)
             {
                 return;
             }
@@ -1134,7 +1173,7 @@ namespace TianHua.Electrical.PDS.Project
 
             var node = edge.Source;
             var miniBusbar = node.Details.MiniBusbars.FirstOrDefault(o => o.Value.Contains(edge)).Key;
-            if(miniBusbar.IsNull())
+            if (miniBusbar.IsNull())
             {
                 edge.Source.CheckWithNode();
             }
@@ -1366,7 +1405,7 @@ namespace TianHua.Electrical.PDS.Project
         /// <summary>
         /// 小母排元器件选型检查
         /// </summary>
-        public static void ComponentCheck(this ThPDSProjectGraphNode node , MiniBusbar miniBusbar, double cascadeCurrent)
+        public static void ComponentCheck(this ThPDSProjectGraphNode node, MiniBusbar miniBusbar, double cascadeCurrent)
         {
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(node, miniBusbar, cascadeCurrent);
             var breaker = componentFactory.CreatBreaker();
@@ -1396,7 +1435,7 @@ namespace TianHua.Electrical.PDS.Project
         {
             SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
             SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
-            if(edge.Details.CircuitForm is RegularCircuit regularCircuit)
+            if (edge.Details.CircuitForm is RegularCircuit regularCircuit)
             {
                 var breaker = componentFactory.CreatBreaker();
                 regularCircuit.breaker = regularCircuit.breaker.ComponentChange(breaker);
@@ -1434,13 +1473,13 @@ namespace TianHua.Electrical.PDS.Project
                 var conductor = componentFactory.CreatConductor();
                 thermalRelayCircuit.Conductor = thermalRelayCircuit.Conductor.ComponentChange(conductor);
             }
-            else if(edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
+            else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
             {
                 var breaker1 = componentFactory.CreatResidualCurrentBreaker();
                 shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
 
                 Meter meter;
-                if(shanghaiCTCircuit.meter.ComponentType == ComponentType.MT)
+                if (shanghaiCTCircuit.meter.ComponentType == ComponentType.MT)
                 {
                     meter = componentFactory.CreatMeterTransformer();
                 }
@@ -1596,7 +1635,7 @@ namespace TianHua.Electrical.PDS.Project
                 var conductor = componentFactory.CreatConductor();
                 MTInBehindCircuit.Conductor = MTInBehindCircuit.Conductor.ComponentChange(conductor);
             }
-            else if(edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
+            else if (edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
             {
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
@@ -1620,7 +1659,7 @@ namespace TianHua.Electrical.PDS.Project
             {
                 edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
             }
-            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsDYYCircuit)
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsYYCircuit)
             {
                 edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
             }
@@ -1635,6 +1674,267 @@ namespace TianHua.Electrical.PDS.Project
             else
             {
                 //框架已搭好，后续补充完成
+                throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// 回路元器件选型检查(全局配置更新)
+        /// </summary>
+        public static void ComponentGlobalConfigurationCheck(this ThPDSProjectGraphEdge edge)
+        {
+            SelectionComponentFactory componentFactory = new SelectionComponentFactory(edge);
+            SpecifyComponentFactory specifyComponentFactory = new SpecifyComponentFactory(edge);
+            if (edge.Details.CircuitForm is RegularCircuit regularCircuit)
+            {
+                var breaker = componentFactory.CreatBreaker();
+                regularCircuit.breaker = regularCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                regularCircuit.Conductor = regularCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is LeakageCircuit leakageCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                leakageCircuit.breaker = leakageCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                leakageCircuit.Conductor = leakageCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is ContactorControlCircuit contactorControlCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                contactorControlCircuit.breaker = contactorControlCircuit.breaker.ComponentChange(breaker);
+
+                var contacter = componentFactory.CreatContactor();
+                contactorControlCircuit.contactor = contactorControlCircuit.contactor.ComponentChange(contacter);
+
+                var conductor = componentFactory.CreatConductor();
+                contactorControlCircuit.Conductor = contactorControlCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is ThermalRelayProtectionCircuit thermalRelayCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                thermalRelayCircuit.breaker = thermalRelayCircuit.breaker.ComponentChange(breaker);
+
+                var thermalRelay = componentFactory.CreatThermalRelay();
+                thermalRelayCircuit.thermalRelay = thermalRelayCircuit.thermalRelay.ComponentChange(thermalRelay);
+
+                var conductor = componentFactory.CreatConductor();
+                thermalRelayCircuit.Conductor = thermalRelayCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiCTCircuit shanghaiCTCircuit)
+            {
+                var breaker1 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiCTCircuit.breaker1 = shanghaiCTCircuit.breaker1.ComponentChange(breaker1);
+
+                Meter meter;
+                if (shanghaiCTCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != shanghaiCTCircuit.meter.ComponentType)
+                {
+                    shanghaiCTCircuit.meter = meter;
+                }
+                else
+                {
+                    shanghaiCTCircuit.meter = shanghaiCTCircuit.meter.ComponentChange(meter);
+                }
+
+                var breaker2 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiCTCircuit.breaker2 = shanghaiCTCircuit.breaker2.ComponentChange(breaker2);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiCTCircuit.Conductor = shanghaiCTCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_ShanghaiMTCircuit shanghaiMTCircuit)
+            {
+                var breaker1 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiMTCircuit.breaker1 = shanghaiMTCircuit.breaker1.ComponentChange(breaker1);
+
+                Meter meter;
+                if (shanghaiMTCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != shanghaiMTCircuit.meter.ComponentType)
+                {
+                    shanghaiMTCircuit.meter = meter;
+                }
+                else
+                {
+                    shanghaiMTCircuit.meter = shanghaiMTCircuit.meter.ComponentChange(meter);
+                }
+
+                var breaker2 = componentFactory.CreatResidualCurrentBreaker();
+                shanghaiMTCircuit.breaker2 = shanghaiMTCircuit.breaker2.ComponentChange(breaker2);
+
+                var conductor = componentFactory.CreatConductor();
+                shanghaiMTCircuit.Conductor = shanghaiMTCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_CTInFrontCircuit CTInFrontCircuit)
+            {
+                Meter meter;
+                if (CTInFrontCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != CTInFrontCircuit.meter.ComponentType)
+                {
+                    CTInFrontCircuit.meter = meter;
+                }
+                else
+                {
+                    CTInFrontCircuit.meter = CTInFrontCircuit.meter.ComponentChange(meter);
+                }
+
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                CTInFrontCircuit.breaker = CTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                CTInFrontCircuit.Conductor = CTInFrontCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_MTInFrontCircuit MTInFrontCircuit)
+            {
+                Meter meter;
+                if (MTInFrontCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != MTInFrontCircuit.meter.ComponentType)
+                {
+                    MTInFrontCircuit.meter = meter;
+                }
+                else
+                {
+                    MTInFrontCircuit.meter = MTInFrontCircuit.meter.ComponentChange(meter);
+                }
+
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                MTInFrontCircuit.breaker = MTInFrontCircuit.breaker.ComponentChange(breaker);
+
+                var conductor = componentFactory.CreatConductor();
+                MTInFrontCircuit.Conductor = MTInFrontCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_CTInBehindCircuit CTInBehindCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                CTInBehindCircuit.breaker = CTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                Meter meter;
+                if (CTInBehindCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != CTInBehindCircuit.meter.ComponentType)
+                {
+                    CTInBehindCircuit.meter = meter;
+                }
+                else
+                {
+                    CTInBehindCircuit.meter = CTInBehindCircuit.meter.ComponentChange(meter);
+                }
+
+                var conductor = componentFactory.CreatConductor();
+                CTInBehindCircuit.Conductor = CTInBehindCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is DistributionMetering_MTInBehindCircuit MTInBehindCircuit)
+            {
+                var breaker = componentFactory.CreatResidualCurrentBreaker();
+                MTInBehindCircuit.breaker = MTInBehindCircuit.breaker.ComponentChange(breaker);
+
+                Meter meter;
+                if (MTInBehindCircuit.meter.ComponentType == ComponentType.MT)
+                {
+                    meter = componentFactory.CreatMeterTransformer();
+                }
+                else
+                {
+                    meter = componentFactory.CreatCurrentTransformer();
+                }
+                if (meter.ComponentType != MTInBehindCircuit.meter.ComponentType)
+                {
+                    MTInBehindCircuit.meter = meter;
+                }
+                else
+                {
+                    MTInBehindCircuit.meter = MTInBehindCircuit.meter.ComponentChange(meter);
+                }
+
+                var conductor = componentFactory.CreatConductor();
+                MTInBehindCircuit.Conductor = MTInBehindCircuit.Conductor.ComponentChange(conductor);
+            }
+            else if (edge.Details.CircuitForm is FireEmergencyLighting fireEmergencyLighting)
+            {
+                edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
+            }
+            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit || edge.Details.CircuitForm is Motor_CPSCircuit)
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                }
+                else
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                }
+            }
+            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsStarTriangleStartCircuit || edge.Details.CircuitForm is Motor_CPSStarTriangleStartCircuit)
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                }
+                else
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                }
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsYYCircuit || edge.Details.CircuitForm is TwoSpeedMotor_CPSYYCircuit)
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsYYCircuit();
+                }
+                else
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSYYCircuit();
+                }
+            }
+            else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsDYYCircuit || edge.Details.CircuitForm is TwoSpeedMotor_CPSDYYCircuit)
+            {
+                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorDiscreteComponentsDYYCircuit();
+                }
+                else
+                {
+                    edge.Details.CircuitForm = specifyComponentFactory.GetTwoSpeedMotorCPSDYYCircuit();
+                }
+            }
+            else
+            {
                 throw new NotSupportedException();
             }
         }

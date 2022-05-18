@@ -15,6 +15,7 @@ using Dreambuild.AutoCAD;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
 using TianHua.Electrical.PDS.Project.PDSProjectException;
 using QuikGraph.Algorithms;
+using TianHua.Electrical.PDS.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -368,34 +369,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// MoterUI Config改变
-        /// </summary>
-        public static void MotorChoiseChange()
-        {
-            var MotorSelection = PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise;
-            var edges = PDSProject.Instance.graphData.Graph.Edges;
-            var type = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS : CircuitFormOutType.电动机_分立元件;
-            var typeStar = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS星三角启动 : CircuitFormOutType.电动机_分立元件星三角启动;
-            var typeYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSYY : CircuitFormOutType.双速电动机_分立元件YY;
-            var typedetailYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSdetailYY : CircuitFormOutType.双速电动机_分立元件detailYY;
-            foreach (var edge in edges)
-            {
-                if (edge.Details.CircuitForm.CircuitFormType == type || edge.Details.CircuitForm.CircuitFormType == typeStar)
-                {
-                    SwitchFormOutType(edge, "电动机配电回路");
-                }
-                else if (edge.Details.CircuitForm.CircuitFormType == typeYY)
-                {
-                    SwitchFormOutType(edge, "双速电机Y-Y");
-                }
-                else if (edge.Details.CircuitForm.CircuitFormType == typedetailYY)
-                {
-                    SwitchFormOutType(edge, "双速电机D-YY");
-                }
-            }
-        }
-
-        /// <summary>
         /// 切换出线回路形式
         /// </summary>
         /// <param name="edge"></param>
@@ -680,7 +653,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
             }
             //Step  2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
@@ -697,7 +670,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             //Step 1:新建空负载
             var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
             //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:获取对应的CircuitFormOutType
             var CircuitFormOutType = Switch(newEdge, type);
             //Step 4:回路选型
@@ -1471,8 +1444,13 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <returns></returns>
         public static bool GlobalConfigurationUpdate()
         {
-            MotorChoiseChange();
+            PDSProjectExtend.GlobalConfigurationUpdate();
             return true;
+        }
+
+        public static IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(this IEnumerable<ThPDSProjectGraphEdge> edges)
+        {
+            return edges.OrderBy(e => e.GetCircuitID().Length == 0 ? 1 : 0).ThenBy(e => ProjectSystemConfiguration.CircuitIDSortNames.IndexOf(ProjectSystemConfiguration.CircuitIDSortNames.FirstOrDefault(x => e.GetCircuitID().ToUpper().StartsWith(x))) + e.GetCircuitID());
         }
     }
 }

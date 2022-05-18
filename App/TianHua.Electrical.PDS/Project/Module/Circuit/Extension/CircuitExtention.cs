@@ -101,5 +101,37 @@ namespace TianHua.Electrical.PDS.Project.Module.Circuit.Extension
             }
             return result;
         }
+
+        /// <summary>
+        /// 是否是电动机回路
+        /// </summary>
+        public static bool IsMotorCircuit(this PDSBaseOutCircuit circuit)
+        {
+            return circuit.IsDiscreteComponentCircuit() || circuit.IsCPSCircuit();
+        }
+
+        /// <summary>
+        /// 是否是分立元件回路
+        /// </summary>
+        public static bool IsDiscreteComponentCircuit(this PDSBaseOutCircuit circuit)
+        {
+            var type = circuit.CircuitFormType;
+            return type == CircuitFormOutType.电动机_分立元件
+                || type == CircuitFormOutType.电动机_分立元件星三角启动
+                || type == CircuitFormOutType.双速电动机_分立元件YY
+                || type == CircuitFormOutType.双速电动机_分立元件detailYY;
+        }
+
+        /// <summary>
+        /// 是否是CPS回路
+        /// </summary>
+        public static bool IsCPSCircuit(this PDSBaseOutCircuit circuit)
+        {
+            var type = circuit.CircuitFormType;
+            return type == CircuitFormOutType.电动机_CPS
+                || type == CircuitFormOutType.电动机_CPS星三角启动
+                || type == CircuitFormOutType.双速电动机_CPSYY
+                || type == CircuitFormOutType.双速电动机_CPSdetailYY;
+        }
     }
 }

@@ -112,15 +112,14 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                var circuitNumber = "";
-                for (var i = 0; i < CircuitIDList.Count; i++)
+                if (!string.IsNullOrEmpty(SourcePanelID))
                 {
-                    if (!string.IsNullOrEmpty(SourcePanelID) && !string.IsNullOrEmpty(CircuitID))
-                    {
-                        circuitNumber = SourcePanelID + "-" + CircuitID;
-                    }
+                    return SourcePanelID + "-" + CircuitID;
                 }
-                return circuitNumber;
+                else
+                {
+                    return "";
+                }
             }
         }
 
