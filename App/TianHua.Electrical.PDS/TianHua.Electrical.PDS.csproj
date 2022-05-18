@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
+    <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
+    <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />
     <Compile Include="Extension\ThPDSCircuitExtension.cs" />

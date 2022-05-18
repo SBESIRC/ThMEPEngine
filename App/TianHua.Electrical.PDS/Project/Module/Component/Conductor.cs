@@ -887,7 +887,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 是否是BA控制
         /// </summary>
-        private bool IsBAControl { get; set; } = false;
+        public bool IsBAControl { get; set; } = false;
         
         /// <summary>
         /// 是否指定外护套材质

@@ -303,9 +303,37 @@ namespace TianHua.Electrical.PDS.Service
                     // 二次结线
                     if (!enterType.Equals(CircuitFormInType.集中电源.GetDescription()))
                     {
-                        //var secJunction = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_SECONDARY_JUNCTION, basePoint, scale);
-                        //assignment.SecJunctionAssign(activeDb, secJunction, tableObjs, thisNode);
-                        //basePoint = new Point3d(basePoint.X, basePoint.Y - 7000.0 * scaleFactor, 0);
+                        var allCircuits = ThPDSProjectGraphService.GetCircuit(Graph, thisNode);
+                        var motorCircuit = allCircuits.Where(c => c.Target.Load.LoadTypeCat_1.Equals(ThPDSLoadTypeCat_1.Motor)).ToList();
+                        if (motorCircuit.Count > 0)
+                        {
+                            var motorCircuitSort = MotorCircuitSort(motorCircuit);
+                            motorCircuitSort.ForEach(circuits =>
+                            {
+                                if (circuits[0].Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.None)
+                                {
+                                    var secJunction = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_SECONDARY_JUNCTION, basePoint, scale);
+                                    assignment.SecJunctionAssign(activeDb, secJunction, tableObjs);
+                                    basePoint = new Point3d(basePoint.X, basePoint.Y - 7000.0 * scaleFactor, 0);
+                                }
+                                else
+                                {
+                                    var primarySpareSort = PrimarySpareSort(circuits);
+                                    primarySpareSort.ForEach(primary =>
+                                    {
+                                        var dualPowerSort = DualPowerSort(primary);
+                                        dualPowerSort.ForEach(dualPower =>
+                                        {
+                                            var secJunction = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.SYSTEM_DIAGRAM_SECONDARY_JUNCTION, basePoint, scale);
+                                            assignment.SecJunctionAssign(activeDb, secJunction, tableObjs, thisNode, dualPower);
+                                            basePoint = new Point3d(basePoint.X, basePoint.Y - 7000.0 * scaleFactor, 0);
+                                        });
+                                    });
+                                }
+                            });
+
+
+                        }
                     }
 
                     basePoint = new Point3d(basePoint.X, basePoint.Y - 1000.0 * scaleFactor, 0);
@@ -530,6 +558,90 @@ namespace TianHua.Electrical.PDS.Service
                         throw new NotSupportedException();
                     }
             }
+        }
+
+        private static List<List<ThPDSProjectGraphEdge>> MotorCircuitSort(List<ThPDSProjectGraphEdge> motorCircuit)
+        {
+            var result = new List<List<ThPDSProjectGraphEdge>>();
+            result.Add(new List<ThPDSProjectGraphEdge>());
+            result[0].Add(motorCircuit[0]);
+            for (var i = 1; i < motorCircuit.Count; i++)
+            {
+                for (var j = 0; j < result.Count; j++)
+                {
+                    if (motorCircuit[i].Target.Load.LoadTypeCat_3.Equals(result[j][0].Target.Load.LoadTypeCat_3))
+                    {
+                        result[j].Add(motorCircuit[i]);
+                    }
+                    else if (j == result.Count - 1)
+                    {
+                        result.Add(new List<ThPDSProjectGraphEdge>());
+                        result.Last().Add(motorCircuit[i]);
+                        break;
+                    }
+                }
+            }
+
+            for (var i = 0; i < result.Count - 1; i++)
+            {
+                if (result[i][0].Target.Load.LoadTypeCat_3.Equals(ThPDSLoadTypeCat_3.None))
+                {
+                    var temp = result[i];
+                    result[i] = result[result.Count - 1];
+                    result[result.Count - 1] = temp;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        private static List<List<ThPDSProjectGraphEdge>> PrimarySpareSort(List<ThPDSProjectGraphEdge> motorCircuit)
+        {
+            var result = new List<List<ThPDSProjectGraphEdge>>();
+            result.Add(new List<ThPDSProjectGraphEdge>());
+            result[0].Add(motorCircuit[0]);
+            for (var i = 1; i < motorCircuit.Count; i++)
+            {
+                for (var j = 0; j < result.Count; j++)
+                {
+                    if (motorCircuit[i].Target.Load.PrimaryAvail.Equals(result[j][0].Target.Load.PrimaryAvail)
+                        && motorCircuit[i].Target.Load.SpareAvail.Equals(result[j][0].Target.Load.SpareAvail))
+                    {
+                        result[j].Add(motorCircuit[i]);
+                    }
+                    else if (j == result.Count - 1)
+                    {
+                        result.Add(new List<ThPDSProjectGraphEdge>());
+                        result.Last().Add(motorCircuit[i]);
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        private static List<List<ThPDSProjectGraphEdge>> DualPowerSort(List<ThPDSProjectGraphEdge> motorCircuit)
+        {
+            var result = new List<List<ThPDSProjectGraphEdge>>();
+            result.Add(new List<ThPDSProjectGraphEdge>());
+            result[0].Add(motorCircuit[0]);
+            for (var i = 1; i < motorCircuit.Count; i++)
+            {
+                for (var j = 0; j < result.Count; j++)
+                {
+                    if (motorCircuit[i].Target.Load.InstalledCapacity.IsDualPower.Equals(result[j][0].Target.Load.InstalledCapacity.IsDualPower))
+                    {
+                        result[j].Add(motorCircuit[i]);
+                    }
+                    else if (j == result.Count - 1)
+                    {
+                        result.Add(new List<ThPDSProjectGraphEdge>());
+                        result.Last().Add(motorCircuit[i]);
+                        break;
+                    }
+                }
+            }
+            return result;
         }
 
         private static Point3d PointClone(Point3d srcPoint)

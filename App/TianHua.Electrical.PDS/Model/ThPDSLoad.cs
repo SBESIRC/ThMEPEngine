@@ -293,6 +293,12 @@ namespace TianHua.Electrical.PDS.Model
         EmergencyFan,
 
         /// <summary>
+        /// 事故后风机
+        /// </summary>
+        [Description("事故后风机")]
+        PostEmergencyFan,
+
+        /// <summary>
         /// 生活水泵
         /// </summary>
         [Description("生活水泵")]
@@ -346,6 +352,8 @@ namespace TianHua.Electrical.PDS.Model
             OnLightingCableTray = false;
             CableLayingMethod1 = LayingSite.CC;
             CableLayingMethod2 = LayingSite.None;
+            PrimaryAvail = 1;
+            SpareAvail = 0;
         }
 
         /// <summary>
