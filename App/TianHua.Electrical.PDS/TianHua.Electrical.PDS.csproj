@@ -49,6 +49,7 @@
     <Compile Include="Service\ThPDSPushDataService.cs" />
     <Compile Include="Service\ThPDSReplaceStringService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />
+    <Compile Include="Service\ThPDSTransientService.cs" />
     <Compile Include="Service\ThPDSZoomService.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
