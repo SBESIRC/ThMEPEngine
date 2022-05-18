@@ -151,28 +151,10 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var drawEngine = new ThPDSSystemDiagramService();
                 drawEngine.Draw(graph, nodes);
             });
+            Action autoNumbering = null;
             var autoNumberingCmd = new RelayCommand(() =>
             {
-                // 获取勾选的节点
-                var vertices = graph.Vertices.ToList();
-                var nodes = new List<ThPDSProjectGraphNode>();
-                void dfs(ThPDSCircuitGraphTreeModel node)
-                {
-                    if (node.IsChecked == true)
-                    {
-                        nodes.Add(vertices[node.Id]);
-                    }
-                    foreach (var n in node.DataList)
-                    {
-                        dfs(n);
-                    }
-                }
-                dfs(tree);
-                if (nodes.Count == 0) return;
-
-                // 自动编号
-                ThPDSProjectGraphService.AutoNumbering(graph, nodes);
-                UpdateTreeView();
+                autoNumbering?.Invoke();
             });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
@@ -338,6 +320,31 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 ThPDSProjectGraphService.CreatBackupCircuit(graph, vertice);
+                UpdateCanvas();
+            };
+            autoNumbering = () =>
+            {
+                // 获取勾选的节点
+                var vertices = graph.Vertices.ToList();
+                var nodes = new List<ThPDSProjectGraphNode>();
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    if (node.IsChecked == true)
+                    {
+                        nodes.Add(vertices[node.Id]);
+                    }
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+                if (nodes.Count == 0) return;
+
+                // 自动编号
+                ThPDSProjectGraphService.AutoNumbering(graph, nodes);
+
+                // 更新画布
                 UpdateCanvas();
             };
             void UpdateCanvas()
