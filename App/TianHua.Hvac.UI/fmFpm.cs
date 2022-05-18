@@ -332,7 +332,7 @@ namespace TianHua.Hvac.UI
                 (!String.IsNullOrEmpty(textRoomHeight.Text) || listBoxRoomDuctSize.SelectedItems.Count > 0))
             {
                 var elevation = Double.Parse(textRoomElevation.Text) * 1000;
-                var height = radioRoomCustom.Checked ? Double.Parse(textRoomHeight.Text) : 
+                var height = radioRoomCustom.Checked ? Double.Parse(textRoomHeight.Text) :
                              ThMEPHVACService.GetHeight((string)listBoxRoomDuctSize.SelectedItem);
                 var idx = scenarioCombox.Items.IndexOf(scenario) + 50;
                 var num = (elevation + height + idx) / 1000;
@@ -402,8 +402,8 @@ namespace TianHua.Hvac.UI
                 portRange = "侧回风口";
             if (portRange.Contains("侧") || radioVerticalPipe.Checked)
             {
-              var num = Math.Round(portNum * 0.5, 0);
-              portNum = (int)num;
+                var num = Math.Round(portNum * 0.5, 0);
+                portNum = (int)num;
             }
             airSpeed = Double.Parse(textAirSpeed.Text);
         }
@@ -710,13 +710,16 @@ namespace TianHua.Hvac.UI
                 throw new NotImplementedException("风机服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
             if (notRoomLines.Count == 0)
                 throw new NotImplementedException("风机非服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+            ExcludeBypass(ref roomLines, mat);
+            ExcludeBypass(ref notRoomLines, mat);
         }
-        
+
         private void GetCenterlinesAndTrans(Point3d p)
         {
             // 用于将指定起点的路由与其他系统分开
             var diffColorRoutine = GetDiffColorRoutine(p);
             var tor = new Tolerance(firstRange, firstRange);
+            var mat = Matrix3d.Displacement(-p.GetAsVector());
             foreach (var lines in diffColorRoutine)
             {
                 foreach (Line l in lines)
@@ -725,6 +728,7 @@ namespace TianHua.Hvac.UI
                     if (LineContainsPoint(l, Point3d.Origin, tor))
                     {
                         centerlines = lines;
+                        ExcludeBypass(ref centerlines, mat);
                         return;
                     }
                 }
@@ -738,21 +742,20 @@ namespace TianHua.Hvac.UI
         }
         private List<DBObjectCollection> GetDiffColorRoutine(Point3d p)
         {
-          centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
-          ExcludeBypass(ref centerlines);
-          var linesDic = SepLineByColor();
-          var diffColorRoutine = new List<DBObjectCollection>();
-          var mat = Matrix3d.Displacement(-p.GetAsVector());
-          foreach (var pair in linesDic)
-          {
-            foreach (Curve l in pair.Value)
-              l.TransformBy(mat);
-            var lines = ThMEPHVACLineProc.PreProc(pair.Value);
-            diffColorRoutine.Add(lines);
-          }
-          linesDic.Clear();
-          centerlines.Clear();
-          return diffColorRoutine;
+            centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
+            var linesDic = SepLineByColor();
+            var diffColorRoutine = new List<DBObjectCollection>();
+            var mat = Matrix3d.Displacement(-p.GetAsVector());
+            foreach (var pair in linesDic)
+            {
+                foreach (Curve l in pair.Value)
+                    l.TransformBy(mat);
+                var lines = ThMEPHVACLineProc.PreProc(pair.Value);
+                diffColorRoutine.Add(lines);
+            }
+            linesDic.Clear();
+            centerlines.Clear();
+            return diffColorRoutine;
         }
         private Dictionary<int, DBObjectCollection> SepLineByColor()
         {
@@ -856,16 +859,18 @@ namespace TianHua.Hvac.UI
             else
                 throw new NotImplementedException("[Check Error]: Select generation side!");
         }
-        private void ExcludeBypass(ref DBObjectCollection centerlines)
+        private void ExcludeBypass(ref DBObjectCollection centerlines, Matrix3d mat)
         {
             foreach (string key in listBox1.Items)
             {
                 var fan = fans[key];
                 foreach (Line l in fan.bypassLines)
                 {
+                    var shadow = l.Clone() as Line;
+                    shadow.TransformBy(mat);
                     foreach (Line judger in centerlines)
                     {
-                        if (ThMEPHVACService.IsSameLine(l, judger))
+                        if (ThMEPHVACService.IsSameLine(shadow, judger))
                         {
                             centerlines.Remove(judger);
                             break;
@@ -986,7 +991,7 @@ namespace TianHua.Hvac.UI
         private Tuple<double, double> GetPortHeight(double airVolume)
         {
             var selector = new ThPortParameter(airVolume, 0, PortRecommendType.PORT);
-            return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight) ;
+            return new Tuple<double, double>(selector.DuctSizeInfor.DuctWidth, selector.DuctSizeInfor.DuctHeight);
         }
 
         private void SetPortSpeed()

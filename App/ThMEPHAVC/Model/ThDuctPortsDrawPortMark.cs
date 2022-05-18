@@ -9,11 +9,13 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPortMark
     {
+        private bool ucsFlag;
         private double ucsAngle;
         private string portMarkName;
         private string portMarkLayer;
-        public ThDuctPortsDrawPortMark(double ucsAngle, string portMarkName, string portMarkLayer)
+        public ThDuctPortsDrawPortMark(bool ucsFlag, double ucsAngle, string portMarkName, string portMarkLayer)
         {
+            this.ucsFlag = ucsFlag;
             this.ucsAngle = ucsAngle;
             this.portMarkName = portMarkName;
             this.portMarkLayer = portMarkLayer;
@@ -46,10 +48,11 @@ namespace ThMEPHVAC.Model
                                                             { "风量", strVolume},
                                                             { "安装属性", ele} };
                 // 设置框的角度
+                var angle = ucsFlag ? ucsAngle : -ucsAngle;
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), -ucsAngle, attr);
+                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), angle, attr);
                 // 设置框内字的角度
-                ThMEPHVACService.SetAttr(obj, attr, -ucsAngle);
+                ThMEPHVACService.SetAttr(obj, attr, angle);
             }
         }
         public void InsertLeader(Point3d srtP, Point3d endP)
