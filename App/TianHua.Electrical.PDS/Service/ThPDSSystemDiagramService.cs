@@ -150,7 +150,7 @@ namespace TianHua.Electrical.PDS.Service
                     var edgeCount = 0;
 
                     // 所有不在小母排/控制回路上的分支
-                    var ordinaryEdges = CircuitSort(ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode));
+                    var ordinaryEdges = ThPDSProjectGraphService.GetOrdinaryCircuit(Graph, thisNode).GetSortedEdges().ToList();
                     DrawCircuit(ordinaryEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint);
                     edgeCount += ordinaryEdges.Count;
 
@@ -162,7 +162,7 @@ namespace TianHua.Electrical.PDS.Service
                         var smallBusbarLine = assignment.SmallBusbarAssign(activeDb, configDb, smallBusbar, tableObjs, o, scale);
                         basePoint = new Point3d(basePoint.X, basePoint.Y + 500.0 * scaleFactor, 0);
 
-                        var smallBusbarEdges = CircuitSort(ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o));
+                        var smallBusbarEdges = ThPDSProjectGraphService.GetSmallBusbarCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
                         DrawCircuit(smallBusbarEdges, activeDb, configDb, scale, scaleFactor, tableObjs, ref basePoint, true);
                         edgeCount += smallBusbarEdges.Count;
 
@@ -186,7 +186,7 @@ namespace TianHua.Electrical.PDS.Service
                         thisNode.Details.SecondaryCircuits.Keys.ForEach(o =>
                         {
                             var circuitData = new ThPDSControlCircuitData();
-                            var controlEdges = CircuitSort(ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o));
+                            var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
                             circuitData.CircuitNumber = controlEdges[0].Circuit.ID.CircuitNumber;
                             var dataList = circuitDatas.Where(data => data.CircuitNumber.Equals(circuitData.CircuitNumber)).ToList();
                             if (dataList.Count > 0)
@@ -647,11 +647,6 @@ namespace TianHua.Electrical.PDS.Service
         private static Point3d PointClone(Point3d srcPoint)
         {
             return new Point3d(srcPoint.X, srcPoint.Y, 0);
-        }
-
-        private static List<ThPDSProjectGraphEdge> CircuitSort(List<ThPDSProjectGraphEdge> edges)
-        {
-            return edges.OrderBy(e => e.Circuit.ID.CircuitID).ToList();
         }
 
         public void Dispose()
