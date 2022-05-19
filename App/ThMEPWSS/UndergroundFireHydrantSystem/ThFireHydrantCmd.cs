@@ -18,6 +18,7 @@ using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using System.Linq;
 using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.UndergroundSpraySystem.Command;
 
 namespace ThMEPWSS.Command
 {
@@ -63,7 +64,7 @@ namespace ThMEPWSS.Command
 
         public Point3dCollection CreateFireHydrantSystem(AcadDatabase curDb, bool hasExtraSelection = false)
         {
-            Autodesk.AutoCAD.Geometry.Point3d loopStartPt;
+            Point3d loopStartPt;
             {
                 var opt = Active.Editor.GetPoint("\n请指定环管标记起点");
                 if (opt.Status != PromptStatus.OK)
@@ -80,8 +81,10 @@ namespace ThMEPWSS.Command
             {
                 return null;
             }
+            var storeyRect = new StoreyRect();
+            storeyRect.Extract(selectArea);
 
-            var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数
+            var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace, storeyRect);//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
                 var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
@@ -99,7 +102,9 @@ namespace ThMEPWSS.Command
                 return exArea;
             }
             var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
-            if(!inputFlag)
+
+            fireHydrantSysOut.HydrantWithReel = fireHydrantSysIn.HydrantWithReel;
+            if (!inputFlag)
             {
                 return null;
             }
@@ -124,13 +129,18 @@ namespace ThMEPWSS.Command
             checkPipe.DrawSubLoop(curDb);
             checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
 
-            GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
-            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取
+            var pepeLen = GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
+
+            var across = FireHydrantAcross.Cmd(curDb, fireHydrantSysIn, fireHydrantSysOut, pepeLen);
+
+            GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
-            fireHydrantSysOut.Draw();//绘制系统图
+
+            fireHydrantSysOut.Draw(across);//绘制系统图
 
             return null;
         }
+
 
         public void Test()
         {

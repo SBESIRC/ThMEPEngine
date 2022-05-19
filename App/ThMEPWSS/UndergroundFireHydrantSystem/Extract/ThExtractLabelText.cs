@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
@@ -49,9 +50,36 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                     
                 }
+#if DEBUG
+
+                using (AcadDatabase currentDb = AcadDatabase.Active())
+                {
+                    string layerName = "文字图层";
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
+                    }
+                    catch { }
+                    foreach (var line in dbTextCollection)
+                    {
+                        var dbtext = line as DBText;
+                        var rect = GetRect(dbtext);
+                        rect.LayerId = DbHelper.GetLayerId(layerName);
+                        currentDb.CurrentSpace.Add(rect);
+                    }
+                }
+#endif
                 return dbTextCollection;
             }
         }
+
+        private Line GetRect(DBText dBText)
+        {
+            var minPt = dBText.GeometricExtents.MinPoint;
+            var maxPt = dBText.GeometricExtents.MaxPoint;
+            return new Line(minPt,maxPt);
+        }
+
         private bool IsHYDTPipeLayer(string layer)
         {
             return layer.ToUpper() == "W-RAIN-DIMS" ||
@@ -115,6 +143,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         textWidth = tWidth;
                         textModel = (ent as DBText).TextString;
                     }
+
                     dBObjects.Add(ent);
                 }
                 return;

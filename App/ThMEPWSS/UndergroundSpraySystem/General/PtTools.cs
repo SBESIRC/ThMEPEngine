@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
@@ -56,6 +57,51 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             return true;
         }
 
+        public static bool AddNewPtDic(this FireHydrantSystemIn fireHydrantSysIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
+        {
+            double tolerance = 120;
+            if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
+            if (objs.Count != 2)
+            {
+                //不是两根线，不必进行连接
+                return false;
+            }
+
+            var l1 = objs[0] as Line;
+            var l2 = objs[1] as Line;
+
+            Point3dEx pt1, pt2;
+            //找出和立管的连接点
+            if (l1.StartPoint.DistanceTo(pt) < tolerance)
+            {
+                pt1 = new Point3dEx(l1.StartPoint);
+            }
+            else
+            {
+                pt1 = new Point3dEx(l1.EndPoint);
+            }
+            if (l2.StartPoint.DistanceTo(pt) < tolerance)
+            {
+                pt2 = new Point3dEx(l2.StartPoint);
+            }
+            else
+            {
+                pt2 = new Point3dEx(l2.EndPoint);
+            }
+            //点集中不存在，就算了
+            if (!fireHydrantSysIn.PtDic.ContainsKey(pt1) || !fireHydrantSysIn.PtDic.ContainsKey(pt2))
+            {
+                return false;
+            }
+            //点集中邻接点数大于1也算了
+            if (fireHydrantSysIn.PtDic[pt1].Count != 1 || fireHydrantSysIn.PtDic[pt2].Count != 1)
+            {
+                return false;
+            }
+            lines.Add(new Line(pt1._pt, pt2._pt));
+            return true;
+        }
+
         public static Point3d Cloned(this Point3d pt)
         {
             return new Point3d(pt.X, pt.Y, 0);
@@ -72,6 +118,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
             return "";
         }
+
+        public static int GetFloorInt(this Point3d pt, Dictionary<string, Polyline> floorRect)
+        {
+            var floorStr = pt.GetFloor(floorRect);
+            return Convert.ToInt32(floorStr.Last().ToString());
+        }
+
         public static bool IsOnLine(this Point3d pt, Line line, double tolerance = 10)
         {
             if (line is null)

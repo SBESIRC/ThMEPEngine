@@ -6,8 +6,10 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
@@ -18,6 +20,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, Point3dEx> BranchDrawDic { get; set; }
         public List<Line> LoopLine { get; set; }
         public List<Line> TextLine { get; set; }
+        public List<Line> StoreyLine { get; set; }
         public List<DBText> TextList { get; set; }
         public Dictionary<Point3d, double> PipeInterrupted { get; set; }
         public List<Point3d> GateValve { get; set; }
@@ -27,6 +30,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
+
+        public bool HydrantWithReel { get; set; }
         public Dictionary<Point3dEx, DBText> ExtraTextDic { get; set; }
 
         public FireHydrantSystemOut()
@@ -34,6 +39,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             BranchDrawDic = new Dictionary<Point3dEx, Point3dEx>();
             LoopLine = new List<Line>();
             TextLine = new List<Line>();
+            StoreyLine = new List<Line>();
             TextList = new List<DBText>();
             PipeInterrupted = new Dictionary<Point3d, double>();
             Valve = new List<Point3d>();
@@ -45,7 +51,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             ExtraTextDic = new Dictionary<Point3dEx, DBText>();
         }
 
-        public void Draw()
+        public void Draw(bool across)
         {
             using ( var acadDatabase = AcadDatabase.Active())
             {
@@ -66,6 +72,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 foreach(var line in TextLine)
                 {
                     acadDatabase.CurrentSpace.Add(line);
+                    line.ColorIndex = (int)ColorIndex.BYLAYER;
+                }
+
+                foreach(var line in StoreyLine)
+                {
+                    acadDatabase.CurrentSpace.Add(line);
+                    line.LayerId = DbHelper.GetLayerId("W-NOTE");
                     line.ColorIndex = (int)ColorIndex.BYLAYER;
                 }
 
@@ -106,15 +119,23 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     objID.SetDynBlockValue("可见性", "放水套管水平");
                 }
 
+                int scaleX = -2 * Convert.ToInt32(HydrantWithReel) + 1;
                 foreach (var fh in FireHydrant)
                 {
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         "W-FRPT-HYDT-PIPE", 
                         "室内消火栓系统1", 
                         fh, 
-                        new Scale3d(1, 1, 1), 
+                        new Scale3d(scaleX, 1, 1), 
                         0);
-                    objID.SetDynBlockValue("可见性", "单栓");
+                    if(HydrantWithReel)
+                    {
+                        objID.SetDynBlockValue("可见性", "单栓带卷盘");
+                    }
+                    else
+                    {
+                        objID.SetDynBlockValue("可见性", "单栓");
+                    }
                 }
 
                 foreach (var text in DNList)
@@ -128,6 +149,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
     public class FireHydrantSystemIn
     {
+        public bool HasStoreyRect { get; set; }
+        public Dictionary<string, Polyline> FloorRect;//楼层区域
+        public Dictionary<string, Point3d> FloorPt;//楼层标准点 
+
         public double FloorHeight { get; set; }
         public List<List<Line>> MarkLineList { get; set; }
         public List<List<Point3dEx>> NodeList { get; set; }
@@ -148,8 +173,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3dEx> StartEndPts { get; set; }
         public HashSet<Point3dEx> VerticalHasHydrant { get; set; }
         public HashSet<Point3dEx> TermPtDic { get; set; }
-        public FireHydrantSystemIn(double floorHeight = 5000)
+        public List<Point3dEx> ThroughPt { get; set; }
+
+        public bool HydrantWithReel { get; set; }
+
+        public Dictionary<Point3dEx,Point3d> CrossMainPtDic { get; set; }//跨层主环的对应点位置
+        public FireHydrantSystemIn(double floorHeight = 5000, StoreyRect storeyRect = null)
         {
+            if(!(storeyRect is null))
+            {
+                HasStoreyRect = storeyRect.HasStoreyRect;
+                FloorRect = storeyRect.FloorRect;
+                FloorPt = storeyRect.FloorPt;
+            }
+
             FloorHeight = floorHeight;
             MarkLineList = new List<List<Line>>();//环管标记所在直线
             NodeList = new List<List<Point3dEx>>();//次环节点
@@ -167,6 +204,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             StartEndPts = new List<Point3dEx>();//环管的起始终结点
             VerticalHasHydrant = new HashSet<Point3dEx>();//立管有消火栓设备
             TermPtDic = new HashSet<Point3dEx>();//是立管的管道末端
+            ThroughPt = new List<Point3dEx>();
+            CrossMainPtDic = new Dictionary<Point3dEx, Point3d>();
         }
     }
 }

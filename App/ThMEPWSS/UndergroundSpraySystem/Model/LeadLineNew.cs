@@ -84,9 +84,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool IsTargetLayer(string layer)
         {
-            var rst1 = layer.Contains("W-") && !layer.Contains("PIPE") 
-                && !layer.Contains("POST") && !layer.Contains("修改提资");//以上两条是对于图纸 FLA01VL4_W10-lyw 添加的限制
-            return rst1;
+            return layer.Contains("W-FRPT-HYDT-DIMS");
         }
 
         private void ExplodeTCHNote(Entity entity)

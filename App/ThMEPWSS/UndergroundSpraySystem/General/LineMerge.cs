@@ -132,10 +132,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 pts.Add(l.StartPoint.ToPoint3d());
                 pts.Add(l.EndPoint.ToPoint3d());
             }
-            var pairPt = pts.GetCollinearMaxPts();
+            var pairPt = pts.GetCollinearMaxPts2();
             return new LineSegment2d(pairPt.Item1.ToPoint2d(), pairPt.Item2.ToPoint2d());
         }
-        public static Tuple<Point3d, Point3d> GetCollinearMaxPts(this List<Point3d> pts)
+        public static Tuple<Point3d, Point3d> GetCollinearMaxPts2(this List<Point3d> pts)
         {
             if (pts.Count == 0)
             {

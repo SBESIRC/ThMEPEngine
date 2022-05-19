@@ -1,58 +1,38 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
-    class PipeLine
+    public class PipeLine
     {
-        public static void DealCircular(DBObjectCollection dbObjs, ref FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList, ref List<Line> lineList)
+        public static bool hasSitong(FireHydrantSystemIn fireHydrantSysIn)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
-
-            foreach (var f in dbObjs)
+            var sitong = false;
+            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
             {
-                if (f is Circle)
+                var cnt = fireHydrantSysIn.PtDic[pt].Count;
+                if (cnt > 3)
                 {
-                    var circle = f as Circle;
-                    var center = circle.Center;
-                    var obb = circle.ToRectangle().Buffer(10)[0] as Polyline;
-                    var crossObjs = spatialIndex.SelectCrossingPolygon(obb);
-                    foreach (var obj in crossObjs)
-                    {
-                        if (obj is Line)
-                        {
-                            var line = obj as Line;
-                            if (obb.Contains(line.StartPoint))
-                            {
-                                var pt1 = new Point3dEx(line.StartPoint.X, line.StartPoint.Y, 0);
-                                var pt2 = new Point3dEx(center.X, center.Y, 0);
-                                pointList.Add(pt1);
-                                pointList.Add(pt2);
-                                ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
-                                lineList.Add(new Line(pt1._pt, pt2._pt));
-                            }
-                            else if (obb.Contains(line.EndPoint))
-                            {
-                                var pt1 = new Point3dEx(line.EndPoint.X, line.EndPoint.Y, 0);
-                                var pt2 = new Point3dEx(center.X, center.Y, 0);
-                                pointList.Add(pt1);
-                                pointList.Add(pt2);
-                                ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
-                                lineList.Add(new Line(pt1._pt, pt2._pt));
-                            }
-                        }
-                    }
+                    sitong = true;
+                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
+                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
                 }
             }
+            return sitong;
         }
+
         public static void AddPipeLine(DBObjectCollection dbObjs, ref FireHydrantSystemIn fireHydrantSysIn, 
             ref List<Point3dEx> pointList, ref List<Line> lineList)
         {
@@ -93,6 +73,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     }
                 }
             }
+
+
         }
 
         public static void AddValveLine(DBObjectCollection valveDB,

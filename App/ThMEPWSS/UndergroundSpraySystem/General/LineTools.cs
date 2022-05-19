@@ -22,7 +22,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class LineTools
     {
-        private static Point3d GetClosedPt(this Line line, Point3dEx verticalPt)
+        public static Point3d GetClosedPt(this Line line, Point3dEx verticalPt)
         {
             var spt = line.StartPoint;
             var ept = line.EndPoint;
