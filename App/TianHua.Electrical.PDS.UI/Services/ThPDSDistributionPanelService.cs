@@ -2348,11 +2348,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
                 {
-                    return from edge in edges
-                           where edge.Source == vertice
-                           let id = edge.GetCircuitID()
-                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
-                           select edge;
+                    return edges.GetSortedEdges();
+                    //return from edge in edges
+                    //       let id = edge.GetCircuitID()
+                    //       orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                    //       select edge;
                 }
                 {
                     var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
