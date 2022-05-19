@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -81,6 +82,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {
+                if (!acad.Layers.Contains(LayerName))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 0);
                 var blockName = acad.Database.GetBlockName(blockTag);
                 Point3d InsertPoint;
                     // 创建块，并且插入到原位

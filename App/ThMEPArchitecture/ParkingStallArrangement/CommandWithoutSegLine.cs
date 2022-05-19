@@ -72,24 +72,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     if (_CommandMode == CommandMode.WithUI)
                     {
-                        Logger?.Information($"############################################");
-                        Logger?.Information($"自动分割线迭代");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                        var stopWatch = new Stopwatch();
-                        stopWatch.Start();
-                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                        if (!rstDataExtract)
+                        if (ParameterViewModel.JustCreateSplittersChecked)
                         {
-                            return;
+                            GenerateAutoSegLine(currentDb);
                         }
-                        for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                        else
                         {
-                            RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            Logger?.Information($"############################################");
+                            Logger?.Information($"自动分割线迭代");
+                            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                            var stopWatch = new Stopwatch();
+                            stopWatch.Start();
+                            var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                            if (!rstDataExtract)
+                            {
+                                return;
+                            }
+                            for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                            {
+                                RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            }
+                            stopWatch.Stop();
+                            var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                            Logger?.Information(strTotalMins);
                         }
-                        stopWatch.Stop();
-                        var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
-                        Logger?.Information(strTotalMins);
-
                     }
                     else//生成二分全部方案
                     {
@@ -105,28 +111,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public void GenerateAutoSegLine(AcadDatabase acadDatabase)
         {
-            //var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger, false);
-            //if (!rstDataExtract) return;
-            var cutTolmsg = Active.Editor.GetInteger("\n 请输入切割阈值（大于正常车道宽的值）:");
-            var options = new PromptKeywordOptions("\n是否横向优先合并：");
-            options.Keywords.Add("是", "Y", "是(Y)");
-            options.Keywords.Add("否", "N", "否(N)");
+            //var cutTolmsg = Active.Editor.GetInteger("\n 请输入切割阈值（大于正常车道宽的值）:");
+            //var options = new PromptKeywordOptions("\n是否横向优先合并：");
+            //options.Keywords.Add("是", "Y", "是(Y)");
+            //options.Keywords.Add("否", "N", "否(N)");
+            //options.Keywords.Default = "是";
+            //var Msg = Active.Editor.GetKeywords(options);
+            //if (Msg.Status != PromptStatus.OK) return;
+            //var HorizontalFirst = Msg.StringResult.Equals("是");
 
-            options.Keywords.Default = "是";
-            var Msg = Active.Editor.GetKeywords(options);
-            if (Msg.Status != PromptStatus.OK) return;
-            var HorizontalFirst = Msg.StringResult.Equals("是");
-
-            if (cutTolmsg.Status != PromptStatus.OK) return;
-            if(cutTolmsg.Value < 5)
-            {
-                Active.Editor.WriteMessage("该值至少为5！");
-            }
+            //if (cutTolmsg.Status != PromptStatus.OK) return;
+            //if(cutTolmsg.Value < 5)
+            //{
+            //    Active.Editor.WriteMessage("该值至少为5！");
+            //}
+            var cutTol = 1000;
+            var HorizontalFirst = true;
             var layoutData = new LayoutData();
             var inputvaild = layoutData.Init(acadDatabase, Logger, false);
             if (!inputvaild) return;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
-            var autogen = new AutoSegGenerator(layoutData, Logger, cutTolmsg.Value);
+            var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
             autogen.Run(false);
             var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
             if(girdLines.Count <2)
@@ -142,7 +147,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
             result = result.DefineSegLinePriority();
-            result.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var layer = "AI自动分割线";
+            if (!acadDatabase.Layers.Contains(layer))
+                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layer, 2);
+            result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer,layer);
             //subareas.ForEach(subarea => subarea.Display("MPDebug"));
 
         }
