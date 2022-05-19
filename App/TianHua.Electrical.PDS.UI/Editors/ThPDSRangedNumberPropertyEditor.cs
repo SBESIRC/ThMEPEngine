@@ -28,7 +28,7 @@ namespace TianHua.Electrical.PDS.UI.Editors
         {
             Minimum = Minimum,
             Maximum = Maximum,
-            Increment = 0.1,
+            Increment = 0.05,
             DecimalPlaces = 2,
             VerifyFunc = VerifyFunc,
             IsReadOnly = propertyItem.IsReadOnly,
