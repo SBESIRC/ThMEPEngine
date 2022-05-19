@@ -245,7 +245,7 @@ namespace ThMEPHVAC.Model
         {
             return new ThValve()
             {
-                Length = 200 + 100,// 洞口固定宽两百
+                Length = Parameters.DuctHeight + 100,// 洞口固定宽两百
                 Width = Parameters.DuctWidth + 100,
                 RotationAngle = Parameters.RotationAngle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,

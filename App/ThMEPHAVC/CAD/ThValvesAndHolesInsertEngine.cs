@@ -67,7 +67,7 @@ namespace ThMEPHVAC.CAD
                 // 设置框内字的角度
                 ThMEPHVACService.SetAttr(obj, attr, -service.ucsAngle);
                 obj.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
-                obj.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
+                obj.SetValveHeight(200, HoleModel.LengthPropertyName);// 洞口固定宽为200
                 obj.SetValveModel(HoleModel.ValveVisibility);
                 // 洞口块本身问题：
                 // 洞口标注的旋转角度会影响洞口块本身的旋转角度，所以此处插洞口块时需要减去洞口标注的旋转角度
