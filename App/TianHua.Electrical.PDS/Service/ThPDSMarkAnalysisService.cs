@@ -233,7 +233,7 @@ namespace TianHua.Electrical.PDS.Service
                     // 电动机及负载标注 直接存块Id
                 },
                 InstalledCapacity = AnalysePower(new List<string> {distBoxData.Attributes.ContainsKey(ThPDSCommon.ELECTRICITY)
-                        ? distBoxData.Attributes[ThPDSCommon.ELECTRICITY] : "", }),
+                        ? CleanBlank( distBoxData.Attributes[ThPDSCommon.ELECTRICITY]) : "", }),
                 LoadTypeCat_1 = distBoxData.Cat_1,
                 LoadTypeCat_2 = distBoxData.Cat_2,
                 CircuitType = distBoxData.DefaultCircuitType,
@@ -422,10 +422,10 @@ namespace TianHua.Electrical.PDS.Service
         /// <param name="infos"></param>
         /// <param name="distBoxKey"></param>
         /// <returns></returns>
-        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, List<string> infos,
+        public ThPDSCircuit CircuitMarkAnalysis(string srcPanelID, string tarPanelID, List<string> infos,
             List<string> distBoxKey)
         {
-            var id = CreateCircuitID(srcPanelID, infos, distBoxKey);
+            var id = CreateCircuitID(srcPanelID, tarPanelID, infos, distBoxKey);
             var circuit = new ThPDSCircuit
             {
                 ID = id,
@@ -443,7 +443,7 @@ namespace TianHua.Electrical.PDS.Service
             return circuit;
         }
 
-        private ThPDSID CreateCircuitID(string srcPanelID, List<string> infos, List<string> distBoxKey)
+        private ThPDSID CreateCircuitID(string srcPanelID, string tarPanelID, List<string> infos, List<string> distBoxKey)
         {
             var circuitID = new ThPDSID();
             var panelIDs = new List<string>();
@@ -505,7 +505,8 @@ namespace TianHua.Electrical.PDS.Service
             if (circuitIDs.Count == 1)
             {
                 if (circuitIDs.Count == panelIDs.Count
-                    && (panelIDs[0].Equals(srcPanelID) || string.IsNullOrEmpty(srcPanelID)))
+                    && (panelIDs[0].Equals(srcPanelID) || string.IsNullOrEmpty(srcPanelID))
+                    && !(panelIDs[0].Equals(tarPanelID)))
                 {
                     circuitID.SourcePanelIDList.Add(panelIDs[0]);
                     circuitID.CircuitIDList.Add(circuitIDs[0]);
@@ -831,6 +832,17 @@ namespace TianHua.Electrical.PDS.Service
             {
                 str = "";
             }
+            return str;
+        }
+
+        /// <summary>
+        /// 清除字符串中的所有空格
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        private string CleanBlank(string str)
+        {
+            str = str.Replace(" ", "");
             return str;
         }
     }

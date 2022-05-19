@@ -104,6 +104,12 @@ namespace TianHua.Electrical.PDS.Service
                     obb.Vertices().OfType<Point3d>()
                         .ForEach(pt => PointDic.Add(ToDbPoint(pt), Tuple.Create(marks, data.SourceObjectId)));
                 }
+                else if(entity.IsTCHText())
+                {
+                    var text = new DBObjectCollection();
+                    entity.Explode(text);
+                    TextDic.Add(text.OfType<DBText>().First(), data.SourceObjectId);
+                }
             });
             LineIndex = new ThCADCoreNTSSpatialIndex(lines);
             TextIndex = new ThCADCoreNTSSpatialIndex(TextDic.Keys.ToCollection());

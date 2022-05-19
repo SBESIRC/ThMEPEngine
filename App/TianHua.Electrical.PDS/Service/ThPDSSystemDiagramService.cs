@@ -187,8 +187,9 @@ namespace TianHua.Electrical.PDS.Service
                         {
                             var circuitData = new ThPDSControlCircuitData();
                             var controlEdges = ThPDSProjectGraphService.GetControlCircuit(Graph, thisNode, o).GetSortedEdges().ToList();
-                            circuitData.CircuitNumber = controlEdges[0].Circuit.ID.CircuitNumber;
-                            var dataList = circuitDatas.Where(data => data.CircuitNumber.Equals(circuitData.CircuitNumber)).ToList();
+                            circuitData.CircuitUID = controlEdges[0].Circuit.CircuitUID;
+                            var dataList = circuitDatas
+                                .Where(data => data.CircuitUID.Equals(circuitData.CircuitUID)).ToList();
                             if (dataList.Count > 0)
                             {
                                 circuitData.BelongToCPS = dataList[0].BelongToCPS;
@@ -217,7 +218,6 @@ namespace TianHua.Electrical.PDS.Service
                                 {
                                     dataList[0].EndPoint = controlEndPoint1;
                                 }
-
                             }
                             else
                             {
@@ -372,6 +372,7 @@ namespace TianHua.Electrical.PDS.Service
                         }
                     }
                 }
+                Active.Editor.Regen();
             }
         }
 

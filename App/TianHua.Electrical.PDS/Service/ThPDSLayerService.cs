@@ -33,6 +33,7 @@ namespace TianHua.Electrical.PDS.Service
             return new List<string>
             {
                 "E-POWR-CMTB",
+                "E-POWR-CMTB-FIRE",
                 "E-LITE-CMTB",
                 "E-UNIV-EL2",
                 //"E-CTRL-CMTB",

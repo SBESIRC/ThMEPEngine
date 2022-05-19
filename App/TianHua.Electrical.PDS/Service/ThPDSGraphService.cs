@@ -161,6 +161,23 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
+        public static ThPDSCircuitGraphNode NodeClone(ThPDSCircuitGraphNode sourceNode, string loadID)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            node.NodeType = sourceNode.NodeType;
+            sourceNode.Loads.ForEach(load =>
+            {
+                node.Loads.Add(load);
+            });
+            node.Loads.ForEach(load =>
+            {
+                load.LoadUID = System.Guid.NewGuid().ToString();
+            });
+            node.Loads[0].ID.LoadID = loadID;
+
+            return node;
+        }
+
         // circuitAssign参数是否是必须的，存疑
         /// <summary>
         /// circuitAssign为true表示可以通过节点身上的回路编号给回路赋值
@@ -177,7 +194,8 @@ namespace TianHua.Electrical.PDS.Service
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
-            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
+            var tarPanelID = edge.Target.Loads.Count > 0 ? edge.Target.Loads[0].ID.LoadID : "";
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, tarPanelID, infos, distBoxKey);
             AssignCircuitNumber(edge, circuitAssign);
 
             if (source.NodeType != PDSNodeType.CableCarrier
@@ -186,9 +204,10 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                 var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
+                var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
                 if (!string.IsNullOrEmpty(anotherSrcPanelID))
                 {
-                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
                     AssignCircuitNumber(anotherEdge, circuitAssign);
                     if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber))
                     {
@@ -203,7 +222,8 @@ namespace TianHua.Electrical.PDS.Service
             {
                 var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                 var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
-                anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
+                anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
                 AssignCircuitNumber(anotherEdge, circuitAssign);
                 edge = anotherEdge;
             }
@@ -268,6 +288,25 @@ namespace TianHua.Electrical.PDS.Service
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, circuitID);
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> InEdgeClone(
+            ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> sourceEdge, ThPDSCircuitGraphNode target)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceEdge.Source, target);
+            edge.Circuit = sourceEdge.Circuit;
+            edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> OutEdgeClone(
+            ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> sourceEdge, ThPDSCircuitGraphNode source)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, sourceEdge.Target);
+            edge.Circuit = sourceEdge.Circuit;
+            edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
+            edge.Circuit.ID.SourcePanelIDList[edge.Circuit.ID.SourcePanelIDList.Count - 1] = source.Loads[0].ID.LoadID;
             return edge;
         }
 

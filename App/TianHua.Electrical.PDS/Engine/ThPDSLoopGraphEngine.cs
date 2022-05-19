@@ -130,6 +130,13 @@ namespace TianHua.Electrical.PDS.Engine
                             var motor = objs.OfType<BlockReference>().First();
                             GeometryMap.Add(block, motor);
                         }
+                        else if (block.Id.GetBlockName().Equals("E-BDB054"))
+                        {
+                            var objs = new DBObjectCollection();
+                            block.Explode(objs);
+                            var motor = objs.OfType<Circle>().First().TessellateCircleWithArc(200.00);
+                            GeometryMap.Add(block, motor);
+                        }
                         else
                         {
                             var obb = block.BlockOBB();
@@ -268,7 +275,7 @@ namespace TianHua.Electrical.PDS.Engine
                                                     strMatch = true;
                                                 }
                                             }
-                                            if(privateMark.Texts.Contains(str) && !str.Contains(key + "E"))
+                                            if (privateMark.Texts.Contains(str) && !str.Contains(key + "E"))
                                             {
                                                 strMatch = true;
                                             }
@@ -579,43 +586,50 @@ namespace TianHua.Electrical.PDS.Engine
                         logos.ObjectIds.AddRange(marks.ObjectIds);
                     });
 
-                    //搭着负载
-                    if (!CacheLoads.Contains(item.Key))
+                    if (DistBoxes.Contains(item.Key))
                     {
-                        newLoads.Add(item.Key);
-                        CacheLoads.Add(item.Key);
-                        var nextLoops = new List<Entity>();
-                        if (item.Key is Curve curve)
+                        entityList.Add(Tuple.Create(sourceEntity, nextEntity, new ThPDSTextInfo(), loads));
+                    }
+                    else if (Loads.Contains(item.Key))
+                    {
+                        //搭着负载
+                        if (!CacheLoads.Contains(item.Key))
                         {
-                            nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
-                        }
-                        else if (item.Key is BlockReference block)
-                        {
-                            if (GeometryMap.ContainsKey(block))
+                            newLoads.Add(item.Key);
+                            CacheLoads.Add(item.Key);
+                            var nextLoops = new List<Entity>();
+                            if (item.Key is Curve curve)
                             {
-                                nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
+                                nextLoops = FindNext(curve, ThPDSBufferService.Buffer(curve, Database));
+                            }
+                            else if (item.Key is BlockReference block)
+                            {
+                                if (GeometryMap.ContainsKey(block))
+                                {
+                                    nextLoops = FindNext(block, ThPDSBufferService.Buffer(GeometryMap[block], Database));
+                                }
+                                else
+                                {
+                                    nextLoops = FindNext(block, ThPDSBufferService.Buffer(block, Database));
+                                }
+                            }
+                            if (item.Value.Count > 0)
+                            {
+                                nextLoops.Remove(item.Value.Last());
                             }
                             else
                             {
-                                nextLoops = FindNext(block, ThPDSBufferService.Buffer(block, Database));
+                                nextLoops.Remove(nextEntity);
                             }
-                        }
-                        if (item.Value.Count > 0)
-                        {
-                            nextLoops.Remove(item.Value.Last());
-                        }
-                        else
-                        {
-                            nextLoops.Remove(nextEntity);
-                        }
-                        foreach (var entity in nextLoops)
-                        {
-                            //这就是自己本身延伸出去的块
-                            entityList.Add(Tuple.Create(item.Key, entity, logos, newLoads));
-                        }
-                        if (newLoads.Count > 0 && nextLoops.Count == 0)
-                        {
-                            Navigate(node, newLoads, onLightingCableTray, logos, nextEntity);
+                            foreach (var entity in nextLoops)
+                            {
+                                //这就是自己本身延伸出去的块
+                                entityList.Add(Tuple.Create(item.Key, entity, logos, newLoads));
+                            }
+                            if (newLoads.Count > 0 && nextLoops.Count == 0)
+                            {
+                                Navigate(node, newLoads, onLightingCableTray, logos, nextEntity);
+                            }
                         }
                     }
                 }
@@ -630,6 +644,35 @@ namespace TianHua.Electrical.PDS.Engine
                 var distributionBox = Navigate(node, tuple.Item4, tuple.Item3, tuple.Item1, tuple.Item2);
                 if (tuple.Item4.Count > 0)
                 {
+                    // 控制单个节点中潜水泵的数量
+                    var containsPump = false;
+                    var removePump = new List<Entity>();
+                    for (var i = 0; i < tuple.Item4.Count; i++)
+                    {
+                        if (tuple.Item4[i] is BlockReference block)
+                        {
+                            if (block.Name.Equals("E-BDB054"))
+                            {
+                                if (!containsPump)
+                                {
+                                    containsPump = true;
+                                }
+                                else
+                                {
+                                    removePump.Add(block);
+                                }
+                            }
+                        }
+                    }
+                    if (containsPump)
+                    {
+                        removePump.ForEach(pump =>
+                        {
+                            tuple.Item4.Remove(pump);
+                            CacheLoads.Remove(pump);
+                        });
+                    }
+
                     var navigate = Navigate(node, tuple.Item4, onLightingCableTray, tuple.Item3, nextEntity);
                     if (!navigate.Item1)
                     {
@@ -1491,6 +1534,58 @@ namespace TianHua.Electrical.PDS.Engine
             });
         }
 
+        public void StandardStorey()
+        {
+            // 处理多楼栋
+            var regex = new Regex(@"[0-9]+/[0-9]+-");
+            var numRegex = new Regex(@"[0-9]+");
+            var searchedVertices = new List<ThPDSCircuitGraphNode>();
+            var addVertices = new List<ThPDSCircuitGraphNode>();
+            var addEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            var removeVertices = new List<ThPDSCircuitGraphNode>();
+            var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+
+            PDSGraph.Graph.Vertices.ForEach(o =>
+            {
+                if (o.NodeType == PDSNodeType.CableCarrier)
+                {
+                    return;
+                }
+
+                var match = regex.Match(o.Loads[0].ID.LoadID);
+                if (match.Success)
+                {
+                    var first = numRegex.Match(match.Value);
+                    var second = first.NextMatch();
+                    if (first.Success && second.Success)
+                    {
+                        var firstLoadID = o.Loads[0].ID.LoadID.Replace(match.Value, first.Value + "-");
+                        var firstNode = ThPDSGraphService.NodeClone(o, firstLoadID);
+                        var secondLoadID = o.Loads[0].ID.LoadID.Replace(match.Value, second.Value + "-");
+                        var secondNode = ThPDSGraphService.NodeClone(o, secondLoadID);
+                        NodeMap.Add(firstNode, NodeMap[o]);
+                        NodeMap.Add(secondNode, NodeMap[o]);
+                        addVertices.Add(firstNode);
+                        addVertices.Add(secondNode);
+                        removeVertices.Add(o);
+                        searchedVertices.Add(o);
+
+                        var inEdges = PDSGraph.Graph.InEdges(o);
+                        inEdges.ForEach(e =>
+                        {
+                            var firstEdge = ThPDSGraphService.InEdgeClone(e, firstNode);
+                            var secondEdge = ThPDSGraphService.InEdgeClone(e, secondNode);
+                            EdgeMap.Add(firstEdge, EdgeMap[e]);
+                            EdgeMap.Add(secondEdge, EdgeMap[e]);
+                            addEdges.Add(firstEdge);
+                            addEdges.Add(secondEdge);
+                            removeEdges.Add(e);
+                        });
+                    }
+                }
+            });
+        }
+
         private DBObjectCollection GeometriesMap(DBObjectCollection objs)
         {
             var results = new DBObjectCollection();
@@ -1509,7 +1604,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         public Extents3d GetGeometry(Entity entity)
         {
-            if(GeometryMap.ContainsKey(entity))
+            if (GeometryMap.ContainsKey(entity))
             {
                 return GeometryMap[entity].GeometricExtents;
             }

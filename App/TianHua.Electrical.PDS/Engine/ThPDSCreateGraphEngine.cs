@@ -183,6 +183,12 @@ namespace TianHua.Electrical.PDS.Engine
                                 storey.Data.Position.Y + (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
                             graphEngine.AssignStorey(doc.Database, storey.StoreyNumber, storeyBasePoint);
 
+                            // 处理标准层
+                            if(storey.StoreyTypeString.Equals("标准层"))
+                            {
+
+                            }
+
                             var graph = graphEngine.GetGraph();
                             graphList.Add(graph);
                         }

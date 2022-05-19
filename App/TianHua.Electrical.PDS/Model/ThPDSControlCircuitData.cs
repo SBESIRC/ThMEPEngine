@@ -6,11 +6,11 @@ namespace TianHua.Electrical.PDS.Model
     {
         public ThPDSControlCircuitData()
         {
-            CircuitNumber = "";
+            CircuitUID = "";
             BelongToCPS = false;
         }
 
-        public string CircuitNumber { get; set; }
+        public string CircuitUID { get; set; }
         public bool BelongToCPS { get; set; }
         public Point3d StartPoint { get; set; }
         public Point3d EndPoint { get; set; }
