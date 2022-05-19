@@ -476,6 +476,8 @@ namespace DotNetARX
         {
             string propValue = null;//用于返回动态属性值的变量
             var props = blockId.GetDynProperties();//获得动态块的所有动态属性
+            if (null == props)
+                return propValue;
             //遍历动态属性
             foreach (DynamicBlockReferenceProperty prop in props)
             {
@@ -500,7 +502,7 @@ namespace DotNetARX
             //获取块参照
             BlockReference br = blockId.GetObject(OpenMode.ForRead) as BlockReference;
             //如果不是动态块，则返回
-            if (br == null && !br.IsDynamicBlock) return null;
+            if (br == null || !br.IsDynamicBlock) return null;
             //返回动态块的动态属性
             return br.DynamicBlockReferencePropertyCollection;
         }

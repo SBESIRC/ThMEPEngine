@@ -112,7 +112,8 @@ namespace ThCADExtension
         /// <returns></returns>
         public static string CurrentVisibilityStateValue(this ThBlockReferenceData blockReference)
         {
-            var visibilityStates = blockReference.DynablockVisibilityStates();
+            if (null == blockReference.CustomProperties)
+                return "";
             var properties = blockReference.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
                 .Where(o => o.IsVisibility());
