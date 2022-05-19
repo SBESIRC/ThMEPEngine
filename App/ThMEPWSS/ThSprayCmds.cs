@@ -78,7 +78,9 @@ namespace ThMEPWSS
             var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, ThWSSUIService.Instance.Parameter.distance);
 
             //放置喷头
-            InsertSprinklerService.Insert(layoutPts);
+            //InsertSprinklerService.Insert(layoutPts);
+            InsertSprinklerService.InsertTCHSprinkler(layoutPts, ThWSSUIService.Instance.Parameter.layoutType == Model.LayoutType.DownSpray ? 0 : 1);
+            
         }
 
         [CommandMethod("TIANHUACAD", "THPLZX", CommandFlags.Modal)]

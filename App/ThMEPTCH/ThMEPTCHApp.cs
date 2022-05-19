@@ -1,4 +1,6 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using Autodesk.AutoCAD.Runtime;
+using System.IO;
 
 namespace ThMEPTCH
 {
@@ -23,6 +25,21 @@ namespace ThMEPTCH
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+        }
+        [CommandMethod("TIANHUACAD", "THTCHPIPIMP", CommandFlags.Modal)]
+        public void THTCHImportWaterPipe()
+        {
+            string cmdName = "TH2T20";
+            string TCHDBPath = Path.GetTempPath() + "TG20.db";
+#if ACAD_ABOVE_2014
+            Active.Editor.Command(cmdName, TCHDBPath, " ");
+#else
+            ResultBuffer args = new ResultBuffer(
+               new TypedValue((int)LispDataType.Text, string.Format("_.{0}", CmdName)),
+               new TypedValue((int)LispDataType.Text, TCHDBPath),
+               new TypedValue((int)LispDataType.Text, " "));
+            Active.Editor.AcedCmd(args);
+#endif
         }
     }
 }

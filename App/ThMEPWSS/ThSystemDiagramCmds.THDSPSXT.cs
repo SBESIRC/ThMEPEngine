@@ -18,7 +18,7 @@ namespace ThMEPWSS
             var res = FramedReadUtil.SelectFloorFramed(out List<FloorFramed> selectList);
             if (res && null != selectList && selectList.Count > 0)
             {
-                ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(selectList, null,null);
+                ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(selectList, null, null);
                 thDrainSystem.Execute();
             }
         }
