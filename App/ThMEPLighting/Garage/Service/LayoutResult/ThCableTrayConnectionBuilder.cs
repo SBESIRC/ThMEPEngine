@@ -93,7 +93,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var tTypeLines = BuildTTypeLinks();
             // 修正lines
             var wireDict = CreateWireDict(Graphs.SelectMany(o=>o.GraphEdges).ToList());
-            var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength);
+            var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength,FdxLines);
 
             lines.AddRange(wires.OfType<Line>());
             lines.AddRange(FdxLines);
@@ -118,9 +118,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private DBObjectCollection CutPortUnLinkWires(
             Dictionary<Line,Point3dCollection> wireDict,
-            double lampLength)
+            double lampLength,List<Line> fdxLines)
         {
-            var handler = new ThCutCableTrayUnlinkWireService(wireDict, lampLength);
+            var handler = new ThCutCableTrayUnlinkWireService(wireDict, lampLength, fdxLines);
             return handler.Cut();
         }
 

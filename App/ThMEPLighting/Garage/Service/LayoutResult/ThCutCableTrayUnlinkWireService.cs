@@ -17,11 +17,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
         private double PointTolerance = ThGarageLightCommon.RepeatedPointDistance*2.5; 
         private double LampLength { get; set; }
-        public ThCutCableTrayUnlinkWireService(
-            Dictionary<Line,Point3dCollection> wireDict,double lampLength)
+        private ThCADCoreNTSSpatialIndex FdxSpatialIndex { get; set; }
+        public ThCutCableTrayUnlinkWireService(Dictionary<Line,Point3dCollection> wireDict,
+            double lampLength,List<Line> fdxLines)
         {
             WireDict = wireDict;
             LampLength = lampLength;
+            FdxSpatialIndex = new ThCADCoreNTSSpatialIndex(fdxLines.ToCollection());
             InitWireSpatialIndex();
         }
         public DBObjectCollection Cut()
@@ -153,15 +155,23 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             // 看起点是否连接物体
             var port = isSp ? line.StartPoint : line.EndPoint;
-            var linkWires = QueryWires(port);
-            linkWires.Remove(line);            
-            return linkWires.Count > 0;
+            var linkWires = QueryWires(port);           
+            linkWires.Remove(line);
+            var fdxWires = QueryFdxs(port);
+            return linkWires.Count > 0 || fdxWires.Count>0;
         }
 
         private DBObjectCollection QueryWires(Point3d port)
         {
             var outline = port.CreateSquare(PointTolerance);
             var results = WireSpatialIndex.SelectCrossingPolygon(outline);
+            outline.Dispose();
+            return results;
+        }
+        private DBObjectCollection QueryFdxs(Point3d port)
+        {
+            var outline = port.CreateSquare(PointTolerance);
+            var results = FdxSpatialIndex.SelectCrossingPolygon(outline);
             outline.Dispose();
             return results;
         }
