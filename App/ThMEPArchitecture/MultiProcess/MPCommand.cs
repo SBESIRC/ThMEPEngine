@@ -386,7 +386,7 @@ namespace ThMEPArchitecture.MultiProcess
             pline.ColorIndex = coloridx;
             return pline;
         }
-        private static Line ToDbLine(this LineSegment segment, int coloridx, string layer)
+        public static Line ToDbLine(this LineSegment segment, int coloridx, string layer)
         {
             var line = segment.ToDbLine();
             line.Layer = layer;

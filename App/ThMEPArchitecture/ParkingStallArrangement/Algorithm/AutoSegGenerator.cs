@@ -71,14 +71,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             ShowSegLineOnly = showSegLineOnly;
             LastPlanOnly = lastPlanOnly;
-            Logger?.Information("\n二分分割线穷举");
+            Logger?.Information("二分分割线穷举\n");
             var initAreaKey = new Tuple<int?, int?, int?, int?>(null, null, null, null);
             BisectAreaDic.Add(initAreaKey, BisectAreaTree);
             List<BisectionArea> areas = new List<BisectionArea> { BisectAreaTree };
             List<BisectionArea> nextLevelAreas;
             while(areas.Count != 0)//当前需要分割的区域
             {
-                Logger?.Information("\n" + areas.GetNewAreaCount().ToString());
+                //Logger?.Information("\n" + areas.GetNewAreaCount().ToString());
                 nextLevelAreas = new List<BisectionArea>();
                 foreach (var bisectArea in areas)
                 {
@@ -86,9 +86,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 areas = nextLevelAreas;
             }
+            Logger?.Information(" 二分分割线总数：" + BisectSegLineDic.Count.ToString() +"\n");
             //if(ShowSegLineOnly) GetGrid();
             //else
-            if(!ShowSegLineOnly)
+            if (!ShowSegLineOnly)
             {
                 GetAllSegLinePlan();
                 //var maxCount = AllSegPlans.Max(p => p.Count);

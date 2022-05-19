@@ -68,8 +68,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int max_process;
             if (ParameterStock.ProcessCount == -1)
             {
-                //max_process = Environment.ProcessorCount;
-                max_process = PopulationSize;
+                if(Environment.ProcessorCount <= 32)
+                {
+                    max_process = Environment.ProcessorCount;
+                }
+                else max_process = PopulationSize;
             }
             else max_process = ParameterStock.ProcessCount;
             //ProcessCount = Math.Min(Environment.ProcessorCount - 1, PopulationSize);

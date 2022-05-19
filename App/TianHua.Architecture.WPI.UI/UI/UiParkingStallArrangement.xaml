@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(2.1)" SizeToContent="Manual" Height="710"
+              Title="车位自动排布(2.2)" SizeToContent="Manual" Height="710"
               Width="460" MaxWidth="550"  MaxHeight="710" WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
 >
@@ -30,9 +30,9 @@
                 <StackPanel Orientation="Horizontal">
                     <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}" Width="210">
-                        <CheckBox Margin="5,8,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">只生成分区线</CheckBox>
-                        <Label Margin="0,2,0,0">方案数：</Label>
-                        <TextBox Width="25" Height="15" Margin="0,5,0,5" Text="{Binding LayoutCount}"></TextBox>
+                        <CheckBox Margin="5,8,5,5" Height="15" FontWeight="Bold" IsChecked="{Binding JustCreateSplittersChecked}">仅生成分区线</CheckBox>
+                        <!--<Label Margin="0,2,0,0">方案数：</Label>
+                        <TextBox Width="25" Height="15" Margin="0,5,0,5" Text="{Binding LayoutCount}"></TextBox>-->
                     </StackPanel>
                 </StackPanel>
 

@@ -72,73 +72,123 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     if (_CommandMode == CommandMode.WithUI)
                     {
-                        Logger?.Information($"############################################");
-                        Logger?.Information($"自动分割线迭代");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                        var stopWatch = new Stopwatch();
-                        stopWatch.Start();
-                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                        if (!rstDataExtract)
+                        if (ParameterViewModel.JustCreateSplittersChecked)
                         {
-                            return;
+                            GenerateAllAutoSegLine(currentDb);
                         }
-                        for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                        else
                         {
-                            RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            Logger?.Information($"############################################");
+                            Logger?.Information($"自动分割线迭代");
+                            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                            var stopWatch = new Stopwatch();
+                            stopWatch.Start();
+                            var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                            if (!rstDataExtract)
+                            {
+                                return;
+                            }
+                            for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                            {
+                                RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            }
+                            stopWatch.Stop();
+                            var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                            Logger?.Information(strTotalMins);
                         }
-                        stopWatch.Stop();
-                        var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
-                        Logger?.Information(strTotalMins);
-
                     }
                     else//生成二分全部方案
                     {
-                        GenerateAutoSegLine(currentDb);
+                        GenerateAllAutoSegLine(currentDb);
                     }
                 }
             }
             catch (Exception ex)
             {
                 Logger?.Information(ex.Message);
+                Logger?.Information("##################################");
+                Logger?.Information(ex.StackTrace);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        public void GenerateAutoSegLine(AcadDatabase acadDatabase)
+        private void ReclaimMemory()
         {
-            //var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger, false);
-            //if (!rstDataExtract) return;
-            var cutTolmsg = Active.Editor.GetInteger("\n 请输入切割阈值（大于正常车道宽的值）:");
-            if (cutTolmsg.Status != PromptStatus.OK) return;
-            if(cutTolmsg.Value < 5)
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+        }
+        public void GenerateAllAutoSegLine(AcadDatabase acadDatabase)
+        {
+            var cutTol = 1000;
+            var HorizontalFirst = true;
+            var blks = InputData.SelectBlocks(acadDatabase);
+            foreach (var blk in blks)
             {
-                Active.Editor.WriteMessage("该值至少为5！");
+                try
+                {
+                    GenerateAutoSegLine(blk, cutTol, HorizontalFirst);
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("##################################");
+                    Logger?.Information(ex.StackTrace);
+                    Active.Editor.WriteMessage(ex.Message);
+                }
             }
+
+        }
+
+        public void GenerateAutoSegLine(BlockReference blk,int cutTol,bool HorizontalFirst)
+        {
+            Logger?.Information("##################################");
+            var blk_Name = blk.GetEffectiveName();
+            Logger?.Information("块名：" + blk_Name);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var t_pre = 0.0;
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(acadDatabase, Logger, false);
+            var inputvaild = layoutData.Init(blk, Logger,false);
             if (!inputvaild) return;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
-            var autogen = new AutoSegGenerator(layoutData, Logger, cutTolmsg.Value);
+            var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
+            Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre }\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+
             autogen.Run(false);
+            Logger?.Information($"穷举用时: {stopWatch.Elapsed.TotalSeconds - t_pre}\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
             var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
-            if(girdLines.Count <2)
+            if (girdLines.Count < 2)
             {
-                Active.Editor.WriteMessage("暂不支持！");
+                Active.Editor.WriteMessage("块名为：" + blk_Name +"的地库暂不支持自动分割线！\n");
                 return;
             }
             girdLines.SeglinePrecut(layoutData.WallLine);
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
-            var grouped = girdLines.GroupSegLines().OrderBy(g=>g.Count).Last();
+            var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();
             //grouped.ForEach(l => l.ToDbLine().AddToCurrentSpace());
             var result = grouped;
 
-            result = result.GridLinesRemoveEmptyAreas();
-            result.ForEach(l => l.ToDbLine().AddToCurrentSpace());
-            //subareas.ForEach(subarea => subarea.Display("MPDebug"));
+            result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
+            result = result.DefineSegLinePriority();
 
+            Logger?.Information($"去重+去空区用时: {stopWatch.Elapsed.TotalSeconds - t_pre}\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            var layer = "AI自动分割线";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+            }
+            result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+            ReclaimMemory();
+            Logger?.Information($"当前图总用时: {stopWatch.Elapsed.TotalSeconds }\n");
         }
         public override void AfterExecute()
         {
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+            Logger?.Information($"从点击运行开始总用时：{_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
 

@@ -478,6 +478,25 @@ namespace ThParkingStall.Core.Tools
             }
             return (pt1, pt2);
         }
+        public static List<Point> GetAllIntSecPs(this List<LineSegment> seglines)
+        {
+            var pts = new HashSet<Point>();
+            for (int i = 0; i < seglines.Count-1; ++i)
+            {
+                var segline = seglines[i];
+                var VerticalDirection = segline.IsVertical();
+                for (int j = i+1; j < seglines.Count; ++j)
+                {
+                    var segline2 = seglines[j];
+                    if (VerticalDirection != segline2.IsVertical())
+                    {
+                        var pt = segline.Intersection(segline2);
+                        if (pt != null) pts.Add(new Point(pt));
+                    }
+                }
+            }
+            return pts.ToList();
+        }
         public static List<Point> GetAllIntSecPs(int idx, List<LineSegment> seglines)//获取分割线交点
         {
             var segline = seglines[idx];
@@ -509,6 +528,7 @@ namespace ThParkingStall.Core.Tools
             }
             return true;
         }
+
         public static Polygon GetRect(this LineSegment segline, double width)
         {
             var distance = width / 2;
