@@ -1,4 +1,7 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 using System.Collections.Generic;
 using System.IO;
 using ThCADExtension;

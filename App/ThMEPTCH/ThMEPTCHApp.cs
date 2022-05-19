@@ -1,5 +1,7 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 using System.IO;
 
 namespace ThMEPTCH
@@ -35,7 +37,7 @@ namespace ThMEPTCH
             Active.Editor.Command(cmdName, TCHDBPath, " ");
 #else
             ResultBuffer args = new ResultBuffer(
-               new TypedValue((int)LispDataType.Text, string.Format("_.{0}", CmdName)),
+               new TypedValue((int)LispDataType.Text, string.Format("_.{0}", cmdName)),
                new TypedValue((int)LispDataType.Text, TCHDBPath),
                new TypedValue((int)LispDataType.Text, " "));
             Active.Editor.AcedCmd(args);
