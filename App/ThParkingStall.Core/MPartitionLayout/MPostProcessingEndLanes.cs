@@ -42,7 +42,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         var l = SplitLine(lane, new List<Coordinate>() { ps }).OrderByDescending(p => p.MidPoint.Distance(carLine.MidPoint)).First();
                         lane = l;
                         lanes[i] = l;
-                    }
+                    }       
                 }
                 if (boundary.ClosestPoint(lane.P1).Distance(lane.P1) < 10)
                 {
@@ -60,7 +60,229 @@ namespace ThParkingStall.Core.MPartitionLayout
                         lanes[i] = l;
                     }
                 }
+                continue;
+                var lane_endpoints = new List<Coordinate>() { lane.P0, lane.P1 };
+                for(int j=0;j< lane_endpoints.Count; j++)
+                {
+                    var endpoint = lane_endpoints[j];
+                    var lane_vec_inner_to_wall = j == 0 ? -Vector(lane) : Vector(lane);
+                    lane_vec_inner_to_wall = lane_vec_inner_to_wall.Normalize();
+                    if (boundary.ClosestPoint(endpoint).Distance(endpoint) < 10)
+                    {
+                        var pointtest = endpoint.Translation(-lane_vec_inner_to_wall * 5000);
+                        var perp_vec= Vector(lane).Normalize().GetPerpendicularVector();
+                        var carLine = new LineSegment();
+                        var succeed_line = new LineSegment();
+                        var vecmove = new Vector2D();
+                        if (CanAddCarSpotsParallelCase(lanes, lane_vec_inner_to_wall, pointtest, perp_vec,ref carspacialindex,ref cars,ref carLine,ref succeed_line))
+                        {
+                            lanes.RemoveAt(i);
+                            generate_cars_parallel_case(carLine,succeed_line,ref lanes,ref lane_vec_inner_to_wall,ref cars,ref pillars, Walls,boundary,obspacialindex);
+                            i--;
+                            break;
+                        }
+                    }
+                }
             }
+        }
+        private static void generate_cars_parallel_case(LineSegment carLine,LineSegment succeedLine,ref List<LineSegment>lanes,ref Vector2D vecmove,
+            ref List<InfoCar>cars,ref List<Polygon> pillars, List<LineString> Walls,Polygon boundary,MNTSSpatialIndex obspacialindex)
+        {
+            var joinded_lanes = new List<LineSegment>() { carLine, succeedLine };
+            var tlanes = JoinCurves(new List<LineString>(), joinded_lanes).OrderByDescending(e => e.Length);
+            var lane=new LineSegment();
+            if (tlanes.Count() >= 1) lane = new LineSegment(tlanes.First().StartPoint.Coordinate,tlanes.First().EndPoint.Coordinate);
+            if (lane.Length > 1)
+            {
+                var tlane_depth = lane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
+                var tlane_rec = PolyFromLines(lane, tlane_depth);
+                cars = cars.Where(e => !tlane_rec.Contains(e.Polyline.Envelope.Centroid)).ToList();
+                pillars = pillars.Where(e => !tlane_rec.Contains(e.Envelope.Centroid)).ToList();
+                var partitionpro = new MParkingPartitionPro();
+                partitionpro.Walls = Walls;
+                partitionpro.Boundary = boundary;
+                partitionpro.ObstaclesSpatialIndex = obspacialindex;
+                partitionpro.Obstacles = obspacialindex.SelectAll().Cast<Polygon>().ToList();
+                partitionpro.IniLanes.Add(new Lane(lane, vecmove.Normalize()));
+                var vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.RoadWidth / 2 + VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth,
+               VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength, false, null, true);
+                foreach (var k in vertlanes)
+                {
+                    var vl = k.Line;
+                    if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
+                    var line = new LineSegment(vl);
+                    line = line.Translation(k.Vec.Normalize() * VMStock.RoadWidth / 2);
+                    partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotWidth : VMStock.VerticalSpotLength,
+                        VMStock.VerticalSpotLength > VMStock.VerticalSpotWidth ? VMStock.VerticalSpotLength : VMStock.VerticalSpotWidth
+                        , true, false, false, false, true, true, false, false, true, false, false, false, true);
+                }
+                vertlanes = partitionpro.GeneratePerpModuleLanes(VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
+                    + VMStock.RoadWidth / 2,
+                    VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
+                    false);
+                foreach (var k in vertlanes)
+                {
+                    var vl = k.Line;
+                    if (ClosestPointInVertLines(vl.P1, vl, lanes.ToArray()) < 10) lane = new LineSegment(lane.P1, lane.P0);
+                    var line = new LineSegment(vl);
+                    line = line.Translation(k.Vec.Normalize() * 2750);
+                    partitionpro.GenerateCarsAndPillarsForEachLane(line, k.Vec,
+                        VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotLength : VMStock.ParallelSpotWidth,
+                        VMStock.ParallelSpotLength > VMStock.ParallelSpotWidth ? VMStock.ParallelSpotWidth : VMStock.ParallelSpotLength
+                        , true, false, false, false, true, true, false);
+                }
+                cars.AddRange(partitionpro.Cars);
+                pillars.AddRange(partitionpro.Pillars);
+            }
+            else return;
+
+        }
+        private static bool CanAddCarSpotsParallelCase(List<LineSegment> lanes,Vector2D lane_vec_inner_to_wall, Coordinate pt, Vector2D perpvec,ref MNTSSpatialIndex carspacialindex,ref List<InfoCar>cars,
+            ref LineSegment carLine,ref LineSegment succeed_line)
+        {
+            var ptwall=pt.Translation(lane_vec_inner_to_wall * 5000);
+            var iline = new LineSegment(pt, ptwall);
+            var iline_a = iline.Translation(perpvec * 4000);
+            var iline_b = iline.Translation(-perpvec * 4000);
+            var pla = PolyFromLines(iline, iline_a);
+            var plb = PolyFromLines(iline, iline_b);
+            var cars_a = carspacialindex.SelectCrossingGeometry(pla).Cast<Polygon>();
+            var cars_b = carspacialindex.SelectCrossingGeometry(plb).Cast<Polygon>();
+            if (cars_a.Count() > 0 && cars_b.Count() > 0)
+            {
+                var car_a = cars_a.OrderBy(e =>
+                  {
+                      var edge = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                      return edge.Distance(ptwall);
+                  }).First();
+                var edge_a = car_a.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                var car_b = cars_b.OrderBy(e =>
+                {
+                    var edge = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                    return edge.Distance(ptwall);
+                }).First();
+                var edge_b = car_b.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                var iaVert_a = Math.Abs(edge_a.Length - MParkingPartitionPro.DisVertCarLength) < 1;
+                var iaVert_b = Math.Abs(edge_b.Length - MParkingPartitionPro.DisVertCarLength) < 1;
+                if (iaVert_a && !iaVert_b)
+                {
+                    cars_b = cars_b.Where(e =>
+                     {
+                         var curseg = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                         if (Math.Abs(curseg.Length - MParkingPartitionPro.DisVertCarLength) < 1) return false;
+                         return true;
+                     }).ToList();
+                    carspacialindex.Update(new List<Polygon>(), cars_b);
+                    for (int k = 0; k < cars.Count; k++)
+                    {
+                        foreach (var car in cars_b)
+                        {
+                            if (cars[k].Polyline.Centroid.Coordinate.Distance(car.Centroid.Coordinate) < 1)
+                            {
+                                cars.RemoveAt(k);
+                                k--;
+                                break;
+                            }
+                        }
+                    }
+                    var another_edges_a = car_a.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).ToList();
+                    another_edges_a.RemoveAt(0);
+                    var another_edge_a = another_edges_a.Take(2).OrderByDescending(seg => ptwall.Distance(seg.MidPoint)).First();
+                    var another_edge_a_mid = another_edge_a.MidPoint;
+                    var a_correspond_lane = lanes.OrderBy(e => e.ClosestPoint(another_edge_a_mid).Distance(another_edge_a_mid)).First();
+                    var p_s = iline.ClosestPoint(a_correspond_lane.P0, true);
+                    var p_s_on_lane = a_correspond_lane.ClosestPoint(p_s);
+                    var p_e = p_s_on_lane.Translation(-perpvec * MParkingPartitionPro.DisLaneWidth);
+                    carLine = new LineSegment(p_s_on_lane, p_e);
+                    succeed_line = a_correspond_lane;
+                    return true;
+                }
+                else if (!iaVert_a && iaVert_b)
+                {
+                    cars_a = cars_a.Where(e =>
+                    {
+                        var curseg = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                        if (Math.Abs(curseg.Length - MParkingPartitionPro.DisVertCarLength) < 1) return false;
+                        return true;
+                    }).ToList();
+                    carspacialindex.Update(new List<Polygon>(), cars_a);
+                    for (int k = 0; k < cars.Count; k++)
+                    {
+                        foreach (var car in cars_a)
+                        {
+                            if (cars[k].Polyline.Centroid.Coordinate.Distance(car.Centroid.Coordinate) < 1)
+                            {
+                                cars.RemoveAt(k);
+                                k--;
+                                break;
+                            }
+                        }
+                    }
+                    var another_edges_b = car_b.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).ToList();
+                    another_edges_b.RemoveAt(0);
+                    var another_edge_b = another_edges_b.Take(2).OrderByDescending(seg => ptwall.Distance(seg.MidPoint)).First();
+                    var another_edge_b_mid = another_edge_b.MidPoint;
+                    var b_correspond_lane = lanes.OrderBy(e => e.ClosestPoint(another_edge_b_mid).Distance(another_edge_b_mid)).First();
+                    var p_s = iline.ClosestPoint(b_correspond_lane.P0, true);
+                    var p_s_on_lane = b_correspond_lane.ClosestPoint(p_s);
+                    var p_e = p_s_on_lane.Translation(perpvec * MParkingPartitionPro.DisLaneWidth);
+                    carLine = new LineSegment(p_s_on_lane, p_e);
+                    succeed_line = b_correspond_lane;
+                    return true;
+                }
+                return false;
+            }
+            else if (cars_a.Count() == 0 && cars_b.Count() > 0)
+            {
+                var car_b = cars_b.OrderBy(e =>
+                {
+                    var edge = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                    return edge.Distance(ptwall);
+                }).First();
+                var edge_b = car_b.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                var iaVert_b = Math.Abs(edge_b.Length - MParkingPartitionPro.DisVertCarLength) < 1;
+                if (iaVert_b)
+                {
+                    var another_edges_b = car_b.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).ToList();
+                    another_edges_b.RemoveAt(0);
+                    var another_edge_b = another_edges_b.Take(2).OrderByDescending(seg => ptwall.Distance(seg.MidPoint)).First();
+                    var another_edge_b_mid = another_edge_b.MidPoint;
+                    var b_correspond_lane = lanes.OrderBy(e => e.ClosestPoint(another_edge_b_mid).Distance(another_edge_b_mid)).First();
+                    var p_s = iline.ClosestPoint(b_correspond_lane.P0, true);
+                    var p_s_on_lane = b_correspond_lane.ClosestPoint(p_s);
+                    var p_e = p_s_on_lane.Translation(perpvec * MParkingPartitionPro.DisLaneWidth);
+                    carLine = new LineSegment(p_s_on_lane, p_e);
+                    succeed_line = b_correspond_lane;
+                    return true;
+                }
+                else return false;
+            }
+            else if (cars_a.Count() > 0 && cars_b.Count() == 0)
+            {
+                var car_a = cars_a.OrderBy(e =>
+                {
+                    var edge = e.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                    return edge.Distance(ptwall);
+                }).First();
+                var edge_a = car_a.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
+                var iaVert_a = Math.Abs(edge_a.Length - MParkingPartitionPro.DisVertCarLength) < 1;
+                if (iaVert_a)
+                {
+                    var another_edges_a = car_a.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).ToList();
+                    another_edges_a.RemoveAt(0);
+                    var another_edge_a = another_edges_a.Take(2).OrderByDescending(seg => ptwall.Distance(seg.MidPoint)).First();
+                    var another_edge_a_mid = another_edge_a.MidPoint;
+                    var a_correspond_lane = lanes.OrderBy(e => e.ClosestPoint(another_edge_a_mid).Distance(another_edge_a_mid)).First();
+                    var p_s = iline.ClosestPoint(a_correspond_lane.P0, true);
+                    var p_s_on_lane = a_correspond_lane.ClosestPoint(p_s);
+                    var p_e = p_s_on_lane.Translation(-perpvec * MParkingPartitionPro.DisLaneWidth);
+                    carLine = new LineSegment(p_s_on_lane, p_e);
+                    succeed_line = a_correspond_lane;
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
         }
         private static bool CanAddCarSpots(LineSegment line, Vector2D linevec, Coordinate pt, Vector2D vec, MNTSSpatialIndex carspacialindex, ref LineSegment carLine)
         {

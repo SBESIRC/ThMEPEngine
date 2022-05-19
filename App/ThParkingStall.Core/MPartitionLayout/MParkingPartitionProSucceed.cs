@@ -137,8 +137,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else return false;
             }
         }
-        private double IsEssentialToCloseToBuilding(LineSegment line, Vector2D vec)
+        private double IsEssentialToCloseToBuilding(LineSegment lane, Vector2D vec)
         {
+            var line = lane.Scale(0.9999);
             if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
             if (!IsPerpVector(vec, Vector2D.Create(1, 0))) return -1;
             if (vec.Y < 0) return -1;
@@ -560,7 +561,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 if (ClosestPointInVertLines(ea.P0, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
                     Math.Abs(ClosestPointInVertLines(ea.P1, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-                    ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
+                    ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 4)
                 {
                     count = 0;
                 }
@@ -650,14 +651,20 @@ namespace ThParkingStall.Core.MPartitionLayout
                 int modulecount = ilanes.Count;
                 int vertcount = ((int)Math.Floor((line.Length - modulecount * DisModulus) / DisVertCarWidth));
                 PerpModlues perpModlue = ConstructPerpModules(lane.Vec, ilanes);
+                int step = 1;
                 for (int i = 0; i < vertcount; i++)
                 {
-                    var test = UpdataPerpModlues(perpModlue);
+                    var test = UpdataPerpModlues(perpModlue, step);
                     if (test.Count >= perpModlue.Count)
                     {
                         perpModlue = test;
+                        step = 1;
                     }
-                    else continue;
+                    else
+                    {
+                        step++;
+                        continue;
+                    }
                 }
                 foreach (var pl in perpModlue.Bounds)
                 {
@@ -675,13 +682,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 CarBoxesSpatialIndex.Update(perpModlue.Bounds, new List<Polygon>());
             }
         }
-        private PerpModlues UpdataPerpModlues(PerpModlues perpModlues)
+        private PerpModlues UpdataPerpModlues(PerpModlues perpModlues,int step)
         {
             PerpModlues result;
             int minindex = perpModlues.Mminindex;
             List<LineSegment> ilanes = new List<LineSegment>(perpModlues.Lanes);
             if (perpModlues.Lanes.Count == 0) return perpModlues;
-            var vec_move = Vector(perpModlues.Lanes[0]).Normalize() * DisVertCarWidth;
+            var vec_move = Vector(perpModlues.Lanes[0]).Normalize() * DisVertCarWidth * step;
             for (int i = 0; i < ilanes.Count; i++)
             {
                 if (i >= minindex)
@@ -858,6 +865,37 @@ namespace ThParkingStall.Core.MPartitionLayout
                     return pl;
                 }).ToList();
             }
+        }
+        private void InsuredForTheCaseOfoncaveBoundary()
+        {
+            var lanebox = IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1));
+            var carspacialindex = new MNTSSpatialIndex(CarSpots);
+            var pillarspacialindex = new MNTSSpatialIndex(Pillars);
+            var cars_to_remove = new List<Polygon>();
+            var pillars_to_remove = new List<Polygon>();
+            foreach (var lane in lanebox)
+            {
+                var cars= carspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                var pillars= pillarspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                cars_to_remove.AddRange(cars);
+                pillars_to_remove.AddRange(pillars);
+            }
+            cars_to_remove=cars_to_remove.Distinct().ToList();
+            pillars_to_remove = pillars_to_remove.Distinct().ToList();
+            CarSpots = CarSpots.Except(cars_to_remove).ToList();
+            for (int i = 0; i < Cars.Count; i++)
+            {
+                foreach (var remove in cars_to_remove)
+                {
+                    if (Cars[i].Polyline.Centroid.Coordinate.Distance(remove.Centroid.Coordinate) < 1)
+                    {
+                        Cars.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            Pillars = Pillars.Except(pillars_to_remove).ToList();
         }
         private Polygon ConvertVertCarToCollisionCar(LineSegment baseline, Vector2D vec)
         {
