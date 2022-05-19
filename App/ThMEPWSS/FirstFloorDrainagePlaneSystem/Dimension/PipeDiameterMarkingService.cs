@@ -48,7 +48,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var secPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 2);
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
-                var sPt = lastPt + dir * startDis;// + moveDir * moveDis;
+                var startDisTemp = startDis;
+                if (Vector3d.YAxis.DotProduct(moveDir) > 0)
+                {
+                    moveDir = -moveDir;
+                    startDisTemp = 0;
+                }
+                var sPt = lastPt + dir * startDisTemp;// + moveDir * moveDis;
                 sPt = originTransformer.Reset(sPt);
                 layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -moveDir));
             }
@@ -69,16 +75,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             {
                 case VerticalPipeType.ConfluencePipe:
                 case VerticalPipeType.SewagePipe:
-                    attriName = "DN100";
+                    attriName = "De110";
                     layerName = ThWSSCommon.DraiDimsLayerName;
                     break;
                 case VerticalPipeType.WasteWaterPipe:
-                    attriName = "DN75";
+                    attriName = "De75";
                     layerName = ThWSSCommon.DraiDimsLayerName;
                     break;
                 case VerticalPipeType.CondensatePipe:
                 case VerticalPipeType.rainPipe:
-                    attriName = "DN75";
+                    attriName = "De110";
                     layerName = ThWSSCommon.RainDimsLayerName;
                     break;
                 default:

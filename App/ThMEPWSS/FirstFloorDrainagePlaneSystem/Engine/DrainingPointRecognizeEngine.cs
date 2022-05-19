@@ -243,7 +243,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             {
                 edges = new List<Line>() { allLines[2], allLines[3] };
             }
-            var checkEdge = edges.OrderBy(x => wall.OrderBy(y => y.Distance(x)).First().Distance(x)).First();
+            var wallLines = wall.SelectMany(x => x.GetAllLineByPolyline()).ToList();
+            var checkEdge = edges.OrderBy(x =>
+            {
+                var parallelLines = wallLines.Where(y => (y.EndPoint - y.StartPoint).IsParallelTo(x.EndPoint - x.StartPoint, new Tolerance(0.001, 0.001))).ToList();
+                if (parallelLines.Count <= 0)
+                {
+                    parallelLines = wallLines;
+                }
+                return parallelLines.OrderBy(y => y.Distance(x)).First().Distance(x);
+            }).First();
             edges.Remove(checkEdge);
             var otherEdge = edges.First();
 
@@ -262,7 +271,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             if (equipModel.BlockReferenceGeo != null)
             {
                 var pt1 = equipModel.BlockReferenceGeo.GetPoint3dAt(0);
-                var pt2 = equipModel.BlockReferenceGeo.GetPoint3dAt(1);
+                var pt2 = equipModel.BlockReferenceGeo.GetPoint3dAt(2);
                 var centerPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
                 equipModel.DiranPoint = centerPt;
                 resModel.Add(equipModel);

@@ -103,7 +103,8 @@
         public static string OutdoorWasteWellBlockName = "污废合流井编号";      //室外污水井块名
         public static string OutdoorRainWellLayerName = "W-RAIN-EQPM";          //室外雨水井图层名
         public static string OutdoorRainWellBlockName = "重力流雨水井编号";     //室外雨水井块名
-
+        //堵头
+        public static string ReservedPlugBlockName = "清扫口系统";     //堵头块名
         //处理冷凝水管
         public static string DisconnectionLayerName = "W-WSUP-EQPM";
         public static string DisconnectionBlockName = "断线";

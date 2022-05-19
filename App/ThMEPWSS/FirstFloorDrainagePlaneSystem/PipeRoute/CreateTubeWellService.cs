@@ -67,7 +67,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 pt = new Point3d((firPt.X + secPt.X) / 2, (firPt.Y + secPt.Y) / 2, 0);
             }
             var polyline = routes.First().route;
-            var dir = (polyline.GetPoint3dAt(polyline.NumberOfVertices - 1) - polyline.GetPoint3dAt(polyline.NumberOfVertices - 2)).GetNormal();
+            var dir = (polyline.GetPoint3dAt(polyline.NumberOfVertices - 2) - polyline.GetPoint3dAt(polyline.NumberOfVertices - 1)).GetNormal();
             pt = pt + dir * shortedDis;
             return new KeyValuePair<Point3d, Vector3d>(pt, -dir);
         }

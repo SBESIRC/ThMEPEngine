@@ -111,7 +111,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             {
                 if (pipeGroup.Key == VerticalPipeType.rainPipe || pipeGroup.Key == VerticalPipeType.CondensatePipe)
                 {
-                    //allLines = rainLines;
+                    allLines = rainLines;
                 }
                 if (allLines.Count <= 0)
                 {

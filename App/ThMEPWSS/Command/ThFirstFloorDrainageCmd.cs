@@ -58,6 +58,7 @@ namespace ThMEPWSS.Command
                         var drainingEquipment = dic.Key.RecognizeSanitaryWarePipe(config, walls, originTransformer);
                         verticalPipe.AddRange(drainingEquipment);
                     }
+                    verticalPipe = FilterNeedRoutePipes(verticalPipe);
                     var thRooms = CalStructrueService.GetRoomInfo(acad, originTransformer);
                     var rooms = CalAllRoomPolylines(thRooms);
                     var userOutFrame = CalStructrueService.GetUserFrame(acad, originTransformer);
@@ -68,19 +69,24 @@ namespace ThMEPWSS.Command
                     var sewagePipes = CalStructrueService.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = CalStructrueService.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = CalStructrueService.GetAxis(acad, originTransformer);
-                    if (userOutFrame.Count == 0 || deepRooms.Count == 0)
+                    if (userOutFrame.Count == 0)
                     {
                         continue;
                     }
-                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting);
+                    CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting, originTransformer);
                     var routes = createDrainageRoute.Routing();
-
-                    //进行路由倒角
-                    ChamferService chamferService = new ChamferService(routes);
-                    routes = chamferService.Chamfer();
 
                     using (acad.Database.GetDocument().LockDocument())
                     {
+                        //套管标注
+                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane, originTransformer);
+                        drivepipeDimensionService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
+                        drivepipeDimensionService.CreateDim();
+
+                        //进行路由倒角
+                        ChamferService chamferService = new ChamferService(routes);
+                        routes = chamferService.Chamfer();
+
                         //放置管井
                         CreateTubeWellService createTubeWellService = new CreateTubeWellService(routes, originTransformer);
                         createTubeWellService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
@@ -93,11 +99,6 @@ namespace ThMEPWSS.Command
                         PipeDiameterMarkingService pipeDiameterMarkingService = new PipeDiameterMarkingService(routes, originTransformer);
                         pipeDiameterMarkingService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
                         pipeDiameterMarkingService.CreateDim();
-
-                        //套管标注
-                        DrivepipeDimensionService drivepipeDimensionService = new DrivepipeDimensionService(routes, userOutFrame, firstFloorPlane, originTransformer);
-                        drivepipeDimensionService.scale = Convert.ToDouble(firstFloorPlane.BlockScale.Tag);
-                        drivepipeDimensionService.CreateDim();
 
                         var otherPipes = routes.Where(x => x.verticalPipeType != VerticalPipeType.CondensatePipe).ToList();
                         PrintPipes.Print(otherPipes, Convert.ToDouble(firstFloorPlane.BlockScale.Tag), originTransformer);
@@ -200,18 +201,34 @@ namespace ThMEPWSS.Command
         /// <param name="routes"></param>
         /// <param name="originTransformer"></param>
         /// <returns></returns>
-        private List<RouteModel> TransResetRouteModels(List<RouteModel> routes, ThMEPOriginTransformer originTransformer)
+        private List<VerticalPipeModel> FilterNeedRoutePipes(List<VerticalPipeModel> pipes)
         {
-            foreach (var route in routes)
+            var verPipes = new List<VerticalPipeModel>();
+            foreach (var pipe in pipes)
             {
-                originTransformer.Reset(route.route);
-                if (route.printCircle != null)
+                if (pipe.PipeType == VerticalPipeType.ConfluencePipe || pipe.PipeType == VerticalPipeType.SewagePipe || pipe.PipeType == VerticalPipeType.WasteWaterPipe)
                 {
-                    originTransformer.Reset(route.printCircle);
+                    if (paramSetting.WasteWaterChecked.Value)
+                    {
+                        verPipes.Add(pipe);
+                    }
                 }
-                route.startPosition = originTransformer.Reset(route.startPosition);
+                else if (pipe.PipeType == VerticalPipeType.CondensatePipe)
+                {
+                    if (paramSetting.CondensateChecked.Value)
+                    {
+                        verPipes.Add(pipe);
+                    }
+                }
+                else if (pipe.PipeType == VerticalPipeType.rainPipe)
+                {
+                    if (paramSetting.RainWaterChecked.Value)
+                    {
+                        verPipes.Add(pipe);
+                    }
+                }
             }
-            return routes;
+            return verPipes;
         }
 
         public void Dispose()

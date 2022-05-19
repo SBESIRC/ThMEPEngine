@@ -19,7 +19,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         double length = 157;
         double noteLength = 500;
         double dimLength = 1000;
-        double txtMoveLength = 80;
+        double txtMoveLength = 230;
         List<RouteModel> routes;
         List<Polyline> outFrames;
         FirstFloorPlaneViewModel firstFloorPlane;
@@ -114,11 +114,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             var txtDir = Vector3d.YAxis;
             var txtPt = midPt + txtMoveLength * txtDir;
             txtPt = originTransformer.Reset(txtPt);
-            var dimtext = new DBText() { Height = 200, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = size, Position = txtPt, AlignmentPoint = txtPt };
+            var dimtext = new DBText() { Height = 350, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = size, Position = txtPt, AlignmentPoint = txtPt };
             dbTexts.Add(dimtext);
             var levelPt = midPt - txtMoveLength * txtDir;
             levelPt = originTransformer.Reset(levelPt);
-            var leveltext = new DBText() { Height = 200, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = firstFloorPlane.DrivepipeLevel.ToString(), Position = levelPt, AlignmentPoint = levelPt };
+            var leveltext = new DBText() { Height = 350, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = firstFloorPlane.DrivepipeLevel.ToString(), Position = levelPt, AlignmentPoint = levelPt };
             dbTexts.Add(leveltext);
 
             noteLines.ForEach(x => originTransformer.Reset(x));

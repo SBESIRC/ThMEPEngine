@@ -265,7 +265,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     var ent = acdb.Element<Entity>(obj).Clone() as Entity;
                     if (ent is Circle circle)
                     {
-                        if (circle.Radius == 50 || circle.Radius == 75 || circle.Radius == 100)
+                        if (circle.Radius == 50 || circle.Radius == 60 || circle.Radius == 75 || circle.Radius == 100)
                         {
                             pipes.Add(ent);
                         }
@@ -463,6 +463,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     else if (ent is  Line)
                     {
                         var linePipe = ent.Clone() as Line;
+                        originTransformer.Transform(linePipe);
                         Polyline pipe = new Polyline();
                         pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
                         pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);

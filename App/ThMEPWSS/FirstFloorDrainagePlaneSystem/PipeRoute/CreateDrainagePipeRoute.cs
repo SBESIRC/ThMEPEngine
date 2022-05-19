@@ -1,14 +1,17 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.BFSAlgorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Data;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
 
@@ -28,9 +31,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         readonly double step = 50;                          //步长
         readonly double lineDis = 210;                      //连接线区域范围
         readonly double lineWieght = 5;                     //连接线区域权重
-        //double angleTolerance = 1 * Math.PI / 180.0;
+        ThMEPOriginTransformer originTransformer;
         public CreateDrainagePipeRoute(List<Polyline> sewagePolys, List<Polyline> rainPolys, List<VerticalPipeModel> verticalPipesModel, List<Polyline> walls, 
-            List<Curve> grids, List<Polyline> _outUserPoly, Dictionary<Polyline, List<string>> _rooms, ParamSettingViewModel _paramSetting)
+            List<Curve> grids, List<Polyline> _outUserPoly, Dictionary<Polyline, List<string>> _rooms, ParamSettingViewModel _paramSetting, ThMEPOriginTransformer _originTransformer)
         {
             mainSewagePipes = sewagePolys;
             mainRainPipes = rainPolys;
@@ -42,6 +45,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             frame = HandleStructService.GetMaxFrame(rooms.Select(x => x.Key).ToList(), mainSewagePipes, mainRainPipes);
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
             wallPolys = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
+            originTransformer = _originTransformer;
         }
 
         /// <summary>
@@ -79,13 +83,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                         if (pipeTuple.Item1.Count > 0)
                         {
                             var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
-                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
+                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
                         }
 
                         if (pipeTuple.Item2 != null)
                         {
                             var mainSewageRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item2.Position) < 0.01).FirstOrDefault();
-                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
+                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item3, wallPolys, mainSewageRoute, pipeTuple.Item6, outUserPoly));
                         }
                     }
                 }
@@ -130,9 +134,27 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                         var ep = lastPt + dir * 200;
                         var resPoly = GeometryUtils.GetBreakLine(poly, sp, ep);
                         mainWasteRoute.route = resPoly;
+                        PrintReservedPlug(ep, dir);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 放置堵头
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        private void PrintReservedPlug(Point3d pt, Vector3d dir)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (acdb.Database.GetDocument().LockDocument())
+            {
+                pt = pt - dir * 50;
+                var transPt = originTransformer.Reset(pt);
+                var layoutInfos = new List<KeyValuePair<Point3d, Vector3d>>() { new KeyValuePair<Point3d, Vector3d>(transPt, dir) };
+                InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.OutdoorWasteWellLayerName, ThWSSCommon.ReservedPlugBlockName);
+            }   
         }
 
         /// <summary>
