@@ -401,6 +401,8 @@
             </Commands>
         </ComponentEntry>
     </Components>
+
+
     <!--Assembly App, ThMEPArchitecture, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
@@ -410,7 +412,7 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPStructure, 2016 version-->
+    <!--Assembly App, ThMEPArchitecture, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
@@ -419,12 +421,39 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPStructure, 2018 version-->
+    <!--Assembly App, ThMEPArchitecture, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
 	<Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
             </Commands>
         </ComponentEntry>
     </Components>
