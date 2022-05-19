@@ -192,6 +192,8 @@ namespace TianHua.Electrical.PDS.Project.Module
     {
         [Description("YJY")]
         YJY,
+        [Description("YJV")]
+        YJV,
         [Description("BYJ")]
         BYJ,
         [Description("KYJY")]
@@ -206,6 +208,12 @@ namespace TianHua.Electrical.PDS.Project.Module
         RTTZ,
         [Description("NG-A(BTLY)")]
         NG_A_BTLY,
+        [Description("BV")]
+        BV,
+        [Description("KYJV")]
+        KYJV,
+        [Description("RVV")]
+        RVV,
     }
 
     public enum ConductorLevel
