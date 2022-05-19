@@ -6,6 +6,9 @@ using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Text.RegularExpressions;
+using ThMEPEngineCore.CAD;
+using Linq2Acad;
 
 namespace ThMEPWSS.Service
 {
@@ -137,6 +140,26 @@ namespace ThMEPWSS.Service
                 }
             }
             return false;
+        }
+        /// <summary>
+        /// 检查外参
+        /// </summary>
+        /// <returns></returns>
+        public static bool CheckXref(BlockReference br, Regex regex)
+        {
+            if (br.Database is null) return false;
+            using var currentDb = AcadDatabase.Active();
+            XrefGraph xrg = currentDb.Database.GetHostDwgXrefGraph(false);
+            if (xrg?.RootNode is null) return false;
+            string name = "";
+            ThXrefDbExtension.XRefNodeName(xrg.RootNode, br.Database, ref name);
+            name ??= "";
+            return regex.IsMatch(name);
+        }
+        static readonly Regex reW = new Regex("^W");
+        public static bool CheckWssXref(BlockReference br)
+        {
+            return CheckXref(br, reW);
         }
     }
 }

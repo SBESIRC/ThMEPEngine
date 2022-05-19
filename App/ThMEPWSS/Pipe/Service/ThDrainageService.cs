@@ -5053,6 +5053,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         {
             if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
             if (!br.Visible) return;
+            if (isInXref)
+            {
+                if (!ThMEPWSS.Service.CheckService.CheckWssXref(br)) return;
+            }
             if (IsLayerVisible(br))
             {
                 var _name = br.GetEffectiveName() ?? THESAURUSDEPLORE;
