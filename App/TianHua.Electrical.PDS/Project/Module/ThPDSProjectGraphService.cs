@@ -1115,89 +1115,89 @@ namespace TianHua.Electrical.PDS.Project.Module
 
                     //WPE
                     {
-                        var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = emergencyPowerEquipmentNo.Count() > 0 ? emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = emergencyPowerEquipmentNo.Count() > 0 ? emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WPE"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WPE"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
-
+                    int WPmaxNo = 0;
                     //WP
                     {
-                        var powerEquipmentNo = powerEquipment.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = powerEquipmentNo.Count() > 0 ? powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty()? "0":o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        powerEquipment.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var powerEquipmentNo = powerEquipment.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        WPmaxNo = powerEquipmentNo.Count() > 0 ? powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        powerEquipment.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WP"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WP"+ (++WPmaxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
-
+                    int WLmaxNo = 0;
                     //WL
                     {
-                        var lightingNo = lighting.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = lightingNo.Count() > 0 ? lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        lighting.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var lightingNo = lighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        WLmaxNo = lightingNo.Count() > 0 ? lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        lighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WL"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WL"+ (++WLmaxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
 
                     //WLE
                     {
-                        var emergencyLightingNo = emergencyLighting.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = emergencyLighting.Count() > 0 ? emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        emergencyLighting.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var emergencyLightingNo = emergencyLighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = emergencyLightingNo.Count() > 0 ? emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        emergencyLighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WLE"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WLE"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
 
                     //WFEL
                     {
-                        var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = fireEmergencyLighting.Count() > 0 ? fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = fireEmergencyLightingNo.Count() > 0 ? fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WFEL"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WFEL"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
 
                     //WS
                     {
-                        var socketNo = socket.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = socketNo.Count() > 0 ? socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        socket.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var socketNo = socket.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = socketNo.Count() > 0 ? socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        socket.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WS"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WS"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
 
                     //WL
                     {
-                        var otherOnePhaseNo = otherOnePhase.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = otherOnePhase.Count() > 0 ? otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        otherOnePhase.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var otherOnePhaseNo = otherOnePhase.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = Math.Max(WLmaxNo, otherOnePhaseNo.Count() > 0 ? otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0);
+                        otherOnePhase.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WL"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WL"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
 
                     //WP
                     {
-                        var otherThreePhaseNo = otherThreePhase.Where(o => o.Circuit.ID.CircuitNumberList.Count > 0);
-                        var maxNo = otherThreePhase.Count() > 0 ? otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitNumber, @"[^0-9]+", ""))) : 0;
-                        otherThreePhase.Where(o => o.Circuit.ID.CircuitNumberList.Count == 0).ForEach(o =>
+                        var otherThreePhaseNo = otherThreePhase.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = Math.Max(WPmaxNo, otherThreePhaseNo.Count() > 0 ? otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0);
+                        otherThreePhase.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
                         {
-                            o.Circuit.ID.CircuitIDList.Add("WP"+ (++maxNo).ToString("00"));
-                            o.Circuit.ID.SourcePanelIDList.Add(o.Source.Load.ID.LoadID);
+                            o.Circuit.ID.CircuitID = "WP"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
                         });
                     }
                 }
