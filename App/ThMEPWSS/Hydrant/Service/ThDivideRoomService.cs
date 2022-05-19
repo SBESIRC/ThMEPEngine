@@ -42,7 +42,9 @@ namespace ThMEPWSS.Hydrant.Service
                 return;
             }
             UnProtectAreas = Subtraction(Room, CoverAreas.ToCollection()).Cast<Entity>().ToList(); // 获取未保护区域            
+            
             var intersectAreas = Intersect(); // 获取房间与其它保护区域相交的区域
+            
             var bufferDic = ThHydrantUtils.BufferPolygon(intersectAreas, SplitAreaOffsetLength);//防止生成的面有边重复
             intersectAreas = bufferDic.Select(o => o.Value).ToList();
             ProtectAreas = Split(intersectAreas); // 分割相交的区域(如一个相交区域中有其它相交区域，需要分割)            
@@ -53,6 +55,20 @@ namespace ThMEPWSS.Hydrant.Service
 
             var unProtectAreaObjs = UnProtectAreas.ToCollection().Clean();
             UnProtectAreas = unProtectAreaObjs.OfType<Entity>().ToList();
+        }
+
+        private void Print(DBObjectCollection objs)
+        {
+            // for test
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                var clones = objs.Clone();
+                clones.OfType<Entity>().ToList().ForEach(e =>
+                {
+                    acadDb.ModelSpace.Add(e);
+                    e.ColorIndex = 6;
+                });
+            }
         }
 
         private List<Entity> Intersect()
