@@ -327,16 +327,11 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// 将点的连接增加至4个
         /// </summary>
         /// <param name="dicTuples"></param>
-        public static void AddConnectUpToFour(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, HashSet<Point3d> basePts, HashSet<Point3d> itcNearPts = null, double MaxBeamLength = 13000)
+        public static void AddConnectUpToFour(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, HashSet<Point3d> basePts, double MaxBeamLength = 13000)
         {
             double partice = Math.PI / 36;
             foreach (Point3d basePt in basePts)
             {
-                if (itcNearPts == null || itcNearPts.Contains(basePt))
-                {
-                    continue;
-                }
-
                 if (dicTuples.ContainsKey(basePt))
                 {
                     var nowCntPts = dicTuples[basePt].ToList();

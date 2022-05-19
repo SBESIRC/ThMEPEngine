@@ -142,7 +142,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             {
                 if (!lineVisit.Contains(line))
                 {
-                    if (findPolylineFromLines[line].Count > 4)
+                    if (findPolylineFromLines[line].Count > 5)
                     {
                         SplitPolyline(findPolylineFromLines[line], ref splitedPolylines);
                     }
@@ -173,7 +173,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 return;
             }
 
-            if (n < 5)
+            if (n <= 5)
             {
                 var pl = LineDealer.Tuples2Polyline(tuples);
                 if (pl.Closed == true)

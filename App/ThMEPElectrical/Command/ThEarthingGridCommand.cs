@@ -79,7 +79,7 @@ namespace ThMEPElectrical.Command
                 var preProcess = new PreProcess(dataset);
                 preProcess.Process();
 
-                bool beMerge = true;
+                bool beMerge = false;
                 //3、Generate
                 var earthGridLines = GridGenerator.Genterate(preProcess, faceSize, beMerge);
 

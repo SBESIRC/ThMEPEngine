@@ -28,6 +28,14 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             //1、贴边
             StichToBorder();
 
+            //删除outline附近的线
+            DeleteLineNearOutline();
+
+            //添加线
+            AddLinesOnOutlines();
+
+            //优化图
+
             //2、连接引下线
             AddDownConductorToEarthGrid();
             return LineDealer.Graph2Lines(EarthGrid);
@@ -60,7 +68,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 var shell = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
                 var holes = outline.Buffer(-bufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());
-                var innerPts = spatialIndex.SelectWindowPolygon(mPolygon).OfType<DBPoint>().Select(d => d.Position);//.Distinct().ToHashSet();
+                var innerPts = spatialIndex.SelectWindowPolygon(mPolygon).OfType<DBPoint>().Select(d => d.Position);
 
                 foreach(var innerPt in innerPts)
                 {
@@ -80,7 +88,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             foreach(var nearPtToOutline in nearPtToOutlines)
             {
                 var nearPt = nearPtToOutline.Key;
-                var circle = new Circle(nearPt, Vector3d.ZAxis, 500);
+                var circle = new Circle(nearPt, Vector3d.ZAxis, 1000);
                 var innerPlPts = plPtsSpatialIndex.SelectWindowPolygon(ThCircleExtension.TessellateCircleWithArc(circle, 100)).OfType<DBPoint>().Select(d => d.Position).ToHashSet();
                 var bestPt = nearPt;
                 if (innerPlPts.Count > 0)
@@ -111,6 +119,60 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 }
             }
             return polylinePts;
+        }
+
+        private void DeleteLineNearOutline()
+        {
+            var allPts = EarthGrid.Keys.ToHashSet();
+            var allPtsSpatialIndex = new ThCADCoreNTSSpatialIndex(allPts.Select(p => new DBPoint(p)).ToCollection());
+            var nearPtToOutlines = GetPtsNearBorders(allPtsSpatialIndex);
+
+            Random rd = new Random();
+            foreach (var nearPtToOutline in nearPtToOutlines)
+            {
+                var nearPtA = nearPtToOutline.Key;
+                var outlines = nearPtToOutline.Value;
+                if (EarthGrid.ContainsKey(nearPtA))
+                {
+                    foreach(var ptB in EarthGrid[nearPtA].ToList())
+                    {
+                        Point3d middlePt = new Point3d((nearPtA.X + ptB.X) / 2, (nearPtA.Y + ptB.Y) / 2, 0);
+                        Circle circle = new Circle(middlePt, Vector3d.ZAxis, nearPtA.DistanceTo(ptB) / 4);
+
+                        int color;
+                        foreach (var ol in outlines)
+                        {
+                            color = rd.Next(0, 7);
+                            var pts = new Point3dCollection();
+                            ol.IntersectWith(circle, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                            if (pts.Count > 0)//|| ol.Contains(middlePt))
+                            {
+                                DeleteLineFromGraph(nearPtA, ptB);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void AddLinesOnOutlines()
+        {
+            foreach (var outline in Outlines)
+            {
+                var cnt = outline.NumberOfVertices;
+                if (cnt < 1)
+                {
+                    continue;
+                }
+                var prePt = outline.GetPoint3dAt(cnt - 1);
+                for (int i = 0; i < cnt; ++i)
+                {
+                    var curPt = outline.GetPoint3dAt(i);
+                    AddLineToGraph(prePt, curPt);
+                    prePt = curPt;
+                }
+            }
         }
 
         private Point3d GetTheClosestPt(HashSet<Point3d> pts, Point3d basePt)

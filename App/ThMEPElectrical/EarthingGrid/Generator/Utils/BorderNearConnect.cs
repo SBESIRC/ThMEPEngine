@@ -24,12 +24,8 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             var allBorderPts = new HashSet<Point3d>();
             foreach(var outlinewithBorderPt in outlinewithBorderPts)
             {
-                if (!buildingOutline.Contains(outlinewithBorderPt.Key))
-                {
-                    outlinewithBorderPt.Value.ForEach(pt => allBorderPts.Add(pt));
-                }
+                outlinewithBorderPt.Value.ForEach(pt => allBorderPts.Add(pt));
             }
-
             //2、墙点和墙点连接
             BorderConnectToNear(allBorderPts, columnPts, allOutlines, nonBuildingOutline, outlinewithBorderPts, ref nearBorderGraph, 11000, Math.PI / 6);
 
@@ -56,15 +52,17 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     Vector3d baseDirection = curOutline.GetClosePoint(nearPt) - nearPt;
                     for (int i = 0; i < 4; ++i)
                     {
-                        aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis).GetNormal(); //////////搜索角度需要限定
+                        aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis).GetNormal();
                         //向这个方向找点，如果找不到，则最近的点（垂直点）和它生成连接
-                        curBorderPt = GetObjects.GetRangePointByDirection(nearPt, aimDirection, outlinewithBorderPts[curOutline], Math.PI / 6, 90000);///////////要设置需按照角度和寻找最大距离
-                        verticalPt = GetObjects.GetClosestPointByDirection(nearPt, aimDirection, 20000, curOutline); ////////////////////20000最长搜索距离
-                        if (curBorderPt == nearPt || verticalPt == nearPt)
-                        {
-                            continue;
-                        }
-                        else if (curBorderPt.DistanceTo(verticalPt) > 4000) ///////////和最近的查找距离需要限定
+                        curBorderPt = GetObjects.GetRangePointByDirection(nearPt, aimDirection, outlinewithBorderPts[curOutline], Math.PI / 6, 90000);
+                        verticalPt = GetObjects.GetClosestPointByDirection(nearPt, aimDirection, 20000, curOutline);
+                        //ShowInfo.ShowPointAsO(verticalPt, 1, 900);
+                        //if (curBorderPt == nearPt || verticalPt == nearPt)
+                        //{
+                        //    continue;
+                        //}
+                        //else 
+                        if (curBorderPt.DistanceTo(verticalPt) > 4000) 
                         {
                             aimWallPt = verticalPt;
                         }
@@ -110,10 +108,9 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         private static void DeleteUselessConnects(List<Polyline> allOutlines, ref Dictionary<Point3d, HashSet<Point3d>> nearBorderGraph)
         {
             //删除掉缩短一定距离后仍穿越多边形的线
-            //nearBorderGraph = LineDealer.RemoveLineIntersectWithOutline(allOutlines, ref nearBorderGraph, 600);
-            LineDealer.RemoveLinesInterSectWithOutlines(allOutlines, ref nearBorderGraph, 600);
+            //LineDealer.RemoveLinesInterSectWithOutlines(allOutlines, ref nearBorderGraph, 700);
             //删除掉和多边形邻近的线
-            StructureDealer.RemoveLinesNearOutlines(allOutlines, ref nearBorderGraph);
+            //StructureDealer.RemoveLinesNearOutlines(allOutlines, ref nearBorderGraph);
             //删除掉夹角小的线对中长度较长的线
             GraphDealer.ReduceSimilarLine(ref nearBorderGraph, Math.PI / 18 * 5);
             //删除掉相交线中长度较长的线
@@ -157,12 +154,16 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             Point3d cntWallPt = GetObjects.GetPointByDirectionB(wallPt, direction, allWallPts, findDegree, findLength);
             if (cntWallPt != wallPt + direction * 500)
             {
-                Point3d middlePt = new Point3d((wallPt.X + cntWallPt.X) / 2, (wallPt.Y + cntWallPt.Y) / 2, 0);
-                Circle circle = new Circle(middlePt, Vector3d.ZAxis, 500);
-                if (!wall.Intersects(circle) && !wall.Contains(middlePt))
-                {
+                //ShowInfo.ShowLine(wallPt, cntWallPt, 2);
+                //Point3d middlePt = new Point3d((wallPt.X + cntWallPt.X) / 2, (wallPt.Y + cntWallPt.Y) / 2, 0);
+                //Circle circle = new Circle(middlePt, Vector3d.ZAxis, 500);
+                //ShowInfo.ShowGeometry(circle.ToNTSGeometry(), 1);
+                //ShowInfo.ShowGeometry(wall.ToNTSGeometry(), 1);
+                //if (!wall.Intersects(circle) )//&& !wall.Contains(middlePt))
+                //{
+                //    ShowInfo.ShowLine(wallPt, cntWallPt, 6);
                     GraphDealer.AddLineToGraph(wallPt, cntWallPt, ref wallConnectWall);
-                }
+                //}
             }
         }
 

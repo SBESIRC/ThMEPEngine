@@ -201,7 +201,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             var containPoints = new HashSet<Point3d>();
             foreach (var ol in preProcessData.innOutline)
             {
-                spatialIndex.SelectWindowPolygon(ol.Buffer(-50).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
+                spatialIndex.SelectWindowPolygon(ol.Buffer(-500).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
             }
             foreach (var pt in pt2Line.Keys)
             {
