@@ -10,16 +10,15 @@ using System.ComponentModel;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.ApplicationServices;
-using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using Microsoft.Toolkit.Mvvm.Input;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
@@ -42,6 +41,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class ThPDSInfoCompareService
     {
+        private readonly ThPDSTransientService TransientService = new();
         private PDSGraph Graph => Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
 
         public void Init(ThPDSInfoCompare panel)
@@ -137,6 +137,13 @@ namespace TianHua.Electrical.PDS.UI.Services
                         {
                             node.DataList.Remove(model);
                         }
+                    }
+                };
+                AcadApp.DocumentManager.DocumentToBeDeactivated += (s, e) =>
+                {
+                    if (e.Document.IsNamedDrawing)
+                    {
+                        TransientService.ClearTransientGraphics();
                     }
                 };
             }
@@ -526,8 +533,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (panel.LoadDataGrid.SelectedItem == null) return;
                     var item = panel.LoadDataGrid.SelectedItem as LoadDiffItem;
-                    var engine = new ThPDSZoomService();
-                    engine.ImmediatelyZoom(item.Node);
+                    var zoomService = new ThPDSZoomService();
+                    zoomService.ImmediatelyZoom(item.Node);
+                    TransientService.ClearTransientGraphics();
+                    TransientService.AddToTransient(item.Node);
                 };
             }
         }
