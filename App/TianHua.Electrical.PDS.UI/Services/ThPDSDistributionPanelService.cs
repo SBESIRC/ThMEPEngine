@@ -154,6 +154,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             {
                 autoNumbering?.Invoke();
             });
+            Action balancedPhaseSequence = null;
+            var balancedPhaseSequenceCmd = new RelayCommand(() =>
+            {
+                balancedPhaseSequence?.Invoke();
+            });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
             {
@@ -313,6 +318,13 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (id < 0) return null;
                 return graph.Vertices.ToList()[id];
             }
+            balancedPhaseSequence = () =>
+            {
+                var vertice = GetCurrentVertice();
+                if (vertice is null) return;
+                ThPDSProjectGraphService.BalancedPhaseSequence(graph, vertice);
+                UpdateCanvas();
+            };
             createBackupCircuit = () =>
             {
                 var vertice = GetCurrentVertice();
@@ -361,10 +373,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "平衡相序",
-                        Command = new RelayCommand(() =>
-                        {
-                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                        }),
+                        Command = balancedPhaseSequenceCmd,
                     });
                     cmenu.Items.Add(new MenuItem()
                     {
