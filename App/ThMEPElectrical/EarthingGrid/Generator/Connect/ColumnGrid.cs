@@ -35,22 +35,19 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         {
             //1、近点与墙点、墙点墙点之间的连接
             BorderNearConnect.ConnectBorderNear(outlinewithBorderPts, outlinewithNearPts, columnPts, allOutlines, buildingOutline, ref nearBorderGraph);
-
             //1.5、处理数据
             var nearAndBorderPts = nearBorderGraph.Keys.ToList();
             nearAndBorderPts.ForEach(pt => allPts.Add(pt));
             columnPts.ForEach(pt => allPts.Add(pt));
+            outlinewithBorderPts.Values.ForEach(pts => pts.ForEach(pt => allPts.Add(pt)));
+            outlinewithNearPts.Values.ForEach(pts => pts.ForEach(pt => allPts.Add(pt)));
             allPts = PointsDealer.PointsDistinct(allPts, 10);
-
             //2、生成初始网格
             GenerateOriGrid();
-
             //3、网格优化
             ModifyGrid();
-
             //4、分割
             Split();
-
             return findPolylineFromLines;
         }
 
@@ -70,12 +67,13 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 
         private void ModifyGrid()
         {
-            var itcBorderPts = PointsDealer.FindIntersectBorderPt(allOutlines, columnPts);
-            GraphDealer.AddConnectUpToFour(ref graph, columnPts, itcBorderPts, 5000); //MaxBeamLength
-
+            var pts = new HashSet<Point3d>();
+            columnPts.ForEach(pt => pts.Add(pt));
+            outlinewithBorderPts.Values.ForEach(ptss => ptss.ForEach(pt => pts.Add(pt)));
+            GraphDealer.AddConnectUpToFour(ref graph, pts, 9000); //MaxBeamLength
             GraphDealer.DeleteConnectUpToFour(ref graph, ref nearBorderGraph);
-
             GraphDealer.SimplifyGraph(ref graph, columnPts.ToList());
+            GraphDealer.RemoveIntersectLines(ref graph);
         }
 
         private void Split()
@@ -84,7 +82,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             StructureDealer.CloseBorder(allOutlines, graph.Keys.ToHashSet(), ref outlineWithBorderLine);
             outlineWithBorderLine.Values.ForEach(tups=> tups.ForEach(o => GraphDealer.AddLineToGraph(o.Item1, o.Item2, ref graph)));
             AreaDealer.BuildPolygonsCustom(graph, ref findPolylineFromLines);
-            AreaDealer.SplitBlock(ref findPolylineFromLines);
+            //AreaDealer.SplitBlock(ref findPolylineFromLines);
         }
     }
 }

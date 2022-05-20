@@ -2,9 +2,12 @@
 using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
+using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
 
 namespace TianHua.Electrical.PDS.Service
@@ -30,10 +33,15 @@ namespace TianHua.Electrical.PDS.Service
             {
                 service.DistBoxMarkAnalysis(marks.Texts, distBoxKey, DistBoxBlocks[entity]),
             };
+            node.Loads.ForEach(o =>
+            {
+                o.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                o.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
+            });
             return node;
         }
 
-        public static ThPDSCircuitGraphNode CreateNode(Entity entity, List<string> marks, List<string> distBoxKey)
+        public static ThPDSCircuitGraphNode CreateNode(Entity entity, List<string> marks, List<string> distBoxKey, Polyline frame)
         {
             var node = new ThPDSCircuitGraphNode
             {
@@ -44,6 +52,11 @@ namespace TianHua.Electrical.PDS.Service
             {
                 service.DistBoxMarkAnalysis(marks, distBoxKey, DistBoxBlocks[entity]),
             };
+            node.Loads.ForEach(o =>
+            {
+                o.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                o.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
+            });
             return node;
         }
 
@@ -54,11 +67,16 @@ namespace TianHua.Electrical.PDS.Service
             var loads = new List<ThPDSLoad>();
             var noneLoad = true;
             var endPoint = new ThPDSPoint3d();
+            var minPoint = new ThPDSPoint3d();
+            var maxPoint = new ThPDSPoint3d();
             foreach (var e in entities)
             {
                 if (e is Line line)
                 {
                     endPoint = Transformer.Reset(line.EndPoint).ToPDSPoint3d();
+                    var rectangle = ThPDSBufferService.Buffer(line).GeometricExtents;
+                    minPoint = PointReset(rectangle.MinPoint);
+                    maxPoint = PointReset(rectangle.MaxPoint);
                 }
                 else
                 {
@@ -67,14 +85,30 @@ namespace TianHua.Electrical.PDS.Service
                     var service = new ThPDSMarkAnalysisService();
                     if (LoadBlocks[e].EffectiveName.IndexOf(ThPDSCommon.MOTOR_AND_LOAD_LABELS) == 0)
                     {
-                        loads.Add(service.LoadMarkAnalysis(LoadBlocks[e]));
+                        var load = service.LoadMarkAnalysis(LoadBlocks[e]);
+                        if (ThPDSLoopGraphEngine.GeometryMap.ContainsKey(e))
+                        {
+                            var frame = ThPDSLoopGraphEngine.GeometryMap[e];
+                            load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                            load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
+                        }
+                        else
+                        {
+                            var frame = load.Location.BasePoint.PDSPoint3dToPoint3d().CreateSquare(500.0);
+                            load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                            load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
+                        }
+                        loads.Add(load);
                         objectIds.Add(LoadBlocks[e].ObjId);
                     }
                     else
                     {
                         var frame = ThPDSBufferService.Buffer(e, database);
                         var marks = markService.GetMarks(frame);
-                        loads.Add(service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy));
+                        var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[e], ref attributesCopy);
+                        load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                        load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
+                        loads.Add(load);
                         objectIds.AddRange(marks.ObjectIds);
                     }
                 }
@@ -86,6 +120,8 @@ namespace TianHua.Electrical.PDS.Service
                 loads[0].SetLocation(new ThPDSLocation
                 {
                     BasePoint = endPoint,
+                    MinPoint = minPoint,
+                    MaxPoint = maxPoint,
                 });
             }
 
@@ -114,12 +150,31 @@ namespace TianHua.Electrical.PDS.Service
                 var frame = ThPDSBufferService.Buffer(entity, database);
                 var marks = markService.GetMarks(frame);
                 var load = service.LoadMarkAnalysis(marks.Texts, distBoxKey, LoadBlocks[entity], ref attributesCopy);
+                load.Location.MinPoint = PointReset(frame.GeometricExtents.MinPoint);
+                load.Location.MaxPoint = PointReset(frame.GeometricExtents.MaxPoint);
                 load.SetOnLightingCableTray(true);
                 loads.Add(load);
             }
 
             node.Loads = loads;
             node.NodeType = PDSNodeType.Load;
+            return node;
+        }
+
+        public static ThPDSCircuitGraphNode NodeClone(ThPDSCircuitGraphNode sourceNode, string loadID)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            node.NodeType = sourceNode.NodeType;
+            sourceNode.Loads.ForEach(load =>
+            {
+                node.Loads.Add(load);
+            });
+            node.Loads.ForEach(load =>
+            {
+                load.LoadUID = System.Guid.NewGuid().ToString();
+            });
+            node.Loads[0].ID.LoadID = loadID;
+
             return node;
         }
 
@@ -139,24 +194,39 @@ namespace TianHua.Electrical.PDS.Service
             var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, target);
             var service = new ThPDSMarkAnalysisService();
             var srcPanelID = edge.Source.Loads.Count > 0 ? edge.Source.Loads[0].ID.LoadID : "";
-            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, infos, distBoxKey);
+            var tarPanelID = edge.Target.Loads.Count > 0 ? edge.Target.Loads[0].ID.LoadID : "";
+            edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, tarPanelID, infos, distBoxKey);
             AssignCircuitNumber(edge, circuitAssign);
 
             if (source.NodeType != PDSNodeType.CableCarrier
                 && target.NodeType != PDSNodeType.Load
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last()))
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber))
             {
                 var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
                 var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
+                var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
                 if (!string.IsNullOrEmpty(anotherSrcPanelID))
                 {
-                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, infos, distBoxKey);
+                    anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
                     AssignCircuitNumber(anotherEdge, circuitAssign);
-                    if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber.Last()))
+                    if (!string.IsNullOrEmpty(anotherEdge.Circuit.ID.CircuitNumber))
                     {
                         edge = anotherEdge;
                     }
                 }
+            }
+
+            // 限制一相配电箱成为三相配电箱的上级
+            if (edge.Source.Loads.Count > 0 && edge.Source.Loads[0].Phase == ThPDSPhase.一相
+                && edge.Target.Loads.Count > 0 && edge.Target.Loads[0].Phase == ThPDSPhase.三相
+                && edge.Target.NodeType == PDSNodeType.DistributionBox && edge.Source.NodeType == PDSNodeType.DistributionBox)
+            {
+                var anotherEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(target, source);
+                var anotherSrcPanelID = anotherEdge.Source.Loads.Count > 0 ? anotherEdge.Source.Loads[0].ID.LoadID : "";
+                var anotherTarPanelID = anotherEdge.Target.Loads.Count > 0 ? anotherEdge.Target.Loads[0].ID.LoadID : "";
+                anotherEdge.Circuit = service.CircuitMarkAnalysis(anotherSrcPanelID, anotherTarPanelID, infos, distBoxKey);
+                AssignCircuitNumber(anotherEdge, circuitAssign);
+                edge = anotherEdge;
             }
 
             if (edge.Source.NodeType == PDSNodeType.CableCarrier)
@@ -168,21 +238,22 @@ namespace TianHua.Electrical.PDS.Service
                 edge.Circuit.ViaConduit = true;
             }
 
-            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber.Last());
+            var circuitModel = ThPDSCircuitConfig.SelectModel(edge.Circuit.ID.CircuitNumber);
             if (circuitModel.CircuitType != ThPDSCircuitType.None)
             {
                 if (edge.Target.Loads.Count > 0)
                 {
                     edge.Target.Loads[0].CircuitType = circuitModel.CircuitType;
+                    edge.Target.Loads[0].SetFireLoad(circuitModel.FireLoad);
                 }
             }
 
             if (edge.Source.Loads.Count > 0
-                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last())
-                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber.Last())
+                && !string.IsNullOrEmpty(edge.Circuit.ID.CircuitID)
+                && string.IsNullOrEmpty(edge.Circuit.ID.CircuitNumber)
                 && !string.IsNullOrEmpty(edge.Source.Loads[0].ID.LoadID))
             {
-                edge.Circuit.ID.SourcePanelID.Add(edge.Source.Loads[0].ID.LoadID);
+                edge.Circuit.ID.SourcePanelIDList.Add(edge.Source.Loads[0].ID.LoadID);
             }
 
             if (edge.Target.NodeType == PDSNodeType.Unkown)
@@ -195,20 +266,20 @@ namespace TianHua.Electrical.PDS.Service
         private static void AssignCircuitNumber(ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> edge, bool circuitAssign)
         {
             // 仅当回路编号有效个数为1时，添加至回路的回路编号中
-            if (circuitAssign && string.IsNullOrEmpty(edge.Circuit.ID.CircuitID.Last()))
+            if (circuitAssign && string.IsNullOrEmpty(edge.Circuit.ID.CircuitIDList.Last()))
             {
                 var circuitIDs = new List<string>();
-                edge.Target.Loads.ForEach(o => o.ID.CircuitID.Where(id => !string.IsNullOrEmpty(id))
+                edge.Target.Loads.ForEach(o => o.ID.CircuitIDList.Where(id => !string.IsNullOrEmpty(id))
                     .ForEach(id => circuitIDs.Add(id)));
                 circuitIDs = circuitIDs.Distinct().ToList();
                 var sourcePanelIDs = new List<string>();
-                edge.Target.Loads.ForEach(o => o.ID.SourcePanelID.Where(id => !string.IsNullOrEmpty(id))
+                edge.Target.Loads.ForEach(o => o.ID.SourcePanelIDList.Where(id => !string.IsNullOrEmpty(id))
                     .ForEach(id => sourcePanelIDs.Add(id)));
                 sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
                 if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
                 {
-                    edge.Circuit.ID.SourcePanelID.Add(sourcePanelIDs.First());
-                    edge.Circuit.ID.CircuitID.Add(circuitIDs.First());
+                    edge.Circuit.ID.SourcePanelIDList.Add(sourcePanelIDs.First());
+                    edge.Circuit.ID.CircuitIDList.Add(circuitIDs.First());
                 }
             }
         }
@@ -220,6 +291,30 @@ namespace TianHua.Electrical.PDS.Service
             var service = new ThPDSMarkAnalysisService();
             edge.Circuit = service.CircuitMarkAnalysis(srcPanelID, circuitID);
             return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> InEdgeClone(
+            ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> sourceEdge, ThPDSCircuitGraphNode target)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceEdge.Source, target);
+            edge.Circuit = sourceEdge.Circuit;
+            edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> OutEdgeClone(
+            ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> sourceEdge, ThPDSCircuitGraphNode source)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(source, sourceEdge.Target);
+            edge.Circuit = sourceEdge.Circuit;
+            edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
+            edge.Circuit.ID.SourcePanelIDList[edge.Circuit.ID.SourcePanelIDList.Count - 1] = source.Loads[0].ID.LoadID;
+            return edge;
+        }
+
+        private static ThPDSPoint3d PointReset(Point3d point)
+        {
+            return Transformer.Reset(point).ToPDSPoint3d();
         }
     }
 }

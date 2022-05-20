@@ -217,15 +217,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                 {
                     var pt1 = room.GetPoint3dAt(i - 1);
                     var pt2 = room.GetPoint3dAt(i);
-                    var dir = Vector3d.ZAxis.CrossProduct((pt2 - pt1).GetNormal());
-                    var pt3 = pt2 + dir * 100;
-                    var pt4 = pt1 + dir * 100;
-                    Polyline wallPoly = new Polyline() { Closed = true };
-                    wallPoly.AddVertexAt(0, pt1.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(1, pt2.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(2, pt3.ToPoint2d(), 0, 0, 0);
-                    wallPoly.AddVertexAt(3, pt4.ToPoint2d(), 0, 0, 0);
-                    roomWallLst.Add(wallPoly);
+                    if (pt1.DistanceTo(pt2) > 10)
+                    {
+                        var dir = Vector3d.ZAxis.CrossProduct((pt2 - pt1).GetNormal());
+                        var pt3 = pt2 + dir * 100;
+                        var pt4 = pt1 + dir * 100;
+                        Polyline wallPoly = new Polyline() { Closed = true };
+                        wallPoly.AddVertexAt(0, pt1.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(1, pt2.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(2, pt3.ToPoint2d(), 0, 0, 0);
+                        wallPoly.AddVertexAt(3, pt4.ToPoint2d(), 0, 0, 0);
+                        roomWallLst.Add(wallPoly);
+                    }
                 }
             }
 
@@ -262,7 +265,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     var ent = acdb.Element<Entity>(obj).Clone() as Entity;
                     if (ent is Circle circle)
                     {
-                        if (circle.Radius == 50 || circle.Radius == 75 || circle.Radius == 100)
+                        var radius = Math.Round(circle.Radius);
+                        if (radius == 50 || radius == 60 || radius == 75 || radius == 100)
                         {
                             pipes.Add(ent);
                         }
@@ -369,15 +373,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             {
                 var vModel = new VerticalPipeModel();
                 vModel.Position = model.DiranPoint;
-                vModel.PipeCircle = new Circle(vModel.Position, Vector3d.ZAxis, 100);
+                vModel.PipeCircle = new Circle(vModel.Position, Vector3d.ZAxis, 50);
                 vModel.IsEuiqmentPipe = true;
                 if (model.EnumEquipmentType == EnumEquipmentType.toilet)
                 {
-                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
+                    vModel.PipeType = VerticalPipeType.SewagePipe;
                 }
                 else
                 {
-                    vModel.PipeType = VerticalPipeType.SewagePipe;
+                    vModel.PipeType = VerticalPipeType.WasteWaterPipe;
                 }
                 resModels.Add(vModel);
             }
@@ -416,6 +420,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     else if (ent is Line)
                     {
                         var linePipe = ent.Clone() as Line;
+                        originTransformer.Transform(linePipe);
                         Polyline pipe = new Polyline();
                         pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
                         pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);
@@ -459,6 +464,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     else if (ent is  Line)
                     {
                         var linePipe = ent.Clone() as Line;
+                        originTransformer.Transform(linePipe);
                         Polyline pipe = new Polyline();
                         pipe.AddVertexAt(0, linePipe.StartPoint.ToPoint2d(), 0, 0, 0);
                         pipe.AddVertexAt(1, linePipe.EndPoint.ToPoint2d(), 0, 0, 0);

@@ -631,6 +631,7 @@ namespace ThMEPWSS.FlatDiagramNs
                             {
                                 return type switch
                                 {
+                                    PipeType.FL0 => vm.Params.WaterWellPipeVerticalDN,
                                     PipeType.Y2L => vm.Params.BalconyRainPipeDN,
                                     PipeType.NL => vm.Params.CondensePipeVerticalDN,
                                     PipeType.Unknown => null,

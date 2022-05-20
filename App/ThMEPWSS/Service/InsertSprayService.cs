@@ -6,6 +6,8 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPTCH.Moel;
+using ThMEPTCH.TCHDrawServices;
 
 namespace ThMEPWSS.Service
 {
@@ -27,7 +29,36 @@ namespace ThMEPWSS.Service
                 });
             }
         }
-
+        /// <summary>
+        /// 插入天正喷淋（在事务外调用）
+        /// </summary>
+        /// <param name="layoutPts"></param>
+        /// <param name="hidePipe"></param>
+        public static void InsertTCHSprinkler(List<Point3d> layoutPts,int hidePipe) 
+        {
+            if (layoutPts ==null || layoutPts.Count < 1)
+                return;
+            var tchSprinklers = new List<ThTCHSprinkler>();
+            foreach (var pt in layoutPts)
+            {
+                var newTCHModel = new ThTCHSprinkler();
+                newTCHModel.Location = pt;
+                newTCHModel.Angle = 0;
+                newTCHModel.Type = 1;
+                newTCHModel.LinkMode = 1;
+                newTCHModel.Radius = 2.12;
+                newTCHModel.SizeX = 300.0;
+                newTCHModel.SizeY = 0;
+                newTCHModel.DocScale = 100.0;
+                newTCHModel.HidePipe = hidePipe;
+                newTCHModel.MirrorByX = 0;
+                newTCHModel.MirrorByY = 0;
+                tchSprinklers.Add(newTCHModel);
+            }
+            var tchDrawSprinkler = new TCHDrawSprinklerService();
+            tchDrawSprinkler.InitData(tchSprinklers);
+            tchDrawSprinkler.DrawExecute();
+        }
         /// <summary>
         /// 喷淋图块名
         /// </summary>

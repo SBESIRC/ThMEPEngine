@@ -8,6 +8,8 @@
         public readonly static string LineTypePropertyName = "LineType";
         public readonly static string FillColorPropertyName = "FillColor";
         public readonly static string FloorElevationPropertyName = "elevation";
+        public readonly static string HeightPropertyName = "height";
+        public readonly static string DirPropertyName = "dir";
         public readonly static string FloorBottomElevationPropertyName = "bottom_elevation";
     }
 }

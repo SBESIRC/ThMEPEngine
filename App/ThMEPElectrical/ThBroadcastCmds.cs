@@ -81,7 +81,7 @@ namespace ThMEPElectrical
                 var holeInfo = CalHoles(plines);
                 foreach (var plInfo in holeInfo)
                 {
-                    var plFrame = plInfo.Key;
+                    var plFrame = plInfo.Key.Buffer(200)[0] as Polyline;
                     //删除原有构建
                     var otherFrames = plFrame.GetInnerFrames(originTransformer);
                     plFrame.ClearBroadCast(originTransformer, otherFrames);

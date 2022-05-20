@@ -2,23 +2,25 @@
 using System.IO;
 using System.Linq;
 using ThCADExtension;
+using System.Windows;
+using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.ComponentModel;
+using System.Windows.Controls;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.ApplicationServices;
-using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.UI.Models;
 using TianHua.Electrical.PDS.UI.UserContorls;
 using Microsoft.Toolkit.Mvvm.Input;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using PDSGraph = QuikGraph.BidirectionalGraph<
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode,
     TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
@@ -41,6 +43,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class ThPDSInfoCompareService
     {
+        private readonly ThPDSTransientService TransientService = new();
         private PDSGraph Graph => Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph;
 
         public void Init(ThPDSInfoCompare panel)
@@ -70,7 +73,11 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }, () => !hasDataError || regenCount > 1),
                     UpdateCmd = new RelayCommand(() =>
                     {
-                        new ThPDSUpdateToDwgService().Update();
+                        // 切回CAD画布
+                        ThPDSCADService.FocusToCAD();
+
+                        // 发送命令更新图纸
+                        CommandHandlerBase.ExecuteFromCommandLine(false, "THPDSUPDATEDWG");
                     }, () => !hasDataError || regenCount > 1),
                 };
                 vm.ValidateCmd = new RelayCommand(() =>
@@ -115,8 +122,9 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (e.Document.IsNamedDrawing)
                     {
-                        node.DataList.Add(new() { 
-                            Name = Path.GetFileNameWithoutExtension(e.Document.Name), 
+                        node.DataList.Add(new()
+                        {
+                            Name = Path.GetFileNameWithoutExtension(e.Document.Name),
                             Key = e.Document.Name,
                             Tag = e.Document,
                         });
@@ -133,13 +141,94 @@ namespace TianHua.Electrical.PDS.UI.Services
                         }
                     }
                 };
+                AcadApp.DocumentManager.DocumentToBeDeactivated += (s, e) =>
+                {
+                    if (e.Document.IsNamedDrawing)
+                    {
+                        TransientService.ClearTransientGraphics();
+                    }
+                };
             }
+            {
+                panel.LoadDataGrid.ContextMenu = GetContextMenu(panel.LoadDataGrid);
+                panel.CircuitDataGrid.ContextMenu = GetContextMenu(panel.CircuitDataGrid);
+            }
+        }
+
+        private ContextMenu GetContextMenu(DataGrid dataGrid)
+        {
+            Visual GetDescendantByType(Visual element, Type type)
+            {
+                if (element == null)
+                {
+                    return null;
+                }
+
+                if (element.GetType() == type)
+                {
+                    return element;
+                }
+
+                Visual foundElement = null;
+
+                if (element is FrameworkElement)
+                {
+                    (element as FrameworkElement).ApplyTemplate();
+                }
+
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+                {
+                    Visual visual = VisualTreeHelper.GetChild(element, i) as Visual;
+                    foundElement = GetDescendantByType(visual, type);
+                    if (foundElement != null)
+                        break;
+                }
+                return foundElement;
+            }
+            void ExpandAllGroups(DataGrid dataGrid, bool expand = true)
+            {
+                var view = (ListCollectionView)CollectionViewSource.GetDefaultView(dataGrid.ItemsSource);
+                foreach (CollectionViewGroup group in view.Groups)
+                {
+                    ItemContainerGenerator generator = dataGrid.ItemContainerGenerator;
+                    GroupItem grpItem = (GroupItem)generator.ContainerFromItem(group);
+                    //Retrieve the Expander inside the GroupItem;
+                    Expander exp = (Expander)GetDescendantByType(grpItem, typeof(Expander));
+                    try
+                    {
+                        exp.IsExpanded = expand;
+                    }
+                    catch
+                    {
+                        //
+                    }
+                }
+            }
+
+            var cmenu = new ContextMenu();
+            cmenu.Items.Add(new MenuItem()
+            {
+                Header = "全部展开",
+                Command = new RelayCommand(() =>
+                {
+                    ExpandAllGroups(dataGrid, true);
+                }),
+            });
+            cmenu.Items.Add(new MenuItem()
+            {
+                Header = "全部折叠",
+                Command = new RelayCommand(() =>
+                {
+                    ExpandAllGroups(dataGrid, false);
+                }),
+            });
+            return cmenu;
         }
 
         public void UpdateView(ThPDSInfoCompare panel)
         {
             {
-                var items = new List<CircuitDiffItem>();
+                var items = new ObservableCollection<CircuitDiffItem>();
                 foreach (var edge in Graph.Edges)
                 {
                     var tag = edge.Tag;
@@ -164,7 +253,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Edge = edge,
                             Background = PDSColorBrushes.Moderate,
                             Img = PDSImageSources.Moderate,
-                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID), 
+                            Hint = string.Format("回路编号变化，原编号为{0}", projectGraphEdgeIdChangeTag.ChangedLastCircuitID),
                         });
                     }
                     else if (tag is ThPDSProjectGraphEdgeMoveTag projectGraphEdgeMoveTag)
@@ -205,6 +294,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Background = PDSColorBrushes.Mild,
                             Img = PDSImageSources.Mild,
                             Hint = "回路编号重复",
+                        });
+                    }
+                    else if (tag is ThPDSProjectGraphEdgeCascadingErrorTag)
+                    {
+                        items.Add(new()
+                        {
+                            Edge = edge,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "断路器选型不具备选择性",
                         });
                     }
                     else
@@ -278,7 +377,7 @@ namespace TianHua.Electrical.PDS.UI.Services
                 //};
             }
             {
-                var items = new List<LoadDiffItem>();
+                var items = new ObservableCollection<LoadDiffItem>();
                 foreach (var node in Graph.Vertices)
                 {
                     var tag = node.Tag;
@@ -466,6 +565,16 @@ namespace TianHua.Electrical.PDS.UI.Services
                             Hint = "不满足消防供电要求",
                         });
                     }
+                    else if (tag is ThPDSProjectGraphNodeCascadingErrorTag)
+                    {
+                        items.Add(new()
+                        {
+                            Node = node,
+                            Background = PDSColorBrushes.Servere,
+                            Img = PDSImageSources.Servere,
+                            Hint = "进线断路器选型不具备选择性",
+                        });
+                    }
                     else
                     {
                         throw new NotSupportedException();
@@ -500,8 +609,10 @@ namespace TianHua.Electrical.PDS.UI.Services
                 {
                     if (panel.LoadDataGrid.SelectedItem == null) return;
                     var item = panel.LoadDataGrid.SelectedItem as LoadDiffItem;
-                    var engine = new ThPDSZoomService();
-                    engine.ImmediatelyZoom(item.Node);
+                    var zoomService = new ThPDSZoomService();
+                    zoomService.ImmediatelyZoom(item.Node);
+                    TransientService.ClearTransientGraphics();
+                    TransientService.AddToTransient(item.Node);
                 };
             }
         }
@@ -522,14 +633,14 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                return Edge.Circuit.ID.CircuitNumber.Last();
+                return Edge.Circuit.ID.CircuitNumber;
             }
         }
         public string CircuitId
         {
             get
             {
-                var id = Edge.Circuit.ID.CircuitID.Last();
+                var id = Edge.Circuit.ID.CircuitID;
                 if (string.IsNullOrEmpty(id))
                 {
                     return "未知编号回路";
@@ -544,11 +655,12 @@ namespace TianHua.Electrical.PDS.UI.Services
                 return Edge.Target.Load.CircuitType.GetDescription();
             }
         }
+        public string CircuitLoad => Edge.Target.LoadIdString();
         public string SourcePanelID
         {
             get
             {
-                var id = Edge.Circuit.ID.SourcePanelID.Last();
+                var id = Edge.Circuit.ID.SourcePanelID;
                 if (string.IsNullOrEmpty(id))
                 {
                     return "未知负载";
@@ -563,18 +675,7 @@ namespace TianHua.Electrical.PDS.UI.Services
     }
     public class LoadDiffItem
     {
-        public string LoadId
-        {
-            get
-            {
-                var id = Node.Load.ID.LoadID;
-                if (string.IsNullOrEmpty(id))
-                {
-                    return "未知负载";
-                }
-                return id;
-            }
-        }
+        public string LoadId => Node.LoadIdString();
         public string LoadType
         {
             get

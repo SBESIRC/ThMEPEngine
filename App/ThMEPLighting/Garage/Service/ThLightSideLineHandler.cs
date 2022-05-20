@@ -26,6 +26,10 @@ namespace ThMEPLighting.Garage.Service
             for(int i =0;i< shortLines.Count;i++)
             {
                 var pair = Find(lines, shortLines[i]);
+                if (pair ==null)
+                {
+                    continue;
+                }
                 var newPair = Handle(pair);
                 if(newPair!=null)
                 {

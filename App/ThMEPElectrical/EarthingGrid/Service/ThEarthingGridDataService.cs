@@ -19,7 +19,7 @@ namespace ThMEPElectrical.EarthingGrid.Service
         {
             get
             {
-                return new List<string>() { "10x10或12x8或20x5", "20x20或24x16或40x10" };
+                return new List<string>() { "10x10或12x8", "20x20或24x16" };
             }
         }
         public string EarthingGridSize { get; set; }

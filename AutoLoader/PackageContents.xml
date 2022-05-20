@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{A212E049-67F6-4018-834D-876E16923F7B}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{37E1BBD3-E975-44B5-BCF2-38DD1819BA0B}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -401,6 +401,8 @@
             </Commands>
         </ComponentEntry>
     </Components>
+
+
     <!--Assembly App, ThMEPArchitecture, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
@@ -410,7 +412,7 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPStructure, 2016 version-->
+    <!--Assembly App, ThMEPArchitecture, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
@@ -419,12 +421,69 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPStructure, 2018 version-->
+    <!--Assembly App, ThMEPArchitecture, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
 	<Command Local="-THZDCWYCL" Global="-THZDCWYCL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPTCH, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPTCH.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for TCH support" AppName="ThMEPTCH" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+	            <Command Local="THTCHPIPIMP" Global="THTCHPIPIMP" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="ThEBAC" Global="ThEBAC" />
+                <Command Local="THFJKX2" Global="THFJKX2" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="ThEBAC" Global="ThEBAC" />
+                <Command Local="THFJKX2" Global="THFJKX2" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Mep.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Mep.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Common UI" AppName="ThMEPUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="ThEBAC" Global="ThEBAC" />
+                <Command Local="THFJKX2" Global="THFJKX2" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -534,7 +593,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
@@ -568,7 +626,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
@@ -602,7 +659,6 @@
                 <Command Local="THWTKSB" Global="THWTKSB" />
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
-                <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />

@@ -25,20 +25,20 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Polygon> BoundingBoxes { get { return _BoundingBoxes; } }// 所有的建筑物的边框
 
         private static Dictionary<int, List<int>> _SegLineIntsecDic;//分割线临近线
-        private static Dictionary<int, List<int>> SegLineIntsecDic { get { return _SegLineIntsecDic; } }//分割线临近线
+        public static Dictionary<int, List<int>> SegLineIntsecDic { get { return _SegLineIntsecDic; } }//分割线临近线
 
         private static List<Ramp> _Ramps;//坡道
-        private static List<Ramp> Ramps { get { return _Ramps; } }//坡道
+        public static List<Ramp> Ramps { get { return _Ramps; } }//坡道
 
         private static MNTSSpatialIndex _BuildingSpatialIndex;//所有障碍物，包含坡道的spatialindex
-        private static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
+        public static MNTSSpatialIndex BuildingSpatialIndex { get { return _BuildingSpatialIndex; } }//所有障碍物，包含坡道的spatialindex
         private static MNTSSpatialIndex _BoundaryObjectsSPIDX;
         private static MNTSSpatialIndex BoundaryObjectsSPIDX { get { return _BoundaryObjectsSPIDX; } }//边界打成断线+可忽略障碍物的spatialindex；
         private static MNTSSpatialIndex _BoundingBoxSpatialIndex;//建筑物块的外包框的spatialindex
-        private static MNTSSpatialIndex BoundingBoxSpatialIndex { get { return _BoundingBoxSpatialIndex; } }//建筑物块的外包框的spatialindex
+        public static MNTSSpatialIndex BoundingBoxSpatialIndex { get { return _BoundingBoxSpatialIndex; } }//建筑物块的外包框的spatialindex
 
         private static MNTSSpatialIndex _BoundarySpatialIndex;// 所有边界，包含边界线，坡道，以及障碍物
-        private static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }// 所有边界，包含边界线，坡道，以及障碍物
+        public static MNTSSpatialIndex BoundarySpatialIndex { get { return _BoundarySpatialIndex; } }// 所有边界，包含边界线，坡道，以及障碍物
 
 
         private static List<(double, double)> _LowerUpperBound;
@@ -95,6 +95,8 @@ namespace ThParkingStall.Core.InterProcess
             }
             newSegLines.ExtendAndIntSect(SegLineIntsecDic);//延展
             newSegLines.SeglinePrecut(TotalArea);//预切割
+            // 这有个bug，影响subareakey
+
             newSegLines.Clean();//过滤孤立的线
             if (!newSegLines.Allconnected()) return subAreas;//判断是否全部相连
             //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
@@ -146,7 +148,7 @@ namespace ThParkingStall.Core.InterProcess
             }
             return subAreas;
         }
-
+        
         public static SubAreaKey GetSubAreaKey(Polygon area,Chromosome chromosome, List<LineString> SegLineStrings)
         {
             var GeneIdxs = new List<int>();

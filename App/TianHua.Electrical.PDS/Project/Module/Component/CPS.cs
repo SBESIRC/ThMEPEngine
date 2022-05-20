@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TianHua.Electrical.PDS.Project.Module.Component.Extension;
 using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
 
 namespace TianHua.Electrical.PDS.Project.Module.Component
 {
@@ -26,7 +27,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             var cPSPicks = CPSConfiguration.CPSComponentInfos.Where(o => o.Amps > calculateCurrent).ToList();
             if (cPSPicks.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的CPS");
             }
             this.CPSPicks = cPSPicks;
             var CPS = cPSPicks.First();
@@ -83,7 +84,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && (combination == "-" || o.CPSCombination.Contains(combination))).Take(1).ToList();
             if (cPSPicks.Count == 0)
             {
-                throw new NotSupportedException();
+                throw new NotFoundComponentException("设备库内找不到对应规格的CPS");
             }
             this.CPSPicks = cPSPicks;
             var CPS = cPSPicks.First();

@@ -146,17 +146,20 @@ namespace ThMEPElectrical.BlockConvert
                 ThBlockReferenceExtensions.Burst(targetBlock, entities);
             }
 
-            entities = entities.OfType<DBText>().ToCollection();
-            var textMaxWidth = entities.GetMaxWidth();
-            if (targetBlockData.EffectiveName == "水泵标注")
+            if (!targetBlockData.CustomProperties.IsNull())
             {
-                textMaxWidth = textMaxWidth > 1000 ? ((int)textMaxWidth / 100 * 100 + 500) : 1500;
+                entities = entities.OfType<DBText>().ToCollection();
+                var textMaxWidth = entities.GetMaxWidth();
+                if (targetBlockData.EffectiveName == "水泵标注")
+                {
+                    textMaxWidth = textMaxWidth > 1000 ? ((int)textMaxWidth / 100 * 100 + 500) : 1500;
+                }
+                else
+                {
+                    textMaxWidth = textMaxWidth > 1600 ? ((int)textMaxWidth / 100 * 100 + 500) : 2100;
+                }
+                targetBlockData.CustomProperties.SetValue("标注表格宽度", textMaxWidth);
             }
-            else
-            {
-                textMaxWidth = textMaxWidth > 1600 ? ((int)textMaxWidth / 100 * 100 + 500) : 2100;
-            }
-            targetBlockData.CustomProperties.SetValue("标注表格宽度", textMaxWidth);
         }
 
         private static double GetMaxWidth(this DBObjectCollection objs)

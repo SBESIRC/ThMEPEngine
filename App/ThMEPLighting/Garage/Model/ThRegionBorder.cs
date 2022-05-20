@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Model
 {
@@ -174,6 +176,16 @@ namespace ThMEPLighting.Garage.Model
             //合并外角小于45度的连接线
             var lines = ThMergeLightLineService.Merge(DxCenterLines);
             return lines.Select(l => l.ToPolyline(ThGarageLightCommon.RepeatedPointDistance)).Cast<Curve>().ToList();
+        }
+        public void TrimOffsetLines(double offsetDis)
+        {
+            // 处理灯线Buffer后超出Border部分
+            var handleService = new ThFilterLineBufferOverBorderService();
+            var results = handleService.Filter(DxCenterLines, RegionBorder, offsetDis);
+            var garbages = DxCenterLines.ToCollection().Difference(results.ToCollection());
+            garbages.MDispose();
+            DxCenterLines.Clear();
+            DxCenterLines = results;
         }
         private void UpgradeOpen()
         {

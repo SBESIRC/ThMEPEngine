@@ -40,7 +40,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
 
             var routeDic = routes.ToDictionary(x => x, y => GeometryUtils.FindRouteIntersectLine(y.Value, frame));
-            return AdjustRoute(routeDic, dir);
+            return AdjustRoute(routeDic, dir, frame);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         /// <param name="routeDic"></param>
         /// <param name="dir"></param>
-        private Dictionary<VerticalPipeModel, Polyline> AdjustRoute(Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> routeDic, Vector3d dir)
+        private Dictionary<VerticalPipeModel, Polyline> AdjustRoute(Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> routeDic, Vector3d dir, Polyline frame)
         {
             var firRoute = routeDic.OrderBy(x => x.Key.Value.NumberOfVertices).First();
             var leftDics = new Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line>();
@@ -69,6 +69,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
             }
 
+            firRoute = AdjustFristRoute(firRoute, ref leftDics, ref rightDics, frame, dir);
             var resRoutes = MoveRouteBySpace(firRoute, leftDics, dir);
             resRoutes.Add(firRoute.Key.Key, firRoute.Key.Value);
             foreach (var dic in MoveRouteBySpace(firRoute, rightDics, dir))
@@ -77,6 +78,58 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
 
             return resRoutes;
+        }
+
+        /// <summary>
+        /// 调整中轴线位置保证上下留出足够的调整空间
+        /// </summary>
+        /// <param name="firRoute"></param>
+        /// <param name="leftCount"></param>
+        /// <param name="rightCount"></param>
+        /// <param name="frame"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        private KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> AdjustFristRoute(KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> firRoute,
+            ref Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> leftDics, ref Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line> rightDics, Polyline frame, Vector3d dir)
+        {
+            var allPts = frame.GetAllLineByPolyline().SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).ToList();
+            var leftPts = allPts.Where(x => (x - firRoute.Value.GetClosestPointTo(x, true)).DotProduct(dir) >= 0).ToList();
+            var rightPts = allPts.Except(leftPts).ToList();
+            if (leftPts.Count > 0)
+            {
+                var leftMinVal = leftPts.Select(x => firRoute.Value.GetClosestPointTo(x, false).DistanceTo(x)).OrderBy(x => x).First();
+                var leftSpace = leftMinVal - frameDis - leftDics.Count * frameSpace;
+                if (leftSpace < 0)
+                {
+                    MoveRouteLineSegment(dir, leftSpace, ref firRoute);
+                    var moveRightDics = new Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line>();
+                    foreach (var dic in rightDics)
+                    {
+                        var moveDic = dic;
+                        MoveRouteLineSegment(dir, leftSpace, ref moveDic);
+                        moveRightDics.Add(moveDic.Key, moveDic.Value);
+                    }
+                    rightDics = moveRightDics;
+                }
+            }
+            if (rightPts.Count > 0)
+            {
+                var rightMinVal = rightPts.Select(x => firRoute.Value.GetClosestPointTo(x, false).DistanceTo(x)).OrderBy(x => x).First();
+                var rightSpace = rightMinVal - frameDis - rightDics.Count * frameSpace;
+                if (rightSpace < 0)
+                {
+                    MoveRouteLineSegment(-dir, rightSpace, ref firRoute);
+                    var moveLeftDics = new Dictionary<KeyValuePair<VerticalPipeModel, Polyline>, Line>();
+                    foreach (var dic in leftDics)
+                    {
+                        var moveDic = dic;
+                        MoveRouteLineSegment(-dir, rightSpace, ref moveDic);
+                        moveLeftDics.Add(moveDic.Key, moveDic.Value);
+                    }
+                    leftDics = moveLeftDics;
+                }
+            }
+            return firRoute;
         }
 
         /// <summary>
@@ -105,16 +158,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             while (routeDic.Count > 0)
             {
                 var dic = routeDic.First();
+                routeDic.Remove(dic.Key);
                 var dis = dic.Value.Distance(firRoute.Value);
                 var routeModel = dic.Key;
                 if (dis != space)
                 {
                     var moveDis = (space - dis);
-                    routeModel = new KeyValuePair<VerticalPipeModel, Polyline>(routeModel.Key, MoveRouteLineSegment(dir, moveDis, dic));
+                    routeModel = new KeyValuePair<VerticalPipeModel, Polyline>(routeModel.Key, MoveRouteLineSegment(dir, moveDis, ref dic));
                 }
                 resRoute.Add(routeModel.Key, routeModel.Value);
                 space += frameSpace;
-                routeDic.Remove(dic.Key);
             }
 
             return resRoute;
@@ -127,7 +180,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="moveDis"></param>
         /// <param name="route"></param>
         /// <returns></returns>
-        private Polyline MoveRouteLineSegment(Vector3d dir, double moveDis, KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> route)
+        private Polyline MoveRouteLineSegment(Vector3d dir, double moveDis, ref KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line> route)
         {
             var allLines = route.Key.Value.GetAllLineByPolyline();
             var resLineDic = new Dictionary<Line, bool>();
@@ -145,16 +198,23 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     resLineDic.Add(line, false);
                 }
             }
-            return CreateMovePolyline(resLineDic);
+            var resPoly = CreateMovePolyline(resLineDic, route.Key.Key.Position);
+            var resKey = new KeyValuePair<VerticalPipeModel, Polyline>(route.Key.Key, resPoly);
+            route = new KeyValuePair<KeyValuePair<VerticalPipeModel, Polyline>, Line>(resKey, route.Value);
+            return resPoly;
         }
 
         /// <summary>
         /// 将移动线创建成polyline
         /// </summary>
         /// <param name="lineDic"></param>
-        private Polyline CreateMovePolyline(Dictionary<Line, bool> lineDic)
+        private Polyline CreateMovePolyline(Dictionary<Line, bool> lineDic, Point3d sPt)
         {
             var pts = new List<Point3d>();
+            if (lineDic.Count == 1)
+            {
+                pts.Add(sPt);
+            }
             var allKeys = lineDic.Keys.ToList();
             var preMove = false;
             for (int i = 0; i < lineDic.Count; i++)

@@ -18,18 +18,21 @@ namespace TianHua.Mep.UI.Command
     public class ThExtractWallLinesCmd: ThMEPBaseCommand,IDisposable
     {
         /// <summary>
-        /// 配置的幕墙图层
+        /// 配置的墙体图层
         /// </summary>
-        private List<string> PcWallLayers { get; set; } = new List<string>();
+        private List<string> WallLayers { get; set; } = new List<string>();
         /// <summary>
         /// 返回提取的墙线
         /// </summary>
         public DBObjectCollection Walls { get; private set; }
-        public ThExtractWallLinesCmd(List<string> pcWallLayers)
+        public Point3dCollection RangePts { get; private set; }
+        public ThExtractWallLinesCmd(List<string> wallLayers)
         {
             ActionName = "提取墙线";
             CommandName = "XXXX";
-            PcWallLayers = pcWallLayers;
+            WallLayers = wallLayers;
+            Walls = new DBObjectCollection();
+            RangePts = new Point3dCollection();
         }
 
         public void Dispose()
@@ -41,35 +44,35 @@ namespace TianHua.Mep.UI.Command
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                var pts = GetRange(); //获取布置范围
-                if (pts.Count < 3)
+                RangePts = GetRange(); //获取布置范围
+                if (RangePts.Count < 3)
                 {
                     return;
                 }
                 Walls = new DBObjectCollection();
-                var originObjs = GetRoomDatas(acadDb.Database, pts);
-                var pcArchObjs = GetPcArchWalls(acadDb.Database, pts);
+                var originObjs = GetRoomDatas(acadDb.Database, RangePts);
+                var wallObjs = GetConfigWalls(acadDb.Database, RangePts);
                 Walls = Walls.Union(originObjs);
-                Walls = Walls.Union(pcArchObjs);
+                Walls = Walls.Union(wallObjs);
             }
         }
 
-        private DBObjectCollection GetPcArchWalls(Database database, Point3dCollection frame)
+        private DBObjectCollection GetConfigWalls(Database database, Point3dCollection frame)
         {
             var layers = new List<string>();
             var defaultPCLayers = ThPCArchitectureWallLayerManager.CurveXrefLayers(database);
             layers.AddRange(defaultPCLayers);
-            layers.AddRange(PcWallLayers.Where(o => !defaultPCLayers.Contains(o)));
+            layers.AddRange(WallLayers.Where(o => !defaultPCLayers.Contains(o)));
 
-            var pcArchWallVisitor = new ThPCArchitectureWallExtractionVisitor()
+            var wallVisitor = new ThWallExtractionVisitor()
             {
                 LayerFilter = layers,
             };
             var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(pcArchWallVisitor);
+            extractor.Accept(wallVisitor);
             extractor.Extract(database);
 
-            var totalObjs = pcArchWallVisitor.Results
+            var totalObjs = wallVisitor.Results
                 .Select(o => o.Geometry).ToCollection();
 
             var transformer = new ThMEPOriginTransformer(totalObjs);

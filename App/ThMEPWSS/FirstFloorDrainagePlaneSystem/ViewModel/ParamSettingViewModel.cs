@@ -12,7 +12,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
         /// <summary>
         /// 是否生成污废水排管
         /// </summary>
-        private bool? _wasteWaterChecked = false;
+        private bool? _wasteWaterChecked = true;
         public bool? WasteWaterChecked
         {
             get
@@ -46,7 +46,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
         /// <summary>
         /// 是否生成雨水排管
         /// </summary>
-        private bool? _rainWaterChecked = false;
+        private bool? _rainWaterChecked = true;
         public bool? RainWaterChecked
         {
             get
@@ -63,7 +63,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
         /// <summary>
         /// 是否生成冷凝水排管
         /// </summary>
-        private bool? _condensateChecked = false;
+        private bool? _condensateChecked = true;
         public bool? CondensateChecked
         {
             get

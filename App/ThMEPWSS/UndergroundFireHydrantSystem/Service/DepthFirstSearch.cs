@@ -75,17 +75,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             foreach (Point3dEx p in neighbors)
             {
-                if (visited.Contains(p))//已经访问过
-                {
-                    continue;
-                }
-                if (subLoopPoint)//次环点
-                {
-                    if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
-                    {
-                        continue;
-                    }
-                }
+                var isOmit = IsOmitPt(p, cur, target, subLoopPoint, visited, fireHydrantSysIn);
+                if (isOmit) continue;
                 tempPath.Add(p);
                 visited.Add(p);
 
@@ -100,12 +91,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return false;
         }
 
+        //主环遍历时忽略掉的点
+        private static bool IsOmitPt(Point3dEx p, Point3dEx cur, Point3dEx target, bool subLoopPoint, HashSet<Point3dEx> visited, FireHydrantSystemIn fireHydrantSysIn)
+        {
+            if (fireHydrantSysIn.ThroughPt.Contains(p))
+            {
+                if (!p.Equals(target))
+                {
+                    return true;
+                }
+            }
+            if (visited.Contains(p))//已经访问过
+            {
+                return true;
+            }
+            if (subLoopPoint)//次环点
+            {
+                if (PointCompute.IsSecondLoop(cur, p, fireHydrantSysIn.AngleList[cur]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
             ref List<List<Point3dEx>> rstPaths, Point3dEx target, FireHydrantSystemIn fireHydrantSysIn, Stopwatch stopwatch)
         {
             if(stopwatch.Elapsed.TotalSeconds > 20)//搜索了20s，可能死循环了
             {
                 return;
+            }
+            if(cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1798444.4, 824795.7, 0))<10)
+            {
+                ;
             }
             if (cur._pt.DistanceTo(target._pt) < 5)
             {

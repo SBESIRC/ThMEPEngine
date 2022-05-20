@@ -227,9 +227,10 @@ namespace TianHua.AutoCAD.ThCui
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
             CreateEMaterials(tab);
+            CreatePowerSystemPanel(tab);
             CreateElectronicPanel(tab);
             CreateELightingPanel(tab);
-            //CreateElightningPanel(tab);
+            CreateElightningPanel(tab);
         }
 
         private static void CreateEMaterials(RibbonTabSource tab)
@@ -259,6 +260,26 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THYDFHJS_SMALL",
                     "IDI_THCAD_THYDFHJS_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+        }
+
+        private static void CreatePowerSystemPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("POWERSYSTEM", "电力系统");
+            var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 配电箱系统
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("配电箱系统",
+                    "天华配电箱系统",
+                    "THDLXT",
+                    "天华配电箱系统",
+                    "IDI_THCAD_THDLXT_SMALL",
+                    "IDI_THCAD_THDLXT_LARGE",
+                RibbonButtonStyle.LargeWithText);
             }
         }
 
@@ -344,12 +365,12 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 接地平面
+                // 接地网
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("接地平面",
-                    "天华接地平面",
+                subRow.AddNewButton("接地网",
+                    "天华接地网",
                     "THJDPM",
-                    "天华接地平面",
+                    "天接地网",
                     "IDI_THCAD_THJDPM_SMALL",
                     "IDI_THCAD_THJDPM_LARGE",
                 RibbonButtonStyle.LargeWithText);
@@ -441,15 +462,25 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 排水平面
+                // 立管布置
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("排水平面",
-                    "天华排水平面",
+                subRow.AddNewButton("立管布置",
+                    "天华立管布置",
                     "THPYSPM",
-                    "天华排水平面",
+                    "天华立管布置",
                     "IDI_THCAD_THPYSPM_SMALL",
                     "IDI_THCAD_THPYSPM_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+                    RibbonButtonStyle.SmallWithText);
+
+                // 一层排水
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("一层排水",
+                    "天华一层排水",
+                    "ThSCPSPM",
+                    "天华一层排水",
+                    "IDI_THCAD_ThSCPSPM_SMALL",
+                    "IDI_THCAD_ThSCPSPM_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
 
             {
@@ -503,20 +534,6 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
             }
         }
-
-        //private static void CreateWGroundSystemPanel(RibbonTabSource tab)
-        //{
-        //    var panel = tab.AddNewPanel("WGROUNDSYSTEM", "地上系统图");
-        //    var row = panel.AddNewRibbonRow();
-
-        //    row.AddNewButton("雨水",
-        //        "天华地上雨水系统图",
-        //        "THYSXTT",
-        //        "天华地上雨水系统图",
-        //        "IDI_THCAD_THYSXTT_SMALL",
-        //        "IDI_THCAD_THYSXTT_LARGE",
-        //        RibbonButtonStyle.LargeWithText);
-        //}
 
         private static void CreateWUndergroundPlanPanel(RibbonTabSource tab)
         {
@@ -1112,7 +1129,7 @@ namespace TianHua.AutoCAD.ThCui
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("房间框线",
                     "天华房间框线",
-                    "THFJKX",
+                    "THFJKX2",
                     "天华房间框线",
                     "IDI_THCAD_THFJKX_SMALL",
                     "IDI_THCAD_THFJKX_LARGE",

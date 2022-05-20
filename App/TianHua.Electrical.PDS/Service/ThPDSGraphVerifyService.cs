@@ -64,7 +64,7 @@ namespace TianHua.Electrical.PDS.Service
             var IdToEdges = new Dictionary<string, List<ThPDSProjectGraphEdge>>();
             foreach(var edge in graph.Edges)
             {
-                var id = edge.Circuit.ID.CircuitNumber.Last();
+                var id = edge.Circuit.ID.CircuitNumber;
                 if (!IdToEdges.ContainsKey(id))
                 {
                     IdToEdges.Add(id, new List<ThPDSProjectGraphEdge>());

@@ -84,6 +84,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     tmpEntitiesLayerRAINPIPE.Add(line1);
                     tmpEntitiesLayerRAINPIPE.Add(line2);
                     Point3d brlocPt1 = new Point3d(pt1.X + disRefElv, pt1.Y, 0);
+                    Point3d brlocPt4 = new Point3d(brlocPt1.X, ptloc.Y + heightDisTofloorLine + bushHeigthHalf_a, 0);
+                    var brId4 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", brlocPt4, new Scale3d(0), 0);
+                    var br4 = adb.Element<BlockReference>(brId4);
+                    br4.Rotation = Math.PI / 2 * 3;
+                    tmpBlocksLayerBUSH.Add(br4);
+                    brlocPt1 = brlocPt1 + Vector3d.XAxis * 600;
                     Dictionary<string, string> atts1 = new Dictionary<string, string>();
                     atts1.Add("标高", "室外覆土敷设");
                     var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", brlocPt1, new Scale3d(1), 0, atts1);
@@ -113,11 +119,6 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var br3 = adb.Element<BlockReference>(brId3);
                     DefinePropertiesOfCADObjects(br3, "W-NOTE");
                     drainwellbr.Add(br3);
-                    Point3d brlocPt4 = new Point3d(ptloc.X, ptloc.Y + heightDisTofloorLine + bushHeigthHalf_a, 0);
-                    var brId4 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", brlocPt4, new Scale3d(0), 0);
-                    var br4 = adb.Element<BlockReference>(brId4);
-                    br4.Rotation = Math.PI / 2 * 3;
-                    tmpBlocksLayerBUSH.Add(br4);
                 }
                 else if (drainageMode == 4)//穿侧墙排水方式
                 {
@@ -158,6 +159,10 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     Line line = new Line(ptloc, pt1);
                     tmpEntitiesLayerRAINPIPE.Add(line);
                     Point3d ptlocbr1 = new Point3d(ptloc.X + disRefElv, ptloc.Y, 0);
+                    Point3d ptlocbr4 = new Point3d(ptlocbr1.X - bushHeigthHalf_b, pt1.Y, 0);
+                    var brId4 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", ptlocbr4, new Scale3d(0), 0);
+                    tmpBlocksLayerBUSH.Add(adb.Element<BlockReference>(brId4));
+                    ptlocbr1 += Vector3d.XAxis * 600;
                     Dictionary<string, string> atts1 = new Dictionary<string, string>();
                     atts1.Add("标高", "室外覆土敷设");
                     var brId1 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", ptlocbr1, new Scale3d(0), 0, atts1);
@@ -178,9 +183,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var br10 = adb.Element<BlockReference>(brId3);
                     DefinePropertiesOfCADObjects(br10, "W-NOTE");
                     drainwellbr.Add(br10);
-                    Point3d ptlocbr4 = new Point3d(pt1.X - bushHeigthHalf_b, pt1.Y, 0);
-                    var brId4 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", ptlocbr4, new Scale3d(0), 0);
-                    tmpBlocksLayerBUSH.Add(adb.Element<BlockReference>(brId4));
+
                 }
                 tmpEntitiesLayerRAINPIPE.ForEach(o => DefinePropertiesOfCADObjects(o, "W-RAIN-PIPE", "CONTINOUS"));
                 tmpEntitiesLayerRAINPIPE.ForEach(o => entities.Add(o));

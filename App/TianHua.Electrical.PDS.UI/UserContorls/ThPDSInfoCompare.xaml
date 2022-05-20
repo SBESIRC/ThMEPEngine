@@ -92,6 +92,13 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="回路负载">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Background="{Binding Background}" HorizontalAlignment="Stretch" Height="20" Text="{Binding CircuitLoad}"></TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                             <DataGrid.GroupStyle>
                                 <GroupStyle>
@@ -104,6 +111,7 @@
                                                             <Expander.Header>
                                                                 <DockPanel>
                                                                     <TextBlock Text="{Binding Name}" />
+                                                                    <TextBlock Text="{Binding ItemCount, StringFormat=回路数量: {0}}" Margin="30,0,0,0" />
                                                                 </DockPanel>
                                                             </Expander.Header>
                                                             <Expander.Content>
@@ -169,6 +177,7 @@
                                                             <Expander.Header>
                                                                 <DockPanel>
                                                                     <TextBlock Text="{Binding Name}" />
+                                                                    <TextBlock Text="{Binding ItemCount, StringFormat=负载数量: {0}}" Margin="30,0,0,0" />
                                                                 </DockPanel>
                                                             </Expander.Header>
                                                             <Expander.Content>

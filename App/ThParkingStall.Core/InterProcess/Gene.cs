@@ -396,30 +396,40 @@ namespace ThParkingStall.Core.InterProcess
     public static class MPGAData
     {
         public static DataWraper dataWraper;
+        public static int ProcIndex;
+        static object lockObj = new object();
+        static bool Saved = false;
         public static void Set(Chromosome chromosome)
         {
             dataWraper.chromosome = chromosome;
         }
-        public static void Save(string fileName = "MPGAData.dat")
+        public static void Save(string fileName = "MPGAData")
         {
-            var path = Path.Combine(System.IO.Path.GetTempPath(), fileName);
-            // Gain code access to the file that we are going
-            // to write to
-            try
+            lock (lockObj)
             {
-                // Create a FileStream that will write data to file.
-                using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                if (!Saved)
                 {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(stream,  dataWraper);
+                    var path = Path.Combine(System.IO.Path.GetTempPath(), fileName + ProcIndex.ToString() + ".dat");
+                    // Gain code access to the file that we are going
+                    // to write to
+                    try
+                    {
+                        // Create a FileStream that will write data to file.
+                        using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                        {
+                            var formatter = new BinaryFormatter();
+                            formatter.Serialize(stream, dataWraper);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MCompute.Logger?.Information(ex.Message);
+                        MCompute.Logger?.Information("----------------------------------");
+                        MCompute.Logger?.Information(ex.StackTrace);
+                        MCompute.Logger?.Information("##################################");
+                    }
+                    Saved = true;
                 }
-            }
-            catch (Exception ex)
-            {
-                MCompute.Logger?.Information(ex.Message);
-                MCompute.Logger?.Information("----------------------------------");
-                MCompute.Logger?.Information(ex.StackTrace);
-                MCompute.Logger?.Information("##################################");
             }
         }
         public static void Load(string fileName = "MPGAData.dat")

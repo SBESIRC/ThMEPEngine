@@ -12,6 +12,6 @@ namespace ThMEPEngineCore.IO.SVG
         public string FloorNo { get; set; } = "";
         public string StdFlrNo { get; set; } = "";
         public string Bottom_elevation { get; set; } = "";
-        public string Elevation { get; set; } = "";
+        public string Height { get; set; } = "";
     }
 }

@@ -100,7 +100,7 @@ namespace TianHua.Electrical.PDS.Service
             },
             new ThPDSCircuitConfigItem
             {
-                CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
+                CircuitType = ThPDSCircuitType.FireEmergencyLighting,
                 TextKey = "WFEL",
                 KV = 0.036,
                 Phase = ThPDSPhase.None,
@@ -110,7 +110,7 @@ namespace TianHua.Electrical.PDS.Service
             },
             new ThPDSCircuitConfigItem
             {
-                CircuitType = ThPDSCircuitType.EmergencyPowerEquipment,
+                CircuitType = ThPDSCircuitType.Control,
                 TextKey = "WC",
                 KV = 0.036,
                 Phase = ThPDSPhase.None,

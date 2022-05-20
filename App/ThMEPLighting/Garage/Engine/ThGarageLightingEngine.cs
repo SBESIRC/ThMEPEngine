@@ -67,8 +67,12 @@ namespace ThMEPLighting.Garage.Engine
                     ThLightWireBuilder lightWireBuilder = null;
                     if (ArrangeParameter.InstallWay == InstallWay.CableTray)
                     {
-                        lightWireBuilder = CreateLightWireBuilder(lightGraphs, r.FdxCenterLines,
-                                singleRowRegionBorder.DxCenterLines);
+                        // 对单排线槽中心线布灯、编号
+                        var singleGraphs=SingleRowCableTrunkingLayout(singleRowRegionBorder, loopNumber);
+                        var totalGraphs = new List<ThLightGraphService>();
+                        totalGraphs.AddRange(singleGraphs);
+                        totalGraphs.AddRange(lightGraphs);
+                        lightWireBuilder = CreateLightWireBuilder(totalGraphs, r.FdxCenterLines);
                     }
                     else if (ArrangeParameter.InstallWay == InstallWay.Chain)
                     {
@@ -87,9 +91,6 @@ namespace ThMEPLighting.Garage.Engine
                     lightWireBuilder.ArrangeParameter = ArrangeParameter;
                     lightWireBuilder.CableTrayParameter = CableTrayParameter;
                     lightWireBuilder.Build();
-
-                    // 对单排线槽中心线布灯、编号
-                    SingleRowCableTrunkingLayout(singleRowRegionBorder, loopNumber);
 
                     r.Delete(ArrangeParameter, Db); //删除已生成的灯块、文字、灯线、线槽边线
                     ((IPrinter)lightWireBuilder).Print(Db); // 打印新生成的布置结果
@@ -148,13 +149,11 @@ namespace ThMEPLighting.Garage.Engine
 
         private ThLightWireBuilder CreateLightWireBuilder(
             List<ThLightGraphService> lightGraphs,
-            List<Line> fdxCenterLines,
-            List<Line> singleRowCableTrunkings)
+            List<Line> fdxCenterLines)
         {
             return new ThCableTrayConnectionBuilder(lightGraphs)
             {
                 FdxLines = fdxCenterLines,
-                SingleRowCableTrunking = singleRowCableTrunkings,
             };
         }
 
@@ -213,29 +212,18 @@ namespace ThMEPLighting.Garage.Engine
             return res.Count() == 1 ? res.First() : new ThRegionBorder() { RegionBorder=new Polyline()};
         }
 
-        private void SingleRowCableTrunkingLayout(ThRegionBorder singleRowRegionBorder, int loopNumber)
+        private List<ThLightGraphService> SingleRowCableTrunkingLayout(ThRegionBorder singleRowRegionBorder, int loopNumber)
         {
             if (singleRowRegionBorder.DxCenterLines.Count == 0 || ArrangeParameter.InstallWay != InstallWay.CableTray)
             {
-                return;
+                return new List<ThLightGraphService>();
             }
-            // 布置
             var lightGraphs = new List<ThLightGraphService>();
             var arrangeEngine = new ThSingleRowArrangementEngine(ArrangeParameter);
             arrangeEngine.SetDefaultStartNumber(loopNumber * 2 + 1);
             arrangeEngine.Arrange(singleRowRegionBorder);
             lightGraphs = arrangeEngine.Graphs;
-
-            // 连线
-            var lightWireBuilder = new ThCableTrayConnectionBuilder(lightGraphs);
-            lightWireBuilder.YnBuildCableTray = false;
-            lightWireBuilder.Transformer = singleRowRegionBorder.Transformer;
-            lightWireBuilder.ArrangeParameter = ArrangeParameter;
-            lightWireBuilder.CableTrayParameter = CableTrayParameter;
-            lightWireBuilder.Build();
-            ((IPrinter)lightWireBuilder).Print(Db); // 打印新生成的布置结果
-            lightWireBuilder.Reset(); // 对生成的结果进行还原
-            singleRowRegionBorder.Reset(); // 对框中的元素进行还原
+            return lightGraphs;
         }
         private void GetStructInfo(List<ThRegionBorder> regionBorders)
         {

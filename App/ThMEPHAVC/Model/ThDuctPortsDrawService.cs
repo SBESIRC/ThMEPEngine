@@ -38,6 +38,7 @@ namespace ThMEPHVAC.Model
         public string verticalPipe;
         public string flipDown45;
         public double ucsAngle;
+        private bool ucsFlag;
         private string airValveVisibility;
         private string fireValveVisibility;
         public string electrycityValveVisibility;
@@ -79,12 +80,13 @@ namespace ThMEPHVAC.Model
             textService = new ThDuctPortsDrawText(ductSizeLayer);
             portService = new ThDuctPortsDrawPort(portLayer, portName, ucsAngle);
             endCompService = new ThDuctPortsDrawEndComp(flipDown45, brokenLine, verticalPipe, geoLayer);
-            markService = new ThDuctPortsDrawPortMark(ucsAngle, portMarkName, portMarkLayer);
+            markService = new ThDuctPortsDrawPortMark(ucsFlag, ucsAngle, portMarkName, portMarkLayer);
         }
         private void GetUcsAngle()
         {
             var ucs = Active.Editor.CurrentUserCoordinateSystem;
             ucsAngle = Vector3d.XAxis.GetAngleTo(ucs.CoordinateSystem3d.Xaxis);
+            ucsFlag = ucs.CoordinateSystem3d.Xaxis.Z > 0;
         }
         private void SetLayer(string scenario)
         {

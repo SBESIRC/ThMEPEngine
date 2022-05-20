@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using TianHua.Electrical.PDS.UI.Models;
+using TianHua.Electrical.PDS.UI.Services;
 using TianHua.Electrical.PDS.Project.Module;
 
 namespace TianHua.Electrical.PDS.UI.ViewModels
@@ -50,20 +51,10 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                         if (si > 1000) return;
                         var v = vertices[node.Id];
                         if (v.Type != Model.PDSNodeType.DistributionBox) return;
-                        var name = v.Load?.ID?.LoadID;
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            name = v.Load?.ID?.Description;
-                        }
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            name = "未知配电箱";
-                        }
-                        name ??= "";
                         var m = new ThPDSCircuitGraphTreeModel()
                         {
                             Id = idDict[v],
-                            Name = name,
+                            Name = v.LoadIdString(),
                             DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
                         };
                         if (parent is null)
@@ -91,23 +82,81 @@ namespace TianHua.Electrical.PDS.UI.ViewModels
                 {
                     DataList = lst,
                 };
-                void dfs(ThPDSCircuitGraphTreeModel node)
                 {
-                    if (node.DataList != null)
+                    int count = 0;
+                    void dfs(ThPDSCircuitGraphTreeModel node)
                     {
-                        var lst = node.DataList.OrderBy(x => x.Name).ToList();
-                        node.DataList.Clear();
-                        foreach (var n in lst)
-                        {
-                            node.DataList.Add(n);
-                        }
+                        ++count;
                         foreach (var n in node.DataList)
                         {
                             dfs(n);
                         }
                     }
+                    dfs(node);
+                    if (count == 1)
+                    {
+                        var vertices = graph.Vertices.ToList();
+                        var vts = vertices.Where(v => v.Type == Model.PDSNodeType.DistributionBox).ToList();
+                        if (vts.Count == 0) vts = vertices;
+                        foreach (var v in vts)
+                        {
+                            var m = new ThPDSCircuitGraphTreeModel()
+                            {
+                                Id = idDict[v],
+                                Name = v.LoadIdString(),
+                                DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                            };
+                            node.DataList.Add(m);
+                        }
+                    }
                 }
-                dfs(node);
+                {
+                    var vertices = graph.Vertices.ToList();
+                    var vts = vertices.Where(v => v.Type == Model.PDSNodeType.DistributionBox).ToList();
+                    var nodes = new List<ThPDSProjectGraphNode>();
+                    void dfs(ThPDSCircuitGraphTreeModel nd)
+                    {
+                        if (nd != node) nodes.Add(vertices[nd.Id]);
+                        foreach (var n in nd.DataList)
+                        {
+                            dfs(n);
+                        }
+                    }
+                    dfs(node);
+                    foreach (var v in vts)
+                    {
+                        if (!nodes.Contains(v))
+                        {
+                            nodes.Add(v);
+                            var m = new ThPDSCircuitGraphTreeModel()
+                            {
+                                Id = idDict[v],
+                                Name = v.LoadIdString(),
+                                DataList = new ObservableCollection<ThPDSCircuitGraphTreeModel>(),
+                            };
+                            node.DataList.Add(m);
+                        }
+                    }
+                }
+                {
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        if (node.DataList != null)
+                        {
+                            var lst = node.DataList.OrderBy(x => x.Name).ToList();
+                            node.DataList.Clear();
+                            foreach (var n in lst)
+                            {
+                                node.DataList.Add(n);
+                            }
+                            foreach (var n in node.DataList)
+                            {
+                                dfs(n);
+                            }
+                        }
+                    }
+                    dfs(node);
+                }
                 return node;
             }
         }

@@ -23,11 +23,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
     {
         public List<Entity> Results { get; private set; }
         public DBObjectCollection DBobjs { get; private set; }
-        public void Extract(Database database, Point3dCollection polygon)
+        public bool Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面");
+                
+                DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面", out bool hydrantWithReel);
+                return hydrantWithReel;
+                ;
 #if DEBUG
                 DrawFireHydrant(database);
 #endif
@@ -116,7 +119,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pl.CreatePolyline(pts);
             return pl;
         }
-        private DBObjectCollection ExtractBlocks(Database db, string blockName)
+        private DBObjectCollection ExtractBlocks(Database db, string blockName, out bool hydrantWithReel)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>
             {
@@ -135,6 +138,22 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             extractor.Extract(db); // 提取块中块(包括外参)
             extractor.ExtractFromMS(db); // 提取本地块
 
+            bool _hydrantWithReel = false;
+            bool hasCheckedHydrant = false;
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                blkVisitor.Results.ForEach(e =>
+                {
+                    var attribute = e.Data;
+                    if(!(attribute is null) && !hasCheckedHydrant)
+                    {
+                        _hydrantWithReel = attribute.ToString().Contains("卷盘");
+                        hasCheckedHydrant = true;
+                    }
+                    ;
+                });
+            }
+            hydrantWithReel = _hydrantWithReel;
             return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
 
@@ -196,9 +215,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 if (clone != null)
                 {
                     clone.TransformBy(matrix);
+                    //var blockData = new ThBlockReferenceData(br.Id);
                     results.Add(new ThRawIfcDistributionElementData()
                     {
                         Geometry = clone,
+                        Data = br.ObjectId.GetDynBlockValue("可见性"),
                     });
                 }
             }

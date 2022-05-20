@@ -28,7 +28,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             {
                 var checkDir = (closeInfo.Value - startPt).GetNormal();
                 var lineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
-                if (checkDir.IsEqualTo(lineDir, new Tolerance(0.001, 0.001)))
+                if (checkDir.IsParallelTo(lineDir, new Tolerance(0.001, 0.001)))
                 {
                     return closeInfo;
                 }

@@ -20,9 +20,9 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void PreProcess()
         {
             var iniLanes = IniLanes.Select(e => e.Line).ToList();
-            for (int i = 0; i < iniLanes.Count; i++)
+            for (int i = 0; i < IniLanes.Count; i++)
             {
-                var line = iniLanes[i];
+                var line = IniLanes[i].Line;
                 var pl = line.Buffer(DisLaneWidth / 2 - 1);
                 var points = new List<Coordinate>();
                 STRtree<Polygon> strTree = new STRtree<Polygon>();
@@ -60,38 +60,39 @@ namespace ThParkingStall.Core.MPartitionLayout
                     i--;
                 }
             }
-            //if (RampList.Count > 0)
-            //{
-            //    var ramp = RampList[0];
-            //    var pt = ramp.InsertPt;
-            //    var pl = ramp.Ramp;
-            //    var segobjs = new DBObjectCollection();
-            //    pl.Explode(segobjs);
-            //    var seg = segobjs.Cast<Line>().OrderByDescending(t => t.Length).First();
-            //    var vec = CreateVector(seg).GetNormal();
-            //    var ptest = pt.TransformBy(Matrix3d.Displacement(vec));
-            //    if (pl.Contains(ptest)) vec = -vec;
-            //    var rampline = CreateLineFromStartPtAndVector(pt, vec, MaxLength);
-            //    rampline = SplitLine(rampline, IniLanes.Select(e => e.Line).ToList()).OrderBy(t => t.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
-            //    var prepvec = vec.GetPerpendicularVector();
-            //    IniLanes.Add(new Lane(rampline, prepvec));
-            //    IniLanes.Add(new Lane(rampline, -prepvec));
-            //    OriginalLanes.Add(rampline);
-            //    IniLaneBoxes.Add(rampline.Buffer(DisLaneWidth / 2));
-            //    for (int i = 0; i < IniLanes.Count; i++)
-            //    {
-            //        var line = IniLanes[i].Line;
-            //        var nvec = IniLanes[i].Vec;
-            //        var splits = SplitLine(line, rampline);
-            //        if (splits.Count() > 1)
-            //        {
-            //            IniLanes.RemoveAt(i);
-            //            IniLanes.Add(new Lane(splits[0], nvec));
-            //            IniLanes.Add(new Lane(splits[1], nvec));
-            //            break;
-            //        }
-            //    }
-            //}
+            if (RampList.Count > 0)
+            {
+                var ramp = RampList[0];
+                var pt = ramp.InsertPt.Coordinate;
+                var pl = ramp.Area;
+                var seg = pl.GetEdges().OrderByDescending(t => t.Length).First();
+                var vec = Vector(seg).Normalize();
+                var ptest = pt.Translation(vec);
+                if (pl.Contains(ptest)) vec = -vec;
+                var rampline = LineSegmentSDL(pt, vec, MaxLength);
+                rampline = SplitLine(rampline, IniLanes.Select(e => e.Line).ToList()).OrderBy(t => t.ClosestPoint(pt, false).Distance(pt)).First();
+                var prepvec = vec.GetPerpendicularVector();
+                IniLanes.Add(new Lane(rampline, prepvec));
+                IniLanes.Add(new Lane(rampline, -prepvec));
+                OriginalLanes.Add(rampline);
+                IniLaneBoxes.Add(rampline.Buffer(DisLaneWidth / 2));
+                for (int i = 0; i < IniLanes.Count; i++)
+                {
+                    var line = IniLanes[i].Line;
+                    var nvec = IniLanes[i].Vec;
+                    var intersect_points = rampline.IntersectPoint(line).ToList();
+                    intersect_points = SortAlongCurve(intersect_points, line.ToLineString());
+                    intersect_points = RemoveDuplicatePts(intersect_points, 1);
+                    var splits = SplitLine(line, intersect_points);
+                    if (splits.Count() > 1)
+                    {
+                        IniLanes.RemoveAt(i);
+                        IniLanes.Add(new Lane(splits[0], nvec));
+                        IniLanes.Add(new Lane(splits[1], nvec));
+                        break;
+                    }
+                }
+            }
         }
         public void GenerateLanes()
         {
@@ -480,7 +481,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         //generate_lane_length = split.Length;
                         double dis_to_move = 0;
                         LineSegment perpLine = new LineSegment(new Coordinate(0, 0), new Coordinate(0, 0));
-                        if (HasParallelLaneForwardExisted(split, vec, 28700 - 15700, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))
+                        if (false && HasParallelLaneForwardExisted(split, vec, 28700 - 15700, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))
                         {
                             paras.CarBoxPlusToAdd[paras.CarBoxPlusToAdd.Count - 1].IsSingleForParallelExist = true;
                             var existBoxes = CarBoxesPlus.Where(e => e.IsSingleForParallelExist).Select(e => e.Box);

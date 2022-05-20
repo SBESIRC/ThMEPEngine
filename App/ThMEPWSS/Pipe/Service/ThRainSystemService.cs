@@ -513,6 +513,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     var c = EntityTool.GetCircles(br).Where(x => x.Visible).Select(x => x.ToGCircle()).Where(x => x.Radius > THESAURUSINCOMPLETE).FirstOrDefault();
                     if (c.IsValid)
                     {
+                        geoData.FloorDrains.Add(c.ToCirclePolygon(SUPERLATIVENESS).ToGRect());
                         geoData.FloorDrainRings.Add(c);
                     }
                 }
@@ -1111,6 +1112,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         {
             if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
             if (!br.Visible) return;
+            if (isInXref)
+            {
+                if (!ThMEPWSS.Service.CheckService.CheckWssXref(br)) return;
+            }
             if (IsLayerVisible(br))
             {
                 var _name = br.GetEffectiveName();
@@ -4026,6 +4031,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         {
                             PipeType.Y2L => viewModel?.Params.BalconyRainPipeDN,
                             PipeType.NL => viewModel?.Params.CondensePipeVerticalDN,
+                            PipeType.FL0 => viewModel?.Params.WaterWellPipeVerticalDN,
                             _ => dft,
                         };
                         dn ??= dft;

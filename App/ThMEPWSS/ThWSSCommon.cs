@@ -90,7 +90,7 @@
         public static string VerticalPipe_BlockName2 = "带定位立管";
         public static string VerticalPipe_BlockName3 = "带定位立管150";
         //出乎框线图层
-        public static string OutFrameLayerName = "0";
+        public static string OutFrameLayerName = "AI-出户框线";
         //室外主管图层
         public static string OutdoorSewagePipeLayerName = "AI-室外污水主管";
         public static string OutdoorRainPipeLayerName = "AI-室外雨水主管";
@@ -103,7 +103,8 @@
         public static string OutdoorWasteWellBlockName = "污废合流井编号";      //室外污水井块名
         public static string OutdoorRainWellLayerName = "W-RAIN-EQPM";          //室外雨水井图层名
         public static string OutdoorRainWellBlockName = "重力流雨水井编号";     //室外雨水井块名
-
+        //堵头
+        public static string ReservedPlugBlockName = "清扫口系统";     //堵头块名
         //处理冷凝水管
         public static string DisconnectionLayerName = "W-WSUP-EQPM";
         public static string DisconnectionBlockName = "断线";

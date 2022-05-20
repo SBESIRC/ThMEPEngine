@@ -213,14 +213,23 @@ namespace ThParkingStall.Core.Tools
                 }
             }
         }
+        public static void CleanLineWithOneIntSecPt(this List<LineSegment> SegLines, Polygon Area)
+        {
+            for (int i = SegLines.Count - 1; i >= 0; i--)
+            {
+                var segLine = SegLines[i];
+                if (GetAllIntSecPs(i, SegLines, Area).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
+
+            }
+        }
         //判断分割线是否全部相连
         public static bool Allconnected(this List<LineSegment> SegLines)
         {
+            if(SegLines.Count == 0) return false;
             var CheckedLines = new List<LineSegment>();
             CheckedLines.Add(SegLines[0]);
             var rest_idx = new List<int>();
             for (int i = 1; i < SegLines.Count; ++i) rest_idx.Add(i);
-
             while (rest_idx.Count != 0)
             {
                 var curCount = rest_idx.Count;// 记录列表个数
@@ -243,7 +252,37 @@ namespace ThParkingStall.Core.Tools
             }
             return true;
         }
-
+        public static List<List<LineSegment>> GroupSegLines(this List<LineSegment> SegLines)
+        {
+            var groups = new List<List<LineSegment>>();
+            var rest_idx = new List<int>();
+            for (int i = 0; i < SegLines.Count; ++i) rest_idx.Add(i);
+            while (rest_idx.Count != 0)
+            {
+                bool new_group = true;
+                foreach (var group in groups)
+                {
+                    foreach(var idx in rest_idx)
+                    {
+                        var line = SegLines[idx];
+                        if (line.ConnectWithAny(group))
+                        {
+                            new_group = false;
+                            group.Add(line);
+                            rest_idx.Remove(idx);
+                            break;
+                        }
+                    }
+                    if (!new_group) break;
+                }
+                if (new_group)
+                {
+                    groups.Add(new List<LineSegment> { SegLines[rest_idx.First()] });
+                    rest_idx.RemoveAt(0);
+                }
+            }
+            return groups;
+        }
         //判断idx位置的分割线是否与其他的存在相交关系
         public static bool ConnectWithAny(this List<LineSegment> SegLines, int idx)
         {
@@ -444,6 +483,25 @@ namespace ThParkingStall.Core.Tools
             }
             return (pt1, pt2);
         }
+        public static List<Point> GetAllIntSecPs(this List<LineSegment> seglines)
+        {
+            var pts = new HashSet<Point>();
+            for (int i = 0; i < seglines.Count-1; ++i)
+            {
+                var segline = seglines[i];
+                var VerticalDirection = segline.IsVertical();
+                for (int j = i+1; j < seglines.Count; ++j)
+                {
+                    var segline2 = seglines[j];
+                    if (VerticalDirection != segline2.IsVertical())
+                    {
+                        var pt = segline.Intersection(segline2);
+                        if (pt != null) pts.Add(new Point(pt));
+                    }
+                }
+            }
+            return pts.ToList();
+        }
         public static List<Point> GetAllIntSecPs(int idx, List<LineSegment> seglines)//获取分割线交点
         {
             var segline = seglines[idx];
@@ -475,6 +533,7 @@ namespace ThParkingStall.Core.Tools
             }
             return true;
         }
+
         public static Polygon GetRect(this LineSegment segline, double width)
         {
             var distance = width / 2;

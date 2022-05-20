@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
@@ -13,9 +14,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
     public class DrainningSettingTaggingService : DraningSettingService
     {
         double moveLength = 1000;
-        public DrainningSettingTaggingService(List<RouteModel> _pipes)
+        public DrainningSettingTaggingService(List<RouteModel> _pipes, ThMEPOriginTransformer _originTransformer)
         {
             pipes = _pipes;
+            originTransformer = _originTransformer;
         }
 
         public override void CreateDraningSetting()
@@ -60,8 +62,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
                 var route = x.route;
                 var pt = route.GetPoint3dAt(route.NumberOfVertices - 1);
                 var secPt = route.GetPoint3dAt(route.NumberOfVertices - 2);
+                var transPr = originTransformer.Reset(pt);
                 var dir = (pt - secPt).GetNormal();
-                return new KeyValuePair<Point3d, Vector3d>(pt, dir);
+                originTransformer.Reset(x.route);
+                return new KeyValuePair<Point3d, Vector3d>(transPr, dir);
             }).ToList();
             InsertBlockService.InsertConnectPipe(pipes.Select(x => x.route).ToList(), ThWSSCommon.DraiLayerName, null);
             InsertBlockService.scaleNum = scale;

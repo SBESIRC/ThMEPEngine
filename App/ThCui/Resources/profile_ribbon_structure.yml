@@ -52,17 +52,17 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "布置优化"
+          - text: "立管布置"
             attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "连管编号"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "消火栓系统"
+          - text: "一层排水"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "范围校核"
+          - text: "排水系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "距离校核"
+          - text: "给水系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "消火栓系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWUNDERGROUNDPLAN"
@@ -204,6 +204,15 @@ panels:
           - text: "用电负荷"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlPOWERSYSTEM"
+    name: "POWERSYSTEM"
+    title: "电力系统"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "配电箱系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELECTRONIC"
     name: "ELECTRONIC"
     title: "消防弱电"
@@ -252,7 +261,7 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "接地平面"
+          - text: "接地网"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlADRAWING"

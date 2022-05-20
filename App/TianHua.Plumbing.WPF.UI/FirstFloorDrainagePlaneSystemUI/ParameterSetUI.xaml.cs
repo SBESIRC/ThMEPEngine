@@ -18,7 +18,6 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("保存成功！");
             this.Close();
         }
     }

@@ -105,6 +105,12 @@
                 <RadioButton GroupName="CreationLayerGroup" Margin="5,0,10,0" IsChecked="{Binding IsRoofRing}" Content="屋顶"/>
                 <RadioButton GroupName="CreationLayerGroup" Margin="10,0,0,0" IsChecked="{Binding IsTopLayerRing}" Content="顶层"/>
             </StackPanel>
+            <Label Content="绘制方式:" Width="Auto" FontWeight="Black" Height="25"></Label>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Margin="5,0,10,0" IsChecked="{Binding IsDoublePipe}" Content="双立管"/>
+                <RadioButton Margin="10,0,0,0" IsChecked="{Binding IsMultiPipe}" Content="多立管"/>
+            </StackPanel>
+            <CheckBox Margin="5" IsChecked="{Binding IsTopRing}" Content="所有分区都在顶层成环"/>
             <DockPanel LastChildFill="False">
                 <CheckBox DockPanel.Dock="Left" Content="设置试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
                 <Button DockPanel.Dock="Right" x:Name="btnSetHighlevelNozzleAndSemiPlatformNozzle" Click="btnSetHighlevelNozzleAndSemiPlatformNozzle_Click" Height="25">高级设置</Button>

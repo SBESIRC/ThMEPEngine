@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using AcHelper;
@@ -38,17 +39,11 @@ namespace TianHua.Electrical.PDS.Engine
             }
             foreach (Document doc in Application.DocumentManager)
             {
-                //var fileName = doc.Name.Split('\\').Last();
-                //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
-                //{
-                //    continue;
-                //}
-
                 using (var docLock = doc.LockDocument())
                 using (var activeDb = AcadDatabase.Use(doc.Database))
                 using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                    var referenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename);
                     if (node.Load.Location.ReferenceDWG.Equals(referenceDWG))
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;
@@ -164,17 +159,11 @@ namespace TianHua.Electrical.PDS.Engine
             }
             foreach (Document doc in Application.DocumentManager)
             {
-                //var fileName = doc.Name.Split('\\').Last();
-                //if (FireCompartmentParameter.ChoiseFileNames.Count(file => string.Equals(fileName, file)) != 1)
-                //{
-                //    continue;
-                //}
-
                 using (var docLock = doc.LockDocument())
                 using (var configDb = AcadDatabase.Open(ThCADCommon.PDSDiagramDwgPath(), DwgOpenMode.ReadOnly, false))
                 using (var activeDb = AcadDatabase.Use(doc.Database))
                 {
-                    var referenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last();
+                    var referenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename);
                     if (edge.Target.Load.Location.ReferenceDWG.Equals(referenceDWG))
                     {
                         Application.DocumentManager.MdiActiveDocument = doc;
@@ -204,7 +193,7 @@ namespace TianHua.Electrical.PDS.Engine
                     }
 
                     var insertEngine = new ThPDSBlockInsertEngine();
-                    var circuitNumber = edge.Circuit.ID.CircuitNumber.Last();
+                    var circuitNumber = edge.Circuit.ID.CircuitNumber;
                     var attributes = new Dictionary<string, string>
                     {
                         { ThPDSCommon.ENTER_CIRCUIT_ID, circuitNumber },

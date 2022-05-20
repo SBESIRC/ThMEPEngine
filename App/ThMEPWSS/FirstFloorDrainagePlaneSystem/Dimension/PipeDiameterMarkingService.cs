@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Print;
 
@@ -15,9 +16,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
         double startDis = 1100;
         double moveDis = 200;
         List<RouteModel> routes;
-        public PipeDiameterMarkingService(List<RouteModel> _routes)
+        ThMEPOriginTransformer originTransformer;
+        public PipeDiameterMarkingService(List<RouteModel> _routes, ThMEPOriginTransformer _originTransformer)
         {
             routes = _routes.Where(x => !x.IsBranchPipe).ToList();
+            originTransformer = _originTransformer;
         }
 
         public void CreateDim()
@@ -28,7 +31,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var layoutInfo = CalLayoutInfo(cRoutes.ToList());
                 Print(cRoutes.Key, layoutInfo);
             }
-            
         }
 
         /// <summary>
@@ -46,7 +48,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
                 var secPt = routeLine.GetPoint3dAt(routeLine.NumberOfVertices - 2);
                 var dir = (secPt - lastPt).GetNormal();
                 var moveDir = Vector3d.ZAxis.CrossProduct(dir);
-                var sPt = lastPt + dir * startDis;// + moveDir * moveDis;
+                var startDisTemp = startDis;
+                if (Vector3d.YAxis.DotProduct(moveDir) > 0)
+                {
+                    moveDir = -moveDir;
+                    startDisTemp = 0;
+                }
+                var sPt = lastPt + dir * startDisTemp;// + moveDir * moveDis;
+                sPt = originTransformer.Reset(sPt);
                 layoutInfo.Add(new KeyValuePair<Point3d, Vector3d>(sPt, -moveDir));
             }
 
@@ -66,16 +75,16 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             {
                 case VerticalPipeType.ConfluencePipe:
                 case VerticalPipeType.SewagePipe:
-                    attriName = "DN100";
+                    attriName = "De110";
                     layerName = ThWSSCommon.DraiDimsLayerName;
                     break;
                 case VerticalPipeType.WasteWaterPipe:
-                    attriName = "DN75";
+                    attriName = "De75";
                     layerName = ThWSSCommon.DraiDimsLayerName;
                     break;
                 case VerticalPipeType.CondensatePipe:
                 case VerticalPipeType.rainPipe:
-                    attriName = "DN75";
+                    attriName = "De110";
                     layerName = ThWSSCommon.RainDimsLayerName;
                     break;
                 default:
@@ -83,7 +92,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             }
             var attri = new Dictionary<string, string>() { { "可见性", attriName } };
             InsertBlockService.scaleNum = scale;
-            InsertBlockService.InsertBlock(layoutInfos, layerName, ThWSSCommon.DimsBlockName, attri);
+            InsertBlockService.InsertBlock(layoutInfos, layerName, ThWSSCommon.DimsBlockName, attri, true);
         }
     }
 }

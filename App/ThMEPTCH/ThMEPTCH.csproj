@@ -69,18 +69,59 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="Data\IO\ThSQLiteHelper.cs" />
+    <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Moel\ThTCHSprinkler.cs" />
+    <Compile Include="Moel\ThTCHVerticalPipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawVerticalPipeService.cs" />
+    <Compile Include="TCHTables\TCHTwtBlock.cs" />
+    <Compile Include="TCHTables\TCHTwtEquipment.cs" />
+    <Compile Include="TCHTables\TCHTwtPoint.cs" />
+    <Compile Include="TCHTables\TCHTwtSprinkler.cs" />
+    <Compile Include="TCHTables\TCHTwtVector.cs" />
+    <Compile Include="TCHTables\TCHTwtVerticalPipe.cs" />
+    <Compile Include="TCHTables\TCHTwtVerticalPipeDim.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
+    <Compile Include="ThMEPTCHCommon.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Data\IO\" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
+      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.8.116</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.bundle_green">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.core">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3">
+      <Version>2.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl">
+      <Version>2.0.4</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

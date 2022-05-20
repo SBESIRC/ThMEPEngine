@@ -21,10 +21,12 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Diagnostics;
 
 using ThMEPWSS.Common;
+using ThMEPWSS.HydrantLayout;
 using ThMEPWSS.HydrantLayout.Command;
 using ThMEPWSS.HydrantLayout.Service;
 using ThMEPWSS.HydrantLayout.Data;
 using ThMEPWSS.HydrantLayout.Model;
+using ThMEPWSS.HydrantLayout.Engine;
 
 namespace ThMEPWSS
 {
@@ -61,7 +63,8 @@ namespace ThMEPWSS
             HydrantLayoutSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>()
                                 {
                                     { "集水井", new List<string>() { "A-Well-1" }},
-                                    { "非机械车位", new List<string>() { "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437", "停车位2" } }
+                                    { "非机械车位", new List<string>() { "43543trer123" , "C充电车位", "ert54645645", "C18196EFF", "ret456546434543543", "机械车位", "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437", "停车位2" } }
+
                                 };
             using (var cmd = new ThHydrantLayoutCmd())
             {
@@ -113,47 +116,11 @@ namespace ThMEPWSS
                 dataQuery.ProjectOntoXYPlane();
                 dataQuery.Print();
 
-
-
                 //dataQuery.Reset(transformer);
                 //dataQuery.Print();
                 //dataQuery.Clean();
 
-                //TestRoomWallColumn(dataQuery);
             }
         }
-
-        private void TestRoomWallColumn(ThHydrantLayoutDataQueryService dataQuery)
-        {
-
-            var room = dataQuery.Room;
-            var wall = dataQuery.Wall;
-            var column = dataQuery.Column;
-            ///////////房间和墙线柱子相交。这里只用第一个room试了一下
-            var obj = new DBObjectCollection();
-            wall.ForEach(x => obj.Add(x));
-            column.ForEach(x => obj.Add(x));
-            var mr = room.OfType<MPolygon>().ToList();
-            var differ = mr[0].DifferenceMP(obj);
-            differ.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0mroom"));
-            //////////////////
-
-            ///////做圆。hard code了
-            var c = new Circle(new Point3d(434675.7626, 789952.2563, 0), Vector3d.ZAxis, 3000);
-            var cp = c.Tessellate(100);//这里是把圆变成polyline
-            DrawUtils.ShowGeometry(cp, "l0c");
-
-            //房间丢去空间索引用，用圆找空间索引
-            var spindex = new ThCADCoreNTSSpatialIndex(differ);
-            var selectRoom = spindex.SelectCrossingPolygon(cp);
-
-            //找出来的空间索引的房间和圆做相交得到我们画的那个”绿色“部分
-            var greedPart = cp.IntersectionMP(selectRoom, true);
-            greedPart.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0green"));
-            selectRoom.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l0selectRoom"));
-        }
-
-
-
     }
 }

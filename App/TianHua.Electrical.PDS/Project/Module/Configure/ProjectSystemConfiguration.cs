@@ -51,6 +51,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
 
         public static char[] NumberArray = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+        public static List<string> CircuitIDSortNames = new List<string>() { "WPE", "WP", "WLE", "WL", "WS", "WFEL" };
         //All
         public static LayingSite[] LayingSiteAll = new LayingSite[] { LayingSite.CE, LayingSite.SCE, LayingSite.WS, LayingSite.RS, LayingSite.CC, LayingSite.WC, LayingSite.CLC, LayingSite.BC, LayingSite.FC, LayingSite.AC, LayingSite.AB };
 

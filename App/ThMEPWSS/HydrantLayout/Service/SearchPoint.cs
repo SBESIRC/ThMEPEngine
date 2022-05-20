@@ -239,9 +239,9 @@ namespace ThMEPWSS.HydrantLayout.Service
                     double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                     if (angle < Math.PI * 3 / 2 + 0.15 && angle > Math.PI*3/2 - 0.15 && dir1.Length > Info.VPSide /4  && dir2.Length > Info.VPSide /4 && dir1.Length + dir2.Length > 3*Info.VPSide)
                     {
-                        Point3d basePoint1 = pt1 - dir1.GetNormal() * 100;
+                        Point3d basePoint1 = pt1 - dir1.GetNormal() * Info.VPSide/2;
                         Vector3d baseDir1 = dir2.GetNormal();
-                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
                         if (IsVPBlocked(basePoint1,baseDir1,Frame))
                         {
@@ -249,7 +249,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
                     }
@@ -276,7 +276,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                         if (angle < Math.PI * 3 / 2 + 0.15 && angle > Math.PI * 3 / 2 - 0.15 && dir1.Length > Info.VPSide / 4 && dir2.Length > Info.VPSide / 4 && dir1.Length + dir2.Length > 3 * Info.VPSide)
                         {
-                            Point3d basePoint1 = pt1 - dir1.GetNormal() * 100;
+                            Point3d basePoint1 = pt1 - dir1.GetNormal() * Info.VPSide / 2;
                             Vector3d baseDir1 = dir2.GetNormal();
 
                             if (IsVPBlocked(basePoint1, baseDir1, Frame))
@@ -285,7 +285,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide / 2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -330,7 +330,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         }
                     }
 
-                    Point3d left = start + 100 * dir01.GetNormal();
+                    Point3d left = start + Info.VPSide/2 * dir01.GetNormal();
                     Polyline vpLeft = CreateBoundaryService.CreateBoundary(left + Info.VPSide/2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
                     if (FeasibilityCheck.IsBoundaryOK(vpLeft,Frame, ProcessedData.ForbiddenIndex)) 
                     {
@@ -343,7 +343,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         }
                     }
 
-                    Point3d right = end - 100 * dir01.GetNormal();
+                    Point3d right = end - Info.VPSide/2 * dir01.GetNormal();
                     Polyline vpRight = CreateBoundaryService.CreateBoundary(right + Info.VPSide / 2 * dirOut, Info.VPSide, Info.VPSide, dirOut);
                     if (FeasibilityCheck.IsBoundaryOK(vpRight, Frame, ProcessedData.ForbiddenIndex))
                     {
@@ -390,7 +390,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                     dirList.Add(baseDir1);
                     LeanWallList.Add(Frame);
 
-                    Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + 100 * baseDir1, 200, 200, baseDir1);
+                    Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                     DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                 }
 
@@ -400,18 +400,18 @@ namespace ThMEPWSS.HydrantLayout.Service
                     //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                     if (dir2.Length >=  Info.VPSide)
                     {
-                        Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
+                        Point3d basePoint1 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                         Point3d basePoint2 = pt1 + dir2 / 2;
-                        Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
+                        Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * Info.VPSide/2;
 
-                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
 
-                        Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                        Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                        drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                        drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                        drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                        drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
 
                         if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1,Frame))
@@ -420,7 +420,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
 
@@ -430,7 +430,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
                      
@@ -440,7 +440,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
                     }
@@ -476,7 +476,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         dirList.Add(baseDir1);
                         LeanWallList.Add(hpl);
 
-                        Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + 100 * baseDir1, 200, 200, baseDir1);
+                        Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                     }
 
@@ -486,18 +486,18 @@ namespace ThMEPWSS.HydrantLayout.Service
                         //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                         if (dir2.Length >= Info.VPSide)
                         {
-                            Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
+                            Point3d basePoint1 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                             Point3d basePoint2 = pt1 + dir2 / 2;
-                            Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
+                            Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * Info.VPSide/2;
 
-                            //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                            //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                             //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
 
-                            Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
 
                             if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1, Frame))
@@ -506,7 +506,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -516,7 +516,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -526,7 +526,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
                         }
@@ -575,13 +575,13 @@ namespace ThMEPWSS.HydrantLayout.Service
                     {
                         Point3d basePoint1 = pt1 - dir1.GetNormal() * 0.5 * shortside;
                         Vector3d baseDir1 = dir2.GetNormal();
-                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
                         basePointList.Add(basePoint1);
                         dirList.Add(baseDir1);
                         LeanWallList.Add(Frame);
 
-                        Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                        Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);                  
                     }
                 }
@@ -607,7 +607,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                         if (angle < Math.PI * 3 / 2 + 0.15 && angle > Math.PI * 3 / 2 - 0.15 && dir1.Length > Info.VPSide / 4 && dir2.Length > Info.VPSide / 4 && dir1.Length + dir2.Length > 3 * Info.VPSide)
                         {
-                            Point3d basePoint1 = pt1 - dir1.GetNormal() * 100;
+                            Point3d basePoint1 = pt1 - dir1.GetNormal() * Info.VPSide/2;
                             Vector3d baseDir1 = dir2.GetNormal();
 
                             if (IsVPBlocked(basePoint1, baseDir1, Frame))
@@ -616,7 +616,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -635,7 +635,7 @@ namespace ThMEPWSS.HydrantLayout.Service
             dirList = new List<Vector3d>();
             foreach (var cl in Columns)
             {
-                Point3d center = cl.GetCentroidPoint();
+                //Point3d center = cl.GetCentroidPoint();
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -644,7 +644,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                     Vector3d dir01 = end - start;
                     Point3d mid = start + 0.5 * dir01;
                     Vector3d dirOut = new Vector3d(-dir01.Y, dir01.X, dir01.Z).GetNormal();
-                    Polyline probe = CreateBoundaryService.CreateBoundary(center, 1000, 190, dirOut);
+                    Polyline probe = CreateBoundaryService.CreateBoundary(mid, 40, 190, dirOut);
                     if (FeasibilityCheck.IsBoundaryOK(probe,Frame,ProcessedData.ParkingIndex))
                     {
                         basePointList.Add(mid);
@@ -685,7 +685,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                     dirList.Add(baseDir1);
                     LeanWallList.Add(Frame);
 
-                    Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + 100 * baseDir1, 200, 200, baseDir1);
+                    Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                     DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                 }
 
@@ -695,9 +695,9 @@ namespace ThMEPWSS.HydrantLayout.Service
                     //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                     if (dir2.Length > 3 * Info.VPSide)
                     {
-                        Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
+                        Point3d basePoint1 = pt1 + dir2.GetNormal() * Info.VPSide/2;
 
-                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                        //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                         //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
                         if (IsVPBlocked(basePoint1, baseDir1,Frame))
                         {
@@ -705,7 +705,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
 
@@ -717,11 +717,11 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
 
-                        Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
+                        Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * Info.VPSide/2;
 
                         if (basePoint3.DistanceTo(CenterPoint) > Info.SearchRadius && IsVPBlocked(basePoint3, baseDir1,Frame))
                         {
@@ -729,7 +729,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                             dirList.Add(baseDir1);
                             LeanWallList.Add(Frame);
 
-                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                         }
                     }
@@ -763,7 +763,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                         dirList.Add(baseDir1);
                         LeanWallList.Add(hpl);
 
-                        Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + 100 * baseDir1, 200, 200, baseDir1);
+                        Polyline drawVP = CreateBoundaryService.CreateBoundary(closetPt + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                         DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                     }
 
@@ -773,18 +773,18 @@ namespace ThMEPWSS.HydrantLayout.Service
                         //double angle = dir2.GetAngleTo(dir1, Vector3d.ZAxis);
                         if (dir2.Length >= Info.VPSide)
                         {
-                            Point3d basePoint1 = pt1 + dir2.GetNormal() * 100;
+                            Point3d basePoint1 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                             Point3d basePoint2 = pt1 + dir2 / 2;
-                            Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * 100;
+                            Point3d basePoint3 = pt1 + dir2 - dir2.GetNormal() * Info.VPSide/2;
 
-                            //Point3d basePoint2 = pt1 + dir2.GetNormal() * 100;
+                            //Point3d basePoint2 = pt1 + dir2.GetNormal() * Info.VPSide/2;
                             //Vector3d baseDir2 = new Vector3d(-dir2.Y, dir2.X, dir2.Z).GetNormal();
 
-                            Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                            Polyline drawVP0 = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
-                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                            drawVP0 = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                             DrawUtils.ShowGeometry(drawVP0, "l1vpbefore", 6, lineWeightNum: 30);
 
                             if (basePoint1.DistanceTo(CenterPoint) < Info.SearchRadius && IsVPBlocked(basePoint1, baseDir1, Frame))
@@ -793,7 +793,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint1 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -803,7 +803,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint2 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
 
@@ -813,7 +813,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                                 dirList.Add(baseDir1);
                                 LeanWallList.Add(hpl);
 
-                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + 100 * baseDir1, 200, 200, baseDir1);
+                                Polyline drawVP = CreateBoundaryService.CreateBoundary(basePoint3 + Info.VPSide/2 * baseDir1, Info.VPSide, Info.VPSide, baseDir1);
                                 DrawUtils.ShowGeometry(drawVP, "l1vp", 5, lineWeightNum: 30);
                             }
                         }

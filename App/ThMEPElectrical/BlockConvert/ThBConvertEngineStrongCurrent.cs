@@ -39,12 +39,7 @@ namespace ThMEPElectrical.BlockConvert
                 var targetData = new ThBlockReferenceData(blkRef);
                 FillProperties(targetData, source);
                 blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(targetData.Attributes));
-                if (source.EffectiveName.Contains("风机") ||
-                    source.EffectiveName.Contains("组合式空调器") ||
-                    source.EffectiveName.Contains("暖通其他设备标注") ||
-                    source.EffectiveName.Contains("风冷热泵") ||
-                    source.EffectiveName.Contains("冷水机组") ||
-                    source.EffectiveName.Contains("冷却塔"))
+                if (targetData.EffectiveName.Contains("负载标注"))
                 {
                     ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(target);
                 }
@@ -66,13 +61,17 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                var br = blkRef.GetObject(OpenMode.ForRead) as BlockReference;
+                if(br.IsDynamicBlock)
                 {
-                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
-                }
-                else
-                {
-                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
+                    if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                    {
+                        blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
+                    }
+                    else
+                    {
+                        blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
+                    }
                 }
             }
         }
@@ -113,6 +112,10 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     var blockAttributes = (block.Data as ThBlockReferenceData).Attributes;
                     var blockProperties = (block.Data as ThBlockReferenceData).CustomProperties;
+                    if(blockProperties.IsNull())
+                    {
+                        continue;
+                    }
                     if (blockAttributes.ContainsKey("集水井编号") && (string)blockAttributes["集水井编号"] == number)
                     {
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
@@ -183,11 +186,19 @@ namespace ThMEPElectrical.BlockConvert
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
                 var scrApproCentriod = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                if (!targetBlockData.EffectiveName.Contains("负载标注"))
+                {
+                    scrApproCentriod = srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS);
+                }
                 var offset = Point3d.Origin.TransformBy(targetMCS2WCS).GetVectorTo(scrApproCentriod);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
 
                 var targetProperties = targetBlockData.CustomProperties;
                 var srcProperties = srcBlockData.CustomProperties;
+                if(targetProperties.IsNull() || srcProperties.IsNull())
+                {
+                    return;
+                }
                 double base_x = 0, base_y = 0;
                 double label_x = 0, label_y = 0;
                 if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
@@ -253,6 +264,11 @@ namespace ThMEPElectrical.BlockConvert
 
                 var targetProperties = targetBlockData.CustomProperties;
                 var srcProperties = srcBlockData.CustomProperties;
+                if(targetProperties.IsNull() || srcProperties.IsNull())
+                {
+                    return;
+                }
+
                 if (targetProperties.Contains("距离") && srcProperties.Contains("距离"))
                 {
                     targetProperties.SetValue("距离", srcProperties.GetValue("距离"));

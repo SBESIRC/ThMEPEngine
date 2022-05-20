@@ -650,12 +650,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         ptLocPumpRec = ptLocPumpRec.TransformBy(Matrix3d.Displacement(new Vector3d(0, -frameHeigth / 2, 0)));
                         Polyline frameRec = ptLocPumpRec.CreateRectangle(frameWidth, frameHeigth);
                         //初步绘制潜水泵立管
-                        InitiallyPlotPumpVerticalPipe(pipeLineSystemUnit, pump, ptLocPumpRec, frameHeigth, frameWidth, frameRec, ref curPoint, parLayers, parIndexes);
-                        //绘制潜水泵立管细节
-                        PlotPumpVerticalPipe(ref pipeLineSystemUnit, pump, floorLines, ptLocPumpRec, frameHeigth, frameWidth, frameRec, curLayer, curIndex, curPoint, parLayers, parIndexes);
-                        //完善具有特殊用途的潜水泵立管
                         var contains_cond = pump.Location.Contains("梯") || pump.Location.Contains("电缆沟");
                         contains_cond = contains_cond && !pump.Location.Equals("开敞楼梯");
+                        var HasSpecialPump = contains_cond;
+                        InitiallyPlotPumpVerticalPipe(pipeLineSystemUnit, pump, ptLocPumpRec, frameHeigth, frameWidth, frameRec, ref curPoint, parLayers, parIndexes, HasSpecialPump);
+                        //绘制潜水泵立管细节
+                        PlotPumpVerticalPipe(ref pipeLineSystemUnit, pump, floorLines, ptLocPumpRec, frameHeigth, frameWidth, frameRec, curLayer, curIndex, curPoint, parLayers, parIndexes, HasSpecialPump);
+                        //完善具有特殊用途的潜水泵立管
                         if (contains_cond)
                         {
                             CompletePumpVerticalPipeForSpecialUse(pump, ptLocPumpRec, frameRec, frameHeigth, frameWidth);
@@ -845,7 +846,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="parIndexes"></param>
         /// <param name="parPoints"></param>
         /// <returns></returns>
-        public SubmergedPumpClass InitiallyPlotPumpVerticalPipe(PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, ref Point3d curPoint, List<int> parLayers, List<int> parIndexes)
+        public SubmergedPumpClass InitiallyPlotPumpVerticalPipe(PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, ref Point3d curPoint, List<int> parLayers, List<int> parIndexes,bool HasSpecialPump)
         {
             double dim_offset_annot = 1200;
             double dim_length = 0;
@@ -933,12 +934,13 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             List<DBText> bTexts = new List<DBText>();
             DBText dB1 = new(), dB2 = new(), dB3 = new(), dB4 = new(), dB5 = new(), dB6 = new(), dB7 = new(), dB8 = new();
-            dB1.TextString = "报警液位:     h1-" + para1;
-            dB8.TextString = "启泵液位:     h1-" + para2;
-            dB7.TextString = "三泵启泵液位: h1-" + para3;
-            dB2.TextString = "二泵启泵液位: h1-" + para4;
-            dB3.TextString = "一泵启泵液位: h1-" + para5;
-            dB4.TextString = "停泵液位:     h1-" + para6;
+            var text_h = HasSpecialPump ? "h1-" : "h-";
+            dB1.TextString = "报警液位:     " + text_h + para1;
+            dB8.TextString = "启泵液位:     " + text_h + para2;
+            dB7.TextString = "三泵启泵液位: " + text_h + para3;
+            dB2.TextString = "二泵启泵液位: " + text_h + para4;
+            dB3.TextString = "一泵启泵液位: " + text_h + para5;
+            dB4.TextString = "停泵液位:     " + text_h + para6;
             dB1.Position = dB2.Position = dB3.Position = dB4.Position = dB7.Position = dB8.Position = ptloc_br_tmp_01;
             if (pump.PumpCount == 1 || pump.Allocation.Contains("一用"))
             {
@@ -1050,7 +1052,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         /// <param name="frameRec"></param>
         /// <param name="curLayer"></param>
         /// <param name="curPoint"></param>
-        private void PlotPumpVerticalPipe(ref PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, List<Line> floorLines, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, int curLayer, int curIndex, Point3d curPoint, List<int> parLayers, List<int> parIndexes)
+        private void PlotPumpVerticalPipe(ref PipeLineSystemUnitClass pipeLineSystemUnit, SubmergedPumpClass pump, List<Line> floorLines, Point3d ptLocPumpRec, double frameHeigth, double frameWidth, Polyline frameRec, int curLayer, int curIndex, Point3d curPoint, List<int> parLayers, List<int> parIndexes,bool HasSpecialPump)
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
@@ -1166,7 +1168,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 Line lineelv4 = new Line(new Point3d(ptlocelv200.X - 250, ptlocelv200.Y, 0), new Point3d(ptlocelv200.X + 50, ptlocelv200.Y, 0));
                 tmpEntitiesUniqueNOTE.Add(lineelv4);
                 Dictionary<string, string> atts03 = new Dictionary<string, string>();
-                string pumpDepthElv = pump.Depth == 0 ? "h1-X.XX" : "h1-" + pump.Depth.ToString("0.00");
+                var text_h = HasSpecialPump ? "h1-" : "h-";
+                string pumpDepthElv = pump.Depth == 0 ? text_h + "X.XX" : text_h + pump.Depth.ToString("0.00");
                 atts03.Add("标高", pumpDepthElv);
                 var blkId5 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-NOTE", "标高", ptlocelv160, new Scale3d(0), 0, atts03);
                 blkId5.SetDynBlockValue("翻转状态1", (short)0);

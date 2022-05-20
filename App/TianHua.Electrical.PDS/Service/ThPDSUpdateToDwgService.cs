@@ -16,6 +16,7 @@ namespace TianHua.Electrical.PDS.Service
             var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph);
             updateService.InfoModify();
+            updateService.GenerateRevcloud();
         }
 
         public void Update(ThPDSProjectGraphNode projectNode)
@@ -27,6 +28,7 @@ namespace TianHua.Electrical.PDS.Service
             var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph, projectNode);
             updateService.InfoModify();
+            updateService.GenerateRevcloud();
         }
 
         public void Update(ThPDSProjectGraphEdge projectEdge)
@@ -38,6 +40,7 @@ namespace TianHua.Electrical.PDS.Service
             var projectGraph = PDSProject.Instance.ProjectUpdateToDwg(unionGraph);
             var updateService = new ThPDSInfoModifyEngine(nodeMapList, edgeMapList, projectGraph, projectEdge);
             updateService.InfoModify();
+            updateService.GenerateRevcloud();
         }
 
         public void Zoom(ThPDSProjectGraphNode node)

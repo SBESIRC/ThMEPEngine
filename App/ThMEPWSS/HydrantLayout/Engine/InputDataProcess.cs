@@ -272,7 +272,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
             List<Polyline> tmpPakings = new List<Polyline>();
             foreach (Polyline pl in rawData0.Car) 
             {
-                var bufferPaking = pl.Buffer(50).OfType<Polyline>().ToList();
+                var bufferPaking = pl.Buffer(Info.PakingBuffer).OfType<Polyline>().ToList();
                 tmpPakings.AddRange(bufferPaking);
             }
             rawData0.Car = tmpPakings;

@@ -71,7 +71,7 @@ namespace ThMEPLighting.Garage.Service
             {
                 if(IsCenterHasBothSides(linkLines[0]))
                 {
-                    Extend(fdxLine, linkLines[0]);
+                    Extend(fdxLine, pt, linkLines[0]);
                 }
             }
             else if (linkLines.Count == 2)
@@ -84,11 +84,11 @@ namespace ThMEPLighting.Garage.Service
                 {
                     if(IsCenterHasBothSides(linkLines[0]))
                     {
-                        Extend(fdxLine, linkLines[0]);
+                        Extend(fdxLine, pt, linkLines[0]);
                     }
                     else if(IsCenterHasBothSides(linkLines[1]))
                     {
-                        Extend(fdxLine, linkLines[1]);
+                        Extend(fdxLine, pt, linkLines[1]);
                     }
                 }
                 else
@@ -96,7 +96,7 @@ namespace ThMEPLighting.Garage.Service
                     var extLine = SelectExtendLine(fdxLine, linkLines.Where(o => IsCenterHasBothSides(o)).ToList());
                     if (extLine!=null)
                     {
-                        Extend(fdxLine, extLine);
+                        Extend(fdxLine, pt, extLine);
                     }
                 }
             }
@@ -105,7 +105,7 @@ namespace ThMEPLighting.Garage.Service
                 var extLine = SelectExtendLine(fdxLine, linkLines.Where(o => IsCenterHasBothSides(o)).ToList());
                 if (extLine != null)
                 {
-                    Extend(fdxLine, extLine);
+                    Extend(fdxLine, pt, extLine);
                 }
             }
         }
@@ -182,12 +182,78 @@ namespace ThMEPLighting.Garage.Service
             }
         }
 
-
-        private void Extend(Line fdx, Line center)
+        private void Extend(Line fdx,Point3d fdxPortPt, Line center)
         {
-            var firstSides = CenterSideDicts[center].Item1;
+            var firstSides = CenterSideDicts[center].Item1;                       
+            var firstInters = new Point3dCollection();
+            fdx.IntersectWith(firstSides[0], Intersect.ExtendBoth, firstInters, IntPtr.Zero, IntPtr.Zero);
+            
             var secondSides = CenterSideDicts[center].Item2;
-            ThLinkElbowService.Extend(fdx, firstSides[0], secondSides[0]);
+            var secondInters = new Point3dCollection();
+            fdx.IntersectWith(secondSides[0], Intersect.ExtendBoth, secondInters, IntPtr.Zero, IntPtr.Zero);
+            if (firstInters.Count == 0 && secondInters.Count == 0)
+            {
+                return;
+            }            
+            bool isStart = fdxPortPt.DistanceTo(fdx.StartPoint) < fdxPortPt.DistanceTo(fdx.EndPoint);
+            var dir = isStart ? fdx.LineDirection().Negate() : fdx.LineDirection();
+            Point3d extentPt = fdxPortPt;
+            if (ThGeometryTool.IsPointOnLine(firstInters[0], secondInters[0], fdx.StartPoint) &&
+               ThGeometryTool.IsPointOnLine(firstInters[0], secondInters[0], fdx.EndPoint))
+            {
+                // 非灯线在双排线里               
+                if (fdxPortPt.GetVectorTo(firstInters[0]).IsCodirectionalTo(dir))
+                {
+                    if(firstSides.Where(o=> firstInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = firstInters[0];
+                    }
+                }
+                else
+                {
+                    if (secondSides.Where(o => secondInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = secondInters[0];
+                    }
+                }                
+            }
+            else
+            {                
+                if (fdxPortPt.GetVectorTo(firstInters[0]).IsCodirectionalTo(dir))
+                {
+                    if (firstSides.Where(o => firstInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = firstInters[0];
+                    }
+                    else if(secondSides.Where(o => secondInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = secondInters[0];
+                    }
+                }
+                else
+                {
+                    if (secondSides.Where(o => secondInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = secondInters[0];
+                    }
+                    else if(firstSides.Where(o => firstInters[0].IsPointOnLine(o)).Any())
+                    {
+                        extentPt = firstInters[0];
+                    }    
+                }
+                
+            }
+            if (extentPt.DistanceTo(fdxPortPt) > 1.0)
+            {
+                if (isStart)
+                {
+                    fdx.StartPoint = extentPt;
+                }
+                else
+                {
+                    fdx.EndPoint = extentPt;
+                }
+            }
         }
 
         private void Shorten(Line fdx, Line center)

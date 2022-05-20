@@ -175,17 +175,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var mainLine1EdgeVec = Query(mainLine1);
                 var maineLine2EdgeVec = Query(mainLine2);
-                var cornerLinkVec = line1CornerPt.Value.GetVectorTo(line2CornerPt.Value);
                 if (mainLine1EdgeVec.HasValue && maineLine2EdgeVec.HasValue)
                 {
                     if (mainLine1EdgeVec.Value.IsSameDirection(maineLine2EdgeVec.Value))
                     {
-                        if (cornerLinkVec.IsSameDirection(mainLine1EdgeVec.Value))
+                        // 主干道, 直接把缺口的那一边连接起来
+                        results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
+                    }
+                    else
+                    {
+                        // 分支,把缺口连起来,把分支左手边连起来
+                        results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
+                        if(line1CornerPt.Value.IsLeftOfLine(branch.StartPoint,branch.EndPoint))
                         {
                             var projectionpt = GetCornerProjectionPt(mainLine1, line1CornerPt.Value);
-                            if (projectionpt.HasValue)
+                            if(projectionpt.HasValue)
                             {
-                                results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
                                 results.Add(new Line(line1CornerPt.Value, projectionpt.Value));
                             }
                         }
@@ -194,7 +199,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                             var projectionpt = GetCornerProjectionPt(mainLine2, line2CornerPt.Value);
                             if (projectionpt.HasValue)
                             {
-                                results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
                                 results.Add(new Line(line2CornerPt.Value, projectionpt.Value));
                             }
                         }

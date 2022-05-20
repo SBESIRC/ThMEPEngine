@@ -94,7 +94,7 @@ namespace ThMEPWSS.HydrantLayout.Model
         public static double DistanceWeight = 0.5;
 
         //消火栓实体形状数据
-        public static double VPSide = 200;
+        public static double VPSide = 150;
 
         //虚假数据
         public static double LongSide = 800;
@@ -108,5 +108,9 @@ namespace ThMEPWSS.HydrantLayout.Model
         
         //其他
         public static double ColumnAreaBound = 8000000;
+        public static double PakingBuffer = 30;
+        public static double CollisionTolerance = 0.25;
+
+
     }
 }

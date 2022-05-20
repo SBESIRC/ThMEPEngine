@@ -42,9 +42,9 @@ namespace TianHua.Electrical.PDS.Engine
 
             for (var i = 0; i < cabletrayEdgeList.Count; i++)
             {
-                var srcpanelID = cabletrayEdgeList[i].Circuit.ID.SourcePanelID;
-                var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitID;
-                var circuitNumber = cabletrayEdgeList[i].Circuit.ID.CircuitNumber.Last();
+                var srcpanelID = cabletrayEdgeList[i].Circuit.ID.SourcePanelIDList;
+                var circuitID = cabletrayEdgeList[i].Circuit.ID.CircuitIDList;
+                var circuitNumber = cabletrayEdgeList[i].Circuit.ID.CircuitNumber;
                 if (string.IsNullOrEmpty(circuitNumber))
                 {
                     continue;

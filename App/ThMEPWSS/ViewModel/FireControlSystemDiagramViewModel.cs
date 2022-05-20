@@ -352,5 +352,45 @@ namespace ThMEPWSS.ViewModel
                 }
             }
         }
+        bool _IsTopRing;
+        public bool IsTopRing
+        {
+            get => _IsTopRing;
+            set
+            {
+                if (value != _IsTopRing)
+                {
+                    _IsTopRing = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        bool _IsDoublePipe = true;
+        public bool IsDoublePipe
+        {
+            get => _IsDoublePipe;
+            set
+            {
+                if (value != _IsDoublePipe)
+                {
+                    _IsDoublePipe = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        bool _IsMultiPipe;
+        public bool IsMultiPipe
+        {
+            get => _IsMultiPipe;
+            set
+            {
+                if (value != _IsMultiPipe)
+                {
+                    _IsMultiPipe = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
     }
 }

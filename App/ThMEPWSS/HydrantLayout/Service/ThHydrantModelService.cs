@@ -60,9 +60,10 @@ namespace ThMEPWSS.HydrantLayout.Service
                 center = outline.GetCenter();
             }
 
-            var hydrantModel = new ThHydrantModel();
+            ThHydrantModel hydrantModel = null;
             if (outline != null && outline.NumberOfVertices > 0)
             {
+                hydrantModel = new ThHydrantModel();
                 hydrantModel.Data = blk;
                 hydrantModel.BlkDir = dir;
                 hydrantModel.Outline = outline;
@@ -109,11 +110,11 @@ namespace ThMEPWSS.HydrantLayout.Service
             blk.Explode(explodeObjs);
             var visibleObjs = explodeObjs.OfType<Polyline>().Where(x => x.Visible == true).FirstOrDefault();
 
-            if (visibleObjs!=null && visibleObjs.NumberOfVertices >0)
+            if (visibleObjs != null && visibleObjs.NumberOfVertices > 0)
             {
                 boundary = visibleObjs;
-            }    
-           
+            }
+
 
             return boundary;
         }

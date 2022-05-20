@@ -15,7 +15,8 @@ namespace ThParkingStall.Core.InterProcess
         public Polygon OutBound { get { return InterParameter.TotalArea; } }//原始边界
         public readonly Polygon Area;//该区域的面域
         public readonly List<LineString> Walls;
-        public readonly List<LineSegment> VaildLanes;//该区域全部分割线
+        public readonly List<LineSegment> VaildLanes;//该区域全部车道线
+        public readonly List<LineString> SegLines;//该区域全部分割线
         public readonly List<Polygon> Buildings; //该区域全部建筑物,包含坡道
         public readonly List<Ramp> Ramps;//该区域全部的坡道
         public readonly List<Polygon> BoundingBoxes;//该区域所有建筑物的bounding box
@@ -34,10 +35,20 @@ namespace ThParkingStall.Core.InterProcess
             BoundingBoxes = boundingBoxes;
             Key = key;
         }
-        static object lockObj = new object();
-        public void UpdateParkingCnts(bool Calculate)
+        public SubArea(Polygon area, List<LineString> segLines, List<LineString> walls,
+                        List<Polygon> buildings, List<Ramp> ramps, List<Polygon> boundingBoxes)
         {
-            if (SubAreaParkingCnt.Contains(this) && !Calculate)
+            Area = area;
+            SegLines = segLines;
+            Walls = walls;
+            Buildings = buildings;
+            Ramps = ramps;
+            BoundingBoxes = boundingBoxes;
+        }
+        static object lockObj = new object();
+        public void UpdateParkingCnts(bool IgnoreCache)
+        {
+            if (SubAreaParkingCnt.Contains(this) && !IgnoreCache)
             {
                 Count = SubAreaParkingCnt.GetParkingNumber(this);
                 if (MCompute.LogInfo)
@@ -74,6 +85,7 @@ namespace ThParkingStall.Core.InterProcess
                     MPGAData.Save();
                 }
                 Count = mParkingPartitionPro.CarSpots.Count;
+
                 lock (lockObj)
                 {
                     SubAreaParkingCnt.UpdateParkingNumber(this, Count);
@@ -88,7 +100,7 @@ namespace ThParkingStall.Core.InterProcess
         public List<double> GeneVals;
         //public bool ValIncreaseDir;
         public (double, double) Center;
-        private static readonly double Tol = 1e-10;
+        //private static readonly double Tol = 1e-10;
         public SubAreaKey(List<int> geneIdxs, List<double> geneVals, Coordinate center)
         {
             if (geneIdxs.Count != geneVals.Count) throw new ArgumentException("Index and Value Counts are different!");

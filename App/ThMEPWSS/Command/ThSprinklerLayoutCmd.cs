@@ -1,19 +1,14 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper.Commands;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
 using ThMEPWSS.Bussiness.LayoutBussiness;
+using ThMEPWSS.Service;
 
 namespace ThMEPWSS.Command
 {
@@ -35,7 +30,7 @@ namespace ThMEPWSS.Command
             {
                 return;
             }
-
+            var layoutPts = new List<Point3d>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 CalHolesService calHolesService = new CalHolesService();
@@ -69,7 +64,8 @@ namespace ThMEPWSS.Command
                     var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, false);
 
                     //放置喷头
-                    InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
+                    //InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
+                    layoutPts.AddRange(sprayPts.Select(o => o.Position));
 
                     //打印喷头变化轨迹
                     MarkService.PrintOriginSpray(sprayPts);
@@ -79,6 +75,7 @@ namespace ThMEPWSS.Command
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
                 }
             }
+            InsertSprinklerService.InsertTCHSprinkler(layoutPts, ThWSSUIService.Instance.Parameter.layoutType == Model.LayoutType.DownSpray ? 0 : 1);
         }
     }
 }

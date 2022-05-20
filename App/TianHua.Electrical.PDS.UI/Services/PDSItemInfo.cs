@@ -301,11 +301,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             new BlockDefInfo("SPD附件", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("接触器控制", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("热继电器保护", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-            new BlockDefInfo("配电计量（上海CT）", new GRect(0, -24, 628, 21+10).Expand(0, EXPY)),
+            new BlockDefInfo("配电计量（上海CT）", new GRect(0, -24, 628, 21 + 10).Expand(0, EXPY)),
             new BlockDefInfo("配电计量（上海直接表）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-            new BlockDefInfo("配电计量（CT表在前）", new GRect(0, -24, 628, 21+10).Expand(0, EXPY)),
+            new BlockDefInfo("配电计量（CT表在前）", new GRect(0, -24, 628, 21 + 10).Expand(0, EXPY)),
             new BlockDefInfo("配电计量（直接表在前）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
-            new BlockDefInfo("配电计量（CT表在后）", new GRect(0, -24, 628, 21+10).Expand(0, EXPY)),
+            new BlockDefInfo("配电计量（CT表在后）", new GRect(0, -24, 628, 21 + 10).Expand(0, EXPY)),
             new BlockDefInfo("配电计量（直接表在后）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("电动机（分立元件）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("电动机（CPS）", new GRect(0, -17, 628, 21).Expand(0, EXPY)),
@@ -335,6 +335,8 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             new BlockDefInfo("小母排分支", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("消防应急照明回路（WFEL）", new GRect(0, -16, 628, 21).Expand(0, EXPY)),
             new BlockDefInfo("过欠电压保护器", new GRect(0, -10, 50, 10)),
+            new BlockDefInfo("PMFE", new GRect(-15, -9, 15, 9)),
+            new BlockDefInfo("EFPU", new GRect(-15, -9, 15, 9)),
         };
         public static BlockDefInfo GetBlockDefInfo(string blkName)
         {
@@ -346,6 +348,20 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             r.BasePoint = px;
             switch (name)
             {
+                case "PMFE":
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-12.0000000000002, 9), px.OffsetXY(11.9999999999998, 9)), "0"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(11.9999999999998, -9.00000000000045), px.OffsetXY(-12.0000000000002, -9)), "0"));
+                    r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(6.82121026329696E-13, -4.54747350886464E-13), 14.9999999999995, 37.0.AngleFromDegree(), 323.0.AngleFromDegree(), false), "0"));
+                    r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(-1.59161572810262E-12, 0), 14.9999999999989, 217.0.AngleFromDegree(), 143.0.AngleFromDegree(), false), "0"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(-15, -7), "PMFE", "E-UNIV-EL", "TH-STYLE3") { Height = 15, });
+                    break;
+                case "EFPU":
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-12.0000000000002, 9), px.OffsetXY(11.9999999999998, 9)), "0"));
+                    r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(11.9999999999998, -9.00000000000045), px.OffsetXY(-12.0000000000002, -9)), "0"));
+                    r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(6.82121026329696E-13, -4.54747350886464E-13), 14.9999999999995, 37.0.AngleFromDegree(), 323.0.AngleFromDegree(), false), "0"));
+                    r.arcInfos.Add(new ArcInfo(new GArc(px.OffsetXY(-1.59161572810262E-12, 0), 14.9999999999989, 217.0.AngleFromDegree(), 143.0.AngleFromDegree(), false), "0"));
+                    r.textInfos.Add(new DBTextInfo(px.OffsetXY(-15,-7), "EFPU", "E-UNIV-EL", "TH-STYLE3") { Height = 15, });
+                    break;
                 case "直接表":
                     r.textInfos.Add(new DBTextInfo(px.OffsetXY(19.9599999999998, -5.90769230769251), "kWh", "E-UNIV-EL", "TH-STYLE3") { Height = 7.20000000000005, });
                     r.lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(15, 0.999999999999318), px.OffsetXY(35, 1)), "0"));

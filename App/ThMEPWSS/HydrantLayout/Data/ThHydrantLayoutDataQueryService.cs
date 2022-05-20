@@ -68,7 +68,14 @@ namespace ThMEPWSS.HydrantLayout.Data
 
         public void ProcessHydrant()
         {
-            Hydrant.ForEach(x => HydrantModel.Add(ThHydrantModelService.CreateHydrantMode(x)));
+            foreach (var h in Hydrant)
+            {
+                var model = ThHydrantModelService.CreateHydrantMode(h);
+                if (model != null)
+                {
+                    HydrantModel.Add(model);
+                }
+            }
         }
 
         public void Transform(ThMEPOriginTransformer transformer)
@@ -92,7 +99,7 @@ namespace ThMEPWSS.HydrantLayout.Data
             Wall.ForEach(x => x.ProjectOntoXYPlane());
             Column.ForEach(x => x.ProjectOntoXYPlane());
             Door.ForEach(x => x.ProjectOntoXYPlane());
-            FireProof.ForEach(x =>x.ProjectOntoXYPlane());
+            FireProof.ForEach(x => x.ProjectOntoXYPlane());
             Room.ForEach(x => x.ProjectOntoXYPlane());
 
             Car.ForEach(x => x.ProjectOntoXYPlane());

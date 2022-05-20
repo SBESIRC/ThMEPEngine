@@ -1,23 +1,18 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AcHelper;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO.SVG;
-using ThMEPStructure.StructPlane.Print;
 
 namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThMultiSvgPrintService
     {
         private Database AcadDb { get; set; }
-        private double FloorSpacing { get; set; } = 5000;
-        private double ElevationTblSpacing { get; set; } = 2000;
+        private double FloorSpacing { get; set; } = 100000;
         private List<string> SvgFiles { get; set; }
         public ThMultiSvgPrintService(Database database,List<string> svgFiles)
         {
@@ -40,11 +35,8 @@ namespace ThMEPStructure.StructPlane.Service
                     {
                         continue;
                     }
-                    var prevExtents = ToExtents2d(floorObjIds[i - 1]);
-                    var currentExtents = ToExtents2d(floorObjIds[i]);
-                    var targetY = prevExtents.MaxPoint.Y + FloorSpacing;
-                    var sourceY = currentExtents.MinPoint.Y;
-                    var mt = Matrix3d.Displacement(new Vector3d(0, targetY- sourceY,0));
+                    var dir = new Vector3d(0, i * FloorSpacing, 0);
+                    var mt = Matrix3d.Displacement(dir);
                     floorObjIds[i].OfType<ObjectId>().ForEach(o =>
                     {
                         var entity = acadDb.Element<Entity>(o, true);

@@ -14,6 +14,9 @@ using ThMEPArchitecture.ViewModel;
 using NFox.Cad;
 using Linq2Acad;
 using ThMEPEngineCore;
+using ThParkingStall.Core.Tools;
+using NetTopologySuite.Geometries;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -38,15 +41,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private HashSet<int> HorzSegLineValues = new HashSet<int>();// 所有合理水平分割线的值
         public HashSet<BisectionPlan> AllSegPlans = new HashSet<BisectionPlan>();
         private bool ShowSegLineOnly = true;
-        public AutoSegGenerator(OuterBrder outerBrder, Serilog.Core.Logger logger)
+        public AutoSegGenerator(LayoutData layoutData, Serilog.Core.Logger logger,int cutol =1000)
         {
-            WallLine = outerBrder.WallLine.Clone() as Polyline;
-            outerBrder.Buildings.ForEach(br => GetBuildings(br));
+            WallLine = layoutData.WallLine.Shell.ToDbPolyline();//初始墙线
+            Buildings = layoutData.Buildings.Select(b=>b.Shell.ToDbPolyline()).ToList();
             BuildingSpatialIndex = new ThCADCoreNTSSpatialIndex(Buildings.ToCollection());//建筑物pline索引
             Logger = logger;
             RoadWidth = ParameterStock.RoadWidth;
             CutProp = 1.0;// 切割阈值比例，默认一倍车道宽（1.0）
-            CutTol = 1000;//比正常道路宽的容差，至少为3
+            CutTol = cutol;//比正常道路宽的容差，至少为3
             StepSize = CutProp * RoadWidth + CutTol;//切割宽度,默认6500距离才尝试切割
             Tol = 2; //出头距离
             var initspliters = new List<BisectionSegLine>() { null, null, null, null };
@@ -68,14 +71,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             ShowSegLineOnly = showSegLineOnly;
             LastPlanOnly = lastPlanOnly;
-            Logger?.Information("\n二分分割线穷举");
+            Logger?.Information("二分分割线穷举");
             var initAreaKey = new Tuple<int?, int?, int?, int?>(null, null, null, null);
             BisectAreaDic.Add(initAreaKey, BisectAreaTree);
             List<BisectionArea> areas = new List<BisectionArea> { BisectAreaTree };
             List<BisectionArea> nextLevelAreas;
             while(areas.Count != 0)//当前需要分割的区域
             {
-                Logger?.Information("\n" + areas.GetNewAreaCount().ToString());
+                //Logger?.Information("\n" + areas.GetNewAreaCount().ToString());
                 nextLevelAreas = new List<BisectionArea>();
                 foreach (var bisectArea in areas)
                 {
@@ -83,7 +86,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 areas = nextLevelAreas;
             }
-            if(!ShowSegLineOnly)
+            Logger?.Information(" 二分分割线总数：" + BisectSegLineDic.Count.ToString() +"");
+            //if(ShowSegLineOnly) GetGrid();
+            //else
+            if (!ShowSegLineOnly)
             {
                 GetAllSegLinePlan();
                 //var maxCount = AllSegPlans.Max(p => p.Count);
@@ -105,6 +111,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 ReclaimMemory();
             }
+        }
+        public List<BisectionSegLine> GetGrid()
+        {
+            var girdLines = new List<BisectionSegLine>();
+            var allLines = BisectSegLineDic.Values.ToList();
+            for(int i = 0; i < allLines.Count(); i++)
+            {
+                bool donminated = false;
+                for (int j = 0;j < allLines.Count(); j++)
+                {
+                    if (i == j) continue;
+                    if(allLines[i].IsDominatedBy(allLines[j]))
+                    {
+                        donminated = true;
+                        break;
+                    }
+                }
+                if (!donminated) girdLines.Add(allLines[i]);
+            }
+            //girdLines.ForEach(l => { l.DrawSegLine();/*l.ShowLowerUpperBound();*/ });
+            return girdLines;
         }
         //获取所有切到不能再切的方案
         private List<BisectionPlan> GetLastLayerPlan()
@@ -235,7 +262,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             var foundMid = GetMidVal(endX, minVal, maxVal, true, out int midX);// 获取中点坐标，优先在所有已有的线中找
                             segLine.StartPoint = new Point3d(midX, top, 0);
                             segLine.EndPoint = new Point3d(midX, bottom, 0);
-                            var segAreas = segLine.SplitByLine(area);
+                            var segAreas = segLine.Split(area);
                             if (segAreas.Count == 2)//当前中线合理
                             {
                                 segAreas.SortByOrder(segLine);// 对分区排序，上下，左右
@@ -251,7 +278,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 else//新的分割线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
-                                    if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
+                                    //if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
                                 }
                                 //为节点添加分支
                                 bisectArea.AddBranch(BisecSegLine, out List<BisectionSegLine> curSpliters1, out List<BisectionSegLine> curSpliters2);
@@ -331,7 +358,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             var foundMid = GetMidVal(endY, minVal, maxVal, false, out int midY);// 获取中点坐标，优先在所有已有的线中找
                             segLine.StartPoint = new Point3d(left, midY, 0);
                             segLine.EndPoint = new Point3d(right, midY, 0);
-                            var segAreas = segLine.SplitByLine(area);
+                            var segAreas = segLine.Split(area);
                             if (segAreas.Count == 2)//当前中线合理
                             {
                                 segAreas.SortByOrder(segLine);// 对分区排序，上下，左右
@@ -347,7 +374,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 else// 新的分割线
                                 {
                                     BisectSegLineDic.Add(lineKey, BisecSegLine);
-                                    if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
+                                    //if (ShowSegLineOnly) BisecSegLine.DrawSegLine();//画出来
                                 }
                                 //为节点添加分支
                                 bisectArea.AddBranch(BisecSegLine, out List<BisectionSegLine> curSpliters1, out List<BisectionSegLine> curSpliters2);
@@ -436,7 +463,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             maxVal = 0;
             minVal = 0;
-            var segAreas = segLine.SplitByLine(area);
+            var segAreas = segLine.Split(area);
             if (segAreas.Count != 2)//不是两个区域直接退出
             {
                 moveDist = StepSize/10;
@@ -723,8 +750,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public static bool GetValueType(this Line line, Point3d pt)
         {
             //判断点是直线的上限还是下限
-            var dir = line.IsVertical();
-            if (dir)
+            //var dir = line.IsVertical();
+            if (line.IsVertical())
             {
                 return pt.X > line.StartPoint.X;
             }
@@ -735,15 +762,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         public static double GetMinDist(this Line line, DBObjectCollection buildLines)// 返回线到建筑点集的最短距离
         {
-            var minDists = new List<double>();
+            //var minDists = new List<double>();
+            var geos = new List<Geometry>();
             foreach (var build in buildLines)
             {
-                 if(build is Curve curve)
+                 if(build is Polyline pline)
                 {
-                    minDists.Add(line.Distance(curve));
+                    geos.Add(pline.ToNTSLineString());
+                    //minDists.Add(line.Distance(curve));
                 }
             }
-            return minDists.Min();
+            return line.ToNTSLineString().Distance(new GeometryCollection(geos.ToArray()));
+            //return minDists.Min();
         }
         public static Tuple<int?, int?, int?, int?> GetKey(this List<BisectionSegLine> Spliters)// 获取当前区域的key，区域ID
         {
@@ -785,6 +815,107 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 if (!area.AllSearched) count += 1;
             }
             return count;
+        }
+
+        public static List<Polyline> Split(this Line line,Polyline pline)
+        {
+            var lstrs = new List<LineString>();
+            lstrs.Add(pline.ToNTSLineString());
+            lstrs.Add(line.ToNTSLineString());
+            return lstrs.GetPolygons().Select(p => p.Shell.ToDbPolyline()).ToList();
+        }
+
+        public static bool IsDominatedBy(this BisectionSegLine l_this, BisectionSegLine l_other)
+        {
+            if(l_this.Vertical != l_other.Vertical) return false;
+            var this_abs = (l_this.MaxVal - l_this.MinVal)/2;
+            var other_abs = (l_other.MaxVal - l_other.MinVal)/2;
+            var this_lb =   l_this.Value - this_abs;
+            var other_lb =  l_other.Value - other_abs;
+            var this_ub =  l_this.Value + this_abs;
+            var other_ub = l_other.Value + other_abs;
+            var tol = 5;
+            bool bool1 = false;
+            if(this_lb <= other_lb + tol && this_ub + tol >= other_lb )
+            {
+                bool1 = true;
+            }
+            if(this_ub + tol >= other_ub  && this_lb <= other_ub + tol)
+            {
+                bool1 = true;
+            }
+            //var bool1 = (this_lb <= other_ub + tol) || (this_ub + tol>= other_lb);
+
+            var this_SE = l_this.SegLine.GetStartEndValue();
+            var other_SE = l_other.SegLine.GetStartEndValue();
+            var bool2 = (this_SE.Item1 + tol >= other_SE.Item1)  && (this_SE.Item2 <= other_SE.Item2 + tol);
+            //var bool2 = l_this.StartVal+tol >= l_other.StartVal && l_this.EndVal <= l_other.EndVal + tol;
+            return bool1 && bool2;
+        }
+        public static bool DominatedByAny(this BisectionSegLine l_this,IEnumerable<BisectionSegLine> others)
+        {
+            foreach(var l in others)
+            {
+                if (l_this.IsDominatedBy(l)) return true;
+            }
+            return false;
+        }
+
+        private static (int, int) GetStartEndValue(this Line SegLine)//利用分割线有效的部分
+        {
+            int minVal;
+            int maxVal;
+            if (SegLine.IsVertical())
+            {
+                minVal = (int)Math.Min(SegLine.StartPoint.Y, SegLine.EndPoint.Y);//向下取整
+                maxVal = (int)Math.Ceiling(Math.Max(SegLine.StartPoint.Y, SegLine.EndPoint.Y));//向上取整
+            }
+            else
+            {
+                minVal = (int)Math.Min(SegLine.StartPoint.X, SegLine.EndPoint.X);
+                maxVal = (int)Math.Ceiling(Math.Max(SegLine.StartPoint.X, SegLine.EndPoint.X));
+            }
+            return (minVal, maxVal);
+        }
+
+        public static void ShowLowerUpperBound(this BisectionSegLine bisectionSeg, string layer = "最大最小值")
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 3);
+            }
+
+
+            LineSegment SegLine = bisectionSeg.SegLine.ToNTSLineSegment();
+            var abs = (bisectionSeg.MaxVal - bisectionSeg.MinVal)/2;
+            var lb =  bisectionSeg.Value + abs;
+            var ub =  bisectionSeg.Value -abs;
+            LinearRing shell;
+            if (SegLine.IsVertical())
+            {
+                var origion = new Coordinate(lb, SegLine.P0.Y);
+                var coors = new Coordinate[] { origion,
+                                                new Coordinate(lb, SegLine.P1.Y),
+                                                new Coordinate(ub, SegLine.P1.Y),
+                                                new Coordinate(ub, SegLine.P0.Y),origion};
+                shell = new LinearRing(coors);
+
+            }
+            else
+            {
+                var origion = new Coordinate(SegLine.P0.X, lb);
+                var coors = new Coordinate[] { origion,
+                                                new Coordinate(SegLine.P1.X, lb),
+                                                new Coordinate(SegLine.P1.X, ub),
+                                                new Coordinate(SegLine.P0.X, ub),origion};
+                shell = new LinearRing(coors);
+
+            }
+            var poly = shell.ToDbPolyline();
+            poly.Layer = layer;
+            poly.ColorIndex = 3;
+            poly.AddToCurrentSpace();
         }
 
     }

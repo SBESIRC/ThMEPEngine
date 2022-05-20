@@ -94,7 +94,7 @@ namespace ThMEPStructure.StructPlane.Service
                             results.Add(text1);
                             break;
                         case 1:
-                            var text2 = CreateText(center, info.Elevation, contentTextHeight,
+                            var text2 = CreateText(center, info.BottomElevation, contentTextHeight,
                                 contentWidthFactor, ThPrintStyleManager.ElevationTableTextStyleName);
                             results.Add(text2);
                             break;
@@ -267,7 +267,7 @@ namespace ThMEPStructure.StructPlane.Service
         /// <summary>
         /// 标高
         /// </summary>
-        public string Elevation { get; set; } = "";
+        public string BottomElevation { get; set; } = "";
         /// <summary>
         /// 层高
         /// </summary>

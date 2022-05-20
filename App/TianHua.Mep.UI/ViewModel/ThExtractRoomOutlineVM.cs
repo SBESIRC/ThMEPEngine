@@ -4,14 +4,16 @@ using System.Collections.ObjectModel;
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
+using DotNetARX;
 using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore;
 using ThMEPWSS.Command;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Common;
 using TianHua.Mep.UI.Command;
+using ThMEPEngineCore.Model.Common;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -28,9 +30,16 @@ namespace TianHua.Mep.UI.ViewModel
             using (var lockDoc = Active.Document.LockDocument())
             using (var cmd = new ThExtractWallLinesCmd(GetLayers()))
             {
-                SetFocusToDwgView();
+                SetFocusToDwgView();                
                 cmd.Execute();
-                PrintWallLines(cmd.Walls);
+                CreateAILayer(AIWallLayer, 7);
+                if (cmd.RangePts.Count>=3 && cmd.Walls.Count>0)
+                {
+                    EraseWallLines(cmd.RangePts, AIWallLayer);
+                }               
+                PrintWallLines(cmd.Walls, AIWallLayer);
+                SetCurrentLayer(AIWallLayer);
+                Active.Editor.Regen();
             }
         }
         public void BuildRoomOutline()
@@ -88,7 +97,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 SetFocusToDwgView();
-                var pneo = new PromptNestedEntityOptions("\n请选择幕墙线:");
+                var pneo = new PromptNestedEntityOptions("\n请选择墙体线:");
                 var pner = Active.Editor.GetNestedEntity(pneo);
                 if (pner.Status == PromptStatus.OK)
                 {
@@ -104,12 +113,10 @@ namespace TianHua.Mep.UI.ViewModel
                 return "";
             }
         }
-        private void PrintWallLines(DBObjectCollection walls)
+        private void PrintWallLines(DBObjectCollection walls,string layer)
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                acadDb.Database.CreateAILayer(AIWallLayer, 7);
-                acadDb.Database.OpenAILayer(AIWallLayer);
                 walls.OfType<Entity>().ForEach(e =>
                 {
                     acadDb.ModelSpace.Add(e);
@@ -120,13 +127,34 @@ namespace TianHua.Mep.UI.ViewModel
                 });
             }
         }
+
+        private void EraseWallLines(Point3dCollection pts,string layer)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                if (!acadDb.Layers.Contains(layer))
+                {
+                    return;
+                }
+                acadDb.Database.OpenAILayer(layer);
+                acadDb.ModelSpace
+                    .OfType<Entity>()
+                    .Where(c => c.Layer == layer)
+                    .ForEach(c =>
+                {
+                    var entity = acadDb.Element<Entity>(c.ObjectId, true);
+                    entity.Erase();
+                });
+            }
+        }
+
         private DBObjectCollection GetWallLines()
         {
             using (var acadDb = AcadDatabase.Active())
             {
                 return acadDb.ModelSpace
                     .OfType<Entity>()
-                    .Where(e => e is Curve)
+                    .Where(e => e is Curve || e is MPolygon)
                     .Where(e => e.Layer == AIWallLayer)
                     .ToCollection();
             }
@@ -161,6 +189,21 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return layerInfos.Where(o => acdb.Layers.Contains(o.Layer)).ToList();
+            }
+        }
+        private void CreateAILayer(string layer, short colorIndex)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                acadDb.Database.CreateAILayer(layer, colorIndex);
+                acadDb.Database.OpenAILayer(layer);
+            }
+        }
+        private void SetCurrentLayer(string layerName)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                acdb.Database.SetCurrentLayer(layerName);
             }
         }
         private void SetFocusToDwgView()

@@ -1,4 +1,5 @@
 ﻿using AcHelper;
+using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using System;
@@ -13,6 +14,7 @@ using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Common;
 using ThMEPWSS.Model;
+using ThMEPWSS.Service;
 using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -117,14 +119,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 FormUtil.DisableForm(gridForm);
                 ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(viewModel.FloorFrameds.ToList(), setViewModel, config);
                 thDrainSystem.Execute();
+                //ThDrainSysADUIService.Instance.selectFloors = viewModel.FloorFrameds.ToList();
+                //ThDrainSysADUIService.Instance.viewmodel = setViewModel;
+                //ThDrainSysADUIService.Instance.layerNames = config;
                 //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
+                ThMEPWSS.Common.Utils.FocusToCAD();
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THTCHPIPIMP");
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "天华-错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally 
+            finally
             {
                 FormUtil.EnableForm(gridForm);
             }
@@ -166,6 +173,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void ChildWindowClosed(object sender, EventArgs e)
         {
             this.Show();
+        }
+        void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+                    Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
     class ShowListViewModel : NotifyPropertyChangedBase

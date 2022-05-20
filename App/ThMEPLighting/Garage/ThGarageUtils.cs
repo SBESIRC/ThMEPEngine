@@ -181,7 +181,7 @@ namespace ThMEPLighting.Garage
             });
             if (pts.Count > 0)
             {
-                var splitLines =  line.Split(pts);
+                var splitLines = line.Split(pts);
                 // 分割的线与传入的重叠线有重叠，
                 return splitLines.OfType<Line>().Where(l =>
                 {
@@ -207,31 +207,31 @@ namespace ThMEPLighting.Garage
         /// <param name="line"></param>
         /// <param name="pts">分割点，点要在线上</param>
         /// <returns></returns>
-        public static List<Line> Split(this Line line,List<Point3d> pts)
+        public static List<Line> Split(this Line line, List<Point3d> pts)
         {
             var results = new List<Line>();
             var newPts = pts.Where(p => ThGeometryTool.IsPointInLine(line.StartPoint, line.EndPoint, p, 0.0))
-                .OrderBy(p=>p.DistanceTo(line.StartPoint)).ToList();
+                .OrderBy(p => p.DistanceTo(line.StartPoint)).ToList();
             var startPt = line.StartPoint;
-            for (int i=0;i<newPts.Count;i++)
+            for (int i = 0; i < newPts.Count; i++)
             {
-                if(startPt.DistanceTo(newPts[i])>1e-6)
+                if (startPt.DistanceTo(newPts[i]) > 1e-6)
                 {
                     results.Add(new Line(startPt, newPts[i]));
                 }
                 startPt = newPts[i];
             }
-            if(startPt.DistanceTo(line.EndPoint) > 1e-6)
+            if (startPt.DistanceTo(line.EndPoint) > 1e-6)
             {
                 results.Add(new Line(startPt, line.EndPoint));
             }
             return results;
         }
 
-        public static List<Point3d> Distinct(this List<Point3d> pts,Tolerance tolerance)
+        public static List<Point3d> Distinct(this List<Point3d> pts, Tolerance tolerance)
         {
             var results = new List<Point3d>();
-            while (pts.Count>0)
+            while (pts.Count > 0)
             {
                 results.Add(pts[0]);
                 pts.RemoveAt(0);
@@ -247,13 +247,13 @@ namespace ThMEPLighting.Garage
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool IsAntiClockwise(this Vector3d a,Vector3d b)
+        public static bool IsAntiClockwise(this Vector3d a, Vector3d b)
         {
             var x1 = a.X;
             var y1 = a.Y;
             var x2 = b.X;
             var y2 = b.Y;
-            var value = x1*y2 - x2*y1;
+            var value = x1 * y2 - x2 * y1;
             return value > 0.0;
         }
         /// <summary>
@@ -276,7 +276,7 @@ namespace ThMEPLighting.Garage
         /// </summary>
         /// <param name="lineVec"></param>
         /// <returns></returns>
-        public static Vector3d GetAlignedDimensionTextDir(this Vector3d lineVec,double tolerance=1e-6)
+        public static Vector3d GetAlignedDimensionTextDir(this Vector3d lineVec, double tolerance = 1e-6)
         {
             // 参照对齐标注的文字方向
             if (lineVec.IsCodirectionalTo(Vector3d.YAxis, new Tolerance(tolerance, tolerance)) ||
@@ -310,9 +310,9 @@ namespace ThMEPLighting.Garage
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public static Polyline ToPolyline(this List<Line> edges,double tolerance=1.0)
+        public static Polyline ToPolyline(this List<Line> edges, double tolerance = 1.0)
         {
-            if(edges.Count==0)
+            if (edges.Count == 0)
             {
                 return new Polyline();
             }
@@ -323,13 +323,13 @@ namespace ThMEPLighting.Garage
             }
             else
             {
-                var linkPt = edges[0].FindLinkPt(edges[1],tolerance);
-                if(!linkPt.HasValue)
+                var linkPt = edges[0].FindLinkPt(edges[1], tolerance);
+                if (!linkPt.HasValue)
                 {
                     return new Polyline();
                 }
                 else
-                {                    
+                {
                     var startPt = linkPt.Value.GetNextLinkPt(edges[0].StartPoint, edges[0].EndPoint);
                     var pts = new Point3dCollection() { startPt };
                     for (int i = 0; i < edges.Count; i++)
@@ -346,7 +346,7 @@ namespace ThMEPLighting.Garage
         public static Polyline Reverse(this Polyline polyline)
         {
             var pts = new Point3dCollection();
-            for(int i=polyline.NumberOfVertices-1;i>=0;i--)
+            for (int i = polyline.NumberOfVertices - 1; i >= 0; i--)
             {
                 pts.Add(polyline.GetPoint3dAt(i));
             }
@@ -417,11 +417,11 @@ namespace ThMEPLighting.Garage
             }
             return false;
         }
-        public static bool GeometryContains(this List<Line> lines ,Line line, Tolerance tolerance)
+        public static bool GeometryContains(this List<Line> lines, Line line, Tolerance tolerance)
         {
-            for(int i=0;i< lines.Count;i++)
+            for (int i = 0; i < lines.Count; i++)
             {
-                if(line.IsGeometryEqual(lines[i], tolerance))
+                if (line.IsGeometryEqual(lines[i], tolerance))
                 {
                     return true;
                 }
@@ -484,16 +484,16 @@ namespace ThMEPLighting.Garage
             //单位化、修正方向
             return lines.Select(o => ThGarageLightUtils.NormalizeLaneLine(o)).ToList();
         }
-        
-        public static Tuple<Line, Point3d> FindPriorityStart(this List<Line> lines,double tolerance=1.0)
+
+        public static Tuple<Line, Point3d> FindPriorityStart(this List<Line> lines, double tolerance = 1.0)
         {
             var instance = ThQueryLineService.Create(lines);
             for (int i = 0; i < lines.Count; i++)
             {
                 var current = lines[i];
-                var querys  = instance.Query(current.StartPoint, tolerance);
+                var querys = instance.Query(current.StartPoint, tolerance);
                 querys.Remove(current);
-                if(querys.Count==0)
+                if (querys.Count == 0)
                 {
                     return Tuple.Create(current, current.StartPoint);
                 }
@@ -547,28 +547,28 @@ namespace ThMEPLighting.Garage
             return result;
         }
 
-        public static Polyline BufferPath(this Polyline path, double offsetDis,bool isSingle=true)
+        public static Polyline BufferPath(this Polyline path, double offsetDis, bool isSingle = true)
         {
             var poly = new Polyline();
-            if(path.Length<1.0)
+            if (path.Length < 1.0)
             {
                 return poly;
             }
             var objs = new DBObjectCollection() { path };
-            var res = isSingle?objs.SingleSidedBuffer(offsetDis):objs.Buffer(offsetDis);
+            var res = isSingle ? objs.SingleSidedBuffer(offsetDis) : objs.Buffer(offsetDis);
             if (res.Count > 0)
             {
                 poly = res.OfType<Polyline>().OrderByDescending(o => o.Area).First();
             }
             return poly;
         }
-        public static DBObjectCollection Query(this Point3d pt, 
+        public static DBObjectCollection Query(this Point3d pt,
             ThCADCoreNTSSpatialIndex spatialIndex, double envelopLength = 1.0)
         {
             var envelop = ThDrawTool.CreateSquare(pt, envelopLength);
             return spatialIndex.SelectCrossingPolygon(envelop);
         }
-        public static DBObjectCollection Delete(this ThRegionBorder border,ThLightArrangeParameter arrangeParameter,Database db)
+        public static DBObjectCollection Delete(this ThRegionBorder border, ThLightArrangeParameter arrangeParameter, Database db)
         {
             using (AcadDatabase acadDb = AcadDatabase.Use(db))
             {
@@ -606,6 +606,34 @@ namespace ThMEPLighting.Garage
         public static bool IsOppositeDirection(this Vector3d first, Vector3d second)
         {
             return first.DotProduct(second) < 0.0;
+        }
+        /// <summary>
+        /// 判断点在线的左边
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <returns></returns>
+        public static bool IsLeftOfLine(this Point3d pt, Point3d sp, Point3d ep)
+        {
+            double tmpx = (sp.X - ep.X) / (sp.Y - ep.Y) * (pt.Y - ep.Y) + ep.X;
+            if (tmpx > pt.X)//当tmpx>p.x的时候，说明点在线的左边，小于在右边，等于则在线上。
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断点在线的右边
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="sp"></param>
+        /// <param name="ep"></param>
+        /// <returns></returns>
+        public static bool IsRightOfLine(this Point3d pt, Point3d sp, Point3d ep)
+        {
+            double tmpx = (sp.X - ep.X) / (sp.Y - ep.Y) * (pt.Y - ep.Y) + ep.X;
+            if (tmpx < pt.X)//当tmpx<p.x的时候，说明点在线的右边，小于在左边，等于则在线上。
+                return true;
+            return false;
         }
     }
 }

@@ -7,12 +7,12 @@ namespace TianHua.Electrical.PDS.Extension
     {
         public static string GetCircuitID(this ThPDSProjectGraphEdge edge)
         {
-            return edge.Circuit.ID.CircuitID.Last();
+            return edge.Circuit.ID.CircuitID;
         }
 
         public static void SetCircuitID(this ThPDSProjectGraphEdge edge, string circuitID)
         {
-            edge.Circuit.ID.CircuitID[edge.Circuit.ID.CircuitID.Count - 1] = circuitID;
+            edge.Circuit.ID.CircuitID = circuitID;
         }
     }
 }

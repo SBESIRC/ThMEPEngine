@@ -11,6 +11,7 @@ using QuikGraph;
 
 using ThCADExtension;
 using TianHua.Electrical.PDS.Extension;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
 using TianHua.Electrical.PDS.Project.Module.Circuit.IncomingCircuit;
@@ -49,7 +50,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 参考尺寸
             var overallDimensions = texts.Where(t => t.TextString == ThPDSCommon.OVERALL_DIMENSIONS).First();
-            overallDimensions.TextString = "";
+            overallDimensions.TextString = node.Details.BoxSize.GetDescription();
 
             // 安装位置
             var location = texts.Where(t => t.TextString == ThPDSCommon.LOCATION).First();
@@ -57,7 +58,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 安装方式
             var installMethod = texts.Where(t => t.TextString == ThPDSCommon.INSTALLMETHOD).First();
-            installMethod.TextString = "";
+            installMethod.TextString = node.Details.BoxInstallationType.GetDescription();
         }
 
         public Tuple<bool, Polyline> EnterCircuitAssign(AcadDatabase activeDb, AcadDatabase configDb, BlockReference circuitBlock,
@@ -111,17 +112,21 @@ namespace TianHua.Electrical.PDS.Diagram
                             srcIsolatingSwitch.Erase();
                         }
                         var QLText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_QL).First();
-                        if(circuit.Component is IsolatingSwitch isolatingSwitch)
+                        if (circuit.Component is IsolatingSwitch isolatingSwitch)
                         {
                             QLText.TextString = isolatingSwitch.Content();
                         }
-                        else if(circuit.Component is Breaker breaker)
+                        else if (circuit.Component is Breaker breaker)
                         {
                             QLText.TextString = breaker.Content();
                         }
 
                         // 电能表
-                        // To do
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(firstPosition.X + 3000.0, firstPosition.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
 
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
@@ -156,7 +161,7 @@ namespace TianHua.Electrical.PDS.Diagram
                             firstIsolatingSwitch.Erase();
                         }
                         var firstQLText = QLTexts[0];
-                        if(circuit.Component1 is IsolatingSwitch isolatingSwitch)
+                        if (circuit.Component1 is IsolatingSwitch isolatingSwitch)
                         {
                             firstQLText.TextString = isolatingSwitch.Content();
                         }
@@ -198,6 +203,13 @@ namespace TianHua.Electrical.PDS.Diagram
                         var ATSEText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_ATSE_320A_4P).First();
                         var type = ComponentTypeSelector.GetComponentType(circuit.transferSwitch.ComponentType);
                         // ATSEText.TextString = circuit.transferSwitch.ComponentType.content;
+
+                        // 电能表
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(thirdPosition.X + 250.0, thirdPosition.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
 
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
@@ -309,6 +321,13 @@ namespace TianHua.Electrical.PDS.Diagram
                         var MTSEtype = ComponentTypeSelector.GetComponentType(circuit.transferSwitch2.ComponentType);
                         //ATSEText.TextString = type.GetProperty("Content").GetValue(circuit.transferSwitch).ToString();
 
+                        // 电能表
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(srcManualTransferSwitch.Position.X + 250.0, srcManualTransferSwitch.Position.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
+
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
                         {
@@ -356,6 +375,42 @@ namespace TianHua.Electrical.PDS.Diagram
             return Tuple.Create(false, new Polyline());
         }
 
+        private void InsertMeter(AcadDatabase activeDb, AcadDatabase configDb, PDSBaseComponent reservedComponent,
+            Point3d secondPosition, List<Entity> tableObjs, Scale3d scale)
+        {
+            var insertEngine = new ThPDSBlockInsertEngine();
+            var newComponentName = ThPDSComponentMap.ComponentMap[reservedComponent.ComponentType.GetDescription()];
+            var newComponent = insertEngine.Insert1(activeDb, configDb, newComponentName, secondPosition, 100 * scale);
+
+            var objs = new DBObjectCollection();
+            newComponent.Explode(objs);
+            newComponent.Erase();
+            objs.OfType<Entity>().ForEach(entity =>
+            {
+                tableObjs.Add(entity);
+                activeDb.ModelSpace.Add(entity);
+            });
+
+            var texts = objs.OfType<DBText>().ToList();
+            if(reservedComponent is CurrentTransformer ct)
+            {
+                var ctText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CT)).First();
+                ctText.TextString = ct.Content();
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
+                mtText.TextString = ct.ContentMT();
+            }
+            else if (reservedComponent is MeterTransformer mt)
+            {
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
+                mtText.TextString = mt.Content();
+            }
+            else if(reservedComponent is OUVP ouvp)
+            {
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_OUVP)).First();
+                mtText.TextString = ouvp.Content();
+            }
+        }
+
         public void TableTailAssign(AcadDatabase activeDb, BlockReference tail, ThPDSProjectGraphNode node, List<Entity> tableObjs, double power)
         {
             var objs = ThPDSExplodeService.BlockExplode(activeDb, tail);
@@ -387,7 +442,7 @@ namespace TianHua.Electrical.PDS.Diagram
 
             // 回路编号
             var circuitNumber = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CIRCUIT_NUMBER).First();
-            circuitNumber.TextString = edge.Circuit.ID.CircuitID.Last();
+            circuitNumber.TextString = edge.Circuit.ID.CircuitID;
 
             // 相序
             var phaseSequence = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_PHSAE).First();
@@ -421,15 +476,15 @@ namespace TianHua.Electrical.PDS.Diagram
                 loadID.TextString = edge.Target.Load.ID.LoadID;
                 description.TextString = edge.Target.Load.ID.Description;
             }
-            else if (string.IsNullOrEmpty(loadID.TextString)
-                && !string.IsNullOrEmpty(description.TextString))
+            else if (string.IsNullOrEmpty(edge.Target.Load.ID.LoadID)
+                && !string.IsNullOrEmpty(edge.Target.Load.ID.Description))
             {
                 loadID.Erase();
                 description.TextString = edge.Target.Load.ID.Description;
                 description.TransformBy(Matrix3d.Displacement(offset));
             }
-            else if (!string.IsNullOrEmpty(loadID.TextString)
-                && string.IsNullOrEmpty(description.TextString))
+            else if (!string.IsNullOrEmpty(edge.Target.Load.ID.LoadID)
+                && string.IsNullOrEmpty(edge.Target.Load.ID.Description))
             {
                 description.Erase();
                 loadID.TextString = edge.Target.Load.ID.LoadID;
@@ -659,12 +714,12 @@ namespace TianHua.Electrical.PDS.Diagram
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            CTText.TextString = meter.Content();
                             if (meter is CurrentTransformer ct)
                             {
-                                MTText.TextString = ct.Content();
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = meter.Content();
+                                MTText.TextString = ct.ContentMT();
                             }
                         }
 
@@ -720,17 +775,19 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            if (meter is CurrentTransformer ct)
+                            {
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = ct.Content();
+                                MTText.TextString = ct.ContentMT();
+                            }
+                                
                         }
 
                         // 元器件2
@@ -790,12 +847,12 @@ namespace TianHua.Electrical.PDS.Diagram
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            CTText.TextString = meter.Content();
-                            if(meter is CurrentTransformer ct)
+                            if (meter is CurrentTransformer ct)
                             {
-                                MTText.TextString = ct.Content();
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = meter.Content();
+                                MTText.TextString = ct.ContentMT();
                             }
                         }
 
@@ -1485,6 +1542,460 @@ namespace TianHua.Electrical.PDS.Diagram
             objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
 
             objs.OfType<DBText>().First().TextString = content;
+        }
+
+        /// <summary>
+        /// 空二次结线
+        /// </summary>
+        /// <param name="activeDb"></param>
+        /// <param name="block"></param>
+        /// <param name="tableObjs"></param>
+        public void SecJunctionAssign(AcadDatabase activeDb, BlockReference block, List<Entity> tableObjs)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+            var texts = objs.OfType<DBText>().ToList();
+
+            var text1 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT1).First();
+            text1.TextString = "";
+
+            var text2 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT2).First();
+            text2.TextString = "";
+
+            var text3 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT3).First();
+            text3.TextString = "";
+
+            var text4 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT4).First();
+            text4.TextString = "";
+
+            var text5 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT5).First();
+            text5.TextString = "";
+
+            var text6 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT6).First();
+            text6.TextString = "";
+        }
+
+        public void SecJunctionAssign(AcadDatabase activeDb, BlockReference block, List<Entity> tableObjs,
+            ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> motors)
+        {
+            var objs = ThPDSExplodeService.BlockExplode(activeDb, block);
+            objs.OfType<Entity>().ForEach(o => tableObjs.Add(o));
+            var texts = objs.OfType<DBText>().ToList();
+
+            var text1 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT1).First();
+            text1.TextString = Text1Assign(node);
+
+            var text2 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT2).First();
+            text2.TextString = Text2Assign(node, motors);
+
+            var motorInfo = ThPDSMotorInfoService.Select(motors[0].Target.Load.LoadTypeCat_3, motors[0].Target.Load.FireLoad);
+            if (motorInfo.IsNull())
+            {
+                motorInfo = new ThPDSMotorInfo();
+            }
+            var text3 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT3).First();
+            text3.TextString = Text3Assign(motors) + "，" + motorInfo.OperationMode;
+
+            var text4 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT4).First();
+            text4.TextString = motorInfo.Signal;
+
+            var text5 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT5).First();
+            text5.TextString = motorInfo.FaultProtection;
+
+            var text6 = texts.Where(t => t.TextString == ThPDSCommon.SECONDARY_JUNCTION_TEXT6).First();
+            text6.TextString = Text6Assign(motors);
+        }
+
+        private string Text1Assign(ThPDSProjectGraphNode node)
+        {
+            var enterType = node.Details.CircuitFormType.CircuitFormType.GetDescription();
+            if (enterType.Equals(CircuitFormInType.一路进线.GetDescription()))
+            {
+                if (node.Load.FireLoad)
+                {
+                    return "一路电源（上级二路电源，自切自复）";
+                }
+                else
+                {
+                    return "一路电源";
+                }
+            }
+            else if (enterType.Equals(CircuitFormInType.二路进线ATSE.GetDescription()))
+            {
+                return "二路电源，自切自复";
+            }
+            else if (enterType.Equals(CircuitFormInType.三路进线.GetDescription()))
+            {
+                return "二路平时电源，自切自复，战时电源手动切换";
+            }
+            return "";
+        }
+
+        private string Text2Assign(ThPDSProjectGraphNode node, List<ThPDSProjectGraphEdge> motors)
+        {
+            var result = motors.Count.ToString() + "台";
+            if (motors[0].Target.Load.InstalledCapacity.IsDualPower)
+            {
+                result += "，双速";
+            }
+            result += "，" + motors[0].Target.Load.PrimaryAvail.ToString() + "用";
+            if (motors[0].Target.Load.SpareAvail > 0)
+            {
+                result += motors[0].Target.Load.SpareAvail.ToString() + "备";
+            }
+            return result;
+        }
+
+        private string Text3Assign(List<ThPDSProjectGraphEdge> motors)
+        {
+            var typeOne = false;
+            var typeTwo = false;
+            var circuitType = motors.Select(m => m.Details.CircuitForm.CircuitFormType).Distinct().ToList();
+            circuitType.ForEach(type =>
+            {
+                switch (type)
+                {
+                    case CircuitFormOutType.电动机_分立元件:
+                    case CircuitFormOutType.电动机_CPS:
+                    case CircuitFormOutType.双速电动机_分立元件detailYY:
+                    case CircuitFormOutType.双速电动机_分立元件YY:
+                    case CircuitFormOutType.双速电动机_CPSdetailYY:
+                    case CircuitFormOutType.双速电动机_CPSYY:
+                        typeOne = true;
+                        break;
+                    case CircuitFormOutType.电动机_分立元件星三角启动:
+                    case CircuitFormOutType.电动机_CPS星三角启动:
+                        typeTwo = true;
+                        break;
+                }
+            });
+
+            var result = "";
+            if (typeOne)
+            {
+                result += "直接启动";
+                if (typeTwo)
+                {
+                    result += "/星三角启动";
+                }
+            }
+            else if (typeTwo)
+            {
+                result += "星三角启动";
+            }
+            return result;
+        }
+
+        private string Text6Assign(List<ThPDSProjectGraphEdge> motors)
+        {
+            var result = new List<string>();
+            motors.ForEach(m =>
+            {
+                result.Add(Text6Assign(m));
+            });
+            result = result.Distinct().ToList();
+            var text = "";
+            for (var i = 0; i < result.Count; i++)
+            {
+                text += result[i] + "；";
+            }
+            return text.Substring(0, text.Count() - 1);
+        }
+
+        private string Text6Assign(ThPDSProjectGraphEdge edge)
+        {
+            switch (edge.Target.Load.LoadTypeCat_3)
+            {
+                case ThPDSLoadTypeCat_3.SmokeExhaustFan:
+                case ThPDSLoadTypeCat_3.MakeupAirFan:
+                case ThPDSLoadTypeCat_3.StaircasePressurizationFan:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第13~14页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第17~18页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件detailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第29~30页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件YY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第37~38页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSdetailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第33~34页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第41~42页";
+                            }
+                            break;
+                    }
+                    break;
+                case ThPDSLoadTypeCat_3.ExhaustFan_Smoke:
+                case ThPDSLoadTypeCat_3.SupplyFan_Smoke:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第21~22页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第25~26页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件detailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第29~30页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件YY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第37~38页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSdetailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第33~34页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第41~42页";
+                            }
+                            break;
+                    }
+                    break;
+                case ThPDSLoadTypeCat_3.ExhaustFan:
+                case ThPDSLoadTypeCat_3.SupplyFan:
+                case ThPDSLoadTypeCat_3.KitchenExhaustFan:
+                case ThPDSLoadTypeCat_3.PostEmergencyFan:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                var circuit = edge.Details.CircuitForm as Motor_DiscreteComponentsCircuit;
+                                if (circuit.Conductor.IsBAControl)
+                                {
+                                    return "《常用风机控制电路图》16D303-2第77~78页";
+                                }
+                                else
+                                {
+                                    return "《常用风机控制电路图》16D303-2第85~86页";
+                                }
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                var circuit = edge.Details.CircuitForm as Motor_CPSCircuit;
+                                if (circuit.Conductor.IsBAControl)
+                                {
+                                    return "《常用风机控制电路图》16D303-2第79~80页";
+                                }
+                                else
+                                {
+                                    return "《常用风机控制电路图》16D303-2第87~88页";
+                                }
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件detailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第45~46页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_分立元件YY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第53~54页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSdetailYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第49~50页";
+                            }
+                            break;
+                        case CircuitFormOutType.双速电动机_CPSYY:
+                            if (edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                return "《常用风机控制电路图》16D303-2第57~58页";
+                            }
+                            break;
+                    }
+                    break;
+                case ThPDSLoadTypeCat_3.EmergencyFan:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                var circuit = edge.Details.CircuitForm as Motor_DiscreteComponentsCircuit;
+                                if (circuit.Conductor.IsBAControl)
+                                {
+                                    return "《常用风机控制电路图》16D303-2第89~90页";
+                                }
+                                else
+                                {
+                                    return "《常用风机控制电路图》16D303-2第91~92页";
+                                }
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (!edge.Target.Load.InstalledCapacity.IsDualPower)
+                            {
+                                var circuit = edge.Details.CircuitForm as Motor_CPSCircuit;
+                                if (circuit.Conductor.IsBAControl)
+                                {
+                                    return "《常用风机控制电路图》16D303-2第93~94页";
+                                }
+                                else
+                                {
+                                    return "《常用风机控制电路图》16D303-2第95~96页";
+                                }
+                            }
+                            break;
+                    }
+                    break;
+                case ThPDSLoadTypeCat_3.DomesticWaterPump:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第136~138页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail == 2 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第177~180页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第139~140页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail == 2 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第181~184页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第157~160页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail == 2 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第177~180页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第161~163页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail == 2 && edge.Target.Load.SpareAvail == 1)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第181~184页";
+                            }
+                            break;
+                    }
+                    break;
+                case ThPDSLoadTypeCat_3.SubmersiblePump:
+                    switch (edge.Details.CircuitForm.CircuitFormType)
+                    {
+                        case CircuitFormOutType.电动机_分立元件:
+                        case CircuitFormOutType.电动机_分立元件星三角启动:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 0)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第230~231页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 2)
+                            {
+                                if (!edge.Target.Load.FireLoad)
+                                {
+                                    return "《常用水泵控制电路图》16D303-3第240~242页";
+                                }
+                                else
+                                {
+                                    return "《常用水泵控制电路图》16D303-3第252~254页";
+                                }
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 3)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第270~273页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 4)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第282~285页";
+                            }
+                            break;
+                        case CircuitFormOutType.电动机_CPS:
+                        case CircuitFormOutType.电动机_CPS星三角启动:
+                            if (edge.Target.Load.PrimaryAvail == 1 && edge.Target.Load.SpareAvail == 0)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第232~233页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 2)
+                            {
+                                if (!edge.Target.Load.FireLoad)
+                                {
+                                    return "《常用水泵控制电路图》16D303-3第243~245页";
+                                }
+                                else
+                                {
+                                    return "《常用水泵控制电路图》16D303-3第255~257页";
+                                }
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 3)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第274~277页";
+                            }
+                            else if (edge.Target.Load.PrimaryAvail + edge.Target.Load.SpareAvail == 4)
+                            {
+                                return "《常用水泵控制电路图》16D303-3第282~285页";
+                            }
+                            break;
+                    }
+                    break;
+            }
+            return "";
         }
 
         private CircuitFormInType FetchDescription(string str)

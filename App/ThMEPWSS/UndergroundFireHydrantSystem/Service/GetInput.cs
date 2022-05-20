@@ -11,7 +11,8 @@ using System.Windows.Forms;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using ThMEPWSS.UndergroundSpraySystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
+using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -29,7 +30,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.VerticalPosition = verticalEngine.CreatePointList();
 
             var fireHydrantEngine = new ThExtractFireHydrant();//提取室内消火栓平面
-            fireHydrantEngine.Extract(acadDatabase.Database, selectArea);
+            fireHydrantSysIn.HydrantWithReel = fireHydrantEngine.Extract(acadDatabase.Database, selectArea);
             var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.DBobjs);
             fireHydrantEngine.CreateVerticalHydrantDic(fireHydrantSysIn.VerticalPosition, fireHydrantSysIn);
 
@@ -37,30 +38,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
             PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
-            var sitong = false;
-            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
-            {
-                var cnt = fireHydrantSysIn.PtDic[pt].Count;
-                if (cnt > 3)
-                {
-                    sitong = true;
-                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
-                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
-                }
-            }
-            if (sitong)
+            //Tools.DrawLines(lineList,  "刚提取环管");
+         
+            if (PipeLine.hasSitong(fireHydrantSysIn))
             {
                 return false;
             }
 
             var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
-
+            PipeLineList.ConnectWithVertical(ref lineList, fireHydrantSysIn);
             PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
             PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
             PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.VerticalPosition);//删除两个点都是端点的线段
             PipeLineList.ConnectBreakLineWithoutPtdic(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
-
             PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                           
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
 
@@ -140,7 +131,83 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;
+
+            CreatePtDic(fireHydrantSysIn);
+
             return true;
         }
+
+        public static void CreatePtDic(FireHydrantSystemIn fireHydrantSysIn)
+        {
+            double maxDist = 1000;
+            double minDist = 400;
+            var ptOffsetDic = new Dictionary<Point3dEx, Point3d>();
+            foreach (var pt in fireHydrantSysIn.VerticalPosition)
+            {
+                if (ptOffsetDic.ContainsKey(pt))
+                {
+                    continue;
+                }
+                var point = pt._pt;
+                var f1 = pt._pt.GetFloor(fireHydrantSysIn.FloorRect);
+                if (f1.Equals(""))
+                {
+                    continue;
+                }
+                var jizhunPt = fireHydrantSysIn.FloorPt[f1];
+                var offsetPt = new Point3d(point.X - jizhunPt.X, point.Y - jizhunPt.Y, 0);
+                ptOffsetDic.Add(pt, offsetPt);
+            }
+            var usedPt = new List<Point3dEx>();
+            foreach (var pt1 in ptOffsetDic.Keys)
+            {
+                if (pt1._pt.DistanceTo(new Point3d(1491786.3, 407697, 0)) < 10)
+                    ;
+                if (pt1._pt.DistanceTo(new Point3d(1491786.3, 907697, 0)) < 10)
+                    ;
+                if (usedPt.Contains(pt1)) continue;
+
+                if (!fireHydrantSysIn.TermPointDic.ContainsKey(pt1)) continue;
+
+                var str1 = fireHydrantSysIn.TermPointDic[pt1].PipeNumber;
+                foreach (var pt2 in ptOffsetDic.Keys)
+                {
+                    if (pt2._pt.DistanceTo(new Point3d(1491786.3, 407697, 0)) < 10)
+                        ;
+                    if (usedPt.Contains(pt2)) continue;
+                    if (!fireHydrantSysIn.TermPointDic.ContainsKey(pt2)) continue;
+
+                    var str2 = fireHydrantSysIn.TermPointDic[pt2].PipeNumber;
+                    //两点case1
+                    if (pt1._pt.DistanceTo(pt2._pt) > maxDist
+                       && ptOffsetDic[pt1].DistanceTo(ptOffsetDic[pt2]) < minDist
+                       && str1?.Equals(str2)==true)
+                    {
+                        DicTools.AddPtDicItem(fireHydrantSysIn, pt1, pt2);
+
+                        fireHydrantSysIn.ThroughPt.AddItem(pt1);
+                        fireHydrantSysIn.ThroughPt.AddItem(pt2);
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        {
+                            Draw.ThroughPt(currentDb, pt1);
+                            Draw.ThroughPt(currentDb, pt2);
+                        }
+
+                        usedPt.Add(pt1);
+                        usedPt.Add(pt2);
+
+                        continue;
+                    }
+                }
+            }
+            foreach (var pt in fireHydrantSysIn.ThroughPt)
+            {
+                if (fireHydrantSysIn.TermPointDic.ContainsKey(pt))
+                {
+                    fireHydrantSysIn.TermPointDic[pt].Type = 5;
+                }
+            }
+        }
+
     }
 }

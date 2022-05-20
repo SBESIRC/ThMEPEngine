@@ -5,6 +5,7 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
@@ -37,6 +38,32 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             else//不包含pt2
             {
                 sprayIn.PtDic.Add(pt2, new List<Point3dEx> { pt1 });
+            }
+        }
+
+        public static void AddPtDicItem(FireHydrantSystemIn fireHydrantSysIn, Point3dEx pt1, Point3dEx pt2)
+        {
+            if (fireHydrantSysIn.PtDic.ContainsKey(pt1))//包含pt1
+            {
+                if (!fireHydrantSysIn.PtDic[pt1].Contains(pt2))
+                {
+                    fireHydrantSysIn.PtDic[pt1].Add(pt2);
+                }
+            }
+            else//不包含pt1
+            {
+                fireHydrantSysIn.PtDic.Add(pt1, new List<Point3dEx> { pt2 });
+            }
+            if (fireHydrantSysIn.PtDic.ContainsKey(pt2))//包含pt2
+            {
+                if (!fireHydrantSysIn.PtDic[pt2].Contains(pt1))
+                {
+                    fireHydrantSysIn.PtDic[pt2].Add(pt1);
+                }
+            }
+            else//不包含pt2
+            {
+                fireHydrantSysIn.PtDic.Add(pt2, new List<Point3dEx> { pt1 });
             }
         }
 

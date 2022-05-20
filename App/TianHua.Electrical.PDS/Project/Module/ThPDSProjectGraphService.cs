@@ -13,6 +13,9 @@ using TianHua.Electrical.PDS.Service;
 using TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory;
 using Dreambuild.AutoCAD;
 using ProjectGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphNode, TianHua.Electrical.PDS.Project.Module.ThPDSProjectGraphEdge>;
+using TianHua.Electrical.PDS.Project.PDSProjectException;
+using QuikGraph.Algorithms;
+using TianHua.Electrical.PDS.Extension;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -116,10 +119,14 @@ namespace TianHua.Electrical.PDS.Project.Module
             {
                 ouvp = componentFactory.CreatOUVP();
             }
-            catch (Exception ex)
+            catch (NotFoundComponentException ex)
             {
                 msg = ex.Message;
                 return false;
+            }
+            catch
+            {
+                throw;
             }
             if (node.Details.CircuitFormType is OneWayInCircuit oneWayInCircuit)
             {
@@ -362,34 +369,6 @@ namespace TianHua.Electrical.PDS.Project.Module
         }
 
         /// <summary>
-        /// MoterUI Config改变
-        /// </summary>
-        public static void MotorChoiseChange()
-        {
-            var MotorSelection = PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise;
-            var edges = PDSProject.Instance.graphData.Graph.Edges;
-            var type = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS : CircuitFormOutType.电动机_分立元件;
-            var typeStar = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.电动机_CPS星三角启动 : CircuitFormOutType.电动机_分立元件星三角启动;
-            var typeYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSYY : CircuitFormOutType.双速电动机_分立元件YY;
-            var typedetailYY = MotorSelection == MotorUIChoise.分立元件 ? CircuitFormOutType.双速电动机_CPSdetailYY : CircuitFormOutType.双速电动机_分立元件detailYY;
-            foreach (var edge in edges)
-            {
-                if (edge.Details.CircuitForm.CircuitFormType == type || edge.Details.CircuitForm.CircuitFormType == typeStar)
-                {
-                    SwitchFormOutType(edge, "电动机配电回路");
-                }
-                else if (edge.Details.CircuitForm.CircuitFormType == typeYY)
-                {
-                    SwitchFormOutType(edge, "双速电机Y-Y");
-                }
-                else if (edge.Details.CircuitForm.CircuitFormType == typedetailYY)
-                {
-                    SwitchFormOutType(edge, "双速电机D-YY");
-                }
-            }
-        }
-
-        /// <summary>
         /// 切换出线回路形式
         /// </summary>
         /// <param name="edge"></param>
@@ -428,7 +407,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void CreatBackupCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.OutEdges(node);
+            var edges = graph.OutEdges(node).Where(edge => !edge.Details.CircuitForm.IsMotorCircuit());
             var OnePhaseCB = new List<ThPDSProjectGraphEdge>();
             var OnePhaseRCD = new List<ThPDSProjectGraphEdge>();
             var ThreePhaseCB = new List<ThPDSProjectGraphEdge>();
@@ -580,8 +559,8 @@ namespace TianHua.Electrical.PDS.Project.Module
         {
             //分配负载 就是拿到所有的 未知负载
             return graph.Vertices
-                .Where(node => node.Type == PDSNodeType.Unkown || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//未知负载/未分配负载
-                .Where(node => !FilterEdged || (graph.InDegree(node) == 0 && graph.OutDegree(node) == 0))//已分配回路负载
+                .Where(node => node.Type != PDSNodeType.Unkown && node.Type != PDSNodeType.Empty)
+                .Where(node => !FilterEdged || (graph.InDegree(node) == 0))
                 .ToList();
         }
 
@@ -597,8 +576,12 @@ namespace TianHua.Electrical.PDS.Project.Module
                 var newEdge = new ThPDSProjectGraphEdge(edge.Source, target) { Circuit = edge.Circuit, Details = edge.Details, Tag = edge.Tag };
                 graph.AddEdge(newEdge);
                 graph.RemoveEdge(edge);
-                graph.RemoveVertex(oldLoad);
-                newEdge.CheckWithEdge();
+                if (oldLoad.Type == PDSNodeType.Empty || oldLoad.Type == PDSNodeType.Unkown)
+                {
+                    graph.RemoveVertex(oldLoad);
+                }
+                newEdge.ComponentSelection();
+                newEdge.Source.CheckCascadeWithNode();
             }
         }
 
@@ -611,7 +594,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="defaultPower">设备功率</param>
         /// <param name="defaultDescription">描述信息</param>
         /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None)
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
@@ -621,9 +604,158 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Load.ID.LoadID = defaultLoadID;
             node.Details.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
-            node.Load.ID.Description = "备用";
-            
             node.Load.SetFireLoad(defaultFireLoad);
+
+            switch (imageLoadType)
+            {
+                case ImageLoadType.None:
+                    {
+                        node.Type = PDSNodeType.Empty;//空负载
+                        break;
+                    }
+                case ImageLoadType.AL:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.LightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AP:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.PowerDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.ALE:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        node.Load.SetFireLoad(true);
+                        break;
+                    }
+                case ImageLoadType.APE:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        node.Load.SetFireLoad(true);
+                        break;
+                    }
+                case ImageLoadType.FEL:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AW:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ElectricalMeterPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.ACB:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ElectricalControlPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.RS:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.INT:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.IsolationSwitchPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.RD:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ResidentialDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AX:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = defaultPhase == ThPDSPhase.一相? ThPDSLoadTypeCat_2.OnePhaseSocket: ThPDSLoadTypeCat_2.ThreePhaseSocket;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Light:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Luminaire;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Socket:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Socket;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AC:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ACCharger;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.DC:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.DCCharger;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Motor:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Motor;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Pump:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Motor;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.Pump;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.SubmersiblePump;
+                        break;
+                    }
+                default:
+                    {
+                        throw new NotSupportedException();//未支持的类型
+                    }
+            }
             PDSProject.Instance.graphData.Graph.AddVertex(node);
             return node;
         }
@@ -671,7 +803,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 target.Details.PhaseSequence = Circuit.PhaseSequence.L1;
             }
             //Step  2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:回路选型
             newEdge.ComponentSelection(type);
             //Step 4:添加到Graph
@@ -688,7 +820,7 @@ namespace TianHua.Electrical.PDS.Project.Module
             //Step 1:新建空负载
             var target = CreatNewLoad(node.Load.Phase, node.Details.PhaseSequence);
             //Step 2:新建回路
-            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() };
+            var newEdge = new ThPDSProjectGraphEdge(node, target) { Circuit = new ThPDSCircuit() { ID = new ThPDSID() { SourcePanelIDList = new List<string>() { node.Load.ID.LoadID } } } };
             //Step 3:获取对应的CircuitFormOutType
             var CircuitFormOutType = Switch(newEdge, type);
             //Step 4:回路选型
@@ -1095,108 +1227,131 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <summary>
         /// 自动编号
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="node">Source</param>
+        public static void AutoNumbering(ProjectGraph graph)
+        {
+            var nodes = graph.Vertices.ToList();
+            AutoNumbering(graph, nodes);
+        }
+
+        /// <summary>
+        /// 自动编号
+        /// </summary>
         public static void AutoNumbering(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.OutEdges(node);
-            var emergencyPowerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyPowerEquipment);//WPE
-            var powerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.PowerEquipment);//WP
-            var lighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Lighting);//WL
-            var emergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyLighting);//WLE
-            var fireEmergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.FireEmergencyLighting);//WFEL
-            var socket = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Socket);//WS
-            var otherEdges = edges.Except(emergencyPowerEquipment).Except(powerEquipment).Except(lighting).Except(emergencyLighting).Except(fireEmergencyLighting).Except(socket);
-            var otherOnePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.一相);
-            var otherThreePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.三相);
+            AutoNumbering(graph, new List<ThPDSProjectGraphNode>() { node });
+        }
 
-            //WPE
+        /// <summary>
+        /// 自动编号
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="node">Source</param>
+        public static void AutoNumbering(ProjectGraph graph, List<ThPDSProjectGraphNode> nodes)
+        {
+            graph.TopologicalSort().ForEach(node =>
             {
-                var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
+                if (nodes.Contains(node))
                 {
-                    o.Circuit.ID.CircuitID.Add("WPE"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    var edges = graph.OutEdges(node);
+                    var emergencyPowerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyPowerEquipment);//WPE
+                    var powerEquipment = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.PowerEquipment);//WP
+                    var lighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Lighting);//WL
+                    var emergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.EmergencyLighting);//WLE
+                    var fireEmergencyLighting = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.FireEmergencyLighting);//WFEL
+                    var socket = edges.Where(o => o.Target.Load.CircuitType == ThPDSCircuitType.Socket);//WS
+                    var otherEdges = edges.Except(emergencyPowerEquipment).Except(powerEquipment).Except(lighting).Except(emergencyLighting).Except(fireEmergencyLighting).Except(socket);
+                    var otherOnePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.一相);
+                    var otherThreePhase = otherEdges.Where(o => o.Target.Load.Phase == ThPDSPhase.三相);
 
-            //WP
-            {
-                var powerEquipmentNo = powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                powerEquipment.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WPE
+                    {
+                        var emergencyPowerEquipmentNo = emergencyPowerEquipment.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = emergencyPowerEquipmentNo.Count() > 0 ? emergencyPowerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        emergencyPowerEquipment.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WPE"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
+                    int WPmaxNo = 0;
+                    //WP
+                    {
+                        var powerEquipmentNo = powerEquipment.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        WPmaxNo = powerEquipmentNo.Count() > 0 ? powerEquipmentNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        powerEquipment.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WP"+ (++WPmaxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
+                    int WLmaxNo = 0;
+                    //WL
+                    {
+                        var lightingNo = lighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        WLmaxNo = lightingNo.Count() > 0 ? lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        lighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WL"+ (++WLmaxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
 
-            //WL
-            {
-                var lightingNo = lighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = lightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                lighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WLE
+                    {
+                        var emergencyLightingNo = emergencyLighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = emergencyLightingNo.Count() > 0 ? emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        emergencyLighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WLE"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
 
-            //WLE
-            {
-                var emergencyLightingNo = emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = emergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                emergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WLE"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WFEL
+                    {
+                        var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = fireEmergencyLightingNo.Count() > 0 ? fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WFEL"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
 
-            //WFEL
-            {
-                var fireEmergencyLightingNo = fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = fireEmergencyLightingNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                fireEmergencyLighting.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WFEL"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WS
+                    {
+                        var socketNo = socket.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = socketNo.Count() > 0 ? socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0;
+                        socket.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WS"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
 
-            //WS
-            {
-                var socketNo = socket.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = socketNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                socket.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WS"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WL
+                    {
+                        var otherOnePhaseNo = otherOnePhase.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = Math.Max(WLmaxNo, otherOnePhaseNo.Count() > 0 ? otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0);
+                        otherOnePhase.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WL"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
 
-            //WL
-            {
-                var otherOnePhaseNo = otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = otherOnePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                otherOnePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WL"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
-
-            //WP
-            {
-                var otherThreePhaseNo = otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count > 0);
-                var maxNo = otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitNumber.Last(), @"[^0-9]+", "")));
-                otherThreePhase.Where(o => o.Circuit.ID.CircuitNumber.Count == 0).ForEach(o =>
-                {
-                    o.Circuit.ID.CircuitID.Add("WP"+ (++maxNo).ToString("00"));
-                    o.Circuit.ID.SourcePanelID.Add(o.Source.Load.ID.LoadID);
-                });
-            }
+                    //WP
+                    {
+                        var otherThreePhaseNo = otherThreePhase.Where(o => !o.Circuit.ID.CircuitID.IsNullOrWhiteSpace());
+                        var maxNo = Math.Max(WPmaxNo, otherThreePhaseNo.Count() > 0 ? otherThreePhaseNo.Max(o => int.Parse(System.Text.RegularExpressions.Regex.Replace(o.Circuit.ID.CircuitID.IsNullOrEmpty() ? "0" : o.Circuit.ID.CircuitID, @"[^0-9]+", ""))) : 0);
+                        otherThreePhase.Where(o => o.Circuit.ID.CircuitID.IsNullOrWhiteSpace()).ForEach(o =>
+                        {
+                            o.Circuit.ID.CircuitID = "WP"+ (++maxNo).ToString("00");
+                            o.Circuit.ID.SourcePanelID = o.Source.Load.ID.LoadID;
+                        });
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -1318,8 +1473,7 @@ namespace TianHua.Electrical.PDS.Project.Module
                 {
                     if (idTag.ChangeFrom)
                     {
-                        var index = edge.Circuit.ID.CircuitID.Count;
-                        edge.Circuit.ID.CircuitID[index - 1] = idTag.ChangedLastCircuitID.Substring(edge.Circuit.ID.SourcePanelID[index].Length + 1);
+                        edge.Circuit.ID.CircuitID = idTag.ChangedLastCircuitID.Substring(edge.Circuit.ID.SourcePanelID.Length + 1);
                     }
                 }
                 else if (edge.Tag is ThPDSProjectGraphEdgeDeleteTag deleteTag)
@@ -1440,8 +1594,13 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <returns></returns>
         public static bool GlobalConfigurationUpdate()
         {
-            MotorChoiseChange();
+            PDSProjectExtend.GlobalConfigurationUpdate();
             return true;
+        }
+
+        public static IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(this IEnumerable<ThPDSProjectGraphEdge> edges)
+        {
+            return edges.OrderBy(e => e.GetCircuitID().Length == 0 ? 1 : 0).ThenBy(e => ProjectSystemConfiguration.CircuitIDSortNames.IndexOf(ProjectSystemConfiguration.CircuitIDSortNames.FirstOrDefault(x => e.GetCircuitID().ToUpper().StartsWith(x))) + e.GetCircuitID());
         }
     }
 }

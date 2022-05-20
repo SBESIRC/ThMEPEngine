@@ -34,7 +34,7 @@
         <Line Grid.Row="4" Margin="0,5,0,5" X1="0" Y1="0" X2="201" Y2="0" Stroke="Gray" 
                       StrokeThickness="1" VerticalAlignment="Center"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Label Content="幕墙图层配置"></Label>
+            <Label Content="墙体图层配置"></Label>
             <Button Name="btnSelectLayer" Width="70" Margin="10,0" Content="增加图层" Template="{StaticResource ButtonTemplate}" Height="20" Click="btnSelectLayer_Click"></Button>
         </StackPanel>
         <StackPanel>        
@@ -142,7 +142,7 @@
             </ListBox>
         </StackPanel>
         <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="确 定" Width="50" Name="btnOk" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>
+            <Button Content="保 存" Width="50" Name="btnOk" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>
             <Button Content="取 消" Width="50" Margin="5,0,0,0" Name="btnCancel" Template="{StaticResource ButtonTemplate}" Click="btnCancel_Click"></Button>
         </StackPanel>
     </StackPanel>

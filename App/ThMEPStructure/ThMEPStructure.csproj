@@ -133,9 +133,11 @@
     <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
     <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
     <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
+    <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
     <Compile Include="StructPlane\Service\ThElevationTableBuilder.cs" />
     <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
     <Compile Include="StructPlane\Service\ThMultiSvgPrintService.cs" />
+    <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
     <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
     <Compile Include="StructPlane\Service\ThStructPlaneUtils.cs" />
     <Compile Include="StructPlane\Service\ThStructurePlaneGenerator.cs" />

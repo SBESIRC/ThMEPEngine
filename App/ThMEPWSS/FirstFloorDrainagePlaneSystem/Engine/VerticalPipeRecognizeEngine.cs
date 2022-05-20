@@ -13,7 +13,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
 {
     public class VerticalPipeRecognizeEngine
     {
-        public double dis = 100;
+        public double dis = 150;
         /// <summary>
         /// 识别规则
         /// </summary>
@@ -41,6 +41,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                 if (x is Line line)
                 {
                     markLines.Add(line);
+                }
+                else if (x is Polyline poly)
+                {
+                    DBObjectCollection dBObject = new DBObjectCollection();
+                    poly.Explode(dBObject);
+                    markLines.AddRange(dBObject.OfType<Line>());
                 }
                 else if (x is DBText text)
                 {

@@ -105,6 +105,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_TG20_DB" Guid="{3512ECA8-E62B-47D5-A4C6-9ECCDF863E9E}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_TG20_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20.db" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_TG20W_DB" Guid="{763DDCD9-7FCB-4E6E-B11F-E5E5E10890CF}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_TG20W_DB" Source="$(var.AutoloaderContentsPath)\Support\TG20W.db" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_PDS_Diagram_Template" Guid="{FFDB073F-A6E3-474B-B758-0512C5AE9E0B}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PDS_Diagram_Template" Source="$(var.AutoloaderContentsPath)\Support\电力配电系统图模板.dwg" KeyPath="yes" />
             </Component>         
@@ -219,6 +222,7 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_TG20_DB" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_TG20W_DB" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" />

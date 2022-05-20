@@ -67,6 +67,10 @@
                 <ComboBox x:Name="cbxLNLG" Width="100" Text="{Binding CondensePipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="水井立管："></Label>
+                <ComboBox x:Name="cbxSJLG" Width="100" Text="{Binding WaterWellPipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="阳台雨水："></Label>
                 <ComboBox x:Name="cbxYTYS" Width="100" Text="{Binding BalconyRainPipeDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>

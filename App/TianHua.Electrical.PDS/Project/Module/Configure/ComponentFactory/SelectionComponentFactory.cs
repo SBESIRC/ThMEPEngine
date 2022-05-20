@@ -98,7 +98,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
                 _ouvpPolesNum = "3P+N";
                 if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
                 {
-                    _specialPolesNum = "3P";
+                    _specialPolesNum = "4P";
                 }
             }
             _characteristics = "";//瞬时脱扣器类型

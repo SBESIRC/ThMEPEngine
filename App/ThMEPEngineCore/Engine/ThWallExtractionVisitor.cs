@@ -6,7 +6,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThPCArchitectureWallExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThWallExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -17,6 +17,10 @@ namespace ThMEPEngineCore.Engine
             else if(dbObj is Line line)
             {
                 elements.AddRange(HandleCurve(line, matrix));
+            }
+            else if (dbObj is Arc arc)
+            {
+                elements.AddRange(HandleCurve(arc, matrix));
             }
         }
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -52,6 +56,23 @@ namespace ThMEPEngineCore.Engine
             {
                 var clone = line.WashClone();
                 if (clone != null && clone is Line)
+                {
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcBuildingElementData()
+                    {
+                        Geometry = clone,
+                    });
+                }
+            }
+            return results;
+        }
+        private List<ThRawIfcBuildingElementData> HandleCurve(Arc arc, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            if (IsBuildElement(arc) && CheckLayerValid(arc))
+            {
+                var clone = arc.WashClone();
+                if (clone != null && clone is Arc)
                 {
                     clone.TransformBy(matrix);
                     results.Add(new ThRawIfcBuildingElementData()

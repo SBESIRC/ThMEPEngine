@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThPDSCommand.cs" />
+    <Compile Include="Diagram\ThPDSMotorInfoService.cs" />
+    <Compile Include="Service\ThPDSMotorInfo.cs" />
     <Compile Include="Engine\ThPDSAddDimensionEngine.cs" />
     <Compile Include="Engine\ThPDSBlcokObbEngine.cs" />
     <Compile Include="Extension\ThPDSCircuitExtension.cs" />
@@ -38,6 +40,7 @@
     <Compile Include="Project\Module\ThPDSProjectGraphNodeCompositeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeTag.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphNodeValidateTag.cs" />
+    <Compile Include="Project\PDSProjectException\NotFoundComponentException.cs" />
     <Compile Include="Project\PDSProjectUBinder.cs" />
     <Compile Include="Project\Module\ThPDSProjectGraphEdgeTag.cs" />
     <Compile Include="Service\ThPDSEdgeContainsService.cs" />
@@ -46,7 +49,8 @@
     <Compile Include="Service\ThPDSPushDataService.cs" />
     <Compile Include="Service\ThPDSReplaceStringService.cs" />
     <Compile Include="Service\ThPDSSelectPointService.cs" />
-    <Compile Include="Engine\ThPDSZoomService.cs" />
+    <Compile Include="Service\ThPDSTransientService.cs" />
+    <Compile Include="Service\ThPDSZoomService.cs" />
     <Compile Include="Service\ThPDSInsertRevcloudService.cs" />
     <Compile Include="Service\ThPDSUpdateToDwgService.cs" />
     <Compile Include="Engine\ThPDSInfoModifyEngine.cs" />

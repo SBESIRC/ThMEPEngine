@@ -75,9 +75,19 @@ namespace TianHua.Architecture.WPI.UI.UI
             }
             else
             {
-                using (var cmd = new WithoutSegLineCmd(_ViewModel))
+                if (_ViewModel.UseMultiProcess)
                 {
-                    cmd.Execute();
+                    using (var cmd = new ThMPArrangementCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
+                }
+                else
+                {
+                    using (var cmd = new WithoutSegLineCmd(_ViewModel))
+                    {
+                        cmd.Execute();
+                    }
                 }
             }
         }

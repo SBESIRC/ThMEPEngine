@@ -11,7 +11,7 @@ namespace TianHua.Electrical.PDS.Service
              BidirectionalGraph<ThPDSProjectGraphNode, ThPDSProjectGraphEdge> graph)
         {
             return graph.InEdges(node)
-                .Select(e => e.Circuit.ID.CircuitNumber.Last())
+                .Select(e => e.Circuit.ID.CircuitNumber)
                 .OrderBy(str => str)
                 .ToList();
         }

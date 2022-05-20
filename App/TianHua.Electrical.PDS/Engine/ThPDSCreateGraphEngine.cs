@@ -17,6 +17,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Electrical;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
+using System.IO;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -64,11 +65,11 @@ namespace TianHua.Electrical.PDS.Engine
 
                         var nodeMap = new ThPDSNodeMap
                         {
-                            ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                            ReferenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename),
                         };
                         var edgeMap = new ThPDSEdgeMap
                         {
-                            ReferenceDWG = doc.Database.OriginalFileName.Split("\\".ToCharArray()).Last(),
+                            ReferenceDWG = Path.GetFileNameWithoutExtension(doc.Database.Filename),
                         };
 
                         var storeysGeometry = new List<Polyline>();
@@ -170,9 +171,9 @@ namespace TianHua.Electrical.PDS.Engine
                             var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
                             var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap);
+                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames);
 
-                            graphEngine.MultiDistBoxAnalysis(acad.Database, distBoxFrames);
+                            graphEngine.MultiDistBoxAnalysis(acad.Database);
                             graphEngine.CreatGraph();
                             graphEngine.UnionEdge();
                             graphEngine.UnionLightingEdge();
@@ -181,6 +182,12 @@ namespace TianHua.Electrical.PDS.Engine
                             var storeyBasePoint = new Point3d(storey.Data.Position.X + (double)storey.Data.CustomProperties.GetValue("基点 X"),
                                 storey.Data.Position.Y + (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
                             graphEngine.AssignStorey(doc.Database, storey.StoreyNumber, storeyBasePoint);
+
+                            // 处理标准层
+                            if(storey.StoreyTypeString.Equals("标准层"))
+                            {
+
+                            }
 
                             var graph = graphEngine.GetGraph();
                             graphList.Add(graph);

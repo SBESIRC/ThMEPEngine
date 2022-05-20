@@ -1,16 +1,20 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -20,7 +24,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
+            var targetPt = new Point3dEx(1754265.38975005, 816578.57326097, 0);
+            var count = fireHydrantSysIn.PtDic[targetPt];
+            ;
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
+            count = fireHydrantSysIn.PtDic[targetPt];
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
@@ -125,6 +133,75 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
+        public static void ConnectWithVertical(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
+        {
+            //基于竖管连接管线
+            var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            var lines = new List<Line>();
+            var connectVreticals = new List<Point3dEx>();
+            foreach (var ver in fireHydrantSysIn.VerticalPosition)
+            {
+                if (ver._pt.DistanceTo(new Point3d(1491786.3, 407197, 0)) < 10)
+                    ;
+                var rect = ver._pt.GetRect(120);
+                var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
+                var flag = fireHydrantSysIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+                if (dbObjs.Count >= 2)
+                {
+                    connectVreticals.Add(ver);
+                }
+                else if (dbObjs.Count == 1)
+                {
+                    var l = dbObjs[0] as Line;
+                    var closedPt = l.GetClosedPt(ver);//获取最近点
+                    var cl = new Line(closedPt, ver._pt);
+                    if (cl.Length > 1.0 && cl.Length < 120)
+                    {
+                        lineList.Add(cl);
+#if DEBUG
+                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        {
+                            var layerNames = "立管和支管的单链接线";
+                            if (!acadDatabase.Layers.Contains(layerNames))
+                            {
+                                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                            }
+                            cl.LayerId = DbHelper.GetLayerId(layerNames);
+                            cl.ColorIndex = (int)ColorIndex.Red;
+                            acadDatabase.CurrentSpace.Add(cl);
+
+                        }
+#endif
+                    }
+
+                }
+            }
+            //var leadLines = sprayIn.LeadLines.ToCollection();
+            //var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leadLines);
+
+
+
+            //foreach (var cv in connectVreticals)
+            //{
+            //    if (cv._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
+            //        ;
+            //    var rect = cv._pt.GetRect(50);
+            //    var rst = leadLineSpatialIndex.SelectCrossingPolygon(rect);
+            //    if (rst.Count == 0)
+            //    {
+            //        Draw.RemovedVerticalPt(cv);
+            //        sprayIn.Verticals.Remove(cv);
+            //    }
+            //}
+
+            lineList.AddRange(lines);
+
+            //把单连通立管和横管连起来
+
+
+            //return lineList;
+        }
+
         public static void ConnectClosedPt(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
         {
             var pts = new List<Point3dEx>();
@@ -139,7 +216,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 for(int j = i + 1; j < pts.Count; j++)
                 {
-                    if(pts[i].DistanceToEx(pts[j]) < 20)
+                    var dist = pts[i].DistanceToEx(pts[j]);
+                    if(dist<1)
+                    {
+                        ;
+                    }
+                    if (dist < 20)
                     {
                         lineList.Add(new Line(pts[i]._pt, pts[j]._pt));
                     }
@@ -282,6 +364,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
             lineList = CleanLaneLines3(lineList);
+
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
         }
 
@@ -446,7 +529,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 pts.Add(l.StartPoint.ToPoint3d());
                 pts.Add(l.EndPoint.ToPoint3d());
             }
-            var pairPt = pts.GetCollinearMaxPts();
+            var pairPt = pts.GetCollinearMaxPts2();
             return new LineSegment2d(pairPt.Item1.ToPoint2d(), pairPt.Item2.ToPoint2d());
         }
     }

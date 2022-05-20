@@ -16,11 +16,21 @@ using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
+using Utils = ThMEPArchitecture.ParkingStallArrangement.General.Utils;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
 using Serilog;
 using System.IO;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
+using ThParkingStall.Core.Tools;
+using Dreambuild.AutoCAD;
+using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
+using MPGene = ThParkingStall.Core.InterProcess.Gene;
+using ThParkingStall.Core.InterProcess;
+using Chromosome = ThMEPArchitecture.ParkingStallArrangement.Algorithm.Chromosome;
+using ThMEPArchitecture.MultiProcess;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -64,43 +74,123 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     if (_CommandMode == CommandMode.WithUI)
                     {
-                        Logger?.Information($"############################################");
-                        Logger?.Information($"自动分割线迭代");
-                        Logger?.Information($"Random Seed:{Utils.GetSeed()}");
-                        var stopWatch = new Stopwatch();
-                        stopWatch.Start();
-                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                        if (!rstDataExtract)
+                        if (ParameterViewModel.JustCreateSplittersChecked)
                         {
-                            return;
+                            GenerateAllAutoSegLine(currentDb);
                         }
-                        for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                        else
                         {
-                            RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            Logger?.Information($"############################################");
+                            Logger?.Information($"自动分割线迭代");
+                            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                            var stopWatch = new Stopwatch();
+                            stopWatch.Start();
+                            var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                            if (!rstDataExtract)
+                            {
+                                return;
+                            }
+                            for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                            {
+                                RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
+                            }
+                            stopWatch.Stop();
+                            var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
+                            Logger?.Information(strTotalMins);
                         }
-                        stopWatch.Stop();
-                        var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
-                        Logger?.Information(strTotalMins);
-
                     }
                     else//生成二分全部方案
                     {
-                        var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
-                        var autogen = new AutoSegGenerator(outerBrder, Logger);
-                        autogen.Run(false);
+                        GenerateAllAutoSegLine(currentDb);
                     }
                 }
             }
             catch (Exception ex)
             {
                 Logger?.Information(ex.Message);
+                Logger?.Information("##################################");
+                Logger?.Information(ex.StackTrace);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+        private void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+        }
+        public void GenerateAllAutoSegLine(AcadDatabase acadDatabase)
+        {
+            var cutTol = 1000;
+            var HorizontalFirst = true;
+            var blks = InputData.SelectBlocks(acadDatabase);
+            foreach (var blk in blks)
+            {
+                try
+                {
+                    GenerateAutoSegLine(blk, cutTol, HorizontalFirst,Logger);
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("##################################");
+                    Logger?.Information(ex.StackTrace);
+                    Active.Editor.WriteMessage(ex.Message);
+                }
+            }
 
+        }
+
+        public List<LineSegment> GenerateAutoSegLine(BlockReference blk,int cutTol,bool HorizontalFirst, Serilog.Core.Logger Logger)
+        {
+            Logger?.Information("##################################");
+            var blk_Name = blk.GetEffectiveName();
+            Logger?.Information("块名：" + blk_Name);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var t_pre = 0.0;
+            var layoutData = new LayoutData();
+            var inputvaild = layoutData.Init(blk, Logger, false);
+            if (!inputvaild) return null;
+            Converter.GetDataWraper(layoutData, ParameterViewModel);
+            var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
+            Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre }\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            autogen.Run(false);
+            Logger?.Information($"穷举用时: {stopWatch.Elapsed.TotalSeconds - t_pre}\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
+            if (girdLines.Count < 2)
+            {
+                Active.Editor.WriteMessage("块名为：" + blk_Name +"的地库暂不支持自动分割线！\n");
+                return null;
+            }
+            girdLines.SeglinePrecut(layoutData.WallLine);
+            //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();
+            //grouped.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var result = grouped;
+
+            result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
+            result = result.DefineSegLinePriority();
+
+            Logger?.Information($"去重+去空区用时: {stopWatch.Elapsed.TotalSeconds - t_pre}\n");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            var layer = "AI自动分割线";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+            }
+            result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+            ReclaimMemory();
+            Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
+            return result;
+        }
         public override void AfterExecute()
         {
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+            Logger?.Information($"从点击运行开始总用时：{_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
 

@@ -58,6 +58,7 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="Engine\ThTCHWaterIndicatorExtractionVisitor.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\HandleStructService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThPipePreProcessService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
@@ -218,6 +219,9 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerTransformer.cs" />
+    <Compile Include="Engine\ThTCHWaterIndicatorRecognitionEngine.cs" />
+    <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorEngine.cs" />
+    <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareRecognitionEngine.cs" />
     <Compile Include="ThHydrantCmds.THXHSYH.cs" />
@@ -362,6 +366,9 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Tools.cs" />
+    <Compile Include="UndergroundSpraySystem\Command\FireHydrantAcross.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThReadFloorFrameCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemCmd.cs" />
     <Compile Include="UndergroundWaterSystem\Command\ThUndergroundWaterSystemUtils.cs" />
@@ -853,7 +860,6 @@
     <Compile Include="ViewModel\FireHydrantSystemViewModel.cs" />
     <Compile Include="ViewModel\DrainageSystemAGViewmodel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
-    <Compile Include="ViewModel\ThRoomOutlineVM.cs" />
     <Compile Include="ViewModel\ThSprinklerCheckerVM.cs" />
     <Compile Include="ViewModel\ThFlushPointVM.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
@@ -921,6 +927,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPTCH\ThMEPTCH.csproj">
+      <Project>{BA9B9213-0D44-4913-94C5-5DC6C0172B31}</Project>
+      <Name>ThMEPTCH</Name>
     </ProjectReference>
     <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
       <Project>{6fadc5fa-f54f-4742-bacd-9f1f855e8210}</Project>

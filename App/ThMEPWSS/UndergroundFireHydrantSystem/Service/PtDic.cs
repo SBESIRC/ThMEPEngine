@@ -28,6 +28,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var pt1 = new Point3dEx(L.StartPoint);
                 var pt2 = new Point3dEx(L.EndPoint);
+                var targetPt = new Point3dEx(1754265.38975005, 816578.57326097, 0);
+                if(pt1.DistanceToEx(targetPt)<1)
+                    ;
+                if (pt2.DistanceToEx(targetPt) < 1)
+                    ;
                 if (pt1.Equals(new Point3dEx(0, 0, 0)) || pt2.Equals(new Point3dEx(0, 0, 0)))
                 {
                     continue;
@@ -76,39 +81,45 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 plineList.Add(line);
             }
             var plineSpatialIndex = new ThCADCoreNTSSpatialIndex(plineList.ToCollection());
-            foreach (var pt in fireHydrantSysIn.PtDic.Keys.ToList())
-            {
-                if (fireHydrantSysIn.PtDic[pt].Count == 1)
-                {
-                    var rect = GetRect(pt._pt);
-                    var rst = plineSpatialIndex.SelectCrossingPolygon(rect);
-                    if (rst.Count > 1)
-                    {
-                        foreach(var db in rst)
-                        {
-                            var line = db as Line;
-                            var spt = new Point3dEx(line.StartPoint);
-                            var ept = new Point3dEx(line.EndPoint);
-                            var sdist = spt._pt.DistanceTo(pt._pt);
-                            var edist = ept._pt.DistanceTo(pt._pt);
-                            if (sdist > 1 && edist > 1)
-                            {
-                                if (!fireHydrantSysIn.PtDic.ContainsKey(pt)) fireHydrantSysIn.PtDic.Add(pt,new List<Point3dEx>());
-                                if (!fireHydrantSysIn.PtDic.ContainsKey(spt)) fireHydrantSysIn.PtDic.Add(spt, new List<Point3dEx>());
-                                if (!fireHydrantSysIn.PtDic.ContainsKey(ept)) fireHydrantSysIn.PtDic.Add(ept, new List<Point3dEx>());
-                                fireHydrantSysIn.PtDic[pt].Add(ept);
-                                fireHydrantSysIn.PtDic[ept].Add(pt);
+            //foreach (var pt in fireHydrantSysIn.PtDic.Keys.ToList())
+            //{
+            //    var targetPt = new Point3dEx(1754265.38975005, 816578.57326097, 0);
+            //    if (pt.DistanceToEx(targetPt) < 1)
+            //        ;
+            //    if (fireHydrantSysIn.PtDic[pt].Count == 1)
+            //    {
+            //        var rect = GetRect(pt._pt);
+            //        var rst = plineSpatialIndex.SelectCrossingPolygon(rect);
+            //        if (rst.Count > 1)
+            //        {
+            //            foreach(var db in rst)
+            //            {
+            //                var line = db as Line;
+            //                var spt = new Point3dEx(line.StartPoint);
+            //                var ept = new Point3dEx(line.EndPoint);
+            //                var sdist = spt._pt.DistanceTo(pt._pt);
+            //                var edist = ept._pt.DistanceTo(pt._pt);
+            //                if (sdist > 1 && edist > 1)
+            //                {
+            //                    if (!fireHydrantSysIn.PtDic.ContainsKey(pt)) 
+            //                        fireHydrantSysIn.PtDic.Add(pt,new List<Point3dEx>());
+            //                    if (!fireHydrantSysIn.PtDic.ContainsKey(spt)) 
+            //                        fireHydrantSysIn.PtDic.Add(spt, new List<Point3dEx>());
+            //                    if (!fireHydrantSysIn.PtDic.ContainsKey(ept)) 
+            //                        fireHydrantSysIn.PtDic.Add(ept, new List<Point3dEx>());
+            //                    fireHydrantSysIn.PtDic[pt].Add(ept);
+            //                    fireHydrantSysIn.PtDic[ept].Add(pt);
 
-                                fireHydrantSysIn.PtDic[pt].Add(spt);
-                                fireHydrantSysIn.PtDic[spt].Add(pt);
+            //                    fireHydrantSysIn.PtDic[pt].Add(spt);
+            //                    fireHydrantSysIn.PtDic[spt].Add(pt);
 
-                                fireHydrantSysIn.PtDic[ept].Remove(spt);
-                                fireHydrantSysIn.PtDic[spt].Remove(ept);
-                            }
-                        }
-                    }
-                }
-            }
+            //                    fireHydrantSysIn.PtDic[ept].Remove(spt);
+            //                    fireHydrantSysIn.PtDic[spt].Remove(ept);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public static Polyline GetRect(Point3d pt)
@@ -248,6 +259,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             int indxx = 0;
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
+                if (pt._pt.DistanceTo(new Point3d(1491786.3,407697, 0)) < 10)
+                    ;
                 try
                 {
                     CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
@@ -280,11 +293,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 ;
             }
             indxx += 1;
-            var tpt = new Point3dEx(new Point3d());
-            if (!pt.GetNearestPt(ref tpt, pointList))
-            {
-                return;
-            }
+            var tpt = pt;//new Point3dEx(new Point3d());
+            //if (!pt.GetNearestPt(ref tpt, pointList))
+            //{
+            //    return;
+            //}
             fireHydrantSysIn.TermPtDic.Add(tpt);//把带立管的端点加入末端点列表
             var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
             var termPoint = new TermPoint(pt);

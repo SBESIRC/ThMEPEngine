@@ -95,6 +95,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             clone.Closed = true;
             return clone;
         }
+
+        public static bool IsVaild(this Polyline pline,double tolerance)
+        {
+            if (pline.NumberOfVertices < 3) return false;
+            if(pline.Closed || (pline.StartPoint.DistanceTo(pline.EndPoint) <= tolerance))
+            {
+                return true;
+            }
+            else return false;
+        }
     }
 }
 

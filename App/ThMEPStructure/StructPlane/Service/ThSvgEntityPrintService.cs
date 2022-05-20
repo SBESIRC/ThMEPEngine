@@ -8,6 +8,7 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Model;
 using ThMEPStructure.StructPlane.Print;
 using ThMEPEngineCore.IO.SVG;
@@ -19,15 +20,19 @@ namespace ThMEPStructure.StructPlane.Service
 {
     internal class ThSvgEntityPrintService
     {
+        private double LtScale = 500;
+        private int Measurement = 0;
+        // 标题文字距离图纸底部的距离
+        private double HeadTextDisToPaperBottom = 3500.0;
+        /// <summary>
+        /// 楼层底部标高
+        /// </summary>
         public double FlrBottomEle { get; private set; }
-        public double FlrElevation { get; private set; }
-        public double FlrHeight 
-        { 
-            get
-            {
-                return FlrElevation - FlrBottomEle;
-            }
-        }
+        /// <summary>
+        /// 楼层高度
+        /// </summary>
+        public double FlrHeight { get; private set; }
+        private string DrawingScale { set; get; }
         public List<ThFloorInfo> FloorInfos { get; set; }
         /// <summary>
         /// 收集所有当前图纸打印的物体
@@ -38,13 +43,15 @@ namespace ThMEPStructure.StructPlane.Service
         public ThSvgEntityPrintService(
             List<ThGeometry> geos,
             List<ThFloorInfo> floorInfos,
-            Dictionary<string,string> docProperties)
+            Dictionary<string,string> docProperties,
+            string drawingSacle="")
         {
             Geos = geos;
             FloorInfos = floorInfos;
             DocProperties = docProperties;
             ObjIds = new ObjectIdCollection();
-            FlrElevation = DocProperties.GetFloorElevation();
+            FlrHeight = DocProperties.GetFloorHeight();
+            DrawingScale = drawingSacle;
             FlrBottomEle = DocProperties.GetFloorBottomElevation();            
         }
         public void Print(Database db)
@@ -52,13 +59,16 @@ namespace ThMEPStructure.StructPlane.Service
             // 从模板导入要打印的图层
             Import(db);
 
+            // 设置系统变量
+            SetSysVariables();
+
             // 获取楼板的标高                
             var elevations = GetSlabElevations(Geos);
             elevations = FilterSlabElevations(elevations);
             var slabHatchConfigs = GetSlabHatchConfigs(elevations);
 
             // 给墙造洞
-            var buildAreaSevice =new  ThWallBuildAreaService();
+            var buildAreaSevice =new ThWallBuildAreaService();
             var newGeos =buildAreaSevice.BuildArea(Geos);
 
             // 打印对象
@@ -66,19 +76,21 @@ namespace ThMEPStructure.StructPlane.Service
 
             // 过滤多余文字
             var beamLines = ToDBObjectCollection(db, res.Item1);
-            var beamTexts = ToDBObjectCollection(db, res.Item2);
+            var beamTexts = ToDBObjectCollection(db, res.Item2.Keys.ToCollection());
             var removedTexts = FilterBeamMarks(beamLines, beamTexts);
 
             // 将带有标高的文字，换成两行
-            var adjustService = new ThAdjustBeamMarkService(beamLines,
-                beamTexts.Difference(removedTexts));
-            var results = adjustService.Adjust();
-            results.ForEach(x => removedTexts.Add(x.Item1));
+            var beamTextInfos = new Dictionary<DBText, Vector3d>();
+            beamTexts.Difference(removedTexts)
+                .OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));           
+            var adjustService = new ThAdjustBeamMarkService(db,beamLines, beamTextInfos);
+            adjustService.Adjust();
+            adjustService.DoubleRowTexts.ForEach(x => removedTexts.Add(x.Item1));
 
             // 将生成的文字打印出来
             var config = ThAnnotationPrinter.GetAnnotationConfig();
             var printer = new ThAnnotationPrinter(config);
-            results.ForEach(x =>
+            adjustService.DoubleRowTexts.ForEach(x =>
             {
                 ObjIds.Remove(x.Item1.ObjectId);
                 var specAnnotions = printer.Print(db, x.Item2);
@@ -111,6 +123,13 @@ namespace ThMEPStructure.StructPlane.Service
             // 过滤无效Id
             ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
         }
+
+        private void SetSysVariables()
+        {
+            acadApp.Application.SetSystemVariable("LTSCALE", LtScale);
+            acadApp.Application.SetSystemVariable("MEASUREMENT", Measurement);
+        }
+
         private DBObjectCollection ToDBObjectCollection(Database db,ObjectIdCollection objIds)
         {
             using (var acadDb = AcadDatabase.Use(db))
@@ -153,49 +172,22 @@ namespace ThMEPStructure.StructPlane.Service
         }
         private void PrintHeadText(Database database)
         {
-            using (var acadDb = AcadDatabase.Use(database))
+            // 打印自然层标识, eg 一层~五层结构平面层
+            var flrRange = GetFloorRange();
+            if (string.IsNullOrEmpty(flrRange))
             {
-                // 打印自然层标识, eg 一层~五层结构平面层
-                var flrRange = GetFloorRange();
-                if (string.IsNullOrEmpty(flrRange))
-                {
-                    return;
-                }
-                var headText = new DBText()
-                {
-                    Position = Point3d.Origin,
-                    TextString = flrRange,
-                    Height = 100,
-                };
-                var config = ThAnnotationPrinter.GetHeadTextConfig();
-                var printer = new ThAnnotationPrinter(config);
-                Append(printer.Print(database, headText));
-                double HeadTextDisToPaperBottom = 3500.0;
-                var extents = ToExtents2d(ToDBObjectCollection(database, ObjIds));
-                var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
-                    extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
-                var lineCenter = new Point3d(textCenter.X, textCenter.Y-headText.Height/2.0-200,0);
-                var obb = headText.TextOBB();
-                var headTextCenter = obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(1));
-                var downLine = new Polyline();
-                var downLineLength = headText.GeometricExtents.MaxPoint.X -
-                    headText.GeometricExtents.MinPoint.X;
-                downLineLength *= 1.05;
-                downLine.AddVertexAt(0, new Point2d(0, 0), 0.0, 80.0, 80.0);
-                downLine.AddVertexAt(1, new Point2d(downLineLength, 0), 0.0, 80.0, 80.0);
-                downLine.Layer = ThPrintLayerManager.HeadTextDownLineLayerName;
-                downLine.ColorIndex = (int)ColorIndex.BYLAYER;
-                ObjIds.Add(acadDb.ModelSpace.Add(downLine));
-
-                // 移动
-                headText = acadDb.Element<DBText>(headText.ObjectId,true);
-                var mt1 = Matrix3d.Displacement(textCenter - headTextCenter);
-                headText.TransformBy(mt1);
-
-                downLine = acadDb.Element<Polyline>(downLine.ObjectId, true);
-                var mt2 = Matrix3d.Displacement(lineCenter-new Point3d(downLine.Length/2.0,0,0));
-                downLine.TransformBy(mt2);
+                return;
             }
+            var extents = ToExtents2d(ToDBObjectCollection(database, ObjIds));
+            var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
+                extents.MinPoint.Y - HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
+            var printService = new ThPrintDrawingHeadService()
+            {
+                Head = flrRange,
+                DrawingSacle = this.DrawingScale,
+                BasePt = textCenter,
+            };
+            Append(printService.Print(database)); // 把结果存到ObjIds中
         }
         private string GetFloorRange()
         {
@@ -203,9 +195,7 @@ namespace ThMEPStructure.StructPlane.Service
             var stdFloors = FloorInfos.Where(o =>
             {
                 double bottomElevation = 0.0;
-                double elevation = 0.0;
-                if (double.TryParse(o.Bottom_elevation,out bottomElevation) &&
-                double.TryParse(o.Elevation, out elevation))
+                if (double.TryParse(o.Bottom_elevation,out bottomElevation))
                 {
                     if(Math.Abs(bottomElevation-FlrBottomEle)<=1e-4)
                     {
@@ -250,17 +240,6 @@ namespace ThMEPStructure.StructPlane.Service
                 });
             }
         }
-        private void SetColor(Database db, DBObjectCollection objs,short colorIndex)
-        {
-            using (var acadDb = AcadDatabase.Use(db))
-            {
-                objs.OfType<Entity>().ForEach(e =>
-                {
-                    var entity = acadDb.Element<Entity>(e.ObjectId, true);
-                    entity.ColorIndex = colorIndex;
-                });
-            }
-        }
         private void PrintSlabPatternTable(Database db,Point3d rightUpbasePt, 
             Dictionary<string, HatchPrintConfig> hatchConfigs)
         {
@@ -278,8 +257,8 @@ namespace ThMEPStructure.StructPlane.Service
                 Database = db,
                 HatchConfigs = cloneHPC,
                 RightUpbasePt = rightUpbasePt,
-                FlrBottomEle = DocProperties.GetFloorBottomElevation(),
-                FlrElevation = DocProperties.GetFloorElevation(),
+                FlrBottomEle = this.FlrBottomEle,
+                FlrHeight = this.FlrHeight,
             };
             var builder = new ThSlabPatternTableBuilder(tblParameter);
             var results = builder.Build();
@@ -304,16 +283,16 @@ namespace ThMEPStructure.StructPlane.Service
                 {
                     flrBottomElevation /= 1000.0;
                 }
-                double flrElevation = 0.0;
-                if (double.TryParse(o.Elevation, out flrElevation))
+                double flrHeight = 0.0;
+                if (double.TryParse(o.Height, out flrHeight))
                 {
-                    flrElevation /= 1000.0;
+                    flrHeight /= 1000.0;
                 }
                 results.Add(new ElevationInfo()
                 {
                     FloorNo = o.FloorNo,
-                    Elevation = flrBottomElevation.ToString("0.000"),
-                    FloorHeight = (flrElevation - flrBottomElevation).ToString("0.000"),
+                    BottomElevation = flrBottomElevation.ToString("0.000"),
+                    FloorHeight = flrHeight.ToString("0.000"),
                     WallColumnGrade = "",
                     BeamBoardGrade = "",
                 });
@@ -321,22 +300,18 @@ namespace ThMEPStructure.StructPlane.Service
             return results;
         }
 
-        private Tuple<ObjectIdCollection, ObjectIdCollection> PrintGeos(
+        private Tuple<ObjectIdCollection, Dictionary<ObjectId, Vector3d>> PrintGeos(
             Database db, List<ThGeometry> geos, 
             Dictionary<string, HatchPrintConfig> slabHatchConfigs)
         {
             using (var acadDb = AcadDatabase.Use(db))
             {
                 var beamLines = new ObjectIdCollection();
-                var beamTexts = new ObjectIdCollection();
+                var beamTexts = new Dictionary<ObjectId,Vector3d>();
 
                 // 打印到图纸中
                 geos.ForEach(o =>
                 {
-                    if(o.Boundary is MPolygon)
-                    {
-
-                    }
                     // Svg解析的属性信息存在于Properties中
                     string category = o.Properties.GetCategory();
                     if(o.Boundary is DBText dbText)
@@ -358,11 +333,23 @@ namespace ThMEPStructure.StructPlane.Service
                                 // update to BG 
                                 dbText.TextString = UpdateBGElevation(dbText.TextString);
                             } 
+
+                            // svg文字是在原点生成
+                            Vector3d textMoveDir = new Vector3d();
+                            if(o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName))
+                            {
+                                textMoveDir = ToVector(o.Properties[ThSvgPropertyNameManager.DirPropertyName].ToString());
+                            }
+                            if(textMoveDir.Length==0.0)
+                            {
+                                textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector();
+                            }
+                            ThAdjustDbTextRotationService.Adjust(dbText, textMoveDir.GetPerpendicularVector());
                             var config = ThAnnotationPrinter.GetAnnotationConfig();
                             var printer = new ThAnnotationPrinter(config);
                             var beamAnnotions = printer.Print(db, dbText);
                             Append(beamAnnotions);
-                            beamAnnotions.OfType<ObjectId>().ForEach(e => beamTexts.Add(e));
+                            beamAnnotions.OfType<ObjectId>().ForEach(e => beamTexts.Add(e, textMoveDir));
                         }
                         else
                         {
@@ -433,6 +420,36 @@ namespace ThMEPStructure.StructPlane.Service
                 return Tuple.Create(beamLines, beamTexts);
             }   
         }      
+
+        private Vector3d ToVector(string vecContent)
+        {
+            if(string.IsNullOrEmpty(vecContent))
+            {
+                return new Vector3d();
+            }
+            else
+            {
+                var values = vecContent.Split(',');
+                if(values.Length==2)
+                {
+                    double value1 = 0.0,value2 =0.0;
+                    if (double.TryParse(values[0], out value1) &&
+                       double.TryParse(values[1], out value2))
+                    {
+                        return new Vector3d(value1, value2, 0);
+                    }
+                    else
+                    {
+                        return new Vector3d();
+                    }
+                }
+                else
+                {
+                    return new Vector3d();
+                }
+            }
+        }
+
         private string UpdateBGElevation(string elevation)
         {
             // 200x530(BG+5.670) 

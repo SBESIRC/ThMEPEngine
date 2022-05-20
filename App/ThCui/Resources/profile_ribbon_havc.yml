@@ -52,7 +52,9 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "排水平面"
+          - text: "立管布置"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "一层排水"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
@@ -202,6 +204,15 @@ panels:
           - text: "用电负荷"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlPOWERSYSTEM"
+    name: "POWERSYSTEM"
+    title: "电力系统"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "配电箱系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELECTRONIC"
     name: "ELECTRONIC"
     title: "消防弱电"
@@ -250,7 +261,7 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "接地平面"
+          - text: "接地网"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlADRAWING"

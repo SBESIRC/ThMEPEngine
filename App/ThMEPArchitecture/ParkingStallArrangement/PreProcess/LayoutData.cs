@@ -38,7 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
-        public  List<LineSegment> SegLines;// 初始分割线
+        public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
         public  List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public  List<Ramp> Ramps = new List<Ramp>();// 坡道
 
@@ -65,23 +65,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
-        public bool Init(BlockReference block, Serilog.Core.Logger logger)
+        public bool Init(BlockReference block, Serilog.Core.Logger logger, bool extractSegLine = true)
         {
             Logger = logger;
 
-            if (!TryInit(block)) return false;
+            if (!TryInit(block, extractSegLine)) return false;
             //Show();
             if (SegLines.Count != 0)
             {
-                bool Isvaild = SegLineVaild();
-                //VaildLanes.ShowInitSegLine();
-                if (!Isvaild) return false;
+                ProcessSegLines();
             }
+            return true;
+        }
+        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null)
+        {
+            if (AutoSegLines != null) SegLines = AutoSegLines.Select(l => l.Extend(1)).ToList();
+            //SegLines = SegLines.RemoveDuplicated(10);
+            bool Isvaild = SegLineVaild();
+            //VaildLanes.ShowInitSegLine();
+            if (!Isvaild) return false;
             GetLowerUpperBound();
             //ShowLowerUpperBound();
             return true;
         }
-        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger)
+
+        public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger,bool extractSegLine = true)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
             if (block is null)
@@ -94,19 +102,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             string drawingName = Path.GetFileName(doc.Name);
             Logger?.Information("文件名：" + drawingName);
             Logger?.Information("用户名：" + Environment.UserName);
-            if (!TryInit(block)) return false;
+            if (!TryInit(block, extractSegLine)) return false;
             //Show();
             if (SegLines.Count != 0)
             {
                 bool Isvaild = SegLineVaild();
                 //VaildLanes.ShowInitSegLine();
                 if (!Isvaild) return false;
+                GetLowerUpperBound();
+                //ShowLowerUpperBound();
             }
-            GetLowerUpperBound();
-            //ShowLowerUpperBound();
             return true;
         }
-        public  bool TryInit(BlockReference basement)
+        public  bool TryInit(BlockReference basement, bool extractSegLine )
         {
             Explode(basement);
             if(CAD_WallLines.Count == 0)
@@ -116,7 +124,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             WallLine = CAD_WallLines.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().OrderBy(plgn => plgn.Area).Last();
             WallLine = WallLine.RemoveHoles();//初始墙线
-            UpdateSegLines();
+            if(extractSegLine)UpdateSegLines();
             var RampPolgons = UpdateWallLine();
             UpdateRamps(RampPolgons);
             UpdateObstacles();
@@ -142,17 +150,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void AddObj(Entity ent)
         {
-            if (ent.Layer.ToUpper().Contains("地库边界"))
+            var layerName = ent.Layer.ToUpper();
+            if (layerName.Contains("地库边界"))
             {
                 if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild(CloseTol))
                     {
                         CAD_WallLines.Add(pline.GetClosed());
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("障碍物"))
+            if (layerName.Contains("障碍物"))
             {
                 if (ent is BlockReference br)
                 {
@@ -162,7 +171,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            if (pline.IsVaild(CloseTol))
                             {
                                 CAD_Obstacles.Add(pline.GetClosed());
                             }
@@ -171,13 +180,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
                 else if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild(CloseTol))
                     {
                         CAD_Obstacles.Add(pline.GetClosed());
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("坡道"))
+            if (layerName.Contains("坡道"))
             {
                 if (ent is BlockReference br)
                 {
@@ -187,7 +196,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     {
                         if (obj is Polyline pline)
                         {
-                            if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                            if (pline.IsVaild(CloseTol))
                             {
                                 CAD_Ramps.Add(pline.GetClosed());
                             }
@@ -196,13 +205,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
                 else if (ent is Polyline pline)
                 {
-                    if (ThMEPFrameService.IsClosed(pline, CloseTol))
+                    if (pline.IsVaild( CloseTol))
                     {
                         CAD_Ramps.Add(pline.GetClosed());
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("分割线"))
+            if (layerName.Contains("分割线")&& !layerName.Contains("最终"))
             {
                 if (ent is Line line)
                 {
@@ -217,7 +226,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void RemoveSortSegLine()
         {
-            //移除和内坡道连接的线
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];

@@ -62,6 +62,23 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
             var config = new ThPDSDistributionPanelConfig();
             panel.canvas.DataContext = config;
             var builder = new ThPDSCircuitGraphTreeBuilder();
+            void UpdateTreeView()
+            {
+                var tree = builder.Build(graph);
+                {
+                    void dfs(ThPDSCircuitGraphTreeModel node)
+                    {
+                        foreach (var n in node.DataList)
+                        {
+                            n.Parent = node;
+                            n.Root = tree;
+                            dfs(n);
+                        }
+                    }
+                    dfs(tree);
+                    panel.tv.DataContext = tree;
+                }
+            }
             var tree = builder.Build(graph);
             static string FixString(string text)
             {
@@ -132,6 +149,16 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var drawEngine = new ThPDSSystemDiagramService();
                 drawEngine.Draw(graph, nodes);
             });
+            Action autoNumbering = null;
+            var autoNumberingCmd = new RelayCommand(() =>
+            {
+                autoNumbering?.Invoke();
+            });
+            Action balancedPhaseSequence = null;
+            var balancedPhaseSequenceCmd = new RelayCommand(() =>
+            {
+                balancedPhaseSequence?.Invoke();
+            });
             Action createBackupCircuit = null;
             var createBackupCircuitCmd = new RelayCommand(() =>
             {
@@ -160,6 +187,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 {
                     Header = "全不选",
                     Command = unselAllCmd,
+                };
+                yield return new()
+                {
+                    Header = "自动编号",
+                    Command = autoNumberingCmd,
                 };
                 yield return new()
                 {
@@ -286,11 +318,43 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 if (id < 0) return null;
                 return graph.Vertices.ToList()[id];
             }
+            balancedPhaseSequence = () =>
+            {
+                var vertice = GetCurrentVertice();
+                if (vertice is null) return;
+                ThPDSProjectGraphService.BalancedPhaseSequence(graph, vertice);
+                UpdateCanvas();
+            };
             createBackupCircuit = () =>
             {
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 ThPDSProjectGraphService.CreatBackupCircuit(graph, vertice);
+                UpdateCanvas();
+            };
+            autoNumbering = () =>
+            {
+                // 获取勾选的节点
+                var vertices = graph.Vertices.ToList();
+                var nodes = new List<ThPDSProjectGraphNode>();
+                void dfs(ThPDSCircuitGraphTreeModel node)
+                {
+                    if (node.IsChecked == true)
+                    {
+                        nodes.Add(vertices[node.Id]);
+                    }
+                    foreach (var n in node.DataList)
+                    {
+                        dfs(n);
+                    }
+                }
+                dfs(tree);
+                if (nodes.Count == 0) return;
+
+                // 自动编号
+                ThPDSProjectGraphService.AutoNumbering(graph, nodes);
+
+                // 更新画布
                 UpdateCanvas();
             };
             void UpdateCanvas()
@@ -304,16 +368,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 var vertice = GetCurrentVertice();
                 if (vertice is null) return;
                 config.Current = new(vertice);
-                config.BatchGenerate = batchGenCmd;
                 {
                     var cmenu = new ContextMenu();
                     cmenu.Items.Add(new MenuItem()
                     {
                         Header = "平衡相序",
-                        Command = new RelayCommand(() =>
-                        {
-                            ThPDSProjectGraphService.BalancedPhaseSequence(graph, GetCurrentVertice());
-                        }),
+                        Command = balancedPhaseSequenceCmd,
                     });
                     cmenu.Items.Add(new MenuItem()
                     {
@@ -393,6 +453,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                         item = PDSItemInfo.Create(left, default);
                     }
                     if (item is null) throw new NotSupportedException(left);
+                    if (circuitInType != CircuitFormInType.集中电源)
+                    {
+                        item.brInfos.Add(new BlockInfo("PMFE", "E-PMFE-DEVC", new(17, -259)));
+                        item.brInfos.Add(new BlockInfo("EFPU", "E-EFPS-DEVC", new(17, -287)));
+                    }
                     foreach (var fe in CreateDrawingObjects(canvas, trans, item))
                     {
                         canvas.Children.Add(fe);
@@ -417,7 +482,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 var figure = new PathFigure();
                                 figure.StartPoint = info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.StartAngle), info.Arc.Radius * Math.Sin(info.Arc.StartAngle));
                                 var arcSeg = new ArcSegment(info.Arc.Center.OffsetXY(info.Arc.Radius * Math.Cos(info.Arc.EndAngle), info.Arc.Radius * Math.Sin(info.Arc.EndAngle)),
-                                  new Size(info.Arc.Radius, info.Arc.Radius), 0, true, SweepDirection.Clockwise, true);
+                                  new Size(info.Arc.Radius, info.Arc.Radius), 30, false, info.Arc.IsClockWise ? SweepDirection.Clockwise : SweepDirection.Counterclockwise, true);
                                 figure.Segments.Add(arcSeg);
                                 geo.Figures.Add(figure);
                             }
@@ -684,6 +749,14 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             }
                             foreach (var el in CreateDrawingObjects(canvas, trans, PDSItemInfo.Create(info.BlockName, info.BasePoint), Brushes.Red))
                             {
+                                if (info.BlockName is "PMFE")
+                                {
+                                    el.SetBinding(UIElement.VisibilityProperty, new Binding(nameof(config.Current.FirePowerMonitoring)) { Source = config.Current, Converter = new BooleanToVisibilityConverter(), });
+                                }
+                                else if (info.BlockName is "EFPU")
+                                {
+                                    el.SetBinding(UIElement.VisibilityProperty, new Binding(nameof(config.Current.ElectricalFireMonitoring)) { Source = config.Current, Converter = new BooleanToVisibilityConverter(), });
+                                }
                                 yield return el;
                             }
                             var _info = PDSItemInfo.GetBlockDefInfo(info.BlockName);
@@ -899,10 +972,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                     else if (meter is CurrentTransformer currentTransformer)
                                     {
-                                        var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
+                                        var o = new ThPDSCurrentTransformerModel(currentTransformer);
                                         vm = o;
                                         {
-                                            var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MT" or "CT");
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is "MT");
+                                            if (m != null)
+                                            {
+                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        }
+                                        {
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is  "CT");
                                             if (m != null)
                                             {
                                                 var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
@@ -2182,13 +2263,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             tree.DataList.Clear();
                                             foreach (var node in ThPDSProjectGraphService.GetUndistributeLoad(graph, filt))
                                             {
-                                                string name;
-                                                name = node.Load.ID.LoadID;
-                                                if (string.IsNullOrEmpty(name))
-                                                {
-                                                    name = node.Load.ID.Description;
-                                                }
-                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = name, Tag = node });
+                                                tree.DataList.Add(new ThPDSCircuitGraphTreeModel() { Name = node.LoadIdString(), Tag = node });
                                             }
                                             ctrl.treeView.DataContext = tree;
                                         }
@@ -2200,6 +2275,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                         {
                                             Update(false);
                                         };
+                                        ctrl.cbxFilt.IsChecked = true;
                                         Update(ctrl.cbxFilt.IsChecked.Value);
                                         var ok = false;
                                         ctrl.btnYes.Command = new RelayCommand(() =>
@@ -2215,6 +2291,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                             {
                                                 ThPDSProjectGraphService.DistributeLoad(graph, edge, node);
                                             }
+                                            UpdateTreeView();
                                             UpdateCanvas();
                                         }
                                     });
@@ -2288,11 +2365,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                 }
                 IEnumerable<ThPDSProjectGraphEdge> GetSortedEdges(IEnumerable<ThPDSProjectGraphEdge> edges)
                 {
-                    return from edge in edges
-                           where edge.Source == vertice
-                           let id = edge.GetCircuitID()
-                           orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
-                           select edge;
+                    return edges.GetSortedEdges();
+                    //return from edge in edges
+                    //       let id = edge.GetCircuitID()
+                    //       orderby id.Length == 0 ? 1 : 0 ascending, circuitIDSortNames.IndexOf(circuitIDSortNames.FirstOrDefault(x => id.ToUpper().StartsWith(x))) + id ascending
+                    //       select edge;
                 }
                 {
                     var edges = ThPDSProjectGraphService.GetOrdinaryCircuit(graph, vertice);
@@ -3140,7 +3217,7 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                 for (int i = 0; i < edges.Count; i++)
                                 {
                                     var edge = edges[i];
-                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID.LastOrDefault(), });
+                                    node.DataList.Add(new ThPDSCircuitGraphTreeModel() { Id = i, Name = edge.Circuit.ID.CircuitID, });
                                 }
                                 var w = new UserContorls.ThPDSAssignCircuit2SmallBusbar() { Width = 400, Height = 400, WindowStartupLocation = WindowStartupLocation.CenterScreen, };
                                 w.ctl.DataContext = node;

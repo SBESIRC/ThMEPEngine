@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -35,7 +36,31 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+#if DEBUG
+            string layerName = "主环qsh";
+            DbHelper.EnsureLayerOn(layerName);
+            foreach (var mainLoop in MainPathList)
+            {
+                for (int i = 0; i < mainLoop.Count - 1; i++)
+                {
+                    try
+                    {
+                        var spt2 = mainLoop[i]._pt;
+                        var ept2 = mainLoop[i + 1]._pt;
+                        var line2 = new Line(spt2, ept2);
+                        line2.Layer = layerName;
+                        acadDatabase.CurrentSpace.Add(line2);
+                    }
+                    catch(Exception ex)
+                    {
+                        ;
+                    }
+                    
+                }
+            }
+#endif
         }
+
         public void DrawSubLoop(AcadDatabase acadDatabase)
         {
             foreach (var subLoop in SubPathList)

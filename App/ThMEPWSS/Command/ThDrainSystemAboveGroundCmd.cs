@@ -12,6 +12,8 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPTCH.Moel;
+using ThMEPTCH.TCHDrawServices;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG;
 using ThMEPWSS.DrainageSystemAG.Bussiness;
@@ -127,6 +129,8 @@ namespace ThMEPWSS.Command
             if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
                 return;
             Active.Document.LockDocument();
+            var verPipes = new List<ThTCHVerticalPipe>();
+            var tchPipeService = new TCHDrawVerticalPipeService();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //所有的楼层框 必须有顶层，没有时不进行后续的生成
@@ -256,34 +260,150 @@ namespace ThMEPWSS.Command
                 var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
                 var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
                 createBasicElems.AddRange(addPLines);
+                var pipeElems = new List<CreateBlockInfo>();
+                var tempElems = new List<CreateBlockInfo>();
+                tempElems.AddRange(createBlockInfos);
+                createBlockInfos.Clear();
+                pipeTags.Add("Y2L");
+                pipeTags.Add("Y1L");
+                pipeTags.Add("NL");
+                foreach (var item in tempElems)
+                {
+                    if (string.IsNullOrEmpty(item.tag))
+                    {
+                        createBlockInfos.Add(item);
+                    }
+                    else if (pipeTags.Any(c => c == item.tag))
+                    {
+                        pipeElems.Add(item);
+                    }
+                    else
+                    {
+                        createBlockInfos.Add(item);
+                    }
+                }
+                var notCreateLineIds = new List<string>();
+                var notCreateTextIds = new List<string>();
+                foreach (var item in pipeElems)
+                {
+                    var tchPipe = new ThTCHVerticalPipe();
+                    tchPipe.PipeBottomPoint = item.createPoint;
+                    tchPipe.PipeTopPoint = item.createPoint + Vector3d.ZAxis.MultiplyBy(3000);
+                    tchPipe.PipeDN = Convert.ToDouble(item.dymBlockAttr.First().Value.ToString().Replace("DN", ""));
+                    string pipeSystem = "废水";
+                    string pipeMaterial = "排水铸铁管";
+                    string pipeDNType = "DN";
+                    switch (item.tag) 
+                    {
+                        case "DL":
+                        case "FL":
+                        case "Y2L":
+                            pipeSystem = "废水";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                        case "TL":
+                            pipeSystem = "通气";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                        case "PL":
+                            pipeSystem = "排水";
+                            pipeMaterial = "镀锌钢管";
+                            break;
+                        case "Y1L":
+                        case "NL":
+                            pipeSystem = "雨水";
+                            pipeMaterial = "排水铸铁管";
+                            break;
+                    }
+                    tchPipe.PipeSystem = pipeSystem;
+                    tchPipe.PipeMaterial = pipeMaterial;
+                    tchPipe.DnType = pipeDNType;
+                    switch (SetServicesModel.Instance.drawingScale) 
+                    {
+                        case EnumDrawingScale.DrawingScale1_100:
+                            tchPipe.DocScale = 100.0;
+                            break;
+                        case EnumDrawingScale.DrawingScale1_150:
+                            tchPipe.DocScale = 150.0;
+                            break;
+                        case EnumDrawingScale.DrawingScale1_50:
+                            tchPipe.DocScale = 50;
+                            break;
+                    }
+                    var bId = string.IsNullOrEmpty(item.copyId) ? item.uid : item.copyId;
+                    var lines = createBasicElems.Where(c => c.belongBlockId.Contains(bId) && c.floorId == item.floorId).ToList();
+                    var texts = createTextElems.Where(c => c.belongBlockId.Contains(bId) && c.floorUid == item.floorId).ToList();
+                    if ((null != lines && lines.Count > 0) && (texts != null && texts.Count > 0))
+                    {
+                        //计算标注
+                        var pipeCenter = item.createPoint;
+                        Line nearLine = null;
+                        double nearDis = double.MaxValue;
+                        foreach (var line in lines)
+                        {
+                            var thisLine = line.baseCurce as Line;
+                            var lineSp = thisLine.StartPoint;
+                            var lineEp = thisLine.EndPoint;
+                            var spDis = lineSp.DistanceTo(pipeCenter);
+                            var epDis = lineEp.DistanceTo(pipeCenter);
+                            var thisDis = Math.Min(spDis, epDis);
+                            if (thisDis < nearDis)
+                            {
+                                nearLine = thisLine;
+                            }
+                        }
+                        Line otherLine = null;
+                        var dir = nearLine.LineDirection();
+                        var allPoints = new List<Point3d>();
+                        foreach (var line in lines)
+                        {
+                            var thisLine = line.baseCurce as Line;
+                            var thisDir = thisLine.LineDirection();
+                            if (Math.Abs(thisDir.DotProduct(dir)) < 0.9)
+                            {
+                                otherLine = thisLine;
+                                break;
+                            }
+                        }
+                        if (otherLine == null)
+                            continue;
+                        notCreateLineIds.AddRange(lines.Select(c => c.uid).ToList());
+                        notCreateTextIds.AddRange(texts.Select(c => c.uid).ToList());
+                        var pt1 = otherLine.StartPoint;
+                        var pt2 = otherLine.EndPoint;
+                        if (pt1.DistanceTo(pipeCenter) < pt2.DistanceTo(pipeCenter))
+                        {
+                            tchPipe.TurnPoint = pt1;
+                            tchPipe.TextDirection = otherLine.LineDirection();
+                        }
+                        else
+                        {
+                            tchPipe.TurnPoint = pt2;
+                            tchPipe.TextDirection = otherLine.LineDirection().Negate();
+                        }
+                        var textFirst = texts.First();
+                        var numStr = textFirst.dbText.TextString.Split('-').ToList().Last();
+                        int.TryParse(numStr, out int intNum);
+                        tchPipe.FloorNum = "";
+                        tchPipe.TextStyle = "_TWT_SERIAL";
+                        tchPipe.DimType = 0;
+                        tchPipe.TextHeight = 3.5;
+                        tchPipe.DimRadius = 4.0;
+                        tchPipe.Spacing = 4.0;
+                        tchPipe.DimTypeText = item.tag;
+                        tchPipe.PipeNum = intNum.ToString();
+                    }
+                    verPipes.Add(tchPipe);
+                }
+                createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid)).ToList();
+                createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid)).ToList();
                 var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                 var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                 var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
-                //根据生成的数据，将同一图纸中的进行创建block
-                foreach (var floor in floorFrameds) 
-                {
-                    var thisFloorBlocks = createBlocks.Where(c => c.floorUid.Equals(floor.floorUid)).ToList();
-                    var thisFloorElems = createElems.Where(c => c.floorUid.Equals(floor.floorUid)).ToList();
-                    var thisFloorTexts = createTexts.Where(c => c.floorUid.Equals(floor.floorUid)).ToList();
-
-                    var createEntitys = new List<Entity>();
-                    thisFloorBlocks.ForEach(c => createEntitys.Add(acdb.Element<Entity>(c.objectId)));
-                    thisFloorElems.ForEach(c => createEntitys.Add(acdb.Element<Entity>(c.objectId)));
-                    thisFloorTexts.ForEach(c => createEntitys.Add(acdb.Element<Entity>(c.objectId)));
-                    if (createEntitys.Count < 1)
-                        continue;
-                    string blockName = string.Format("{0}", DrainSysAGCommon.BLOCKNAMEPREFIX);
-                    int i = 0;
-                    while (acdb.Database.BlockTable().Has(blockName)) 
-                    {
-                        i += 1;
-                        blockName = string.Format("{0}-{1}", DrainSysAGCommon.BLOCKNAMEPREFIX, i);
-                    }
-                    var record = ThBlockTools.AddBlockTableRecordDBEntity(acdb.Database, blockName,floor.datumPoint, createEntitys.Select(c=>c.ObjectId).ToArray(),true);
-                    var blockRecord = acdb.Blocks.Element(record);
-                    acdb.ModelSpace.ObjectId.InsertBlockReference("0", blockRecord.Name, floor.datumPoint, new Scale3d(),0.0);
-                }
+                
             }
+            tchPipeService.InitPipe(verPipes);
+            tchPipeService.DrawExecute(false);
         }
         void InitData(Database database) 
         {

@@ -24,5 +24,10 @@ namespace TianHua.Electrical.PDS.Model
         {
             return this.X == other.X && this.Y == other.Y;
         }
+
+        public bool AlmostEqualsTo(ThPDSPoint3d other)
+        {
+            return Math.Abs(this.X - other.X) + Math.Abs(this.Y - other.Y) < 1.0;
+        }
     }
 }

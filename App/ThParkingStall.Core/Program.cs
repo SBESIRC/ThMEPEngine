@@ -41,7 +41,7 @@ namespace ThParkingStall.Core
             var IterationCount = Int32.Parse(ProcessInfo[2]);
             var LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
             var ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
-            if(ThreadCnt >2) InterParameter.MultiThread = true;
+            if (ThreadCnt > 2) InterParameter.MultiThread = true;
             else InterParameter.MultiThread = false;
             string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SubProcessLog" + ProcessIndex.ToString() + "_.txt");
             var Logger = new Serilog.LoggerConfiguration().WriteTo
@@ -49,6 +49,7 @@ namespace ThParkingStall.Core
             MCompute.Logger = Logger;
             MCompute.LogInfo = LogAllInfo;
             MCompute.ThreadCnt = ThreadCnt;
+            MPGAData.ProcIndex = ProcessIndex;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var t_pre = 0.0;
@@ -76,70 +77,78 @@ namespace ThParkingStall.Core
             }
             for (int iter = 0; iter < IterationCount; iter++)
             {
-                MCompute.CatchedTimes = 0;
+                
                 var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
                 StartSignal.WaitOne();
-                if (LogAllInfo)
+
+                try
                 {
-                    Logger?.Information("第" + (iter + 1).ToString() + "代开始：");
-                    t_pre = stopWatch.Elapsed.TotalSeconds;
-                }
-                ChromosomeCollection chromosomeCollection;
-                using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("ChromosomeCollection", MemoryMappedFileRights.Read))//读取
-                {
-                    using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
-                    {
-                        //IFormatter formatter = new BinaryFormatter();
-                        //chromosomeCollection = (ChromosomeCollection)formatter.Deserialize(stream);
-                        chromosomeCollection = ChromosomeCollection.ReadFromStream(stream);
-                        SubAreaParkingCnt.Update(chromosomeCollection);
-                    }
-                }
-                if (LogAllInfo)
-                {
-                    Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
-                    t_pre = stopWatch.Elapsed.TotalSeconds;
-                }
-                var ParkingCnts = new List<int>();
-                var Chromosomes = chromosomeCollection.Chromosomes;
-                for (int i = 0; i <= Chromosomes.Count / ProcessCount; i++)//计算
-                {
-                    int j = i * ProcessCount + ProcessIndex;
-                    if (j >= Chromosomes.Count) break;
-                    var chromosome = Chromosomes[j];
-                    MPGAData.Set( chromosome);
-                    var subAreas = InterParameter.GetSubAreas(chromosome);
                     if (LogAllInfo)
                     {
-                        Logger?.Information($"区域分割用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                        Logger?.Information("第" + (iter + 1).ToString() + "代开始：");
                         t_pre = stopWatch.Elapsed.TotalSeconds;
                     }
-                    List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                    MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                    var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+                    ChromosomeCollection chromosomeCollection;
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("ChromosomeCollection", MemoryMappedFileRights.Read))//读取
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                        {
+                            //IFormatter formatter = new BinaryFormatter();
+                            //chromosomeCollection = (ChromosomeCollection)formatter.Deserialize(stream);
+                            chromosomeCollection = ChromosomeCollection.ReadFromStream(stream);
+                            SubAreaParkingCnt.Update(chromosomeCollection);
+                        }
+                    }
                     if (LogAllInfo)
                     {
-                        Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
-                        Logger?.Information("Catched:" + MCompute.CatchedTimes.ToString() + "/" + subAreas.Count.ToString());
+                        Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
                         t_pre = stopWatch.Elapsed.TotalSeconds;
                     }
-                    ParkingCnts.Add(ParkingCount);
-                }
-                //if (LogAllInfo) Logger?.Information("计算完成");
-                    
-                using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("CachedPartitionCnt" + ProcessIndex.ToString()))
-                {
-                    using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
+                    var ParkingCnts = new List<int>();
+                    var Chromosomes = chromosomeCollection.Chromosomes;
+                    for (int i = 0; i <= Chromosomes.Count / ProcessCount; i++)//计算
                     {
-                        //IFormatter formatter = new BinaryFormatter();
-                        //var newCatched = SubAreaParkingCnt.GetNewUpdated();
-                        //formatter.Serialize(stream, (ParkingCnts, newCatched.Item1, newCatched.Item2));
-                        BinaryWriter writer = new BinaryWriter(stream);
-                        ParkingCnts.WriteToStream(writer);
-                        SubAreaParkingCnt.NewCachedPartitionCnt.WriteToStream(writer);
+                        MCompute.CatchedTimes = 0;
+                        int j = i * ProcessCount + ProcessIndex;
+                        if (j >= Chromosomes.Count) break;
+                        var chromosome = Chromosomes[j];
+                        MPGAData.Set(chromosome);
+                        var subAreas = InterParameter.GetSubAreas(chromosome);
+                        if (LogAllInfo)
+                        {
+                            Logger?.Information($"区域分割用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                            t_pre = stopWatch.Elapsed.TotalSeconds;
+                        }
+                        List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+                        MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                        var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition);
+                        if (LogAllInfo)
+                        {
+                            Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                            Logger?.Information("Catched:" + MCompute.CatchedTimes.ToString() + "/" + subAreas.Count.ToString());
+                            t_pre = stopWatch.Elapsed.TotalSeconds;
+                        }
+                        ParkingCnts.Add(ParkingCount);
+                    }
+                    //if (LogAllInfo) Logger?.Information("计算完成");
+
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("CachedPartitionCnt" + ProcessIndex.ToString()))
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
+                        {
+                            //IFormatter formatter = new BinaryFormatter();
+                            //var newCatched = SubAreaParkingCnt.GetNewUpdated();
+                            //formatter.Serialize(stream, (ParkingCnts, newCatched.Item1, newCatched.Item2));
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            ParkingCnts.WriteToStream(writer);
+                            SubAreaParkingCnt.NewCachedPartitionCnt.WriteToStream(writer);
+                        }
                     }
                 }
-                StartSignal.ReleaseMutex();//发出信号确认完成
+                finally
+                {
+                    StartSignal.ReleaseMutex();//发出信号确认完成
+                }
                 if (LogAllInfo)
                 {
                     Logger?.Information("输出完成");
@@ -149,6 +158,7 @@ namespace ThParkingStall.Core
                 SubAreaParkingCnt.ClearNewAdded();
                 if (IterationCount % 3 == 0)
                     ReclaimMemory();
+
             }
             if (LogAllInfo)
             {
@@ -165,7 +175,7 @@ namespace ThParkingStall.Core
         }
         static int YMain(string[] parameter)
         {
-            string[] parameters = parameter[0].Split('|').Where(e => e.Length>0).ToArray();
+            string[] parameters = parameter[0].Split('|').Where(e => e.Length > 0).ToArray();
             List<LineString> twalls = new List<LineString>();
             List<LineSegment> tinilanes = new List<LineSegment>();
             List<Polygon> tobs = new List<Polygon>();
@@ -268,5 +278,5 @@ namespace ThParkingStall.Core
         }
 
     }
-    
+
 }

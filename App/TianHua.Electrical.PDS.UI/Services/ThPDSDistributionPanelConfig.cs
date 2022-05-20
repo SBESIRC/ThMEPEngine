@@ -1,25 +1,10 @@
 ﻿using TianHua.Electrical.PDS.Project.Module;
 using ThControlLibraryWPF.ControlUtils;
-using Microsoft.Toolkit.Mvvm.Input;
 
 namespace TianHua.Electrical.PDS.UI.Services
 {
     public class ThPDSDistributionPanelConfig : NotifyPropertyChangedBase
     {
-        private RelayCommand _batchGenerate;
-        public RelayCommand BatchGenerate
-        {
-            get => _batchGenerate;
-            set
-            {
-                if (value != _batchGenerate)
-                {
-                    _batchGenerate = value;
-                    OnPropertyChanged(nameof(BatchGenerate));
-                }
-            }
-        }
-
         private ThPDSDistributionPanelConfigState _current;
         public ThPDSDistributionPanelConfigState Current
         {

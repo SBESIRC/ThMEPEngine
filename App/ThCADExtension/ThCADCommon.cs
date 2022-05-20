@@ -242,6 +242,10 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "TG20.db");
         }
+        public static string TCHWSSDBPath()
+        {
+            return Path.Combine(SupportPath(), "TG20W.db");
+        }
 
         public static string DuctInOutMapping()
         {
