@@ -62,7 +62,11 @@ namespace TianHua.Electrical.PDS.Project
                 e.ComponentSelection();
             });
             edges.BalancedPhaseSequence();
-            node.Details.HighPower =Math.Max(node.Load.InstalledCapacity.HighPower, node.CalculatePower());
+            node.Details.HighPower =Math.Max(node.Load.InstalledCapacity.HighPower, node.CalculateHighPower());
+            if(node.Details.IsDualPower)
+            {
+                node.Details.LowPower =Math.Max(node.Load.InstalledCapacity.LowPower, node.CalculateLowPower());
+            }
             node.CalculateCurrent();
             node.ComponentSelection(edges);
             edges.CalculateSecondaryCircuit();
@@ -810,7 +814,7 @@ namespace TianHua.Electrical.PDS.Project
             edge.Details.CascadeCurrent = Math.Max(edge.Target.Details.CascadeCurrent, edge.Details.CircuitForm.GetCascadeCurrent());
         }
 
-        public static double CalculatePower(this ThPDSProjectGraphNode source)
+        public static double CalculateHighPower(this ThPDSProjectGraphNode source)
         {
             var edges = _projectGraph.OutEdges(source).ToList();
             if (source.Details.CircuitFormType.CircuitFormType == CircuitFormInType.集中电源)
@@ -851,6 +855,58 @@ namespace TianHua.Electrical.PDS.Project
                     case PhaseSequence.L123:
                         {
                             power += node.Details.HighPower;
+                            break;
+                        }
+                    default:
+                        {
+                            throw new NotSupportedException();
+                        }
+                }
+            });
+            return power + 3 * Math.Max(Math.Max(L1Power, L2Power), L3Power);
+        }
+
+        public static double CalculateLowPower(this ThPDSProjectGraphNode source)
+        {
+            if (!source.Details.IsDualPower)
+            {
+                return 0;
+            }
+            var edges = _projectGraph.OutEdges(source).ToList();
+            if (source.Load.Phase == ThPDSPhase.一相)
+            {
+                return edges.Sum(o => o.Target.Details.LowPower);
+            }
+            double power = 0;
+            double L1Power = 0, L2Power = 0, L3Power = 0;
+            edges.ForEach(edge =>
+            {
+                var node = edge.Target;
+                switch (node.Details.PhaseSequence)
+                {
+                    case PhaseSequence.L1:
+                        {
+                            L1Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L2:
+                        {
+                            L2Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L3:
+                        {
+                            L3Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L:
+                        {
+                            L3Power += node.Details.LowPower;
+                            break;
+                        }
+                    case PhaseSequence.L123:
+                        {
+                            power += node.Details.LowPower;
                             break;
                         }
                     default:
@@ -1071,7 +1127,8 @@ namespace TianHua.Electrical.PDS.Project
             var edges = _projectGraph.OutEdges(node).ToList();
             if (IsPhaseSequenceChange)
             {
-                node.Details.HighPower = node.CalculatePower();
+                node.Details.HighPower = node.CalculateHighPower();
+                node.Details.LowPower =Math.Max(node.Details.LowPower, node.CalculateLowPower());
             }
             node.CalculateCurrent();
             //统计节点级联电流
@@ -1115,7 +1172,11 @@ namespace TianHua.Electrical.PDS.Project
         public static void CheckWithNode(this ThPDSProjectGraphNode node)
         {
             var edges = _projectGraph.OutEdges(node).ToList();
-            node.Details.HighPower = Math.Max(node.Details.HighPower, node.CalculatePower());
+            node.Details.HighPower = Math.Max(node.Details.HighPower, node.CalculateHighPower());
+            if (node.Details.IsDualPower)
+            {
+                node.Details.LowPower =Math.Max(node.Details.LowPower, node.CalculateLowPower());
+            }
             node.CalculateCurrent();
             //统计节点级联电流
             var CascadeCurrent = edges.Count > 0 ? edges.Max(e => e.Details.CascadeCurrent) : 0;
@@ -1889,26 +1950,57 @@ namespace TianHua.Electrical.PDS.Project
             {
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
-            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit || edge.Details.CircuitForm is Motor_CPSCircuit)
+            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsCircuit || edge.Details.CircuitForm is Motor_CPSCircuit || edge.Details.CircuitForm is Motor_DiscreteComponentsStarTriangleStartCircuit || edge.Details.CircuitForm is Motor_CPSStarTriangleStartCircuit)
             {
                 if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
                 {
-                    edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                    if(edge.Target.Load.FireLoad)
+                    {
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                        }
+                    }
+                    else
+                    {
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
+                        }
+                    }
                 }
                 else
                 {
-                    edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
-                }
-            }
-            else if (edge.Details.CircuitForm is Motor_DiscreteComponentsStarTriangleStartCircuit || edge.Details.CircuitForm is Motor_CPSStarTriangleStartCircuit)
-            {
-                if (PDSProject.Instance.projectGlobalConfiguration.MotorUIChoise == MotorUIChoise.分立元件)
-                {
-                    edge.Details.CircuitForm = specifyComponentFactory.GetDiscreteComponentsStarTriangleStartCircuit();
-                }
-                else
-                {
-                    edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                    if (edge.Target.Load.FireLoad)
+                    {
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.FireMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                        }
+                    }
+                    else
+                    {
+                        if (edge.Target.Details.HighPower < PDSProject.Instance.projectGlobalConfiguration.NormalMotorPower)
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSCircuit();
+                        }
+                        else
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetCPSStarTriangleStartCircuit();
+                        }
+                    }
                 }
             }
             else if (edge.Details.CircuitForm is TwoSpeedMotor_DiscreteComponentsYYCircuit || edge.Details.CircuitForm is TwoSpeedMotor_CPSYYCircuit)

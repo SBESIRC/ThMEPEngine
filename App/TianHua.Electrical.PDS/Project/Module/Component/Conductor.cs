@@ -563,7 +563,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             get
             {
                 string val = $"{(IsBAControl ? "" : (IsSpecifyMaterialStructure ? ConductorUse.ConductorMaterial + "-" + SpecifyMaterialStructure : ConductorUse.Content)+"-"+ConductorInfo+"-")}{LayingTyle}";
-                if (NumberOfPhaseWire != 1)
+                if (NumberOfPhaseWire > 1)
                 {
                     val = $"{NumberOfPhaseWire}×({val})";
                 }
@@ -764,7 +764,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             {
                 if (Phase == ThPDSPhase.一相)
                 {
-                    return $"1×{ConductorCrossSectionalArea}{(HasPELine ? "+E"+PECrossSectionalArea : "")}";
+                    return $"2×{ConductorCrossSectionalArea}{(HasPELine ? "+E"+PECrossSectionalArea : "")}";
                 }
                 else
                 {

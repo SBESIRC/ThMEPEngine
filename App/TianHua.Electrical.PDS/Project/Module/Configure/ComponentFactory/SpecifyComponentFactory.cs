@@ -90,7 +90,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_DiscreteComponentsCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsInfos : MotorConfiguration.NonFire_DiscreteComponentsInfos;
-            var config = configs.First(o => o.InstalledCapacity > _lowPower);
+            var config = configs.First(o => o.InstalledCapacity > _highPower);
             _breakerConfig = config.CB;
             _contactorConfig = config.QAC;
             _thermalRelayConfig = config.KH;
@@ -110,7 +110,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_CPSCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_CPSInfos : MotorConfiguration.NonFire_CPSInfos;
-            var config = configs.First(o => o.InstalledCapacity > _lowPower);
+            var config = configs.First(o => o.InstalledCapacity > _highPower);
             _cPSConfig = config.CPS;
             _conductorConfig = config.Conductor;
             CircuitForm.cps = CreatCPS();
@@ -126,7 +126,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_DiscreteComponentsStarTriangleStartCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_DiscreteComponentsStarTriangleStartInfos : MotorConfiguration.NonFire_DiscreteComponentsStarTriangleStartInfos;
-            var config = configs.First(o => o.InstalledCapacity > _lowPower);
+            var config = configs.First(o => o.InstalledCapacity > _highPower);
             _breakerConfig = config.CB;
             CircuitForm.breaker = CreatBreaker();
             _contactorConfig = config.QAC1;
@@ -152,7 +152,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             var CircuitForm = new Motor_CPSStarTriangleStartCircuit();
             var configs = _isFireLoad ? MotorConfiguration.Fire_CPSStarTriangleStartInfos : MotorConfiguration.NonFire_CPSStarTriangleStartInfos;
-            var config = configs.First(o => o.InstalledCapacity > _lowPower);
+            var config = configs.First(o => o.InstalledCapacity > _highPower);
             _cPSConfig = config.CPS;
             CircuitForm.cps = CreatCPS();
             _contactorConfig = config.QAC1;

@@ -54,7 +54,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                 }
-                breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
+                breaker = breakers.FirstOrDefault(o => o.DefaultPick &&  o.Poles == polesNum);
+                if(breaker.IsNull())
+                {
+                    breaker = breakers.FirstOrDefault(o => o.Poles == polesNum);
+                    if (breaker.IsNull())
+                    {
+                        breaker = breakers.First();
+                    }
+                }
                 //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
                 RCDType = RCDType.A;
                 if (IsDomesticWaterPump)
@@ -82,7 +90,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 {
                     throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                 }
-                breaker = breakers.First(o => o.DefaultPick &&  o.Poles == polesNum);
+                breaker = breakers.FirstOrDefault(o => o.DefaultPick &&  o.Poles == polesNum);
+                if (breaker.IsNull())
+                {
+                    breaker = breakers.FirstOrDefault(o => o.Poles == polesNum);
+                    if (breaker.IsNull())
+                    {
+                        breaker = breakers.First();
+                    }
+                }
             }
             Model = breaker.Model;
             FrameSpecification = breaker.FrameSize;
@@ -235,7 +251,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         {
                             throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                         }
-                        breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
+                        breaker = breakers.FirstOrDefault(o => o.DefaultPick &&  o.Poles == PolesNum);
+                        if (breaker.IsNull())
+                        {
+                            breaker = breakers.FirstOrDefault(o => o.Poles == PolesNum);
+                            if (breaker.IsNull())
+                            {
+                                breaker = breakers.First();
+                            }
+                        }
                         //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
                         RCDType = RCDType.A;
                         if (IsDomesticWaterPump)
@@ -262,8 +286,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         {
                             throw new NotFoundComponentException("设备库内找不到对应规格的Breaker");
                         }
-                        breaker = breakers.First(o => o.DefaultPick &&  o.Poles == PolesNum);
-                        if(componentType == ComponentType.CB)
+                        breaker = breakers.FirstOrDefault(o => o.DefaultPick &&  o.Poles == PolesNum);
+                        if (breaker.IsNull())
+                        {
+                            breaker = breakers.FirstOrDefault(o => o.Poles == PolesNum);
+                            if (breaker.IsNull())
+                            {
+                                breaker = breakers.First();
+                            }
+                        }
+                        if (componentType == ComponentType.CB)
                         {
                             Appendix = AppendixType.无;
                             ComponentType = ComponentType.CB;

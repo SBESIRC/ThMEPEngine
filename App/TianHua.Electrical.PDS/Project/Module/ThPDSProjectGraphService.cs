@@ -407,7 +407,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// </summary>
         public static void CreatBackupCircuit(ProjectGraph graph, ThPDSProjectGraphNode node)
         {
-            var edges = graph.OutEdges(node);
+            var edges = graph.OutEdges(node).Where(edge => !edge.Details.CircuitForm.IsMotorCircuit());
             var OnePhaseCB = new List<ThPDSProjectGraphEdge>();
             var OnePhaseRCD = new List<ThPDSProjectGraphEdge>();
             var ThreePhaseCB = new List<ThPDSProjectGraphEdge>();
