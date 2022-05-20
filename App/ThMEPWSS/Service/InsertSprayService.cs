@@ -47,7 +47,7 @@ namespace ThMEPWSS.Service
                 newTCHModel.Type = 1;
                 newTCHModel.LinkMode = 1;
                 newTCHModel.Radius = 2.12;
-                newTCHModel.SizeX = 250.0;
+                newTCHModel.SizeX = 300.0;
                 newTCHModel.SizeY = 0;
                 newTCHModel.DocScale = 100.0;
                 newTCHModel.HidePipe = hidePipe;

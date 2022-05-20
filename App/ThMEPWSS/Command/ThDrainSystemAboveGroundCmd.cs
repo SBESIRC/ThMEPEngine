@@ -330,16 +330,16 @@ namespace ThMEPWSS.Command
                             tchPipe.DocScale = 50;
                             break;
                     }
-
-                    var lines = createBasicElems.Where(c => c.belongBlockId.Contains(item.uid) && c.floorId == item.floorId).ToList();
-                    var texts = createTextElems.Where(c => c.belongBlockId.Contains(item.uid) && c.floorUid == item.floorId).ToList();
+                    var bId = string.IsNullOrEmpty(item.copyId) ? item.uid : item.copyId;
+                    var lines = createBasicElems.Where(c => c.belongBlockId.Contains(bId) && c.floorId == item.floorId).ToList();
+                    var texts = createTextElems.Where(c => c.belongBlockId.Contains(bId) && c.floorUid == item.floorId).ToList();
                     if ((null != lines && lines.Count > 0) && (texts != null && texts.Count > 0))
                     {
                         //计算标注
                         var pipeCenter = item.createPoint;
                         Line nearLine = null;
                         double nearDis = double.MaxValue;
-                        foreach (var line in lines) 
+                        foreach (var line in lines)
                         {
                             var thisLine = line.baseCurce as Line;
                             var lineSp = thisLine.StartPoint;
@@ -347,12 +347,12 @@ namespace ThMEPWSS.Command
                             var spDis = lineSp.DistanceTo(pipeCenter);
                             var epDis = lineEp.DistanceTo(pipeCenter);
                             var thisDis = Math.Min(spDis, epDis);
-                            if (thisDis < nearDis) 
+                            if (thisDis < nearDis)
                             {
                                 nearLine = thisLine;
                             }
                         }
-                        Line otherLine =null;
+                        Line otherLine = null;
                         var dir = nearLine.LineDirection();
                         var allPoints = new List<Point3d>();
                         foreach (var line in lines)
@@ -361,7 +361,7 @@ namespace ThMEPWSS.Command
                             var thisDir = thisLine.LineDirection();
                             if (Math.Abs(thisDir.DotProduct(dir)) < 0.9)
                             {
-                                otherLine =thisLine;
+                                otherLine = thisLine;
                                 break;
                             }
                         }
@@ -376,7 +376,7 @@ namespace ThMEPWSS.Command
                             tchPipe.TurnPoint = pt1;
                             tchPipe.TextDirection = otherLine.LineDirection();
                         }
-                        else 
+                        else
                         {
                             tchPipe.TurnPoint = pt2;
                             tchPipe.TextDirection = otherLine.LineDirection().Negate();
