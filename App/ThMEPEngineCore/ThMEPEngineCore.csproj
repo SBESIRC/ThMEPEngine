@@ -193,7 +193,7 @@
     <Compile Include="Engine\ThCircleVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThCircleVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircleVPipeRecognitionEngine.cs" />
-    <Compile Include="Engine\ThPCArchitectureWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageVPipeRecognitionEngine.cs" />
