@@ -481,7 +481,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         //generate_lane_length = split.Length;
                         double dis_to_move = 0;
                         LineSegment perpLine = new LineSegment(new Coordinate(0, 0), new Coordinate(0, 0));
-                        if (HasParallelLaneForwardExisted(split, vec, 28700 - 15700, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))
+                        if (false && HasParallelLaneForwardExisted(split, vec, 28700 - 15700, /*19000 - 15700*//*0*/3000, ref dis_to_move, ref perpLine))
                         {
                             paras.CarBoxPlusToAdd[paras.CarBoxPlusToAdd.Count - 1].IsSingleForParallelExist = true;
                             var existBoxes = CarBoxesPlus.Where(e => e.IsSingleForParallelExist).Select(e => e.Box);
