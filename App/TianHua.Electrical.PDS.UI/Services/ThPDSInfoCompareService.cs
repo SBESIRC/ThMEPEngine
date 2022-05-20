@@ -2,11 +2,13 @@
 using System.IO;
 using System.Linq;
 using ThCADExtension;
+using System.Windows;
 using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.ComponentModel;
+using System.Windows.Controls;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.ObjectModel;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -147,6 +149,80 @@ namespace TianHua.Electrical.PDS.UI.Services
                     }
                 };
             }
+            {
+                panel.LoadDataGrid.ContextMenu = GetContextMenu(panel.LoadDataGrid);
+                panel.CircuitDataGrid.ContextMenu = GetContextMenu(panel.CircuitDataGrid);
+            }
+        }
+
+        private ContextMenu GetContextMenu(DataGrid dataGrid)
+        {
+            Visual GetDescendantByType(Visual element, Type type)
+            {
+                if (element == null)
+                {
+                    return null;
+                }
+
+                if (element.GetType() == type)
+                {
+                    return element;
+                }
+
+                Visual foundElement = null;
+
+                if (element is FrameworkElement)
+                {
+                    (element as FrameworkElement).ApplyTemplate();
+                }
+
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+                {
+                    Visual visual = VisualTreeHelper.GetChild(element, i) as Visual;
+                    foundElement = GetDescendantByType(visual, type);
+                    if (foundElement != null)
+                        break;
+                }
+                return foundElement;
+            }
+            void ExpandAllGroups(DataGrid dataGrid, bool expand = true)
+            {
+                var view = (ListCollectionView)CollectionViewSource.GetDefaultView(dataGrid.ItemsSource);
+                foreach (CollectionViewGroup group in view.Groups)
+                {
+                    ItemContainerGenerator generator = dataGrid.ItemContainerGenerator;
+                    GroupItem grpItem = (GroupItem)generator.ContainerFromItem(group);
+                    //Retrieve the Expander inside the GroupItem;
+                    Expander exp = (Expander)GetDescendantByType(grpItem, typeof(Expander));
+                    try
+                    {
+                        exp.IsExpanded = expand;
+                    }
+                    catch
+                    {
+                        //
+                    }
+                }
+            }
+
+            var cmenu = new ContextMenu();
+            cmenu.Items.Add(new MenuItem()
+            {
+                Header = "全部展开",
+                Command = new RelayCommand(() =>
+                {
+                    ExpandAllGroups(dataGrid, true);
+                }),
+            });
+            cmenu.Items.Add(new MenuItem()
+            {
+                Header = "全部折叠",
+                Command = new RelayCommand(() =>
+                {
+                    ExpandAllGroups(dataGrid, false);
+                }),
+            });
+            return cmenu;
         }
 
         public void UpdateView(ThPDSInfoCompare panel)
