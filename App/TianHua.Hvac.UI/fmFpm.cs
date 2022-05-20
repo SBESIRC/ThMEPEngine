@@ -667,7 +667,7 @@ namespace TianHua.Hvac.UI
             labelBypassNum.Text = bypassLine.Count.ToString();
             Focus();
         }
-        private void GetNotRoomInfo()
+        private void GetNotRoomInfo(DBObjectCollection notRoomLines)
         {
             // 收集非服务侧的起始点和相连的线
             var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
@@ -679,7 +679,7 @@ namespace TianHua.Hvac.UI
                 notRoomStartPoint = notRoomStartPoint.TransformBy(mat);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索全部的线
-                notRoomDetector.SearchCenterLine(centerlines, ref notRoomStartPoint, SearchBreakType.breakWithEndline);
+                notRoomDetector.SearchCenterLine(notRoomLines, ref notRoomStartPoint, SearchBreakType.breakWithEndline);
                 connNotRoomLines = notRoomDetector.connectLines;
             }
         }
@@ -687,50 +687,49 @@ namespace TianHua.Hvac.UI
         {
             // 风机进出口路由可能在平面上共线(仅处理进出口必须有线的情况)
             var diffColorRoutine = GetDiffColorRoutine(RoomStartPoint);
-            var tor = new Tolerance(firstRange, firstRange);
             roomLines = new DBObjectCollection();
             notRoomLines = new DBObjectCollection();
             var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
             var notRoomP = otherP.TransformBy(mat);
             foreach (var lines in diffColorRoutine)
             {
-                foreach (Line l in lines)
+                var index = new ThCADCoreNTSSpatialIndex(lines);
+                var pl1 = ThMEPHVACService.CreateDetector(Point3d.Origin, firstRange);
+                var res = index.SelectCrossingPolygon(pl1);
+                if (roomLines.Count == 0 && res.Count == 1)
                 {
-                    if (roomLines.Count == 0 && LineContainsPoint(l, Point3d.Origin, tor))
-                    {
-                        roomLines = lines;
-                    }
-                    if (notRoomLines.Count == 0 && LineContainsPoint(l, notRoomP, tor))
-                    {
-                        notRoomLines = lines;
-                    }
+                    roomLines = lines;
+                    ExcludeBypass(ref roomLines, mat);
+                }
+                var pl2 = ThMEPHVACService.CreateDetector(notRoomP, firstRange);
+                var res1 = index.SelectCrossingPolygon(pl2);
+                if (notRoomLines.Count == 0 && res1.Count == 1)
+                {
+                    notRoomLines = lines;
+                    ExcludeBypass(ref notRoomLines, mat);
                 }
             }
             if (roomLines.Count == 0)
                 throw new NotImplementedException("风机服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
             if (notRoomLines.Count == 0)
                 throw new NotImplementedException("风机非服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
-            ExcludeBypass(ref roomLines, mat);
-            ExcludeBypass(ref notRoomLines, mat);
         }
 
         private void GetCenterlinesAndTrans(Point3d p)
         {
             // 用于将指定起点的路由与其他系统分开
             var diffColorRoutine = GetDiffColorRoutine(p);
-            var tor = new Tolerance(firstRange, firstRange);
             var mat = Matrix3d.Displacement(-p.GetAsVector());
             foreach (var lines in diffColorRoutine)
             {
-                foreach (Line l in lines)
+                var index = new ThCADCoreNTSSpatialIndex(lines);
+                var pl = ThMEPHVACService.CreateDetector(Point3d.Origin, firstRange);
+                var res = index.SelectCrossingPolygon(pl);
+                if (res.Count == 1)
                 {
-                    // 此处一定有包含原点的线，所以就不做容差
-                    if (LineContainsPoint(l, Point3d.Origin, tor))
-                    {
-                        centerlines = lines;
-                        ExcludeBypass(ref centerlines, mat);
-                        return;
-                    }
+                    centerlines = lines;
+                    ExcludeBypass(ref centerlines, mat);
+                    return;
                 }
             }
             if (centerlines.Count == 0)
@@ -786,10 +785,10 @@ namespace TianHua.Hvac.UI
             if (roomLine.Equals(notRoomLine))
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
         }
-        private void GetFanConnectLine()
+        private void GetFanConnectLine(out DBObjectCollection notRoomLines)
         {
             RoomStartPoint = GetBasePoint(out Point3d otherP);
-            GetFanCenterlinesAndTrans(otherP, out DBObjectCollection roomLines, out DBObjectCollection notRoomLines);
+            GetFanCenterlinesAndTrans(otherP, out DBObjectCollection roomLines, out notRoomLines);
             var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
             var reverseMat = Matrix3d.Displacement(RoomStartPoint.GetAsVector());
             foreach (string key in listBox1.Items)
@@ -1086,10 +1085,9 @@ namespace TianHua.Hvac.UI
                 if (fans.ContainsKey(key))
                     fans.Remove(key);
                 fans.Add(key, param);
-                GetFanConnectLine();
-                GetNotRoomInfo();
+                GetFanConnectLine(out DBObjectCollection notRoomLines);
+                GetNotRoomInfo(notRoomLines);
                 RecordPortParam();
-                // 在集成系统中将风机参数转换到port参数
             }
             else
             {
@@ -1239,6 +1237,11 @@ namespace TianHua.Hvac.UI
             if (radioGenStyle1.Checked)
             {
                 RecordPortParam();
+                if (fans.Values.Count > 0)
+                {
+                    var param = selectFansDic.Values.First();
+                    srtPoint = param.FanInletBasePoint;
+                }
                 GetCenterlinesAndTrans(srtPoint);
                 if (centerlines.Count == 0)
                     return;
