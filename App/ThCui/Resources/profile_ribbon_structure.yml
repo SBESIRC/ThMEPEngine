@@ -252,7 +252,7 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "接地平面"
+          - text: "接地网"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlADRAWING"

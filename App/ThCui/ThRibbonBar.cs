@@ -229,7 +229,7 @@ namespace TianHua.AutoCAD.ThCui
             CreateEMaterials(tab);
             CreateElectronicPanel(tab);
             CreateELightingPanel(tab);
-            //CreateElightningPanel(tab);
+            CreateElightningPanel(tab);
         }
 
         private static void CreateEMaterials(RibbonTabSource tab)
@@ -344,12 +344,12 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 接地平面
+                // 接地网
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("接地平面",
-                    "天华接地平面",
+                subRow.AddNewButton("接地网",
+                    "天华接地网",
                     "THJDPM",
-                    "天华接地平面",
+                    "天接地网",
                     "IDI_THCAD_THJDPM_SMALL",
                     "IDI_THCAD_THJDPM_LARGE",
                 RibbonButtonStyle.LargeWithText);

@@ -8,7 +8,7 @@
              SizeToContent="Height"
              ResizeMode="NoResize"
              mc:Ignorable="d"
-             Title="接地平面"
+             Title="接地网"
              Width="180" Height="157" Closed="Window_Closed">
     <Grid Margin="5,0">
         <Grid.RowDefinitions>
