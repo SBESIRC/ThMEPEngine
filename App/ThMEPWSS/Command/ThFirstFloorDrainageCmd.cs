@@ -52,6 +52,7 @@ namespace ThMEPWSS.Command
                     var frame = dic.Key.Clone() as Polyline;
                     originTransformer.Transform(frame);
                     CalStructrueService.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
+                    
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
                     if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)        //不考虑一层出户不需要读取洁具立管
                     {
@@ -69,10 +70,7 @@ namespace ThMEPWSS.Command
                     var sewagePipes = CalStructrueService.GetSewageDrainageMainPipe(acad, originTransformer);
                     var rainPipes = CalStructrueService.GetRainDrainageMainPipe(acad, originTransformer);
                     var gridLines = CalStructrueService.GetAxis(acad, originTransformer);
-                    if (userOutFrame.Count == 0)
-                    {
-                        continue;
-                    }
+
                     CreateDrainagePipeRoute createDrainageRoute = new CreateDrainagePipeRoute(sewagePipes, rainPipes, verticalPipe, holeWalls, gridLines, userOutFrame, deepRooms, paramSetting, originTransformer);
                     var routes = createDrainageRoute.Routing();
 

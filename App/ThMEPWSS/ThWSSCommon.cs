@@ -90,7 +90,7 @@
         public static string VerticalPipe_BlockName2 = "带定位立管";
         public static string VerticalPipe_BlockName3 = "带定位立管150";
         //出乎框线图层
-        public static string OutFrameLayerName = "0";
+        public static string OutFrameLayerName = "AI-出户框线";
         //室外主管图层
         public static string OutdoorSewagePipeLayerName = "AI-室外污水主管";
         public static string OutdoorRainPipeLayerName = "AI-室外雨水主管";

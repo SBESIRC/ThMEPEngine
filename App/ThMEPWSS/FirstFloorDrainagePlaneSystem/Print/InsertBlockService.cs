@@ -26,14 +26,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
-        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPts, string layerName, string blockName, Dictionary<string, string> attNameValues)
+        public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPts, string layerName, string blockName, Dictionary<string, string> attNameValues, bool isDynAttri = false)
         {
             using (var db = AcadDatabase.Active())
             {
                 db.Database.ImportModel(layerName, blockName);
                 foreach (var col in insertPts)
                 {
-                    db.Database.InsertModel(col.Key, col.Value, layerName, blockName, attNameValues);
+                    db.Database.InsertModel(col.Key, col.Value, layerName, blockName, attNameValues, isDynAttri);
                 }
             }
         }
@@ -130,7 +130,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
             }
         }
 
-        public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName, Dictionary<string, string> attNameValues)
+        public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, string layerName, string blockName, Dictionary<string, string> attNameValues, bool isDynAttri)
         {
             double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);
             //控制旋转角度
@@ -141,13 +141,21 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                     layerName,
                     blockName,
                     pt,
                     new Scale3d(scaleNum),
                     rotateAngle,
                     attNameValues);
+                if (isDynAttri)
+                {
+                    foreach (var dynamic in attNameValues)
+                    {
+                        objId.SetDynBlockValue(dynamic.Key, dynamic.Value);
+                    }
+                }
+                return objId;
             }
         }
         

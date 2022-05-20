@@ -24,9 +24,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         List<Polyline> outUserPoly;                         //出户框线
         List<Polyline> wallPolys;                           //墙线
         double step = 100;                                  //步长
-        double lineWieght = 5;                              //连接线区域权重
+        double lineWieght = 10;                              //连接线区域权重
         readonly double lineDis = 210;                      //连接线区域范围
-        readonly double extendLength = 100;                 //连线到出户框线上的管线先延长一定长度（避免贴着出户框线）         
+        readonly double extendLength = 300;                 //连线到出户框线上的管线先延长一定长度（避免贴着出户框线）         
         double angleTolerance = 1 * Math.PI / 180.0;
         public ConnectMainPipeService(Polyline _frame, List<Polyline> sewagePolys, List<Polyline> rainPolys, List<Curve> grids, List<Polyline> _outUserPoly,
             List<Polyline> _wallPolys, double _step, double _lineWieght)
@@ -103,12 +103,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var resRoutes = new List<RouteModel>();
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var connecLines = new List<Line>(sewageLines);
-            connecLines.AddRange(rainLines);
-            var allLines = sewageLines;
             var holeConnectLines = new List<Polyline>();
-            foreach (var pipeGroup in frameConnectLines.GroupBy(x=>x.Key.PipeType))
+            foreach (var pipeGroup in frameConnectLines.GroupBy(x => x.Key.PipeType))
             {
+                var allLines = sewageLines;
                 if (pipeGroup.Key == VerticalPipeType.rainPipe || pipeGroup.Key == VerticalPipeType.CondensatePipe)
                 {
                     allLines = rainLines;
@@ -119,10 +117,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 }
                 var firPipe = pipeGroup.ToList().First();
                 var closetPt = firPipe.Value.EndPoint;
-                if (closetPt.DistanceTo(firPipe.Key.Position) < firPipe.Value.StartPoint.DistanceTo(firPipe.Key.Position))
-                {
-                    closetPt = firPipe.Value.StartPoint;
-                }
                 var closetLine = CreateRouteHelper.GetClosetLane(allLines, closetPt, frame, wallPolys, 400);
                 var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
                 foreach (var dic in pipeGroup)
@@ -272,7 +266,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <returns></returns>
         private List<Polyline> GetOneDeepOutFrame(Dictionary<KeyValuePair<Polyline, List<string>>, int> deepRooms)
         {
-            var oneDeepRooms = deepRooms.Where(x => x.Value == 1).Select(x => x.Key.Key).Select(x=>x.Buffer(100)[0] as Polyline).ToList();
+            var oneDeepRooms = deepRooms.Where(x => x.Value == 1).Select(x => x.Key.Key).Select(x => x.Buffer(100)[0] as Polyline).ToList();
             var otherDeepRooms = deepRooms.Where(x => x.Value != 1).Select(x => x.Key.Key).Select(x => x.Buffer(100)[0] as Polyline).ToList();
             var needOutFrames = outUserPoly.Where(x => oneDeepRooms.Any(y => y.IsIntersects(x)) && !otherDeepRooms.Any(y => y.IsIntersects(x))).ToList();
             return needOutFrames;
@@ -322,5 +316,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             }
             return lineGroup;
         }
+
+        //private void GetClosetLineInfo(List<Line> swageLines, List<Line> rainLines, Dictionary<VerticalPipeModel, Polyline> frameConnectLines, out Line swageCloseLine, out Line rainCloseLine)
+        //{
+        //    var closetLine = CreateRouteHelper.GetClosetLane(allLines, closetPt, frame, wallPolys, 400);
+        //}
     }
 }

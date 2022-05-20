@@ -265,7 +265,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     var ent = acdb.Element<Entity>(obj).Clone() as Entity;
                     if (ent is Circle circle)
                     {
-                        if (circle.Radius == 50 || circle.Radius == 60 || circle.Radius == 75 || circle.Radius == 100)
+                        var radius = Math.Round(circle.Radius);
+                        if (radius == 50 || radius == 60 || radius == 75 || radius == 100)
                         {
                             pipes.Add(ent);
                         }

@@ -75,8 +75,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         var otherPipes = new List<VerticalPipeModel>(pipeTuple.Item3);
                         otherPipes.AddRange(pipeTuple.Item4);
-                        var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
-                        resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
+                        if (pipeTuple.Item1.Count > 0)
+                        {
+                            var mainRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
+                            resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, otherPipes, wallPolys, mainRoute, pipeTuple.Item6, outUserPoly));
+                        }
                     }
                     else if (paramSetting.SewageWasteWater == SewageWasteWaterEnum.Diversion)
                     {
@@ -167,13 +170,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var resRoutes = new List<RouteModel>();
             var sewageLines = mainSewagePipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
             var rainLines = mainRainPipes.SelectMany(x => x.GetAllLineByPolyline()).ToList();
-            var holeConnectLines = routes.Select(x => x.route).ToList();
+            var holeConnectLines = CreateRouteHelper.CreateConnectLineHoles(routes.Select(x => x.route).ToList(), lineDis);
             foreach (var pipe in outPipes)
             {
                 var allLines = sewageLines;
                 if (pipe.PipeType == VerticalPipeType.rainPipe || pipe.PipeType == VerticalPipeType.CondensatePipe)
                 {
-                    //allLines = rainLines;
+                    allLines = rainLines;
                 }
                 if (allLines.Count <= 0 || !frame.Contains(pipe.Position))
                 {
