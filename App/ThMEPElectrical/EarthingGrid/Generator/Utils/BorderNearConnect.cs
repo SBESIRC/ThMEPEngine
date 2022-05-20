@@ -56,12 +56,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                         //向这个方向找点，如果找不到，则最近的点（垂直点）和它生成连接
                         curBorderPt = GetObjects.GetRangePointByDirection(nearPt, aimDirection, outlinewithBorderPts[curOutline], Math.PI / 6, 90000);
                         verticalPt = GetObjects.GetClosestPointByDirection(nearPt, aimDirection, 20000, curOutline);
-                        //ShowInfo.ShowPointAsO(verticalPt, 1, 900);
-                        //if (curBorderPt == nearPt || verticalPt == nearPt)
-                        //{
-                        //    continue;
-                        //}
-                        //else 
                         if (curBorderPt.DistanceTo(verticalPt) > 4000) 
                         {
                             aimWallPt = verticalPt;
@@ -107,10 +101,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
 
         private static void DeleteUselessConnects(List<Polyline> allOutlines, ref Dictionary<Point3d, HashSet<Point3d>> nearBorderGraph)
         {
-            //删除掉缩短一定距离后仍穿越多边形的线
-            //LineDealer.RemoveLinesInterSectWithOutlines(allOutlines, ref nearBorderGraph, 700);
-            //删除掉和多边形邻近的线
-            //StructureDealer.RemoveLinesNearOutlines(allOutlines, ref nearBorderGraph);
             //删除掉夹角小的线对中长度较长的线
             GraphDealer.ReduceSimilarLine(ref nearBorderGraph, Math.PI / 18 * 5);
             //删除掉相交线中长度较长的线

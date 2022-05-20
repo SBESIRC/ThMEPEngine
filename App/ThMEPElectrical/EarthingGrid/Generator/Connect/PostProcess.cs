@@ -8,12 +8,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.EarthingGrid.Generator.Data;
 using ThMEPElectrical.EarthingGrid.Generator.Utils;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.EarthingGrid.Generator.Connect
 {
     internal class PostProcess
     {
         private Dictionary<Point3d, HashSet<Point3d>> ConductorGraph { get; set; }
+
+        private PreProcess PreProcessData { get; set; }
         private HashSet<Polyline> Outlines { get; set; }
         private Dictionary<Point3d, HashSet<Point3d>> EarthGrid { get; set; }
         public PostProcess(PreProcess _preProcessData, Dictionary<Point3d, HashSet<Point3d>> _earthGrid)
@@ -21,21 +24,30 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             ConductorGraph = _preProcessData.conductorGraph;
             Outlines = _preProcessData.outlines.ToHashSet();
             EarthGrid = _earthGrid;
+            PreProcessData = _preProcessData;
         }
 
         public HashSet<Tuple<Point3d, Point3d>> Process()
         {
+            MergeGrid();
             //1、贴边
             StichToBorder();
-
+            //优化图
+            var tmpgrid = new Dictionary<Point3d, HashSet<Point3d>>();
+            foreach (var kv in EarthGrid)
+            {
+                tmpgrid.Add(kv.Key, kv.Value);
+            }
+            GraphDealer.SimplifyGraph(ref tmpgrid, GetPtsOnBorders().ToList(), 1000);
+            EarthGrid.Clear();
+            EarthGrid = tmpgrid;
+            StichToBorder();
             //删除outline附近的线
             DeleteLineNearOutline();
-
             //添加线
             AddLinesOnOutlines();
-
-            //优化图
-
+            //2.1 删除禁区内的线
+            RemoveInnerForbiddenLines();
             //2、连接引下线
             AddDownConductorToEarthGrid();
             return LineDealer.Graph2Lines(EarthGrid);
@@ -63,14 +75,14 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         private Dictionary<Point3d, HashSet<Polyline>> GetPtsNearBorders(ThCADCoreNTSSpatialIndex spatialIndex, int bufferLength = 500)
         {
             var nearPtToOutlines = new Dictionary<Point3d, HashSet<Polyline>>();
-            foreach(var outline in Outlines)
+            foreach (var outline in Outlines)
             {
                 var shell = outline.Buffer(bufferLength).OfType<Polyline>().OrderByDescending(p => p.Area).First();
                 var holes = outline.Buffer(-bufferLength).OfType<Polyline>().Where(o => o.Area > 1.0).ToList();
                 var mPolygon = ThMPolygonTool.CreateMPolygon(shell, holes.OfType<Curve>().ToList());
                 var innerPts = spatialIndex.SelectWindowPolygon(mPolygon).OfType<DBPoint>().Select(d => d.Position);
 
-                foreach(var innerPt in innerPts)
+                foreach (var innerPt in innerPts)
                 {
                     if (!nearPtToOutlines.ContainsKey(innerPt))
                     {
@@ -85,7 +97,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         private void MovePts(Dictionary<Point3d, HashSet<Polyline>> nearPtToOutlines, ThCADCoreNTSSpatialIndex plPtsSpatialIndex, ThCADCoreNTSSpatialIndex allPtsSpatialIndex)
         {
             //EarthGrid
-            foreach(var nearPtToOutline in nearPtToOutlines)
+            foreach (var nearPtToOutline in nearPtToOutlines)
             {
                 var nearPt = nearPtToOutline.Key;
                 var circle = new Circle(nearPt, Vector3d.ZAxis, 1000);
@@ -113,7 +125,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var polylinePts = new HashSet<Point3d>();
             foreach (var outline in Outlines)
             {
-                for(int i = 0; i < outline.NumberOfVertices; ++i)
+                for (int i = 0; i < outline.NumberOfVertices; ++i)
                 {
                     polylinePts.Add(outline.GetPoint3dAt(i));
                 }
@@ -127,25 +139,24 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             var allPtsSpatialIndex = new ThCADCoreNTSSpatialIndex(allPts.Select(p => new DBPoint(p)).ToCollection());
             var nearPtToOutlines = GetPtsNearBorders(allPtsSpatialIndex);
 
-            Random rd = new Random();
             foreach (var nearPtToOutline in nearPtToOutlines)
             {
                 var nearPtA = nearPtToOutline.Key;
                 var outlines = nearPtToOutline.Value;
                 if (EarthGrid.ContainsKey(nearPtA))
                 {
-                    foreach(var ptB in EarthGrid[nearPtA].ToList())
+                    foreach (var ptB in EarthGrid[nearPtA].ToList())
                     {
                         Point3d middlePt = new Point3d((nearPtA.X + ptB.X) / 2, (nearPtA.Y + ptB.Y) / 2, 0);
-                        Circle circle = new Circle(middlePt, Vector3d.ZAxis, nearPtA.DistanceTo(ptB) / 4);
-
-                        int color;
+                        var dis = nearPtA.DistanceTo(ptB) / 4;
+                        dis = dis < 500 ? 500 : dis;
+                        Circle circle = new Circle(middlePt, Vector3d.ZAxis, dis);
                         foreach (var ol in outlines)
                         {
-                            color = rd.Next(0, 7);
                             var pts = new Point3dCollection();
                             ol.IntersectWith(circle, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
                             if (pts.Count > 0)//|| ol.Contains(middlePt))
+                            //if (ol.Intersects(circle))//|| ol.Contains(middlePt))
                             {
                                 DeleteLineFromGraph(nearPtA, ptB);
                                 break;
@@ -179,7 +190,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         {
             var ansPt = basePt;
             double minDis = double.MaxValue;
-            foreach(var pt in pts)
+            foreach (var pt in pts)
             {
                 var curDis = pt.DistanceTo(basePt);
                 if (curDis < minDis)
@@ -283,6 +294,80 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                 if (cloestBasePt != new Point3d() && cloestPt != new Point3d())
                 {
                     AddLineToGraph(cloestBasePt, cloestPt);
+                }
+            }
+        }
+
+        public void RemoveInnerForbiddenLines()
+        {
+            var pt2Line = new Dictionary<Point3d, Tuple<Point3d, Point3d>>();
+            foreach (var lines in EarthGrid)
+            {
+                foreach (var pt in lines.Value)
+                {
+                    var middlePt = new Point3d((pt.X + lines.Key.X) / 2, (pt.Y + lines.Key.Y) / 2, 0);
+                    var curline = new Tuple<Point3d, Point3d>(pt, lines.Key);
+                    if (!pt2Line.ContainsKey(middlePt))
+                    {
+                        pt2Line.Add(middlePt, curline);
+                    }
+                    if (!pt2Line.ContainsKey(pt))
+                    {
+                        pt2Line.Add(pt, curline);
+                    }
+                    if (!pt2Line.ContainsKey(lines.Key))
+                    {
+                        pt2Line.Add(lines.Key, curline);
+                    }
+                }
+            }
+
+            var dbPoints = pt2Line.Keys.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            var containPoints = new HashSet<Point3d>();
+            foreach (var ol in PreProcessData.innOutline)
+            {
+                spatialIndex.SelectWindowPolygon(ol.Buffer(-500).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
+            }
+            foreach (var pt in pt2Line.Keys)
+            {
+                if (containPoints.Contains(pt))
+                    DeleteLineFromGraph(pt2Line[pt].Item1, pt2Line[pt].Item2);
+            }
+        }
+
+        private void MergeGrid()
+        {
+            var allPts = EarthGrid.Keys.ToHashSet();
+            var allPtsSpatialIndex = new ThCADCoreNTSSpatialIndex(allPts.Select(p => new DBPoint(p)).ToCollection());
+
+            foreach(var pt in allPts.ToList())
+            {
+                if (allPts.Contains(pt))
+                {
+                    var circle = new Circle(pt, Vector3d.ZAxis, 1000);
+                    var innerPlPts = allPtsSpatialIndex.SelectWindowPolygon(ThCircleExtension.TessellateCircleWithArc(circle, 100)).OfType<DBPoint>().Select(d => d.Position).ToHashSet();
+                    
+                    int cnt = innerPlPts.Count;
+                    double xSum = 0;
+                    double ySum = 0;
+                    foreach(var pt2 in innerPlPts)
+                    {
+                        xSum+= pt2.X;
+                        ySum += pt2.Y;
+                    }
+                    var middlePt = new Point3d(xSum / cnt, ySum/cnt, 0);
+                    foreach (var closePt in innerPlPts)
+                    {
+                        if (EarthGrid.ContainsKey(closePt))
+                        {
+                            foreach (var cntPt in EarthGrid[closePt].ToList())
+                            {
+                                DeleteLineFromGraph(cntPt, closePt);
+                                AddLineToGraph(middlePt, cntPt);
+                            }
+                        }
+                    }
                 }
             }
         }

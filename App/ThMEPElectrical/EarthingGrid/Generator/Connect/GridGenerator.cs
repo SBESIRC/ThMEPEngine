@@ -31,10 +31,6 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
                     GraphDealer.AddLineToGraph(line.Item1, line.Item2, ref earthGrid);
                 }
             }
-
-            //2.1 删除禁区内的线
-            RangeConfine.RemoveInnerForbiddenLines(ref earthGrid, preProcessData);
-
             //3、后处理
             var postPress = new PostProcess(preProcessData, earthGrid);
             return postPress.Process();

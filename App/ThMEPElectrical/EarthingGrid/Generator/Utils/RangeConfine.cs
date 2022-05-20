@@ -171,43 +171,5 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 }
             }
         }
-
-        public static void RemoveInnerForbiddenLines(ref Dictionary<Point3d, HashSet<Point3d>> earthGrid, PreProcess preProcessData)
-        {
-            var pt2Line = new Dictionary<Point3d, Tuple<Point3d, Point3d>>();
-            foreach (var lines in earthGrid)
-            {
-                foreach (var pt in lines.Value)
-                {
-                    var middlePt = new Point3d((pt.X + lines.Key.X) / 2, (pt.Y + lines.Key.Y) / 2, 0);
-                    var curline = new Tuple<Point3d, Point3d>(pt, lines.Key);
-                    if (!pt2Line.ContainsKey(middlePt))
-                    {
-                        pt2Line.Add(middlePt, curline);
-                    }
-                    if (!pt2Line.ContainsKey(pt))
-                    {
-                        pt2Line.Add(pt, curline);
-                    }
-                    if (!pt2Line.ContainsKey(lines.Key))
-                    {
-                        pt2Line.Add(lines.Key, curline);
-                    }
-                }
-            }
-
-            var dbPoints = pt2Line.Keys.Select(p => new DBPoint(p)).ToCollection();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
-            var containPoints = new HashSet<Point3d>();
-            foreach (var ol in preProcessData.innOutline)
-            {
-                spatialIndex.SelectWindowPolygon(ol.Buffer(-500).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
-            }
-            foreach (var pt in pt2Line.Keys)
-            {
-                if (containPoints.Contains(pt))
-                    GraphDealer.DeleteFromGraph(pt2Line[pt].Item1, pt2Line[pt].Item2, ref earthGrid);
-            }
-        }
     }
 }
