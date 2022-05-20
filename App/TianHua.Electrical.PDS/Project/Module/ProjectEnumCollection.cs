@@ -340,4 +340,44 @@ namespace TianHua.Electrical.PDS.Project.Module
         [Description("嵌墙明装")]
         嵌墙明装 = 3,
     }
+
+    public enum ImageLoadType
+    {
+        [Description("未选择")]
+        None = 0,
+        [Description("照明配电箱")]
+        AL = 1,
+        [Description("动力配电箱")]
+        AP = 2,
+        [Description("消防照明配电箱")]
+        ALE = 3,
+        [Description("消防动力配电箱")]
+        APE = 4,
+        [Description("应急照明配电箱/集中电源")]
+        FEL = 5,
+        [Description("电度表箱")]
+        AW = 6,
+        [Description("控制箱")]
+        ACB = 7,
+        [Description("防火卷帘控制箱")]
+        RS = 8,
+        [Description("现场隔离开关箱")]
+        INT = 9,
+        [Description("住户配电箱")]
+        RD = 10,
+        [Description("插座箱")]
+        AX = 11,
+        [Description("灯具")]
+        Light = 12,
+        [Description("插座")]
+        Socket = 13,
+        [Description("交流充电桩")]
+        AC = 14,
+        [Description("直流充电桩")]
+        DC = 15,
+        [Description("电动机")]
+        Motor = 16,
+        [Description("潜水泵电动机")]
+        Pump = 17,
+    }
 }

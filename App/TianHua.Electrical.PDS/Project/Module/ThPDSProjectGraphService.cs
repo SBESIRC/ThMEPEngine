@@ -580,7 +580,8 @@ namespace TianHua.Electrical.PDS.Project.Module
                 {
                     graph.RemoveVertex(oldLoad);
                 }
-                newEdge.CheckWithEdge();
+                newEdge.ComponentSelection();
+                newEdge.Source.CheckCascadeWithNode();
             }
         }
 
@@ -593,7 +594,7 @@ namespace TianHua.Electrical.PDS.Project.Module
         /// <param name="defaultPower">设备功率</param>
         /// <param name="defaultDescription">描述信息</param>
         /// <param name="defaultFireLoad">是否消防</param>
-        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "" , bool defaultFireLoad = false)
+        public static ThPDSProjectGraphNode CreatNewLoad(ThPDSPhase defaultPhase = ThPDSPhase.三相, Circuit.PhaseSequence defaultPhaseSequence = Circuit.PhaseSequence.L123, string defaultLoadID = "", double defaultPower = 0, string defaultDescription = "备用", bool defaultFireLoad = false, ImageLoadType imageLoadType = ImageLoadType.None)
         {
             //业务逻辑：业务新建的负载，都是空负载，建立不出别的负载
             var node = new ThPDSProjectGraphNode();
@@ -603,9 +604,158 @@ namespace TianHua.Electrical.PDS.Project.Module
             node.Load.ID.LoadID = defaultLoadID;
             node.Details.HighPower = defaultPower;
             node.Load.ID.Description = defaultDescription;
-            node.Load.ID.Description = "备用";
-            
             node.Load.SetFireLoad(defaultFireLoad);
+
+            switch (imageLoadType)
+            {
+                case ImageLoadType.None:
+                    {
+                        node.Type = PDSNodeType.Empty;//空负载
+                        break;
+                    }
+                case ImageLoadType.AL:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.LightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AP:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.PowerDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.ALE:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        node.Load.SetFireLoad(true);
+                        break;
+                    }
+                case ImageLoadType.APE:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.EmergencyPowerDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        node.Load.SetFireLoad(true);
+                        break;
+                    }
+                case ImageLoadType.FEL:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AW:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ElectricalMeterPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.ACB:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ElectricalControlPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.RS:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.FireResistantShutter;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.INT:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.IsolationSwitchPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.RD:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ResidentialDistributionPanel;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AX:
+                    {
+                        node.Type = PDSNodeType.DistributionBox;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.DistributionPanel;
+                        node.Load.LoadTypeCat_2 = defaultPhase == ThPDSPhase.一相? ThPDSLoadTypeCat_2.OnePhaseSocket: ThPDSLoadTypeCat_2.ThreePhaseSocket;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Light:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Luminaire;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Socket:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Socket;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.AC:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.ACCharger;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.DC:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.DCCharger;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Motor:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Motor;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.None;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
+                        break;
+                    }
+                case ImageLoadType.Pump:
+                    {
+                        node.Type = PDSNodeType.Load;
+                        node.Load.LoadTypeCat_1 = ThPDSLoadTypeCat_1.Motor;
+                        node.Load.LoadTypeCat_2 = ThPDSLoadTypeCat_2.Pump;
+                        node.Load.LoadTypeCat_3 = ThPDSLoadTypeCat_3.SubmersiblePump;
+                        break;
+                    }
+                default:
+                    {
+                        throw new NotSupportedException();//未支持的类型
+                    }
+            }
             PDSProject.Instance.graphData.Graph.AddVertex(node);
             return node;
         }
