@@ -25,6 +25,7 @@ namespace ThMEPHVAC.Algorithm
         private bool isOrigine;
         private HashSet<int> identifier;
         private ThCADCoreNTSSpatialIndex index;
+        private double firstFixRange = 200;
         public ThFanCenterLineDetector(bool isOrigine)
         {
             this.isOrigine = isOrigine;
@@ -35,26 +36,20 @@ namespace ThMEPHVAC.Algorithm
         }
         private void FixSrtPoint(ref Point3d startPoint)
         {
-            if (!startPoint.IsEqualTo(srtLine.StartPoint, tor) && !startPoint.IsEqualTo(srtLine.EndPoint, tor))
-            {
-                startPoint = (startPoint.DistanceTo(srtLine.StartPoint) > startPoint.DistanceTo(srtLine.EndPoint)) ?
-                    srtLine.EndPoint : srtLine.StartPoint;
-            }
+            startPoint = startPoint.DistanceTo(srtLine.StartPoint) < firstFixRange ? srtLine.StartPoint : srtLine.EndPoint;
         }
         public void SearchCenterLine(DBObjectCollection lines, ref Point3d startPoint, SearchBreakType type)
         {
             index = new ThCADCoreNTSSpatialIndex(lines);
             var pl = new Polyline();
-            // 起始搜索点容差为300
-            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 300);
+            // 起始搜索点容差为200
+            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 200);
             var res = index.SelectCrossingPolygon(pl);
             if (res.Count != 1)
                 return;
             srtLine = res[0] as Line; ;
             FixSrtPoint(ref startPoint);
             var detectPoint = ThMEPHVACService.GetOtherPoint(srtLine, startPoint, tor);
-            
-            
             if (identifier.Add(srtLine.GetHashCode()))
             {
                 //if (isOrigine)

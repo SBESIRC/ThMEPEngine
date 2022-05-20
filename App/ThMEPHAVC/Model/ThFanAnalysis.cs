@@ -72,7 +72,6 @@ namespace ThMEPHVAC.CAD
         private double ioBypassSepDis;
         private List<BypassTee> bypassTees;
         private ThCADCoreNTSSpatialIndex spatialIndex;
-        private ThDuctPortsDrawService service;
         public ThShrinkDuct shrinkService;
         public ThFanAnalysis(double ioBypassSepDis,
                              ThDbModelFan fan,
@@ -80,11 +79,10 @@ namespace ThMEPHVAC.CAD
                              PortParam portParam,
                              DBObjectCollection bypass,
                              DBObjectCollection wallLines,
-                             bool haveMultiFan,
-                             ThDuctPortsDrawService service)
+                             bool haveMultiFan)
         {
-            Init(ioBypassSepDis, fan, param, bypass, portParam, service);
-            MoveToZero(fan.FanInletBasePoint, fan.FanOutletBasePoint, param.centerLines, wallLines, out Point3d roomP, out Point3d notRoomP);
+            Init(ioBypassSepDis, fan, param, bypass, portParam);
+            MoveToZero(fan.FanInletBasePoint, fan.FanOutletBasePoint, param, out Point3d roomP, out Point3d notRoomP);
             MergeBypassCenterLine(ref param.centerLines, bypass);
             UpdateSearchPoint(roomP, notRoomP, param, ref param.centerLines, out Point3d iRoomP, out Point3d iNotRoomP, out Line roomLine, out Line notRoomLine);
             auxLines = new List<Line>() { new Line(roomP, iRoomP) , new Line(notRoomP, iNotRoomP) };
@@ -151,10 +149,8 @@ namespace ThMEPHVAC.CAD
                           ThDbModelFan fan, 
                           FanParam param, 
                           DBObjectCollection bypass, 
-                          PortParam portParam,
-                          ThDuctPortsDrawService service)
+                          PortParam portParam)
         {
-            this.service = service;
             this.fan = fan;
             this.fanParam = param;
             this.bypass = bypass;
@@ -366,15 +362,18 @@ namespace ThMEPHVAC.CAD
         }
         private void MoveToZero(Point3d fanInletP,
                                 Point3d fanOutletP,
-                                DBObjectCollection centerLine,
-                                DBObjectCollection wallLines,
+                                FanParam param,
                                 out Point3d roomP,
                                 out Point3d notRoomP)
         {
             var disMat = Matrix3d.Displacement(-moveSrtP.GetAsVector());
             foreach (Line l in bypass)
                 l.TransformBy(disMat);
-            foreach (Line l in centerLine)
+            foreach (Line l in param.centerLines)
+                l.TransformBy(disMat);
+            foreach (Line l in param.roomLines)
+                l.TransformBy(disMat);
+            foreach (Line l in param.notRoomLines)
                 l.TransformBy(disMat);
             if (!isExhaust)
             {
@@ -730,7 +729,6 @@ namespace ThMEPHVAC.CAD
                     UpdateInStartInfo(centerLine, fanParam.roomDuctSize, ref roomLine, ref iRoomP);
                     DoAddInnerDuct(roomLine, iRoomP, fanParam.roomDuctSize);
                     UpdateOutStartInfo(false, fan.fanOutWidth, info, centerLine, ref notRoomLine, ref iNotRoomP);
-
                 }
                 else if (fan.IntakeForm.Contains("上出") || fan.IntakeForm.Contains("下出"))
                 {

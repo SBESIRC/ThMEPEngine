@@ -831,6 +831,10 @@ namespace TianHua.Hvac.UI
                 CollectFanConnectLine(fan, roomDetector, notRoomDetector);
                 foreach (Line l in fan.centerLines)
                     l.TransformBy(reverseMat);
+                foreach (Line l in fan.roomLines)
+                    l.TransformBy(reverseMat);
+                foreach (Line l in fan.notRoomLines)
+                    l.TransformBy(reverseMat);
             }
         }
         private void CollectFanConnectLine(FanParam fan,
