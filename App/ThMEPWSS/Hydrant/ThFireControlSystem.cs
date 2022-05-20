@@ -118,8 +118,8 @@ namespace ThMEPWSS.FireProtectionSystemNs
                     }
                 }
                 var floorRanges = vm.ZoneConfigs.Where(x => x.IsEffective()).Select(x => new ValueTuple<int?, int?>(x.GetIntStartFloor(), x.GetIntEndFloor()))
-                    .Where(x => x.Item1.HasValue && x.Item2.HasValue).Select(x => new ValueTuple<int, int>(x.Item1.Value, x.Item2.Value))
-                    .OrderBy(x => x.Item1).ToList();
+                .Where(x => x.Item1.HasValue && x.Item2.HasValue).Select(x => new ValueTuple<int, int>(x.Item1.Value, x.Item2.Value))
+                .OrderBy(x => x.Item1).ToList();
                 var ringPairFloors = new List<ValueTuple<string, string>>();
                 var ringPairInts = new List<ValueTuple<int, int>>();
                 for (int i = 0; i < floorRanges.Count - 1; i++)
@@ -1756,6 +1756,184 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             textInfos.Add(new DBTextInfo(seg.StartPoint.OffsetXY((seg.Length - w) / 2, -h - 100).ToPoint3d(), text, "W-FRPT-NOTE", "TH-STYLE3"));
                                         }
                                     }
+                                    {
+                                        for (int i = 0; i < allStoreys.Count; i++)
+                                        {
+                                            var storey = allStoreys[i];
+                                            if (storey == "RF")
+                                            {
+                                                if (rgi != floorRanges.Count - 1)
+                                                {
+                                                    var bds = new List<GRect>();
+                                                    for (int j = 0; j < _generalCount; j++)
+                                                    {
+                                                        {
+                                                            if (j != 0 && j != _refugeCount - 1)
+                                                            {
+                                                                var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
+                                                                brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(210, -300)));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(0, 0)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(210, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(450, -300), px.OffsetXY(510, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                vsels.Add(px.OffsetXY(510, -300));
+                                                                vkills.Add(px.OffsetXY(510, -300 + .1));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            }
+                                                            else
+                                                            {
+                                                                var px = getGeneralBsPt(i, j).OffsetY(-610);
+                                                                vsels.Add(px);
+                                                                vkills.Add(px.OffsetY(.1));
+                                                            }
+                                                        }
+                                                        if (j == 0)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j).OffsetXY(1500, -610 + 50);
+                                                            {
+                                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                            }
+                                                        }
+                                                        if (j != _generalCount - 1)
+                                                        {
+                                                            var dy = -610.0;
+                                                            var vecs = new List<Vector2d> { new Vector2d(300, dy) };
+                                                            var bsPt = getGeneralBsPt(i, j);
+                                                            var px = bsPt;
+                                                            var dx = .0;
+                                                            if (rgi != floorRanges.Count - 1)
+                                                            {
+                                                                dx += 680.0;
+                                                            }
+                                                            bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
+                                                        }
+                                                    }
+                                                    var seg = new GLineSegment(getGeneralBsPt(i, 0), getGeneralBsPt(i, _generalCount - 1)).Offset(0, -610);
+                                                    drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                }
+                                                for (int j = 0; j < _generalCount; j++)
+                                                {
+                                                    if (j == 0 && rgi != floorRanges.Count - 1)
+                                                    {
+                                                        var px = getGeneralBsPt(i, j).OffsetY(-610);
+                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
+                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                    }
+                                                }
+                                                if (rgi == floorRanges.Count - 1)
+                                                {
+                                                    var p1s = new List<Point3d>();
+                                                    var bds = new List<GRect>();
+                                                    var h = HEIGHT / 2 - 300;
+                                                    for (int j = 0; j < _generalCount; j++)
+                                                    {
+                                                        var bsPt = getGeneralBsPt(i, j);
+                                                        if (j != 0 && j != _generalCount - 1)
+                                                        {
+                                                            var px = bsPt;
+                                                            vsels.Add(px.OffsetY(300));
+                                                            vsels.Add(px.OffsetY(-300));
+                                                            vkills.Add(px.OffsetY(-300 + .1));
+                                                            vkills.Add(px.OffsetY(300 - .1));
+                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300)));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                        }
+                                                        var p1 = bsPt.OffsetY(h);
+                                                        p1s.Add(p1);
+                                                        vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
+                                                        if (_generalCount > 1)
+                                                        {
+                                                            if (j == _generalCount - 1)
+                                                            {
+                                                                if (_generalCount == 2)
+                                                                {
+                                                                    var (w, _) = getValveSize();
+                                                                    var p3 = p1s.First();
+                                                                    var p4 = p1s.Last();
+                                                                    bds.Add(drawValve(GetMidPoint(p3, p4).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
+                                                                }
+                                                                else
+                                                                {
+                                                                    bds.Add(drawValve(p1.OffsetX(-600)));
+                                                                }
+                                                            }
+                                                            else if (j == _generalCount - 2)
+                                                            {
+                                                            }
+                                                            else
+                                                            {
+                                                                Point3d p2;
+                                                                if (j == 0)
+                                                                {
+                                                                    p2 = p1.OffsetX(400);
+                                                                }
+                                                                else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
+                                                                {
+                                                                    var (w, _) = getValveSize();
+                                                                    p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
+                                                                }
+                                                                else
+                                                                {
+                                                                    p2 = p1.OffsetX(700);
+                                                                }
+                                                                bds.Add(drawValve(p2));
+                                                                if (j + 1 == _generalCount / 2)
+                                                                {
+                                                                    var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
+                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
+                                                                    if (dn != null)
+                                                                    {
+                                                                        var px = p2.OffsetY(150);
+                                                                        var x1 = getGeneralBsPt(i, 0).X;
+                                                                        if (px.X - x1 < 1500)
+                                                                        {
+                                                                            px = px.ReplaceX(x1 + 1500);
+                                                                        }
+                                                                        textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    if (_generalCount == 2)
+                                                    {
+                                                        var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
+                                                        var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
+                                                        if (dn != null)
+                                                        {
+                                                            var bsPt = getGeneralBsPt(i, 0);
+                                                            var p1 = bsPt.OffsetY(h);
+                                                            textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                        }
+                                                    }
+                                                    if (_generalCount == 1)
+                                                    {
+                                                    }
+                                                    else if (_generalCount > 1)
+                                                    {
+                                                        var bsp = p1s.First();
+                                                        drawTestFire(bsp, 300, 1000);
+                                                    }
+                                                    if (_generalCount > 1)
+                                                    {
+                                                        if (rgi == floorRanges.Count - 1)
+                                                        {
+                                                            var seg = new GLineSegment(p1s.First(), p1s.Last());
+                                                            if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
+                                                            drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     if (vsels.Count > 0 && vkills.Count > 0)
                                     {
                                         var kill = GeoFac.CreateGeometryEx(vkills.Distinct().Select(x => GRect.Create(x.ToPoint2D(), .01, .01).ToPolygon()).ToList());
@@ -1773,6 +1951,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                 void drawTestFire(Point3d bsp, double height, double offsetX)
                                 {
                                     if (!vm.HaveTestFireHydrant) return;
+                                    if (rgi != floorRanges.Count - 1) return;
                                     var segs = new List<Vector2d> { new Vector2d(offsetX, 0), new Vector2d(0, height), }.ToGLineSegments(bsp).Skip(1).ToList();
                                     drawDomePipes(segs);
                                     {
@@ -1792,7 +1971,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                         {
                                         }
@@ -1800,221 +1978,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             var dn = "DN65";
                                             var (w, h) = GetDBTextSize(dn, TEXT_HEIGHT, .7, "TH-STLYE3");
                                             textInfos.Add(new DBTextInfo(p7.OffsetXY(-w - 100, -h - 100), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                        }
-                                    }
-                                }
-                                for (int i = 0; i < allStoreys.Count; i++)
-                                {
-                                    var storey = allStoreys[i];
-                                    if (storey == "RF")
-                                    {
-                                        if (vm.IsRoofRing)
-                                        {
-                                            var p1s = new List<Point3d>();
-                                            var bds = new List<GRect>();
-                                            var h = HEIGHT / 2 - 300;
-                                            for (int j = 0; j < _generalCount; j++)
-                                            {
-                                                var bsPt = getGeneralBsPt(i, j);
-                                                var p1 = bsPt.OffsetY(h);
-                                                p1s.Add(p1);
-                                                vlines.Add(new GLineSegment(bsPt, p1).ToLineString());
-                                                if (_generalCount > 1)
-                                                {
-                                                    if (j == _generalCount - 1)
-                                                    {
-                                                        if (_generalCount == 2)
-                                                        {
-                                                            var (w, _) = getValveSize();
-                                                            var p3 = p1s.First();
-                                                            var p4 = p1s.Last();
-                                                            bds.Add(drawValve(GetMidPoint(p3, p4).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
-                                                        }
-                                                        else
-                                                        {
-                                                            bds.Add(drawValve(p1.OffsetX(-600)));
-                                                        }
-                                                    }
-                                                    else if (j == _generalCount - 2)
-                                                    {
-                                                    }
-                                                    else
-                                                    {
-                                                        Point3d p2;
-                                                        if (j == 0)
-                                                        {
-                                                            p2 = p1.OffsetX(400);
-                                                        }
-                                                        else if (_refugeCount > _generalCount && j + 1 == _generalCount / 2)
-                                                        {
-                                                            var (w, _) = getValveSize();
-                                                            p2 = new Point3d((getGeneralBsPt(0, j).X + getGeneralBsPt(0, j + 1).X) / 2 - w / 2, p1.Y, 0);
-                                                        }
-                                                        else
-                                                        {
-                                                            p2 = p1.OffsetX(700);
-                                                        }
-                                                        bds.Add(drawValve(p2));
-                                                        if (j + 1 == _generalCount / 2)
-                                                        {
-                                                            var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                            var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                            if (dn != null)
-                                                            {
-                                                                var px = p2.OffsetY(150);
-                                                                var x1 = getGeneralBsPt(i, 0).X;
-                                                                if (px.X - x1 < 1500)
-                                                                {
-                                                                    px = px.ReplaceX(x1 + 1500);
-                                                                }
-                                                                textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if (_generalCount == 2)
-                                            {
-                                                var id = vm.ZoneConfigs.Where(x => x.IsEffective() && x.GetIntStartFloor().HasValue && x.GetIntEndFloor().HasValue).Select(x => x.ZoneID).Max();
-                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == id)?.DNSelectItem;
-                                                if (dn != null)
-                                                {
-                                                    var bsPt = getGeneralBsPt(i, 0);
-                                                    var p1 = bsPt.OffsetY(h);
-                                                    textInfos.Add(new DBTextInfo(p1.OffsetXY(1200, 200), dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
-                                                }
-                                            }
-                                            if (_generalCount == 1)
-                                            {
-                                            }
-                                            else if (_generalCount > 1)
-                                            {
-                                                var bsp = p1s.First();
-                                                drawTestFire(bsp, 300, 1000);
-                                            }
-                                            if (_generalCount > 1)
-                                            {
-                                                var seg = new GLineSegment(p1s.First(), p1s.Last());
-                                                if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p1s[0]) { Scale = AIR_VALVE_SCALE });
-                                                drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                            }
-                                            for (int j = 1; j < _generalCount - 1; j++)
-                                            {
-                                                var p1 = p1s[j];
-                                                var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
-                                                var vecs = new List<Vector2d> { new Vector2d(0, -300), new Vector2d(-600, 0), new Vector2d(0, -600), new Vector2d(600, 0) };
-                                                if (isLeft) vecs = vecs.GetYAxisMirror();
-                                                var segs = vecs.ToGLineSegments(p1);
-                                                {
-                                                    var s = segs[1];
-                                                    var p3 = s.StartPoint;
-                                                    var p4 = segs.Last().EndPoint;
-                                                    var r3 = GRect.Create(p3, .01, .01);
-                                                    var r4 = GRect.Create(p4, .01, .01);
-                                                    var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(-.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                    var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                    vlines = vlines.Except(lines).ToList();
-                                                    lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                    lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                    var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                    vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                    segs.RemoveAt(1);
-                                                    var bd = drawValve((isLeft ? s.StartPoint : s.EndPoint).OffsetX(150).ToPoint3d());
-                                                    drawDomePipes(GeoFac.GetLines(s.ToLineString().Difference(bd.ToPolygon())));
-                                                }
-                                                drawDomePipes(segs);
-                                            }
-                                        }
-                                        else if (vm.IsTopLayerRing)
-                                        {
-                                            if (_generalCount == 1)
-                                            {
-                                                var bsPt = getGeneralBsPt(i, 0);
-                                                drawTestFire(bsPt, 1000, 0);
-                                            }
-                                            else if (_generalCount > 1)
-                                            {
-                                                var h1 = 300;
-                                                var h2 = 300;
-                                                {
-                                                    var p3 = getGeneralBsPt(i - 1, 0).OffsetY(HEIGHT - h1).ToPoint2D();
-                                                    drawTestFire(p3.ToPoint3d(), 600, 1000);
-                                                    var p4 = getGeneralBsPt(i - 1, _generalCount - 1).OffsetY(HEIGHT - h1).ToPoint2D();
-                                                    if (!vm.HaveTestFireHydrant) brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", p3.ToPoint3d()) { Scale = AIR_VALVE_SCALE });
-                                                    {
-                                                        var bds = new List<GRect>();
-                                                        for (int j = 0; j < _generalCount; j++)
-                                                        {
-                                                            if (j == _generalCount - 1)
-                                                            {
-                                                                if (_generalCount == 2)
-                                                                {
-                                                                    var (w, _) = getValveSize();
-                                                                    bds.Add(drawValve(GetMidPoint(p3.ToPoint3d(), p4.ToPoint3d()).OffsetXY(vm.HaveTestFireHydrant ? w : 0, 0)));
-                                                                }
-                                                                else
-                                                                {
-                                                                    bds.Add(drawValve(p4.OffsetX(-650).ToPoint3d()));
-                                                                }
-                                                            }
-                                                            else if (j == _generalCount - 2)
-                                                            {
-                                                            }
-                                                            else if (j == 0)
-                                                            {
-                                                                var dx = 400;
-                                                                bds.Add(drawValve(p3.OffsetX(dx).ToPoint3d()));
-                                                            }
-                                                            else
-                                                            {
-                                                                var p = getGeneralBsPt(i - 1, j);
-                                                                var dx = 710.0;
-                                                                if (_refugeCount != _generalCount && j + 1 == _generalCount / 2)
-                                                                {
-                                                                    dx += 2300;
-                                                                }
-                                                                bds.Add(drawValve(p.OffsetXY(dx, HEIGHT - h1)));
-                                                            }
-                                                        }
-                                                        drawDomePipes(GeoFac.GetLines(new GLineSegment(p4, p3).ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
-                                                    }
-                                                    var r3 = GRect.Create(p3, .01, .01);
-                                                    var r4 = GRect.Create(p4, .01, .01);
-                                                    var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                    var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                    vlines = vlines.Except(lines).ToList();
-                                                    lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                    lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                    var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                    vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                }
-                                                for (int j = 1; j < _generalCount - 1; j++)
-                                                {
-                                                    var isLeft = _refugeCount != _generalCount && (j + 1 > _generalCount / 2);
-                                                    var p = getGeneralBsPt(i - 1, j);
-                                                    var segs = new List<Vector2d> { new Vector2d(isLeft ? 600 : -600, 0), new Vector2d(0, h2) }.ToGLineSegments(p.OffsetY(HEIGHT - h1 - h2));
-                                                    if (isLeft)
-                                                    {
-                                                        drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].StartPoint.OffsetX(210).ToPoint3d()).ToPolygon())));
-                                                    }
-                                                    else
-                                                    {
-                                                        drawDomePipes(GeoFac.GetLines(segs[0].ToLineString().Difference(drawValve(segs[0].EndPoint.OffsetX(150).ToPoint3d()).ToPolygon())));
-                                                    }
-                                                    drawDomePipe(segs[1]);
-                                                    var p3 = segs[0].StartPoint;
-                                                    var p4 = segs[0].StartPoint.OffsetY(h2);
-                                                    var r3 = GRect.Create(p3, .01, .01);
-                                                    var r4 = GRect.Create(p4, .01, .01);
-                                                    var kill = GeoFac.CreateGeometryEx(new GRect[] { GRect.Create(p3.OffsetY(.1), .01, .01), GRect.Create(p4.OffsetY(.1), .01, .01) }.Select(x => x.ToPolygon()).ToList());
-                                                    var lines = GeoFac.CreateIntersectsSelector(vlines)(GeoFac.CreateGeometryEx(new GRect[] { r3, r4 }.Select(x => x.ToPolygon()).ToList()));
-                                                    vlines = vlines.Except(lines).ToList();
-                                                    lines.Add(new GLineSegment(r3.LeftTop, r3.RightButtom).ToLineString());
-                                                    lines.Add(new GLineSegment(r4.LeftTop, r4.RightButtom).ToLineString());
-                                                    var lst = GeoFac.ToNodedLineSegments(GeoFac.GetLines(new MultiLineString(lines.ToArray())).ToList()).Where(x => x.Length > 1).ToList();
-                                                    vlines.AddRange(lst.Select(x => x.ToLineString()).Where(x => !x.Intersects(kill)));
-                                                }
-                                            }
                                         }
                                     }
                                 }
@@ -3589,7 +3552,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                     textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                     textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                     {
                                     }
@@ -5488,7 +5450,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                         {
                                         }
@@ -5562,9 +5523,22 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                     }
                                                 }
                                                 for (int k = 0; k < floorRanges.Count; k++)
+                                                {
+                                                    if (k == floorRanges.Count - 1)
                                                     {
                                                         var bsPt = getGeneralBasePt(i, 0, k);
                                                         var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
+                                                        {
+                                                            var p = px;
+                                                            {
+                                                                px = px.OffsetXY(500, 50);
+                                                                {
+                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                    if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                }
+                                                            }
+                                                            px = p;
+                                                        }
                                                         var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
                                                         bi.DynaDict["可见性"] = "试验消火栓";
                                                         brInfos.Add(bi);
@@ -5580,10 +5554,40 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1444), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var j = 0;
+                                                var k = rgi;
+                                                {
+                                                    var bsPt = getGeneralBasePt(i, 0, k);
+                                                    var px = bsPt.OffsetY(k * stepH);
+                                                    {
+                                                        var p = px;
+                                                        if (j == 0)
+                                                        {
+                                                            px = px.OffsetXY(1000, 600 + 50);
+                                                            {
+                                                                var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                            }
+                                                        }
+                                                        px = p;
+                                                    }
+                                                    {
+                                                        var p = px;
+                                                        px = px.OffsetXY(0, 600);
+                                                        brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
+                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
+                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                        px = p;
+                                                    }
+                                                }
                                             }
                                         }
                                         else
@@ -7399,11 +7403,41 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                             {
                                                 for (int j = 0; j < _generalCount; j++)
                                                 {
-                                                    if (!(j == 0 || j == _generalCount - 1))
+                                                    if (rgi == floorRanges.Count - 1)
                                                     {
-                                                        var px = getGeneralBsPt(i, j);
-                                                        vsels.Add(px.OffsetY(-300));
-                                                        vkills.Add(px.OffsetY(-300 + .1));
+                                                        if (j != 0 && j != _generalCount - 1)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j);
+                                                            vsels.Add(px.OffsetY(-300));
+                                                            vkills.Add(px.OffsetY(-300 + .1));
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if (j != 0 && j != _refugeCount - 1)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j).OffsetXY(-510, -610);
+                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(210, -300)));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(0, 0)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, -300), px.OffsetXY(210, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(450, -300), px.OffsetXY(510, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            vsels.Add(px.OffsetXY(510, -300));
+                                                            vkills.Add(px.OffsetXY(510, -300 + .1));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                        }
+                                                        if (j == 0)
+                                                        {
+                                                            var px = getGeneralBsPt(i, j).OffsetY(-610);
+                                                            brInfos.Add(new BlockInfo("自动排气阀系统1", "W-FRPT-HYDT-PIPE", px.OffsetXY(0, 0)));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 732), px.OffsetXY(212, 944)), "W-WSUP-NOTE"));
+                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(212, 944), px.OffsetXY(2954, 944)), "W-WSUP-NOTE"));
+                                                            textInfos.Add(new DBTextInfo(px.OffsetXY(212, 994), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
+                                                        }
+                                                        {
+                                                            var px = getGeneralBsPt(i, j);
+                                                            vsels.Add(px.OffsetY(-610));
+                                                            vkills.Add(px.OffsetY(-610 + .1));
+                                                        }
                                                     }
                                                 }
                                             }
@@ -7445,7 +7479,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                         {
                                         }
@@ -7485,44 +7518,78 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                             {
                                                                 if (j == 0 || j == _generalCount - 1)
                                                                 {
-                                                                    lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                    if (rgi == floorRanges.Count - 1)
+                                                                    {
+                                                                        lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 0), px.OffsetXY(0, 600)), "W-FRPT-HYDT-PIPE"));
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                         if (j != _generalCount - 1)
                                                         {
-                                                            var vecs = new List<Vector2d> { new Vector2d(300, 600 + stepH * k) };
+                                                            var dy = 600 + stepH * k;
+                                                            if (rgi != floorRanges.Count - 1) dy = -610;
+                                                            var vecs = new List<Vector2d> { new Vector2d(300, dy) };
                                                             var bsPt = getGeneralBasePt(i, j, k);
                                                             var px = bsPt;
-                                                            bds.Add(drawValve(px + vecs[0].ToVector3d()));
+                                                            var dx = .0;
+                                                            if (rgi != floorRanges.Count - 1)
+                                                            {
+                                                                dx += 680.0;
+                                                            }
+                                                            bds.Add(drawValve(px.OffsetX(dx) + vecs[0].ToVector3d()));
                                                         }
-                                                        if (!(j == 0 || j == _generalCount - 1) && k == rgi)
+                                                        if (rgi == floorRanges.Count - 1)
                                                         {
-                                                            var bsPt = getGeneralBasePt(i, j, k);
-                                                            var px = bsPt;
-                                                            brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
-                                                            lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            if (!(j == 0 || j == _generalCount - 1) && k == rgi)
+                                                            {
+                                                                var bsPt = getGeneralBasePt(i, j, k);
+                                                                var px = bsPt;
+                                                                brInfos.Add(new BlockInfo("蝶阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-450, 300).OffsetXY(0, stepH * k)));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 300), px.OffsetXY(-210, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-450, 300), px.OffsetXY(-600, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(0, 600), px.OffsetXY(0, 300)).Offset(0, stepH * k), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, 300 + stepH * k), px.OffsetXY(-600, -300)), "W-FRPT-HYDT-PIPE"));
+                                                                lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-600, -300), px.OffsetXY(0, -300)), "W-FRPT-HYDT-PIPE"));
+                                                            }
                                                         }
                                                     }
                                                     for (int j = 0; j < _generalCount; j++)
                                                     {
                                                         if (j == 0 && k == rgi)
                                                         {
-                                                            var seg = getSeg(i, Enumerable.Range(0, _generalCount).ToArray(), k).Offset(0, 600 + k * stepH);
+                                                             if(rgi != floorRanges.Count - 1)
+                                                                {
+                                                                    var px = getGeneralBsPt(i, j).OffsetXY(1500, -610 + 50);
+                                                                    {
+                                                                        var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                        if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                    }
+                                                                }
+                                                            var dy = -610.0;
+                                                            if (rgi == floorRanges.Count - 1) dy = 600;
+                                                            var seg = getSeg(i, Enumerable.Range(0, _generalCount).ToArray(), k).Offset(0, dy);
                                                             drawDomePipes(GeoFac.GetLines(seg.ToLineString().Difference(GeoFac.CreateGeometryEx(bds.Select(bd => bd.ToPolygon()).ToList()))));
                                                         }
                                                     }
                                                 }
                                                 for (int k = 0; k < floorRanges.Count; k++)
                                                 {
-                                                    if (k == rgi)
+                                                    if (k == rgi && (rgi == floorRanges.Count - 1))
                                                     {
                                                         var bsPt = getGeneralBasePt(i, 0, k);
                                                         var px = bsPt.OffsetY(k * stepH).OffsetXY(600, 600);
+                                                        {
+                                                            var p = px;
+                                                            {
+                                                                px = px.OffsetXY(500, 50);
+                                                                {
+                                                                    var dn = vm.ZoneConfigs.FirstOrDefault(x => x.ZoneID == rgi + 1)?.DNSelectItem;
+                                                                    if (dn != null) textInfos.Add(new DBTextInfo(px, dn, "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
+                                                                }
+                                                            }
+                                                            px = p;
+                                                        }
                                                         var bi = new BlockInfo("室内消火栓系统1", "W-FRPT-HYDT", px.OffsetXY(-1200, 600));
                                                         bi.DynaDict["可见性"] = "试验消火栓";
                                                         brInfos.Add(bi);
@@ -7538,7 +7605,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 959), px.OffsetXY(-1600, 700)), "W-WSUP-NOTE"));
                                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 700), px.OffsetXY(-2898, 700)), "W-WSUP-NOTE"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1894), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1444), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 700), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-1426, 217), "DN65", "W-FRPT-HYDT-DIMS", "TH-STYLE3"));
                                                     }
@@ -9384,7 +9450,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                         {
                                         }
@@ -11224,7 +11289,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                         lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                        textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                         textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                         {
                                         }
@@ -13044,7 +13108,6 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1341, 659), px.OffsetXY(-1600, 400)), "W-WSUP-NOTE"));
                                     lineInfos.Add(new LineInfo(new GLineSegment(px.OffsetXY(-1600, 400), px.OffsetXY(-2898, 400)), "W-WSUP-NOTE"));
                                     textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1594), "自动排气阀DN25，余同", "W-WSUP-NOTE", "TH-STYLE3"));
-                                    textInfos.Add(new DBTextInfo(px.OffsetXY(-388, 1144), "该排气阀高度距地1.5m", "W-WSUP-NOTE", "TH-STYLE3"));
                                     textInfos.Add(new DBTextInfo(px.OffsetXY(-2898, 400), "试验消火栓", "W-WSUP-NOTE", "TH-STYLE3"));
                                     {
                                     }
