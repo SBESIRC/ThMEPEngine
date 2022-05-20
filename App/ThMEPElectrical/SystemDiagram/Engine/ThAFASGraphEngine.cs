@@ -654,6 +654,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         else if (sourceElement is Line sourceline)
                         {
                             var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
+                            var pt = IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint;
                             foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
                             {
                                 if (CMTBRule(targetline))
@@ -665,7 +666,9 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                                     ang -= Math.PI;
                                 }
                                 //误差一度内认为近似垂直
-                                if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
+                                if (Math.Abs(ang / Math.PI * 180 - 90) < 1 
+                                    && targetline.StartPoint.DistanceTo(pt) > ThAutoFireAlarmSystemCommon.ConnectionTolerance 
+                                    && targetline.EndPoint.DistanceTo(pt) > ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                 {
                                     sharedPath.Add(targetline);
                                     var square = Buffer(targetline);
@@ -797,11 +800,13 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     if (Buffer(rootblk, 0).Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, false);
+                        NextElement.Remove(rootblk);
                     }
                     //终点连着块
                     else
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, true);
+                        NextElement.Remove(rootblk);
                     }
                 }
                 //桥架
@@ -830,7 +835,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <returns></returns>
         public List<Entity> FindNextEntity(Entity existingEntity, Polyline space)
         {
-            var results = SpatialIndex.SelectCrossingPolygon(space);
+            var results = SpatialIndex.SelectFence(space);
             results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
             results.Remove(existingEntity);
             return results.Cast<Entity>().ToList();
