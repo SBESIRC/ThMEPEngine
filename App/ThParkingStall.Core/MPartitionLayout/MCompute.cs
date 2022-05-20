@@ -182,25 +182,26 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (joined) break;
                 }
             }
-            //判断是否有孤立的车道线
-            if (lanes.Count == 1) return true;
-            for (int i = 0; i < lanes.Count; i++)
-            {
-                bool connected = false;
-                for (int j = 0; j < lanes.Count; j++)
-                {
-                    if (i != j)
-                    {
-                        if (IsConnectedLines(lanes[i], lanes[j]) || lanes[i].IntersectPoint(lanes[j]).Count() > 0)
-                        {
-                            connected = true;
-                            break;
-                        }
-                    }
-                }
-                if (!connected) return false;
-            }
             return true;
+            ////判断是否有孤立的车道线
+            //if (lanes.Count == 1) return true;
+            //for (int i = 0; i < lanes.Count; i++)
+            //{
+            //    bool connected = false;
+            //    for (int j = 0; j < lanes.Count; j++)
+            //    {
+            //        if (i != j)
+            //        {
+            //            if (IsConnectedLines(lanes[i], lanes[j]) || lanes[i].IntersectPoint(lanes[j]).Count() > 0)
+            //            {
+            //                connected = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //    if (!connected) return false;
+            //}
+            //return true;
         }
 
     }

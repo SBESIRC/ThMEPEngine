@@ -151,6 +151,45 @@ namespace ThParkingStall.Core.Tools
             if (l1.P0.Distance(l2.P1) < tol && l1.P1.Distance(l2.P0) < tol) return true;
             return false;
         }
+        public static List<LineSegment> RemoveDuplicated(this List<LineSegment> lines ,double tol = 1)
+        {
+            var NonDuplicated = new List<int>();
+            for(int i = 0; i < lines.Count; i++) NonDuplicated.Add(i);
+            var DuplicatedGroup = new List<HashSet<int>>();
+            while (true)
+            {
+                var Duplicated = new HashSet<int>();
+                for (int i = 0; i < NonDuplicated.Count ; i++)
+                {
+                    var idx_i = NonDuplicated[i];
+                    for (int j = 0; j < NonDuplicated.Count; j++)
+                    {
+                        var idx_j = NonDuplicated[j];
+                        if(i == j) continue;
+                        if(lines[idx_i].AlmostEqual(lines[idx_j],tol))
+                        {
+                            Duplicated.Add(idx_i);
+                            Duplicated.Add(idx_j);
+                        }
+                    }
+                    if (Duplicated.Count > 0) break;
+                }
+                if (Duplicated.Count == 0) break;
+                else
+                {
+                    DuplicatedGroup.Add(Duplicated);
+                    Duplicated.ToList().ForEach(idx => NonDuplicated.Remove(idx));
+                }
+            }
+            var result = new List<LineSegment>();
+            NonDuplicated.ForEach(idx => result.Add(lines[idx]));
+            foreach(var group in DuplicatedGroup)
+            {
+                var longestIdx = group.OrderBy(idx => lines[idx].Length).Last();
+                result.Add(lines[longestIdx]);
+            }
+            return result;
+        }
 
         public static List<LineSegment> Merge(this List<LineSegment> lines,double tol = 1)
         {
@@ -195,6 +234,24 @@ namespace ThParkingStall.Core.Tools
                 var l1 = new LineSegment( coors[0].X,Y, coors[1].X,Y);
                 var l2 = new LineSegment( coors[1].X,Y, coors[2].X,Y);
                 return (l1, l2);
+            }
+        }
+
+        public static LineSegment Extend(this LineSegment line,double distance)
+        {
+            if (line.IsVertical())
+            {
+                var X = line.P0.X;
+                var minY = Math.Min(line.P0.Y, line.P1.Y);
+                var maxY = Math.Max(line.P0.Y, line.P1.Y);
+                return new LineSegment(X,minY-distance,X,maxY + distance);
+            }
+            else
+            {
+                var Y = line.P0.Y;
+                var minX = Math.Min(line.P0.X, line.P1.X);
+                var maxX = Math.Max(line.P0.X, line.P1.X);
+                return new LineSegment( minX - distance,Y, maxX + distance,Y);
             }
         }
     }

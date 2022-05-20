@@ -73,14 +73,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //Show();
             if (SegLines.Count != 0)
             {
-                bool Isvaild = SegLineVaild();
-                //VaildLanes.ShowInitSegLine();
-                if (!Isvaild) return false;
+                ProcessSegLines();
             }
+            return true;
+        }
+        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null)
+        {
+            if (AutoSegLines != null) SegLines = AutoSegLines.Select(l => l.Extend(1)).ToList();
+            //SegLines = SegLines.RemoveDuplicated(10);
+            bool Isvaild = SegLineVaild();
+            //VaildLanes.ShowInitSegLine();
+            if (!Isvaild) return false;
             GetLowerUpperBound();
             //ShowLowerUpperBound();
             return true;
         }
+
         public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger,bool extractSegLine = true)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
@@ -142,7 +150,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void AddObj(Entity ent)
         {
-            if (ent.Layer.ToUpper().Contains("地库边界"))
+            var layerName = ent.Layer.ToUpper();
+            if (layerName.Contains("地库边界"))
             {
                 if (ent is Polyline pline)
                 {
@@ -152,7 +161,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("障碍物"))
+            if (layerName.Contains("障碍物"))
             {
                 if (ent is BlockReference br)
                 {
@@ -177,7 +186,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("坡道"))
+            if (layerName.Contains("坡道"))
             {
                 if (ent is BlockReference br)
                 {
@@ -202,7 +211,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("分割线"))
+            if (layerName.Contains("分割线")&& !layerName.Contains("最终"))
             {
                 if (ent is Line line)
                 {
@@ -217,7 +226,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void RemoveSortSegLine()
         {
-            //移除和内坡道连接的线
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];

@@ -30,6 +30,8 @@ using MPGene = ThParkingStall.Core.InterProcess.Gene;
 using ThParkingStall.Core.InterProcess;
 using Chromosome = ThMEPArchitecture.ParkingStallArrangement.Algorithm.Chromosome;
 using ThMEPArchitecture.MultiProcess;
+using NetTopologySuite.Geometries;
+
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
@@ -126,7 +128,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 try
                 {
-                    GenerateAutoSegLine(blk, cutTol, HorizontalFirst);
+                    GenerateAutoSegLine(blk, cutTol, HorizontalFirst,Logger);
                 }
                 catch (Exception ex)
                 {
@@ -139,7 +141,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         }
 
-        public void GenerateAutoSegLine(BlockReference blk,int cutTol,bool HorizontalFirst)
+        public List<LineSegment> GenerateAutoSegLine(BlockReference blk,int cutTol,bool HorizontalFirst, Serilog.Core.Logger Logger)
         {
             Logger?.Information("##################################");
             var blk_Name = blk.GetEffectiveName();
@@ -148,13 +150,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             stopWatch.Start();
             var t_pre = 0.0;
             var layoutData = new LayoutData();
-            var inputvaild = layoutData.Init(blk, Logger,false);
-            if (!inputvaild) return;
+            var inputvaild = layoutData.Init(blk, Logger, false);
+            if (!inputvaild) return null;
             Converter.GetDataWraper(layoutData, ParameterViewModel);
             var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
             Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre }\n");
             t_pre = stopWatch.Elapsed.TotalSeconds;
-
             autogen.Run(false);
             Logger?.Information($"穷举用时: {stopWatch.Elapsed.TotalSeconds - t_pre}\n");
             t_pre = stopWatch.Elapsed.TotalSeconds;
@@ -162,7 +163,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             if (girdLines.Count < 2)
             {
                 Active.Editor.WriteMessage("块名为：" + blk_Name +"的地库暂不支持自动分割线！\n");
-                return;
+                return null;
             }
             girdLines.SeglinePrecut(layoutData.WallLine);
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
@@ -183,7 +184,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
             ReclaimMemory();
-            Logger?.Information($"当前图总用时: {stopWatch.Elapsed.TotalSeconds }\n");
+            Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
+            return result;
         }
         public override void AfterExecute()
         {

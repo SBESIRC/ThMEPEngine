@@ -225,6 +225,7 @@ namespace ThParkingStall.Core.Tools
         //判断分割线是否全部相连
         public static bool Allconnected(this List<LineSegment> SegLines)
         {
+            if(SegLines.Count == 0) return false;
             var CheckedLines = new List<LineSegment>();
             CheckedLines.Add(SegLines[0]);
             var rest_idx = new List<int>();
@@ -274,7 +275,11 @@ namespace ThParkingStall.Core.Tools
                     }
                     if (!new_group) break;
                 }
-                if (new_group) groups.Add(new List<LineSegment> { SegLines[ rest_idx.First()] });
+                if (new_group)
+                {
+                    groups.Add(new List<LineSegment> { SegLines[rest_idx.First()] });
+                    rest_idx.RemoveAt(0);
+                }
             }
             return groups;
         }

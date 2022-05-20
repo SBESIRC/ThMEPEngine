@@ -22,6 +22,8 @@ using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 using MPChromosome = ThParkingStall.Core.InterProcess.Chromosome;
 using MPGene = ThParkingStall.Core.InterProcess.Gene;
+using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
 
@@ -274,7 +276,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 t_pre = stopWatch.Elapsed.TotalSeconds;
 
                 var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
-                Active.Editor.WriteMessage(strFirstPopCnt);
                 Logger?.Information(strFirstPopCnt);
                 CurIteration = 0;
                 int maxCount = 0;
