@@ -459,13 +459,17 @@ namespace ThMEPArchitecture.MultiProcess
 
             Logger?.Information($"去重+去空区用时: {stopWatch.Elapsed.TotalSeconds - t_pre}");
             t_pre = stopWatch.Elapsed.TotalSeconds;
-            var layer = "AI自动分割线";
-            using (AcadDatabase acad = AcadDatabase.Active())
+            if(ParameterViewModel.JustCreateSplittersChecked)
             {
-                if (!acad.Layers.Contains(layer))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                var layer = "AI自动分割线";
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (!acad.Layers.Contains(layer))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                }
+                result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
             }
-            if(ParameterViewModel.JustCreateSplittersChecked) result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                
             ReclaimMemory();
             Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
             return result;
