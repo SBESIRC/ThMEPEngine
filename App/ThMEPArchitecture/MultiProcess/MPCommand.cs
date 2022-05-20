@@ -241,6 +241,16 @@ namespace ThMEPArchitecture.MultiProcess
                     var res = GA.Run2();
                     var best = res.First();
                     subAreas = InterParameter.GetSubAreas(best);
+                    var finalSegLines = best.Genome.Select(g => g.ToLineSegment()).ToList();
+                    finalSegLines.ExtendAndIntSect(InterParameter.SegLineIntsecDic);
+                    var layer = "最终分割线";
+                    using (AcadDatabase acad = AcadDatabase.Active())
+                    {
+                        if (!acad.Layers.Contains(layer))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                        finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                        MPEX.HideLayer(layer);
+                    }
 #if DEBUG
                     for (int i = 0; i < subAreas.Count; i++)
                     {
@@ -367,6 +377,17 @@ namespace ThMEPArchitecture.MultiProcess
                     var res = GA.Run2();
                     var best = res.First();
                     subAreas = InterParameter.GetSubAreas(best);
+                    var finalSegLines = best.Genome.Select(g => g.ToLineSegment()).ToList();
+                    finalSegLines.ExtendAndIntSect(InterParameter.SegLineIntsecDic);
+                    var layer = "最终分割线";
+                    using (AcadDatabase acad = AcadDatabase.Active())
+                    {
+                        if (!acad.Layers.Contains(layer))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                        finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                        MPEX.HideLayer(layer);
+                    }
+                    
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -444,7 +465,7 @@ namespace ThMEPArchitecture.MultiProcess
                 if (!acad.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
             }
-            result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+            if(ParameterViewModel.JustCreateSplittersChecked) result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
             ReclaimMemory();
             Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
             return result;
@@ -505,6 +526,14 @@ namespace ThMEPArchitecture.MultiProcess
             mpolygon.ColorIndex = coloridx;
             return mpolygon;
 
+        }
+        public static void HideLayer(string layerName)
+        {
+            var id = DbHelper.GetLayerId(layerName);
+            id.QOpenForWrite<LayerTableRecord>(layer =>
+            {
+                layer.IsOff = true;
+            });
         }
         public static void ShowLowerUpperBound(this List<LineSegment> SegLines, string layer = "最大最小值")
         {

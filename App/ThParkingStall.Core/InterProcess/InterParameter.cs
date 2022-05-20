@@ -25,7 +25,7 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Polygon> BoundingBoxes { get { return _BoundingBoxes; } }// 所有的建筑物的边框
 
         private static Dictionary<int, List<int>> _SegLineIntsecDic;//分割线临近线
-        private static Dictionary<int, List<int>> SegLineIntsecDic { get { return _SegLineIntsecDic; } }//分割线临近线
+        public static Dictionary<int, List<int>> SegLineIntsecDic { get { return _SegLineIntsecDic; } }//分割线临近线
 
         private static List<Ramp> _Ramps;//坡道
         public static List<Ramp> Ramps { get { return _Ramps; } }//坡道
