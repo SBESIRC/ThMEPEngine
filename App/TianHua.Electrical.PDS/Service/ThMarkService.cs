@@ -316,8 +316,6 @@ namespace TianHua.Electrical.PDS.Service
         private ThPDSTextInfo GetMarks(Polyline frame, List<Tuple<DBText, ObjectId>> dbTexts)
         {
             var result = new ThPDSTextInfo();
-            var otherResult = new ThPDSTextInfo();
-            var doSearch = true;
             var points = PointIndex.SelectWindowPolygon(frame);
             if (points.Count > 0)
             {
@@ -325,10 +323,43 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     result.Texts.AddRange(PointDic[p].Item1);
                     result.ObjectIds.Add(PointDic[p].Item2);
-                    doSearch = false;
                 });
             }
-            else
+            var textLeads = new List<Line>();
+            var doSearch = true;
+            SearchMarkLine(frame, textLeads);
+            var tolerence = 3.0 * Math.PI / 180.0;
+            textLeads.ForEach(o =>
+            {
+                var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
+                var textCollection = TextIndex.SelectCrossingPolygon(newFrame);
+                if (textCollection.Count > 0)
+                {
+                    textCollection.OfType<DBText>().ForEach(t =>
+                    {
+                        // 只取与引线方向相同的文字
+                        var rad = t.Rotation % Math.PI;
+                        var lineAngle = o.Angle % Math.PI;
+                        if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
+                        {
+                            dbTexts.Add(Tuple.Create(t, TextDic[t]));
+                            doSearch = false;
+                        }
+                    });
+                }
+                else
+                {
+                    var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
+                    if (pointCollection.Count > 0)
+                    {
+                        result.Texts.AddRange((PointDic[pointCollection[0] as DBPoint]).Item1);
+                        result.ObjectIds.Add((PointDic[pointCollection[0] as DBPoint]).Item2);
+                        doSearch = false;
+                    }
+                }
+            });
+
+            if (doSearch)
             {
                 var newframe = frame.Buffer(200.0).OfType<Polyline>().OrderByDescending(o => o.Length).First();
                 var TextCollection = TextIndex.SelectCrossingPolygon(newframe);
@@ -342,47 +373,6 @@ namespace TianHua.Electrical.PDS.Service
                 }
             }
 
-            var lineSearched = false;
-            if (doSearch)
-            {
-                var textLeads = new List<Line>();
-                SearchMarkLine(frame, textLeads);
-                var tolerence = 3.0 * Math.PI / 180.0;
-                textLeads.ForEach(o =>
-                {
-                    var newFrame = ThPDSBufferService.Buffer(o, 200.0);//（Buffer200）+文字
-                    var TextCollection = TextIndex.SelectCrossingPolygon(newFrame);
-                    if (TextCollection.Count > 0)
-                    {
-                        TextCollection.OfType<DBText>().ForEach(t =>
-                        {
-                            // 只取与引线方向相同的文字
-                            var rad = t.Rotation * Math.PI / 180.0;
-                            var vector = new Vector3d(Math.Cos(rad), Math.Sin(rad), 0);
-                            var lineAngle = o.Angle % Math.PI;
-                            if (Math.Abs(lineAngle - rad) < tolerence || Math.Abs(lineAngle - rad) > Math.PI - tolerence)
-                            {
-                                dbTexts.Add(Tuple.Create(t, TextDic[t]));
-                                lineSearched = true;
-                            }
-                        });
-                    }
-                    else
-                    {
-                        var pointCollection = PointIndex.SelectWindowPolygon(newFrame);
-                        if (pointCollection.Count > 0)
-                        {
-                            otherResult.Texts.AddRange((PointDic[pointCollection[0] as DBPoint]).Item1);
-                            otherResult.ObjectIds.Add((PointDic[pointCollection[0] as DBPoint]).Item2);
-                        }
-                    }
-                });
-            }
-
-            if(lineSearched)
-            {
-                result = otherResult;
-            }
             result.Texts = Filter(result.Texts);
             Filter(dbTexts);
             return result;

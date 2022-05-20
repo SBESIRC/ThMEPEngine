@@ -18,19 +18,26 @@ namespace TianHua.Electrical.PDS.Service
             var sourceEdge = circuitGraph.Edges.Where(e => e.Equals(edge)).ToList();
             if (sourceEdge.Count > 0)
             {
-                if (edge.Circuit.ID.CircuitNumber.Equals(sourceEdge[0].Circuit.ID.CircuitNumber))
+                foreach (var e in sourceEdge)
                 {
-                    return true;
+                    if (edge.Circuit.ID.CircuitNumber.Equals(e.Circuit.ID.CircuitNumber))
+                    {
+                        return true;
+                    }
                 }
             }
             var inverseEdge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(edge.Target, edge.Source);
             var sourceInverseEdge = circuitGraph.Edges.Where(e => e.Equals(inverseEdge)).ToList();
             if (sourceInverseEdge.Count > 0)
             {
-                if (inverseEdge.Circuit.ID.CircuitNumber.Equals(sourceInverseEdge[0].Circuit.ID.CircuitNumber))
+                foreach (var e in sourceEdge)
                 {
-                    return true;
+                    if (inverseEdge.Circuit.ID.CircuitNumber.Equals(e.Circuit.ID.CircuitNumber))
+                    {
+                        return true;
+                    }
                 }
+                    
             }
             return false;
         }

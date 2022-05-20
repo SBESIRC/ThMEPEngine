@@ -415,37 +415,42 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         var objectIds = new List<ObjectId>();
                         var newNode = ThPDSGraphService.CreateNode(distBox, Database, MarkService, DistBoxKey, objectIds);
-                        CacheDistBoxes.Add(distBox, newNode);
-                        PDSGraph.Graph.AddVertex(newNode);
-                        NodeMap.Add(newNode, objectIds);
-
-                        newNode.Loads[0].ID.CircuitNumberList.ForEach(circuitNumber =>
+                        // 当上级配电箱为ALE，下级配电箱为FEL时，才认为配电箱直接相连
+                        if (node.Loads[0].LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel)
+                            && newNode.Loads[0].LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel))
                         {
-                            if (string.IsNullOrEmpty(circuitNumber))
-                            {
-                                return;
-                            }
+                            CacheDistBoxes.Add(distBox, newNode);
+                            PDSGraph.Graph.AddVertex(newNode);
+                            NodeMap.Add(newNode, objectIds);
 
-                            var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { circuitNumber }, DistBoxKey);
-                            if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+                            newNode.Loads[0].ID.CircuitNumberList.ForEach(circuitNumber =>
                             {
-                                return;
-                            }
-                            var newOBB = ThPDSBufferService.Buffer(distBox, Database);
-                            var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
-                            if (filter.Count > 0)
-                            {
-                                newEdge.Circuit.ViaCableTray = true;
-                            }
-                            else
-                            {
-                                newEdge.Circuit.ViaConduit = true;
-                            }
-                            PDSGraph.Graph.AddEdge(newEdge);
-                            EdgeMap.Add(newEdge, objectIds);
-                        });
+                                if (string.IsNullOrEmpty(circuitNumber))
+                                {
+                                    return;
+                                }
 
-                        FindGraph(startingEntity, distBox);
+                                var newEdge = ThPDSGraphService.CreateEdge(node, newNode, new List<string> { circuitNumber }, DistBoxKey);
+                                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+                                {
+                                    return;
+                                }
+                                var newOBB = ThPDSBufferService.Buffer(distBox, Database);
+                                var filter = CableTrayIndex.SelectCrossingPolygon(newOBB);
+                                if (filter.Count > 0)
+                                {
+                                    newEdge.Circuit.ViaCableTray = true;
+                                }
+                                else
+                                {
+                                    newEdge.Circuit.ViaConduit = true;
+                                }
+                                PDSGraph.Graph.AddEdge(newEdge);
+                                EdgeMap.Add(newEdge, objectIds);
+                            });
+
+                            FindGraph(startingEntity, distBox);
+                        }
                     }
                 }
 
@@ -557,6 +562,24 @@ namespace TianHua.Electrical.PDS.Engine
                         });
 
                         FindGraph(startingEntity, distBox);
+                    }
+                    else
+                    {
+                        var node = CacheDistBoxes[distBox];
+                        node.Loads[0].ID.CircuitNumberList.ForEach(x =>
+                        {
+                            // new List<string> { newNode.Loads[0].ID.CircuitNumber } 可能会有bug
+                            var edge = ThPDSGraphService.CreateEdge(CableTrayNode, node, new List<string> { x }, DistBoxKey);
+                            if (ThPDSEdgeContainsService.EdgeContainsEx(edge, PDSGraph.Graph))
+                            {
+                                return;
+                            }
+                            PDSGraph.Graph.AddEdge(edge);
+                            if (!EdgeMap.ContainsKey(edge))
+                            {
+                                EdgeMap.Add(edge, new List<ObjectId>());
+                            }
+                        });
                     }
                 }
             }

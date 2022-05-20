@@ -243,6 +243,7 @@ namespace TianHua.Electrical.PDS.Service
                 if (edge.Target.Loads.Count > 0)
                 {
                     edge.Target.Loads[0].CircuitType = circuitModel.CircuitType;
+                    edge.Target.Loads[0].SetFireLoad(circuitModel.FireLoad);
                 }
             }
 
