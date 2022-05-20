@@ -61,13 +61,17 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                var br = blkRef.GetObject(OpenMode.ForRead) as BlockReference;
+                if(br.IsDynamicBlock)
                 {
-                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
-                }
-                else
-                {
-                    blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
+                    if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                    {
+                        blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_FIRE_POWER);
+                    }
+                    else
+                    {
+                        blkRef.SetDynBlockValue("电源类别", ThBConvertCommon.PROPERTY_VALUE_NON_FIRE_POWER);
+                    }
                 }
             }
         }
@@ -178,7 +182,7 @@ namespace ThMEPElectrical.BlockConvert
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
                 var scrApproCentriod = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
-                if(!targetBlockData.EffectiveName.Contains("负载标注"))
+                if (!targetBlockData.EffectiveName.Contains("负载标注"))
                 {
                     scrApproCentriod = srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS);
                 }
