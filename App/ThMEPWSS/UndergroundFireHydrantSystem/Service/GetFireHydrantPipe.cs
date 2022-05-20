@@ -130,12 +130,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return stPt.X - fireHydrantSysOut.InsertPoint.X;
         }
 
-        private static Point3d GetStPt(bool across, int index, FireHydrantSystemOut fireHydrantSysOut, FireHydrantSystemIn fireHydrantSysIn)
+        private static Point3d GetStPt(bool across, int index, FireHydrantSystemOut fireHydrantSysOut, 
+            FireHydrantSystemIn fireHydrantSysIn, int subPathLsCnt)
         {
             var stPt1 = fireHydrantSysOut.InsertPoint;
             if (across)
             {
-                return new Point3d(stPt1.X, stPt1.Y - (fireHydrantSysIn.FloorHeight + 3000) * (index+1) - 3000, 0);
+                return new Point3d(stPt1.X, stPt1.Y - (fireHydrantSysIn.FloorHeight + 3000) * (index + subPathLsCnt+1) - 3000, 0);
             }
             else
             {
@@ -143,12 +144,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
         public static void GetSubLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<List<Point3dEx>> subPathList, FireHydrantSystemIn fireHydrantSysIn,
-            Dictionary<Point3dEx, List<Point3dEx>> branchDic, bool across = false)
+            Dictionary<Point3dEx, List<Point3dEx>> branchDic, bool across = false, int subPathLsCnt=0)
         {
             var index = 0;
             foreach (var rstPath in subPathList)
             {
-                var stPt = GetStPt(across, index, fireHydrantSysOut, fireHydrantSysIn);
+                var stPt = GetStPt(across, index, fireHydrantSysOut, fireHydrantSysIn, subPathLsCnt);
                 index += 1;
                 var ptStart = new Point3d(stPt.X, stPt.Y, 0);
                 var pipeGap = 400;
