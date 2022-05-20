@@ -40,7 +40,15 @@ namespace TianHua.Electrical.PDS.Service
             });
             foreach (var str in marks)
             {
-                thPDSDistBox.ID.Description = StringClean(str);
+                if(thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                    && str.Contains("AR"))
+                {
+                    thPDSDistBox.ID.LoadID = str;
+                }
+                else
+                {
+                    thPDSDistBox.ID.Description = StringClean(str);
+                }
             }
 
             thPDSDistBox.SetFireLoad(distBoxData.FireLoad);

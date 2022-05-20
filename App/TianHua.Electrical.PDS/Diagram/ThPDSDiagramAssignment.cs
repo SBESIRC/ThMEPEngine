@@ -122,7 +122,11 @@ namespace TianHua.Electrical.PDS.Diagram
                         }
 
                         // 电能表
-                        // To do
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(firstPosition.X + 3000.0, firstPosition.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
 
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
@@ -199,6 +203,13 @@ namespace TianHua.Electrical.PDS.Diagram
                         var ATSEText = texts.Where(t => t.TextString == ThPDSCommon.ENTER_CIRCUIT_ATSE_320A_4P).First();
                         var type = ComponentTypeSelector.GetComponentType(circuit.transferSwitch.ComponentType);
                         // ATSEText.TextString = circuit.transferSwitch.ComponentType.content;
+
+                        // 电能表
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(thirdPosition.X + 250.0, thirdPosition.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
 
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
@@ -310,6 +321,13 @@ namespace TianHua.Electrical.PDS.Diagram
                         var MTSEtype = ComponentTypeSelector.GetComponentType(circuit.transferSwitch2.ComponentType);
                         //ATSEText.TextString = type.GetProperty("Content").GetValue(circuit.transferSwitch).ToString();
 
+                        // 电能表
+                        if (!circuit.reservedComponent.IsNull())
+                        {
+                            var secondPosition = new Point3d(srcManualTransferSwitch.Position.X + 250.0, srcManualTransferSwitch.Position.Y, 0);
+                            InsertMeter(activeDb, configDb, circuit.reservedComponent, secondPosition, tableObjs, scale);
+                        }
+
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
                         {
@@ -355,6 +373,42 @@ namespace TianHua.Electrical.PDS.Diagram
                     }
             }
             return Tuple.Create(false, new Polyline());
+        }
+
+        private void InsertMeter(AcadDatabase activeDb, AcadDatabase configDb, PDSBaseComponent reservedComponent,
+            Point3d secondPosition, List<Entity> tableObjs, Scale3d scale)
+        {
+            var insertEngine = new ThPDSBlockInsertEngine();
+            var newComponentName = ThPDSComponentMap.ComponentMap[reservedComponent.ComponentType.GetDescription()];
+            var newComponent = insertEngine.Insert1(activeDb, configDb, newComponentName, secondPosition, 100 * scale);
+
+            var objs = new DBObjectCollection();
+            newComponent.Explode(objs);
+            newComponent.Erase();
+            objs.OfType<Entity>().ForEach(entity =>
+            {
+                tableObjs.Add(entity);
+                activeDb.ModelSpace.Add(entity);
+            });
+
+            var texts = objs.OfType<DBText>().ToList();
+            if(reservedComponent is CurrentTransformer ct)
+            {
+                var ctText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_CT)).First();
+                ctText.TextString = ct.Content();
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
+                mtText.TextString = ct.ContentMT();
+            }
+            else if (reservedComponent is MeterTransformer mt)
+            {
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_MT)).First();
+                mtText.TextString = mt.Content();
+            }
+            else if(reservedComponent is OUVP ouvp)
+            {
+                var mtText = texts.Where(t => t.TextString.Equals(ThPDSCommon.OUT_CIRCUIT_OUVP)).First();
+                mtText.TextString = ouvp.Content();
+            }
         }
 
         public void TableTailAssign(AcadDatabase activeDb, BlockReference tail, ThPDSProjectGraphNode node, List<Entity> tableObjs, double power)
@@ -660,12 +714,12 @@ namespace TianHua.Electrical.PDS.Diagram
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            CTText.TextString = meter.Content();
                             if (meter is CurrentTransformer ct)
                             {
-                                MTText.TextString = ct.Content();
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = meter.Content();
+                                MTText.TextString = ct.ContentMT();
                             }
                         }
 
@@ -721,17 +775,19 @@ namespace TianHua.Electrical.PDS.Diagram
                         {
                             // 无CT表
                             var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            MTText.TextString = CTtype.GetProperty("Content").GetValue(meter).ToString();
+                            MTText.TextString = meter.Content();
                         }
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            var CTtype = ComponentTypeSelector.GetComponentType(meter.ComponentType);
-                            CTText.TextString = CTtype.GetProperty("ContentCT").GetValue(meter).ToString();
-                            MTText.TextString = CTtype.GetProperty("ContentMT").GetValue(meter).ToString();
+                            if (meter is CurrentTransformer ct)
+                            {
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = ct.Content();
+                                MTText.TextString = ct.ContentMT();
+                            }
+                                
                         }
 
                         // 元器件2
@@ -791,12 +847,12 @@ namespace TianHua.Electrical.PDS.Diagram
                         else
                         {
                             // 有CT表
-                            var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
-                            var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
-                            CTText.TextString = meter.Content();
                             if (meter is CurrentTransformer ct)
                             {
-                                MTText.TextString = ct.Content();
+                                var CTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_CT).First();
+                                var MTText = texts.Where(t => t.TextString == ThPDSCommon.OUT_CIRCUIT_MT).First();
+                                CTText.TextString = meter.Content();
+                                MTText.TextString = ct.ContentMT();
                             }
                         }
 

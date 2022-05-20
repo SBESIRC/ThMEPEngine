@@ -42,6 +42,7 @@ namespace TianHua.Electrical.PDS.Service
         public static readonly string OUT_CIRCUIT_KH2 = "KH2";
         public static readonly string OUT_CIRCUIT_CT = "CT";
         public static readonly string OUT_CIRCUIT_MT = "MT";
+        public static readonly string OUT_CIRCUIT_OUVP = "OUVP";
         public static readonly string OUT_CIRCUIT_CPS = "CPS";
         public static readonly string OUT_CIRCUIT_CPS1 = "CPS1";
         public static readonly string OUT_CIRCUIT_CPS2 = "CPS2";
