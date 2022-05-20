@@ -39,12 +39,7 @@ namespace ThMEPElectrical.BlockConvert
                 var targetData = new ThBlockReferenceData(blkRef);
                 FillProperties(targetData, source);
                 blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(targetData.Attributes));
-                if (source.EffectiveName.Contains("风机") ||
-                    source.EffectiveName.Contains("组合式空调器") ||
-                    source.EffectiveName.Contains("暖通其他设备标注") ||
-                    source.EffectiveName.Contains("风冷热泵") ||
-                    source.EffectiveName.Contains("冷水机组") ||
-                    source.EffectiveName.Contains("冷却塔"))
+                if (targetData.EffectiveName.Contains("负载标注"))
                 {
                     ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(target);
                 }
@@ -183,6 +178,10 @@ namespace ThMEPElectrical.BlockConvert
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
                 var scrApproCentriod = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                if(!targetBlockData.EffectiveName.Contains("负载标注"))
+                {
+                    scrApproCentriod = srcBlockData.Position.TransformBy(srcBlockData.OwnerSpace2WCS);
+                }
                 var offset = Point3d.Origin.TransformBy(targetMCS2WCS).GetVectorTo(scrApproCentriod);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
 
