@@ -972,10 +972,18 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                                     }
                                     else if (meter is CurrentTransformer currentTransformer)
                                     {
-                                        var o = new Project.Module.Component.ThPDSCurrentTransformerModel(currentTransformer);
+                                        var o = new ThPDSCurrentTransformerModel(currentTransformer);
                                         vm = o;
                                         {
-                                            var m = leftTemplates.FirstOrDefault(x => x.UnicodeString is "MT" or "CT");
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is "MT");
+                                            if (m != null)
+                                            {
+                                                var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.MTSpecification)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
+                                                m.SetBinding(Glyphs.UnicodeStringProperty, bd);
+                                            }
+                                        }
+                                        {
+                                            var m = leftTemplates.FirstOrDefault(x => x.Tag as string is  "CT");
                                             if (m != null)
                                             {
                                                 var bd = new Binding() { Converter = glyphsUnicodeStrinConverter, Source = vm, Path = new PropertyPath(nameof(o.ContentCT)), UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, };
