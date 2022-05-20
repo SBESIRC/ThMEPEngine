@@ -204,6 +204,15 @@ panels:
           - text: "用电负荷"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlPOWERSYSTEM"
+    name: "POWERSYSTEM"
+    title: "电力系统"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "配电箱系统"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELECTRONIC"
     name: "ELECTRONIC"
     title: "消防弱电"

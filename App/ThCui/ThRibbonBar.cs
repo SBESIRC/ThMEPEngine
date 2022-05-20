@@ -227,6 +227,7 @@ namespace TianHua.AutoCAD.ThCui
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
             CreateEMaterials(tab);
+            CreatePowerSystemPanel(tab);
             CreateElectronicPanel(tab);
             CreateELightingPanel(tab);
             CreateElightningPanel(tab);
@@ -259,6 +260,26 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THYDFHJS_SMALL",
                     "IDI_THCAD_THYDFHJS_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+        }
+
+        private static void CreatePowerSystemPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("POWERSYSTEM", "电力系统");
+            var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 配电箱系统
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("配电箱系统",
+                    "天华配电箱系统",
+                    "THDLXT",
+                    "天华配电箱系统",
+                    "IDI_THCAD_THDLXT_SMALL",
+                    "IDI_THCAD_THDLXT_LARGE",
+                RibbonButtonStyle.LargeWithText);
             }
         }
 
