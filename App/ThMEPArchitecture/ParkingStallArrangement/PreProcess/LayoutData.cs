@@ -73,14 +73,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //Show();
             if (SegLines.Count != 0)
             {
-                bool Isvaild = SegLineVaild();
-                //VaildLanes.ShowInitSegLine();
-                if (!Isvaild) return false;
+                ProcessSegLines();
             }
+            return true;
+        }
+        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null)
+        {
+            if (AutoSegLines != null) SegLines = AutoSegLines.Select(l => l.Extend(1)).ToList();
+            //SegLines = SegLines.RemoveDuplicated(10);
+            bool Isvaild = SegLineVaild();
+            //VaildLanes.ShowInitSegLine();
+            if (!Isvaild) return false;
             GetLowerUpperBound();
             //ShowLowerUpperBound();
             return true;
         }
+
         public bool Init(AcadDatabase acadDatabase, Serilog.Core.Logger logger,bool extractSegLine = true)
         {
             var block = InputData.SelectBlock(acadDatabase);//提取地库对象
@@ -217,7 +225,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void RemoveSortSegLine()
         {
-            //移除和内坡道连接的线
             for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];

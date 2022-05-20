@@ -108,7 +108,7 @@ namespace ThMEPArchitecture.MultiProcess
                             RunDirect(currentDb);
                         }
                     }
-                    else
+                    else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
                     {
                         if (ParameterViewModel.UseMultiSelection)
                         {
@@ -127,6 +127,12 @@ namespace ThMEPArchitecture.MultiProcess
                                 Run(currentDb);
                             }
                         }
+                    }
+                    else 
+                    {
+                        using (var docLock = Active.Document.LockDocument())
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                            RunWithAutoSegLine(currentDb);
                     }
                 }
             }
@@ -217,9 +223,7 @@ namespace ThMEPArchitecture.MultiProcess
             var inputvaild = layoutData.Init(acadDatabase, Logger);
             if (!inputvaild) return;
             var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
-#if DEBUG
-            InterParameter.InitSegLines.ShowLowerUpperBound();
-#endif
+
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
             {
                 using (MemoryMappedViewStream stream = mmf.CreateViewStream())
@@ -278,68 +282,10 @@ namespace ThMEPArchitecture.MultiProcess
                     var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
                     Logger = new Serilog.LoggerConfiguration().WriteTo
                             .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    int fileSize = 128; // 128Mb
-                    var nbytes = fileSize * 1024 * 1024;
-                    var layoutData = new LayoutData();
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
-                    
-                    var inputvaild = layoutData.Init(blk, Logger);
-                    if (!inputvaild) return;
-                    var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
-#if DEBUG
-            InterParameter.InitSegLines.ShowLowerUpperBound();
-#endif
-                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
-                    {
-                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())
-                        {
-                            IFormatter formatter = new BinaryFormatter();
-                            formatter.Serialize(stream, dataWraper);
-                        }
-                        ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
-                        var GA = new MultiProcessGAGenerator(ParameterViewModel);
-                        Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
-                        GA.Logger = Logger;
-                        List<SubArea> subAreas;
-                        try
-                        {
-                            var res = GA.Run2();
-                            var best = res.First();
-                            subAreas = InterParameter.GetSubAreas(best);
-#if DEBUG
-                    for (int i = 0; i < subAreas.Count; i++)
-                    {
-                        var subArea = subAreas[i];
-                        subArea.Display("MPDebug");
-                    }
-#endif
-                            List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                            MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
-                            var strBest = $"最大车位数{ParkingStallCount}\n";
-                            Logger?.Information(strBest);
-                            Active.Editor.WriteMessage(strBest);
-                            MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
-                            subAreas.ForEach(area => area.ShowText());
-                            SubAreaParkingCnt.Clear();
-                            Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger?.Information(ex.Message);
-                            Logger?.Information("##################################");
-                            Logger?.Information(ex.StackTrace);
-                            Active.Editor.WriteMessage(ex.Message);
-                        }
-                        finally
-                        {
-                           
-                        }
-                    }
+                    RunABlock(blk);
                 }
                 catch(Exception ex)
                 {
@@ -349,6 +295,165 @@ namespace ThMEPArchitecture.MultiProcess
                     Active.Editor.WriteMessage(ex.Message);
                 }
             }
+        }
+
+        public void RunWithAutoSegLine(AcadDatabase acadDatabase)
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            var cutTol = 1000;
+            var HorizontalFirst = true;
+            foreach (var blk in blks)
+            {
+
+                try
+                {
+                    var blkName = blk.GetEffectiveName();
+                    Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+                    var drawingName = Path.GetFileName(doc.Name);
+                    var logFileName = Path.Combine(System.IO.Path.GetTempPath(), drawingName + '(' + blkName + ')' + "Log.txt");
+                    Logger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(logFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                    Logger?.Information("块名：" + blkName);
+                    Logger?.Information("文件名：" + drawingName);
+                    Logger?.Information("用户名：" + Environment.UserName);
+                    var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData);
+                    if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, autoSegLines, layoutData);
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("##################################");
+                    Logger?.Information(ex.StackTrace);
+                    Active.Editor.WriteMessage(ex.Message);
+                }
+            }
+        }
+        public void RunABlock(BlockReference blk,List<LineSegment> AutoSegLines = null, LayoutData layoutData = null)
+        {
+            Logger?.Information("##################################");
+            Logger?.Information("迭代模式：");
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            int fileSize = 128; // 128Mb
+            var nbytes = fileSize * 1024 * 1024;
+
+            if(AutoSegLines == null)
+            {
+                layoutData = new LayoutData();
+                var inputvaild = layoutData.Init(blk, Logger);
+                if (!inputvaild) return;
+            }
+            else
+            {
+                var inputvaild = layoutData.ProcessSegLines(AutoSegLines);
+                if (!inputvaild) return;
+            }
+            var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
+
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
+            {
+                using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                {
+                    IFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, dataWraper);
+                }
+                ParkingPartitionPro.LayoutMode = (int)ParameterViewModel.RunMode;
+                var GA = new MultiProcessGAGenerator(ParameterViewModel);
+                Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+                GA.Logger = Logger;
+                List<SubArea> subAreas;
+                try
+                {
+                    var res = GA.Run2();
+                    var best = res.First();
+                    subAreas = InterParameter.GetSubAreas(best);
+#if DEBUG
+            for (int i = 0; i < subAreas.Count; i++)
+            {
+                var subArea = subAreas[i];
+                subArea.Display("MPDebug");
+            }
+#endif
+                    List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
+                    MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                    var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+                    var strBest = $"最大车位数{ParkingStallCount}\n";
+                    Logger?.Information(strBest);
+                    Active.Editor.WriteMessage(strBest);
+                    MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
+                    subAreas.ForEach(area => area.ShowText());
+                    SubAreaParkingCnt.Clear();
+                    ReclaimMemory();
+                    Logger?.Information($"总用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
+
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("##################################");
+                    Logger?.Information(ex.StackTrace);
+                    Active.Editor.WriteMessage(ex.Message);
+                }
+                finally
+                {
+
+                }
+            }
+        }
+        public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData)
+        {
+            Logger?.Information("##################################");
+            var blk_Name = blk.GetEffectiveName();
+            Logger?.Information("块名：" + blk_Name);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var t_pre = 0.0;
+            layoutData = new LayoutData();
+            var inputvaild = layoutData.Init(blk, Logger, false);
+            if (!inputvaild) return null;
+            Converter.GetDataWraper(layoutData, ParameterViewModel);
+            var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
+            Logger?.Information($"初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre }");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            autogen.Run(false);
+            Logger?.Information($"穷举用时: {stopWatch.Elapsed.TotalSeconds - t_pre}");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
+            if (girdLines.Count < 2)
+            {
+                Active.Editor.WriteMessage("块名为：" + blk_Name + "的地库暂不支持自动分割线！\n");
+                Logger?.Information("块名为：" + blk_Name + "的地库暂不支持自动分割线！\n");
+                return null;
+            }
+            //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            //girdLines = girdLines.RemoveDuplicated(5);
+            girdLines.SeglinePrecut(layoutData.WallLine);
+            //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();
+            //grouped.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+            var result = grouped;
+
+            result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
+            result = result.DefineSegLinePriority();
+
+            Logger?.Information($"去重+去空区用时: {stopWatch.Elapsed.TotalSeconds - t_pre}");
+            t_pre = stopWatch.Elapsed.TotalSeconds;
+            var layer = "AI自动分割线";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+            }
+            result.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+            ReclaimMemory();
+            Logger?.Information($"当前图生成分割线总用时: {stopWatch.Elapsed.TotalSeconds }\n");
+            return result;
+        }
+        private void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
         }
     }
     public static class MPEX
