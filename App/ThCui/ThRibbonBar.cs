@@ -462,15 +462,25 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 排水平面
+                // 立管布置
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("排水平面",
-                    "天华排水平面",
+                subRow.AddNewButton("立管布置",
+                    "天华立管布置",
                     "THPYSPM",
-                    "天华排水平面",
+                    "天华立管布置",
                     "IDI_THCAD_THPYSPM_SMALL",
                     "IDI_THCAD_THPYSPM_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+                    RibbonButtonStyle.SmallWithText);
+
+                // 一层排水
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("一层排水",
+                    "天华一层排水",
+                    "ThSCPSPM",
+                    "天华一层排水",
+                    "IDI_THCAD_ThSCPSPM_SMALL",
+                    "IDI_THCAD_ThSCPSPM_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
 
             {
@@ -524,20 +534,6 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.SmallWithText);
             }
         }
-
-        //private static void CreateWGroundSystemPanel(RibbonTabSource tab)
-        //{
-        //    var panel = tab.AddNewPanel("WGROUNDSYSTEM", "地上系统图");
-        //    var row = panel.AddNewRibbonRow();
-
-        //    row.AddNewButton("雨水",
-        //        "天华地上雨水系统图",
-        //        "THYSXTT",
-        //        "天华地上雨水系统图",
-        //        "IDI_THCAD_THYSXTT_SMALL",
-        //        "IDI_THCAD_THYSXTT_LARGE",
-        //        RibbonButtonStyle.LargeWithText);
-        //}
 
         private static void CreateWUndergroundPlanPanel(RibbonTabSource tab)
         {

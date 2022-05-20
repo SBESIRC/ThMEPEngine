@@ -52,7 +52,9 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "排水平面"
+          - text: "立管布置"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "一层排水"
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
