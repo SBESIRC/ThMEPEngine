@@ -112,6 +112,10 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     var blockAttributes = (block.Data as ThBlockReferenceData).Attributes;
                     var blockProperties = (block.Data as ThBlockReferenceData).CustomProperties;
+                    if(blockProperties.IsNull())
+                    {
+                        continue;
+                    }
                     if (blockAttributes.ContainsKey("集水井编号") && (string)blockAttributes["集水井编号"] == number)
                     {
                         var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
@@ -191,6 +195,10 @@ namespace ThMEPElectrical.BlockConvert
 
                 var targetProperties = targetBlockData.CustomProperties;
                 var srcProperties = srcBlockData.CustomProperties;
+                if(targetProperties.IsNull() || srcProperties.IsNull())
+                {
+                    return;
+                }
                 double base_x = 0, base_y = 0;
                 double label_x = 0, label_y = 0;
                 if (srcProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
@@ -256,6 +264,11 @@ namespace ThMEPElectrical.BlockConvert
 
                 var targetProperties = targetBlockData.CustomProperties;
                 var srcProperties = srcBlockData.CustomProperties;
+                if(targetProperties.IsNull() || srcProperties.IsNull())
+                {
+                    return;
+                }
+
                 if (targetProperties.Contains("距离") && srcProperties.Contains("距离"))
                 {
                     targetProperties.SetValue("距离", srcProperties.GetValue("距离"));
