@@ -150,7 +150,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void AddObj(Entity ent)
         {
-            if (ent.Layer.ToUpper().Contains("地库边界"))
+            var layerName = ent.Layer.ToUpper();
+            if (layerName.Contains("地库边界"))
             {
                 if (ent is Polyline pline)
                 {
@@ -160,7 +161,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("障碍物"))
+            if (layerName.Contains("障碍物"))
             {
                 if (ent is BlockReference br)
                 {
@@ -185,7 +186,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("坡道"))
+            if (layerName.Contains("坡道"))
             {
                 if (ent is BlockReference br)
                 {
@@ -210,7 +211,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
-            if (ent.Layer.ToUpper().Contains("分割线"))
+            if (layerName.Contains("分割线")&& !layerName.Contains("最终"))
             {
                 if (ent is Line line)
                 {
