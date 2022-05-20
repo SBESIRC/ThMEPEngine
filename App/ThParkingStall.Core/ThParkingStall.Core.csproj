@@ -71,6 +71,7 @@
     <Compile Include="MPartitionLayout\MParkingPartitionProMain.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionProDefine.cs" />
     <Compile Include="MPartitionLayout\MParkingPartitionProSucceed.cs" />
+    <Compile Include="MPartitionLayout\MPostProcessing.cs" />
     <Compile Include="MPartitionLayout\MPostProcessingEndLanes.cs" />
     <Compile Include="MPartitionLayout\MPostProcessingOutputLanes.cs" />
     <Compile Include="Program.cs" />
