@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,6 +71,32 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
             InsertBlockService.InsertConnectPipe(pipes.Select(x => x.route).ToList(), ThWSSCommon.DraiLayerName, null);
             InsertBlockService.scaleNum = scale;
             InsertBlockService.InsertBlock(layoutInfos, ThWSSCommon.DisconnectionLayerName, ThWSSCommon.DisconnectionBlockName);
+            PrintTaggingMarks(layoutInfos);
+        }
+
+        /// <summary>
+        /// 打印标注（“接至雨水口”）
+        /// </summary>
+        /// <param name="layoutInfos"></param>
+        private void PrintTaggingMarks(List<KeyValuePair<Point3d,Vector3d>> layoutInfos)
+        {
+            foreach (var lInfo in layoutInfos)
+            {
+                var dir = -lInfo.Value;
+                var routeDir = dir.RotateBy(Math.PI * (45.0 / 180.0), Vector3d.ZAxis);
+                var movePt = lInfo.Key + routeDir * 1000;
+                var lastPt = movePt + Vector3d.XAxis * 1100;
+                Polyline notePoly = new Polyline();
+                notePoly.AddVertexAt(0, lInfo.Key.ToPoint2D(), 0, 0, 0);
+                notePoly.AddVertexAt(1, movePt.ToPoint2D(), 0, 0, 0);
+                notePoly.AddVertexAt(2, lastPt.ToPoint2D(), 0, 0, 0);
+                var txtPt = movePt + Vector3d.XAxis * 500 + Vector3d.YAxis * 200;
+                var markLines = new List<Polyline>() { notePoly };
+                var dimtext = new DBText() { Height = 350, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "接至雨水口", Position = txtPt, AlignmentPoint = txtPt };
+                var dbTxts = new List<DBText>() { dimtext };
+                PrintMarks.PrintNoteLines(markLines, ThWSSCommon.RainDimsLayerName, scale);
+                PrintMarks.PrintText(dbTxts, ThWSSCommon.RainDimsLayerName, scale);
+            }
         }
     }
 }

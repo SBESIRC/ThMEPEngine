@@ -29,7 +29,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             ReadUIConfig(layerNames);
             InitBlockNames();
             equipmentBlcoks = new List<DrainingEquipmentModel>();
+            Init();
+        }
 
+        private void Init()
+        {
             using (AcadDatabase acdb = AcadDatabase.Active())
             using (acdb.Database.GetDocument().LockDocument())
             {

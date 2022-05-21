@@ -209,6 +209,7 @@
     <Compile Include="Hydrant\Service\ThPipeComputeService.cs" />
     <Compile Include="Model\ThFireExtinguisher.cs" />
     <Compile Include="Model\ThFireHydrant.cs" />
+    <Compile Include="Model\ThPSPMParameter.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
     <Compile Include="PressureDrainageSystem\Service\DrwaingServiesAssistant.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
@@ -224,6 +225,7 @@
     <Compile Include="Sprinkler\Data\ThWaterFlowIndicatorExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareExtractionVisitor.cs" />
     <Compile Include="Temp\ThSanitarywareRecognitionEngine.cs" />
+    <Compile Include="ThFirstFloorDrainningPlaneSystemCmd.cs" />
     <Compile Include="ThHydrantCmds.THXHSYH.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />

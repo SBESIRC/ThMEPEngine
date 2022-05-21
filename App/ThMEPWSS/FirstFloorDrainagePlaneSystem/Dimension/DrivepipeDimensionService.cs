@@ -129,8 +129,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             dbTexts.Add(leveltext);
 
             noteLines.ForEach(x => originTransformer.Reset(x));
-            PrintMarks.PrintNoteLines(noteLines, scale);
-            PrintMarks.PrintText(dbTexts, scale);
+            PrintMarks.PrintNoteLines(noteLines, ThWSSCommon.DrivepipeNoteLayerName, scale);
+            PrintMarks.PrintText(dbTexts, ThWSSCommon.DrivepipeNoteLayerName, scale);
         }
 
         /// <summary>
