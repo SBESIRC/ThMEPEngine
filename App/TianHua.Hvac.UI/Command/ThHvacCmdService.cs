@@ -116,7 +116,7 @@ namespace TianHua.Hvac.UI.Command
         {
             var bypassLines = new DBObjectCollection();
             var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
-            var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan, service);
+            var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
             if (anayRes.centerLines.Count == 0)
                 return;
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes, service);
@@ -149,7 +149,7 @@ namespace TianHua.Hvac.UI.Command
             var orgMaxBypass = maxBypass.Clone() as Line;
             if (!CheckoutInput(fanParam.bypassPattern, bypassLines, fanParam.centerLines))
                 return;
-            var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan, service);
+            var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
             if (anayRes.centerLines.Count == 0)
             {
                 ThMEPHVACService.PromptMsg("未搜索到与风机相连的中心线");
