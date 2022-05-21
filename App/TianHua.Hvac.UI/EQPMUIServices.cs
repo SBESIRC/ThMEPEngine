@@ -13,10 +13,10 @@ namespace TianHua.Hvac.UI
         public List<FanSelectHisModel> HisFanViewModels;
         EQPMUIServices() 
         {
-            fanSelectUI = new FanEQPMSelection();
-            fanSelectUI.Hide();
             SelectFanBlockGuid = string.Empty;
             HisFanViewModels = new List<FanSelectHisModel>();
+            fanSelectUI = new FanEQPMSelection();
+            fanSelectUI.Hide();
         }
 
         public string SelectFanBlockGuid { get; set; }
@@ -24,19 +24,22 @@ namespace TianHua.Hvac.UI
         {
             if (fanSelectUI == null)
                 return;
+            if (string.IsNullOrEmpty(SelectFanBlockGuid))
+                ChangeActiveDocument();
             if (!string.IsNullOrEmpty(dwgId))
             {
                 var hisValue = HisFanViewModels.Where(c => c.DWGID == dwgId).FirstOrDefault();
-                if (hisValue == null || !hisValue.ShowInThisDwg)
+                if (hisValue == null || !hisValue.ShowInThisDwg) 
+                {
+                    if (fanSelectUI.IsVisible)
+                        fanSelectUI.Close();
                     return;
+                }
             }
             if (!fanSelectUI.IsVisible)
             {
                 AcadApp.ShowModelessWindow(fanSelectUI);
             }
-            if (string.IsNullOrEmpty(SelectFanBlockGuid))
-                ChangeActiveDocument();
-
         }
         public void HideFanSelectUI() 
         {

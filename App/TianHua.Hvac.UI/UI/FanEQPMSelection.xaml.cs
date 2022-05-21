@@ -64,6 +64,7 @@ namespace TianHua.Hvac.UI.UI
             if (null == tempModel)
             {
                 fanViewModel = new EQPMFanSelectViewModel();
+                RefreshDataFromDocument();
                 EQPMUIServices.Instance.HisFanViewModels.Add(new FanSelectHisModel(id,true,fanViewModel));
             }
             else
@@ -360,7 +361,9 @@ namespace TianHua.Hvac.UI.UI
                     fanViewModel.FanInfos.Remove(delModel);
                 }
             }
-            
+            fanViewModel.allFanDataMoedels.Remove(selectFan);
+            fanViewModel.FanInfos.Remove(selectFan);
+            fanViewModel.CheckShowFanNumberIsRepeat();
         }
 
         private void btnMoveUpRow_Click(object sender, RoutedEventArgs e)
@@ -481,10 +484,6 @@ namespace TianHua.Hvac.UI.UI
                 //防止操作文件失败，导致CAD退出
                 MessageBox.Show(ex.Message, "天华-错误提醒", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally 
-            {
-                
-            }
         }
 
         private void btnExportExcel_Click(object sender, RoutedEventArgs e)
@@ -495,12 +494,12 @@ namespace TianHua.Hvac.UI.UI
             var targetFans = GetExportTargetFans(selectTypes);
             if (targetFans.Count < 1)
                 return;
+            var targetFanParas = GetListExportFanPara(fanViewModel.allFanDataMoedels.Select(c => c.fanDataModel).ToList());
+            if (targetFans.Count < 1)
+                return;
             var savePath = GetSavePath("风机参数表");
             if (string.IsNullOrEmpty(savePath))
                 return;
-            var targetFanParas = GetListExportFanPara(fanViewModel.allFanDataMoedels.Select(c => c.fanDataModel).ToList());
-            if (targetFans.Count < 1)
-                return; 
             try
             {
                 var exportExcel = new EQPMExportExcel(savePath);
@@ -510,10 +509,6 @@ namespace TianHua.Hvac.UI.UI
             {
                 //防止操作文件失败，导致CAD退出
                 MessageBox.Show(ex.Message, "天华-错误提醒", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-
             }
         }
 
