@@ -60,20 +60,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// <param name="line"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public static List<Line> GetConenctLine(List<Line> lines, Line line, double tol = 1)
+        public static List<Line> GetConenctLine(ref List<Line> lines, Line line, double tol = 1)
         {
             var resLines = new List<Line>();
-            var allLines = new List<Line>(lines);
-            var connectLines = lines.Where(x => x.DistanceTo(line.StartPoint, false) < tol ||
-                 x.DistanceTo(line.EndPoint, false) < tol ||
-                 line.DistanceTo(x.StartPoint, false) < tol ||
-                 line.DistanceTo(x.EndPoint, false) < tol).ToList();
+            var connectLines = lines.Where(x => x.StartPoint.DistanceTo(line.StartPoint) < tol ||
+                 x.StartPoint.DistanceTo(line.EndPoint) < tol ||
+                 line.StartPoint.DistanceTo(x.EndPoint) < tol ||
+                 line.EndPoint.DistanceTo(x.EndPoint) < tol).ToList();
             resLines.AddRange(connectLines);
-            allLines = allLines.Except(connectLines).ToList();
+            lines = lines.Except(connectLines).ToList();
             var resConnectLines = new List<Line>();
-            foreach (var rLine in resLines)
+            foreach (var rLine in connectLines)
             {
-                resConnectLines.AddRange(GetConenctLine(allLines, rLine, tol));
+                resConnectLines.AddRange(GetConenctLine(ref lines, rLine, tol));
             }
             resLines.AddRange(resConnectLines);
             return resLines;

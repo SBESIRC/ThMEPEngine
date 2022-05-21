@@ -42,12 +42,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     DoExtract(elems, block, Matrix3d.Identity);
                     equipmentBlcoks.AddRange(elems);
                 }
-                //var s = equipmentBlcoks.Where(x => x.EnumEquipmentType == EnumEquipmentType.singleBasinWashingTable).ToList();
-                //foreach (var item in s)
-                //{
-                //    Circle cl = new Circle(item.BlockPoint, Vector3d.ZAxis, 1000);
-                //    acdb.ModelSpace.Add(cl);
-                //}
             }
         }
 

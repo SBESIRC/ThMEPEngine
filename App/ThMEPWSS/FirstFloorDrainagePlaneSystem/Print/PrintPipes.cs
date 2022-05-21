@@ -37,7 +37,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                 var pipeLst = group.ToList();
                 pipeLst.ForEach(x =>
                 {
-                    if (x.printCircle != null)
+                    if (x.printCircle != null && !x.HasReservedPlug)
                     {
                         PrintPipeCircle(x.printCircle, originTransformer);
                         x.route = GeometryUtils.ShortenPolyline(x.route, 50, true);

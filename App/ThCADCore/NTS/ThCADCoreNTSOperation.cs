@@ -50,6 +50,16 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        public static DBObjectCollection BufferFlatPL(this Polyline polyline, double distance)
+        {
+            var buffer = new BufferOp(polyline.ToNTSLineString(), new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+                EndCapStyle = EndCapStyle.Flat,
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
         public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()

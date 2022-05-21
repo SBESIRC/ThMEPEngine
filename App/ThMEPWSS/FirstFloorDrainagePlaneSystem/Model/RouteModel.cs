@@ -37,5 +37,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// 是否是连接支管（污废合流接上去的支管）
         /// </summary>
         public bool IsBranchPipe = false;
+
+        /// <summary>
+        /// 有堵头
+        /// </summary>
+        public bool HasReservedPlug = false;
     }
 }

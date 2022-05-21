@@ -66,7 +66,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 mainPipes.AddRange(pipeTuple.Item5);
                 mainPipes = mainPipes.Where(x => x != null).ToList();
                 // 连接主管（连接污水、废水主管和立管）
-                ConnectMainPipeService connectMainPipeService = new ConnectMainPipeService(frame, mainSewagePipes, mainRainPipes, gridLines, outUserPoly, wallPolys, step, lineWieght);
+                ConnectMainPipeService connectMainPipeService = new ConnectMainPipeService(frame, mainSewagePipes, mainRainPipes, gridLines, outUserPoly, wallPolys, step, 20);
                 var routing = connectMainPipeService.Connect(mainPipes, pipeTuple.Item6);
 
                 if (paramSetting.SingleRowSetting == SingleRowSettingEnum.DrawDetail)
@@ -85,7 +85,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         if (pipeTuple.Item1.Count > 0)
                         {
-                            var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
+                            var mainWasteRoute = routing.Where(x => { return true; var s =x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01; }).FirstOrDefault();
                             resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
                         }
 
@@ -127,6 +127,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     var poly = mainWasteRoute.route;
                     var outFrame = GeometryUtils.FindOutFrame(poly, outUserPoly, point, false);
                     var intersectLine = GeometryUtils.FindRouteIntersectLine(poly, outFrame);
+                    if (poly.EndPoint.DistanceTo(point) > poly.StartPoint.DistanceTo(point))
+                    {
+                        poly.ReverseCurve();
+                    }
                     var sp = intersectLine.StartPoint.DistanceTo(point) > intersectLine.EndPoint.DistanceTo(point) ? intersectLine.StartPoint : intersectLine.EndPoint;
                     var pts = new Point3dCollection();
                     intersectLine.IntersectWith(outFrame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
@@ -135,9 +139,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                         var lastPt = pts.Cast<Point3d>().OrderByDescending(x => x.DistanceTo(sp)).FirstOrDefault();
                         var dir = (lastPt - sp).GetNormal();
                         var ep = lastPt + dir * 200;
-                        var resPoly = GeometryUtils.GetBreakLine(poly, sp, ep);
+                        var resPoly = GeometryUtils.GetBreakLine(poly, sp, lastPt);
+                        resPoly.AddVertexAt(resPoly.NumberOfVertices, ep.ToPoint2D(), 0, 0, 0);
+                        resPoly = resPoly.DPSimplify(1);
                         mainWasteRoute.route = resPoly;
                         PrintReservedPlug(ep, dir);
+                        routes.FirstOrDefault(x => x == mainWasteRoute).HasReservedPlug = true;
                     }
                 }
             }
