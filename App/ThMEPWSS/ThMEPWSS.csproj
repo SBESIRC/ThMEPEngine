@@ -894,7 +894,6 @@
     <Compile Include="WaterWellPumpLayout\Service\ThWaterWellPumpUtils.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallEdgeService.cs" />
     <Compile Include="WaterWellPumpLayout\Service\ThWWallLayerManager.cs" />
-    <Compile Include="ThSystemDiagramCmds.THJSXTT.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
