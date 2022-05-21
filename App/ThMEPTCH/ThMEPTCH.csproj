@@ -71,8 +71,8 @@
   <ItemGroup>
     <Compile Include="Data\IO\ThSQLiteHelper.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
-    <Compile Include="Moel\ThTCHSprinkler.cs" />
-    <Compile Include="Moel\ThTCHVerticalPipe.cs" />
+    <Compile Include="Model\ThTCHSprinkler.cs" />
+    <Compile Include="Model\ThTCHVerticalPipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />

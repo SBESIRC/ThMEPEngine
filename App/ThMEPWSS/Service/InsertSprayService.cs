@@ -6,7 +6,7 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPTCH.Moel;
+using ThMEPTCH.Model;
 using ThMEPTCH.TCHDrawServices;
 
 namespace ThMEPWSS.Service

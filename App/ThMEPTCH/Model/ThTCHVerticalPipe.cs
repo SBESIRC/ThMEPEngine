@@ -1,6 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 
-namespace ThMEPTCH.Moel
+namespace ThMEPTCH.Model
 {
     public class ThTCHVerticalPipe
     {
