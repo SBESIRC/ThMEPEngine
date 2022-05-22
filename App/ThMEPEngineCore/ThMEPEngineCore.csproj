@@ -238,6 +238,9 @@
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
+    <Compile Include="Model\ThIfcContext.cs" />
+    <Compile Include="Model\ThIfcObjectDefinition.cs" />
+    <Compile Include="Model\ThIfcProject.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
