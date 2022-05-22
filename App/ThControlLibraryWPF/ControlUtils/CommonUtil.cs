@@ -212,6 +212,8 @@ namespace ThControlLibraryWPF.ControlUtils
         {
             string value = enumValue.ToString();
             FieldInfo field = enumValue.GetType().GetField(value);
+            if (field == null)
+                return "";
             object[] objs = field.GetCustomAttributes(typeof(DescriptionAttribute), false);
             if (objs.Length == 0)
                 return value;

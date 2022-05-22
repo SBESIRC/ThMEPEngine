@@ -154,6 +154,10 @@ namespace ThMEPHVAC.EQPMFanSelect
         /// </summary>
         public string FanModelPowerDescribe { get; set; }
         /// <summary>
+        /// 单位风量耗功率 P/(3600*n*nt)
+        /// </summary>
+        public string FanInternalEfficiencyDescribe { get; set; }
+        /// <summary>
         /// 是否重复
         /// </summary>
         public bool IsRepetitions { get; set; }
