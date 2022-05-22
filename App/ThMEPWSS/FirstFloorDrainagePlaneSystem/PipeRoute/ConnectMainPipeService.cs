@@ -41,7 +41,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             lineWieght = _lineWieght;
         }
 
-        public List<RouteModel> Connect(List<VerticalPipeModel> mainPipes, Dictionary<KeyValuePair<Polyline, List<string>>, int> deepRooms)
+        public List<RouteModel> Connect(List<VerticalPipeModel> mainPipes, List<VerticalPipeModel> otherPipes, Dictionary<KeyValuePair<Polyline, List<string>>, int> deepRooms)
         {
             var resRoutes = new List<RouteModel>();         //1.step1：先将管线连接到出户框线上
             var needOutFrames = GetOneDeepOutFrame(deepRooms);          //最后出户的用户画的出乎框线
@@ -59,13 +59,15 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 var outFrameLines = dic.Key.GetAllLineByPolyline().OrderByDescending(x => x.Length).ToList();
                 var closetLine = outFrameLines.First();
                 var connectPipes = OrderPipeConnect(closetLine, mainPipes);
+                var holesPipes = new List<VerticalPipeModel>(connectPipes);
+                holesPipes.AddRange(otherPipes);
                 var frameConnectLines = new Dictionary<VerticalPipeModel, Polyline>();
                 foreach (var pipe in connectPipes)
                 {
                     CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, gridInfo);
                     Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                     weightHoles.Add(roomWallPolys, double.MaxValue);
-                    weightHoles.Add(CreateRouteHelper.CreateOtherPipeHoles(connectPipes, pipe, closetLine, step), double.MaxValue);
+                    weightHoles.Add(CreateRouteHelper.CreateOtherPipeHoles(holesPipes, pipe, closetLine, step), double.MaxValue);
                     weightHoles.Add(holeConnectLines, lineWieght);
                     var connectLine = connectPipesService.CreatePipes(roomFrame, closetLine, pipe.Position, weightHoles);
                     holeConnectLines.AddRange(CreateRouteHelper.CreateConnectLineHoles(connectLine, lineDis));
@@ -140,6 +142,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     if (pipeLine.Key.IsEuiqmentPipe)
                     {
                         route.printCircle = pipeLine.Key.PipeCircle;
+                    }
+                    else
+                    {
+                        route.originCircle = pipeLine.Key.PipeCircle;
                     }
                     route.connecLine = closetLine;
                     resRoutes.Add(route);

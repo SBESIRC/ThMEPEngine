@@ -24,6 +24,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             { new List<string>(){ "YxLx-x" },  VerticalPipeType.rainPipe},
             { new List<string>(){ "PLx-x" },  VerticalPipeType.ConfluencePipe},
             { new List<string>(){ "*NLx-x", "FLx-0" },  VerticalPipeType.CondensatePipe},
+            { new List<string>(){ "TLx-x" },  VerticalPipeType.holePipe},
         };
 
         /// <summary>

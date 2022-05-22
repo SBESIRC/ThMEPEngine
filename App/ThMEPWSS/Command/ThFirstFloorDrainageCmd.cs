@@ -52,7 +52,6 @@ namespace ThMEPWSS.Command
                     var frame = dic.Key.Clone() as Polyline;
                     originTransformer.Transform(frame);
                     CalStructrueService.GetStructureInfo(acad, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
-                    
                     var verticalPipe = frame.RecognizeVerticalPipe(acad, originTransformer);
                     if (paramSetting.SingleRowSetting != SingleRowSettingEnum.NotConsidered)        //不考虑一层出户不需要读取洁具立管
                     {
@@ -210,11 +209,21 @@ namespace ThMEPWSS.Command
                     {
                         verPipes.Add(pipe);
                     }
+                    else
+                    {
+                        pipe.PipeType = VerticalPipeType.holePipe;
+                        verPipes.Add(pipe);
+                    }
                 }
                 else if (pipe.PipeType == VerticalPipeType.CondensatePipe)
                 {
                     if (paramSetting.CondensateChecked.Value)
                     {
+                        verPipes.Add(pipe);
+                    }
+                    else
+                    {
+                        pipe.PipeType = VerticalPipeType.holePipe;
                         verPipes.Add(pipe);
                     }
                 }
@@ -224,6 +233,16 @@ namespace ThMEPWSS.Command
                     {
                         verPipes.Add(pipe);
                     }
+                    else
+                    {
+                        pipe.PipeType = VerticalPipeType.holePipe;
+                        verPipes.Add(pipe);
+                    }
+                }
+                else
+                {
+                    pipe.PipeType = VerticalPipeType.holePipe;
+                    verPipes.Add(pipe);
                 }
             }
             return verPipes;

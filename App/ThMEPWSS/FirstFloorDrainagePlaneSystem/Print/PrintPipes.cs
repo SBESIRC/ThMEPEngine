@@ -42,6 +42,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Print
                         PrintPipeCircle(x.printCircle, originTransformer);
                         x.route = GeometryUtils.ShortenPolyline(x.route, 50, true);
                     }
+                    else if (x.originCircle != null)
+                    {
+                        x.route = GeometryUtils.ShortenPolyline(x.route, x.originCircle.Radius, true);
+                    }
                 });
                 var pipes = pipeLst.Select(x => { originTransformer.Reset(x.route); return x.route; }).ToList();
                 InsertBlockService.scaleNum = scale;

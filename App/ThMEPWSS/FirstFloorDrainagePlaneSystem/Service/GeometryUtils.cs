@@ -316,6 +316,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// <returns></returns>
         public static Polyline ShortenPolyline(Polyline polyline, double length, bool shortStart = false)
         {
+            polyline = polyline.DPSimplify(1);
             if (shortStart)
             {
                 polyline.ReverseCurve();
@@ -336,6 +337,57 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 resPoly.ReverseCurve();
             }
             return resPoly;
+        }
+
+        /// <summary>
+        /// 从起点开始沿一定长度间断polyline
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <param name="sPolyline"></param>
+        /// <param name="ePolyline"></param>
+        /// <param name="dir"></param>
+        public static void CutPolylineByLength(Polyline poly, double length, out Polyline sPolyline, out Polyline ePolyline, out Vector3d dir, out Point3d cutPt)
+        {
+            sPolyline = new Polyline();
+            ePolyline = new Polyline();
+            dir = Vector3d.YAxis;
+            cutPt = poly.EndPoint;
+            if (poly.Length <= length)
+            {
+                sPolyline = poly;
+            }
+
+            sPolyline.AddVertexAt(sPolyline.NumberOfVertices, poly.GetPoint3dAt(0).ToPoint2D(), 0, 0, 0);
+            bool isBreak = false;
+            double moveLength = 0;
+            for (int i = 1; i < poly.NumberOfVertices; i++)
+            {
+                if (!isBreak)
+                {
+                    var line = new Line(poly.GetPoint3dAt(i - 1), poly.GetPoint3dAt(i));
+                    moveLength = moveLength + line.Length;
+                    if (moveLength >= length)
+                    {
+                        isBreak = true;
+                        var lineDir = (poly.GetPoint3dAt(i - 1) - poly.GetPoint3dAt(i)).GetNormal();
+                        var movePt = poly.GetPoint3dAt(i) + lineDir * (moveLength - length);
+                        dir = -lineDir;
+                        cutPt = movePt;
+                        sPolyline.AddVertexAt(sPolyline.NumberOfVertices, movePt.ToPoint2D(), 0, 0, 0);
+                        ePolyline.AddVertexAt(ePolyline.NumberOfVertices, movePt.ToPoint2D(), 0, 0, 0);
+                        ePolyline.AddVertexAt(ePolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                    else
+                    {
+                        sPolyline.AddVertexAt(sPolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                }
+                else
+                {
+                    ePolyline.AddVertexAt(ePolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                }
+            }
         }
     }
 }

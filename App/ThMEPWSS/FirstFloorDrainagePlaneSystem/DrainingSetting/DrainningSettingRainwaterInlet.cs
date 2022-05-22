@@ -47,24 +47,20 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.DrainingSetting
         /// <param name="pipes"></param>
         private void GetRainwaterInlet(List<RouteModel> pipes)
         {
-            double allLength = moveLength + inletWidth * 2;
             var inletPts = new List<KeyValuePair<Point3d, Vector3d>>();
             var routes = new List<Polyline>();
             foreach (var pipe in pipes)
             {
-                var sp = pipe.route.GetPoint3dAt(0);
-                var secP = pipe.route.GetPoint3dAt(1);
-                var dir = (secP - sp).GetNormal();
-                var firRoute = new Polyline();
-                firRoute.AddVertexAt(0, sp.ToPoint2D(), 0, 0, 0);
-                firRoute.AddVertexAt(1, (sp + dir * moveLength).ToPoint2D(), 0, 0, 0);
-                originTransformer.Reset(firRoute);
-                routes.Add(firRoute);
-                var transPt = originTransformer.Reset(sp);
-                inletPts.Add(new KeyValuePair<Point3d, Vector3d>(transPt + dir * (moveLength + inletWidth), dir));
-                pipe.route = GeometryUtils.ShortenPolyline(pipe.route, allLength, true);
-                originTransformer.Reset(pipe.route);
-                routes.Add(pipe.route);
+                var routePoly = pipe.route;
+                originTransformer.Reset(routePoly);
+                GeometryUtils.CutPolylineByLength(routePoly, moveLength, out Polyline sPoly, out Polyline ePoly, out Vector3d layoutDir, out Point3d cutPt);
+                routes.Add(sPoly);
+                if (ePoly.Length > 0)
+                {
+                    ePoly = GeometryUtils.ShortenPolyline(ePoly, inletWidth * 2, true);
+                    routes.Add(ePoly);
+                    inletPts.Add(new KeyValuePair<Point3d, Vector3d>(cutPt, -layoutDir));
+                }
             }
 
             Print(inletPts, routes);

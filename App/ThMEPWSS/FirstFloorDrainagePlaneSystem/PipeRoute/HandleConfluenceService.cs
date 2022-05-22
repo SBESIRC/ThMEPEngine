@@ -16,8 +16,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
     public class HandleConfluenceService
     {
-        //item1.洁具废水主管 item2.洁具污水主管 item3.其他废水支管 item4.其他污水支管 item5.房间内其他立管 item6. 带权联通房间
-        public List<Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>> pipeTuples;
+        //item1.洁具废水主管 item2.洁具污水主管 item3.其他废水支管 item4.其他污水支管 item5.房间内其他立管 item6. 带权联通房间 item7. 当作洞口的立管 
+        public List<Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>, List<VerticalPipeModel>>> pipeTuples;
         public List<VerticalPipeModel> otherOutPoly;
         List<VerticalPipeModel> verticalPipes;
         SewageWasteWaterEnum sewageWasteWaterEnum;
@@ -37,7 +37,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public void GetMainPolyVerticalPipe()
         {
-            pipeTuples = new List<Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>>();
+            pipeTuples = new List<Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>, List<VerticalPipeModel>>>();
             foreach (var dRoom in deepRooms)
             {
                 var rooms = dRoom.Select(x => x.Key).ToList();
@@ -51,7 +51,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 List<VerticalPipeModel> otherWastePolys = new List<VerticalPipeModel>();                            //其他废水支管
                 List<VerticalPipeModel> otherSewagePolys = new List<VerticalPipeModel>();                           //其他污水支管
                 List<VerticalPipeModel> otherVerPipes = new List<VerticalPipeModel>();                              //其他立管
+                List<VerticalPipeModel> holeVerPipes = roomPipeDic.Where(x => x.Key.PipeType == VerticalPipeType.holePipe).Select(x => x.Key).ToList();  //洞口立管
 
+                roomPipeDic = roomPipeDic.Where(x => !holeVerPipes.Any(y => y == x.Key)).ToDictionary(x => x.Key, y => y.Value);
                 if (roomEquipementPipes.Count > 0)
                 {
                     if (singleRowSettingEnum == SingleRowSettingEnum.ReservedPlug)
@@ -61,6 +63,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     else if (singleRowSettingEnum == SingleRowSettingEnum.DrawDetail)
                     {
                         sewageMainPolys = new List<VerticalPipeModel>() { roomEquipementPipes.Where(x => x.PipeType == VerticalPipeType.SewagePipe).FirstOrDefault() };
+                        sewageMainPolys = sewageMainPolys.Where(x => x != null).ToList();
                         if (sewageWasteWaterEnum == SewageWasteWaterEnum.Confluence)
                         {
                             roomEquipementPipes.ForEach(x => x.PipeType = VerticalPipeType.ConfluencePipe);
@@ -80,13 +83,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     otherSewagePolys = otherPolys.Where(x => x.PipeType == VerticalPipeType.SewagePipe).ToList();
                 }
                 otherVerPipes = roomPipeDic.Where(x => !x.Key.IsEuiqmentPipe).Select(x => x.Key).ToList();
-                var tuple = new Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>>(sewageMainPolys, wasteMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom);
+                var tuple = new Tuple<List<VerticalPipeModel>, VerticalPipeModel, List<VerticalPipeModel>, List<VerticalPipeModel>, List<VerticalPipeModel>, Dictionary<KeyValuePair<Polyline, List<string>>, int>, List<VerticalPipeModel>>(sewageMainPolys, wasteMainPoly, otherWastePolys, otherSewagePolys, otherVerPipes, dRoom, holeVerPipes);
                 pipeTuples.Add(tuple);
 
                 verticalPipes = verticalPipes.Except(roomPipeDic.Select(x => x.Key)).ToList();
             }
 
-            otherOutPoly = verticalPipes;
+            otherOutPoly = verticalPipes.Where(x => x.PipeType != VerticalPipeType.holePipe).ToList();
         }
 
         /// <summary>
@@ -156,17 +159,21 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var mainLine = mainLineDic.Key;
             var orderPipeDic = OrderPipes(mainLine, otherPipes);
             var cPipe = ClassifyPipes(orderPipeDic);
-            var resPipeLines = new List<RouteModel>();
+            var resPipeLines = new Dictionary<RouteModel, bool>();
             var otherPolyline = new List<RouteModel>();
             foreach (var pipes in cPipe)
             {
-                resPipeLines.Add(ConnectPipes(frame, mainLine, resPipeLines, pipes, wallPolys, roomPolys, out List<RouteModel> otherConnectPipeLines));
+                var connectPipe = ConnectPipes(frame, mainLine, resPipeLines.Keys.ToList(), pipes, wallPolys, roomPolys, out List<RouteModel> otherConnectPipeLines, out bool connectMain);
+                resPipeLines.Add(connectPipe, connectMain);
                 otherPolyline.AddRange(otherConnectPipeLines);
             }
-            var lastPipe = resPipeLines.Last();
-            //resPipeLines.Remove(lastPipe);
-            //resPipeLines.Add(ConnectLastPipe(lastPipe, mainLineDic.Value));
-            var allResPolys = new List<RouteModel>(resPipeLines);
+            var lastPipe = resPipeLines.Where(x=>x.Value).LastOrDefault();
+            if (lastPipe.Key != null)
+            {
+                resPipeLines.Remove(lastPipe.Key);
+                resPipeLines.Add(ConnectLastPipe(lastPipe.Key, mainLineDic.Value), true);
+            }
+            var allResPolys = new List<RouteModel>(resPipeLines.Keys.ToList());
             allResPolys.AddRange(otherPolyline);
             return allResPolys;
         }
@@ -178,8 +185,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// <param name="connectLines"></param>
         /// <param name="otherPipes"></param>
         /// <param name="mainDir"></param>
-        private RouteModel ConnectPipes(Polyline frame, Polyline mainPoly, List<RouteModel> connectLines, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, List<Polyline> rooms, out List<RouteModel> otherConnectPipeLines)
+        private RouteModel ConnectPipes(Polyline frame, Polyline mainPoly, List<RouteModel> connectLines, List<VerticalPipeModel> otherPipes, List<Polyline> wallPolys, List<Polyline> rooms, out List<RouteModel> otherConnectPipeLines, out bool connectMain)
         {
+            connectMain = true;
             otherPipes = otherPipes.OrderByDescending(x => mainPoly.GetClosestPointTo(x.Position, true).DistanceTo(x.Position)).ToList();
             var closePt = mainPoly.GetClosestPointTo(otherPipes.First().Position, true);
             var createDir = (closePt - otherPipes.First().Position).GetNormal();
@@ -201,6 +209,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 {
                     if (otherPipes.Count > 1)
                     {
+                        connectMain = false;
                         var tempLine = new Line(firPt, firPt + createDir * 100);
                         var tempPt = tempLine.GetClosestPointTo(otherPipes.Last().Position, true);
                         resConnectLine.AddVertexAt(resConnectLine.NumberOfVertices, tempPt.ToPoint2D(), 0, 0, 0);
@@ -220,6 +229,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 
             otherPipes.Remove(otherPipes.First());
             var resLine = CreateConnectLine(resConnectLine, connectLine, connectPt, closetLine.Key, pipeType);
+            resLine.printCircle = otherPipes.First().PipeCircle;
             otherConnectPipeLines = CreateOtherPipes(otherPipes, resLine);
             return resLine;
         }
@@ -279,6 +289,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 connectLine.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);
                 connectLine.AddVertexAt(1, pipe.Position.ToPoint2D(), 0, 0, 0);
                 var route = new RouteModel(connectLine, pipe.PipeType, pipe.Position, pipe.IsEuiqmentPipe);
+                route.printCircle = pipe.PipeCircle;
                 route.IsBranchPipe = true;
                 resPolys.Add(route);
             }

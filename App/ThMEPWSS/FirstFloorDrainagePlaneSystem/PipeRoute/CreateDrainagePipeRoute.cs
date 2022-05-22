@@ -65,9 +65,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 mainPipes.Add(pipeTuple.Item2);
                 mainPipes.AddRange(pipeTuple.Item5);
                 mainPipes = mainPipes.Where(x => x != null).ToList();
+                var otherHolePipes = new List<VerticalPipeModel>(pipeTuple.Item3);
+                otherHolePipes.AddRange(pipeTuple.Item4);
+                otherHolePipes.AddRange(pipeTuple.Item7);
                 // 连接主管（连接污水、废水主管和立管）
                 ConnectMainPipeService connectMainPipeService = new ConnectMainPipeService(frame, mainSewagePipes, mainRainPipes, gridLines, outUserPoly, wallPolys, step, 20);
-                var routing = connectMainPipeService.Connect(mainPipes, pipeTuple.Item6);
+                var routing = connectMainPipeService.Connect(mainPipes, otherHolePipes, pipeTuple.Item6);
 
                 if (paramSetting.SingleRowSetting == SingleRowSettingEnum.DrawDetail)
                 {
@@ -85,7 +88,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     {
                         if (pipeTuple.Item1.Count > 0)
                         {
-                            var mainWasteRoute = routing.Where(x => { return true; var s =x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01; }).FirstOrDefault();
+                            var mainWasteRoute = routing.Where(x => x.startPosition.DistanceTo(pipeTuple.Item1.First().Position) < 0.01).FirstOrDefault();
                             resRoutes.AddRange(handleConfluenceService.ConnectPipe(frame, pipeTuple.Item4, wallPolys, mainWasteRoute, pipeTuple.Item6, outUserPoly));
                         }
 
@@ -205,6 +208,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                     if (pipe.IsEuiqmentPipe)
                     {
                         route.printCircle = pipe.PipeCircle;
+                    }
+                    else
+                    {
+                        route.originCircle = pipe.PipeCircle;
                     }
                     route.connecLine = closetLine.Key;
                     resRoutes.Add(route);

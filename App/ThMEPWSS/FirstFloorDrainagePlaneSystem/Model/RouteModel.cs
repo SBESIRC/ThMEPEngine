@@ -22,6 +22,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 
         public Circle printCircle { get; set; }
 
+        public Circle originCircle { get; set; }
+
         public Polyline route { get; set; }
 
         public VerticalPipeType verticalPipeType { get; set; }
