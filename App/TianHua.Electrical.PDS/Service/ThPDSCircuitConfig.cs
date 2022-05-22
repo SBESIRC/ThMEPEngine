@@ -17,6 +17,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 1.0,
                 PowerFactor =  0.85,
                 FireLoad = true,
+                DefaultDescription = "消防备用照明",
             },
             new ThPDSCircuitConfigItem
             {
@@ -27,6 +28,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.85,
                 FireLoad = false,
+                DefaultDescription = "正常照明",
             },
             new ThPDSCircuitConfigItem
             {
@@ -37,6 +39,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.85,
                 FireLoad = false,
+                DefaultDescription = "插座",
             },
             new ThPDSCircuitConfigItem
             {
@@ -47,6 +50,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
                 FireLoad = true,
+                DefaultDescription = "动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -57,6 +61,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
                 FireLoad = false,
+                DefaultDescription = "动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -67,6 +72,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
                 FireLoad = false,
+                DefaultDescription = "动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -77,6 +83,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 1.0,
                 PowerFactor =  0.8,
                 FireLoad = true,
+                DefaultDescription = "消防动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -87,6 +94,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 0.8,
                 PowerFactor =  0.8,
                 FireLoad = false,
+                DefaultDescription = "动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -97,6 +105,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 1.0,
                 PowerFactor =  0.8,
                 FireLoad = true,
+                DefaultDescription = "消防动力负载",
             },
             new ThPDSCircuitConfigItem
             {
@@ -107,6 +116,7 @@ namespace TianHua.Electrical.PDS.Service
                 DemandFactor = 1.0,
                 PowerFactor =  0.85,
                 FireLoad = true,
+                DefaultDescription = "应急照明/疏散指示",
             },
             new ThPDSCircuitConfigItem
             {

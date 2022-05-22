@@ -172,7 +172,7 @@ namespace TianHua.Electrical.PDS.Engine
         private bool IsContains(BidirectionalGraph<ThPDSCircuitGraphNode, ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>> graph,
             ThPDSCircuitGraphNode node, out ThPDSCircuitGraphNode originalNode)
         {
-            if (node.NodeType != PDSNodeType.Unkown)
+            if (node.NodeType != PDSNodeType.Unkown && !node.Loads[0].Location.IsStandardStorey)
             {
                 if (!string.IsNullOrEmpty(node.Loads[0].ID.LoadID))
                 {

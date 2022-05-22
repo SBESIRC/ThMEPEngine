@@ -144,6 +144,11 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     load.SetFireLoad(config.FireLoad);
                 }
+
+                if (string.IsNullOrEmpty( load.ID.Description ))
+                {
+                    load.ID.DefaultDescription = config.DefaultDescription;
+                }
             }
         }
 

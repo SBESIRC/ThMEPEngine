@@ -170,8 +170,9 @@ namespace TianHua.Electrical.PDS.Engine
                             //做一个标注的Service
                             var markService = new ThMarkService(marksInfo, markBlockData, tchWireDimsInfo);
 
+                            var isStandardStorey = storey.StoreyTypeString.Equals("标准层");
                             var graphEngine = new ThPDSLoopGraphEngine(acad.Database, distBoxes, loads, cableTrays, cables, markService,
-                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames);
+                                distBoxKey, cableTrayNode, nodeMap.NodeMap, edgeMap.EdgeMap, distBoxFrames, isStandardStorey);
 
                             graphEngine.MultiDistBoxAnalysis(acad.Database);
                             graphEngine.CreatGraph();
@@ -181,16 +182,18 @@ namespace TianHua.Electrical.PDS.Engine
                             graphEngine.AssignDefaultDescription();
                             var storeyBasePoint = new Point3d(storey.Data.Position.X + (double)storey.Data.CustomProperties.GetValue("基点 X"),
                                 storey.Data.Position.Y + (double)storey.Data.CustomProperties.GetValue("基点 Y"), 0);
-                            graphEngine.AssignStorey(doc.Database, storey.StoreyNumber, storeyBasePoint);
-
-                            // 处理标准层
-                            if(storey.StoreyTypeString.Equals("标准层"))
-                            {
-
-                            }
+                            graphEngine.AssignStorey(doc.Database, storey, storeyBasePoint);
 
                             var graph = graphEngine.GetGraph();
                             graphList.Add(graph);
+
+                            //// 处理标准层
+                            //var graphs = graphEngine.HandleMultiBuilding();
+                            //if(storey.StoreyTypeString.Equals("标准层"))
+                            //{
+                            //    graphEngine.HandleStandardStorey(graphs);
+                            //}
+                            //graphList.AddRange(graphs);
                         }
 
                         NodeMapList.Add(nodeMap);

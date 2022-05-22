@@ -15,6 +15,7 @@ namespace TianHua.Electrical.PDS.Model
             DefaultDescription = "";
             CircuitIDList = new List<string> { "" };
             SourcePanelIDList = new List<string> { "" };
+            Storeys = new List<int>();
         }
 
         /// <summary>
@@ -144,6 +145,29 @@ namespace TianHua.Electrical.PDS.Model
                 }
                 return circuitNumber;
             }
+        }
+
+        /// <summary>
+        /// 楼层序列
+        /// </summary>
+        public List<int> Storeys { get; set; }
+
+        public ThPDSID Clone()
+        {
+            var id = new ThPDSID
+            {
+                BlockName = this.BlockName,
+                LoadID = this.LoadID,
+                Description = this.Description,
+                DefaultDescription = this.DefaultDescription,
+                CircuitIDList = new List<string>(),
+                SourcePanelIDList = new List<string>(),
+                Storeys = new List<int>(),
+            };
+            this.CircuitIDList.ForEach(circuitID => id.CircuitIDList.Add(circuitID));
+            this.SourcePanelIDList.ForEach(sourcePanelID => id.SourcePanelIDList.Add(sourcePanelID));
+            this.Storeys.ForEach(storey => id.Storeys.Add(storey));
+            return id;
         }
     }
 }
