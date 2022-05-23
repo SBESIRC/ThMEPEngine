@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using DotNetARX;
@@ -15,6 +16,7 @@ using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.FrameComparer;
+using ThMEPEngineCore.Diagnostics;
 
 namespace TianHua.Electrical.UI.FrameComparer
 {
@@ -23,7 +25,7 @@ namespace TianHua.Electrical.UI.FrameComparer
         private bool isFirst = true;
         private List<ObjectId> ids;
         private Dictionary<ObjectId, ObjectId> changedIdMaps;
-        private ThFramePainter painter;
+        // private ThFramePainter painter;
         public Point3dCollection fence;
         public UIFrameComparer()
         {
@@ -31,7 +33,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             fence = new Point3dCollection();
             ids = new List<ObjectId>();
             changedIdMaps = new Dictionary<ObjectId, ObjectId>();
-            painter = new ThFramePainter();
+            ThFramePainter.InitialPainter();
             AddPath();
         }
 
@@ -43,28 +45,29 @@ namespace TianHua.Electrical.UI.FrameComparer
             }
         }
 
-        public void DoAddFrame(ThMEPFrameComparer comp, Dictionary<int, ObjectId> dicCode2Id, string frameType)
+        public void DoAddFrame(ThMEPFrameComparer2 comp, Dictionary<int, ObjectId> dicCode2Id, string frameType)
         {
-            DoAddChangeFrame(comp.AppendedFrame.ToCollection(), dicCode2Id, "新增区域", frameType);
+            DoAddChangeFrame(comp.AppendedFrame.ToList(), dicCode2Id, "新增区域", frameType);
             DoAddChangeFrame(comp.ErasedFrame, dicCode2Id, "删除区域", frameType);
             DoAddChangeFrame(comp.ChangedFrame, dicCode2Id, frameType);
         }
 
-        private void DoAddChangeFrame(Dictionary<Polyline, Tuple<Polyline, double>> changedFrame, Dictionary<int, ObjectId> dicCode2Id, string frameType)
+        private void DoAddChangeFrame(Dictionary<Polyline, Polyline> changedFrame, Dictionary<int, ObjectId> dicCode2Id, string frameType)
         {
             foreach (var it in changedFrame)
             {
                 var item = new ListViewItem();
-                item.SubItems[0].Text = it.Value.Item2 > 1 ? "功能变化" : "框线变化";
+                // item.SubItems[0].Text = it.Value.Item2 > 1 ? "功能变化" : "框线变化";
+                item.SubItems[0].Text = "框线变化";
                 item.SubItems.Add(frameType);
-                var id = dicCode2Id[it.Value.Item1.GetHashCode()];
+                var id = dicCode2Id[it.Value.GetHashCode()];
                 ids.Add(id);
                 changedIdMaps.Add(id, dicCode2Id[it.Key.GetHashCode()]);
                 listViewComparerRes.Items.Add(item);
             }
         }
 
-        private void DoAddChangeFrame(DBObjectCollection frames, Dictionary<int, ObjectId> dicCode2Id, string regionName, string frameType)
+        private void DoAddChangeFrame(List<Polyline> frames, Dictionary<int, ObjectId> dicCode2Id, string regionName, string frameType)
         {
             foreach (var frame in frames)
             {
@@ -140,12 +143,12 @@ namespace TianHua.Electrical.UI.FrameComparer
             if (entity != null)
             {
                 var entitys = new DBObjectCollection() { entity };
-                painter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
+                ThFramePainter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id);
             }
             if (mapEntity != null)
             {
                 var mapEntitys = new DBObjectCollection() { mapEntity };
-                painter.DrawLines(ref mapEntitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
+                ThFramePainter.DrawLines(ref mapEntitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id);
             }
         }
 
@@ -158,7 +161,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             {
                 var entitys = new DBObjectCollection() { entity };
                 var dicCode2Id = new Dictionary<int, ObjectId>();
-                painter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
+                ThFramePainter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
             }
         }
 
@@ -168,55 +171,70 @@ namespace TianHua.Electrical.UI.FrameComparer
         }
         private void btnDoComparer_Click(object sender, System.EventArgs e)
         {
-            if (frameUpdate.Enabled)
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             {
-                ClearItems();
-                frameUpdate.Enabled = false;
-                isFirst = true;
-                return;
-            }
-            if (isFirst)
-            {
-                isFirst = false;
-                frameUpdate.Enabled = true;
-            }
-            Hide();
-            var fen = SelectRect();
-            fence = new Point3dCollection() { fen.Item1, fen.Item2 };
-            
-            DoRoomComparer(fence, CompareFrameType.ROOM, out ThFrameExactor roomExactor, out ThMEPFrameComparer roomComp);
-            DoComparer(fence, CompareFrameType.DOOR, out ThFrameExactor doorExactor, out ThMEPFrameComparer doorComp);
-            DoComparer(fence, CompareFrameType.WINDOW, out ThFrameExactor windowExactor, out ThMEPFrameComparer windowComp);
-            DoComparer(fence, CompareFrameType.FIRECOMPONENT, out ThFrameExactor fireExactor, out ThMEPFrameComparer fireComp);
+                if (frameUpdate.Enabled)
+                {
+                    ClearItems();
+                    frameUpdate.Enabled = false;
+                    isFirst = true;
+                    return;
+                }
+                if (isFirst)
+                {
+                    isFirst = false;
+                    frameUpdate.Enabled = true;
+                }
+                Hide();
+                var fen = SelectRect();
+                fence = new Point3dCollection() { fen.Item1, fen.Item2 };
+                var pl = new Polyline();
+                pl.CreateRectangle(fence[0].ToPoint2D(), fence[1].ToPoint2D());
+                fence = pl.Vertices();
 
-            DoAddFrame(roomComp, roomExactor.dicCode2Id, FrameType.ROOM);
-            DoAddFrame(doorComp, doorExactor.dicCode2Id, FrameType.DOOR);
-            DoAddFrame(windowComp, windowExactor.dicCode2Id, FrameType.WINDOWS);
-            DoAddFrame(fireComp, fireExactor.dicCode2Id, FrameType.FIRECOMP);
-            Show();
+                DoRoomComparer(fence, CompareFrameType.ROOM, out ThFrameExactor roomExactor, out ThMEPFrameComparer2 roomComp);
+                DoComparer(fence, CompareFrameType.DOOR, out ThFrameExactor doorExactor, out ThMEPFrameComparer2 doorComp);
+                DoComparer(fence, CompareFrameType.WINDOW, out ThFrameExactor windowExactor, out ThMEPFrameComparer2 windowComp);
+                DoComparer(fence, CompareFrameType.FIRECOMPONENT, out ThFrameExactor fireExactor, out ThMEPFrameComparer2 fireComp);
+
+                DoAddFrame(roomComp, roomExactor.dicCode2Id, FrameType.ROOM);
+                DoAddFrame(doorComp, doorExactor.dicCode2Id, FrameType.DOOR);
+                DoAddFrame(windowComp, windowExactor.dicCode2Id, FrameType.WINDOWS);
+                DoAddFrame(fireComp, fireExactor.dicCode2Id, FrameType.FIRECOMP);
+
+                //var compareEngin = new ThFrameCompareEnging(fence);
+                //compareEngin.Excute();
+
+
+                Show();
+            }
         }
 
-        private void DoRoomComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
+        private static void DoRoomComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer2 frameComp)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
                 frameExactor = new ThFrameExactor(type, fence);
-                frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
-                var textExactor = new ThFrameTextExactor();
-                _ = new ThMEPFrameTextComparer(frameComp, textExactor);// 对房间框线需要对文本再进行比对
-                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
+                frameExactor.curGraph.OfType<Entity>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l0curGraph", 1));
+                frameExactor.reference.OfType<Entity>().ToList().ForEach(x => DrawUtils.ShowGeometry(x, "l0refGraph", 2));
+
+                frameComp = new ThMEPFrameComparer2(frameExactor.curGraph, frameExactor.reference);
+                var textExactor = new ThFrameTextExactor(fence);
+                var testCompare = new ThMEPFrameTextComparer(frameComp, textExactor);// 对房间框线需要对文本再进行比对
+
+                ThFramePainter.Draw(frameComp, frameExactor.dicCode2Id, type);
             }
         }
-        private void DoComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
+        private void DoComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer2 frameComp)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
                 frameExactor = new ThFrameExactor(type, fence);
-                frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
-                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
+                frameComp = new ThMEPFrameComparer2(frameExactor.curGraph, frameExactor.reference);
+                ThFramePainter.Draw(frameComp, frameExactor.dicCode2Id, type);
             }
         }
-        public Tuple<Point3d, Point3d> SelectRect()
+        private Tuple<Point3d, Point3d> SelectRect()
         {
             var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
             Point3d leftDownPt = Point3d.Origin;
@@ -290,7 +308,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             {
                 var entitys = new DBObjectCollection() { entity };
                 var dicCode2Id = new Dictionary<int, ObjectId>();
-                painter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
+                ThFramePainter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
             }
         }
 
@@ -302,12 +320,12 @@ namespace TianHua.Electrical.UI.FrameComparer
         {
             var layer = GetLayer(item.SubItems[1].Text);
             var entity = db.ModelSpace.ElementOrDefault(ids[idx]);
-            Dreambuild.AutoCAD.Modify.Erase(ids[idx]);            
+            Dreambuild.AutoCAD.Modify.Erase(ids[idx]);
             if (entity != null)
             {
                 var entitys = new DBObjectCollection() { entity };
                 var dicCode2Id = new Dictionary<int, ObjectId>();
-                painter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
+                ThFramePainter.DrawLines(ref entitys, ColorIndex.BYLAYER, LineTypeInfo.ByLayer, layer, dicCode2Id); ;
             }
         }
         private string GetLayer(string frameType)

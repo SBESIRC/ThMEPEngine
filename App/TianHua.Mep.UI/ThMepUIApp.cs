@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using TianHua.Mep.UI.UI;
+using TianHua.Mep.UI.FrameCompare;
 
 namespace TianHua.Mep.UI
 {
@@ -60,6 +61,15 @@ namespace TianHua.Mep.UI
         public void ThExtractBeamAreaConfig()
         {
             var config = new ExtractBeamConfigUI();
+            config.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(config);
+        }
+
+        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
+        public void ThFrameCompare()
+        {
+            var config = new FrameCompareUI();
             config.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(config);

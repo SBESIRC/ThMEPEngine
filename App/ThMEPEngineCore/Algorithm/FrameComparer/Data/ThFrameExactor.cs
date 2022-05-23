@@ -13,32 +13,30 @@ using ThCADExtension;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 
+using ThMEPEngineCore.Algorithm.FrameComparer.Model;
+
 namespace ThMEPEngineCore.Algorithm.FrameComparer
 {
-    public enum CompareFrameType
-    {
-        DOOR,WINDOW,ROOM,FIRECOMPONENT
-    }
+   
     public class ThFrameExactor
     {
         public DBObjectCollection curGraph;
         public DBObjectCollection reference;
         public Dictionary<int, ObjectId> dicCode2Id;
         private Point3dCollection fence;
-        public ThFrameExactor(CompareFrameType type, Point3dCollection fence)
+
+        public ThFrameExactor(ThFrameChangedCommon.CompareFrameType type, Point3dCollection fence)
         {
             curGraph = new DBObjectCollection();
             reference = new DBObjectCollection();
-            var pl = new Polyline();
-            pl.CreateRectangle(fence[0].ToPoint2d(), fence[1].ToPoint2d());
-            this.fence = pl.Vertices();
-            if (type == CompareFrameType.ROOM)
+            this.fence = fence;
+            if (type == ThFrameChangedCommon.CompareFrameType.ROOM)
                 GetRoomFrame();
-            else if (type == CompareFrameType.DOOR)
+            else if (type == ThFrameChangedCommon.CompareFrameType.DOOR)
                 GetDoorFrame();
-            else if (type == CompareFrameType.WINDOW)
+            else if (type == ThFrameChangedCommon.CompareFrameType.WINDOW)
                 GetWindowFrame();
-            else if (type == CompareFrameType.FIRECOMPONENT)
+            else if (type == ThFrameChangedCommon.CompareFrameType.FIRECOMPONENT)
                 GetFireComponentFrame();
             else
                 throw new NotImplementedException("未找到该框线类型！！！");

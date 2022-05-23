@@ -1,323 +1,316 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0"
     xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{537E996D-C4A0-4C7D-8277-ADF5EA7F9D76}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <RootNamespace>TianHua.Electrical.UI</RootNamespace>
-        <AssemblyName>TianHua.Electrical.UI</AssemblyName>
-        <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-    </PropertyGroup>
-    <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-    <ItemGroup>
-        <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.Charts.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Data.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.DataAccess.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.DataAccess.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Images.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Office.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Printing.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.RichEdit.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Sparkline.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.Spreadsheet.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.Utils.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.Utils.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.XtraBars.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.XtraCharts.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.XtraEditors.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.XtraGrid.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.XtraLayout.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.XtraNavBar.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.XtraPrinting.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-        <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-        <Reference Include="PresentationCore" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Deployment" />
-        <Reference Include="System.Drawing" />
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.Windows.Forms" />
-        <Reference Include="System.Xml" />
-        <Reference Include="TianHua.Publics.BaseCode, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{537E996D-C4A0-4C7D-8277-ADF5EA7F9D76}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TianHua.Electrical.UI</RootNamespace>
+    <AssemblyName>TianHua.Electrical.UI</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <ItemGroup>
+    <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Charts.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Data.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.DataAccess.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.DataAccess.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Images.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Office.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Printing.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.RichEdit.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Sparkline.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Spreadsheet.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Utils.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Utils.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraBars.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraEditors.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraGrid.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraNavBar.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraPrinting.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TianHua.Publics.BaseCode, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CAD\ElectricalUIDbExtension.cs" />
+    <Compile Include="CapitalConverter\CapitalConverterUI.xaml.cs">
+      <DependentUpon>CapitalConverterUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
+    <Compile Include="Command\ThElectricalLoadCalculationUICmd.cs" />
+    <Compile Include="EarthingGrid\ThEarthingGridVM.cs" />
+    <Compile Include="EarthingGrid\UIEarthingGrid.xaml.cs">
+      <DependentUpon>UIEarthingGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\PowerNormConfig.xaml.cs">
+      <DependentUpon>PowerNormConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml.cs">
+      <DependentUpon>ElectricalLoadCalculationUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationViewModel.cs" />
+    <Compile Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml.cs">
+      <DependentUpon>RoomFunctionConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ElectricalLoadCalculation\SerializableHelper.cs" />
+    <Compile Include="ElectricalUIApp.cs" />
+    <Compile Include="ElectricalUICommon.cs" />
+    <Compile Include="FireAlarm\UIThFireAlarm.xaml.cs">
+      <DependentUpon>UIThFireAlarm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
+      <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="fmSmokeLayout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmSmokeLayout.Designer.cs">
+      <DependentUpon>fmSmokeLayout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FuncControlStyle.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml.cs">
+      <DependentUpon>SecurityPlaneSystemUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SystemDiagram\DoubleConvert.cs" />
+    <Compile Include="SystemDiagram\ElectricalUISystemDiagram.cs" />
+    <Compile Include="SystemDiagram\UI\DrainageLayerViewModel.cs" />
+    <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
+      <DependentUpon>SelectLayers.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SystemDiagram\UI\ShowAlarm.xaml.cs">
+      <DependentUpon>ShowAlarm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SystemDiagram\UI\ShowAlarmViewModel.cs" />
+    <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
+      <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="fmSmokeLayout.resx">
+      <DependentUpon>fmSmokeLayout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
+      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
+      <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
+      <Name>ThMEPElectrical</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TianHua.Electrical\TianHua.Electrical.csproj">
+      <Project>{c74a25a1-1991-4eb7-bd43-808cd8df4b32}</Project>
+      <Name>TianHua.Electrical</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1-1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\2-1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3-1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\4-1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\温感.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\烟感.png" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
         </Reference>
-        <Reference Include="WindowsBase" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="CAD\ElectricalUIDbExtension.cs" />
-        <Compile Include="CapitalConverter\CapitalConverterUI.xaml.cs">
-            <DependentUpon>CapitalConverterUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
-        <Compile Include="Command\ThElectricalLoadCalculationUICmd.cs" />
-        <Compile Include="EarthingGrid\ThEarthingGridVM.cs" />
-        <Compile Include="EarthingGrid\UIEarthingGrid.xaml.cs">
-            <DependentUpon>UIEarthingGrid.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="ElectricalLoadCalculation\PowerNormConfig.xaml.cs">
-            <DependentUpon>PowerNormConfig.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml.cs">
-            <DependentUpon>ElectricalLoadCalculationUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationViewModel.cs" />
-        <Compile Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml.cs">
-            <DependentUpon>RoomFunctionConfig.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="ElectricalLoadCalculation\SerializableHelper.cs" />
-        <Compile Include="ElectricalUIApp.cs" />
-        <Compile Include="ElectricalUICommon.cs" />
-        <Compile Include="FireAlarm\UIThFireAlarm.xaml.cs">
-            <DependentUpon>UIThFireAlarm.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
-            <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="fmSmokeLayout.cs">
-            <SubType>Form</SubType>
-        </Compile>
-        <Compile Include="fmSmokeLayout.Designer.cs">
-            <DependentUpon>fmSmokeLayout.cs</DependentUpon>
-        </Compile>
-        <Compile Include="FrameComparer\UIFrameComparer.cs">
-            <SubType>Form</SubType>
-        </Compile>
-        <Compile Include="FrameComparer\UIFrameComparer.Designer.cs">
-            <DependentUpon>UIFrameComparer.cs</DependentUpon>
-        </Compile>
-        <Compile Include="FuncControlStyle.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml.cs">
-            <DependentUpon>SecurityPlaneSystemUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="SystemDiagram\DoubleConvert.cs" />
-        <Compile Include="SystemDiagram\ElectricalUISystemDiagram.cs" />
-        <Compile Include="SystemDiagram\UI\DrainageLayerViewModel.cs" />
-        <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
-            <DependentUpon>SelectLayers.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="SystemDiagram\UI\ShowAlarm.xaml.cs">
-            <DependentUpon>ShowAlarm.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="SystemDiagram\UI\ShowAlarmViewModel.cs" />
-        <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
-            <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
-        </Compile>
-        <EmbeddedResource Include="fmSmokeLayout.resx">
-            <DependentUpon>fmSmokeLayout.cs</DependentUpon>
-        </EmbeddedResource>
-        <EmbeddedResource Include="FrameComparer\UIFrameComparer.resx">
-            <DependentUpon>UIFrameComparer.cs</DependentUpon>
-        </EmbeddedResource>
-        <EmbeddedResource Include="Properties\licenses.licx" />
-        <EmbeddedResource Include="Properties\Resources.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <SubType>Designer</SubType>
-            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <None Include="Properties\Settings.settings">
-            <Generator>SettingsSingleFileGenerator</Generator>
-            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-        </None>
-        <Compile Include="Properties\Resources.Designer.cs">
-            <AutoGen>True</AutoGen>
-            <DesignTime>True</DesignTime>
-            <DependentUpon>Resources.resx</DependentUpon>
-        </Compile>
-        <Compile Include="Properties\Settings.Designer.cs">
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Settings.settings</DependentUpon>
-            <DesignTimeSharedInput>True</DesignTimeSharedInput>
-        </Compile>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CADExtension\CADExtension.csproj">
-            <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
-            <Name>CADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
-            <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-            <Name>ThDotNetARX</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
-            <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
-            <Name>ThCADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
-            <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
-            <Name>ThControlLibraryWPF</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
-            <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
-            <Name>ThMEPElectrical</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-            <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
-            <Name>ThMEPEngineCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\TianHua.Electrical\TianHua.Electrical.csproj">
-            <Project>{c74a25a1-1991-4eb7-bd43-808cd8df4b32}</Project>
-            <Name>TianHua.Electrical</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\1.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\1-1.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\2.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\2-1.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\3.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\3-1.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\4.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\4-1.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\温感.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resources\烟感.png" />
-    </ItemGroup>
-    <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
-    <ItemGroup>
-        <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-    <ItemGroup />
-    <ItemGroup>
-        <Page Include="CapitalConverter\CapitalConverterUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="EarthingGrid\UIEarthingGrid.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="ElectricalLoadCalculation\PowerNormConfig.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="FireAlarm\UIThFireAlarm.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="FireAlarm\UIThFireAlarmSetting.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="SystemDiagram\UI\SelectLayers.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="SystemDiagram\UI\ShowAlarm.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="ThBroadcast\ThBroadcastUI.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <PropertyGroup>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FrameComparer\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="CapitalConverter\CapitalConverterUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EarthingGrid\UIEarthingGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\PowerNormConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\ElectricalLoadCalculationUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ElectricalLoadCalculation\RoomFunctionConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FireAlarm\UIThFireAlarm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FireAlarm\UIThFireAlarmSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SystemDiagram\UI\SelectLayers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SystemDiagram\UI\ShowAlarm.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ThBroadcast\ThBroadcastUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
         <PostBuildEvent>
             if $(Configuration)==Debug-NET45 (
-            Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
-            )
-            if $(Configuration)==Release-NET45 (
-            Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
-            )
-            if $(Configuration)==Debug-NET46 (
-            Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
-            )
-            if $(Configuration)==Release-NET46 (
-            Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
-            )
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Debug-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
             Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"
         </PostBuildEvent>
-    </PropertyGroup>
+  </PropertyGroup>
 </Project>

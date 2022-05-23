@@ -464,6 +464,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="ThEBAC" Global="ThEBAC" />
                 <Command Local="THFJKX2" Global="THFJKX2" />
+                <Command Local="THKXDB" Global="THKXDB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -474,6 +475,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="ThEBAC" Global="ThEBAC" />
                 <Command Local="THFJKX2" Global="THFJKX2" />
+                <Command Local="THKXDB" Global="THKXDB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -484,6 +486,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="ThEBAC" Global="ThEBAC" />
                 <Command Local="THFJKX2" Global="THFJKX2" />
+                <Command Local="THKXDB" Global="THKXDB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -498,7 +501,6 @@
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
                 <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THJDPM"  Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />
@@ -516,7 +518,6 @@
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
                 <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THJDPM"  Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />
@@ -534,7 +535,6 @@
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
                 <Command Local="THXFGB"  Global="THXFGB" />
-                <Command Local="THKXDB"  Global="THKXDB" />
                 <Command Local="THJDPM"  Global="THJDPM" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
                 <Command Local="THYDFHJS" Global="THYDFHJS" />

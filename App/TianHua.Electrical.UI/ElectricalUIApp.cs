@@ -6,7 +6,6 @@ using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
 using ThMEPElectrical.BlockConvert;
-using TianHua.Electrical.UI.FrameComparer;
 using TianHua.Electrical.UI.FireAlarm;
 using TianHua.Electrical.UI.ThBroadcast;
 using TianHua.Electrical.UI.SecurityPlaneUI;
@@ -162,15 +161,15 @@ namespace TianHua.Electrical.UI
             }
         }
 
-        /// <summary>
-        /// 框线比较
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
-        public void FrameComparerUI()
-        {
-            var dlg = new UIFrameComparer();
-            AcadApp.ShowModelessDialog(dlg);
-        }
+        ///// <summary>
+        ///// 框线比较
+        ///// </summary>
+        //[CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
+        //public void FrameComparerUI()
+        //{
+        //    var dlg = new UIFrameComparer();
+        //    AcadApp.ShowModelessDialog(dlg);
+        //}
 
         /// <summary>
         /// 用电负荷
