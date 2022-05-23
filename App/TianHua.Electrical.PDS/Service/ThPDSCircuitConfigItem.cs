@@ -9,6 +9,7 @@ namespace TianHua.Electrical.PDS.Service
             CircuitType = ThPDSCircuitType.None;
             DemandFactor = 1.0;
             PowerFactor = 0.85;
+            DefaultDescription = "";
         }
 
         /// <summary>
@@ -45,5 +46,10 @@ namespace TianHua.Electrical.PDS.Service
         /// 是否消防回路
         /// </summary>
         public bool FireLoad { get; set; }
+
+        /// <summary>
+        /// 默认负载描述
+        /// </summary>
+        public string DefaultDescription { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using DotNetARX;
+﻿using AcHelper;
+using AcHelper.Commands;
+using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,8 @@ using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS;
 using ThMEPWSS.Command;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel;
+using ThMEPWSS.Model;
+using ThMEPWSS.Service;
 using TianHua.Plumbing.WPF.UI.UI;
 
 namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
@@ -38,9 +42,16 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 
         private void btnPipeLine_Click(object sender, RoutedEventArgs e)
         {
-            var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-            ThFirstFloorDrainageCmd drainageCmd = new ThFirstFloorDrainageCmd(config, ParameterSetUI.paramSetting, firstFloorPlaneViewModel); 
-            drainageCmd.Execute();
+            ThPSPMParameter param = new ThPSPMParameter();
+            param.paraSettingViewModel = ParameterSetUI.paramSetting;
+            param.firstFloorPlaneViewModel = firstFloorPlaneViewModel;
+            param.config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            ThWSSUIService.Instance.PSPMParameter = param;
+
+            //聚焦到CAD
+            SetFocusToDwgView();
+
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THPSSYS");
         }
 
         private void btnParamSet_Click(object sender, RoutedEventArgs e)
@@ -84,6 +95,19 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
                 currentDb.Database.SetCurrentLayer(ThWSSCommon.OutdoorSewagePipeLayerName);
                 ThMEPWSS.Common.Utils.FocusToCAD();
             }
+        }
+
+        /// <summary>
+        /// 聚焦到CAD
+        /// </summary>
+        private void SetFocusToDwgView()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
 }

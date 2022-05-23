@@ -339,8 +339,8 @@ namespace TianHua.Electrical.PDS.Model
         {
             LoadUID = System.Guid.NewGuid().ToString();
             ID = new ThPDSID();
-            LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
             LoadTypeCat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
+            LoadTypeCat_3 = ThPDSLoadTypeCat_3.None;
             CircuitType = ThPDSCircuitType.None;
             InstalledCapacity = new ThInstalledCapacity();
             AttributesCopy = "";
@@ -348,7 +348,7 @@ namespace TianHua.Electrical.PDS.Model
             DemandFactor = 1.0;
             PowerFactor = 0.85;
             FireLoadWithNull = ThPDSFireLoad.Unknown;
-            LocationList = new List<ThPDSLocation> ();
+            LocationList = new List<ThPDSLocation>();
             OnLightingCableTray = false;
             CableLayingMethod1 = LayingSite.CC;
             CableLayingMethod2 = LayingSite.None;
@@ -449,7 +449,7 @@ namespace TianHua.Electrical.PDS.Model
         {
             get
             {
-                if(LocationList.Count > 0)
+                if (LocationList.Count > 0)
                 {
                     return LocationList[0];
                 }
@@ -555,6 +555,29 @@ namespace TianHua.Electrical.PDS.Model
             return LocationList;
         }
 
-
+        public ThPDSLoad Clone()
+        {
+            var load = new ThPDSLoad
+            {
+                LoadUID = System.Guid.NewGuid().ToString(),
+                ID = this.ID.Clone(),
+                LoadTypeCat_1 = this.LoadTypeCat_1,
+                LoadTypeCat_3 = this.LoadTypeCat_3,
+                CircuitType = this.CircuitType,
+                InstalledCapacity = this.InstalledCapacity,
+                AttributesCopy = this.AttributesCopy,
+                Phase = this.Phase,
+                DemandFactor = this.DemandFactor,
+                PowerFactor = this.PowerFactor,
+                FireLoadWithNull = this.FireLoadWithNull,
+                LocationList = this.LocationList,
+                OnLightingCableTray = this.OnLightingCableTray,
+                CableLayingMethod1 = this.CableLayingMethod1,
+                CableLayingMethod2 = this.CableLayingMethod2,
+                PrimaryAvail = this.PrimaryAvail,
+                SpareAvail = this.SpareAvail,
+            };
+            return load;
+        }
     }
 }

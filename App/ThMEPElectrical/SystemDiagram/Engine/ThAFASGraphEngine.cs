@@ -576,7 +576,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     {
                         if (probeResults[0] is BlockReference blk)
                         {
-                            FindPath.Add(blk, sharedPath);
+                            if (!CacheDataCollection.Contains(blk))
+                            {
+                                FindPath.Add(blk, sharedPath);
+                            }
                         }
                         else if (probeResults[0] is Curve curve)
                         {
@@ -653,54 +656,78 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         //遇到分支的情况
                         else if (sourceElement is Line sourceline)
                         {
-                            var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
-                            foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
+                            var pt = IsStartPoint ? sourceElement.StartPoint : sourceElement.EndPoint;
+                            var probeLines = probeResults.OfType<Line>();
+                            var nextLines = probeLines.Where(o => 
+                            o.StartPoint.DistanceTo(pt) < ThAutoFireAlarmSystemCommon.ConnectionTolerance || o.EndPoint.DistanceTo(pt) < ThAutoFireAlarmSystemCommon.ConnectionTolerance).ToList();
+                            if (nextLines.Count > 1)
                             {
-                                if (CMTBRule(targetline))
-                                    continue;
-                                var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
-                                var ang = mainVec.GetAngleTo(branchVec);
-                                if (ang > Math.PI)
+                                var curve = nextLines.Where(o => !IsApproximateOverlap(sourceline, o, 1)).First();
+                                var a = nextLines.Where(o => !IsApproximateOverlap(sourceline,o,1)).ToList();
+                                if (CMTBRule(curve))
+                                    return FindPath;
+                                if (curve.EndPoint.DistanceTo(pt) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                 {
-                                    ang -= Math.PI;
+                                    return FindRootNextPath(ref sharedPath, curve, true);
                                 }
-                                //误差一度内认为近似垂直
-                                if (Math.Abs(ang / Math.PI * 180 - 90) < 1)
+                                else if (curve.StartPoint.DistanceTo(pt) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                 {
-                                    sharedPath.Add(targetline);
-                                    var square = Buffer(targetline);
-                                    var Secondresults = SpatialIndex.SelectCrossingPolygon(square);
-                                    Secondresults = Secondresults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
-                                    Secondresults.Remove(sourceline);
-                                    Secondresults.Remove(targetline);
-                                    if (Secondresults.Count == 0)
-                                        break;
-                                    else
+                                    return FindRootNextPath(ref sharedPath, curve, false);
+                                }
+                            }
+                            else
+                            {
+                                var mainVec = sourceline.StartPoint.GetVectorTo(sourceline.EndPoint);
+                                foreach (Line targetline in probeResults.Cast<Entity>().Where(e => e is Line).Cast<Line>())
+                                {
+                                    if (CMTBRule(targetline))
+                                        continue;
+                                    var branchVec = targetline.StartPoint.GetVectorTo(targetline.EndPoint);
+                                    var ang = mainVec.GetAngleTo(branchVec);
+                                    if (ang > Math.PI)
                                     {
-                                        foreach (var secondEntity in Secondresults)
+                                        ang -= Math.PI;
+                                    }
+                                    //误差一度内认为近似垂直
+                                    if (Math.Abs(ang / Math.PI * 180 - 90) < 1
+                                        && targetline.StartPoint.DistanceTo(pt) > ThAutoFireAlarmSystemCommon.ConnectionTolerance
+                                        && targetline.EndPoint.DistanceTo(pt) > ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                    {
+                                        sharedPath.Add(targetline);
+                                        var square = Buffer(targetline);
+                                        var Secondresults = SpatialIndex.SelectCrossingPolygon(square);
+                                        Secondresults = Secondresults.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
+                                        Secondresults.Remove(sourceline);
+                                        Secondresults.Remove(targetline);
+                                        if (Secondresults.Count == 0)
+                                            break;
+                                        else
                                         {
-                                            if (secondEntity is Curve secondCurve)
+                                            foreach (var secondEntity in Secondresults)
                                             {
-                                                if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
+                                                if (secondEntity is Curve secondCurve)
                                                 {
-                                                    var newsharedPath = sharedPath.Clone().ToList();
-                                                    FindRootNextPath(ref newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                    if (secondCurve.StartPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.StartPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                                     {
-                                                        FindPath.Add(newPath.Key, newPath.Value);
-                                                    });
-                                                }
-                                                else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
-                                                {
-                                                    var newsharedPath = sharedPath.Clone().ToList();
-                                                    FindRootNextPath(ref newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                        var newsharedPath = sharedPath.Clone().ToList();
+                                                        FindRootNextPath(ref newsharedPath, secondCurve, false).ForEach(newPath =>
+                                                        {
+                                                            FindPath.Add(newPath.Key, newPath.Value);
+                                                        });
+                                                    }
+                                                    else if (secondCurve.EndPoint.DistanceTo(targetline.GetClosestPointTo(secondCurve.EndPoint, false)) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                                                     {
-                                                        FindPath.Add(newPath.Key, newPath.Value);
-                                                    });
+                                                        var newsharedPath = sharedPath.Clone().ToList();
+                                                        FindRootNextPath(ref newsharedPath, secondCurve, true).ForEach(newPath =>
+                                                        {
+                                                            FindPath.Add(newPath.Key, newPath.Value);
+                                                        });
+                                                    }
                                                 }
                                             }
                                         }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }
@@ -797,11 +824,13 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     if (Buffer(rootblk, 0).Distance(curve.StartPoint) < ThAutoFireAlarmSystemCommon.ConnectionTolerance)
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, false);
+                        NextElement.Remove(rootblk);
                     }
                     //终点连着块
                     else
                     {
                         NextElement = FindRootNextPath(ref sharedpath, curve, true);
+                        NextElement.Remove(rootblk);
                     }
                 }
                 //桥架
@@ -830,7 +859,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         /// <returns></returns>
         public List<Entity> FindNextEntity(Entity existingEntity, Polyline space)
         {
-            var results = SpatialIndex.SelectCrossingPolygon(space);
+            var results = SpatialIndex.SelectFence(space);
             results = results.Cast<Entity>().Select(o => GlobleNTSMappingDic[o]).Where(o => !(o is DBText)).ToCollection();
             results.Remove(existingEntity);
             return results.Cast<Entity>().ToList();
@@ -962,6 +991,43 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         colorindex++;
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 判断两根线是否近似重叠
+        /// </summary>
+        private bool IsApproximateOverlap(Line line, Line otherLine, double tol)
+        {
+            if (Math.Abs(line.Length - otherLine.Length) > tol)
+            {
+                return false;
+            }
+            if (line.StartPoint.DistanceTo(otherLine.StartPoint) < tol)
+            {
+                if (line.EndPoint.DistanceTo(otherLine.EndPoint) < tol)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (line.StartPoint.DistanceTo(otherLine.EndPoint) < tol)
+            {
+                if (line.StartPoint.DistanceTo(otherLine.EndPoint) < tol)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
             }
         }
     }

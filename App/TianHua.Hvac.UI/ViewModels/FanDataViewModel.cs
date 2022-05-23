@@ -339,6 +339,7 @@ namespace TianHua.Hvac.UI.ViewModels
             if (pModel != null)
             {
                 fanDataModel.VentStyle = pModel.VentStyle;
+                fanDataModel.Control = EnumFanControl.TwoSpeed;
                 //fanDataModel.MountType = pModel.
             }
             CanUseFanModelPickers = new List<FanModelPicker>();
@@ -377,6 +378,10 @@ namespace TianHua.Hvac.UI.ViewModels
             }
             if (pModel != null)
                 EQPMFanDataService.Instance.CalcFanEfficiency(pModel.FanModelTypeCalcModel, pModel, fanDataModel);
+            else if (!fanDataModel.IsChildFan) 
+            {
+                EQPMFanDataService.Instance.CalcFanEfficiency(fanDataModel.FanModelTypeCalcModel, fanDataModel, null);
+            }
             IsSelectFanError = fanDataModel.FanSelectionStateMsg.FanSelectionState != EnumFanSelectionState.HighAndLowBothSafe;
             if (fanDataModel.FanModelTypeCalcModel.ValueSource == EnumValueSource.IsCalcValue)
             {

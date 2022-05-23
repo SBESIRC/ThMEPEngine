@@ -51,7 +51,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
             var resLines = new List<Polyline>();
             foreach (var polyline in polylines)
             {
-                resLines.AddRange(polyline.BufferPL(lineDis).Cast<Polyline>().ToList());
+                resLines.AddRange(polyline.BufferFlatPL(lineDis).Cast<Polyline>().ToList());
             }
             return resLines;
         }

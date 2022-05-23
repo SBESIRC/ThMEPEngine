@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using ThMEPTCH.Data;
-using ThMEPTCH.Moel;
+using ThMEPTCH.Model;
 using ThMEPTCH.TCHTables;
 
 namespace ThMEPTCH.TCHDrawServices

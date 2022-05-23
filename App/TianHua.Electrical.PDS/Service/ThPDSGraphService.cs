@@ -27,6 +27,7 @@ namespace TianHua.Electrical.PDS.Service
             };
             var frame = ThPDSBufferService.Buffer(entity, database);
             var marks = markService.GetMarks(frame);
+            marks.Texts = marks.Texts.Where(x => x != "E").ToList();
             objectIds.AddRange(marks.ObjectIds);
             var service = new ThPDSMarkAnalysisService();
             node.Loads = new List<ThPDSLoad>
@@ -161,19 +162,27 @@ namespace TianHua.Electrical.PDS.Service
             return node;
         }
 
-        public static ThPDSCircuitGraphNode NodeClone(ThPDSCircuitGraphNode sourceNode, string loadID)
+        public static ThPDSCircuitGraphNode NodeClone(ThPDSCircuitGraphNode sourceNode,string source, string target)
         {
             var node = new ThPDSCircuitGraphNode();
             node.NodeType = sourceNode.NodeType;
             sourceNode.Loads.ForEach(load =>
             {
-                node.Loads.Add(load);
+                node.Loads.Add(load.Clone());
             });
-            node.Loads.ForEach(load =>
+            node.Loads[0].ID.LoadID = node.Loads[0].ID.LoadID.Replace(source, target);
+
+            return node;
+        }
+
+        public static ThPDSCircuitGraphNode NodeClone(ThPDSCircuitGraphNode sourceNode)
+        {
+            var node = new ThPDSCircuitGraphNode();
+            node.NodeType = sourceNode.NodeType;
+            sourceNode.Loads.ForEach(load =>
             {
-                load.LoadUID = System.Guid.NewGuid().ToString();
+                node.Loads.Add(load.Clone());
             });
-            node.Loads[0].ID.LoadID = loadID;
 
             return node;
         }
@@ -245,6 +254,10 @@ namespace TianHua.Electrical.PDS.Service
                 {
                     edge.Target.Loads[0].CircuitType = circuitModel.CircuitType;
                     edge.Target.Loads[0].SetFireLoad(circuitModel.FireLoad);
+                    if (string.IsNullOrEmpty(edge.Target.Loads[0].ID.Description))
+                    {
+                        edge.Target.Loads[0].ID.DefaultDescription = circuitModel.DefaultDescription;
+                    }
                 }
             }
 
@@ -278,8 +291,11 @@ namespace TianHua.Electrical.PDS.Service
                 sourcePanelIDs = sourcePanelIDs.Distinct().ToList();
                 if (circuitIDs.Count == 1 && sourcePanelIDs.Count == 1)
                 {
-                    edge.Circuit.ID.SourcePanelIDList.Add(sourcePanelIDs.First());
-                    edge.Circuit.ID.CircuitIDList.Add(circuitIDs.First());
+                    if(string.IsNullOrEmpty( edge.Source.Loads[0].ID.LoadID) || edge.Source.Loads[0].ID.LoadID.Equals(sourcePanelIDs[0]))
+                    {
+                        edge.Circuit.ID.SourcePanelIDList.Add(sourcePanelIDs.First());
+                        edge.Circuit.ID.CircuitIDList.Add(circuitIDs.First());
+                    }
                 }
             }
         }
@@ -293,11 +309,22 @@ namespace TianHua.Electrical.PDS.Service
             return edge;
         }
 
-        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> InEdgeClone(
-            ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> sourceEdge, ThPDSCircuitGraphNode target)
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> EdgeClone(ThPDSCircuitGraphNode sourceNode, 
+            ThPDSCircuitGraphNode targetNode, ThPDSCircuit circuit, string source, string target)
         {
-            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceEdge.Source, target);
-            edge.Circuit = sourceEdge.Circuit;
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceNode, targetNode);
+            edge.Circuit = circuit;
+            edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
+            var count = edge.Circuit.ID.SourcePanelIDList.Count;
+            edge.Circuit.ID.SourcePanelIDList[count - 1] = edge.Circuit.ID.SourcePanelIDList[count - 1].Replace(source, target);
+            return edge;
+        }
+
+        public static ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode> EdgeClone(ThPDSCircuitGraphNode sourceNode,
+            ThPDSCircuitGraphNode targetNode, ThPDSCircuit circuit)
+        {
+            var edge = new ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>(sourceNode, targetNode);
+            edge.Circuit = circuit;
             edge.Circuit.CircuitUID = System.Guid.NewGuid().ToString();
             return edge;
         }

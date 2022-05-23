@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Engine
         }
         public void Build()
         {
-            if(Beams.Count==0 || Columns.Count==0)
+            if(Beams.Count==0)
             {
                 return;
             }

@@ -100,7 +100,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.ViewModel
             DrvepipeDimensionList.Add(new UListItemData("A型防护密闭套管", 3, DirvepipeDimensionTypeEnum.AProtectiveSealing));
             DrvepipeDimensionList.Add(new UListItemData("C型防护密闭套管", 4, DirvepipeDimensionTypeEnum.CProtectiveSealing));
             DrvepipeDimensionList.Add(new UListItemData("E型防护密闭套管", 5, DirvepipeDimensionTypeEnum.EProtectiveSealing));
-            DirvepipeDimensionType = DrvepipeDimensionList[0];
+            DirvepipeDimensionType = DrvepipeDimensionList[1];
         }
     }
 

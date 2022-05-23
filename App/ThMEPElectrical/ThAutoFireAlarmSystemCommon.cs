@@ -80,6 +80,8 @@ namespace ThMEPElectrical
         public static bool CanDrawSprinklerPump = false;
         //配置
         public static readonly List<string> AlarmControlWireCircuitBlocks = new List<string>() {
+            "分区声光报警器",
+            "消防广播火栓强制启动模块",
             "手动火灾报警按钮(带消防电话插座)",
             "感烟火灾探测器",
             "感温火灾探测器",

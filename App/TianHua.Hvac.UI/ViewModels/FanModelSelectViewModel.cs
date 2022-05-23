@@ -428,12 +428,12 @@ namespace TianHua.Hvac.UI.ViewModels
         {
             var pick = (FanModelPicker)CCCFSelectItem.Tag;
             var points = new List<double>() { ChildFanModel.AirVolume, ChildFanModel.WindResis, 0 };
-            var childPickers = EQPMFanDataService.Instance.GetFanCanUseFanModels(ChildFanModel, points, MainCalcFan.FanModelName);
+            var childPickers = EQPMFanDataService.Instance.GetFanCanUseFanModels(ChildFanModel, points, pick.Model);
             FanModelMotorLowPower = "-";
             if (childPickers.Count > 0)
             {
                 var usePick = childPickers.Where(c => c.Model == pick.Model).FirstOrDefault();
-                EQPMFanDataUtils.SetFanModelParameter(ChildFanModel, BaseModelPick, usePick);
+                EQPMFanDataUtils.SetFanModelParameter(ChildFanModel, childPickers.First(), usePick);
                 FanModelMotorLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelMotorPower;
                 FanModelLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelPower;
             }

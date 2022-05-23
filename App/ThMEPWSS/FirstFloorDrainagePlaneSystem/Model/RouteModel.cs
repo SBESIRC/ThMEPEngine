@@ -22,6 +22,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
 
         public Circle printCircle { get; set; }
 
+        public Circle originCircle { get; set; }
+
         public Polyline route { get; set; }
 
         public VerticalPipeType verticalPipeType { get; set; }
@@ -37,5 +39,10 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// 是否是连接支管（污废合流接上去的支管）
         /// </summary>
         public bool IsBranchPipe = false;
+
+        /// <summary>
+        /// 有堵头
+        /// </summary>
+        public bool HasReservedPlug = false;
     }
 }

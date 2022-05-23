@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using ThMEPTCH.Data;
-using ThMEPTCH.Moel;
+using ThMEPTCH.Model;
 using ThMEPTCH.TCHTables;
 
 namespace ThMEPTCH.TCHDrawServices

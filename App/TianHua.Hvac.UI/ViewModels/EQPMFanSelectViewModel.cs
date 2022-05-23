@@ -418,12 +418,18 @@ namespace TianHua.Hvac.UI.ViewModels
             if (null == FanInfos) 
                 return;
             var fanCount = FanInfos.Count;
-            for (int i = 0; i < fanCount; i++) 
+            for (int i = 0; i < fanCount; i++)
             {
                 var current = FanInfos[i];
                 if (current.IsChildFan)
                     continue;
                 current.IsRepetitions = false;
+            }
+            for (int i = 0; i < fanCount; i++) 
+            {
+                var current = FanInfos[i];
+                if (current.IsChildFan || current.IsRepetitions)
+                    continue;
                 if (string.IsNullOrEmpty(current.InstallSpace) || string.IsNullOrEmpty(current.InstallFloor) || string.IsNullOrEmpty(current.VentNum))
                     continue;
                 var fanNum = string.Format("{0}-{1}-{2}-{3}", current.Name, current.InstallSpace, current.InstallFloor, current.VentNum);
@@ -432,9 +438,8 @@ namespace TianHua.Hvac.UI.ViewModels
                     if (i == j)
                         continue;
                     var check = FanInfos[j];
-                    if (check.IsChildFan)
+                    if (check.IsChildFan || current.IsRepetitions)
                         continue;
-                    check.IsRepetitions = false;
                     if (string.IsNullOrEmpty(current.InstallSpace) || string.IsNullOrEmpty(current.InstallFloor) || string.IsNullOrEmpty(current.VentNum))
                         continue;
                     if (current.ScenarioString != check.ScenarioString)

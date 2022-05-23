@@ -29,7 +29,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             ReadUIConfig(layerNames);
             InitBlockNames();
             equipmentBlcoks = new List<DrainingEquipmentModel>();
+            Init();
+        }
 
+        private void Init()
+        {
             using (AcadDatabase acdb = AcadDatabase.Active())
             using (acdb.Database.GetDocument().LockDocument())
             {
@@ -42,12 +46,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
                     DoExtract(elems, block, Matrix3d.Identity);
                     equipmentBlcoks.AddRange(elems);
                 }
-                //var s = equipmentBlcoks.Where(x => x.EnumEquipmentType == EnumEquipmentType.singleBasinWashingTable).ToList();
-                //foreach (var item in s)
-                //{
-                //    Circle cl = new Circle(item.BlockPoint, Vector3d.ZAxis, 1000);
-                //    acdb.ModelSpace.Add(cl);
-                //}
             }
         }
 

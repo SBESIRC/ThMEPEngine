@@ -60,20 +60,19 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// <param name="line"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public static List<Line> GetConenctLine(List<Line> lines, Line line, double tol = 1)
+        public static List<Line> GetConenctLine(ref List<Line> lines, Line line, double tol = 1)
         {
             var resLines = new List<Line>();
-            var allLines = new List<Line>(lines);
-            var connectLines = lines.Where(x => x.DistanceTo(line.StartPoint, false) < tol ||
-                 x.DistanceTo(line.EndPoint, false) < tol ||
-                 line.DistanceTo(x.StartPoint, false) < tol ||
-                 line.DistanceTo(x.EndPoint, false) < tol).ToList();
+            var connectLines = lines.Where(x => x.StartPoint.DistanceTo(line.StartPoint) < tol ||
+                 x.StartPoint.DistanceTo(line.EndPoint) < tol ||
+                 line.StartPoint.DistanceTo(x.EndPoint) < tol ||
+                 line.EndPoint.DistanceTo(x.EndPoint) < tol).ToList();
             resLines.AddRange(connectLines);
-            allLines = allLines.Except(connectLines).ToList();
+            lines = lines.Except(connectLines).ToList();
             var resConnectLines = new List<Line>();
-            foreach (var rLine in resLines)
+            foreach (var rLine in connectLines)
             {
-                resConnectLines.AddRange(GetConenctLine(allLines, rLine, tol));
+                resConnectLines.AddRange(GetConenctLine(ref lines, rLine, tol));
             }
             resLines.AddRange(resConnectLines);
             return resLines;
@@ -317,6 +316,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// <returns></returns>
         public static Polyline ShortenPolyline(Polyline polyline, double length, bool shortStart = false)
         {
+            polyline = polyline.DPSimplify(1);
             if (shortStart)
             {
                 polyline.ReverseCurve();
@@ -337,6 +337,57 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
                 resPoly.ReverseCurve();
             }
             return resPoly;
+        }
+
+        /// <summary>
+        /// 从起点开始沿一定长度间断polyline
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <param name="sPolyline"></param>
+        /// <param name="ePolyline"></param>
+        /// <param name="dir"></param>
+        public static void CutPolylineByLength(Polyline poly, double length, out Polyline sPolyline, out Polyline ePolyline, out Vector3d dir, out Point3d cutPt)
+        {
+            sPolyline = new Polyline();
+            ePolyline = new Polyline();
+            dir = Vector3d.YAxis;
+            cutPt = poly.EndPoint;
+            if (poly.Length <= length)
+            {
+                sPolyline = poly;
+            }
+
+            sPolyline.AddVertexAt(sPolyline.NumberOfVertices, poly.GetPoint3dAt(0).ToPoint2D(), 0, 0, 0);
+            bool isBreak = false;
+            double moveLength = 0;
+            for (int i = 1; i < poly.NumberOfVertices; i++)
+            {
+                if (!isBreak)
+                {
+                    var line = new Line(poly.GetPoint3dAt(i - 1), poly.GetPoint3dAt(i));
+                    moveLength = moveLength + line.Length;
+                    if (moveLength >= length)
+                    {
+                        isBreak = true;
+                        var lineDir = (poly.GetPoint3dAt(i - 1) - poly.GetPoint3dAt(i)).GetNormal();
+                        var movePt = poly.GetPoint3dAt(i) + lineDir * (moveLength - length);
+                        dir = -lineDir;
+                        cutPt = movePt;
+                        sPolyline.AddVertexAt(sPolyline.NumberOfVertices, movePt.ToPoint2D(), 0, 0, 0);
+                        ePolyline.AddVertexAt(ePolyline.NumberOfVertices, movePt.ToPoint2D(), 0, 0, 0);
+                        ePolyline.AddVertexAt(ePolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                    else
+                    {
+                        sPolyline.AddVertexAt(sPolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                }
+                else
+                {
+                    ePolyline.AddVertexAt(ePolyline.NumberOfVertices, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                }
+            }
         }
     }
 }

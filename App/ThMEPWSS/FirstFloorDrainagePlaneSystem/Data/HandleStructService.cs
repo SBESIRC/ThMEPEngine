@@ -62,22 +62,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
                     xDir.Z, yDir.Z, zDir.Z, 0,
                     0.0, 0.0, 0.0, 1.0});
             var allPts = rooms.SelectMany(x => GeometryUtils.GetAllPolylinePts(x))
-                .Select(y => y.TransformBy(matrix.Inverse()));
+                .Select(y => y.TransformBy(matrix.Inverse())).ToList();
+            allPts.AddRange(new List<Point3d>() { line.StartPoint.TransformBy(matrix.Inverse()), line.EndPoint.TransformBy(matrix.Inverse()) });
             allPts = allPts.OrderBy(x => x.X).ToList();
             double minX = allPts.First().X;
             double maxX = allPts.Last().X;
             allPts = allPts.OrderBy(x => x.Y).ToList();
             double minY = allPts.First().Y;
             double maxY = allPts.Last().Y;
-            double lineYVal = line.StartPoint.TransformBy(matrix.Inverse()).Y;
-            if (lineYVal < minY)
-            {
-                minY = lineYVal;
-            }
-            else if (lineYVal > minY)
-            {
-                maxY = lineYVal;
-            }
 
             var pt1 = new Point3d(minX, minY, 0);
             var pt2 = new Point3d(maxX, minY, 0);

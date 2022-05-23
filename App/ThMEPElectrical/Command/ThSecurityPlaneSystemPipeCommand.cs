@@ -68,6 +68,7 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(Line)).DxfName,
                     RXClass.GetClass(typeof(Polyline)).DxfName,
+                    "TCH_CABLETRY",//天正桥架
                 };
                 var trunkingFilter = ThSelectionFilterTool.Build(trunkingDxfNames);
                 var trunkingResult = Active.Editor.GetSelection(trunkingOptions, trunkingFilter);

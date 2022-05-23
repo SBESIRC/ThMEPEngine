@@ -2,7 +2,7 @@
 
 namespace ThMEPEngineCore.Model
 {
-    public abstract class ThIfcObject
+    public abstract class ThIfcObject : ThIfcObjectDefinition
     {
         public string Uuid { get; set; }
         

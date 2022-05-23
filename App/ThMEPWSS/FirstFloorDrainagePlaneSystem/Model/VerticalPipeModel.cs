@@ -87,5 +87,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Model
         /// </summary>
         [Description("雨水立管")]
         rainPipe,
+
+        /// <summary>
+        /// 洞口立管（仅作为洞口躲避）
+        /// </summary>
+        [Description("洞口立管")]
+        holePipe,
     }
 }

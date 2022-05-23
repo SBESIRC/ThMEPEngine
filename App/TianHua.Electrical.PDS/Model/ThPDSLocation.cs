@@ -9,6 +9,7 @@ namespace TianHua.Electrical.PDS.Model
         {
             ReferenceDWG = "";
             FloorNumber = "";
+            IsStandardStorey = false;
             RoomType = "";
             BasePoint = new ThPDSPoint3d();
             MinPoint = new ThPDSPoint3d();
@@ -25,6 +26,11 @@ namespace TianHua.Electrical.PDS.Model
         /// 楼层
         /// </summary>
         public string FloorNumber { get; set; }
+
+        /// <summary>
+        /// 是否为标准层
+        /// </summary>
+        public bool IsStandardStorey { get; set; }
 
         /// <summary>
         /// 房间

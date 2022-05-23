@@ -22,5 +22,7 @@ namespace ThMEPWSS.Service
 
 
         public ThWSSParameter Parameter = new ThWSSParameter();
+
+        public ThPSPMParameter PSPMParameter = new ThPSPMParameter();
     }
 }

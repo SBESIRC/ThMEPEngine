@@ -8,7 +8,7 @@
              xmlns:converters="clr-namespace:TianHua.Mep.UI.Converter"
              xmlns:local="clr-namespace:TianHua.Mep.UI.UI"
                     Title="梁配置" SizeToContent="Manual" Height="370" 
-                    Width="200" MaxWidth="200" MaxHeight="370"
+                    Width="240" MaxWidth="240" MaxHeight="370"
              mc:Ignorable="d">
     <Window.Resources>        
         <ResourceDictionary>
@@ -25,7 +25,7 @@
     </Window.Resources>
     <StackPanel Orientation="Vertical">
         <Label Content="梁识别引擎："></Label>        
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,5" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Margin="45,0,0,5" HorizontalAlignment="Center">
             <RadioButton Margin="0,6" x:Name="rbLayer" Content="图 层" GroupName="CheckObject" IsThreeState="False"
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=0}" Checked="rbLayer_Checked">
@@ -41,109 +41,14 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <Label Content="图层配置" Margin="8,0"></Label>
-            <Button Content="增加图层" Name="btnAddLayer" Margin="15,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddLayer_Click"></Button>
+            <Button Content="增加图层" Name="btnAddLayer" Margin="5,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddLayer_Click"></Button>
+            <Button Content="删除图层" Name="btnDelLayer" Margin="0,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnDelLayer_Click"></Button>
         </StackPanel>
-        <ListBox x:Name="listBox" Height="220" 
+        <ListBox x:Name="listBox1" Height="220" SelectionMode="Multiple" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                             SelectionMode="Extended"
-                                        ItemsSource="{Binding LayerInfos}" Margin="5">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}" >
-                    <Setter Property="Margin" Value="0" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" x:Name="Bd" SnapsToDevicePixels="True">
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-                                        <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                    </CheckBox>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsMouseOver">
-                                                <Condition.Value>
-                                                    <s:Boolean>True</s:Boolean>
-                                                </Condition.Value>
-                                            </Condition>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Panel.Background" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#1F26A0DA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="BorderBrush" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#A826A0DA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiTrigger>
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="Selector.IsSelectionActive">
-                                                <Condition.Value>
-                                                    <s:Boolean>False</s:Boolean>
-                                                </Condition.Value>
-                                            </Condition>
-                                            <Condition Property="Selector.IsSelected">
-                                                <Condition.Value>
-                                                    <s:Boolean>True</s:Boolean>
-                                                </Condition.Value>
-                                            </Condition>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Panel.Background" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#3DDADADA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="BorderBrush" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#FFDADADA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiTrigger>
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="Selector.IsSelectionActive">
-                                                <Condition.Value>
-                                                    <s:Boolean>True</s:Boolean>
-                                                </Condition.Value>
-                                            </Condition>
-                                            <Condition Property="Selector.IsSelected">
-                                                <Condition.Value>
-                                                    <s:Boolean>True</s:Boolean>
-                                                </Condition.Value>
-                                            </Condition>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Panel.Background" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#3D26A0DA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="BorderBrush" TargetName="Bd">
-                                            <Setter.Value>
-                                                <SolidColorBrush>#FF26A0DA</SolidColorBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiTrigger>
-                                    <Trigger Property="IsEnabled">
-                                        <Trigger.Value>
-                                            <s:Boolean>False</s:Boolean>
-                                        </Trigger.Value>
-                                        <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Layer}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                                        ItemsSource="{Binding LayerInfos}" Margin="5"
+                 DisplayMemberPath="Layer">
         </ListBox>
         <StackPanel Margin="0,5,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="确 定" Width="50" Name="btnOk" Template="{StaticResource ButtonTemplate}" Click="btnOk_Click"></Button>

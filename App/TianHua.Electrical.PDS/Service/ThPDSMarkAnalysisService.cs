@@ -40,14 +40,50 @@ namespace TianHua.Electrical.PDS.Service
             });
             foreach (var str in marks)
             {
-                if(thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
                     && str.Contains("AR"))
                 {
                     thPDSDistBox.ID.LoadID = str;
                 }
                 else
                 {
-                    thPDSDistBox.ID.Description = StringClean(str);
+                    var strClean = StringClean(str);
+                    if (strClean.Contains("n=") || strClean.Contains("N="))
+                    {
+                        if (strClean.Contains("~"))
+                        {
+                            var numRegex = new Regex(@"[0-9]+");
+                            var match = numRegex.Match(strClean);
+                            if (match.Success)
+                            {
+                                var start = Convert.ToInt16(match.Value);
+                                match = match.NextMatch();
+                                if (match.Success)
+                                {
+                                    var end = Convert.ToInt16(match.Value);
+                                    for (var k = start; k <= end; k++)
+                                    {
+                                        thPDSDistBox.ID.Storeys.Add(k);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+
+                            var numRegex = new Regex(@"[0-9]+");
+                            var match = numRegex.Match(strClean);
+                            while (match.Success)
+                            {
+                                thPDSDistBox.ID.Storeys.Add(Convert.ToInt16(match.Value));
+                                match = match.NextMatch();
+                            }
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(strClean))
+                    {
+                        thPDSDistBox.ID.Description = strClean;
+                    }
                 }
             }
 
@@ -356,7 +392,20 @@ namespace TianHua.Electrical.PDS.Service
                     return;
                 }
 
-                var value = ThPDSReplaceStringService.ReplaceLastChar(o, "/", "-");
+                var value = o;
+                var count = o.Count(c => c.Equals('/'));
+                if (count > 1)
+                {
+                    value = ThPDSReplaceStringService.ReplaceLastChar(o, "/", "-");
+                }
+                else if (count == 1)
+                {
+                    var charRegex = new Regex(@"[0-9]+/[0-9]+-");
+                    if (!charRegex.Match(o).Success)
+                    {
+                        value = ThPDSReplaceStringService.ReplaceLastChar(o, "/", "-");
+                    }
+                }
                 var check1 = "-W[a-zA-Z]+[-0-9]+";
                 var regex1 = new Regex(@check1);
                 var match1 = regex1.Match(value);

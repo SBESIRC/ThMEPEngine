@@ -12,7 +12,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
-using ThMEPTCH.Moel;
+using ThMEPTCH.Model;
 using ThMEPTCH.TCHDrawServices;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG;

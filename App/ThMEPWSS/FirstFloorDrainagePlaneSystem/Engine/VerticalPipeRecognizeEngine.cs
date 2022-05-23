@@ -24,6 +24,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             { new List<string>(){ "YxLx-x" },  VerticalPipeType.rainPipe},
             { new List<string>(){ "PLx-x" },  VerticalPipeType.ConfluencePipe},
             { new List<string>(){ "*NLx-x", "FLx-0" },  VerticalPipeType.CondensatePipe},
+            { new List<string>(){ "TLx-x" },  VerticalPipeType.holePipe},
         };
 
         /// <summary>
@@ -73,11 +74,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine
             List<VerticalPipeModel> resModel = new List<VerticalPipeModel>();
             foreach (var line in markLines)
             {
-                var connectPipe = allPipeCircles.FirstOrDefault(x => line.StartPoint.DistanceTo(x.Center) < x.Radius || line.EndPoint.DistanceTo(x.Center) < x.Radius);
+                var connectPipe = allPipeCircles.FirstOrDefault(x => line.StartPoint.DistanceTo(x.Center) < x.Radius - 5 || line.EndPoint.DistanceTo(x.Center) < x.Radius - 5);
                 if (connectPipe != null)
                 {
                     canUseLines.Remove(line);
-                    var connectLines = GeometryUtils.GetConenctLine(canUseLines, line, 0.001).Distinct().ToList();
+                    var tempLines = new List<Line>(canUseLines);
+                    var connectLines = GeometryUtils.GetConenctLine(ref tempLines, line, 0.001).Distinct().ToList();
                     canUseLines = canUseLines.Except(connectLines).ToList();
                     connectLines.Add(line);
                     var resText = GetMathcingMarkTextByLine(connectLines, markTxts);

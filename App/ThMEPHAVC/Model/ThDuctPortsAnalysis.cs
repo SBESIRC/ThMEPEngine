@@ -408,13 +408,17 @@ namespace ThMEPHVAC.Model
             var infos = mainLinesInfos.Values.ToList();
             int idx = infos.Count - 1;
             string limit = portParam.param.inDuctSize;
+            double preAirVolume = 0;
             // 倒着遍历，从根到末端设置管段
             for (int i = idx; i >= 0; --i)
             {
                 var info = infos[i];
                 if (!String.IsNullOrEmpty(info.ductSize))
                     continue;//根管段
+                if (info.airVolume > preAirVolume)
+                    limit = portParam.param.inDuctSize;// 此时是另一组主管段的管段选择，需要更新limit
                 info.ductSize = SelectAMainSize(info.airVolume, limit);
+                preAirVolume = info.airVolume;
                 limit = info.ductSize;
             }
         }

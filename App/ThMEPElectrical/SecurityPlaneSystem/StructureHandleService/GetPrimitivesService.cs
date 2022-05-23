@@ -315,6 +315,10 @@ namespace ThMEPElectrical.StructureHandleService
                 var trunkingLines = acdb.ModelSpace
                 .OfType<Curve>()
                 .Where(o => o.Layer == layerName);
+                var TCHElements = trunkingLines.Where(o => o.IsTCHElement());
+                var trunkingLineCollection = trunkingLines.Except(TCHElements).ToCollection();
+                TCHElements.ForEach(o => trunkingLineCollection.Union(o.ExplodeTCHElement()));
+                trunkingLines = trunkingLineCollection.Cast<Curve>();
                 trunkingLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;

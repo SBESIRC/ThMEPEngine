@@ -34,6 +34,13 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
 
         public void CreateDim()
         {
+            foreach (var route in routes)
+            {
+                if (route.route.EndPoint.DistanceTo(route.startPosition) < route.route.StartPoint.DistanceTo(route.startPosition))
+                {
+                    route.route.ReverseCurve();
+                }
+            }
             var layoutInfos = GetLayoutInfo();
             Layout(layoutInfos);
         }
@@ -122,8 +129,8 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Dimension
             dbTexts.Add(leveltext);
 
             noteLines.ForEach(x => originTransformer.Reset(x));
-            PrintMarks.PrintNoteLines(noteLines, scale);
-            PrintMarks.PrintText(dbTexts, scale);
+            PrintMarks.PrintNoteLines(noteLines, ThWSSCommon.DrivepipeNoteLayerName, scale);
+            PrintMarks.PrintText(dbTexts, ThWSSCommon.DrivepipeNoteLayerName, scale);
         }
 
         /// <summary>

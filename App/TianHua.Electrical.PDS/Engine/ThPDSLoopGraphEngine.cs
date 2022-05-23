@@ -17,6 +17,9 @@ using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 using DotNetARX;
 using System.IO;
+using CircuitGraph = QuikGraph.BidirectionalGraph<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode,
+    TianHua.Electrical.PDS.Model.ThPDSCircuitGraphEdge<TianHua.Electrical.PDS.Model.ThPDSCircuitGraphNode>>;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace TianHua.Electrical.PDS.Engine
 {
@@ -81,6 +84,11 @@ namespace TianHua.Electrical.PDS.Engine
         /// </summary>
         private List<Polyline> DistBoxFrames { get; set; }
 
+        /// <summary>
+        /// 是否是标准层
+        /// </summary>
+        public bool IsStandardStorey { get; set; }
+
         private ThCADCoreNTSSpatialIndex DistBoxIndex;
         private ThCADCoreNTSSpatialIndex LoadIndex;
         private ThCADCoreNTSSpatialIndex CableIndex;
@@ -96,13 +104,14 @@ namespace TianHua.Electrical.PDS.Engine
             List<string> distBoxKey, ThPDSCircuitGraphNode cableTrayNode,
             Dictionary<ThPDSCircuitGraphNode, List<ObjectId>> nodeMap,
             Dictionary<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>, List<ObjectId>> edgeMap,
-            List<Polyline> distBoxFrames)
+            List<Polyline> distBoxFrames, bool isStandardStorey)
         {
             Database = database;
             MarkService = markService;
             DistBoxKey = distBoxKey;
             NodeMap = nodeMap;
             EdgeMap = edgeMap;
+            IsStandardStorey = isStandardStorey;
             using (var acad = AcadDatabase.Use(this.Database))
             {
                 DistBoxes = distBoxes;
@@ -748,18 +757,93 @@ namespace TianHua.Electrical.PDS.Engine
                 newNode.Loads[0].AttributesCopy = attributesCopy;
             }
 
-            var newEdge = ThPDSGraphService.CreateEdge(node, newNode, logos.Texts, DistBoxKey);
-            if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && nextEntity is Line circuit)
+            var textList = new List<List<string>>();
+            logos.Texts = logos.Texts.Distinct().ToList();
+            // 对标准层特殊处理
+            if (IsStandardStorey)
             {
-                ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer, true);
+                logos.Texts.ForEach(t =>
+                {
+                    if (t.Contains("~"))
+                    {
+                        var regex = new Regex(@"[0-9]+~[a-zA-Z]*[0-9]+");
+                        var match = regex.Match(t);
+                        if (match.Success)
+                        {
+                            var numRegex = new Regex(@"[0-9]+");
+                            var numMatch = numRegex.Match(match.Value);
+                            if (numMatch.Success)
+                            {
+                                var start = Convert.ToInt16(numMatch.Value);
+                                numMatch = numMatch.NextMatch();
+                                if (numMatch.Success)
+                                {
+                                    var end = Convert.ToInt16(numMatch.Value);
+                                    for (var i = start; i <= end; i++)
+                                    {
+                                        var numString = i.ToString();
+                                        if (i < 10)
+                                        {
+                                            numString = "0" + i;
+                                        }
+                                        textList.Add(new List<string> { t.Replace(match.Value, numString) });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
-            if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+            if (textList.Count == 0)
             {
-                return Tuple.Create(false, newNode, newEdge);
+                textList.Add(logos.Texts);
             }
-            PDSGraph.Graph.AddEdge(newEdge);
-            EdgeMap.Add(newEdge, logos.ObjectIds);
-            return Tuple.Create(true, newNode, newEdge);
+
+            if (textList.Count == 1)
+            {
+                var newEdge = ThPDSGraphService.CreateEdge(node, newNode, textList[0], DistBoxKey);
+                if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && nextEntity is Line circuit)
+                {
+                    ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer, true);
+                }
+                if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+                {
+                    return Tuple.Create(false, newNode, newEdge);
+                }
+                PDSGraph.Graph.AddEdge(newEdge);
+                EdgeMap.Add(newEdge, logos.ObjectIds);
+                return Tuple.Create(true, newNode, newEdge);
+            }
+            else
+            {
+                var edges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+                for (var i = 0; i < textList.Count; i++)
+                {
+                    var otherNode = new ThPDSCircuitGraphNode();
+                    if (i == 0)
+                    {
+                        otherNode = newNode;
+                    }
+                    else
+                    {
+                        otherNode = ThPDSGraphService.NodeClone(newNode);
+                        PDSGraph.Graph.AddVertex(otherNode);
+                    }
+                    var newEdge = ThPDSGraphService.CreateEdge(node, otherNode, textList[i], DistBoxKey);
+                    if (newEdge.Target.Loads[0].CircuitType == ThPDSCircuitType.None && nextEntity is Line circuit)
+                    {
+                        ThPDSLayerService.SelectCircuitType(newEdge.Target.Loads[0], circuit.Layer, true);
+                    }
+                    if (ThPDSEdgeContainsService.EdgeContains(newEdge, PDSGraph.Graph))
+                    {
+                        continue;
+                    }
+                    PDSGraph.Graph.AddEdge(newEdge);
+                    EdgeMap.Add(newEdge, logos.ObjectIds);
+                    edges.Add(newEdge);
+                }
+                return Tuple.Create(true, newNode, edges[0]);
+            }
         }
 
         /// <summary>
@@ -1290,20 +1374,25 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 shrinkLine = polyline.GetEdges().Last();
             }
-
-            if (shrinkLine.Length < 10 * ThPDSCommon.ALLOWABLE_TOLERANCE + 1.0)
+            else if(curve is Arc arc)
             {
-                return (isStartPoint ? curve.StartPoint : curve.EndPoint).CreateSquare(ThPDSCommon.ALLOWABLE_TOLERANCE);
+                shrinkLine = arc.TessellateArcWithArc(50.0).GetEdges().Last();
+            }
+
+            var tolerance = 10 * ThPDSCommon.ALLOWABLE_TOLERANCE;
+            if (shrinkLine.Length < 20 * ThPDSCommon.ALLOWABLE_TOLERANCE + 1.0)
+            {
+                tolerance = shrinkLine.Length / 2;
             }
 
             if (isStartPoint)
             {
-                var newLine = new Line(shrinkLine.StartPoint, shrinkLine.EndPoint - shrinkLine.LineDirection() * 10 * ThPDSCommon.ALLOWABLE_TOLERANCE);
+                var newLine = new Line(shrinkLine.StartPoint, shrinkLine.EndPoint - shrinkLine.LineDirection() * tolerance);
                 return ThPDSBufferService.Buffer(newLine);
             }
             else
             {
-                var newLine = new Line(shrinkLine.StartPoint + shrinkLine.LineDirection() * 10 * ThPDSCommon.ALLOWABLE_TOLERANCE, shrinkLine.EndPoint);
+                var newLine = new Line(shrinkLine.StartPoint + shrinkLine.LineDirection() * tolerance, shrinkLine.EndPoint);
                 return ThPDSBufferService.Buffer(newLine);
             }
         }
@@ -1540,8 +1629,14 @@ namespace TianHua.Electrical.PDS.Engine
             return results;
         }
 
-        public void AssignStorey(Database database, string floorNumber, Point3d storeyBasePoint)
+        public void AssignStorey(Database database, ThEStoreys storeys, Point3d storeyBasePoint)
         {
+            var isStandardStorey = false;
+            if (storeys.StoreyTypeString.Equals("标准层"))
+            {
+                isStandardStorey = true;
+            }
+
             PDSGraph.Graph.Vertices.ForEach(o =>
             {
                 o.Loads.ForEach(e =>
@@ -1550,62 +1645,138 @@ namespace TianHua.Electrical.PDS.Engine
                     {
                         e.SetLocation(new ThPDSLocation());
                     }
-                    e.Location.FloorNumber = floorNumber;
+                    e.Location.FloorNumber = storeys.StoreyNumber;
                     e.Location.StoreyBasePoint = ThPDSPoint3dService.ToPDSPoint3d(storeyBasePoint);
                     e.Location.ReferenceDWG = Path.GetFileNameWithoutExtension(database.Filename);
+                    e.Location.IsStandardStorey = isStandardStorey;
                 });
             });
         }
 
-        public void StandardStorey()
+        public List<CircuitGraph> HandleMultiBuilding()
         {
             // 处理多楼栋
             var regex = new Regex(@"[0-9]+/[0-9]+-");
             var numRegex = new Regex(@"[0-9]+");
-            var searchedVertices = new List<ThPDSCircuitGraphNode>();
-            var addVertices = new List<ThPDSCircuitGraphNode>();
-            var addEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
-            var removeVertices = new List<ThPDSCircuitGraphNode>();
-            var removeEdges = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+            var sourceInfo = "";
+            var storeyList = new List<string>();
 
-            PDSGraph.Graph.Vertices.ForEach(o =>
+            foreach (var vertice in PDSGraph.Graph.Vertices)
             {
-                if (o.NodeType == PDSNodeType.CableCarrier)
+                if (vertice.NodeType == PDSNodeType.CableCarrier)
                 {
-                    return;
+                    continue;
                 }
 
-                var match = regex.Match(o.Loads[0].ID.LoadID);
+                var match = regex.Match(vertice.Loads[0].ID.LoadID);
                 if (match.Success)
                 {
                     var first = numRegex.Match(match.Value);
                     var second = first.NextMatch();
                     if (first.Success && second.Success)
                     {
-                        var firstLoadID = o.Loads[0].ID.LoadID.Replace(match.Value, first.Value + "-");
-                        var firstNode = ThPDSGraphService.NodeClone(o, firstLoadID);
-                        var secondLoadID = o.Loads[0].ID.LoadID.Replace(match.Value, second.Value + "-");
-                        var secondNode = ThPDSGraphService.NodeClone(o, secondLoadID);
-                        NodeMap.Add(firstNode, NodeMap[o]);
-                        NodeMap.Add(secondNode, NodeMap[o]);
-                        addVertices.Add(firstNode);
-                        addVertices.Add(secondNode);
-                        removeVertices.Add(o);
-                        searchedVertices.Add(o);
-
-                        var inEdges = PDSGraph.Graph.InEdges(o);
-                        inEdges.ForEach(e =>
-                        {
-                            var firstEdge = ThPDSGraphService.InEdgeClone(e, firstNode);
-                            var secondEdge = ThPDSGraphService.InEdgeClone(e, secondNode);
-                            EdgeMap.Add(firstEdge, EdgeMap[e]);
-                            EdgeMap.Add(secondEdge, EdgeMap[e]);
-                            addEdges.Add(firstEdge);
-                            addEdges.Add(secondEdge);
-                            removeEdges.Add(e);
-                        });
+                        sourceInfo = match.Value;
+                        storeyList.Add(first.Value + "-");
+                        storeyList.Add(second.Value + "-");
+                        break;
                     }
                 }
+            }
+
+            if (storeyList.Count == 0)
+            {
+                return new List<CircuitGraph> { PDSGraph.Graph };
+            }
+
+            var graphList = new List<CircuitGraph>();
+            for (var i = 0; i < storeyList.Count; i++)
+            {
+                var clone = new CircuitGraph();
+                var nodeMap = new Dictionary<ThPDSCircuitGraphNode, ThPDSCircuitGraphNode>();
+                PDSGraph.Graph.Vertices.ForEach(v =>
+                {
+                    if (v.Loads.Count > 0)
+                    {
+                        var newNode = ThPDSGraphService.NodeClone(v, sourceInfo, storeyList[i]);
+                        clone.AddVertex(newNode);
+                        nodeMap.Add(v, newNode);
+                    }
+                    else
+                    {
+                        clone.AddVertex(v);
+                        nodeMap.Add(v, v);
+                    }
+                });
+                PDSGraph.Graph.Edges.ForEach(e =>
+                {
+                    var sourceNode = nodeMap[e.Source];
+                    var targetNode = nodeMap[e.Target];
+                    var newEdge = ThPDSGraphService.EdgeClone(sourceNode, targetNode, e.Circuit, sourceInfo, storeyList[i]);
+                    clone.AddEdge(newEdge);
+                });
+                graphList.Add(clone);
+            }
+
+            return graphList;
+        }
+
+        public void HandleStandardStorey(List<CircuitGraph> graphList)
+        {
+            graphList.ForEach(graph =>
+            {
+                var addNode = new List<ThPDSCircuitGraphNode>();
+                var addEdge = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+                var removeNode = new List<ThPDSCircuitGraphNode>();
+                var removeEdge = new List<ThPDSCircuitGraphEdge<ThPDSCircuitGraphNode>>();
+
+                graph.Vertices.ForEach(v =>
+                {
+                    if (v.Loads.Count > 0)
+                    {
+                        if (v.Loads[0].ID.Storeys.Count > 0)
+                        {
+                            if (v.Loads[0].ID.LoadID.Contains("n") || v.Loads[0].ID.LoadID.Contains("N"))
+                            {
+                                v.Loads[0].ID.LoadID.Replace("N", "n");
+                                v.Loads[0].ID.Storeys.ForEach(s =>
+                                {
+                                    var newNode = ThPDSGraphService.NodeClone(v, "n", s.ToString());
+                                    addNode.Add(newNode);
+                                    removeNode.Add(v);
+                                    graph.InEdges(v).ForEach(e =>
+                                    {
+                                        var newEdge = ThPDSGraphService.EdgeClone(e.Source, newNode, e.Circuit);
+                                        addEdge.Add(newEdge);
+                                        removeEdge.Add(e);
+                                    });
+                                    graph.OutEdges(v).ForEach(e =>
+                                    {
+                                        var newEdge = ThPDSGraphService.EdgeClone(newNode, e.Target, e.Circuit, "n", s.ToString());
+                                        addEdge.Add(newEdge);
+                                        removeEdge.Add(e);
+                                    });
+                                });
+                            }
+                        }
+                    }
+                });
+
+                addNode.ForEach(node =>
+                {
+                    graph.AddVertex(node);
+                });
+                addEdge.ForEach(edge =>
+                {
+                    graph.AddEdge(edge);
+                });
+                removeNode.Distinct().ForEach(node =>
+                {
+                    graph.RemoveVertex(node);
+                });
+                removeEdge.ForEach(edge =>
+                {
+                    graph.RemoveEdge(edge);
+                });
             });
         }
 
