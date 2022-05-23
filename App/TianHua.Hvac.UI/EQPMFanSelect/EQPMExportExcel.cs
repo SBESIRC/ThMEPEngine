@@ -127,7 +127,7 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 dataRow[20] = item.DragModel.DynPress;
                 dataRow[21] = item.DragModel.CalcResistance;
                 dataRow[22] = item.WindResis;
-                dataRow[23] = item.FanModelPowerDescribe;
+                dataRow[23] = item.FanModelTypeCalcModel.FanModelPower;
                 dataTable.Rows.Add(dataRow);
                 if (item.Control != EnumFanControl.TwoSpeed)
                     continue;
@@ -149,6 +149,7 @@ namespace TianHua.Hvac.UI.EQPMFanSelect
                 cDataRow[20] = cFan.DragModel.DynPress;
                 cDataRow[21] = cFan.DragModel.CalcResistance;
                 cDataRow[22] = cFan.WindResis;
+                cDataRow[23] = cFan.FanModelTypeCalcModel.FanModelPower;
                 dataTable.Rows.Add(cDataRow);
             }
             return dataTable;

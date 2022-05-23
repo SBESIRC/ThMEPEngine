@@ -64,6 +64,7 @@ namespace TianHua.Hvac.UI.UI
             if (null == tempModel)
             {
                 fanViewModel = new EQPMFanSelectViewModel();
+                RefreshDataFromDocument();
                 EQPMUIServices.Instance.HisFanViewModels.Add(new FanSelectHisModel(id,true,fanViewModel));
             }
             else
@@ -360,7 +361,9 @@ namespace TianHua.Hvac.UI.UI
                     fanViewModel.FanInfos.Remove(delModel);
                 }
             }
-            
+            fanViewModel.allFanDataMoedels.Remove(selectFan);
+            fanViewModel.FanInfos.Remove(selectFan);
+            fanViewModel.CheckShowFanNumberIsRepeat();
         }
 
         private void btnMoveUpRow_Click(object sender, RoutedEventArgs e)
@@ -481,10 +484,6 @@ namespace TianHua.Hvac.UI.UI
                 //防止操作文件失败，导致CAD退出
                 MessageBox.Show(ex.Message, "天华-错误提醒", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally 
-            {
-                
-            }
         }
 
         private void btnExportExcel_Click(object sender, RoutedEventArgs e)
@@ -495,12 +494,12 @@ namespace TianHua.Hvac.UI.UI
             var targetFans = GetExportTargetFans(selectTypes);
             if (targetFans.Count < 1)
                 return;
+            var targetFanParas = GetListExportFanPara(targetFans);
+            if (targetFanParas.Count < 1)
+                return;
             var savePath = GetSavePath("风机参数表");
             if (string.IsNullOrEmpty(savePath))
                 return;
-            var targetFanParas = GetListExportFanPara(fanViewModel.allFanDataMoedels.Select(c => c.fanDataModel).ToList());
-            if (targetFans.Count < 1)
-                return; 
             try
             {
                 var exportExcel = new EQPMExportExcel(savePath);
@@ -510,10 +509,6 @@ namespace TianHua.Hvac.UI.UI
             {
                 //防止操作文件失败，导致CAD退出
                 MessageBox.Show(ex.Message, "天华-错误提醒", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-
             }
         }
 
@@ -555,6 +550,18 @@ namespace TianHua.Hvac.UI.UI
             else 
             {
                 fanViewModel.ScenarioSelectItem = fanViewModel.ScenarioSelectItem;
+            }
+            foreach (var item in fanViewModel.allFanDataMoedels)
+            {
+                //continue;
+                if (!item.IsChildFan)
+                    continue;
+                var pModel = fanViewModel.allFanDataMoedels.Where(c => !c.IsChildFan && c.fanDataModel.ID == item.fanDataModel.PID).FirstOrDefault();
+                if (null == pModel)
+                    continue;
+                item.fanDataModel.FanSelectionStateMsg = new FanSelectionStateInfo();
+                //item.SelectModelPicker = pModel.SelectModelPicker;
+                RefreshFanModel(item);
             }
         }
         List<FanDataViewModel> GetDocnmentFanData() 
@@ -628,7 +635,7 @@ namespace TianHua.Hvac.UI.UI
             if (isChild)
             {
                 cViewModel = fanDataView;
-                pViewModel = fanViewModel.FanInfos.Where(c => !c.IsChildFan && c.fanDataModel.ID == fanDataView.fanDataModel.PID).FirstOrDefault();
+                pViewModel = fanViewModel.allFanDataMoedels.Where(c => !c.IsChildFan && c.fanDataModel.ID == fanDataView.fanDataModel.PID).FirstOrDefault();
             }
             else 
             {
@@ -775,6 +782,7 @@ namespace TianHua.Hvac.UI.UI
                 addItem.WindResis = item.WindResis;
                 RefreshFanModelParameter(addItem);
                 addItem.FanModelCCCF = item.FanModelCCCF;
+                RefreshFanModel(addItem);
                 retViewModels.Add(addItem);
             }
             return retViewModels;
@@ -825,6 +833,18 @@ namespace TianHua.Hvac.UI.UI
                 if (!exportTypes.Any(c => c == item.fanDataModel.Scenario))
                     continue;
                 resList.Add(item.fanDataModel);
+            }
+            foreach (var item in tempViewModels)
+            {
+                //continue;
+                if (!item.IsChildFan)
+                    continue;
+                var pModel = tempViewModels.Where(c => !c.IsChildFan && c.fanDataModel.ID == item.fanDataModel.PID).FirstOrDefault();
+                if (null == pModel)
+                    continue;
+                item.fanDataModel.FanSelectionStateMsg = new FanSelectionStateInfo();
+                //item.SelectModelPicker = pModel.SelectModelPicker;
+                RefreshFanModel(item);
             }
             return resList;
         }
@@ -906,6 +926,7 @@ namespace TianHua.Hvac.UI.UI
                     {
                         exportFanPara.CalcAirVolume += "/" + cFan.VolumeCalcModel.AirCalcValue.ToString();
                         exportFanPara.StaticPa += "/" + ((cFan.DragModel.DuctResistance + cFan.DragModel.Damper) * cFan.DragModel.SelectionFactor).ToString();
+                        exportFanPara.WS +="/"+ cFan.FanModelTypeCalcModel.FanModelPower;
                     }
                 }
                 retRes.Add(exportFanPara);
