@@ -134,7 +134,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         }
 
         /// <summary>
-        /// 获取墙和墙之间的连接（支持两面有墙点或某一面墙有墙点，不支持两面墙都没有墙点）
+        /// 获取墙和墙之间的连接
         /// 直接在范围内找最合适的墙连接点
         /// </summary>
         public static void WallCntWallPt(Point3d wallPt, Vector3d direction, HashSet<Point3d> allWallPts, Polyline wall, double findLength,
@@ -144,16 +144,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
             Point3d cntWallPt = GetObjects.GetPointByDirectionB(wallPt, direction, allWallPts, findDegree, findLength);
             if (cntWallPt != wallPt + direction * 500)
             {
-                //ShowInfo.ShowLine(wallPt, cntWallPt, 2);
-                //Point3d middlePt = new Point3d((wallPt.X + cntWallPt.X) / 2, (wallPt.Y + cntWallPt.Y) / 2, 0);
-                //Circle circle = new Circle(middlePt, Vector3d.ZAxis, 500);
-                //ShowInfo.ShowGeometry(circle.ToNTSGeometry(), 1);
-                //ShowInfo.ShowGeometry(wall.ToNTSGeometry(), 1);
-                //if (!wall.Intersects(circle) )//&& !wall.Contains(middlePt))
-                //{
-                //    ShowInfo.ShowLine(wallPt, cntWallPt, 6);
-                    GraphDealer.AddLineToGraph(wallPt, cntWallPt, ref wallConnectWall);
-                //}
+                GraphDealer.AddLineToGraph(wallPt, cntWallPt, ref wallConnectWall);
             }
         }
 

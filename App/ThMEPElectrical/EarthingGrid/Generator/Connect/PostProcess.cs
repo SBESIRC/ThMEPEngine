@@ -38,8 +38,13 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             {
                 tmpgrid.Add(kv.Key, kv.Value);
             }
-            GraphDealer.SimplifyGraph(ref tmpgrid, GetPtsOnBorders().ToList(), 1000);
+            var pts = PointsDealer.PointsDistinct(GetPtsOnBorders().ToList());
+            //GraphDealer.SimplifyGraph(ref tmpgrid, GetPtsOnBorders().ToList(), 1000);
+            GraphDealer.ReduceSimilarPoints(ref tmpgrid, pts);
+            //GraphDealer.ReduceSimilarLine(ref tmpgrid, Math.PI / 8);
+            GraphDealer.GraphStandardize(ref tmpgrid, pts, 1000);
             EarthGrid.Clear();
+
             EarthGrid = tmpgrid;
             StichToBorder();
             //删除outline附近的线
