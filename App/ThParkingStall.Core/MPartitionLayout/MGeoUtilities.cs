@@ -704,6 +704,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 || a.P1.Distance(b.P0) < 1 || a.P1.Distance(b.P1) < 1) return true;
             else return false;
         }
-
+        public static double ClosestDistanceBetweenTwoParallelLines(LineSegment a, LineSegment b)
+        {
+            var p_on_a = a.ClosestPoint(b.P0);
+            return b.ClosestPoint(p_on_a).Distance(p_on_a);
+        }
     }
 }

@@ -65,7 +65,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 RemoveDuplicatedLines(lanes);
                 MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
+                //MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
                 //MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 MLayoutPostProcessing.RemoveInvalidPillars(ref pillars,cars);
                 mParkingPartition = new MParkingPartitionPro();

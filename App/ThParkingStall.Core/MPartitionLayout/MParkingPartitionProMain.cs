@@ -312,7 +312,14 @@ namespace ThParkingStall.Core.MPartitionLayout
             offsetlane = offsetlane.Scale(20);
             //与边界相交
 
-            var splits = SplitBufferLineByPoly(offsetlane, DisLaneWidth / 2, Boundary);
+            var _splits = SplitBufferLineByPoly(offsetlane, DisLaneWidth / 2, Boundary);
+            var splits = new List<LineSegment>();
+            foreach (var s in _splits)
+            {
+                var k=s.Translation(-vec * DisLaneWidth / 2);
+                splits.AddRange(SplitBufferLineByPoly(k, DisLaneWidth / 2, Boundary)
+                    .Select(e => e.Translation(vec * DisLaneWidth / 2)));
+            }
             var linesplitbounds =/* SplitLine(offsetlane, Boundary)*/
                 splits
                 .Where(e =>
@@ -324,6 +331,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var bf = l.Buffer(DisLaneWidth / 2 - 1);
                     bf = bf.Scale(ScareFactorForCollisionCheck);
                     var result = bf.IntersectPoint(Boundary).Count() == 0;
+                    //var result = true;
                     l = l.Translation(vec * DisLaneWidth / 2);
                     l.P0 = l.P0.Translation(Vector(l).Normalize() * 10);
                     l.P1 = l.P1.Translation(-Vector(l).Normalize() * 10);
