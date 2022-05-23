@@ -111,16 +111,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
         /// <param name="tolerance"></param>
         public static void ReduceSimilarLine(ref Dictionary<Point3d, HashSet<Point3d>> graph, double tolerance = Math.PI / 8)
         {
-            Dictionary<Point3d, List<Point3d>> newDicTuples = new Dictionary<Point3d, List<Point3d>>();
-            foreach (var dicTuple in graph)
-            {
-                newDicTuples.Add(dicTuple.Key, dicTuple.Value.ToList());
-            }
-            foreach (var dic in newDicTuples)
+            foreach (var key in graph.Keys.ToList())
             {
                 while (true)
                 {
-                    var key = dic.Key;
                     if (!graph.ContainsKey(key))
                     {
                         break;
@@ -139,7 +133,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     double curDegree;
                     for (int i = 1; i <= n; ++i)
                     {
-                        if (cntPts[i % n].DistanceTo(cntPts[i - 1]) < 1.0 || key.DistanceTo(cntPts[i - 1]) < 1.0 || cntPts[i % n].DistanceTo(key) < 1.0)
+                        if (cntPts[i % n].DistanceTo(cntPts[i - 1]) < 10 || key.DistanceTo(cntPts[i - 1]) < 10 || cntPts[i % n].DistanceTo(key) < 10)
                         {
                             continue;
                         }
