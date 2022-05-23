@@ -499,7 +499,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="EPPlus">
-      <Version>6.0.4</Version>
+      <Version>5.8.8</Version>
     </PackageReference>
     <PackageReference Include="QuikGraph">
       <Version>2.3.0</Version>
