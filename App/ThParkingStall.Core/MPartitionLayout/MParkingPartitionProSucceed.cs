@@ -137,8 +137,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                 else return false;
             }
         }
-        private double IsEssentialToCloseToBuilding(LineSegment line, Vector2D vec)
+        private double IsEssentialToCloseToBuilding(LineSegment lane, Vector2D vec)
         {
+            var line = lane.Scale(ScareFactorForCollisionCheck);
             if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
             if (!IsPerpVector(vec, Vector2D.Create(1, 0))) return -1;
             if (vec.Y < 0) return -1;
@@ -207,7 +208,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return -1;
         }
-        private void UpdateLaneBoxAndSpatialIndexForGenerateVertLanes()
+        public void UpdateLaneBoxAndSpatialIndexForGenerateVertLanes()
         {
             LaneSpatialIndex.Update(IniLanes.Select(e => (Geometry)PolyFromLine(e.Line)).ToList(), new List<Geometry>());
             LaneBoxes.AddRange(IniLanes.Select(e =>
@@ -233,10 +234,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             LaneBufferSpatialIndex.Update(LaneBoxes.Cast<Geometry>().ToList(), new List<Geometry>());
         }
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
-        , Lane specialLane = null,bool check_adj_collision=false)
+        , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null)
         {
             var lanes = new List<Lane>();
             var Lanes = IniLanes;
+            if (rlanes != null)
+                Lanes = rlanes;
             if (specialLane != null)
                 Lanes = new List<Lane>() { specialLane };
             foreach (var lane in Lanes)
@@ -309,7 +312,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             .Where(e =>
                             {
                                 var k = new LineSegment(e);
-                                k=k.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2);
+                                k=k.Translation(-lane.Vec.Normalize() * DisLaneWidth / 2/*(minlength < DisLaneWidth / 2? minlength : DisLaneWidth / 2)*/);
                                 var con = !IsInAnyBoxes(k.MidPoint, LaneBoxes, true);
                                 if (con) return true;
                                 else return false;
@@ -527,6 +530,76 @@ namespace ThParkingStall.Core.MPartitionLayout
                     i--;
                 }
             }
+
+            //测试：返回只要满足车道宽度的车道——不以满足整个模块宽度的为车道线——避免的的情况在线后半部分依然能排布的情况
+            var pointsa_lane = pointsa.Where(p =>
+             {
+                 var dis = edgea.ClosestPoint(p).Distance(p);
+                 return dis < DisVertCarLength + DisLaneWidth && dis > DisVertCarLength;
+             }).Select( p=> edgea.ClosestPoint(p)).ToList();
+            var pointsb_lane = pointsb.Where(p =>
+            {
+                var dis = edgeb.ClosestPoint(p).Distance(p);
+                return dis < DisVertCarLength + DisLaneWidth && dis > DisVertCarLength;
+            }).Select(p=> edgeb.ClosestPoint(p)).ToList();
+            Coordinate pta_lane;
+            Coordinate ptb_lane;
+            pointsa_lane = pointsa_lane.Where(e => e.Distance(lane.P0) > 1).OrderBy(e => e.Distance(lane.P0)).ToList();
+            pointsb_lane = pointsb_lane.Where(e => e.Distance(lane.P1) > 1).OrderBy(e => e.Distance(lane.P1)).ToList();
+            if (pointsa_lane.ToArray().Length == 0) pta_lane = lane.P0;
+            else pta_lane = pointsa_lane.First();
+            if (pointsb_lane.ToArray().Length == 0) ptb_lane = lane.P0;
+            else ptb_lane = pointsb_lane.First();
+            foreach (var la in IniLanes)
+            {
+                var disa = la.Line.ClosestPoint(pta_lane).Distance(pta_lane);
+                if (disa < DisLaneWidth / 2)
+                {
+                    pta_lane = pta_lane.Translation((new Vector2D(pta_lane, lane.P0)).Normalize() * (DisLaneWidth / 2 - disa));
+                }
+                var disb = la.Line.ClosestPoint(ptb_lane).Distance(ptb_lane);
+                if (disb < DisLaneWidth / 2)
+                {
+                    ptb_lane = ptb_lane.Translation(new Vector2D(ptb_lane, lane.P1).Normalize() * (DisLaneWidth / 2 - disb));
+                }
+            }
+            LineSegment eb_lane = new LineSegment(lane.P1, ptb_lane);
+            LineSegment ea_lane = new LineSegment(lane.P0, pta_lane);
+            var pa_lane = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
+                pta_lane.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta_lane });
+            if (pa_lane.Area > 0)
+            {
+                if (ClosestPointInVertLines(ea_lane.P0, ea_lane ,IniLanes.Select(e => e.Line).ToList()) < 1 &&
+                    Math.Abs(ClosestPointInVertLines(ea_lane.P1, ea_lane, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
+                    ea_lane.Length < DisLaneWidth / 2 + DisVertCarWidth * 4)
+                {
+                    count = 0;
+                }
+                else
+                {
+                    plys.Add(pa_lane);
+                    generatedcount++;
+                }
+            }
+            var pb_lane = PolyFromPoints(new List<Coordinate>() { lane.P1, lane.P1.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
+                 ptb_lane.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),ptb_lane});
+            if (pb_lane.Area > 0)
+            {
+                if (ClosestPointInVertLines(eb_lane.P0, eb_lane, IniLanes.Select(e => e.Line).ToList()) < 1 &&
+                    Math.Abs(ClosestPointInVertLines(eb_lane.P1, eb_lane, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
+    eb_lane.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
+                {
+                    count = 0;
+                }
+                else
+                {
+                    plys.Add(pb_lane);
+                    generatedcount++;
+                }
+            }
+            //以上为测试代码
+
+
             pointsa = pointsa.Select(e => edgea.ClosestPoint(e)).ToList();
             pointsb = pointsb.Select(e => edgeb.ClosestPoint(e)).ToList();
             Coordinate pta;
@@ -554,38 +627,39 @@ namespace ThParkingStall.Core.MPartitionLayout
             LineSegment ea = new LineSegment(lane.P0, pta);
             count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2) / DisVertCarWidth));
             count += ((int)Math.Floor((eb.Length - DisLaneWidth / 2) / DisVertCarWidth));
-            var pa = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-                pta.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta });
-            if (pa.Area > 0)
-            {
-                if (ClosestPointInVertLines(ea.P0, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-                    Math.Abs(ClosestPointInVertLines(ea.P1, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-                    ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
-                {
-                    count = 0;
-                }
-                else
-                {
-                    plys.Add(pa);
-                    generatedcount++;
-                }
-            }
-            var pb = PolyFromPoints(new List<Coordinate>() { lane.P1, lane.P1.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
-                 ptb.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),ptb});
-            if (pb.Area > 0)
-            {
-                if (ClosestPointInVertLines(eb.P0, eb, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-                    Math.Abs(ClosestPointInVertLines(eb.P1, eb, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
-    eb.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
-                {
-                    count = 0;
-                }
-                else
-                {
-                    plys.Add(pb);
-                    generatedcount++;
-                }
-            }
+
+    //        var pa = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
+    //            pta.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta });
+    //        if (pa.Area > 0)
+    //        {
+    //            if (ClosestPointInVertLines(ea.P0, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
+    //                Math.Abs(ClosestPointInVertLines(ea.P1, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
+    //                ea.Length < DisLaneWidth / 2 + DisVertCarWidth * 4)
+    //            {
+    //                count = 0;
+    //            }
+    //            else
+    //            {
+    //                plys.Add(pa);
+    //                generatedcount++;
+    //            }
+    //        }
+    //        var pb = PolyFromPoints(new List<Coordinate>() { lane.P1, lane.P1.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
+    //             ptb.Translation(-new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),ptb});
+    //        if (pb.Area > 0)
+    //        {
+    //            if (ClosestPointInVertLines(eb.P0, eb, IniLanes.Select(e => e.Line).ToList()) < 1 &&
+    //                Math.Abs(ClosestPointInVertLines(eb.P1, eb, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisVertCarWidth &&
+    //eb.Length < DisLaneWidth / 2 + DisVertCarWidth * 5)
+    //            {
+    //                count = 0;
+    //            }
+    //            else
+    //            {
+    //                plys.Add(pb);
+    //                generatedcount++;
+    //            }
+    //        }
 
             return count;
         }
@@ -650,14 +724,20 @@ namespace ThParkingStall.Core.MPartitionLayout
                 int modulecount = ilanes.Count;
                 int vertcount = ((int)Math.Floor((line.Length - modulecount * DisModulus) / DisVertCarWidth));
                 PerpModlues perpModlue = ConstructPerpModules(lane.Vec, ilanes);
+                int step = 1;
                 for (int i = 0; i < vertcount; i++)
                 {
-                    var test = UpdataPerpModlues(perpModlue);
+                    var test = UpdataPerpModlues(perpModlue, step);
                     if (test.Count >= perpModlue.Count)
                     {
                         perpModlue = test;
+                        step = 1;
                     }
-                    else continue;
+                    else
+                    {
+                        step++;
+                        continue;
+                    }
                 }
                 foreach (var pl in perpModlue.Bounds)
                 {
@@ -669,19 +749,20 @@ namespace ThParkingStall.Core.MPartitionLayout
                     module.Box = pl;
                     module.Line = a;
                     module.Vec = vec;
+                    module.IsInVertUnsureModule = true;
                     CarModules.Add(module);
                 }
                 CarBoxes.AddRange(perpModlue.Bounds);
                 CarBoxesSpatialIndex.Update(perpModlue.Bounds, new List<Polygon>());
             }
         }
-        private PerpModlues UpdataPerpModlues(PerpModlues perpModlues)
+        private PerpModlues UpdataPerpModlues(PerpModlues perpModlues,int step)
         {
             PerpModlues result;
             int minindex = perpModlues.Mminindex;
             List<LineSegment> ilanes = new List<LineSegment>(perpModlues.Lanes);
             if (perpModlues.Lanes.Count == 0) return perpModlues;
-            var vec_move = Vector(perpModlues.Lanes[0]).Normalize() * DisVertCarWidth;
+            var vec_move = Vector(perpModlues.Lanes[0]).Normalize() * DisVertCarWidth * step;
             for (int i = 0; i < ilanes.Count; i++)
             {
                 if (i >= minindex)
@@ -858,6 +939,37 @@ namespace ThParkingStall.Core.MPartitionLayout
                     return pl;
                 }).ToList();
             }
+        }
+        private void InsuredForTheCaseOfoncaveBoundary()
+        {
+            var lanebox = IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1).Scale(ScareFactorForCollisionCheck));
+            var carspacialindex = new MNTSSpatialIndex(CarSpots);
+            var pillarspacialindex = new MNTSSpatialIndex(Pillars);
+            var cars_to_remove = new List<Polygon>();
+            var pillars_to_remove = new List<Polygon>();
+            foreach (var lane in lanebox)
+            {
+                var cars= carspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                var pillars= pillarspacialindex.SelectCrossingGeometry(lane).Cast<Polygon>();
+                cars_to_remove.AddRange(cars);
+                pillars_to_remove.AddRange(pillars);
+            }
+            cars_to_remove=cars_to_remove.Distinct().ToList();
+            pillars_to_remove = pillars_to_remove.Distinct().ToList();
+            CarSpots = CarSpots.Except(cars_to_remove).ToList();
+            for (int i = 0; i < Cars.Count; i++)
+            {
+                foreach (var remove in cars_to_remove)
+                {
+                    if (Cars[i].Polyline.Centroid.Coordinate.Distance(remove.Centroid.Coordinate) < 1)
+                    {
+                        Cars.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            Pillars = Pillars.Except(pillars_to_remove).ToList();
         }
         private Polygon ConvertVertCarToCollisionCar(LineSegment baseline, Vector2D vec)
         {

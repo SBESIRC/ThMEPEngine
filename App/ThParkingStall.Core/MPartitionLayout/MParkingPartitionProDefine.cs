@@ -89,7 +89,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
 
-        const double ScareFactorForCollisionCheck = 0.99;
+        public static double ScareFactorForCollisionCheck = 0.999999;
         public static bool GeneratePillars = true;
         public static bool GenerateMiddlePillars = true;
         public static bool HasImpactOnDepthForPillarConstruct = true;
