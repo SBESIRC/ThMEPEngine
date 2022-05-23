@@ -73,6 +73,17 @@ namespace TianHua.Mep.UI.ViewModel
                 IsSelected = true,
             });
         }
+        public void RemoveLayers(List<string> layers)
+        {
+            if(layers.Count>0)
+            {
+                var layerInfos = LayerInfos
+                .OfType<ThLayerInfo>()
+                .Where(o => !layers.Contains(o.Layer))
+                .ToList();
+                LayerInfos = new ObservableCollection<ThLayerInfo>(layerInfos);
+            }
+        }
         private bool IsExisted(string layer)
         {
             return LayerInfos.Where(o => o.Layer == layer).Any();
@@ -138,7 +149,7 @@ namespace TianHua.Mep.UI.ViewModel
             storeInfos.Where(o => !sbeamLayers.Select(s => s.Layer).Contains(o.Layer))
                 .ForEach(o => results.Add(o));
 
-            results = Sort(results);
+            //results = Sort(results);
             return results;
         }
         private void SaveLayers()
