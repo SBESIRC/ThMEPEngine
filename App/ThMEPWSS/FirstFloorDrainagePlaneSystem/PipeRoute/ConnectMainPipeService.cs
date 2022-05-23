@@ -132,15 +132,6 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 CreateConnectPipesService connectPipesService = new CreateConnectPipesService(step, gridInfo);
                 Dictionary<List<Polyline>, double> weightHoles = new Dictionary<List<Polyline>, double>();
                 weightHoles.Add(wallPolys, double.MaxValue);
-                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-                using (db.Database.GetDocument().LockDocument())
-                {
-                    foreach (var item in wallPolys)
-                    {
-                           
-                    }
-                    db.ModelSpace.Add(outFrame);
-                }
                 weightHoles.Add(holeConnectLines, lineWieght);
                 var connectLine = connectPipesService.CreatePipes(outFrame, closetLine, pipeLine.Value.EndPoint, weightHoles);
                 if (connectLine.Count > 0)
