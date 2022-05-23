@@ -701,7 +701,11 @@ namespace TianHua.Electrical.PDS.UI.Services
         {
             get
             {
-                return Node.Load.Location.ReferenceDWG;
+                if (Node.Load.Location != null)
+                {
+                    return Node.Load.Location.ReferenceDWG;
+                }
+                return string.Empty;
             }
         }
         public Point3d BasePoint
