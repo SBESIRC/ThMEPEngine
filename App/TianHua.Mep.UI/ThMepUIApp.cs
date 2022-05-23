@@ -66,7 +66,10 @@ namespace TianHua.Mep.UI
             AcadApp.ShowModelessWindow(config);
         }
 
-        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
+        /// <summary>
+        /// 框线对比
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKXBD", CommandFlags.Modal)]
         public void ThFrameCompare()
         {
             var config = new FrameCompareUI();
