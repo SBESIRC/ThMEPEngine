@@ -30,8 +30,7 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
         public HashSet<Tuple<Point3d, Point3d>> Process()
         {
             MergeGrid();
-            //1、贴边
-            StichToBorder();
+
             //优化图
             var tmpgrid = new Dictionary<Point3d, HashSet<Point3d>>();
             foreach (var kv in EarthGrid)
@@ -41,14 +40,17 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Connect
             GraphDealer.SimplifyGraph(ref tmpgrid, GetPtsOnBorders().ToList(), 1000);
             EarthGrid.Clear();
             EarthGrid = tmpgrid;
+
+            //贴边
             StichToBorder();
             //删除outline附近的线
             DeleteLineNearOutline();
+
             //添加线
             AddLinesOnOutlines();
-            //2.1 删除禁区内的线
+            //删除禁区内的线
             RemoveInnerForbiddenLines();
-            //2、连接引下线
+            //连接引下线
             AddDownConductorToEarthGrid();
             return LineDealer.Graph2Lines(EarthGrid);
         }

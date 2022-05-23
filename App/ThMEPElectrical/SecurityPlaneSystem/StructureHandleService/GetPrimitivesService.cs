@@ -317,7 +317,7 @@ namespace ThMEPElectrical.StructureHandleService
                 .Where(o => o.Layer == layerName);
                 var TCHElements = trunkingLines.Where(o => o.IsTCHElement());
                 var trunkingLineCollection = trunkingLines.Except(TCHElements).ToCollection();
-                TCHElements.ForEach(o => trunkingLineCollection.Union(o.ExplodeTCHElement()));
+                TCHElements.ForEach(o => trunkingLineCollection = trunkingLineCollection.Union(o.ExplodeTCHElement()));
                 trunkingLines = trunkingLineCollection.Cast<Curve>();
                 trunkingLines.ForEach(x =>
                 {

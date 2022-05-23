@@ -1177,7 +1177,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("框线对比",
                     "天华框线对比",
-                    "THKXDB",
+                    "THKXBD",
                     "天华框线对比",
                     "IDI_THCAD_THKXDB_SMALL",
                     "IDI_THCAD_THKXDB_LARGE",

@@ -50,42 +50,42 @@ FocusToCAD();
             Active.Document.Window.Focus();
 #endif
         }
-        public void ImportBlockFile()
+        private void ImportBlockFile()
         {
+            using (var acadDb = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 if (blockDb.Blocks.Contains("AI-壁式轴流风机"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-壁式轴流风机"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-壁式轴流风机"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-壁式排风扇"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-壁式排风扇"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-壁式排风扇"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-吊顶式排风扇"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式排风扇"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式排风扇"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-吊顶式排风扇"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式排风扇"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式排风扇"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-风口标注1"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-风口标注1"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-风口标注1"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-风口"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-风口"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-风口"), true);
                 }
                 if (blockDb.Blocks.Contains("防火阀"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("防火阀"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("防火阀"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-洞口"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-洞口"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-洞口"), true);
                 }
                 if (blockDb.Layers.Contains("H-EQUP-FANS"))
                 {
@@ -112,13 +112,16 @@ FocusToCAD();
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-DUCT-VENT"));
                 }
             }
-            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+        }
+        private void EnsureLayerOn()
+        {
+            using (var acadDb = AcadDatabase.Active())
             {
+                DbHelper.EnsureLayerOn("H-HOLE");
                 DbHelper.EnsureLayerOn("H-EQUP-FANS");
                 DbHelper.EnsureLayerOn("H-DIMS-DUCT");
                 DbHelper.EnsureLayerOn("H-DAPP-GRIL");
                 DbHelper.EnsureLayerOn("H-DAPP-ADAMP");
-                DbHelper.EnsureLayerOn("H-HOLE");
                 DbHelper.EnsureLayerOn("H-DUCT-VENT");
             }
         }
@@ -153,6 +156,7 @@ FocusToCAD();
                 using (var database = AcadDatabase.Active())
                 {
                     ImportBlockFile();
+                    EnsureLayerOn();
                     switch (thFanLayoutConfigInfo.FanType)
                     {
                         case 0://壁式轴流风机

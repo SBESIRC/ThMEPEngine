@@ -1,516 +1,519 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{9F81D0C6-08FE-451E-9379-5882F9270E55}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>ThMEPElectrical</RootNamespace>
-        <AssemblyName>ThMEPElectrical</AssemblyName>
-        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-        <TargetFrameworkProfile />
-    </PropertyGroup>
-    <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-    <ItemGroup>
-        <Reference Include="PresentationCore" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Xml" />
-        <Reference Include="WindowsBase" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="AFAS\Command\ThAFASCommand.cs" />
-        <Compile Include="AFAS\DataFactory\ThAFASBusinessDataSetFactory.cs" />
-        <Compile Include="AFAS\DataFactory\ThAFASDataQueryService.cs" />
-        <Compile Include="AFAS\Model\ThAFASDataPass.cs" />
-        <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
-        <Compile Include="AFAS\DataFactory\ThAFASDataSetFactory.cs" />
-        <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
-        <Compile Include="AFAS\Model\ThBeamDataParameter.cs" />
-        <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
-        <Compile Include="AFAS\Utils\LogUtil.cs" />
-        <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />
-        <Compile Include="AFAS\Utils\ThAFASSelectFrameUtil.cs" />
-        <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
-        <Compile Include="Assistant\GeometryTrans.cs" />
-        <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
-        <Compile Include="BlockConvert\ThBConvertCommon.cs" />
-        <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
-        <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
-        <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
-        <Compile Include="BlockConvert\ThBConvertElementExtractionEngine.cs" />
-        <Compile Include="BlockConvert\ThBConvertEngine.cs" />
-        <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
-        <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
-        <Compile Include="BlockConvert\ThBConvertExcelExtension.cs" />
-        <Compile Include="BlockConvert\ThBConvertManager.cs" />
-        <Compile Include="BlockConvert\ThBConvertParameter.cs" />
-        <Compile Include="BlockConvert\ThBConvertRule.cs" />
-        <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
-        <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
-        <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
-        <Compile Include="BlockConvert\ThBConvertBlockExtractionEngine.cs" />
-        <Compile Include="BlockConvert\ThBConvertUtils.cs" />
-        <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
-        <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
-        <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
-        <Compile Include="Broadcast\Model\ThBroadcastParameter.cs" />
-        <Compile Include="Broadcast\Service\PrintBlindAreaService.cs" />
-        <Compile Include="Broadcast\Service\CheckService.cs" />
-        <Compile Include="Broadcast\Service\ClearService\ClearComponentService.cs" />
-        <Compile Include="Broadcast\Service\StructureService.cs" />
-        <Compile Include="Broadcast\Service\StructUtils.cs" />
-        <Compile Include="Broadcast\Service\ToleranceService.cs" />
-        <Compile Include="Broadcast\StructureLayoutService.cs" />
-        <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
-        <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
-        <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
-        <Compile Include="Business\ClearScene\ClearSmoke.cs" />
-        <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
-        <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
-        <Compile Include="Business\MainBeam\Optimize\NonRegular2PointsOptimizer.cs" />
-        <Compile Include="Business\Procedure\NoUserCoordinateWorker.cs" />
-        <Compile Include="Business\Procedure\SplitWallWorker.cs" />
-        <Compile Include="CAD\BlockInsertDBExtension.cs" />
-        <Compile Include="Business\BlockInsertor.cs" />
-        <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
-        <Compile Include="Business\DetectionRegion\DetectionCalculator.cs" />
-        <Compile Include="Business\DetectionRegion\GridDetectionCalculator.cs" />
-        <Compile Include="Business\DetectionRegion\NoBeamStoreyDetectionCalculator.cs" />
-        <Compile Include="Business\LayoutCalculator.cs" />
-        <Compile Include="Business\EntityPicker.cs" />
-        <Compile Include="Business\MainBeam\OneColMultiSegmentsPlaceEx.cs" />
-        <Compile Include="Business\Operation\ValidInputPairInfoCalculator.cs" />
-        <Compile Include="Business\PlacePointCalculator.cs" />
-        <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
-        <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
-        <Compile Include="Business\MainBeam\OneColRectPlace.cs" />
-        <Compile Include="Business\MainBeam\RectProfilePlace.cs" />
-        <Compile Include="Business\MainSecondBeam\MSBeamNoRegularOneColPlacer.cs" />
-        <Compile Include="Business\MainSecondBeam\MSBeamNoRegularPlacer.cs" />
-        <Compile Include="Business\MainSecondBeam\MSBeamRectPlacer.cs" />
-        <Compile Include="Business\PreWindowSelector.cs" />
-        <Compile Include="Business\Procedure\UcsInfoCalculator.cs" />
-        <Compile Include="Business\Procedure\UserCoordinateWorker.cs" />
-        <Compile Include="Business\Procedure\WallDataPicker.cs" />
-        <Compile Include="CAD\DBExtract.cs" />
-        <Compile Include="CAD\InfoReader.cs" />
-        <Compile Include="CAD\ThCompassDrawJig.cs" />
-        <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
-        <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
-        <Compile Include="Command\TxtStrucInfoCommand.cs" />
-        <Compile Include="Command\ThAccessControlSystemCommand.cs" />
-        <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
-        <Compile Include="Command\ThEarthingGridCommand.cs" />
-        <Compile Include="Command\ThDclCommand.cs" />
-        <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
-        <Compile Include="Command\ThGuardToourSystemCommand.cs" />
-        <Compile Include="Command\ThInsertStoreyCommand.cs" />
-        <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
-        <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
-        <Compile Include="Command\ThBConvertCommand.cs" />
-        <Compile Include="Command\ThLaneLineCommand.cs" />
-        <Compile Include="Command\ThSecurityPlaneSystemPipeCommand.cs" />
-        <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
-        <Compile Include="ConnectPipe\ConnetPipeService.cs" />
-        <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
-        <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
-        <Compile Include="ConnectPipe\Service\BlockUtils.cs" />
-        <Compile Include="ConnectPipe\Service\CheckService.cs" />
-        <Compile Include="ConnectPipe\Service\ConnectBroadcastService.cs" />
-        <Compile Include="ConnectPipe\Service\CorrectPipeConnectService.cs" />
-        <Compile Include="ConnectPipe\Service\CreatePipeLineService.cs" />
-        <Compile Include="ConnectPipe\Service\GeUtils.cs" />
-        <Compile Include="ConnectPipe\Service\MainLanesConnectPipeSrevice.cs" />
-        <Compile Include="ConnectPipe\Service\PathfindingByPointService.cs" />
-        <Compile Include="ConnectPipe\Service\PathfindingUitlsService.cs" />
-        <Compile Include="ConnectPipe\Service\PathfindingWithDirServce.cs" />
-        <Compile Include="Core\PackageManager.cs" />
-        <Compile Include="Assistant\DrawUtils.cs" />
-        <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
-        <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
-        <Compile Include="EarthingGrid\Data\ThEarthingGridDatasetFactory.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorRecognitionEngine.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionEngine.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionVisitor.cs" />
-        <Compile Include="EarthingGrid\Engine\ThDownConductorWireRecognitionEngine.cs" />
-        <Compile Include="EarthingGrid\Generator\Connect\ColumnGrid.cs" />
-        <Compile Include="EarthingGrid\Generator\Connect\DataProcess.cs" />
-        <Compile Include="EarthingGrid\Generator\Connect\EarthGrid.cs" />
-        <Compile Include="EarthingGrid\Generator\Connect\GridGenerator.cs" />
-        <Compile Include="EarthingGrid\Generator\Connect\PostProcess.cs" />
-        <Compile Include="EarthingGrid\Generator\Data\ClassData.cs" />
-        <Compile Include="EarthingGrid\Generator\Data\LayerDealer.cs" />
-        <Compile Include="EarthingGrid\Generator\Data\PreProcess.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\AreaDealer.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\BorderNearConnect.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\GetObjects.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\GraphDealer.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\LineDealer.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\MergeGrid.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\PointsDealer.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\RangeConfine.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\ShowInfo.cs" />
-        <Compile Include="EarthingGrid\Generator\Utils\StructureDealer.cs" />
-        <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
-        <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
-        <Compile Include="EarthingGrid\Service\ThEarthingGridDataService.cs" />
-        <Compile Include="EarthingGrid\Service\ThShearwallGroupService.cs" />
-        <Compile Include="EarthingGrid\ThEarthingGridCommon.cs" />
-        <Compile Include="ElectricalLoadCalculation\ElectricalConfigDataModel.cs" />
-        <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationConfig.cs" />
-        <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationService.cs" />
-        <Compile Include="ElectricalLoadCalculation\GetPrimitivesService.cs" />
-        <Compile Include="ElectricalLoadCalculation\LogicService.cs" />
-        <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
-        <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
-        <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
-        <Compile Include="FireAlarmArea\Command\ThAFASGasCmd.cs" />
-        <Compile Include="FireAlarmArea\Engine\ThAFASGasEngine.cs" />
-        <Compile Include="FireAlarmDistance\Command\ThAFASBroadcastCmd.cs" />
-        <Compile Include="FireAlarmDistance\Command\ThAFASManualAlarmCmd.cs" />
-        <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataQueryService.cs" />
-        <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
-        <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
-        <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
-        <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />
-        <Compile Include="FireAlarmDistance\ThFaDistCommon.cs" />
-        <Compile Include="FireAlarmFixLayout\Command\ThAFASDisplayDeviceLayoutCmd.cs" />
-        <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
-        <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
-        <Compile Include="AFAS\Utils\ThFaCleanService.cs" />
-        <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactory.cs" />
-        <Compile Include="FireAlarmFixLayout\Service\ThAFASFixUtil.cs" />
-        <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
-        <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
-        <Compile Include="AFAS\Model\ThLayoutPt.cs" />
-        <Compile Include="FireAlarmArea\Service\ThFASmokeStairService.cs" />
-        <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutParamterCalculationService.cs" />
-        <Compile Include="FireAlarmArea\Service\ThFaSmokeRoomTypeService.cs" />
-        <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutService.cs" />
-        <Compile Include="FireAlarmArea\ThFaSmokeCommon.cs" />
-        <Compile Include="FireAlarmArea\Command\ThAFASSmokeCmd.cs" />
-        <Compile Include="FireAlarmArea\Engine\ThAFASSmokeEngine.cs" />
-        <Compile Include="AFAS\ViewModel\FireAlarmSetting.cs" />
-        <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
-        <Compile Include="AFAS\Data\ThAFASPlaceCoverageExtractor.cs" />
-        <Compile Include="AFAS\Data\ThFireAlarmBlkExtractor.cs" />
-        <Compile Include="FireAlarmFixLayout\Data\ThAFASFixDataQueryService.cs" />
-        <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
-        <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
-        <Compile Include="FireAlarmFixLayout\Logic\ThFireTelFixedPointLayoutService.cs" />
-        <Compile Include="AFAS\Utils\ThFireAlarmInsertBlk.cs" />
-        <Compile Include="AFAS\Service\ThIsExteriorDoorService.cs" />
-        <Compile Include="AFAS\Service\ThQueryHoleTextInfoService.cs" />
-        <Compile Include="AFAS\ViewModel\FireAlarmViewModel.cs" />
-        <Compile Include="AFAS\ThFaCommon.cs" />
-        <Compile Include="FireAlarmFixLayout\ThFaFixCommon.cs" />
-        <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
-        <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
-        <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
-        <Compile Include="DCL\Data\ThOuterOtherShearWallExtractor.cs" />
-        <Compile Include="DCL\Data\ThOuterVertialComponentData.cs" />
-        <Compile Include="DCL\Service\ThBuildOuterArchOutline.cs" />
-        <Compile Include="DCL\Service\ThBuildOuterOutline.cs" />
-        <Compile Include="DCL\Service\ThBuildOuterStruOutline.cs" />
-        <Compile Include="DCL\Service\ThDclUtils.cs" />
-        <Compile Include="DCL\Service\ThStruOuterVerticalComponentRecognizer.cs" />
-        <Compile Include="DCL\Service\ThArchOuterVerticalComponentRecognizer.cs" />
-        <Compile Include="DCL\Service\ThOuterVerticalComponentRecognizer.cs" />
-        <Compile Include="AFAS\Data\ThAFASEStoreyExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASArchitectureWallExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASBeamExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASColumnExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASDoorOpeningExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASFireProofShutterExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASRailingExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASRoomExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASShearWallExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASWindowExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASFireCompartmentExtractor.cs" />
-        <Compile Include="AFAS\Data\ThAFASHoleExtractor.cs" />
-        <Compile Include="AFAS\Interface\ISetStorey.cs" />
-        <Compile Include="AFAS\Service\ThCleanEntityService.cs" />
-        <Compile Include="AFAS\Service\ThHandleContainsService.cs" />
-        <Compile Include="AFAS\Service\ThHandleNonClosedPolylineService.cs" />
-        <Compile Include="AFAS\Service\ThHandleConflictService.cs" />
-        <Compile Include="AFAS\Service\ThHandleRoomBufferService.cs" />
-        <Compile Include="Geometry\ABBRectangle.cs" />
-        <Compile Include="Geometry\CoordinateTransform.cs" />
-        <Compile Include="Geometry\GeomUtils.cs" />
-        <Compile Include="Geometry\MinRectangle.cs" />
-        <Compile Include="Geometry\MPolygonProfileFinder.cs" />
-        <Compile Include="GroundingGrid\Data\ThEarthConductorExtractor.cs" />
-        <Compile Include="GroundingGrid\Data\ThDownConductorExtractor.cs" />
-        <Compile Include="GroundingGrid\Data\ThFloorOutlineExtractor.cs" />
-        <Compile Include="GroundingGrid\Data\ThGroundColumnExtractor.cs" />
-        <Compile Include="GroundingGrid\Data\ThGroundShearwallExtractor.cs" />
-        <Compile Include="GroundingGrid\Data\ThGroundWireExtractor.cs" />
-        <Compile Include="Layout\ILayout.cs" />
-        <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
-        <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
-        <Compile Include="Layout\MBeamLayout\MainBeamRectangleLayout.cs" />
-        <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamLayout.cs" />
-        <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamPolygonLayout.cs" />
-        <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamRectLayout.cs" />
-        <Compile Include="Layout\SensorLayout.cs" />
-        <Compile Include="Broadcast\ColumnService.cs" />
-        <Compile Include="Broadcast\InsertBroadcastService.cs" />
-        <Compile Include="Broadcast\LayoutService.cs" />
-        <Compile Include="Model\BeamProfile.cs" />
-        <Compile Include="Model\ThCapitalConverterModel.cs" />
-        <Compile Include="Model\ColumnModel.cs" />
-        <Compile Include="Model\DetectionPolygon.cs" />
-        <Compile Include="Model\DetectionRegion.cs" />
-        <Compile Include="Model\LayoutMap.cs" />
-        <Compile Include="Model\LayoutProfileData.cs" />
-        <Compile Include="Model\MainSecondBeamRegion.cs" />
-        <Compile Include="Model\PairData.cs" />
-        <Compile Include="Model\PolylineCircle.cs" />
-        <Compile Include="Model\SplitBeamPath.cs" />
-        <Compile Include="Model\PlaceInputProfileData.cs" />
-        <Compile Include="Model\PlaceParameter.cs" />
-        <Compile Include="Model\PlacePoint.cs" />
-        <Compile Include="Model\PlacePointProArea.cs" />
-        <Compile Include="Model\PlaceRect.cs" />
-        <Compile Include="Model\PointPosType.cs" />
-        <Compile Include="Model\PolygonInfo.cs" />
-        <Compile Include="Model\ThSecurityPlaneSystemParameter.cs" />
-        <Compile Include="Model\UcsInfo.cs" />
-        <Compile Include="Model\WallModel.cs" />
-        <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
-        <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
-        <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
-        <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
-        <Compile Include="PostProcess\HoleAdjustor\HoleRegionPointAdjustor.cs" />
-        <Compile Include="PostProcess\HoleAdjustor\IsolatedHoleAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamLargeAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamAdjustor\PointMoveAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamAdjustor\RegularPointMoveAdjustor.cs" />
-        <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
-        <Compile Include="PostProcess\PlacePointAdjustor.cs" />
-        <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\HandleAccessControlRoomService.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutAccessControlService.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayAuthenticationService.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayVisitorTalkService.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
-        <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\AccessControlConnectService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\ConnectPipeService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\InsertConnectPipeService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\IntrucsionAlarmConnectService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ACModel.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\BlockModel.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\IAModel.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ModelClassifyService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\VMModel.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\ConnectBlockService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\PipePathService.cs" />
-        <Compile Include="SecurityPlaneSystem\ConnectPipe\SystemConnectPipeService.cs" />
-        <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
-        <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
-        <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
-        <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutOtherGTService.cs" />
-        <Compile Include="SecurityPlaneSystem\InsertBlockService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\HandleIntrusionAlarmRoomService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutDisabledToiletService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutEmergencyAlarmService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutFactoryService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutWallMountingDetectorService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutMonitoringService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutHositingDetectorService.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\LayoutModel.cs" />
-        <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\RoomInfoModel.cs" />
-        <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
-        <Compile Include="SecurityPlaneSystem\Utils\CheckService.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\HandleVideoMonitoringRoomService.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutModel.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
-        <Compile Include="Service\ThElectricalCommonService.cs" />
-        <Compile Include="Service\ThElectricalUIService.cs" />
-        <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
-        <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
-        <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
-        <Compile Include="SystemDiagram\Engine\ThControlCircuitRecognitionEngine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThControlCircuitVisitor.cs" />
-        <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionEngine.cs" />
-        <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionVistor.cs" />
-        <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractor.cs" />
-        <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
-        <Compile Include="SystemDiagram\Extension\ThAFASGraphExtension.cs" />
-        <Compile Include="SystemDiagram\Extension\ThDBObbExtension.cs" />
-        <Compile Include="SystemDiagram\Extension\ThEStoreysExtension.cs" />
-        <Compile Include="SystemDiagram\Extension\ThQuantityMarkExtension.cs" />
-        <Compile Include="SystemDiagram\Model\AlarmModel.cs" />
-        <Compile Include="SystemDiagram\Model\DynamicCheckBox.cs" />
-        <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromFireCompartment.cs" />
-        <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThBlockModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThBlockNumStatistics.cs" />
-        <Compile Include="SystemDiagram\Model\ThDrawModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThFireDistrictModel.cs" />
-        <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThConnect280FireDamperWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThDC24VPowerWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFireControlRoomVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFireIndicatingWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFirePumpStartVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFireTelephoneWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFireWaterTankLevelVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThFormHeaderVerticalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThSprinklerPumpStartSignalWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThTextWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuit.cs" />
-        <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
-        <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
-        <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
-        <Compile Include="ThAFASCmds.cs" />
-        <Compile Include="THAFASDebugCmds.cs" />
-        <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
-        <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
-        <Compile Include="ThElectricalLoadCalculationCmd.cs" />
-        <Compile Include="ThEarthingGridCmds.cs" />
-        <Compile Include="ThAuxiliaryCmds.cs" />
-        <Compile Include="ThBroadcastCmds.cs" />
-        <Compile Include="ThMEPCommon.cs" />
-        <Compile Include="ThMEPElectricalApp.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="ThMEPElectricalService.cs" />
-        <Compile Include="ThMEPElectricalUtils.cs" />
-        <Compile Include="ThProtectThunderCmd.cs" />
-        <Compile Include="ThSecurityPlaneCmds.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\LayoutService.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
-        <Compile Include="SecurityPlaneSystem\Utils\UtilService.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
-        <Compile Include="SecurityPlaneSystem\StructureHandleService\GetLayoutStructureService.cs" />
-        <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CADExtension\CADExtension.csproj">
-            <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
-            <Name>CADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
-            <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
-            <Name>ThDotNetARX</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
-            <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
-            <Name>ThCADCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
-            <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
-            <Name>ThCADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
-            <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
-            <Name>ThControlLibraryWPF</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-            <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
-            <Name>ThMEPEngineCore</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="DCL\Engine\" />
-        <Folder Include="DCL\Model\" />
-    </ItemGroup>
-    <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
-    <ItemGroup>
-        <PackageReference Include="QuikGraph">
-            <Version>2.3.0</Version>
-        </PackageReference>
-        <PackageReference Include="Serilog">
-            <Version>2.10.0</Version>
-        </PackageReference>
-        <PackageReference Include="Serilog.Sinks.File">
-            <Version>5.0.0</Version>
-        </PackageReference>
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-    <PropertyGroup>
-        <PostBuildEvent>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9F81D0C6-08FE-451E-9379-5882F9270E55}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ThMEPElectrical</RootNamespace>
+    <AssemblyName>ThMEPElectrical</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AFAS\Command\ThAFASCommand.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASBusinessDataSetFactory.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataQueryService.cs" />
+    <Compile Include="AFAS\Model\ThAFASDataPass.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataSetFactory.cs" />
+    <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
+    <Compile Include="AFAS\Model\ThBeamDataParameter.cs" />
+    <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
+    <Compile Include="AFAS\Utils\LogUtil.cs" />
+    <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />
+    <Compile Include="AFAS\Utils\ThAFASSelectFrameUtil.cs" />
+    <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
+    <Compile Include="Assistant\GeometryTrans.cs" />
+    <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertCommon.cs" />
+    <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertElementExtractionVisitor.cs" />
+    <Compile Include="BlockConvert\ThBConvertElementExtractionEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertExcelExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertManager.cs" />
+    <Compile Include="BlockConvert\ThBConvertParameter.cs" />
+    <Compile Include="BlockConvert\ThBConvertRule.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertBlockExtractionEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
+    <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
+    <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
+    <Compile Include="Broadcast\Model\ThBroadcastParameter.cs" />
+    <Compile Include="Broadcast\Service\PrintBlindAreaService.cs" />
+    <Compile Include="Broadcast\Service\CheckService.cs" />
+    <Compile Include="Broadcast\Service\ClearService\ClearComponentService.cs" />
+    <Compile Include="Broadcast\Service\StructureService.cs" />
+    <Compile Include="Broadcast\Service\StructUtils.cs" />
+    <Compile Include="Broadcast\Service\ToleranceService.cs" />
+    <Compile Include="Broadcast\StructureLayoutService.cs" />
+    <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
+    <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
+    <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
+    <Compile Include="Business\ClearScene\ClearSmoke.cs" />
+    <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
+    <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
+    <Compile Include="Business\MainBeam\Optimize\NonRegular2PointsOptimizer.cs" />
+    <Compile Include="Business\Procedure\NoUserCoordinateWorker.cs" />
+    <Compile Include="Business\Procedure\SplitWallWorker.cs" />
+    <Compile Include="CAD\BlockInsertDBExtension.cs" />
+    <Compile Include="Business\BlockInsertor.cs" />
+    <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\DetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\GridDetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\NoBeamStoreyDetectionCalculator.cs" />
+    <Compile Include="Business\LayoutCalculator.cs" />
+    <Compile Include="Business\EntityPicker.cs" />
+    <Compile Include="Business\MainBeam\OneColMultiSegmentsPlaceEx.cs" />
+    <Compile Include="Business\Operation\ValidInputPairInfoCalculator.cs" />
+    <Compile Include="Business\PlacePointCalculator.cs" />
+    <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
+    <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
+    <Compile Include="Business\MainBeam\OneColRectPlace.cs" />
+    <Compile Include="Business\MainBeam\RectProfilePlace.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamNoRegularOneColPlacer.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamNoRegularPlacer.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamRectPlacer.cs" />
+    <Compile Include="Business\PreWindowSelector.cs" />
+    <Compile Include="Business\Procedure\UcsInfoCalculator.cs" />
+    <Compile Include="Business\Procedure\UserCoordinateWorker.cs" />
+    <Compile Include="Business\Procedure\WallDataPicker.cs" />
+    <Compile Include="CAD\DBExtract.cs" />
+    <Compile Include="CAD\InfoReader.cs" />
+    <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
+    <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
+    <Compile Include="Command\TxtStrucInfoCommand.cs" />
+    <Compile Include="Command\ThAccessControlSystemCommand.cs" />
+    <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThEarthingGridCommand.cs" />
+    <Compile Include="Command\ThDclCommand.cs" />
+    <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThGuardToourSystemCommand.cs" />
+    <Compile Include="Command\ThInsertStoreyCommand.cs" />
+    <Compile Include="Command\ThIntrusionAlarmSystemCommand.cs" />
+    <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
+    <Compile Include="Command\ThBConvertCommand.cs" />
+    <Compile Include="Command\ThLaneLineCommand.cs" />
+    <Compile Include="Command\ThSecurityPlaneSystemPipeCommand.cs" />
+    <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
+    <Compile Include="ConnectPipe\ConnetPipeService.cs" />
+    <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
+    <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
+    <Compile Include="ConnectPipe\Service\BlockUtils.cs" />
+    <Compile Include="ConnectPipe\Service\CheckService.cs" />
+    <Compile Include="ConnectPipe\Service\ConnectBroadcastService.cs" />
+    <Compile Include="ConnectPipe\Service\CorrectPipeConnectService.cs" />
+    <Compile Include="ConnectPipe\Service\CreatePipeLineService.cs" />
+    <Compile Include="ConnectPipe\Service\GeUtils.cs" />
+    <Compile Include="ConnectPipe\Service\MainLanesConnectPipeSrevice.cs" />
+    <Compile Include="ConnectPipe\Service\PathfindingByPointService.cs" />
+    <Compile Include="ConnectPipe\Service\PathfindingUitlsService.cs" />
+    <Compile Include="ConnectPipe\Service\PathfindingWithDirServce.cs" />
+    <Compile Include="Core\PackageManager.cs" />
+    <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
+    <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="EarthingGrid\Data\ThEarthingGridDatasetFactory.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorRecognitionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionEngine.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireExtractionVisitor.cs" />
+    <Compile Include="EarthingGrid\Engine\ThDownConductorWireRecognitionEngine.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\ColumnGrid.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\DataProcess.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\EarthGrid.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\GridGenerator.cs" />
+    <Compile Include="EarthingGrid\Generator\Connect\PostProcess.cs" />
+    <Compile Include="EarthingGrid\Generator\Data\ClassData.cs" />
+    <Compile Include="EarthingGrid\Generator\Data\LayerDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Data\PreProcess.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\AreaDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\BorderNearConnect.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\GetObjects.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\GraphDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\LineDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\MergeGrid.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\PointsDealer.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\RangeConfine.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\ShowInfo.cs" />
+    <Compile Include="EarthingGrid\Generator\Utils\StructureDealer.cs" />
+    <Compile Include="EarthingGrid\Model\ThDownConductor.cs" />
+    <Compile Include="EarthingGrid\Model\ThDownConductorWire.cs" />
+    <Compile Include="EarthingGrid\Service\ThEarthingGridDataService.cs" />
+    <Compile Include="EarthingGrid\Service\ThShearwallGroupService.cs" />
+    <Compile Include="EarthingGrid\ThEarthingGridCommon.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalConfigDataModel.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationConfig.cs" />
+    <Compile Include="ElectricalLoadCalculation\ElectricalLoadCalculationService.cs" />
+    <Compile Include="ElectricalLoadCalculation\GetPrimitivesService.cs" />
+    <Compile Include="ElectricalLoadCalculation\LogicService.cs" />
+    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
+    <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
+    <Compile Include="FireAlarmArea\Command\ThAFASGasCmd.cs" />
+    <Compile Include="FireAlarmArea\Engine\ThAFASGasEngine.cs" />
+    <Compile Include="FireAlarmDistance\Command\ThAFASBroadcastCmd.cs" />
+    <Compile Include="FireAlarmDistance\Command\ThAFASManualAlarmCmd.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataQueryService.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
+    <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
+    <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
+    <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />
+    <Compile Include="FireAlarmDistance\ThFaDistCommon.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThAFASDisplayDeviceLayoutCmd.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
+    <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
+    <Compile Include="AFAS\Utils\ThFaCleanService.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactory.cs" />
+    <Compile Include="FireAlarmFixLayout\Service\ThAFASFixUtil.cs" />
+    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
+    <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
+    <Compile Include="AFAS\Model\ThLayoutPt.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFASmokeStairService.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutParamterCalculationService.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFaSmokeRoomTypeService.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutService.cs" />
+    <Compile Include="FireAlarmArea\ThFaSmokeCommon.cs" />
+    <Compile Include="FireAlarmArea\Command\ThAFASSmokeCmd.cs" />
+    <Compile Include="FireAlarmArea\Engine\ThAFASSmokeEngine.cs" />
+    <Compile Include="AFAS\ViewModel\FireAlarmSetting.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
+    <Compile Include="AFAS\Data\ThAFASPlaceCoverageExtractor.cs" />
+    <Compile Include="AFAS\Data\ThFireAlarmBlkExtractor.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixDataQueryService.cs" />
+    <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
+    <Compile Include="FireAlarmFixLayout\Logic\ThFireTelFixedPointLayoutService.cs" />
+    <Compile Include="AFAS\Utils\ThFireAlarmInsertBlk.cs" />
+    <Compile Include="AFAS\Service\ThIsExteriorDoorService.cs" />
+    <Compile Include="AFAS\Service\ThQueryHoleTextInfoService.cs" />
+    <Compile Include="AFAS\ViewModel\FireAlarmViewModel.cs" />
+    <Compile Include="AFAS\ThFaCommon.cs" />
+    <Compile Include="FireAlarmFixLayout\ThFaFixCommon.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
+    <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
+    <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
+    <Compile Include="DCL\Data\ThOuterOtherShearWallExtractor.cs" />
+    <Compile Include="DCL\Data\ThOuterVertialComponentData.cs" />
+    <Compile Include="DCL\Service\ThBuildOuterArchOutline.cs" />
+    <Compile Include="DCL\Service\ThBuildOuterOutline.cs" />
+    <Compile Include="DCL\Service\ThBuildOuterStruOutline.cs" />
+    <Compile Include="DCL\Service\ThDclUtils.cs" />
+    <Compile Include="DCL\Service\ThStruOuterVerticalComponentRecognizer.cs" />
+    <Compile Include="DCL\Service\ThArchOuterVerticalComponentRecognizer.cs" />
+    <Compile Include="DCL\Service\ThOuterVerticalComponentRecognizer.cs" />
+    <Compile Include="AFAS\Data\ThAFASEStoreyExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASArchitectureWallExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASBeamExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASColumnExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASDoorOpeningExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASFireProofShutterExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASRailingExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASRoomExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASShearWallExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASWindowExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASFireCompartmentExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASHoleExtractor.cs" />
+    <Compile Include="AFAS\Interface\ISetStorey.cs" />
+    <Compile Include="AFAS\Service\ThCleanEntityService.cs" />
+    <Compile Include="AFAS\Service\ThHandleContainsService.cs" />
+    <Compile Include="AFAS\Service\ThHandleNonClosedPolylineService.cs" />
+    <Compile Include="AFAS\Service\ThHandleConflictService.cs" />
+    <Compile Include="AFAS\Service\ThHandleRoomBufferService.cs" />
+    <Compile Include="Geometry\ABBRectangle.cs" />
+    <Compile Include="Geometry\CoordinateTransform.cs" />
+    <Compile Include="Geometry\GeomUtils.cs" />
+    <Compile Include="Geometry\MinRectangle.cs" />
+    <Compile Include="Geometry\MPolygonProfileFinder.cs" />
+    <Compile Include="GroundingGrid\Data\ThEarthConductorExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThDownConductorExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThFloorOutlineExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundColumnExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundShearwallExtractor.cs" />
+    <Compile Include="GroundingGrid\Data\ThGroundWireExtractor.cs" />
+    <Compile Include="Layout\ILayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamRectangleLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamRectLayout.cs" />
+    <Compile Include="Layout\SensorLayout.cs" />
+    <Compile Include="Broadcast\ColumnService.cs" />
+    <Compile Include="Broadcast\InsertBroadcastService.cs" />
+    <Compile Include="Broadcast\LayoutService.cs" />
+    <Compile Include="Model\BeamProfile.cs" />
+    <Compile Include="Model\ThCapitalConverterModel.cs" />
+    <Compile Include="Model\ColumnModel.cs" />
+    <Compile Include="Model\DetectionPolygon.cs" />
+    <Compile Include="Model\DetectionRegion.cs" />
+    <Compile Include="Model\LayoutMap.cs" />
+    <Compile Include="Model\LayoutProfileData.cs" />
+    <Compile Include="Model\MainSecondBeamRegion.cs" />
+    <Compile Include="Model\PairData.cs" />
+    <Compile Include="Model\PolylineCircle.cs" />
+    <Compile Include="Model\SplitBeamPath.cs" />
+    <Compile Include="Model\PlaceInputProfileData.cs" />
+    <Compile Include="Model\PlaceParameter.cs" />
+    <Compile Include="Model\PlacePoint.cs" />
+    <Compile Include="Model\PlacePointProArea.cs" />
+    <Compile Include="Model\PlaceRect.cs" />
+    <Compile Include="Model\PointPosType.cs" />
+    <Compile Include="Model\PolygonInfo.cs" />
+    <Compile Include="Model\ThSecurityPlaneSystemParameter.cs" />
+    <Compile Include="Model\UcsInfo.cs" />
+    <Compile Include="Model\WallModel.cs" />
+    <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
+    <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
+    <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
+    <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\HoleRegionPointAdjustor.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\IsolatedHoleAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamLargeAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\PointMoveAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\RegularPointMoveAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
+    <Compile Include="PostProcess\PlacePointAdjustor.cs" />
+    <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\HandleAccessControlRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutAccessControlService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutOneWayVisitorTalkService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\LayoutService\LayoutTwoWayAuthenticationService.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\AccessControlModel.cs" />
+    <Compile Include="SecurityPlaneSystem\AccessControlSystem\Model\RoomInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\AccessControlConnectService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\ConnectPipeService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\InsertConnectPipeService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\IntrucsionAlarmConnectService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ACModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\BlockModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\IAModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\ModelClassifyService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Model\VMModel.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\ConnectBlockService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\Service\PipePathService.cs" />
+    <Compile Include="SecurityPlaneSystem\ConnectPipe\SystemConnectPipeService.cs" />
+    <Compile Include="SecurityPlaneSystem\ExcelService\ExcelService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\HandleGuardTourRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGTAlongLaneService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutGuardTourService.cs" />
+    <Compile Include="SecurityPlaneSystem\GuardTourSystem\LayoutService\LayoutOtherGTService.cs" />
+    <Compile Include="SecurityPlaneSystem\InsertBlockService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\HandleIntrusionAlarmRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutControllerService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutDisabledToiletService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutEmergencyAlarmService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutFactoryService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutWallMountingDetectorService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutMonitoringService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutHositingDetectorService.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\LayoutModel.cs" />
+    <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\RoomInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
+    <Compile Include="SecurityPlaneSystem\Utils\CheckService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\HandleVideoMonitoringRoomService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutModel.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
+    <Compile Include="Service\ThElectricalCommonService.cs" />
+    <Compile Include="Service\ThElectricalUIService.cs" />
+    <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThExtractLabelText.cs" />
+    <Compile Include="SystemDiagram\Engine\ThRequiredElementVisitor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThRequiredElementRecognitionEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThControlCircuitRecognitionEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThControlCircuitVisitor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionEngine.cs" />
+    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractionVistor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThEntityCommonExtractor.cs" />
+    <Compile Include="SystemDiagram\Engine\ThEntityCommonRecognitionEngine.cs" />
+    <Compile Include="SystemDiagram\Extension\ThAFASGraphExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThDBObbExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThEStoreysExtension.cs" />
+    <Compile Include="SystemDiagram\Extension\ThQuantityMarkExtension.cs" />
+    <Compile Include="SystemDiagram\Model\AlarmModel.cs" />
+    <Compile Include="SystemDiagram\Model\DynamicCheckBox.cs" />
+    <Compile Include="SystemDiagram\Model\ThAlarmControlWireCircuitModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModelFromFireCompartment.cs" />
+    <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThBlockConfigModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThBlockModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThBlockNumStatistics.cs" />
+    <Compile Include="SystemDiagram\Model\ThDrawModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThFireDistrictModel.cs" />
+    <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThConnect280FireDamperWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThDC24VPowerWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireControlRoomVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireIndicatingWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFirePumpStartVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireTelephoneWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireWaterTankLevelVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFormHeaderVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThSprinklerPumpStartSignalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThTextWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
+    <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
+    <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
+    <Compile Include="ThAFASCmds.cs" />
+    <Compile Include="THAFASDebugCmds.cs" />
+    <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
+    <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
+    <Compile Include="ThElectricalLoadCalculationCmd.cs" />
+    <Compile Include="ThEarthingGridCmds.cs" />
+    <Compile Include="ThAuxiliaryCmds.cs" />
+    <Compile Include="ThBroadcastCmds.cs" />
+    <Compile Include="ThMEPCommon.cs" />
+    <Compile Include="ThMEPElectricalApp.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThMEPElectricalService.cs" />
+    <Compile Include="ThMEPElectricalUtils.cs" />
+    <Compile Include="ThProtectThunderCmd.cs" />
+    <Compile Include="ThSecurityPlaneCmds.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\LayoutService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\Utils\UtilService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
+    <Compile Include="SecurityPlaneSystem\StructureHandleService\GetLayoutStructureService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotNetARX\2010\ThDotNetARX.csproj">
+      <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
+      <Name>ThDotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
+      <Name>ThCADCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DCL\Engine\" />
+    <Folder Include="DCL\Model\" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <PackageReference Include="EPPlus">
+      <Version>5.8.8</Version>
+    </PackageReference>
+    <PackageReference Include="QuikGraph">
+      <Version>2.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog">
+      <Version>2.10.0</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Sinks.File">
+      <Version>5.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
             if $(Configuration)==Debug-NET45 (
             Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
             )
@@ -525,5 +528,5 @@
             )
             Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"
         </PostBuildEvent>
-    </PropertyGroup>
+  </PropertyGroup>
 </Project>

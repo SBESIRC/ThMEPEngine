@@ -117,10 +117,14 @@
     <Compile Include="Algorithm\FastAStarAlgorithm\Point_PathFinding\Model\PointMap.cs" />
     <Compile Include="Algorithm\FastAStarAlgorithm\Point_PathFinding\Model\RoutePlanMap.cs" />
     <Compile Include="Algorithm\FastAStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
-    <Compile Include="Algorithm\FrameComparer\ThFramePainter.cs" />
-    <Compile Include="Algorithm\FrameComparer\ThFrameExactor.cs" />
-    <Compile Include="Algorithm\FrameComparer\ThFrameTextExactor.cs" />
-    <Compile Include="Algorithm\FrameComparer\ThMEPFrameTextComparer.cs" />
+    <Compile Include="Algorithm\FrameComparer\Engine\ThFrameCompareEnging.cs" />
+    <Compile Include="Algorithm\FrameComparer\Engine\ThFramePainter.cs" />
+    <Compile Include="Algorithm\FrameComparer\Data\ThFrameExactor.cs" />
+    <Compile Include="Algorithm\FrameComparer\Data\ThFrameTextExactor.cs" />
+    <Compile Include="Algorithm\FrameComparer\Engine\ThMEPFrameTextComparer.cs" />
+    <Compile Include="Algorithm\FrameComparer\Engine\ThFrameCompareModel.cs" />
+    <Compile Include="Algorithm\FrameComparer\Model\ThFrameChangedCommon.cs" />
+    <Compile Include="Algorithm\FrameComparer\Model\ThFrameChangeItem.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphBase.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphNodeBase.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphNodeRelation.cs" />
@@ -129,7 +133,7 @@
     <Compile Include="Algorithm\GraphDomain\IGraphNode.cs" />
     <Compile Include="Algorithm\GraphDomain\PointGraphNode.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
-    <Compile Include="Algorithm\FrameComparer\ThMEPFrameComparer.cs" />
+    <Compile Include="Algorithm\FrameComparer\Engine\ThMEPFrameComparer.cs" />
     <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPPolygonService.cs" />
@@ -241,6 +245,7 @@
     <Compile Include="Model\ThIfcContext.cs" />
     <Compile Include="Model\ThIfcObjectDefinition.cs" />
     <Compile Include="Model\ThIfcProject.cs" />
+    <Compile Include="Model\ThIfcTextNodeData.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />

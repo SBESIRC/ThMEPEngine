@@ -1,22 +1,16 @@
-﻿using System.Windows.Forms;
-using System.Collections.Generic;
-using Linq2Acad;
+﻿using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
 using ThMEPElectrical.BlockConvert;
-using TianHua.Electrical.UI.FrameComparer;
+using TianHua.Electrical.UI.Command;
 using TianHua.Electrical.UI.FireAlarm;
 using TianHua.Electrical.UI.ThBroadcast;
+using TianHua.Electrical.UI.EarthingGrid;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using ThMEPEngineCore.Algorithm.FrameComparer;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using TianHua.Electrical.UI.Command;
-using TianHua.Electrical.UI.EarthingGrid;
 
 namespace TianHua.Electrical.UI
 {
@@ -160,16 +154,6 @@ namespace TianHua.Electrical.UI
                 }
                 return ThMEPElectricalService.Instance.Parameter;
             }
-        }
-
-        /// <summary>
-        /// 框线比较
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
-        public void FrameComparerUI()
-        {
-            var dlg = new UIFrameComparer();
-            AcadApp.ShowModelessDialog(dlg);
         }
 
         /// <summary>

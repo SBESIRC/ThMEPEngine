@@ -365,12 +365,12 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var swageConnectLines = frameConnectLines.Except(rainConnectLines).ToDictionary(x => x.Key, y => y.Value);
             if (rainConnectLines.Count > 0 && rainLines.Count > 0)
             {
-                var closetLine = CreateRouteHelper.GetClosetLane(rainLines, rainConnectLines.First().Value.EndPoint, frame, wallPolys, 400);
+                var closetLine = CreateRouteHelper.GetClosetLane(rainLines, rainConnectLines.First().Value.EndPoint, frame, wallPolys, 50);
                 rainClosetLine = closetLine.Key;
             }
             if (swageConnectLines.Count > 0 && swageLines.Count > 0)
             {
-                var closetLine = CreateRouteHelper.GetClosetLane(swageLines, swageConnectLines.First().Value.EndPoint, frame, wallPolys, 400);
+                var closetLine = CreateRouteHelper.GetClosetLane(swageLines, swageConnectLines.First().Value.EndPoint, frame, wallPolys, 50);
                 swageClosetLine = closetLine.Key;
             }
         }

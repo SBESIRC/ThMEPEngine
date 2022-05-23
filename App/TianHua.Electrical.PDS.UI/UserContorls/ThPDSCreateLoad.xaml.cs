@@ -24,6 +24,7 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
             InitializeComponent();
             defaultKV.SelectedItem = "0.38";
             defaultKV.ItemsSource = new List<string>() { "0.38", "0.22" };
+            defaultPower.Text = "0";
             var array = typeof(PDSImageSources).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             for (int i = 0; i < array.Length; i++)
             {
@@ -79,13 +80,15 @@ namespace TianHua.Electrical.PDS.UI.UserContorls
         }
         private void btnInsert(object sender, RoutedEventArgs e)
         {
-            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: double.Parse(defaultPower.Text), defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
+            double.TryParse(defaultPower.Text, out var v);
+            new ThPDSUpdateToDwgService().AddLoadDimension(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v /*defaultPower: double.Parse(defaultPower.Text)*/, defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
             Close();
         }
 
         private void btnSave(object sender, RoutedEventArgs e)
         {
-            Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph.AddVertex(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower: double.Parse(defaultPower.Text), defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
+            double.TryParse(defaultPower.Text, out var v);
+            Project.PDSProjectVM.Instance.InformationMatchViewModel.Graph.AddVertex(ThPDSProjectGraphService.CreatNewLoad(/*defaultKV: double.Parse(defaultKV.SelectedItem.ToString()), */defaultLoadID: defaultLoadID.Text, defaultPower:v ,/*defaultPower: double.Parse(defaultPower.Text),*/ defaultDescription: defaultDescription.Text, defaultFireLoad: defaultFireLoad.IsChecked == true, imageLoadType: ImageLoadType));
             Close();
         }
     }

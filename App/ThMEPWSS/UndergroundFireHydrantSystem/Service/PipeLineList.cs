@@ -24,11 +24,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
-            var targetPt = new Point3dEx(1754265.38975005, 816578.57326097, 0);
-            var count = fireHydrantSysIn.PtDic[targetPt];
-            ;
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
-            count = fireHydrantSysIn.PtDic[targetPt];
             foreach (var l in lineList)
             {
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);

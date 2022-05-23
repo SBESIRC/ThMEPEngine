@@ -14,6 +14,7 @@ using ThMEPEngineCore.IO.IOService;
 using ThMEPEngineCore.IO.ExcelService;
 using System.Text.RegularExpressions;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPElectrical.SecurityPlaneSystem.ExcelService;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI.SecurityPlaneUI
@@ -140,8 +141,8 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// </summary>
         private void TransferConfiguration()
         {
-            FileInfo[] urlfiles = new DirectoryInfo(urlFolder).GetFiles("*.xls");
-            FileInfo[] configfiles = new DirectoryInfo(configFolderUrl).GetFiles("*.xls");
+            FileInfo[] urlfiles = new DirectoryInfo(urlFolder).GetFiles("*.xls?");
+            FileInfo[] configfiles = new DirectoryInfo(configFolderUrl).GetFiles("*.xls?");
             foreach (FileInfo file in urlfiles)
             {
                 var fileName = file.Name;
@@ -226,7 +227,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         {
             scale.ItemsSource = new List<string>() { "100", "150" };
             inGroup.ItemsSource = new List<string>() { "是", "否" };
-            string[] files = Directory.GetFiles(configFolderUrl + @"\", "*.xls");
+            string[] files = Directory.GetFiles(configFolderUrl + @"\", "*.xls?");
             List<string> fileLst = new List<string>();
             foreach (string file in files)
             {
@@ -270,7 +271,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// <returns></returns>
         private DataSet GetExcelContent(string path)
         {
-            ReadExcelService excelSrevice = new ReadExcelService();
+            ExcelService excelSrevice = new ExcelService();
             return excelSrevice.ReadExcelToDataSet(path, true);
         }
 
@@ -297,7 +298,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             //dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
 
             //存储成excel
-            ReadExcelService excelService = new ReadExcelService();
+            ExcelService excelService = new ExcelService();
             excelService.ConvertDataSetToExcel(dataSet, url);
         }
 
@@ -429,7 +430,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         {
             System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
             openFileDialog.Multiselect = false;//该值确定是否可以选择多个文件
-            openFileDialog.Filter = "Microsoft Excel files(*.xls)|*.xls;*.xlsx";
+            openFileDialog.Filter = "Microsoft Excel files(*.xlsx)|*.xlsx|Microsoft Excel files(*.xls)|*.xls;*.xlsx";
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string file = openFileDialog.FileName;
@@ -459,7 +460,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         private void btnExportTable_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
-            dialog.Filter = "Microsoft Excel files(*.xlsx)|*.xls;*.xlsx";
+            dialog.Filter = "Microsoft Excel files(*.xlsx)|*.xlsx;*.xlsx";
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 var localFilePath = dialog.FileName.ToString();

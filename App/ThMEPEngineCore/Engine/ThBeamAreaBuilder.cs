@@ -127,18 +127,16 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    var objs = new DBObjectCollection() { p };
-                    results = results.Union(objs.Buffer(distance));
+                    results = results.Union(p.BufferPL(distance));
                 }
             });
 
             rawBeams
                 .OfType<Line>()
                 .Where(o => o.Length > 1.0)
-                .ForEach(p =>
+                .ForEach(l =>
                 {
-                    var objs = new DBObjectCollection() { p };
-                    results = results.Union(objs.Buffer(distance));
+                    results.Add(l.BufferSquare(distance));
                 });
             return results.FilterSmallArea(SmallAreaTolerance);
         }

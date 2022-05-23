@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
             var engine = new ThAIRoomMarkExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
-        }       
+        }
 
         public override void Recognize(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon)
         {
@@ -74,6 +74,30 @@ namespace ThMEPEngineCore.Engine
             }
             filterDatas.ForEach(o => Elements.Add(ThIfcTextNote.Create(GetContent(o.Data), o.Geometry as Polyline)));
         }
+
+        public void RecognizeWithData(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon)
+        {
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            var filterDatas = new List<ThRawIfcAnnotationElementData>();
+            if (polygon.Count > 0)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var pline = new Polyline()
+                {
+                    Closed = true,
+                };
+                pline.CreatePolyline(polygon);
+                var filterObjs = spatialIndex.SelectCrossingPolygon(pline);
+                filterDatas = datas.Where(o => filterObjs.Contains(o.Geometry)).ToList();
+            }
+            else
+            {
+                filterDatas = datas;
+            }
+
+            filterDatas.ForEach(o => Elements.Add(new ThIfcTextNodeData(GetContent(o.Data), o.Geometry as Polyline, o.Data as Entity)));
+        }
+
         private string GetContent(object data)
         {
             if (data is DBText dbText)
