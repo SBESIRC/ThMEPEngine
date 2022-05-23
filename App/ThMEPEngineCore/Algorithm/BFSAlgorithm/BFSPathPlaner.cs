@@ -142,7 +142,7 @@ namespace ThMEPEngineCore.Algorithm.BFSAlgorithm
                 //遍历
                 foreach (var aNode in adjNodes)
                 {
-                    if (holes == null || !holes.Any(x=>x.Contains(aNode.point)) || polyline.Contains(aNode.point))
+                    if ((holes == null || !holes.Any(x=>x.Contains(aNode.point))) && polyline.Contains(aNode.point))
                     {
                         aNode.parent = node;
                         q.Enqueue(aNode);
