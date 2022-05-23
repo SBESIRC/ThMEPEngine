@@ -39,9 +39,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
             //Tools.DrawLines(lineList,  "刚提取环管");
+
+
          
             if (PipeLine.hasSitong(fireHydrantSysIn))
             {
+                return false;
+            }
+
+            var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
+
+            var mark = markEngine.Extract(acadDatabase.Database, selectArea);
+            var markAngleDic = new Dictionary<Point3dEx, double>();
+            var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
+            MarkLine.GetPipeMark(ref fireHydrantSysIn, pipeMarkSite, startPt);
+            var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);
+
+            if (!markBool)
+            {
+                MessageBox.Show("找不到环管标记所在直线");
                 return false;
             }
 
@@ -78,19 +94,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
 
             
-            var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             
-            var mark = markEngine.Extract(acadDatabase.Database, selectArea);
-            var markAngleDic = new Dictionary<Point3dEx, double>();
-            var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
-            MarkLine.GetPipeMark(ref fireHydrantSysIn, pipeMarkSite, startPt);
-            var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);
-
-            if (!markBool)
-            {
-                MessageBox.Show("找不到环管标记所在直线");
-                return false;
-            }
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
             var labelLine = labelEngine.CreateLabelLineList(labelDB);
