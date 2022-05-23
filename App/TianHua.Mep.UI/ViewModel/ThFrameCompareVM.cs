@@ -14,9 +14,9 @@ using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm.FrameComparer.Model;
 
 
-namespace TianHua.Mep.UI.FrameCompare
+namespace TianHua.Mep.UI.ViewModel
 {
-    public class FrameCompareVM : NotifyPropertyChangedBase
+    public class ThFrameCompareVM : NotifyPropertyChangedBase
     {
         private ObservableCollection<UListItemData> _PathListItem = new ObservableCollection<UListItemData>();
         public ObservableCollection<UListItemData> PathListItem
@@ -56,7 +56,7 @@ namespace TianHua.Mep.UI.FrameCompare
         public Dictionary<string, ThFrameCompareEnging> PathEnginDict;//full path file,compare enging
         private List<Polyline> HighlightItem;
 
-        public FrameCompareVM()
+        public ThFrameCompareVM()
         {
             PathEnginDict = new Dictionary<string, ThFrameCompareEnging>();
             HighlightItem = new List<Polyline>();

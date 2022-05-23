@@ -17,7 +17,7 @@ using ThCADExtension;
 
 using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm.FrameComparer.Model;
-
+using TianHua.Mep.UI.ViewModel;
 
 namespace TianHua.Mep.UI.FrameCompare
 {
@@ -26,7 +26,7 @@ namespace TianHua.Mep.UI.FrameCompare
     /// </summary>
     public partial class FrameCompareUI : ThCustomWindow
     {
-        static FrameCompareVM VM;
+        static ThFrameCompareVM VM;
 
         public FrameCompareUI()
         {
@@ -34,7 +34,7 @@ namespace TianHua.Mep.UI.FrameCompare
 
             if (VM == null)
             {
-                VM = new FrameCompareVM();
+                VM = new ThFrameCompareVM();
             }
             this.DataContext = VM;
 

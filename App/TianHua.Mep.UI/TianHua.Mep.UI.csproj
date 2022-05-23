@@ -34,7 +34,7 @@
     <Compile Include="FrameCompare\FrameCompareUI.xaml.cs">
       <DependentUpon>FrameCompareUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FrameCompare\FrameCompareVM.cs" />
+    <Compile Include="ViewModel\ThFrameCompareVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMepUIApp.cs" />
     <Compile Include="UI\ExtractBeamConfigUI.xaml.cs">
