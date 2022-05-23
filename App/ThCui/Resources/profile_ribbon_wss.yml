@@ -34,13 +34,13 @@ panels:
           - text: "房间编号"
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "房间名称"
-            attributes: { "IsVisible": false, "IsEnabled": false }
+            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "房间功能"
             attributes: { "IsVisible": false, "IsEnabled": false }
       - text: ""
         items:
           - text: "框线对比"
-            attributes: { "IsVisible": false, "IsEnabled": false }
+            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "提车道线"
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "提中心线"
