@@ -222,7 +222,7 @@ namespace ThMEPWSS.Command
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        public static void GetStructureInfo(AcadDatabase acdb, Polyline polyline, Polyline pFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls)
+        public static void GetStructureInfo(AcadDatabase acdb, Polyline polyline, Polyline pFrame, out List<Polyline> columns, out List<Entity> beams, out List<Polyline> walls)
         {
             var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
 
@@ -234,13 +234,18 @@ namespace ThMEPWSS.Command
             columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
 
             //获取梁
-            var thBeams = allStructure.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
-            thBeams.ForEach(x => x.ExtendBoth(20, 20));
-            beams = thBeams.Select(o => o.Outline).Cast<Polyline>().ToList();
-            objs = new DBObjectCollection();
-            beams.ForEach(x => objs.Add(x));
-            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            beams = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
+            #region  原始获取梁的方式(暂不要)
+            //var thBeams = allStructure.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
+            //thBeams.ForEach(x => x.ExtendBoth(20, 20));
+            //beams = thBeams.Select(o => o.Outline).Cast<Entity>().ToList();
+            //objs = new DBObjectCollection();
+            //beams.ForEach(x => objs.Add(x));
+            //thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            //beams = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Entity>().ToList();
+            #endregion
+            var engine = new ThBeamAreaBuilderEngine();
+            engine.Build(acdb.Database, pFrame.Vertices());
+            beams = engine.BeamAreas.OfType<Entity>().ToList();
 
             //获取剪力墙
             walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();

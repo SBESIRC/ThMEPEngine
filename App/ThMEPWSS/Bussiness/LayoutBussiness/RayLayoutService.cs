@@ -26,7 +26,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double spacing = 100;  //布置线间距为100的倍数
         readonly double minColArea = 350 * 350; 
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Entity> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
         {
             #region 预设参数
             sideLength = ThWSSUIService.Instance.Parameter.protectRange;
@@ -34,7 +34,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)  //不考虑梁
             {
-                beams = new List<Polyline>();
+                beams = new List<Entity>();
             }
             #endregion
 
