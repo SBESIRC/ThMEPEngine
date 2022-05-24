@@ -46,7 +46,7 @@ namespace ThMEPWSS.Command
 
                     //获取构建信息
                     var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
-                    ThSprinklerLayoutCmdUtils.GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    ThSprinklerLayoutCmdUtils.GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Entity> beams, out List<Polyline> walls);
 
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
@@ -59,7 +59,7 @@ namespace ThMEPWSS.Command
                     //不考虑梁
                     if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)
                     {
-                        beams = new List<Polyline>();
+                        beams = new List<Entity>();
                     }
 
                     //计算可布置区域
