@@ -7,17 +7,21 @@ using System.Collections.ObjectModel;
 using ThControlLibraryWPF.ControlUtils;
 
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
+using CadApp = Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using AcHelper;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Algorithm.FrameComparer;
 using ThMEPEngineCore.Algorithm.FrameComparer.Model;
-
+using System.IO;
 
 namespace TianHua.Mep.UI.ViewModel
 {
     public class ThFrameCompareVM : NotifyPropertyChangedBase
     {
+        //UI Control/////////////////////////
         private ObservableCollection<UListItemData> _PathListItem = new ObservableCollection<UListItemData>();
         public ObservableCollection<UListItemData> PathListItem
         {
@@ -52,15 +56,40 @@ namespace TianHua.Mep.UI.ViewModel
         }
 
         public ThFrameChangeItem selectItem { get; set; }
+        /////////////////////////////////////
 
+        //Engine Control///////////////////////////////////
         public Dictionary<string, ThFrameCompareEnging> PathEnginDict;//full path file,compare enging
         private List<Polyline> HighlightItem;
-
+        public bool IsClose { get; set; }
         public ThFrameCompareVM()
         {
             PathEnginDict = new Dictionary<string, ThFrameCompareEnging>();
             HighlightItem = new List<Polyline>();
+            IsClose = false;
+
         }
+
+        public void LoadOpenningDrawing()
+        {
+            var i = 0;
+            foreach (CadApp.Document document in CadApp.Application.DocumentManager)
+            {
+                if (PathEnginDict.ContainsKey(document.Name) == false)
+                {
+                    PathEnginDict.Add(document.Name, new ThFrameCompareEnging());
+                    var fileName = Path.GetFileName(document.Name);
+                    PathListItem.Add(new UListItemData(fileName, i, document.Name));
+                    i++;
+                }
+            }
+            PathItem = PathListItem.Where(x => x.Name == Active.Document.Name).FirstOrDefault();
+            if (PathItem == null)
+            {
+                PathItem = PathListItem.First();
+            }
+        }
+
 
         public void AddToTransient(ThFrameChangeItem focusItem)
         {
@@ -71,7 +100,7 @@ namespace TianHua.Mep.UI.ViewModel
                 {
                     colorIdx = 2;
                 }
-                else if (focusItem.ChangeType == ThFrameChangedCommon.ChangeType_Append )
+                else if (focusItem.ChangeType == ThFrameChangedCommon.ChangeType_Append)
                 {
                     colorIdx = 3;
                 }
@@ -98,7 +127,38 @@ namespace TianHua.Mep.UI.ViewModel
 
             }
         }
+        public void DocumentStatusReturn()
+        {
+            // PathEnginDict.ForEach(x => x.Value.ReturnStatus());
+        }
 
+        public void RefreshToCurrentDocument()
+        {
+
+            PathEnginDict.TryGetValue((string)PathItem.Tag, out var engine);
+            if (engine != null && IsClose == false)
+            {
+                engine.ResultList.ForEach(x => ChangeFrameList.Add(x));
+
+            }
+            else
+            {
+                if (IsClose == false)
+                {
+                    PathEnginDict.Remove((string)PathItem.Tag);
+                }
+            }
+        }
+        public bool CheckCurrentDocument()
+        {
+            var isSame = false;
+            if (PathItem != null && (string)PathItem.Tag == Active.Document.Name)
+            {
+                isSame = true;
+            }
+            return isSame;
+
+        }
     }
 
 
