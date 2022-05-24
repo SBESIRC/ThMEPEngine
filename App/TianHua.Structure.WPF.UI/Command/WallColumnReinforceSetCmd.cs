@@ -13,7 +13,7 @@ namespace TianHua.Structure.WPF.UI.Command
         public WallColumnReinforceSetCmd()
         {
             this.ActionName = "墙柱配筋设置";
-            this.CommandName = "THQZCSSZ";
+            this.CommandName = "THQZSZ";
         }
 
         public override void SubExecute()

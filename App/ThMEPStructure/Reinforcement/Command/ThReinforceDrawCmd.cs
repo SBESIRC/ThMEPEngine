@@ -29,7 +29,7 @@ namespace ThMEPStructure.Reinforcement.Command
         public ThReinforceDrawCmd()
         {
             ActionName = "生成柱表";
-            CommandName = "THHRBYGJ";
+            CommandName = "THQZPJ";
         }
 
         public void Dispose()

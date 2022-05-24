@@ -41,7 +41,7 @@ namespace ThMEPStructure.Reinforcement.Command
         public ThYjkReinforceExtractCmd()
         {
             ActionName = "提取信息";
-            CommandName = "THHRBYGJ";
+            CommandName = "THQZPJ";
         }
 
         public void Dispose()
@@ -50,6 +50,7 @@ namespace ThMEPStructure.Reinforcement.Command
 
         public override void SubExecute()
         {
+            using (var docLock = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
@@ -61,7 +62,7 @@ namespace ThMEPStructure.Reinforcement.Command
                 {
                     return;
                 }
-                if(pc.CollectedPoints ==null || pc.CollectedPoints.Count==0)
+                if (pc.CollectedPoints == null || pc.CollectedPoints.Count == 0)
                 {
                     return;
                 }
