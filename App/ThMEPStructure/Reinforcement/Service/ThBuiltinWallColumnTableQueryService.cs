@@ -224,14 +224,39 @@ namespace ThMEPStructure.Reinforcement.Service
             var component = new ThLTypeEdgeComponent();
             component.Stirrup = GetStirrupSpec(values);
             var linkSpecs = GetLinkSpecs(values);
-            if (linkSpecs.Count == 1)
+            if (IsCloseHoleStirup(values))
             {
-                component.Link3 = linkSpecs[0];
+                if (linkSpecs.Count == 1)
+                {
+                    component.Link3 = linkSpecs[0];
+                }
+                else if (linkSpecs.Count == 2)
+                {
+                    // 暂时未出现
+                }
+                else if (linkSpecs.Count == 3)
+                {
+                    component.Link3 = linkSpecs[1];
+                    component.Link4 = linkSpecs[2];
+                }
             }
-            else if (linkSpecs.Count == 2)
+            else
             {
-                component.Link3 = linkSpecs[0];
-                component.Link4 = linkSpecs[1];
+                if (linkSpecs.Count == 1)
+                {
+                    component.Link2 = linkSpecs[0];
+                }
+                else if (linkSpecs.Count == 2)
+                {
+                    component.Link2 = linkSpecs[0];
+                    component.Link3 = linkSpecs[1];
+                }
+                else if (linkSpecs.Count == 3)
+                {
+                    component.Link2 = linkSpecs[0];
+                    component.Link3 = linkSpecs[1];
+                    component.Link4 = linkSpecs[2];
+                }
             }
             component.Reinforce = GetGBZReinforceSpec(values);
             return component;
@@ -249,15 +274,7 @@ namespace ThMEPStructure.Reinforcement.Service
                 }
                 else if (linkSpecs.Count == 2)
                 {
-                    if(IsStirupLinkSameSpec(values))
-                    {
-                        component.Link3 = linkSpecs[1];
-                    }
-                    else
-                    {
-                        component.Link2 = linkSpecs[0];
-                        component.Link3 = linkSpecs[1];
-                    }
+                    // 暂时未出现
                 }
                 else if (linkSpecs.Count == 3)
                 {
@@ -295,20 +312,6 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 if (values[i].Item1.Contains(StirrupKword) &&
                     values[i].Item1.Contains("临洞口"))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool IsStirupLinkSameSpec(List<Tuple<string, string>> values)
-        {
-            // 箍筋/拉筋
-            for (int i = 0; i < values.Count; i++)
-            {
-                if (values[i].Item1.Contains(StirrupKword) &&
-                    values[i].Item1.Contains(LinkKword))
                 {
                     return true;
                 }
