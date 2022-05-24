@@ -305,7 +305,7 @@ namespace TianHua.Electrical.PDS.Service
             }
             else if (distBoxData.FireLoad == ThPDSFireLoad.Unknown)
             {
-                if (distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                if (!distBoxData.CustomProperties.IsNull() && distBoxData.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
                 {
                     var fireLoad = distBoxData.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY).Equals(ThPDSCommon.PROPERTY_VALUE_FIRE_POWER);
                     thPDSLoad.SetFireLoad(fireLoad);

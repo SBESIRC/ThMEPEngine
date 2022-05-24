@@ -1374,7 +1374,7 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 shrinkLine = polyline.GetEdges().Last();
             }
-            else if(curve is Arc arc)
+            else if (curve is Arc arc)
             {
                 shrinkLine = arc.TessellateArcWithArc(50.0).GetEdges().Last();
             }
@@ -1508,7 +1508,11 @@ namespace TianHua.Electrical.PDS.Engine
                     }
                 }
             }
-            removeEdges.ForEach(e => PDSGraph.Graph.RemoveEdge(e));
+            removeEdges.Distinct().ForEach(e =>
+            {
+                PDSGraph.Graph.RemoveEdge(e);
+                PDSGraph.Graph.RemoveVertex(e.Target);
+            });
         }
 
         public void UnionLightingEdge()

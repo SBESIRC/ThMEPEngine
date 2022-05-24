@@ -234,7 +234,7 @@ namespace TianHua.Electrical.PDS.Service
                 else if (o.Value.EffectiveName.Contains(ThPDSCommon.LOAD_LABELS))
                 {
                     var value = GetTexts(o.Value);
-                    if (o.Value.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
+                    if (!o.Value.CustomProperties.IsNull() && o.Value.CustomProperties.Contains(ThPDSCommon.POWER_CATEGORY))
                     {
                         value.Add(o.Value.CustomProperties.GetValue(ThPDSCommon.POWER_CATEGORY) as string);
                     }
