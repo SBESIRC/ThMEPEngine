@@ -21,7 +21,8 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
         private const string roomTextName = "AI-房间名称";
         public ThFrameTextExactor(Point3dCollection fance)
         {
-            this.fance = fance;
+            //this.fance = fance;
+            this.fance = new Point3dCollection();
             Init();
             ReadCurTexts();
             ReadRefTexts();

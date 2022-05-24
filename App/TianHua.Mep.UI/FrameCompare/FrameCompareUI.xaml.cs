@@ -37,38 +37,35 @@ namespace TianHua.Mep.UI.FrameCompare
                 VM = new ThFrameCompareVM();
             }
             this.DataContext = VM;
-
-            LoadCurrentDrawing();
+            VM.LoadOpenningDrawing();
+            VM.IsClose = false;
         }
 
-        private void LoadCurrentDrawing()
-        {
-            var i = 0;
-            foreach (CadApp.Document document in CadApp.Application.DocumentManager)
-            {
-                if (VM.PathEnginDict.ContainsKey(document.Name) == false)
-                {
-                    VM.PathEnginDict.Add(document.Name, new ThFrameCompareEnging());
-                    var fileName = Path.GetFileName(document.Name);
-                    VM.PathListItem.Add(new UListItemData(fileName, i, document.Name));
-                    i++;
-                }
-            }
-            VM.PathItem = VM.PathListItem.FirstOrDefault();
-        }
 
         private void lvFrameGrid_LeftClick(object sender, MouseButtonEventArgs e)
         {
-            var item = sender as ListViewItem;
-            if (item != null)
+            if (VM.CheckCurrentDocument() == false)
             {
-                var focusFrameItem = lvFrameGrid.SelectedItem as ThFrameChangeItem;
-                VM.selectItem = focusFrameItem;
-                if (focusFrameItem != null)
+                return;
+            }
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                var item = sender as ListViewItem;
+                if (item != null)
                 {
-                    Active.Editor.ZoomToObjects(new Entity[] { focusFrameItem.FocusPoly }, 2.0);
-                    VM.ClearTransientGraphics();
-                    VM.AddToTransient(VM.selectItem);
+                    var focusFrameItem = lvFrameGrid.SelectedItem as ThFrameChangeItem;
+                    VM.selectItem = focusFrameItem;
+                    if (VM.selectItem != null)
+                    {
+                        if ((short)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("LWDISPLAY") == 0)
+                        {
+                            Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("LWDISPLAY", 1);
+                        }
+                        Active.Editor.ZoomToObjects(new Entity[] { focusFrameItem.FocusPoly }, 2.0);
+                        VM.ClearTransientGraphics();
+                        VM.AddToTransient(VM.selectItem);
+                        CadApp.Application.UpdateScreen();
+                    }
                 }
             }
         }
@@ -76,15 +73,20 @@ namespace TianHua.Mep.UI.FrameCompare
         private void cbPathList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             VM.ChangeFrameList.Clear();
-            VM.PathEnginDict.TryGetValue((string)VM.PathItem.Tag, out var engine);
-            if (engine != null)
+            if (VM.CheckCurrentDocument() == false)
             {
-                engine.ResultList.ForEach(x => VM.ChangeFrameList.Add(x));
+                return;
             }
+
+            VM.RefreshToCurrentDocument();
         }
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)
         {
+            if (VM.CheckCurrentDocument() == false)
+            {
+                return;
+            }
             var path = CadApp.Application.DocumentManager.MdiActiveDocument.Name;
             VM.PathEnginDict.TryGetValue(path, out var engine);
             if (VM.selectItem != null && engine != null)
@@ -93,20 +95,45 @@ namespace TianHua.Mep.UI.FrameCompare
                 VM.selectItem = null;
                 VM.ChangeFrameList.Clear();
                 engine.ResultList.ForEach(x => VM.ChangeFrameList.Add(x));
-
+                VM.ClearTransientGraphics();
                 CadApp.Application.UpdateScreen();
 
             }
+        }
 
 
 
+        private void btnUpdateAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (VM.CheckCurrentDocument() == false)
+            {
+                return;
+            }
+
+            var path = CadApp.Application.DocumentManager.MdiActiveDocument.Name;
+            VM.PathEnginDict.TryGetValue(path, out var engine);
+            if (engine != null)
+            {
+                engine.UpdateAll();
+
+                VM.ChangeFrameList.Clear();
+                engine.ResultList.ForEach(x => VM.ChangeFrameList.Add(x));
+                VM.ClearTransientGraphics();
+                CadApp.Application.UpdateScreen();
+
+            }
         }
 
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
+            if (VM.CheckCurrentDocument() == false)
+            {
+                return;
+            }
             var path = CadApp.Application.DocumentManager.MdiActiveDocument.Name;
             try
             {
+                VM.ChangeFrameList.Clear();
                 ThFrameCompareEnging engine;
                 if (VM.PathEnginDict.ContainsKey(path))
                 {
@@ -124,7 +151,7 @@ namespace TianHua.Mep.UI.FrameCompare
 
                 engine.Excute();
 
-                VM.ChangeFrameList.Clear();
+              
                 engine.ResultList.ForEach(x => VM.ChangeFrameList.Add(x));
 
 
@@ -137,7 +164,7 @@ namespace TianHua.Mep.UI.FrameCompare
 
 
         }
-        void FocusToCAD()
+        private void FocusToCAD()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
 #if ACAD2012
@@ -150,6 +177,8 @@ namespace TianHua.Mep.UI.FrameCompare
         private void ThCustomWindow_Closed(object sender, EventArgs e)
         {
             VM.ClearTransientGraphics();
+            VM.DocumentStatusReturn();
+            VM.IsClose = true;
         }
     }
 }

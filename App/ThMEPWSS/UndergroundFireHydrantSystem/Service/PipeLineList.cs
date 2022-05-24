@@ -135,10 +135,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
             var lines = new List<Line>();
             var connectVreticals = new List<Point3dEx>();
+            var sePts = fireHydrantSysIn.StartEndPts;
             foreach (var ver in fireHydrantSysIn.VerticalPosition)
             {
-                if (ver._pt.DistanceTo(new Point3d(1491786.3, 407197, 0)) < 10)
-                    ;
+                foreach(var sept in sePts)
+                {
+                    if(ver.DistanceToEx(sept)< 120)
+                    {
+                        continue;//到起始终止点距离小于tor的立管直接删除
+                    }
+                }
                 var rect = ver._pt.GetRect(120);
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
                 var flag = fireHydrantSysIn.AddNewPtDic(dbObjs, ver._pt, ref lines);

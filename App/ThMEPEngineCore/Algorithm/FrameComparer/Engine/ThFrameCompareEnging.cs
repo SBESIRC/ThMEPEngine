@@ -24,12 +24,18 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
     public class ThFrameCompareEnging
     {
         public List<ThFrameChangeItem> ResultList { get; set; }
+        //public short IsLineWeightOpen { get; set; } = 0;//用于记录本身线宽是否打开
+        //public string FullPath { get; set; }
+        //public string UIFullPath { get; set; }
 
         private List<ThFrameCompareModel> CompareList;
         public ThFrameCompareEnging()
         {
             ResultList = new List<ThFrameChangeItem>();
             CompareList = new List<ThFrameCompareModel>();
+            //UIFullPath = path;
+            //CheckIsLineWeightOpen();
+            //FullPath = Active.DocumentFullPath;
         }
 
         public void Excute()
@@ -37,7 +43,6 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-
                 var selectPts = SelectFramePointCollection("框选范围", "框选范围");
                 if (selectPts.Count == 0)
                 {
@@ -82,6 +87,18 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
                 {
                     comparer.UpdateFrame(changeItem);
                     ResultList.Remove(changeItem);
+                }
+            }
+        }
+
+        public void UpdateAll()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                for (int i = ResultList.Count - 1; i >= 0; i--)
+                {
+                    UpdateResult(ResultList[i]);
                 }
             }
         }
@@ -143,7 +160,20 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             }
             return pl;
         }
-        #endregion 
+        #endregion
+        #region RecordDrawStatus
+        //private void CheckIsLineWeightOpen()
+        //{
+        //    IsLineWeightOpen = (short)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("LWDISPLAY");
+        //}
 
+        //public void ReturnStatus()
+        //{
+        //    if (IsLineWeightOpen == 0)
+        //    {
+        //        Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("LWDISPLAY", 0);
+        //    }
+        //}
+        #endregion
     }
 }

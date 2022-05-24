@@ -53,15 +53,73 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private Line Cut(Line line,bool isStartLink,bool isEndLink,double lampLength)
         {
             var pts = WireDict[line];
+            if(pts.Count==0)
+            {
+                return CutWireWithoutLight(line, isStartLink, isEndLink);
+            }
+            else
+            {
+                return CutWireWithLights(line, isStartLink, isEndLink, lampLength);
+            }
+        }
+        private Line CutWireWithoutLight(Line line, bool isStartLink, bool isEndLink)
+        {
             var newSp = line.StartPoint;
             var newEp = line.EndPoint;
             var dir = newSp.GetVectorTo(newEp).GetNormal();
+            var fdxs = QueryFdxs(line);
+            var fdxIntersectPts = fdxs.OfType<Line>().SelectMany(o => GetIntersectPts(o, line).OfType<Point3d>()).ToCollection();
+            if(fdxIntersectPts.Count==0)
+            {
+                return new Line(newSp, newEp);
+            }
+            if (!isStartLink)
+            {
+                // 找出距离StartPoint最近的点
+                var closePt = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.StartPoint.DistanceTo(p)).First();
+                if (closePt.IsPointOnLine(line))
+                {
+                    newSp = closePt;
+                }
+            }
+            if (!isEndLink)
+            {
+                // 找出距离EndPoint最近的点
+                var closePt = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.EndPoint.DistanceTo(p)).First();
+                if (closePt.IsPointOnLine(line))
+                {
+                    newEp = closePt;
+                }
+            }
+            return new Line(newSp, newEp);
+        }
+        private Line CutWireWithLights(Line line, bool isStartLink, bool isEndLink, double lampLength)
+        {
+            var pts = WireDict[line];
+            var newSp = line.StartPoint;
+            var newEp = line.EndPoint;
+            var dir = newSp.GetVectorTo(newEp).GetNormal();
+            var fdxs = QueryFdxs(line);
+            var fdxIntersectPts = fdxs.OfType<Line>().SelectMany(o => GetIntersectPts(o, line).OfType<Point3d>()).ToCollection();
             if (!isStartLink)
             {
                 // 找出距离StartPoint最近的点
                 var closePt = pts.OfType<Point3d>().OrderBy(p => line.StartPoint.DistanceTo(p)).First();
-                var portPt = closePt + dir.Negate().MultiplyBy(lampLength/2.0);
-                if(portPt.IsPointOnLine(line))
+                var portPt = closePt + dir.Negate().MultiplyBy(lampLength / 2.0);
+                // 检查newSp与portPt有没有非灯线点
+                if (fdxIntersectPts.Count>0)
+                {
+                    var fdxCloseSp = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.StartPoint.DistanceTo(p)).First();
+                    if(ThGeometryTool.IsPointOnLine(newSp, portPt, fdxCloseSp, PointTolerance, PointTolerance))
+                    {
+                        newSp = fdxCloseSp;
+                    }
+                    else
+                    {
+                        newSp = portPt;
+                    }
+                }
+                else
                 {
                     newSp = portPt;
                 }
@@ -71,21 +129,37 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 // 找出距离EndPoint最近的点
                 var closePt = pts.OfType<Point3d>().OrderBy(p => line.EndPoint.DistanceTo(p)).First();
                 var portPt = closePt + dir.MultiplyBy(lampLength / 2.0);
-                if (portPt.IsPointOnLine(line))
+                // 检查newEp与portPt有没有非灯线点
+                if (fdxIntersectPts.Count > 0)
+                {
+                    var fdxCloseEp = fdxIntersectPts.OfType<Point3d>().OrderBy(p => line.EndPoint.DistanceTo(p)).First();
+                    if (ThGeometryTool.IsPointOnLine(newEp, portPt, fdxCloseEp, PointTolerance, PointTolerance))
+                    {
+                        newEp = fdxCloseEp;
+                    }
+                    else
+                    {
+                        newEp = portPt;
+                    }
+                }
+                else
                 {
                     newEp = portPt;
                 }
             }
             return new Line(newSp, newEp);
         }
-
+        private Point3dCollection GetIntersectPts(Line first, Line second)
+        {
+            return first.IntersectWithEx(second, Intersect.ExtendBoth);
+        }
        private List<Tuple<Line,bool,bool>> Find()
         {
             var results = new List<Tuple<Line, bool, bool>>();
             WireDict.Where(o => o.Value.Count > 0).ForEach(o =>
                 {
-                    bool isStartLink = IsLinkObjs(o.Key, true);
-                    bool isEndLink = IsLinkObjs(o.Key, false);
+                    bool isStartLink = IsPortLinkObjs(o.Key, true);
+                    bool isEndLink = IsPortLinkObjs(o.Key, false);
                     if (!isStartLink || !isEndLink)
                     {
                         results.Add(Tuple.Create(o.Key,isStartLink,isEndLink));
@@ -107,13 +181,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 {
                     if(!results.Contains(o.Key))
                     {
-                        if (!IsLinkObjs(o.Key, true))
+                        if (!IsPortLinkObjs(o.Key, true))
                         {
                             var links = new List<Line> { o.Key };
                             Traverse(o.Key.EndPoint, links);
                             links.ForEach(l => results.Add(l));
                         }
-                        else if (!IsLinkObjs(o.Key, false))
+                        else if (!IsPortLinkObjs(o.Key, false))
                         {
                             var links = new List<Line> { o.Key };
                             Traverse(o.Key.StartPoint, links);
@@ -126,6 +200,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private void Traverse(Point3d portPt,List<Line> links)
         {
+            if(IsBodyLinkFdxs(links.Last()))
+            {
+                // 灯线上没有灯点，但是自身与非灯线相交，停止遍历下去
+                return;
+            }
             var wires = QueryWires(portPt);
             links.ForEach(l => wires.Remove(l));
             if(wires.Count == 1)
@@ -151,7 +230,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
         }
 
-        private bool IsLinkObjs(Line line,bool isSp)
+        private bool IsPortLinkObjs(Line line,bool isSp)
         {
             // 看起点是否连接物体
             var port = isSp ? line.StartPoint : line.EndPoint;
@@ -159,6 +238,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             linkWires.Remove(line);
             var fdxWires = QueryFdxs(port);
             return linkWires.Count > 0 || fdxWires.Count>0;
+        }
+
+        private bool IsBodyLinkFdxs(Line line)
+        {
+            return QueryFdxs(line).Count > 0;
         }
 
         private DBObjectCollection QueryWires(Point3d port)
@@ -171,9 +255,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection QueryFdxs(Point3d port)
         {
             var outline = port.CreateSquare(PointTolerance);
-            var results = FdxSpatialIndex.SelectCrossingPolygon(outline);
+            var results = QueryFdxs(outline);
             outline.Dispose();
             return results;
+        }
+        private DBObjectCollection QueryFdxs(Polyline outline)
+        {
+            return FdxSpatialIndex.SelectCrossingPolygon(outline);
+        }
+        private DBObjectCollection QueryFdxs(Line line)
+        {
+            var outline = ThDrawTool.ToRectangle(line.StartPoint,
+                line.EndPoint, PointTolerance * 2.0);
+            return FdxSpatialIndex.SelectCrossingPolygon(outline);
         }
     }
 }

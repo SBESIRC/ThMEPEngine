@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NFox.Cad;
@@ -12,12 +11,14 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
     public static class ThReinforcementUtils
     {
+        public readonly static double WallColumnBufferLength = 1.0;
         public static DBObjectCollection GetEntitiesFromMS(this Database db, List<string> layers)
         {
             using (var acadDb = AcadDatabase.Use(db))
@@ -325,6 +326,40 @@ namespace ThMEPStructure.Reinforcement.Service
         public static bool IsBiggerThan(double value1, double value2,int value1Digits)
         {
             return value1 >= value2 || Math.Round(value1, value1Digits) >= value2;
+        }
+        public static DBObjectCollection Clip(this Entity polygon,
+            DBObjectCollection curves, bool inverted = false)
+        {            
+            var results = new DBObjectCollection();
+            if (polygon is Polyline polyline)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(polyline, curves, inverted);
+            }
+            else if (polygon is MPolygon mPolygon)
+            {
+                results = ThCADCoreNTSGeometryClipper.Clip(mPolygon, curves, inverted);
+            }
+            return results.OfType<Curve>().ToCollection();
+        }
+        public static DBObjectCollection ExplodeLines(this DBObjectCollection curves)
+        {
+            return ThLaneLineEngine.Explode(curves)
+                .OfType<Line>()
+                .Where(o => o.Length > 0.0)
+                .ToCollection();
+        }
+        public static void Print(this DBObjectCollection objs,Database database,string layer="0")
+        {
+            using (var acadDb= AcadDatabase.Use(database))
+            {
+                objs.OfType<Entity>().ForEach(e =>
+                {
+                    acadDb.ModelSpace.Add(e);
+                    e.Layer = layer;
+                    e.ColorIndex = (short)ColorIndex.BYLAYER;
+                    e.Linetype = "Bylayer";
+                });
+            }
         }
     }
 }

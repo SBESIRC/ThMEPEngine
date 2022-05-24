@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPStructure.Reinforcement.Model;
+using ThCADExtension;
 
 namespace ThMEPStructure.Reinforcement.Service
 {
@@ -39,20 +40,31 @@ namespace ThMEPStructure.Reinforcement.Service
         }
         protected bool IsLinkWall(Point3d edgeSp,Point3d edgeEp)
         {
+            var bufferL = ThReinforcementUtils.WallColumnBufferLength+1.0;
             var dir = (edgeEp - edgeSp).GetNormal();
             var newEdgeSp = edgeSp - dir.MultiplyBy(1.0);
             var newEdgeEp = edgeEp + dir.MultiplyBy(1.0);
             var perpendVec = dir.GetPerpendicularVector();
-            var l1Sp = newEdgeSp + perpendVec.MultiplyBy(2.0);
-            var l1Ep = newEdgeEp + perpendVec.MultiplyBy(2.0);
-            var l2Sp = newEdgeSp - perpendVec.MultiplyBy(2.0);
-            var l2Ep = newEdgeEp - perpendVec.MultiplyBy(2.0);
-            var l1Outline = ThDrawTool.ToOutline(l1Sp, l1Ep, 5.0);
-            var l2Outline = ThDrawTool.ToOutline(l2Sp, l2Ep, 5.0);
-            bool isLink = Query(l1Outline).Count > 0 && Query(l2Outline).Count > 0;
-            l1Outline.Dispose();
-            l2Outline.Dispose();
+            var pts = new Point3dCollection();
+            pts.Add(newEdgeSp + perpendVec.MultiplyBy(bufferL));
+            pts.Add(newEdgeEp + perpendVec.MultiplyBy(bufferL));
+            pts.Add(newEdgeSp - perpendVec.MultiplyBy(bufferL));
+            pts.Add(newEdgeEp - perpendVec.MultiplyBy(bufferL));
+            var outLine = pts.CreatePolyline();
+            // 与边垂直的线
+            bool isLink = Query(outLine)
+                .OfType<Line>()
+                .Where(l=>IsCloseVertical(dir,l.LineDirection()))
+                .Any();
+            outLine.Dispose();
             return isLink;
+        }
+        private bool IsCloseVertical(Vector3d first,Vector3d second,
+            double angTolerance=1.0)
+        {
+            var ang = first.GetAngleTo(second).RadToAng();
+            ang %= 180.0;
+            return Math.Abs(ang - 90.0) <= angTolerance;
         }
     }
     internal class ThHuaRunRectSecAnalysisService : ThHuaRunSecAnalysisService

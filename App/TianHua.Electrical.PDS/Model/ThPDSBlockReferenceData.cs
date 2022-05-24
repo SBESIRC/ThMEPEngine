@@ -19,7 +19,20 @@ namespace TianHua.Electrical.PDS.Model
         public Database Database { get; set; }
         public ObjectId ObjId { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
-        public DynamicBlockReferencePropertyCollection CustomProperties { get; set; }
+        public DynamicBlockReferencePropertyCollection CustomProperties
+        {
+            get
+            {
+                try
+                {
+                    return ObjId.GetDynProperties();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         /// <summary>
         /// 一级负载类型
@@ -79,7 +92,6 @@ namespace TianHua.Electrical.PDS.Model
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            CustomProperties = blockRef.GetDynProperties();
             Attributes = blockRef.GetAttributesInBlockReference();
             Cat_1 =  ThPDSLoadTypeCat_1.LumpedLoad;
             Cat_2 = ThPDSLoadTypeCat_2.None;
@@ -100,7 +112,6 @@ namespace TianHua.Electrical.PDS.Model
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
-            CustomProperties = blockRef.GetDynProperties();
             Attributes = blockRef.GetAttributesInBlockReference();
             Cat_1 = ThPDSLoadTypeCat_1.LumpedLoad;
             Cat_2 = ThPDSLoadTypeCat_2.None;

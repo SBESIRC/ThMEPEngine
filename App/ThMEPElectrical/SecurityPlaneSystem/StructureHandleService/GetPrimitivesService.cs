@@ -346,8 +346,24 @@ namespace ThMEPElectrical.StructureHandleService
                     resLines.AddRange(poly.GetAllLinesInPolyline(false));
                 }
             }
-
-            return resLines;
+            ThCADCoreNTSSpatialIndex trunkingSpatialIndex = new ThCADCoreNTSSpatialIndex(resLines.Select(o => o.ExtendLine(200)).ToCollection());
+            var trunkings = new List<Line>();
+            resLines.ForEach(o =>
+            {
+                if (o.Length > 2000)
+                {
+                    trunkings.Add(o);
+                }
+                else
+                {
+                    var trunkingsObjs = trunkingSpatialIndex.SelectFence(o.ExtendLine(200).Buffer(10));
+                    if (trunkingsObjs.Cast<Line>().All(e => e.Length < o.Length * 4 || e.IsCollinear(o)))
+                    {
+                        trunkings.Add(o);
+                    }
+                }
+            });
+            return trunkings;
         }
     }
 }

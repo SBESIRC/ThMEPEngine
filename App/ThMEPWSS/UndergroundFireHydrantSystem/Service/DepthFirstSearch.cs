@@ -15,7 +15,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var rstPath = new List<Point3dEx>(tempPath);
                 //rstPaths.Add(rstPath);//把当前路径加入
                 var flag = true;
-                if (rstPath.Count < 20)
+                if (rstPath.Count < 15)
                 {
                     return false;
                 }

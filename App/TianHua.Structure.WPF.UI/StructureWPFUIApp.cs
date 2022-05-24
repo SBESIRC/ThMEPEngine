@@ -42,16 +42,16 @@ namespace TianHua.Structure.WPF.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THQZCSSZ", CommandFlags.Session)]
-        public void THQZCSSZ()
+        [CommandMethod("TIANHUACAD", "THQZSZ", CommandFlags.Session)]
+        public void THQZSZ()
         {
             var ui = new WallColumnReinforceSetUI();
             ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(ui);
         }
 
-        [CommandMethod("TIANHUACAD", "THHRBYGJ", CommandFlags.Session)]
-        public void THHRBYGJ()
+        [CommandMethod("TIANHUACAD", "THQZPJ", CommandFlags.Session)]
+        public void THQZPJ()
         {
             var vm = new EdgeComponentDrawVM();
             var ui = new EdgeComponentDrawUI(vm);
