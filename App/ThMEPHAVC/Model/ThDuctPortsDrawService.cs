@@ -52,7 +52,7 @@ namespace ThMEPHVAC.Model
         
         public ThDuctPortsDrawService(string scenario, string scale)
         {
-            airValveName = "风阀";
+            airValveName = "AI-风阀";
             fireValveName = "防火阀";
             portMarkName = "AI-风口标注1";
             holeName = "AI-洞口";
