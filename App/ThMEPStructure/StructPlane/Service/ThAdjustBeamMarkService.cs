@@ -44,16 +44,21 @@ namespace ThMEPStructure.StructPlane.Service
                 BeamTexts.ForEach(o =>
                 {
                     var text = acadDb.Element<DBText>(o.Key.ObjectId, true);
-                    if (IsBeamBgMark(text.TextString) || IsBeamSpec(text.TextString))
+                    if(IsBeamSpec(text.TextString))
                     {
                         Move(text, o.Value);
                     }
-                    if (IsBeamBgMark(text.TextString))
+                    else if(IsBeamBgMark(text.TextString))
                     {
-                        var texts = Split(text, o.Value);
+                        var texts = Split(text); // spec,bg
                         if (texts != null)
                         {
+                            Move(text, texts.Item1, texts.Item2, o.Value);
                             DoubleRowTexts.Add(Tuple.Create(text, texts.Item1, texts.Item2));
+                        }
+                        else
+                        {
+                            Move(text, o.Value);
                         }
                     }
                 });
@@ -68,35 +73,69 @@ namespace ThMEPStructure.StructPlane.Service
             {
                 return;
             }
-            var beamSpec = GetBeamWidth(beamMark.TextString);
-            var beamWidth = beamSpec.Item1;
+            var beamWidth = GetBeamWidth(beamMark);
+            var geoH = CalculateTextHeight(beamMark);
             var newTextCenter = textCenter.Value + moveVec.GetNormal().MultiplyBy(
-                beamWidth / 2.0 + BeamMarkInterval + beamMark.Height / 2.0);
+                beamWidth / 2.0 + BeamMarkInterval + geoH / 2.0);
             var mt = Matrix3d.Displacement(newTextCenter - textCenter.Value);
             beamMark.TransformBy(mt);
         }
 
-        private Tuple<DBText, DBText> Split(DBText beamMark,Vector3d direction)
+        private void Move(DBText beamMark, DBText spec,DBText bg,Vector3d moveVec)
+        {
+            // 让梁标注外包框距离梁线 eg.50mm
+            var textCenter = GetTextCenter(beamMark);
+            if (!textCenter.HasValue)
+            {
+                return;
+            }
+            // 先把标高文字移动到规格文字一边
+            var movePt = beamMark.Position.GetExtentPoint(moveVec, beamMark.Height);
+            var mt1 = Matrix3d.Displacement(movePt - beamMark.Position);
+            bg.TransformBy(mt1);
+
+            var beamWidth = GetBeamWidth(beamMark);
+            var geoH = CalculateTextHeight(spec);
+            var newTextCenter = textCenter.Value + moveVec.GetNormal().MultiplyBy(
+                beamWidth / 2.0 + BeamMarkInterval + geoH / 2.0);
+            var mt2 = Matrix3d.Displacement(newTextCenter - textCenter.Value);
+            bg.TransformBy(mt2);
+            spec.TransformBy(mt2);
+        }
+
+        private double GetBeamWidth(DBText beamMark)
+        {
+            // 暂时解析文字中的宽度
+            // beamWidth后期通过两边的梁线来获取，暂时取梁规格中的宽度
+            return GetBeamWidth(beamMark.TextString).Item1;
+        }
+
+        private double CalculateTextHeight(DBText text)
+        {
+            double geoH = text.Height;
+            var clone = text.Clone() as DBText;
+            var mt = Matrix3d.Rotation(clone.Rotation * -1.0, clone.Normal, clone.Position);
+            clone.TransformBy(mt);
+            if(clone.Bounds.HasValue)
+            {
+                geoH = clone.GeometricExtents.MaxPoint.Y - clone.GeometricExtents.MinPoint.Y;
+            }
+            clone.Dispose();
+            return geoH;
+        }
+
+        private Tuple<DBText, DBText> Split(DBText beamMark)
         {
             // 把单行文字拆成两行文字
-            // 往direction方向调整
-            var center = GetTextCenter(beamMark);
-            if (!center.HasValue)
-            {
-                return null;
-            }
             var texts = SplitBeamMarkTexts(beamMark.TextString);
             if (texts.Count != 2)
             {
                 return null;
             }
             var specText = CreateText(beamMark, texts[0]);
-            var bgText = CreateText(beamMark, texts[1]);            
-            Move(beamMark, specText, bgText, direction);
+            var bgText = CreateText(beamMark, texts[1]);
             return Tuple.Create(specText, bgText);
         }
-
-
 
         private Tuple<double, double> GetBeamWidth(string textstring)
         {
@@ -114,47 +153,14 @@ namespace ThMEPStructure.StructPlane.Service
             }
             return obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(2));
         }
-        private void Move(DBText beamMark,DBText specText,DBText bgText, Vector3d towardVec)
-        {
-            var radTolerance = ThAuxiliaryUtils.AngToRad(1.0);
-            var movePt = beamMark.Position.GetExtentPoint(towardVec, beamMark.Height);
-            var mt = Matrix3d.Displacement(movePt - beamMark.Position);
-            if (IsParallel(beamMark.Rotation,Math.PI*0.5, radTolerance) ||
-                IsParallel(beamMark.Rotation, Math.PI * 1.5, radTolerance))
-            {
-                // 垂直,specText在左边，gbText在右边               
-                if(movePt.X< beamMark.Position.X)
-                {
-                    specText.TransformBy(mt);
-                }
-                else
-                {
-                    bgText.TransformBy(mt);
-                }
-            }
-            else
-            {
-                // 水平,specText在上方，gbText在下方
-                // 二四象限，specText在上方，gbText在下方
-                // 一三象限，specText在上方，gbText在下方
-                if (movePt.Y > beamMark.Position.Y)
-                {
-                    specText.TransformBy(mt);
-                }
-                else
-                {
-                    bgText.TransformBy(mt);
-                }
-            }            
-        }
-
+ 
         private DBText CreateText(DBText beamMark, string content)
         {
             var clone = beamMark.Clone() as DBText;
             clone.TextString = content;
-            clone.AlignmentPoint = beamMark.AlignmentPoint;
-            clone.HorizontalMode = TextHorizontalMode.TextCenter;
-            clone.VerticalMode = TextVerticalMode.TextVerticalMid;
+            //clone.AlignmentPoint = beamMark.AlignmentPoint;
+            //clone.HorizontalMode = TextHorizontalMode.TextCenter;
+            //clone.VerticalMode = TextVerticalMode.TextVerticalMid;
             return clone;
         }
 
