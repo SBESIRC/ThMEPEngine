@@ -7,8 +7,8 @@
              xmlns:s="clr-namespace:System;assembly=mscorlib"             
              xmlns:converters="clr-namespace:TianHua.Mep.UI.Converter"
              xmlns:local="clr-namespace:TianHua.Mep.UI.UI"
-                    Title="梁配置" SizeToContent="Manual" Height="370" 
-                    Width="240" MaxWidth="240" MaxHeight="370"
+                    Title="梁配置" SizeToContent="Manual" Height="400" 
+                    Width="240" MaxWidth="240" MaxHeight="400"
              mc:Ignorable="d">
     <Window.Resources>        
         <ResourceDictionary>
@@ -23,13 +23,13 @@
             </ControlTemplate>
         </ResourceDictionary>
     </Window.Resources>
-    <StackPanel Orientation="Vertical">
-        <Label Content="梁识别引擎："></Label>        
-        <StackPanel Orientation="Horizontal" Margin="45,0,0,5" HorizontalAlignment="Center">
-            <RadioButton Margin="0,6" x:Name="rbLayer" Content="图 层" GroupName="CheckObject" IsThreeState="False"
+    <StackPanel Orientation="Vertical">              
+        <StackPanel Orientation="Horizontal" Margin="8,5,0,0" HorizontalAlignment="Left">
+            <Label Content="梁识别引擎："></Label>
+            <!--<RadioButton Margin="0,6" x:Name="rbLayer" Content="图 层" GroupName="CheckObject" IsThreeState="False"
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=0}" Checked="rbLayer_Checked">
-            </RadioButton>
+            </RadioButton>-->
             <RadioButton Margin="10,6" x:Name="rbDB" Content="D B" GroupName="CheckObject" IsThreeState="False"
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=1}" Checked="rbDB_Checked">
@@ -44,7 +44,7 @@
             <Button Content="增加图层" Name="btnAddLayer" Margin="5,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddLayer_Click"></Button>
             <Button Content="删除图层" Name="btnDelLayer" Margin="0,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnDelLayer_Click"></Button>
         </StackPanel>
-        <ListBox x:Name="listBox1" Height="220" SelectionMode="Multiple" 
+        <ListBox x:Name="listBox1" Height="270" SelectionMode="Multiple" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         ItemsSource="{Binding LayerInfos}" Margin="5"
