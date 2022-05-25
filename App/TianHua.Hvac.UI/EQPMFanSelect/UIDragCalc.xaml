@@ -69,20 +69,20 @@
 
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputDouble" NumCanMinus="False"
-                                  Text="{Binding DuctLength,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  Text="{Binding DuctLength,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                                   MaxDecimalPlaces ="1"
                                   Width="50"/>
                 </Border>
 
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputDouble" NumCanMinus="False"
-                                  Text="{Binding Friction,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  Text="{Binding Friction,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                                   MaxDecimalPlaces="1" Width="40"/>
                 </Border>
 
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputDouble" NumCanMinus="False" 
-                                  Text="{Binding LocRes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  Text="{Binding LocRes,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                                   MaxDecimalPlaces="1" Width="40"/>
                 </Border>
                 
@@ -94,15 +94,15 @@
 
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="4" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Width="50"
-                                  Text="{Binding Damper,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                                  Text="{Binding Damper,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" />
                 </Border>
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="5" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Width="50"
-                                  Text="{Binding EndReservedAirPressure,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                  Text="{Binding EndReservedAirPressure,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
                 </Border>
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="6" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Width="50"
-                                  Text="{Binding DynPress,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                  Text="{Binding DynPress,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
                 </Border>
                 
                 <Label Content="{Binding CalcResistance,Mode=OneWay,NotifyOnSourceUpdated=True}" 
@@ -110,7 +110,7 @@
                        Grid.Row="1" Grid.Column="7" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                 <Border BorderBrush="#787878" BorderThickness="0,0,1,0" Grid.Row="1" Grid.Column="8" HorizontalAlignment="Stretch" >
                     <cus:InputTextBox TextBoxInputType="InputDouble" NumCanMinus="False" Width="40"
-                                  Text="{Binding SelectionFactor,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
+                                  Text="{Binding SelectionFactor,UpdateSourceTrigger=LostFocus,Mode=TwoWay}"/>
                 </Border>
                 <Label Content="{Binding WindResis,UpdateSourceTrigger=PropertyChanged,Mode=OneWay,NotifyOnSourceUpdated=True}" 
                        BorderThickness="0"
