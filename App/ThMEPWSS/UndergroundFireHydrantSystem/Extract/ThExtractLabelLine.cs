@@ -59,7 +59,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
                    layer.ToUpper() == "W-WSUP-DIMS" ||
-                   layer.ToUpper() == "W-DRAI-DIMS" ||
                    layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "0" ||

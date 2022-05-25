@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
@@ -80,33 +81,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         public void SetPipeNumber(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var textHeight = 350;
-            double leftX;
-            double rightX;
-            double leftY;
-            double rightY;
-            if (TextLine.StartPoint.X < TextLine.EndPoint.X)
-            {
-                leftX = TextLine.StartPoint.X;
-                rightX = TextLine.EndPoint.X;
-                leftY = TextLine.StartPoint.Y;
-                rightY = TextLine.EndPoint.Y;
-            }
-            else
-            {
-                leftX = TextLine.EndPoint.X;
-                rightX = TextLine.StartPoint.X;
-                leftY = TextLine.EndPoint.Y;
-                rightY = TextLine.StartPoint.Y;
-            }
-
-            var pt1 = new Point3d(leftX, leftY + textHeight, 0);
-            var pt2 = new Point3d(rightX, rightY, 0);
-            string str = ExtractText(spatialIndex, pt1, pt2);
+            string str = ExtractText(spatialIndex);
             PipeNumber = str;
-            pt1 = new Point3d(leftX, leftY - 150, 0);
-            pt2 = new Point3d(rightX, rightY - textHeight, 0);
-            var str2 = ExtractText(spatialIndex, pt1, pt2);
+            var str2 = ExtractText(spatialIndex);
             PipeNumber2 = str2;
             if (PipeNumber2 is null)
             {
@@ -118,17 +95,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
         }
 
-        private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex, Point3d pt1, Point3d pt2)
+        private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//文字范围
-            var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
-            var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+            double offset = 200;
+            var pt1 = TextLine.StartPoint.OffsetY(offset);
+            var pt2 = TextLine.EndPoint.OffsetY(offset);
+            var line = new Line(pt1,pt2);
+            var midPt = General.GetMidPt(pt1,pt2);
+            double tor = 1000;
+            var DBObjs = spatialIndex.SelectFence(line);
             var pipeNumber = "";
             foreach (var obj in DBObjs)
             {
                 if (obj is DBText br)
                 {
-                    pipeNumber = br.TextString;
+                    var centerPt = General.GetMidPt(br);
+                    var dist = centerPt.DistanceTo(midPt);
+                    if(dist<tor)
+                    {
+                        tor = dist;
+                        pipeNumber = br.TextString;
+                    }
                 }
                 else
                 {
@@ -144,13 +131,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         }
         public void SetType(bool verticalHasHydrant)
         {
-            var xRange = 250;
-            var yRange = 250;
-            var pt1 = new Point3d(PtEx._pt.X - xRange, PtEx._pt.Y + yRange, 0);
-            var pt2 = new Point3d(PtEx._pt.X + xRange, PtEx._pt.Y - yRange, 0);
-            var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//消火栓范围
-            var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
-            //var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             if(PipeNumber?.Contains("水泵接合器") == true)
             {
                 Type = 4;

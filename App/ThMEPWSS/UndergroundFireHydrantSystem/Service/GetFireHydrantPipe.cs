@@ -213,14 +213,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 try
                 {
-                    if(pt.DistanceToEx(new Point3dEx(1495711.3, 896071, 0))<10)
-                    {
-                        ;
-                    }
-                    if (pt.DistanceToEx(new Point3dEx(1496511.5, 896071, 0)) < 10)
-                    {
-                        ;
-                    }
                     if (!fireHydrantSysOut.BranchDrawDic.ContainsKey(pt))
                     {
                         continue;

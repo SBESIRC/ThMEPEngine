@@ -259,7 +259,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             int indxx = 0;
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
-                if (pt._pt.DistanceTo(new Point3d(1491786.3,407697, 0)) < 10)
+                if (pt._pt.DistanceTo(new Point3d(36370369505.4, 2939969268.9, 0)) < 10)
                     ;
                 try
                 {
@@ -302,6 +302,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
             var termPoint = new TermPoint(pt);
             termPoint.SetLines(fireHydrantSysIn, labelLine);
+            termPoint.SetPipeNumber(textSpatialIndex);
             termPoint.SetType(verticalHasHydrant);
             fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             if (termPoint.StartLine is null)
