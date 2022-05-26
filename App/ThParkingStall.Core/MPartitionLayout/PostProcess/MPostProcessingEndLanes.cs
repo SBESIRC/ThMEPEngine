@@ -267,42 +267,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 succeed_lanes[i] = update_succeedlane;
             }
-
-            //old
-            //for (int i = 0; i < lanes.Count; i++)
-            //{
-            //    var lane = lanes[i];
-            //    var lane_endpoints = new List<Coordinate>() { lane.P0, lane.P1 };
-            //    for (int j = 0; j < lane_endpoints.Count; j++)
-            //    {
-            //        var endpoint = lane_endpoints[j];
-            //        var lane_vec_inner_to_wall = j == 0 ? -Vector(lane) : Vector(lane);
-            //        lane_vec_inner_to_wall = lane_vec_inner_to_wall.Normalize();
-            //        if (boundary.ClosestPoint(endpoint).Distance(endpoint) < 10)
-            //        {
-            //            var pointtest = endpoint.Translation(-lane_vec_inner_to_wall * 5000);
-            //            var perp_vec = Vector(lane).Normalize().GetPerpendicularVector();
-            //            var carLine = new LineSegment();
-            //            var succeed_line = new LineSegment();
-            //            var vecmove = new Vector2D();
-            //            if (CanAddCarSpotsParallelCase(lanes, lane_vec_inner_to_wall, pointtest, perp_vec, ref carspacialindex, ref cars, ref carLine, ref succeed_line))
-            //            {
-            //                found = true;
-            //                var splits = SplitLine(lanes[i], new List<LineSegment>() { succeed_line }).OrderByDescending(e => e.MidPoint.Distance(endpoint));
-            //                if (splits.Count() > 1) lanes[i] = splits.First();
-            //                else
-            //                {
-            //                    lanes.RemoveAt(i);
-            //                    i--;
-            //                }
-            //                int carscount = cars.Count;
-            //                generate_cars_parallel_case(carLine, succeed_line, ref lanes, ref lane_vec_inner_to_wall, ref cars, ref pillars, Walls, boundary, obspacialindex);
-            //                if (carscount == cars.Count) found = false;
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
         }
         private static void generate_cars_parallel_case(LineSegment carLine,ref LineSegment succeedLine, ref List<LineSegment> lanes, Vector2D vecmove,
             ref List<InfoCar> cars, ref List<Polygon> pillars, List<LineString> Walls, Polygon boundary, MNTSSpatialIndex obspacialindex)
