@@ -48,12 +48,12 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 string[] detaileds = o.Split('x');
                 if(detaileds.Length == 2)
                 {
-                    configs.Add(detaileds[1]);
+                    configs.Add(detaileds[1].Replace("A",""));
                     PolesNum = "3P";
                 }
                 else
                 {
-                    configs.Add(detaileds[0]);
+                    configs.Add(detaileds[0].Replace("A", ""));
                     PolesNum = "1P";
                 }
             });
