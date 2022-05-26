@@ -71,7 +71,7 @@ namespace TianHua.Hvac.UI.EQPMFanSelect.EventMonitor
             }
             else 
             {
-                var thisDwgId = e.Document.Database.VersionGuid.ToString();
+                var thisDwgId = e.Document.UnmanagedObject.ToString();
                 EQPMUIServices.Instance.ShowFanSelectUI(thisDwgId);
             }
             SubscribeToDocumentEvents(e.Document);
