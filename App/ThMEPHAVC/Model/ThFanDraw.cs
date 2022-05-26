@@ -122,7 +122,7 @@ namespace ThMEPHVAC.Model
                 {
                     Length = 200,
                     Width = valvewidth,
-                    ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
+                    ValveBlockName = service.airValveName,
                     ValveBlockLayer = service.electrycityValveLayer,
                     ValveVisibility = service.electrycityValveVisibility,
                     WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,

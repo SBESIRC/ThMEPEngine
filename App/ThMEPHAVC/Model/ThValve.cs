@@ -284,7 +284,7 @@ namespace ThMEPHVAC.Model
                 Width = Parameters.DuctWidth,
                 RotationAngle = isExhaust ? angle : angle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,
-                ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
+                ValveBlockName = service.airValveName,
                 ValveBlockLayer = service.airValveLayer,
                 ValveVisibility = ThDuctUtils.CheckValveModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
