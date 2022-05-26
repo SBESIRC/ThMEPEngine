@@ -57,7 +57,7 @@ namespace TianHua.Mep.UI
         /// <summary>
         /// 梁配置
         /// </summary>
-        [CommandMethod("TIANHUACAD", "ThEBAC", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THLPZ", CommandFlags.Modal)]
         public void ThExtractBeamAreaConfig()
         {
             var config = new ExtractBeamConfigUI();
