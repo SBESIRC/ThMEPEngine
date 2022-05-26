@@ -81,7 +81,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             if (node.Load.Phase == ThPDSPhase.一相)
             {
                 _polesNum = "1P";
-                _ouvpPolesNum = "1P+N";
+                _ouvpPolesNum = "2P";
                 //当相数为1时，若负载类型不为“Outdoor Lights”，且断路器不是ATSE前的主进线开关，则断路器选择1P；
                 //当相数为1时，若负载类型为“Outdoor Lights”，或断路器是ATSE前的主进线开关，则断路器选择2P；
                 if (node.Load.LoadTypeCat_2 != ThPDSLoadTypeCat_2.OutdoorLights && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
@@ -95,7 +95,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             }
             else if (node.Load.Phase == ThPDSPhase.三相)
             {
-                _ouvpPolesNum = "3P+N";
+                _ouvpPolesNum = "4P";
                 if (node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.二路进线ATSE && node.Details.CircuitFormType.CircuitFormType != CircuitFormInType.三路进线)
                 {
                     _specialPolesNum = "4P";
@@ -117,7 +117,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if(_IsEmptyLoad)
                 return null;
-            return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2);
+            return new Conductor(_calculateCurrent, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber,_edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2,_edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
         }
 
         public Conductor GetSecondaryCircuitConductor(SecondaryCircuitInfo secondaryCircuitInfo)

@@ -37,6 +37,38 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeParameters = meters.Select(o => o.parameter).ToList();
         }
 
+        public MeterTransformer(List<string> mtConfigs)
+        {
+            this.ComponentType = ComponentType.MT;
+
+            var configs = new List<string>();
+            mtConfigs.ForEach(o =>
+            {
+                //例：3x5(60)A
+                string[] detaileds = o.Split('x');
+                if(detaileds.Length == 2)
+                {
+                    configs.Add(detaileds[1]);
+                    PolesNum = "3P";
+                }
+                else
+                {
+                    configs.Add(detaileds[0]);
+                    PolesNum = "1P";
+                }
+            });
+            var meters = MeterTransformerConfiguration.MeterComponentInfos.Where(o =>
+            configs.Contains(o.parameter)).ToList();
+            if (meters.Count == 0)
+            {
+                throw new NotFoundComponentException("设备库内找不到对应规格的MT");
+            }
+            Meters = meters;
+            var meter = meters.First();
+            MeterParameter = meter.parameter;
+            AlternativeParameters = meters.Select(o => o.parameter).ToList();
+        }
+
         public override List<string> GetParameters()
         {
             return AlternativeParameters;

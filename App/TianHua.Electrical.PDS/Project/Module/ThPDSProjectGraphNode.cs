@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using QuikGraph;
 using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Project.Module.Circuit;
+using TianHua.Electrical.PDS.Project.Module.Configure;
+using TianHua.Electrical.PDS.Project.Module.ProjectConfigure;
 
 namespace TianHua.Electrical.PDS.Project.Module
 {
@@ -27,6 +30,58 @@ namespace TianHua.Electrical.PDS.Project.Module
             if (this.Details.HighPower != power)
             {
                 this.Details.HighPower = power;
+                if (this.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
+                {
+                    switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType)
+                    {
+                        case MeterBoxCircuitType.上海住宅:
+                            {
+                                var config = DistributionMeteringConfiguration.ShanghaiResidential.FirstOrDefault(o => o.HighPower >= this.Details.HighPower);
+                                if (config.IsNull() || config.Phase == ThPDSPhase.三相)
+                                {
+                                    if (this.Load.Phase == ThPDSPhase.一相)
+                                    {
+                                        this.Load.Phase = ThPDSPhase.三相;
+                                        this.Details.PhaseSequence = PhaseSequence.L123;
+                                    }
+                                }
+                                else
+                                {
+                                    if (this.Load.Phase == ThPDSPhase.三相)
+                                    {
+                                        this.Load.Phase = ThPDSPhase.一相;
+                                        this.Details.PhaseSequence = PhaseSequence.L1;
+                                    }
+                                }
+                                break;
+                            }
+                        case MeterBoxCircuitType.江苏住宅:
+                            {
+                                var config = DistributionMeteringConfiguration.JiangsuResidential.FirstOrDefault(o => o.HighPower >= this.Details.HighPower);
+                                if (config.IsNull() || config.Phase == ThPDSPhase.三相)
+                                {
+                                    if (this.Load.Phase == ThPDSPhase.一相)
+                                    {
+                                        this.Load.Phase = ThPDSPhase.三相;
+                                        this.Details.PhaseSequence = PhaseSequence.L123;
+                                    }
+                                }
+                                else
+                                {
+                                    if (this.Load.Phase == ThPDSPhase.三相)
+                                    {
+                                        this.Load.Phase = ThPDSPhase.一相;
+                                        this.Details.PhaseSequence = PhaseSequence.L1;
+                                    }
+                                }
+                                break;
+                            }
+                        case MeterBoxCircuitType.国标_表在前:
+                        case MeterBoxCircuitType.国标_表在后:
+                        default:
+                            break;
+                    }
+                }
                 this.UpdateWithNode(false);
             }
         }

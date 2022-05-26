@@ -461,6 +461,63 @@ namespace TianHua.Electrical.PDS.Project
                 //消防应急照明回路
                 edge.Details.CircuitForm = specifyComponentFactory.GetFireEmergencyLighting();
             }
+            else if(edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ElectricalMeterPanel)
+            {
+                switch (PDSProject.Instance.projectGlobalConfiguration.MeterBoxCircuitType) 
+                {
+                    case MeterBoxCircuitType.上海住宅:
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetShanghaiMTCircuit();
+                            if (edge.Details.CircuitForm.IsNull())
+                            {
+                                edge.Details.CircuitForm = new DistributionMetering_ShanghaiMTCircuit()
+                                {
+                                    breaker1 = componentFactory.CreatBreaker(),
+                                    meter = componentFactory.CreatMeterTransformer(),
+                                    breaker2 = componentFactory.CreatBreaker(),
+                                    Conductor = componentFactory.CreatConductor(),
+                                };
+                            }
+                            break;
+                        }
+                    case MeterBoxCircuitType.江苏住宅:
+                        {
+                            edge.Details.CircuitForm = specifyComponentFactory.GetMTInFrontCircuit();
+                            if (edge.Details.CircuitForm.IsNull())
+                            {
+                                edge.Details.CircuitForm = new DistributionMetering_MTInFrontCircuit()
+                                {
+                                    meter = componentFactory.CreatMeterTransformer(),
+                                    breaker = componentFactory.CreatBreaker(),
+                                    Conductor = componentFactory.CreatConductor(),
+                                };
+                            }
+                            break;
+                        }
+                    case MeterBoxCircuitType.国标_表在前:
+                        {
+                            edge.Details.CircuitForm = new DistributionMetering_CTInFrontCircuit()
+                            {
+                                meter = componentFactory.CreatMeterTransformer(),
+                                breaker = componentFactory.CreatBreaker(),
+                                Conductor = componentFactory.CreatConductor(),
+                            };
+                            break;
+                        }
+                    case MeterBoxCircuitType.国标_表在后:
+                        {
+                            edge.Details.CircuitForm = new DistributionMetering_CTInBehindCircuit()
+                            {
+                                meter = componentFactory.CreatCurrentTransformer(),
+                                breaker = componentFactory.CreatBreaker(),
+                                Conductor = componentFactory.CreatConductor(),
+                            };
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
             else if (edge.Target.Type == PDSNodeType.Unkown)
             {
                 edge.Details.CircuitForm = new RegularCircuit()

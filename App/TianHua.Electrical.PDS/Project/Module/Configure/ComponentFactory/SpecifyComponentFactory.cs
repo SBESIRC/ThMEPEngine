@@ -18,6 +18,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         private bool _IsEmptyLoad;//是否是空负载
         private double _lowPower;//单速功率/双速低速功率
         private double _highPower;//双速高速功率
+        private string _characteristics;//瞬时脱扣器类型
+        private List<string> _tripDevice;//脱扣器类型
+        private double _calculateCurrent;//计算电流
+        private double _calculateCurrentMagnification;//计算电流
+        private string _polesNum;//级数
 
         /// <summary>
         /// 断路器配置
@@ -47,6 +52,15 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             _isFireLoad = edge.Target.Load.FireLoad;
             _lowPower = edge.Target.Details.LowPower;
             _highPower = edge.Target.Details.HighPower;
+            _calculateCurrent = edge.Target.Load.CalculateCurrent;//计算电流
+            _calculateCurrentMagnification = edge.Target.Load.CalculateCurrent * PDSProject.Instance.projectGlobalConfiguration.CalculateCurrentMagnification;//计算电流放大倍数
+            _polesNum = "3P"; //极数 参考ID1002581 业务逻辑-元器件选型-断路器选型-3.极数的确定方法
+            if (edge.Target.Load.Phase == ThPDSPhase.一相)
+            {
+                _polesNum = "1P";
+            }
+            _characteristics = "";//瞬时脱扣器类型
+            _tripDevice = edge.Target.Load.LoadTypeCat_1.GetTripDevice(edge.Target.Load.FireLoad, out _characteristics);//脱扣器类型
         }
 
         public PDSBaseOutCircuit GetMotorCircuit(Type type)
@@ -292,9 +306,53 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             return CircuitForm;
         }
 
+        /// <summary>
+        /// 获取上海住宅回路配置
+        /// </summary>
+        /// <returns></returns>
+        public DistributionMetering_ShanghaiMTCircuit GetShanghaiMTCircuit()
+        {
+            var DistributionMeteringConfigs = DistributionMeteringConfiguration.ShanghaiResidential;
+            var config = DistributionMeteringConfigs.FirstOrDefault(o => o.HighPower >= _highPower );
+            if(config.IsNull() || config.Phase != _edge.Target.Load.Phase)
+            {
+                return null;
+            }
+            var CircuitForm = new DistributionMetering_ShanghaiMTCircuit();
+            CircuitForm.breaker1 = CreatBreaker(config.CB1);
+            CircuitForm.meter = CreatMeterTransformer(config.MT);
+            CircuitForm.breaker2 = CreatBreaker(config.CB2);
+            CircuitForm.Conductor = CreatConductor(config.Conductor);
+            return CircuitForm;
+        }
+
+        /// <summary>
+        /// 获取江苏住宅回路配置
+        /// </summary>
+        /// <returns></returns>
+        public DistributionMetering_MTInFrontCircuit GetMTInFrontCircuit()
+        {
+            var DistributionMeteringConfigs = DistributionMeteringConfiguration.JiangsuResidential;
+            var config = DistributionMeteringConfigs.FirstOrDefault(o => o.HighPower >= _highPower);
+            if (config.IsNull() || config.Phase != _edge.Target.Load.Phase)
+            {
+                return null;
+            }
+            var CircuitForm = new DistributionMetering_MTInFrontCircuit();
+            CircuitForm.meter = CreatMeterTransformer();
+            CircuitForm.breaker = CreatBreaker(config.CB);
+            CircuitForm.Conductor = CreatConductor(config.Conductor);
+            return CircuitForm;
+        }
+
         public override Breaker CreatBreaker()
         {
             return new Breaker(_breakerConfig);
+        }
+
+        private Breaker CreatBreaker(List<string> config)
+        {
+            return new Breaker(config, _tripDevice, _characteristics);
         }
 
         public override Conductor CreatConductor()
@@ -302,6 +360,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             if (_IsEmptyLoad)
                 return null;
             return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2);
+        }
+
+        private Conductor CreatConductor(string config)
+        {
+            return new Conductor(_conductorConfig, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.FloorNumber, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod2, _edge.Target.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.ResidentialDistributionPanel);
         }
 
         /// <summary>
@@ -332,12 +395,24 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
 
         public override Meter CreatMeterTransformer()
         {
-            throw new NotImplementedException();
+            if (_calculateCurrent < 100)
+            {
+                return new MeterTransformer(_calculateCurrent, _polesNum);
+            }
+            else
+            {
+                return CreatCurrentTransformer();
+            }
+        }
+
+        private Meter CreatMeterTransformer(List<string> mT)
+        {
+            return new MeterTransformer(mT);
         }
 
         public override CurrentTransformer CreatCurrentTransformer()
         {
-            throw new NotImplementedException();
+            return new CurrentTransformer(_calculateCurrent, _polesNum);
         }
 
         public override IsolatingSwitch CreatIsolatingSwitch()
