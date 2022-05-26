@@ -604,6 +604,7 @@ namespace TianHua.Hvac.UI.UI
             clonePModel.FanControlItem = fanViewModel.FanControlItems.Where(c => c.Value == pModel.FanControlItem.Value).FirstOrDefault();
             clonePModel.FanMountTypeItem = fanViewModel.FanMountTypeItems.Where(c => c.Value == pModel.FanMountTypeItem.Value).FirstOrDefault();
             clonePModel.VibrationModeItem = fanViewModel.VibrationModeItems.Where(c => c.Value == pModel.VibrationModeItem.Value).FirstOrDefault();
+            clonePModel.AirflowDirectionItem = clonePModel.AirflowDirectionItems.Where(c => c.Value == pModel.AirflowDirectionItem.Value).FirstOrDefault();
             fanViewModel.allFanDataMoedels.Add(clonePModel);
             fanViewModel.FanInfos.Add(clonePModel);
             if (null != cModel)

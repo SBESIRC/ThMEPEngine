@@ -146,38 +146,45 @@ namespace ThMEPHVAC.EQPMFanSelect
             {
                 return retModel;
             }
-            fanBlockXData = new FanBlockXDataBase();
-            //读取顺序要和上面的写入顺序一致
-            for (int i = 1; i < valueList.Count; i++) 
+            try 
             {
-                var strData = valueList.ElementAt(i).Value.ToString();
-                switch (i) 
+                fanBlockXData = new FanBlockXDataBase();
+                //读取顺序要和上面的写入顺序一致
+                for (int i = 1; i < valueList.Count; i++)
                 {
-                    case 1:
-                        fanBlockXData.Id = strData;
-                        break;
-                    case 2:
-                        fanBlockXData.Number = (int)valueList.ElementAt(i).Value;
-                        break;
-                    case 3:
-                        fanBlockXData.VentStyleString = strData;
-                        break;
-                    case 4:
-                        fanBlockXData.ScenarioString = strData;
-                        break;
-                    case 5:
-                        fanBlockXData.FanControlString = strData;
-                        break;
-                    case 6:
-                        retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
-                        break;
-                    case 7:
-                        fanBlockXData.HandleString = strData;
-                        break;
-                    case 8:
-                        fanBlockXData.Remark = strData;
-                        break;
+                    var strData = valueList.ElementAt(i).Value.ToString();
+                    switch (i)
+                    {
+                        case 1:
+                            fanBlockXData.Id = strData;
+                            break;
+                        case 2:
+                            fanBlockXData.Number = (int)valueList.ElementAt(i).Value;
+                            break;
+                        case 3:
+                            fanBlockXData.VentStyleString = strData;
+                            break;
+                        case 4:
+                            fanBlockXData.ScenarioString = strData;
+                            break;
+                        case 5:
+                            fanBlockXData.FanControlString = strData;
+                            break;
+                        case 6:
+                            retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                            break;
+                        case 7:
+                            fanBlockXData.HandleString = strData;
+                            break;
+                        case 8:
+                            fanBlockXData.Remark = strData;
+                            break;
+                    }
                 }
+            }
+            catch 
+            {
+                return null;
             }
             return retModel;
         }
