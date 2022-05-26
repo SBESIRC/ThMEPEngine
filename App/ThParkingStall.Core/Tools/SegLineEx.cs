@@ -10,30 +10,30 @@ namespace ThParkingStall.Core.Tools
 {
     public static class SegLineEx
     {
-        public static Dictionary<int, List<int>> GetSegLineIntsecDic(this List<LineSegment> segLines)
+        public static List<List<int>> GetSegLineIntsecList(this List<LineSegment> segLines)
         {
-            var seglineIntsecDic = new Dictionary<int, List<int>>();
+            var seglineIntsecList = new List<List<int>>();
 
             for (int i = 0; i < segLines.Count; i++)
             {
-                seglineIntsecDic.Add(i, new List<int>());
+                seglineIntsecList.Add(new List<int>());
                 for (int j = 0; j < segLines.Count; j++)
                 {
                     if (i == j) continue;
                     if (segLines[i].IsVertical() == segLines[j].IsVertical()) continue;
                     if (segLines[i].Intersection(segLines[j]) != null)
                     {
-                        seglineIntsecDic[i].Add(j);
+                        seglineIntsecList[i].Add(j);
                     }
                 }
             }
-            return seglineIntsecDic;
+            return seglineIntsecList;
         }
-        public static void ExtendAndIntSect(this List<LineSegment> segLines, Dictionary<int, List<int>> seglineIndexDic)
+        public static void ExtendAndIntSect(this List<LineSegment> segLines, List<List<int>> seglineIntsecList)
         {
             for (int i = 0; i < segLines.Count; i++)
             {
-                foreach (var j in seglineIndexDic[i])
+                foreach (var j in seglineIntsecList[i])
                 {
                     if (segLines[i].Intersection(segLines[j]) != null)//邻接表中连接的线不需要扩展
                     {
@@ -55,6 +55,70 @@ namespace ThParkingStall.Core.Tools
             if (IntSecPt == null) return;
             line.ExtendToPoint(IntSecPt);
             line2.ExtendToPoint(IntSecPt);
+        }
+        public static List<(bool, bool)> GetSeglineConnectToBound(this List<LineSegment> SegLines, Polygon WallLine)
+        {
+            var seglineConnectToBound = new List<(bool, bool)>();
+            for (int i = 0; i < SegLines.Count; i++)
+            {
+                var segLine = SegLines[i].ToLineString();
+                var IntSection = segLine.Intersection(WallLine);
+                
+                var IntSecPts = segLine.Intersection(WallLine.Shell).Coordinates.OrderBy(c=>c.X+c.Y);
+                if(IntSecPts.Count() == 0|| IntSection.IsEmpty)
+                {
+                    seglineConnectToBound.Add((false, false));
+                    continue;
+                }
+                var mid = IntSection.Centroid;
+                var lastCoor = IntSecPts.Last();
+                var firstCoor = IntSecPts.First();
+                var posConnected = (mid.X+mid.Y) < (lastCoor.X + lastCoor.Y);
+                var negConnected = (mid.X + mid.Y) > (firstCoor.X + firstCoor.Y);
+                seglineConnectToBound.Add((negConnected,posConnected));
+            }
+            return seglineConnectToBound;
+        }
+        public static void ExtendToBound(this List<LineSegment> SegLines, Polygon WallLine, List<(bool, bool)> seglineConnectToBound)
+        {
+            for (int i = 0; i < SegLines.Count; i++)
+            {
+                var segLine = SegLines[i];
+                SegLines[i] = segLine.ExtendToBound(WallLine, seglineConnectToBound[i]);
+            }
+        }
+        public static LineSegment ExtendToBound(this LineSegment SegLine, Polygon WallLine, (bool, bool) seglineConnectToBound)
+        {
+            if (!seglineConnectToBound.Item1 && !seglineConnectToBound.Item2) return SegLine;
+            var SegLineStr = SegLine.ToLineString();
+            if(!WallLine.Contains(SegLineStr.Centroid)) return SegLine;
+            List<Coordinate> LineIntSecPts = null;
+            var IntSection = SegLineStr.Intersection(WallLine);
+            var mid = IntSection.Centroid;
+            var IntSecPts = SegLineStr.Intersection(WallLine.Shell).Coordinates.OrderBy(c => c.X + c.Y);
+            Coordinate P0;
+            Coordinate P1;
+            if(SegLine.P0.X + SegLine.P0.Y < SegLine.P1.X + SegLine.P1.Y)
+            {
+                P0 = SegLine.P0;
+                P1 = SegLine.P1;
+            }  
+            else
+            {
+                P0 = SegLine.P1;
+                P1 = SegLine.P0;
+            }
+            if (seglineConnectToBound.Item1 && !mid.Coordinate.ExistPtInDirection(IntSecPts, false))//负向需要连接，且未连接
+            {
+                if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
+                P0 = LineIntSecPts.Where(c => c.X + c.Y < mid.X + mid.Y).Last();
+            }
+            if (seglineConnectToBound.Item2&&!mid.Coordinate.ExistPtInDirection(IntSecPts,true))
+            {
+                if (LineIntSecPts == null) LineIntSecPts = SegLine.LineIntersection(WallLine.Shell).OrderBy(c => c.X + c.Y).ToList();
+                P1 = LineIntSecPts.Where(c =>c.X + c.Y > mid.X + mid.Y).First();
+            }
+            return new LineSegment(P0, P1);
         }
 
         public static void SeglinePrecut(this List<LineSegment> SegLines, Polygon WallLine, double prop = 0.8)

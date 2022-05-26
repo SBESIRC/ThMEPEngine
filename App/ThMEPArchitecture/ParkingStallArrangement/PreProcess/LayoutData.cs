@@ -61,7 +61,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  MNTSSpatialIndex BoundaryObjectsSPIDX;//边界打成断线+可忽略障碍物的spatialindex；
         public  MNTSSpatialIndex BoundLineSpatialIndex;//边界的打成碎线的spindex
 
-        public  Dictionary<int, List<int>> SeglineIndexDic;//分割线连接关系
+        public List<List<int>> SeglineIndexList;//分割线连接关系
+        public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
+        public List<(int,int,int,int)> SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
+
+
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
@@ -77,13 +81,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             }
             return true;
         }
-        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null)
+        public bool ProcessSegLines(List<LineSegment> AutoSegLines = null,bool autoAdjustPriority = false)
         {
             if (AutoSegLines != null) SegLines = AutoSegLines.Select(l => l.Extend(1)).ToList();
             //SegLines = SegLines.RemoveDuplicated(10);
             bool Isvaild = SegLineVaild();
             //VaildLanes.ShowInitSegLine();
             if (!Isvaild) return false;
+            if(autoAdjustPriority)
+            {
+
+            }
             GetLowerUpperBound();
             //ShowLowerUpperBound();
             return true;
@@ -348,6 +356,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             if (!HaveAtLeastTwoIntsecPoints(true)) return false;
             // 先预切割
             SegLines.SeglinePrecut(WallLine);
+            SeglineIndexList = SegLines.GetSegLineIntsecList();
+            SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
             //获取有效分割线
             VaildLanes = SegLines.GetVaildLanes(WallLine,BoundaryObjectsSPIDX);
             // 判断分割线净宽（中点标记）
@@ -432,7 +442,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         // 判断分割线净宽,如果不够移动一下在判断是否够
         private  bool LaneWidthSatisfied()
         {
-            SeglineIndexDic = SegLines.GetSegLineIntsecDic();
+            
             double tol = VMStock.RoadWidth ;// 5500 -0.1
             for (int i = 0; i < VaildLanes.Count; i++)
             {
@@ -474,7 +484,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         private  bool SatisfiedAfterMove(int idx, ref List<LineSegment> segLines_C)
         {
             double tol = ParameterStock.RoadWidth - 0.1;// 5500-0.1
-            segLines_C.ExtendAndIntSect(SeglineIndexDic);//延长各分割线使之相交
+            segLines_C.ExtendAndIntSect(SeglineIndexList);//延长各分割线使之相交
+            segLines_C[idx] = segLines_C[idx].ExtendToBound(WallLine, SeglineConnectToBound[idx]);
             var vaildSeg = SegLineEx.GetVaildLane(idx, segLines_C, SegLineBoundary,BoundaryObjectsSPIDX);// 获取分割线有效部分
             if (vaildSeg == null) return false;//有效分割线无效
             var rect = vaildSeg.GetRect(tol);

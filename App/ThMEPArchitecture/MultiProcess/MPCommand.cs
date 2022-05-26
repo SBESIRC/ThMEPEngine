@@ -242,7 +242,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var best = res.First();
                     subAreas = InterParameter.GetSubAreas(best);
                     var finalSegLines = best.Genome.Select(g => g.ToLineSegment()).ToList();
-                    finalSegLines.ExtendAndIntSect(InterParameter.SegLineIntsecDic);
+                    finalSegLines.ExtendAndIntSect(InterParameter.SeglineIndexList);
                     var layer = "最终分割线";
                     using (AcadDatabase acad = AcadDatabase.Active())
                     {
@@ -378,7 +378,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var best = res.First();
                     subAreas = InterParameter.GetSubAreas(best);
                     var finalSegLines = best.Genome.Select(g => g.ToLineSegment()).ToList();
-                    finalSegLines.ExtendAndIntSect(InterParameter.SegLineIntsecDic);
+                    finalSegLines.ExtendAndIntSect(InterParameter.SeglineIndexList);
                     var layer = "最终分割线";
                     using (AcadDatabase acad = AcadDatabase.Active())
                     {
@@ -421,7 +421,7 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
-        public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData)
+        public List<LineSegment> GenerateAutoSegLine(BlockReference blk, int cutTol, bool HorizontalFirst,out LayoutData layoutData,bool definePriority = true)
         {
             Logger?.Information("##################################");
             var blk_Name = blk.GetEffectiveName();
@@ -455,7 +455,7 @@ namespace ThMEPArchitecture.MultiProcess
             var result = grouped;
 
             result = result.GridLinesRemoveEmptyAreas(HorizontalFirst);
-            result = result.DefineSegLinePriority();
+            if(definePriority) result = result.DefineSegLinePriority();
 
             Logger?.Information($"去重+去空区用时: {stopWatch.Elapsed.TotalSeconds - t_pre}");
             t_pre = stopWatch.Elapsed.TotalSeconds;

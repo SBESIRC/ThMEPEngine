@@ -62,5 +62,11 @@ namespace ThParkingStall.Core.Tools
         {
             return coordinates.Min(c => c.Distance(coor));
         }
+        public static bool ExistPtInDirection(this Coordinate coor, IEnumerable<Coordinate> coordinates,bool PosDirection)
+        {
+            if(coordinates.Count() == 0) return false;
+            if (PosDirection) return coordinates.Any(c => (c.X + c.Y) > (coor.X + coor.Y));
+            else return coordinates.Any(c => (c.X + c.Y) < (coor.X + coor.Y));
+        }
     }
 }
