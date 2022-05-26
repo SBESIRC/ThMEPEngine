@@ -9,7 +9,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Service;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Uitl;
 
@@ -59,7 +58,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
                    layer.ToUpper() == "W-WSUP-DIMS" ||
-                   layer.ToUpper() == "W-DRAI-DIMS" ||
                    layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "0" ||
@@ -141,9 +139,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                ;
             }
         }
 
@@ -199,7 +196,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                 }
             }
-            return;
         }
     }
 }

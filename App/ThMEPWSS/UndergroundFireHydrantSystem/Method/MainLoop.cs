@@ -24,7 +24,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 ref mainPathList, fireHydrantSysIn, ref extraNodes);
             ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
 
-
             return mainPathList;
         }
 

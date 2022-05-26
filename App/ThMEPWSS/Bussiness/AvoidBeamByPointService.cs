@@ -28,7 +28,7 @@ namespace ThMEPWSS.Bussiness
         double maxSpacing = 3400;
         double minSpacing = 100;
 
-        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, List<Polyline> wallPolys, 
+        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Entity> beamPolys, List<Polyline> wallPolys, 
             double maxValue, double minValue, Matrix3d matrix)
         {
             maxSpacing = maxValue;

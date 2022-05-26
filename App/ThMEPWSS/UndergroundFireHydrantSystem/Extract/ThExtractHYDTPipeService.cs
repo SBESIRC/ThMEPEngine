@@ -15,6 +15,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public ThExtractHYDTPipeService()
         {
         }
+
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
             using var acadDatabase = AcadDatabase.Use(database);
@@ -25,6 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 (polygon.ToRect().ToPolygon()).
                 SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
         }
+
         public static bool IsHYDTPipeLayer(string layer)
         {
             return layer.Contains("W-FRPT") && layer.Contains("HYDT") && layer.Contains("PIPE");

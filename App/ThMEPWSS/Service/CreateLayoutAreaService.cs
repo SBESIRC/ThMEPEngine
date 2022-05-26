@@ -16,7 +16,7 @@ namespace ThMEPWSS.Service
         /// <param name="polyline"></param>
         /// <param name="allBeams"></param>
         /// <returns></returns>
-        public static List<MPolygon> GetLayoutArea(Polyline polyline, List<Polyline> allBeams, List<Polyline> columnPoly, List<Polyline> wallPolys, double spacing = 300)
+        public static List<MPolygon> GetLayoutArea(Polyline polyline, List<Entity> allBeams, List<Polyline> columnPoly, List<Polyline> wallPolys, double spacing = 300)
         {
             DBObjectCollection dBObjects = new DBObjectCollection();
             foreach (var beam in allBeams)

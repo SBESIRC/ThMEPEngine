@@ -254,5 +254,24 @@ namespace ThParkingStall.Core.Tools
                 return new LineSegment( minX - distance,Y, maxX + distance,Y);
             }
         }
+
+        public static List<Coordinate> LineIntersection(this LineSegment line,LineString lstr)
+        {
+            double distance;
+            if (line.IsVertical())
+            {
+                var ordered = lstr.Coordinates.OrderBy(c => c.X);
+                distance = ordered.Last().X - ordered.First().X;
+            }
+            else
+            {
+                var ordered = lstr.Coordinates.OrderBy(c => c.Y);
+                distance = ordered.Last().Y - ordered.First().Y;
+            }
+            distance +=  line.GetLineString().Distance(lstr) + 1;
+            var extended = line.Extend(distance);
+            return extended.GetLineString().Intersection(lstr).Coordinates.ToList();
+
+        }
     }
 }

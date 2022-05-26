@@ -52,9 +52,10 @@ namespace ThMEPArchitecture.MultiProcess
             dataWraper.Buildings = layoutData.Buildings;
             dataWraper.BoundingBoxes = layoutData.BoundingBoxes;
             dataWraper.Ramps = layoutData.Ramps;
-            dataWraper.SegLineIntsecDic = layoutData.SeglineIndexDic;
+            dataWraper.SeglineIndexList = layoutData.SeglineIndexList;
             dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
             dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
+            dataWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
@@ -80,7 +81,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             dataWraper.BoundingBoxes = dataWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
             dataWraper.Ramps = outerBrder.GetRamps();
-            dataWraper.SegLineIntsecDic = outerBrder.SegLines.GetSegLineIntsecDic();
+            dataWraper.SeglineIndexList = outerBrder.SegLines.Select(l =>l.ToNTSLineSegment()).ToList().GetSegLineIntsecList();
             dataWraper.LowerUpperBound = dataWraper.SegLines.GetLowerUpperBound(dataWraper);
 
         }
@@ -150,25 +151,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             return mpChromosome;
         }
-        public static Dictionary<int, List<int>> GetSegLineIntsecDic(this List<Line> segLines)
-        {
-            var seglineIntsecDic = new Dictionary<int, List<int>>();
 
-            for (int i = 0; i < segLines.Count; i++)
-            {
-                seglineIntsecDic.Add(i, new List<int>());
-                for (int j = i; j < segLines.Count; j++)
-                {
-                    if (i == j) continue;
-                    if (segLines[i].IsVertical() == segLines[j].IsVertical()) continue;
-                    if (segLines[i].Intersect(segLines[j], Intersect.OnBothOperands).Count != 0 )
-                    {
-                        seglineIntsecDic[i].Add(j);
-                    }
-                }
-            }
-            return seglineIntsecDic;
-        }
 
         public static List<(double, double)> GetLowerUpperBound(this List<LineSegment> SegLines, DataWraper dataWraper)
         {

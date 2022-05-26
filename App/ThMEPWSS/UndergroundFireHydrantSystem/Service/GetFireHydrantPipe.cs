@@ -119,7 +119,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     ;
                 }
             }
-
             
             if(!across)
             {
@@ -213,14 +212,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 try
                 {
-                    if(pt.DistanceToEx(new Point3dEx(1495711.3, 896071, 0))<10)
-                    {
-                        ;
-                    }
-                    if (pt.DistanceToEx(new Point3dEx(1496511.5, 896071, 0)) < 10)
-                    {
-                        ;
-                    }
                     if (!fireHydrantSysOut.BranchDrawDic.ContainsKey(pt))
                     {
                         continue;
@@ -261,7 +252,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         }
                         else
                         {
-                            ;
                             var vpt = new Point3dEx();
                             foreach (var tpt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
                             {
@@ -305,7 +295,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                 else
                                 {
                                     GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
-
                                 }
                             }
 
@@ -383,7 +372,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             }
         }
-
 
         public static void DrawPipeLabels(FireHydrantSystemIn fireHydrantSysIn, FireHydrantSystemOut fireHydrantSysOut)
         {
@@ -696,11 +684,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
             var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
             var p2Flag = false;
-            if (pipeNumber1 is null)
-            {
-                ;
-            }
-            else
+
+            if (pipeNumber1 is not null)
             {
                 var text = ThTextSet.ThText(pt6, pipeNumber1.Trim());
                 if (!pipeNumber1.Trim().Equals(""))

@@ -683,6 +683,34 @@ namespace TianHua.Hvac.UI
                 connNotRoomLines = notRoomDetector.connectLines;
             }
         }
+        private bool LineContainsPoint(Line l, Point3d p, Tolerance tor)
+        {
+            return p.IsEqualTo(l.StartPoint, tor) || p.IsEqualTo(l.EndPoint, tor);
+        }
+        private void SearchRoutineSet(DBObjectCollection detectLineSet,
+                                      Point3d roomSrtP,
+                                      Point3d notRoomSrtP,
+                                      Tolerance tor,
+                                      Matrix3d mat,
+                                      ref DBObjectCollection roomLines,
+                                      ref DBObjectCollection notRoomLines)
+        {
+            // 因为风口进出口路由线存在重叠的情况，
+            // 所以使用点判断路由线集合，用空间索引会有搜索重复的情况出现
+            foreach (Line l in detectLineSet)
+            {
+                if (roomLines.Count == 0 && LineContainsPoint(l, roomSrtP, tor))
+                {
+                    roomLines = detectLineSet;
+                    ExcludeBypass(ref roomLines, mat);
+                }
+                if (notRoomLines.Count == 0 && LineContainsPoint(l, notRoomSrtP, tor))
+                {
+                    notRoomLines = detectLineSet;
+                    ExcludeBypass(ref notRoomLines, mat);
+                }
+            }
+        }
         private void GetFanCenterlinesAndTrans(Point3d otherP, out DBObjectCollection roomLines, out DBObjectCollection notRoomLines)
         {
             // 风机进出口路由可能在平面上共线(仅处理进出口必须有线的情况)
@@ -691,23 +719,10 @@ namespace TianHua.Hvac.UI
             notRoomLines = new DBObjectCollection();
             var mat = Matrix3d.Displacement(-RoomStartPoint.GetAsVector());
             var notRoomP = otherP.TransformBy(mat);
+            var tor = new Tolerance(firstRange, firstRange);
             foreach (var lines in diffColorRoutine)
             {
-                var index = new ThCADCoreNTSSpatialIndex(lines);
-                var pl1 = ThMEPHVACService.CreateDetector(Point3d.Origin, firstRange);
-                var res = index.SelectCrossingPolygon(pl1);
-                if (roomLines.Count == 0 && res.Count == 1)
-                {
-                    roomLines = lines;
-                    ExcludeBypass(ref roomLines, mat);
-                }
-                var pl2 = ThMEPHVACService.CreateDetector(notRoomP, firstRange);
-                var res1 = index.SelectCrossingPolygon(pl2);
-                if (notRoomLines.Count == 0 && res1.Count == 1)
-                {
-                    notRoomLines = lines;
-                    ExcludeBypass(ref notRoomLines, mat);
-                }
+                SearchRoutineSet(lines, Point3d.Origin, notRoomP, tor, mat, ref roomLines, ref notRoomLines);
             }
             if (roomLines.Count == 0)
                 throw new NotImplementedException("风机服务侧未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
@@ -734,10 +749,6 @@ namespace TianHua.Hvac.UI
             }
             if (centerlines.Count == 0)
                 throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
-        }
-        private bool LineContainsPoint(Line l, Point3d p, Tolerance tor)
-        {
-            return p.IsEqualTo(l.StartPoint, tor) || p.IsEqualTo(l.EndPoint, tor);
         }
         private List<DBObjectCollection> GetDiffColorRoutine(Point3d p)
         {

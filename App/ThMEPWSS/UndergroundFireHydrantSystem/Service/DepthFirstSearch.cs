@@ -13,7 +13,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
-                //rstPaths.Add(rstPath);//把当前路径加入
                 var flag = true;
                 if (rstPath.Count < 15)
                 {
@@ -121,10 +120,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             if(stopwatch.Elapsed.TotalSeconds > 20)//搜索了20s，可能死循环了
             {
                 return;
-            }
-            if(cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1798444.4, 824795.7, 0))<10)
-            {
-                ;
             }
             if (cur._pt.DistanceTo(target._pt) < 5)
             {

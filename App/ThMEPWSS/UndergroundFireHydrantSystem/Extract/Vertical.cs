@@ -176,7 +176,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 return br.GetEffectiveName().Contains("定位立管");
             }
-            catch (Exception ex)
+            catch
             {
                 return br.Name.Contains("定位立管");
             }
@@ -263,88 +263,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
 #endif
             return VerticalPts;
-        }
-    }
-
-
-
-    public class ThVerticalExtractionVisitor : ThDistributionElementExtractionVisitor
-    {
-        public ThVerticalExtractionVisitor()
-        {
-        }
-        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
-        {
-            if (dbObj is BlockReference br)
-            {
-                elements.AddRange(Handle(br, matrix));
-            }
-        }
-
-        public override void DoXClip(List<ThRawIfcDistributionElementData> elements,
-            BlockReference blockReference, Matrix3d matrix)
-        {
-            var xclip = blockReference.XClipInfo();
-            if (xclip.IsValid)
-            {
-                xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
-            }
-        }
-
-        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
-        {
-            var results = new List<ThRawIfcDistributionElementData>();
-            if (IsDistributionElement(br) && CheckLayerValid(br))
-            {
-                var clone = br.Clone() as BlockReference;
-                if (clone != null)
-                {
-                    clone.TransformBy(matrix);
-                    results.Add(new ThRawIfcDistributionElementData()
-                    {
-                        Geometry = clone,
-                    });
-                }
-            }
-            return results;
-        }
-        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
-        {
-            if (ent is BlockReference br)
-            {
-                return xclip.Contains(br.GeometricExtents.ToRectangle());
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public override bool IsDistributionElement(Entity entity)
-        {
-            return (entity as BlockReference)?.Name?.Contains("定位立管") ?? false;
-        }
-
-        public override bool CheckLayerValid(Entity curve)
-        {
-            var layer = curve.Layer.ToUpper();
-            return (layer.Contains("FRPT") && !layer.Contains("SPRL")) //包含FRPT且不包含SPRL
-                || (layer.Contains("HYDT")); //包含HYDT
-        }
-
-        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
-        {
-            // 忽略图纸空间和匿名块
-            if (blockTableRecord.IsLayout)
-            {
-                return false;
-            }
-            // 忽略不可“炸开”的块
-            if (!blockTableRecord.Explodable)
-            {
-                return false;
-            }
-            return true;
         }
     }
 }

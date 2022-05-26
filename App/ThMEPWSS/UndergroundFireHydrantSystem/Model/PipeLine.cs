@@ -1,23 +1,16 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using Linq2Acad;
-using NFox.Cad;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore;
-using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
     public class PipeLine
     {
-        public static bool hasSitong(FireHydrantSystemIn fireHydrantSysIn)
+        public static bool HasSitong(FireHydrantSystemIn fireHydrantSysIn)
         {
             var sitong = false;
             foreach (var pt in fireHydrantSysIn.PtDic.Keys)
@@ -73,8 +66,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     }
                 }
             }
-
-
         }
 
         public static void AddValveLine(DBObjectCollection valveDB,

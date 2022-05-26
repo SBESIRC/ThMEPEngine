@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore;
-using ThMEPEngineCore.CAD;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
@@ -178,30 +177,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                 }
             }
-            //var leadLines = sprayIn.LeadLines.ToCollection();
-            //var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leadLines);
-
-
-
-            //foreach (var cv in connectVreticals)
-            //{
-            //    if (cv._pt.DistanceTo(new Point3d(1016754.2, -2354896.8, 0)) < 10)
-            //        ;
-            //    var rect = cv._pt.GetRect(50);
-            //    var rst = leadLineSpatialIndex.SelectCrossingPolygon(rect);
-            //    if (rst.Count == 0)
-            //    {
-            //        Draw.RemovedVerticalPt(cv);
-            //        sprayIn.Verticals.Remove(cv);
-            //    }
-            //}
 
             lineList.AddRange(lines);
-
-            //把单连通立管和横管连起来
-
-
-            //return lineList;
         }
 
         public static void ConnectClosedPt(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
@@ -219,10 +196,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 for(int j = i + 1; j < pts.Count; j++)
                 {
                     var dist = pts[i].DistanceToEx(pts[j]);
-                    if(dist<1)
-                    {
-                        ;
-                    }
+
                     if (dist < 20)
                     {
                         lineList.Add(new Line(pts[i]._pt, pts[j]._pt));
@@ -230,103 +204,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
-        public static void ConnectBreakLine(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, 
-            ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
-        {
-            //连接不是端点的孤立线段
-            var connectLine = new List<Line>();
-            foreach(var line in lineList)
-            {
-                try
-                {
-                    var pt1 = new Point3dEx(line.StartPoint);
-                    var pt2 = new Point3dEx(line.EndPoint);
-                    var flag1 = true;
-                    var flag2 = true;
-                    foreach (var stop in stopPts)
-                    {
-                        if (pt1._pt.DistanceTo(stop._pt) < 10)
-                        {
-                            flag1 = false;
-                            break;
-                        }
-                        if (pt2._pt.DistanceTo(stop._pt) < 10)
-                        {
-                            flag2 = false;
-                            break;
-                        }
-                    }
-                    if (line.Length < 50)
-                    {
-                        continue;//把一些短线直接跳过
-                    }
-                    if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.VerticalPosition))
-                    {
-                        foreach (var l in lineList)
-                        {
-                            if (l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < 10 && !l.Equals(line))
-                            {
-                                var pts = new Point3dCollection();
-                                l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
-                                if (pts.Count > 0)
-                                {
-                                    if (pts[0].DistanceTo(pt1._pt) < 10 && pts[0].DistanceTo(pt1._pt) > 1)
-                                    {
-                                        connectLine.Add(new Line(pts[0], pt1._pt));
-                                    }
-                                }
 
-                            }
-                        }
-                    }
-                    if (flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.VerticalPosition))
-                    {
-                        foreach (var l in lineList)
-                        {
-                            if (l.GetClosestPointTo(pt2._pt, false).DistanceTo(pt2._pt) < 10 && !l.Equals(line))
-                            {
-                                var pts = new Point3dCollection();
-                                l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
-                                if (pts.Count > 0)
-                                {
-                                    if (pts[0].DistanceTo(pt2._pt) < 10 && pts[0].DistanceTo(pt2._pt) > 1)
-                                    {
-                                        connectLine.Add(new Line(pts[0], pt2._pt));
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    ;
-                }
-                
-            }
-            foreach(var l in connectLine)
-            {
-                lineList.Add(l);
-            }
-            foreach (var pt1 in pointList)
-            {
-                foreach(var pt2 in pointList)
-                {
-                    double dist = pt1.DistanceToEx(pt2);
-                    if (dist < 10 && dist >1)
-                    {
-                        var line = new Line(pt1._pt, pt2._pt);
-                        if(!lineList.Contains(line))
-                        {
-                            lineList.Add(new Line(pt1._pt, pt2._pt));
-                        }
-                    }
-                }
-            }
-            lineList = CleanLaneLines3(lineList);
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
-        }
         public static void ConnectBreakLineWithoutPtdic(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn,
             ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
         {
@@ -404,8 +282,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             return true;
         }
 
-
-
         public static List<Line> CleanLaneLines3(List<Line> lines)
         {
             var rstLines = new List<Line>();
@@ -441,6 +317,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             return rstLines;
         }
+
         private static List<Line> MergeGroupLines(HashSet<LineSegment2d> lineGroup)
         {
             var rstLines = new List<Line>();
@@ -463,6 +340,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             rstLine.EndPoint = l.EndPoint.ToPoint3d();
             return rstLine;
         }
+
         private static void MergeLineEx(ref LineSegment2d l, ref HashSet<LineSegment2d> lineGroup)
         {
             //如果 l 与 group里面任何一条线都没有交点，那么就把该l返回

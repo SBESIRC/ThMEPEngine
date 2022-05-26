@@ -121,6 +121,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
         public static int GetFloorInt(this Point3d pt, Dictionary<string, Polyline> floorRect)
         {
+            if(floorRect.Count == 0)
+            {
+                return 0;
+            }
             var floorStr = pt.GetFloor(floorRect);
             return Convert.ToInt32(floorStr.Last().ToString());
         }

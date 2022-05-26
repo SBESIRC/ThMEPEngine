@@ -63,7 +63,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     foreach (var line in dbTextCollection)
                     {
                         var dbtext = line as DBText;
-                        var rect = GetRect(dbtext);
+                        var rect = dbtext.GetRect();
                         rect.LayerId = DbHelper.GetLayerId(layerName);
                         currentDb.CurrentSpace.Add(rect);
                     }
@@ -71,13 +71,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 #endif
                 return dbTextCollection;
             }
-        }
-
-        private Line GetRect(DBText dBText)
-        {
-            var minPt = dBText.GeometricExtents.MinPoint;
-            var maxPt = dBText.GeometricExtents.MaxPoint;
-            return new Line(minPt,maxPt);
         }
 
         private bool IsHYDTPipeLayer(string layer)
@@ -118,16 +111,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                                     .Where(e => e is DBText)
                                     .ForEach(e => dBObjects.Add(e));
                             }
-                            
                         }
                         return;
                     }
                 }
-                catch(Exception ex)
+                catch
                 {
-
                 }
-                
             }
             if (ent is DBText dbText)//DBText直接添加
             {
@@ -182,17 +172,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     textModel = dBText.TextString;
                 }
                 dBObjects.Add((DBObject)dBText);
-                //foreach (var text in texts)
-                //{
-                //    var tWidth = Math.Abs((text as Entity).GeometricExtents.MaxPoint.X - (text as Entity).GeometricExtents.MinPoint.X);
-                //    if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X") && (!(text as DBText).TextString.Trim().Contains("/")))
-                //    {
-                //        textWidth = tWidth;
-
-                //        textModel = (text as DBText).TextString;
-                //    }
-                //    dBObjects.Add((DBObject)text);
-                //}
                 return;
             }
             if(ent.IsTCHPipe())
@@ -221,7 +200,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             catch
             {
-                //
             }
         }
 

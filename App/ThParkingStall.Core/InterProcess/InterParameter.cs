@@ -24,8 +24,10 @@ namespace ThParkingStall.Core.InterProcess
         private static List<Polygon> _BoundingBoxes;// 所有的建筑物的边框
         private static List<Polygon> BoundingBoxes { get { return _BoundingBoxes; } }// 所有的建筑物的边框
 
-        private static Dictionary<int, List<int>> _SegLineIntsecDic;//分割线临近线
-        public static Dictionary<int, List<int>> SegLineIntsecDic { get { return _SegLineIntsecDic; } }//分割线临近线
+        private static List<List<int>> _SegLineIntsecList;//分割线临近线
+        public static List<List<int>> SeglineIndexList { get { return _SegLineIntsecList; } }//分割线临近线
+        private static List<(bool, bool)> _SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
+        public static List<(bool, bool)> SeglineConnectToBound { get { return _SeglineConnectToBound; } }//分割线（负，正）方向是否与边界连接
 
         private static List<Ramp> _Ramps;//坡道
         public static List<Ramp> Ramps { get { return _Ramps; } }//坡道
@@ -65,7 +67,8 @@ namespace ThParkingStall.Core.InterProcess
             foreach (int idx in OuterBuildingIdxs) ignorableBuildings.Add(Buildings[idx]);
             ignorableBuildings.AddRange(TotalArea.Shell.ToLineStrings().ToList());
             _BoundaryObjectsSPIDX = new MNTSSpatialIndex(ignorableBuildings);
-            _SegLineIntsecDic = dataWraper.SegLineIntsecDic;
+            _SegLineIntsecList = dataWraper.SeglineIndexList;
+            _SeglineConnectToBound = dataWraper.SeglineConnectToBound;
             _LowerUpperBound = dataWraper.LowerUpperBound;
         }
         public static bool IsValid(Chromosome chromosome)
@@ -75,7 +78,8 @@ namespace ThParkingStall.Core.InterProcess
             {
                 newSegLines.Add(gene.ToLineSegment());
             }
-            newSegLines.ExtendAndIntSect(SegLineIntsecDic);//延展
+            newSegLines.ExtendAndIntSect(SeglineIndexList);//延展
+            newSegLines.ExtendToBound(TotalArea, SeglineConnectToBound);
             newSegLines.SeglinePrecut(TotalArea);//预切割
             newSegLines.Clean();//过滤孤立的线
             if (!newSegLines.Allconnected()) return false;//判断是否全部相连
@@ -93,7 +97,8 @@ namespace ThParkingStall.Core.InterProcess
             {
                 newSegLines.Add(gene.ToLineSegment());
             }
-            newSegLines.ExtendAndIntSect(SegLineIntsecDic);//延展
+            newSegLines.ExtendAndIntSect(SeglineIndexList);//延展
+            newSegLines.ExtendToBound(TotalArea, SeglineConnectToBound);
             newSegLines.SeglinePrecut(TotalArea);//预切割
             // 这有个bug，影响subareakey
 

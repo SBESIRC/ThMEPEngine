@@ -23,7 +23,8 @@ namespace ThParkingStall.Core.InterProcess
         public List<Ramp> Ramps;//坡道
 
         public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
-        public Dictionary<int, List<int>> SegLineIntsecDic ;// 分割线相交关系
+        public List<List<int>> SeglineIndexList ;// 分割线相交关系
+        public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
         #endregion
         #region ViewModel Parameters
         //平行车位尺寸,长度

@@ -14,43 +14,25 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-//using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
     public class ThExtractFireHydrant//室内消火栓平面
     {
-        public List<Entity> Results { get; private set; }
         public DBObjectCollection DBobjs { get; private set; }
         public bool Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                
                 DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面", out bool hydrantWithReel);
                 return hydrantWithReel;
-                ;
 #if DEBUG
                 DrawFireHydrant(database);
 #endif
             }
         }
 
-        private Polyline GetRect(BlockReference br)
-        {
-            var minPt = br.GeometricExtents.MinPoint;
-            var maxPt = br.GeometricExtents.MaxPoint;
-            var pline = new Polyline();
-            var point2dColl = new Point2dCollection();
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            pline.CreatePolyline(point2dColl);
-            return pline;
-        }
         public void CreateVerticalHydrantDic(List<Point3dEx> verticals, FireHydrantSystemIn fireHydrantSysIn)
         {
             var verticalSpatialIndex = new ThCADCoreNTSSpatialIndex(CreateRect(verticals));
@@ -77,14 +59,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
                 }
             }
-            
         }
+
         private Point3d GetCenter(Extents3d extent3d)
         {
             var pt1 = extent3d.MaxPoint;
             var pt2 = extent3d.MinPoint;
             return new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
         }
+
         private DBObjectCollection CreateRect(List<Point3dEx> verticals)
         {
             var dbObjs = new DBObjectCollection();
@@ -95,6 +78,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return dbObjs;
         }
+
         private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
         {
             var pl = new Polyline();
@@ -107,6 +91,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pl.CreatePolyline(pts);
             return pl;
         }
+
         private static Polyline CreatePolyline(Point3d c, int tolerance = 50)
         {
             var pl = new Polyline();
@@ -119,6 +104,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pl.CreatePolyline(pts);
             return pl;
         }
+
         private DBObjectCollection ExtractBlocks(Database db, string blockName, out bool hydrantWithReel)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>
@@ -150,7 +136,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         _hydrantWithReel = attribute.ToString().Contains("卷盘");
                         hasCheckedHydrant = true;
                     }
-                    ;
                 });
             }
             hydrantWithReel = _hydrantWithReel;
@@ -171,22 +156,25 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var br = db as BlockReference;
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    var rect = GetRect(br);
+                    var rect = br.GetRect();
                     rect.LayerId = DbHelper.GetLayerId(layerName);
                     currentDb.CurrentSpace.Add(rect);
                 }
             }
         }
     }
+
     public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        
         public ThBlockReferenceExtractionVisitor()
         {
             CheckQualifiedLayer = base.CheckLayerValid;
             CheckQualifiedBlockName = (Entity entity) => true;
         }
+        
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference br)
@@ -215,7 +203,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 if (clone != null)
                 {
                     clone.TransformBy(matrix);
-                    //var blockData = new ThBlockReferenceData(br.Id);
                     results.Add(new ThRawIfcDistributionElementData()
                     {
                         Geometry = clone,
@@ -225,6 +212,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return results;
         }
+
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
         {
             if (ent is BlockReference br)
@@ -236,14 +224,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 return false;
             }
         }
+
         public override bool IsDistributionElement(Entity entity)
         {
             return CheckQualifiedBlockName(entity);
         }
+
         public override bool CheckLayerValid(Entity curve)
         {
             return true;
         }
+
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
             // 忽略图纸空间和匿名块

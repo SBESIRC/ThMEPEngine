@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using System.Linq;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem
 {
@@ -22,6 +19,36 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             var pt1 = dBText.GeometricExtents.MaxPoint;
             var pt2 = dBText.GeometricExtents.MinPoint;
             return GetMidPt(pt1, pt2);
+        }
+
+        public static Polyline GetRect(this DBText br)
+        {
+            var minPt = br.GeometricExtents.MinPoint;
+            var maxPt = br.GeometricExtents.MaxPoint;
+            var pline = new Polyline();
+            var point2dColl = new Point2dCollection();
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            pline.CreatePolyline(point2dColl);
+            return pline;
+        }
+
+        public static Polyline GetRect(this BlockReference br)
+        {
+            var minPt = br.GeometricExtents.MinPoint;
+            var maxPt = br.GeometricExtents.MaxPoint;
+            var pline = new Polyline();
+            var point2dColl = new Point2dCollection();
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            pline.CreatePolyline(point2dColl);
+            return pline;
         }
 
         /// <summary>
@@ -44,7 +71,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
 
             return pl;
         }
-
         
         public static double GetLinesDist(this Line l1, Line l2)
         {
@@ -61,24 +87,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             double dist2 = l1.GetClosestPointTo(l2.EndPoint, false).DistanceTo(l2.EndPoint);
 
             return Math.Min(dist1, dist2);
-        }
-
-        public static bool GetNearestPt(this Point3dEx pt, ref Point3dEx tpt, List<Point3dEx> pts, double tolerance = 250)
-        {
-            var rangePts = new List<Point3dEx>();
-            foreach (var p in pts)
-            {
-                if (p._pt.DistanceTo(pt._pt) < tolerance)
-                {
-                    rangePts.Add(p);
-                    //tpt = p;
-                    //return true;
-                }
-            }
-            if(rangePts.Count == 0) return false;
-            var sortedPts = rangePts.OrderBy(p => p._pt.DistanceTo(pt._pt)).ToList();
-            tpt = sortedPts.First();
-            return true;
         }
     }
 }

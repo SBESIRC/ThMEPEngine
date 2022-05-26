@@ -21,27 +21,27 @@ panels:
     rowPanels:
       - text: ""
         items:
-          - text: "选项"
-            attributes: { "IsVisible": false, "IsEnabled": false }
-          - text: "图块配置"
-            attributes: { "IsVisible": false, "IsEnabled": false }
-          - text: "楼层定义"
+          - text: "梁配置"
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "房间框线"
             attributes: { "IsVisible": false, "IsEnabled": false }
-      - text: ""
-        items:
-          - text: "房间编号"
-            attributes: { "IsVisible": false, "IsEnabled": false }
-          - text: "房间名称"
-            attributes: { "IsVisible": false, "IsEnabled": false }
-          - text: "房间功能"
-            attributes: { "IsVisible": false, "IsEnabled": false }
-      - text: ""
-        items:
           - text: "框线对比"
             attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "房间名称"
+            attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "提车道线"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+          - text: "楼层定义"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+          - text: "图块配置"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "房间功能"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+          - text: "房间编号"
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "提中心线"
             attributes: { "IsVisible": false, "IsEnabled": false }

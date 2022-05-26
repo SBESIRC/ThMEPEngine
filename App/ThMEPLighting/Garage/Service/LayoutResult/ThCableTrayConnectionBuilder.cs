@@ -92,13 +92,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var crossLines = BuildCrossLinks();
             var tTypeLines = BuildTTypeLinks();
             // 修正lines
+            var crossLinks = new List<Line>();
+            crossLinks.AddRange(crossLines);
+            crossLinks.AddRange(tTypeLines);
+            crossLinks.AddRange(FdxLines);
             var wireDict = CreateWireDict(Graphs.SelectMany(o=>o.GraphEdges).ToList());
-            var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength,FdxLines);
+            var wires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength, crossLinks);
 
             lines.AddRange(wires.OfType<Line>());
-            lines.AddRange(FdxLines);
-            lines.AddRange(crossLines);
-            lines.AddRange(tTypeLines);
+            lines.AddRange(crossLinks);
             var cableTrayEngine = new ThCableTrayBuilder(lines, ArrangeParameter.Width);
             cableTrayEngine.Build();
             return cableTrayEngine;

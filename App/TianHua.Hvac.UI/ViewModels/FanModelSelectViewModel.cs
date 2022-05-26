@@ -437,6 +437,15 @@ namespace TianHua.Hvac.UI.ViewModels
                 FanModelMotorLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelMotorPower;
                 FanModelLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelPower;
             }
+            else 
+            {
+                if (ChildFanModel.FanModelTypeCalcModel != null
+                    && !string.IsNullOrEmpty(ChildFanModel.FanModelTypeCalcModel.FanModelMotorPower))
+                {
+                    FanModelMotorLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelMotorPower;
+                    FanModelLowPower = ChildFanModel.FanModelTypeCalcModel.FanModelPower;
+                }
+            }
         }
     }
 }
