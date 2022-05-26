@@ -1095,24 +1095,58 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 选项
+                // 梁配置
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("选项",
-                    "天华选项",
-                    "THMEPOPTIONS",
-                    "天华选项",
-                    "IDI_THCAD_THOPTIONS_SMALL",
-                    "IDI_THCAD_THOPTIONS_LARGE",
+                subRow.AddNewButton("梁配置",
+                    "天华梁配置",
+                    "THLPZ",
+                    "天华梁配置",
+                    "IDI_THCAD_THLPZ_SMALL",
+                    "IDI_THCAD_THLPZ_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
-                // 图块配置
+                // 房间框线
                 subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("图块配置",
-                    "天华图块配置",
-                    "THWTKSB",
-                    "天华图块配置",
-                    "IDI_THCAD_THWTKSB_SMALL",
-                    "IDI_THCAD_THWTKSB_LARGE",
+                subRow.AddNewButton("房间框线",
+                    "天华房间框线",
+                    "THFJKX2",
+                    "天华房间框线",
+                    "IDI_THCAD_THFJKX_SMALL",
+                    "IDI_THCAD_THFJKX_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 框线对比
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("框线对比",
+                    "天华框线对比",
+                    "THKXBD",
+                    "天华框线对比",
+                    "IDI_THCAD_THKXDB_SMALL",
+                    "IDI_THCAD_THKXDB_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 房间名称
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("房间名称",
+                    "天华房间名称",
+                    "THKJMCTQ",
+                    "天华房间名称",
+                    "IDI_THCAD_THKJMCTQ_SMALL",
+                    "IDI_THCAD_THKJMCTQ_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 提车道线
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("提车道线",
+                    "天华提车道中心线",
+                    "THTCDX",
+                    "天华提车道中心线",
+                    "IDI_THCAD_THTCD_SMALL",
+                    "IDI_THCAD_THTCD_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 楼层定义
@@ -1125,42 +1159,22 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THLCDY_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
-                // 房间框线
+                // 图块配置
                 subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("房间框线",
-                    "天华房间框线",
-                    "THFJKX2",
-                    "天华房间框线",
-                    "IDI_THCAD_THFJKX_SMALL",
-                    "IDI_THCAD_THFJKX_LARGE",
+                subRow.AddNewButton("图块配置",
+                    "天华图块配置",
+                    "THWTKSB",
+                    "天华图块配置",
+                    "IDI_THCAD_THWTKSB_SMALL",
+                    "IDI_THCAD_THWTKSB_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
 
             {
                 var subPanel = row.AddNewPanel();
 
-                // 房间编号
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("房间编号",
-                    "天华房间编号",
-                    "THFJBH",
-                    "天华房间编号",
-                    "IDI_THCAD_THFJBH_SMALL",
-                    "IDI_THCAD_THFJBH_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
-                // 房间名称
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("房间名称",
-                    "天华房间名称",
-                    "THKJMCTQ",
-                    "天华房间名称",
-                    "IDI_THCAD_THKJMCTQ_SMALL",
-                    "IDI_THCAD_THKJMCTQ_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
                 // 房间功能
-                subRow = subPanel.AddNewRibbonRow();
+                var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("房间功能",
                     "天华房间功能提取",
                     "THFJGN",
@@ -1168,29 +1182,15 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THFJGN_SMALL",
                     "IDI_THCAD_THFJGN_LARGE",
                     RibbonButtonStyle.SmallWithText);
-            }
 
-            {
-                var subPanel = row.AddNewPanel();
-
-                // 框线对比
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("框线对比",
-                    "天华框线对比",
-                    "THKXBD",
-                    "天华框线对比",
-                    "IDI_THCAD_THKXDB_SMALL",
-                    "IDI_THCAD_THKXDB_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-
-                // 提车道线
+                // 房间编号
                 subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("提车道线",
-                    "天华提车道中心线",
-                    "THTCDX",
-                    "天华提车道中心线",
-                    "IDI_THCAD_THTCD_SMALL",
-                    "IDI_THCAD_THTCD_LARGE",
+                subRow.AddNewButton("房间编号",
+                    "天华房间编号",
+                    "THFJBH",
+                    "天华房间编号",
+                    "IDI_THCAD_THFJBH_SMALL",
+                    "IDI_THCAD_THFJBH_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 提中心线
