@@ -20,7 +20,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public List<Entity> Results { get; private set; }
         public DBObjectCollection DBObjs { get; private set; }
         public List<Line> DBObjResults { get; private set; }
-        public List<Line> LabelPosition { get; private set; }
 
         public ThExtractPipeDNLine()
         {

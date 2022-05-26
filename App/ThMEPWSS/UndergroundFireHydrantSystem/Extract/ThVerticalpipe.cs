@@ -91,7 +91,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     ;
                 }
                 
-
                 return GetVerticals();
             }
         }
@@ -169,7 +168,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 name = bkr.GetEffectiveName();
             }
-            catch (Exception ex)
+            catch
             {
                 name = bkr.Name;
             }

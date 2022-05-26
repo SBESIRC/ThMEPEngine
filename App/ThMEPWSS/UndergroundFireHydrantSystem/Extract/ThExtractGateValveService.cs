@@ -44,6 +44,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 return objs;
             }
         }
+
         private bool IsHYDTPipeLayer(string layer)
         {
             return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
@@ -56,6 +57,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    blkName.Contains("闸阀") ||
                    blkName.Contains("296");
         }
+
         private bool IsValve(string valveName)
         {
             return valveName.Contains("截止阀") ||

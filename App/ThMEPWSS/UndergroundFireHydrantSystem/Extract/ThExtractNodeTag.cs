@@ -88,10 +88,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var ptEx2 = new Point3dEx();
                 foreach (var pt in fireHydrantSysIn.PtDic.Keys)
                 {
-                    if(pt._pt.DistanceTo(new Point3d(1661861.3, 876522,0))<10)
-                    {
-                        ;
-                    }
                     if(fireHydrantSysIn.PtDic[pt].Count == 3)
                     {
                         var dist1 = pt._pt.DistanceTo(pt1);

@@ -14,7 +14,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static bool IsSplashLine(Line line)
         {
             var torlerance = 0.035;
-            var lenTor = 20;
             if (line.Length < 180 && line.Length > 400)//线长不合理直接返回false
             {
                 return false;

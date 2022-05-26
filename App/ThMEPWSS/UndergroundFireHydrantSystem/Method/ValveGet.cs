@@ -63,6 +63,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 lineList.Add(new Line(pt1, pt4));
             }
         }
+
         private static void ValveCheck(ref FireHydrantSystemOut fireHydrantSysOut, Point3d valve, Point3d stPt,
             FireHydrantSystemIn fireHydrantSysIn, ref bool flag)
         {

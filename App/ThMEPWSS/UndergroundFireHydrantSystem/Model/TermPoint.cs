@@ -1,5 +1,4 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -129,6 +128,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             return pipeNumber;
         }
+
         public void SetType(bool verticalHasHydrant)
         {
             if(PipeNumber?.Contains("水泵接合器") == true)

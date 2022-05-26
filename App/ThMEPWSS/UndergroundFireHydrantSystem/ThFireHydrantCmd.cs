@@ -11,12 +11,7 @@ using GeometryExtensions;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPWSS.Hydrant.Engine;
-using ThCADCore.NTS;
-using ThMEPWSS.Uitl;
-using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
-using System.Linq;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundSpraySystem.Command;
 
@@ -50,12 +45,7 @@ namespace ThMEPWSS.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-        private void ReclaimMemory()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.WaitForFullGCComplete();
-        }
+
         public override void AfterExecute()
         {
             base.AfterExecute();

@@ -39,10 +39,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
             //Tools.DrawLines(lineList,  "刚提取环管");
-
-
          
-            if (PipeLine.hasSitong(fireHydrantSysIn))
+            if (PipeLine.HasSitong(fireHydrantSysIn))
             {
                 return false;
             }
@@ -92,8 +90,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             nodeEngine.GetPointList(ref fireHydrantSysIn);
             
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
-
-            
             
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
@@ -131,7 +127,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
 
-            //PtDic.CreateTermPtDicOrg(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;
@@ -165,10 +160,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var usedPt = new List<Point3dEx>();
             foreach (var pt1 in ptOffsetDic.Keys)
             {
-                if (pt1._pt.DistanceTo(new Point3d(1491786.3, 407697, 0)) < 10)
-                    ;
-                if (pt1._pt.DistanceTo(new Point3d(1491786.3, 907697, 0)) < 10)
-                    ;
                 if (usedPt.Contains(pt1)) continue;
 
                 if (!fireHydrantSysIn.TermPointDic.ContainsKey(pt1)) continue;
@@ -176,8 +167,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var str1 = fireHydrantSysIn.TermPointDic[pt1].PipeNumber;
                 foreach (var pt2 in ptOffsetDic.Keys)
                 {
-                    if (pt2._pt.DistanceTo(new Point3d(1491786.3, 407697, 0)) < 10)
-                        ;
                     if (usedPt.Contains(pt2)) continue;
                     if (!fireHydrantSysIn.TermPointDic.ContainsKey(pt2)) continue;
 
@@ -212,6 +201,5 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
-
     }
 }
