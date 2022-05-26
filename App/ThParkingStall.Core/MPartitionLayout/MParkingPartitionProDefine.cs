@@ -115,10 +115,10 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
         public static double DisPillarMoveDeeplyBackBack = 1000;
         public static double DisPillarMoveDeeplySingle = 550;
-        public static double LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2;
-        public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
-        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3;
-        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8;
+        public static double LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2+DisPillarLength;
+        public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth+DisPillarLength*2;
+        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3 + DisPillarLength;
+        public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8+DisPillarLength*2;
         public static double STRTreeCount = 10;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
         public enum LayoutDirection : int

@@ -594,7 +594,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                             generate = true;
                             break;
                         }
+                        double dis_connected_double = 0;
                         if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false) && split.Length < LengthCanGIntegralModulesConnectDouble) continue;
+                        if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false))
+                        {
+                            dis_connected_double = DisCarAndHalfLane;
+                        }
                         if (GetCommonLengthForTwoParallelLinesOnPerpDirection(split, lane) < 1) continue;
                         paras.SetNotBeMoved = i;
                         var pl = PolyFromLines(split, splitback);
@@ -654,6 +659,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 paras.SetNotBeMoved = -1;
                             else
                                 continue;
+                            if (generate_lane_length - dis_connected_double > 0)
+                                generate_lane_length -= dis_connected_double;
                             mod.IsInBackBackModule = true;
                             paras.CarModulesToAdd.Add(mod);
                             paras.CarBoxPlusToAdd.Add(new CarBoxPlus(plback));
@@ -875,11 +882,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             var inilinesplitcarboxes = SplitLine(line, CarBoxes).Where(e => e.Length > 1).First();
             //解决车道线靠墙的方向有车道线的情况
             var line_to_wall = line.Translation(-gvec.Normalize() * (DisCarAndHalfLane + CollisionD - CollisionTOP));
-            var wall_buffer = line_to_wall.Buffer(/*DisLaneWidth / 2 - 1*/DisModulus + DisLaneWidth);
+            var wall_buffer = line_to_wall.Buffer(/*DisLaneWidth / 2 - 1*/DisModulus /*+ DisLaneWidth*/);
             var wall_crossed_lanes_points = new List<Coordinate>();
             foreach (var lane_to_wall in IniLanes.Where(e => IsParallelLine(e.Line, line)).Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1)))
             {
                 wall_crossed_lanes_points.AddRange(lane_to_wall.IntersectPoint(wall_buffer));
+                wall_crossed_lanes_points.AddRange(lane_to_wall.Coordinates.Where(p => wall_buffer.Contains(p)));
             }
             wall_crossed_lanes_points = wall_crossed_lanes_points.Select(p => line.ClosestPoint(p)).ToList();
             wall_crossed_lanes_points = SortAlongCurve(wall_crossed_lanes_points, line.ToLineString());
@@ -943,8 +951,13 @@ namespace ThParkingStall.Core.MPartitionLayout
 
             double dis_to_move = 0;
             var perpLine = new LineSegment();
+            double dis_connected_double = 0;
             if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move, ref perpLine)) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
+            if (IsConnectedToLaneDouble(iniobsplit))
+            {
+                dis_connected_double = DisCarAndHalfLane;
+            }
             var offsetline = new LineSegment(iniobsplit);
             offsetline = offsetline.Translation(-gvec * DisCarAndHalfLane);
             var pl = PolyFromLines(iniobsplit, offsetline);
@@ -957,6 +970,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             CarModule module = new CarModule(pl, iniobsplit, -gvec);
             paras.CarModulesToAdd.Add(module);
             generate_lane_length = iniobsplit.Length;
+            if (generate_lane_length - dis_connected_double > 0)
+                generate_lane_length -= dis_connected_double;
             return generate_lane_length;
         }
         private double GenerateLaneBetweenTwoBuilds(ref GenerateLaneParas paras)
@@ -1001,7 +1016,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     if (Math.Abs(line.P0.X - line.P1.X) > 1)
                     {
                         if (line.P0.X < line.P1.X) line = new LineSegment(line.P1, line.P0);
-                        ps = line.P0.Translation(Vector(line).Normalize() * DisCarAndHalfLane);
+                        ps = line.P0.Translation(Vector(line).Normalize() * (DisCarAndHalfLane + CollisionD - CollisionTOP));
                     }
                     else if (Math.Abs(line.P0.Y - line.P1.Y) > 1)
                     {
@@ -1025,6 +1040,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                         continue;
                     if (gline.Length < LengthCanGAdjLaneConnectSingle) continue;
                     if (!IsConnectedToLane(gline)) continue;
+                    double dis_connected_double = 0;
+                    if (IsConnectedToLaneDouble(gline)) dis_connected_double = DisCarAndHalfLane;
                     bool quit = false;
                     foreach (var box in BuildingBoxes)
                     {
@@ -1039,6 +1056,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     paras.LanesToAdd.Add(new Lane(gline, -Vector(line).Normalize()));
                     paras.CarBoxesToAdd.Add(PolyFromLine(gline));
                     generate_lane_length = gline.Length;
+                    if (generate_lane_length - dis_connected_double > 0)
+                        generate_lane_length -= dis_connected_double;
                 }
             }
             return generate_lane_length;

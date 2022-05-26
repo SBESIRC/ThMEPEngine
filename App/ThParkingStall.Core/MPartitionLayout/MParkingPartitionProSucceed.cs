@@ -139,6 +139,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         private double IsEssentialToCloseToBuilding(LineSegment lane, Vector2D vec)
         {
+            return -1;
             var line = lane.Scale(ScareFactorForCollisionCheck);
             if (!GenerateLaneForLayoutingCarsInShearWall) return -1;
             if (!IsPerpVector(vec, Vector2D.Create(1, 0))) return -1;
@@ -625,8 +626,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             LineSegment eb = new LineSegment(lane.P1, ptb);
             LineSegment ea = new LineSegment(lane.P0, pta);
-            count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2) / DisVertCarWidth));
-            count += ((int)Math.Floor((eb.Length - DisLaneWidth / 2) / DisVertCarWidth));
+            count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2-DisPillarLength*2) / DisVertCarWidth));
+            count += ((int)Math.Floor((eb.Length - DisLaneWidth / 2- DisPillarLength * 2) / DisVertCarWidth));
 
     //        var pa = PolyFromPoints(new List<Coordinate>() { lane.P0, lane.P0.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane),
     //            pta.Translation(new Vector2D(lane.P0,lane.P1).Normalize()*DisCarAndHalfLane), pta });
