@@ -132,6 +132,7 @@
     <Compile Include="StructPlane\Print\ThSlabAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThSlabPatternTableBuilder.cs" />
     <Compile Include="StructPlane\Print\ThSlabPrinter.cs" />
+    <Compile Include="StructPlane\Print\ThStairLineMarkPrinter.cs" />
     <Compile Include="StructPlane\Service\ThAdjustBeamMarkService.cs" />
     <Compile Include="StructPlane\Service\ThAdjustDbTextRotationService.cs" />
     <Compile Include="StructPlane\Service\ThBuildStairSlabLineService.cs" />

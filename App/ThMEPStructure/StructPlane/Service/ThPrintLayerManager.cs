@@ -25,7 +25,8 @@ namespace ThMEPStructure.StructPlane.Service
         public static string SlabPatternTableTextLayerName = "S_PLAN_TEXT";
         public static string HeadTextLayerName = "S_PLAN_TOPC";
         public static string HeadTextDownLineLayerName = "S_PLAN_TOPC";
-
+        public static string StairSlabCornerLineLayerName = "S_STAR_TEXT";
+        public static string StairSlabCornerTextLayerName = "S_STAR_TEXT";
         public static List<string> AllLayers
         {
             get
@@ -35,7 +36,8 @@ namespace ThMEPStructure.StructPlane.Service
                     ShearWallLayerName,ShearWallHatchLayerName,BelowShearWallLayerName,
                     BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
-                    SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName};
+                    SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName,
+                StairSlabCornerLineLayerName,StairSlabCornerTextLayerName};
                 return layers.Distinct().ToList();
             }
         }
