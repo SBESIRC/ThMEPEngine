@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Mathematics;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.Tools
 {
@@ -272,6 +273,25 @@ namespace ThParkingStall.Core.Tools
             var extended = line.Extend(distance);
             return extended.GetLineString().Intersection(lstr).Coordinates.ToList();
 
+        }
+
+        public static List<Point> GetCrossPoints(this List<LineSegment> segLines, Polygon area)
+        {
+            var areas = area.Shell.GetPolygons(segLines.ToLineStrings());//区域分割
+            areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
+            var subAreaSPIdx = new MNTSSpatialIndex(areas);
+            var IntSecPts = segLines.GetAllIntSecPs();
+            //找到被4个非空区域公用的pt
+            var PtToDefine = new List<Point>();
+            foreach (var pt in IntSecPts)
+            {
+                var neighbors = subAreaSPIdx.SelectCrossingGeometry(pt.Buffer(1));
+                if (neighbors.Count == 4)
+                {
+                    PtToDefine.Add(pt);
+                }
+            }
+            return PtToDefine;
         }
     }
 }

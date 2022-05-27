@@ -65,7 +65,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<(bool, bool)> SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
         public List<(int,int,int,int)> SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
 
-
         public List<(double, double)> LowerUpperBound; // 基因的下边界和上边界，绝对值
         public  Serilog.Core.Logger Logger;
         private double CloseTol = 5.0;
@@ -90,6 +89,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             if (!Isvaild) return false;
             if(autoAdjustPriority)
             {
+                var CrossPts = SegLines.GetCrossPoints(WallLine);
+                var BreakedSegLines = new List<LineSegment>();
+                var segLines_C = SegLines.Select(l => l.Clone()).ToList();
+                //基于交点打断
+                foreach (Point pt in CrossPts)
+                {
+                    var LinesToBreak = segLines_C.Where(l => l.Distance(pt.Coordinate) < 1);
+                    foreach(var l in LinesToBreak)
+                    {
+                        var breaked = l.Split(pt.Coordinate);
+                        BreakedSegLines.Add(breaked.Item1.Extend(1));
+                        BreakedSegLines.Add(breaked.Item2.Extend(1));
+                        segLines_C.Remove(l);
+                    }
+                }
+                //获取新的分割线（延长）
+                BreakedSegLines.AddRange(segLines_C);
+                SegLines = BreakedSegLines;
+                //获取连接关系
+                SeglineIndexList = SegLines.GetSegLineIntsecList();
+                SeglineConnectToBound = SegLines.GetSeglineConnectToBound(WallLine);
+                //获取交点关系
 
             }
             GetLowerUpperBound();
