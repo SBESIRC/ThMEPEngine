@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 {
@@ -23,12 +24,94 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
         /// </summary>
         public List<RouteModel> Chamfer()
         {
-            foreach (var route in routes)
+            var lstTree = GetRouteLstTree();
+            foreach (var lTree in lstTree)
             {
-                route.route = HandleChamfer(route.route);
+                HandleLstTreeChamfer(lTree, null);
             }
+            return GetRoutePath(lstTree);
+        }
+
+        /// <summary>
+        /// 拿到树中的所有路径
+        /// </summary>
+        /// <param name="routeLst"></param>
+        /// <returns></returns>
+        private List<RouteModel> GetRoutePath(List<RouteList> routeLst)
+        {
+            List<RouteModel> routes = new List<RouteModel>();
+            foreach (var rLst in routeLst)
+            {
+                routes.Add(rLst.route);
+                if (rLst.Childs != null && rLst.Childs.Count > 0)
+                {
+                    routes.AddRange(GetRoutePath(rLst.Childs));
+                }
+            }
+            
             return routes;
         }
+
+        /// <summary>
+        /// 计算管线树
+        /// </summary>
+        /// <returns></returns>
+        private List<RouteList> GetRouteLstTree()
+        {
+            var rootRoutes = routes.Where(x => x.connecLine != null).ToList();
+            var otherRoutes = routes.Except(rootRoutes).ToList();
+            List<RouteList> routeTree = new List<RouteList>();
+            foreach (var route in rootRoutes)
+            {
+                RouteList routeList = new RouteList();
+                routeList.route = route;
+                routeList.Childs = GetRouteList(route.route, ref otherRoutes);
+                routeList.oringinRoutePoly = route.route;
+                routeTree.Add(routeList);
+            }
+            return routeTree;
+        }
+
+        /// <summary>
+        /// 计算树
+        /// </summary>
+        /// <param name="polyRoute"></param>
+        /// <param name="routeModels"></param>
+        /// <returns></returns>
+        private List<RouteList> GetRouteList(Polyline polyRoute, ref List<RouteModel> routeModels)
+        {
+            var childRoutes = routeModels.Where(x => polyRoute.GetClosestPointTo(x.route.EndPoint, false).DistanceTo(x.route.EndPoint) < 0.01).ToList();
+            routeModels = routeModels.Except(childRoutes).ToList();
+            var routeLst = new List<RouteList>();
+            foreach (var cRoute in childRoutes)
+            {
+                RouteList cRouteList = new RouteList();
+                cRouteList.route = cRoute;
+                cRouteList.Childs = GetRouteList(cRoute.route, ref routeModels);
+                cRouteList.oringinRoutePoly = cRoute.route;
+                routeLst.Add(cRouteList);
+            }
+            return routeLst;
+        }
+
+        /// <summary>
+        /// 按树结构处理转角
+        /// </summary>
+        /// <param name="routeLst"></param>
+        /// <param name="parentRoute"></param>
+        private void HandleLstTreeChamfer(RouteList routeLst, RouteList parentRoute)
+        {
+            if (parentRoute != null)
+            {
+                routeLst.route.route = ConnectChamfer(routeLst.route.route, parentRoute.route.route, parentRoute.oringinRoutePoly);
+            }
+            routeLst.route.route = HandleChamfer(routeLst.route.route);
+
+            foreach (var cRoute in routeLst.Childs)
+            {
+                HandleLstTreeChamfer(cRoute, routeLst);
+            }
+        } 
 
         /// <summary>
         /// 处理倒角
@@ -75,6 +158,45 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
                 line = thisLine;
             }
             return CreateChamforByLine(resLines);
+        }
+
+        /// <summary>
+        /// 处理转角
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="parentPoly"></param>
+        /// <param name="parentOringinPoly"></param>
+        /// <returns></returns>
+        private Polyline ConnectChamfer(Polyline polyline, Polyline parentPoly, Polyline parentOringinPoly)
+        {
+            Polyline resPoly = new Polyline();
+            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+            {
+                resPoly.AddVertexAt(i, polyline.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+            }
+
+            var clonePoly = parentOringinPoly.Clone() as Polyline;
+            clonePoly.ReverseCurve();
+            var allLines = clonePoly.GetAllLineByPolyline();
+            var closetLine = GeometryUtils.GetClosetLine(allLines, polyline.EndPoint).Key;
+            if (parentPoly.GetClosestPointTo(polyline.EndPoint, false).DistanceTo(polyline.EndPoint) < 0.01)
+            {
+                var dis = polyline.EndPoint.DistanceTo(resPoly.EndPoint);
+                if (dis > length)
+                {
+                    var lineDir = (polyline.EndPoint - polyline.StartPoint).GetNormal();
+                    var lineEndP = polyline.EndPoint - lineDir * length;
+                    resPoly.AddVertexAt(resPoly.NumberOfVertices, lineEndP.ToPoint2D(), 0, 0, 0);
+                }
+            }
+            else
+            {
+                resPoly.AddVertexAt(resPoly.NumberOfVertices, polyline.EndPoint.ToPoint2D(), 0, 0, 0);
+            }
+            var dir = (closetLine.StartPoint - closetLine.EndPoint).GetNormal();
+            var lastPt = polyline.EndPoint + dir * length;
+            resPoly.AddVertexAt(resPoly.NumberOfVertices, lastPt.ToPoint2D(), 0, 0, 0);
+            return resPoly;
         }
 
         /// <summary>
@@ -142,5 +264,14 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 
             return false;
         }
+    }
+
+    public class RouteList
+    {
+        public RouteModel route { get; set; }
+
+        public List<RouteList> Childs = new List<RouteList>();
+
+        public Polyline oringinRoutePoly { get; set; }
     }
 }

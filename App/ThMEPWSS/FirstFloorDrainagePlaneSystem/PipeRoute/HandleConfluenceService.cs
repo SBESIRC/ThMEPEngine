@@ -227,9 +227,9 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
             var outFrame = HandleStructService.GetNeedFrame(closetLine.Key, rooms);
             var connectLine = connectPipesService.CreatePipes(outFrame, closetLine.Key, connectPt, weightHoles);
 
-            otherPipes.Remove(otherPipes.First());
             var resLine = CreateConnectLine(resConnectLine, connectLine, connectPt, closetLine.Key, pipeType);
             resLine.printCircle = otherPipes.First().PipeCircle;
+            otherPipes.Remove(otherPipes.First());
             otherConnectPipeLines = CreateOtherPipes(otherPipes, resLine);
             return resLine;
         }
