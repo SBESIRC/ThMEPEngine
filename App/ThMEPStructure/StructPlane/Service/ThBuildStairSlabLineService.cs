@@ -13,6 +13,10 @@ namespace ThMEPStructure.StructPlane.Service
         public DBObjectCollection Build(DBObjectCollection texts,DBObjectCollection slabs)
         {
             var results = new DBObjectCollection();
+            if(texts.Count==0 || slabs.Count==0)
+            {
+                return results;
+            }
             var spatialIndex = new ThCADCoreNTSSpatialIndex(texts);
             texts.OfType<Polyline>().ForEach(p =>
             {
