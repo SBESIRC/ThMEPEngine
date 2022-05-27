@@ -34,6 +34,18 @@ namespace TianHua.Electrical.PDS.UI.Project
         public ThPDSConductorUsageModel NonFireDistributionControlCable => _ConductorUsages[6];
         public ThPDSConductorUsageModel FireControlSignalWire => _ConductorUsages[7];
         public ThPDSConductorUsageModel NonFireControlSignalWire => _ConductorUsages[8];
+        public MeterBoxCircuitType MeterBoxCircuitType
+        {
+            get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MeterBoxCircuitType;
+            set
+            {
+                if (value != MeterBoxCircuitType)
+                {
+                    PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.MeterBoxCircuitType = value;
+                    OnPropertyChanged(null);
+                }
+            }
+        }
         public int UniversalPipeDiameter
         {
             get => PDSProjectVM.Instance.GlobalParameterViewModel.Configuration.UniversalPipeDiameter;

@@ -283,6 +283,10 @@
                                 <ComboBox ItemsSource="{Binding CommonMotorPowerMore,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding CommonMotorPowerMore}"></ComboBox>
                                 <Label Content="方式启动"></Label>
                             </StackPanel>
+<StackPanel Orientation="Horizontal">
+<Label Content="电表箱出线回路原则"></Label>
+<ComboBox ItemsSource="{Binding MeterBoxCircuitType,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding MeterBoxCircuitType}"></ComboBox>
+</StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>消防应急照明与疏散指示系统采用</Label>
                                 <ComboBox ItemsSource="{Binding FireEmergencyLightingModel,Converter={StaticResource EnumValuesConverter},Mode=OneTime,ConverterParameter=SkipNone}"  SelectedItem="{Binding FireEmergencyLightingModel}"></ComboBox>
