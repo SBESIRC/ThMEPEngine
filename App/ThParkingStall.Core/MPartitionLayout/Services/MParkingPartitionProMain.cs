@@ -236,6 +236,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             RemoveInvalidPillars();
             ReDefinePillarDimensions();
             InsuredForTheCaseOfoncaveBoundary();
+            if (!DisplayFinal)
+                ClassifyLanesForLayoutFurther();
         }
         private double GenerateIntegralModuleLanesOptimizedByRealLength(ref GenerateLaneParas paras, bool allow_through_build = true)
         {

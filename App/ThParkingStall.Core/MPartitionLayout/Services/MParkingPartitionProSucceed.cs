@@ -462,7 +462,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (dis < tol) return true;
             else return false;
         }
-        private bool IsConnectedToLaneDouble(LineSegment line)
+        public bool IsConnectedToLaneDouble(LineSegment line)
         {
             if (IsConnectedToLane(line, true) && IsConnectedToLane(line, false)) return true;
             else return false;
@@ -940,6 +940,115 @@ namespace ThParkingStall.Core.MPartitionLayout
                     return pl;
                 }).ToList();
             }
+        }
+        private void ClassifyLanesForLayoutFurther()
+        {
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var overlap = false;
+                foreach (var lane in OriginalLanes)
+                {
+                    var cond_a = lane.ClosestPoint(IniLanes[i].Line.P0).Distance(IniLanes[i].Line.P0) < 1;
+                    var cond_b = lane.ClosestPoint(IniLanes[i].Line.P1).Distance(IniLanes[i].Line.P1) < 1;
+                    if (cond_a && cond_b)
+                    {
+                        overlap = true;
+                        break;
+                    }
+                }
+                if (overlap) continue;
+                if (IsConnectedToLaneDouble(IniLanes[i].Line))
+                {
+                    OutEnsuredLanes.Add(IniLanes[i].Line);
+                }
+                else
+                {
+                    var test_lane = new LineSegment(IniLanes[i].Line);
+                    if (IsConnectedToLane(test_lane, false))
+                        test_lane = new LineSegment(test_lane.P1, test_lane.P0);
+                    var lane_clone = new LineSegment(test_lane);
+                    var endp = test_lane.P1.Translation(-Vector(test_lane).Normalize() * 1000);
+                    test_lane.P1 = test_lane.P1.Translation(Vector(test_lane).Normalize() * MaxLength);
+                    test_lane.P0 = endp;
+                    var bdpoints = test_lane.IntersectPoint(Boundary).ToList();
+                    var obspoints = new List<Coordinate>();
+                    var lanecarpoints= new List<Coordinate>();
+                    var test_lane_pl = test_lane.Buffer(1);
+                    var obscrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>();
+                    foreach (var cross in obscrossed)
+                    {
+                        obspoints.AddRange(test_lane.IntersectPoint(cross));
+                    }
+                    foreach (var box in BuildingBoxes)
+                    {
+                        obspoints.AddRange(test_lane.IntersectPoint(box));
+                    }
+                    var carcrossed=CarSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>().ToList();
+                    //carcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingGeometry(test_lane_pl).Cast<Polygon>());
+                    foreach (var cross in carcrossed)
+                    {
+                        lanecarpoints.AddRange(test_lane.IntersectPoint(cross));
+                    }
+                    var tmpLanes = IniLanes.Select(e => e.Line).Where(e => IsPerpLine(e, test_lane));
+                    foreach (var cross in tmpLanes)
+                    {
+                        lanecarpoints.AddRange(test_lane.IntersectPoint(cross.Buffer(1)));
+                    }
+                    bdpoints = bdpoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
+                    obspoints = obspoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
+                    lanecarpoints = lanecarpoints.OrderBy(e => e.Distance(test_lane.P0)).ToList();
+                    var dis_bd = bdpoints.Count > 0 ? bdpoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
+                    var dis_obs = obspoints.Count > 0 ? obspoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
+                    var dis_lane = lanecarpoints.Count > 0 ? lanecarpoints.First().Distance(test_lane.P0) : double.PositiveInfinity;
+                    if (dis_bd < dis_obs && dis_bd < dis_lane)
+                    {
+                        lane_clone.P1 = lane_clone.P1.Translation(Vector(lane_clone).Normalize() * (dis_bd-1000));
+                        OutEnsuredLanes.Add(lane_clone);
+                    }
+                    else if (dis_obs < dis_bd)
+                    {
+                        if (dis_lane>MaxLength)
+                        {
+                            OutUnsuredLanes.Add(lane_clone);
+                        }
+                        else
+                        {
+                            //穿过障碍物，还有车道线
+                        }
+                    }
+                    else { }
+                }
+            }
+
+            while (true)
+            {
+                var found = false;
+                var resultLanes = new List<LineSegment>();
+                resultLanes.AddRange(OriginalLanes);
+                resultLanes.AddRange(OutEnsuredLanes);
+                resultLanes.AddRange(OutUnsuredLanes);
+                for (int i = 0; i < OutEnsuredLanes.Count; i++)
+                {
+                    if (!(ClosestPointInVertLines(OutEnsuredLanes[i].P0, OutEnsuredLanes[i], resultLanes) < 10
+                        || ClosestPointInVertLines(OutEnsuredLanes[i].P1, OutEnsuredLanes[i], resultLanes) < 10))
+                    {
+                        OutEnsuredLanes.RemoveAt(i);
+                        i--;
+                        found = true;
+                    }
+                }
+                for (int i = 0; i < OutUnsuredLanes.Count; i++)
+                {
+                    if (!(ClosestPointInVertLines(OutUnsuredLanes[i].P0, OutUnsuredLanes[i], resultLanes) < 10
+                        || ClosestPointInVertLines(OutUnsuredLanes[i].P1, OutUnsuredLanes[i], resultLanes) < 10))
+                    {
+                        OutUnsuredLanes.RemoveAt(i);
+                        i--;
+                        found = true;
+                    }
+                }
+                if (!found) break;
+            } 
         }
         private void InsuredForTheCaseOfoncaveBoundary()
         {

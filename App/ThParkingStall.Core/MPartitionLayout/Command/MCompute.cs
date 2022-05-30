@@ -54,6 +54,47 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var iniPillars = new List<Polygon>();
                 var obsVertices = new List<Coordinate>();
                 var lanes = new List<LineSegment>();
+
+                foreach (var subArea in subAreas)
+                {
+                    walls.AddRange(subArea.mParkingPartitionPro.Walls);
+                    cars.AddRange(subArea.mParkingPartitionPro.Cars);
+                    pillars.AddRange(subArea.mParkingPartitionPro.Pillars);
+                    iniPillars.AddRange(subArea.mParkingPartitionPro.IniPillar);
+                    obsVertices.AddRange(subArea.mParkingPartitionPro.ObstacleVertexes);
+                    lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
+                }
+                RemoveDuplicatedLines(lanes);
+                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                //MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
+                MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+                MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
+                mParkingPartition = new MParkingPartitionPro();
+                mParkingPartition.Cars = cars;
+                mParkingPartition.Pillars = pillars;
+                //mParkingPartition.OutputLanes = lanes;
+
+                mParkingPartition.OutputLanes = new List<LineSegment>();
+                var ensuredLanes = new List<LineSegment>();
+                var unsuredLanes = new List<LineSegment>();
+                foreach (var subArea in subAreas)
+                {
+                    ensuredLanes.AddRange(subArea.mParkingPartitionPro.OutEnsuredLanes);
+                    unsuredLanes.AddRange(subArea.mParkingPartitionPro.OutUnsuredLanes);
+                }
+                mParkingPartition.OutEnsuredLanes= ensuredLanes;
+                mParkingPartition.OutUnsuredLanes= unsuredLanes;
+
+                return cars.Count;
+            }
+            if (/*display*/false)
+            {
+                var walls = new List<LineString>();
+                var cars = new List<InfoCar>();
+                var pillars = new List<Polygon>();
+                var iniPillars = new List<Polygon>();
+                var obsVertices = new List<Coordinate>();
+                var lanes = new List<LineSegment>();
                 foreach (var subArea in subAreas)
                 {
                     walls.AddRange(subArea.mParkingPartitionPro.Walls);
