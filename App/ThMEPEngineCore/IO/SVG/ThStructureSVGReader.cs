@@ -553,7 +553,7 @@ namespace ThMEPEngineCore.IO.SVG
                         isBottomElevation = true;
                         floorInfo.Bottom_elevation = item.Value;
                         break;
-                    case "HEIGHT": // 存放的是楼层高度
+                    case "ELEVATION": // 存放的是楼层高度
                         isHeight = true;
                         floorInfo.Height = item.Value;
                         break;

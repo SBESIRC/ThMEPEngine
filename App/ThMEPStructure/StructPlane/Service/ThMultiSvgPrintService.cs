@@ -90,7 +90,7 @@ namespace ThMEPStructure.StructPlane.Service
                 svg.ReadFromFile(svgFile);
 
                 var prinService = new ThSvgEntityPrintService(
-                    svg.Geos, svg.FloorInfos,svg.DocProperties);
+                    svg.Geos, svg.FloorInfos,svg.DocProperties,"1:100");
                 prinService.Print(AcadDb);
                 results.Add(prinService);
             });
