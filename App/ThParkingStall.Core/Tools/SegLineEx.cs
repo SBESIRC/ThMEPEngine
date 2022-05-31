@@ -157,6 +157,7 @@ namespace ThParkingStall.Core.Tools
             if (top == -1 || bottom == -1 || left == -1 || right == -1) throw new Exception("Can not find All the neighbors");
             return(top,bottom,left,right);
         }
+
         public static void SeglinePrecut(this List<LineSegment> SegLines, Polygon WallLine, double prop = 0.8)
         {
             for (int i = 0; i < SegLines.Count; ++i)

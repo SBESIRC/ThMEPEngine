@@ -326,7 +326,7 @@ namespace ThMEPArchitecture.MultiProcess
                     Logger?.Information("块名：" + blkName);
                     Logger?.Information("文件名：" + drawingName);
                     Logger?.Information("用户名：" + Environment.UserName);
-                    var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData);
+                    var autoSegLines = GenerateAutoSegLine(blk,cutTol, HorizontalFirst, out LayoutData layoutData,false);
                     if(! ParameterViewModel.JustCreateSplittersChecked && autoSegLines != null) RunABlock(blk, autoSegLines, layoutData);
                 }
                 catch (Exception ex)
@@ -355,7 +355,7 @@ namespace ThMEPArchitecture.MultiProcess
             }
             else
             {
-                var inputvaild = layoutData.ProcessSegLines(AutoSegLines);
+                var inputvaild = layoutData.ProcessSegLines(AutoSegLines,true);
                 if (!inputvaild) return;
             }
             var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);

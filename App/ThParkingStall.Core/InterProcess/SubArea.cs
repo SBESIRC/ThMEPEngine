@@ -96,24 +96,23 @@ namespace ThParkingStall.Core.InterProcess
 
     public class SubAreaKey : IEquatable<SubAreaKey>
     {
-        public List<Int16> GeneIdxs;
-        public List<double> GeneVals;
+        public List<double> X_Vals;
+        public List<double> Y_Vals;
         //public bool ValIncreaseDir;
         public (double, double) Center;
         //private static readonly double Tol = 1e-10;
-        public SubAreaKey(List<int> geneIdxs, List<double> geneVals, Coordinate center)
+        public SubAreaKey(List<Point> Centers, Coordinate center)
         {
-            if (geneIdxs.Count != geneVals.Count) throw new ArgumentException("Index and Value Counts are different!");
-            GeneIdxs = geneIdxs.Select(i => Convert.ToInt16(i)).ToList();
-            GeneVals = geneVals;
+            var ordered = Centers.OrderBy(c=>c.X).ThenBy(c =>c.Y);
+            X_Vals=ordered.Select(c => c.X).ToList();
+            Y_Vals=ordered.Select(c => c.Y).ToList();
             //ValIncreaseDir = valIncreaseDir;
             Center = (center.X, center.Y);
         }
-        public SubAreaKey(List<Int16> geneIdxs, List<double> geneVals, (double, double) center)
+        public SubAreaKey(List<double> x_Vals, List<double> y_Vals, (double, double) center)
         {
-            if (geneIdxs.Count != geneVals.Count) throw new ArgumentException("Index and Value Counts are different!");
-            GeneIdxs = geneIdxs;
-            GeneVals = geneVals;
+            X_Vals = x_Vals;
+            Y_Vals = y_Vals;
             //ValIncreaseDir = valIncreaseDir;
             Center = center;
         }
@@ -123,11 +122,11 @@ namespace ThParkingStall.Core.InterProcess
             //res = res * 31 + ValIncreaseDir.GetHashCode();
             res = res * 31 + Center.Item1.GetHashCode();
             res = res * 31 + Center.Item2.GetHashCode();
-            foreach (var item in GeneIdxs)
+            foreach (var item in X_Vals)
             {
                 res = res * 31 + item.GetHashCode();
             }
-            foreach (var item in GeneVals)
+            foreach (var item in Y_Vals)
             {
                 res = res * 31 + item.GetHashCode();
             }
@@ -141,11 +140,11 @@ namespace ThParkingStall.Core.InterProcess
             //if(Math.Abs(Center.Item1 - other.Center.Item1) >= Tol || 
             //    Math.Abs(Center.Item2 - other.Center.Item2) >= Tol) return false;
             if (Center.Item1 != other.Center.Item1 || Center.Item2 != other.Center.Item2) return false;
-            if (GeneIdxs.Count != other.GeneIdxs.Count) return false;
-            for (int i = 0; i < GeneIdxs.Count; i++)
+            if (X_Vals.Count != other.X_Vals.Count) return false;
+            for (int i = 0; i < X_Vals.Count; i++)
             {
-                if (GeneIdxs[i] != other.GeneIdxs[i]) return false;
-                if (GeneVals[i] != other.GeneVals[i]) return false;
+                if (X_Vals[i] != other.X_Vals[i]) return false;
+                if (Y_Vals[i] != other.Y_Vals[i]) return false;
                 //if (Math.Abs(GeneVals[i] - other.GeneVals[i]) >= Tol) return false;
             }
             return true;
@@ -155,17 +154,17 @@ namespace ThParkingStall.Core.InterProcess
             //writer.Write(ValIncreaseDir);
             writer.Write(Center.Item1);
             writer.Write(Center.Item2);
-            GeneIdxs.WriteToStream(writer);
-            GeneVals.WriteToStream(writer);
+            X_Vals.WriteToStream(writer);
+            Y_Vals.WriteToStream(writer);
         }
 
         public static SubAreaKey ReadFromStream(BinaryReader reader)
         {
             //var valIncreaseDir = reader.ReadBoolean();
             var center = (reader.ReadDouble(), reader.ReadDouble());
-            var geneIdxs = ReadWriteEx.ReadInt16s(reader);
-            var geneVals = ReadWriteEx.ReadDoubles(reader);
-            return new SubAreaKey(geneIdxs, geneVals, center);
+            var x_Vals = ReadWriteEx.ReadDoubles(reader);
+            var y_Vals = ReadWriteEx.ReadDoubles(reader);
+            return new SubAreaKey(x_Vals, y_Vals, center);
         }
     }
 }

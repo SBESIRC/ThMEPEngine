@@ -56,6 +56,7 @@ namespace ThMEPArchitecture.MultiProcess
             dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
             dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
             dataWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
+            dataWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {

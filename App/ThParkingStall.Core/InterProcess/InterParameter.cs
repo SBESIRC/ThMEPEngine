@@ -29,6 +29,10 @@ namespace ThParkingStall.Core.InterProcess
         private static List<(bool, bool)> _SeglineConnectToBound;//分割线（负，正）方向是否与边界连接
         public static List<(bool, bool)> SeglineConnectToBound { get { return _SeglineConnectToBound; } }//分割线（负，正）方向是否与边界连接
 
+        public static List<(int, int, int, int)> _SegLineIntSecNode;//四岔节点关系，上下左右的分割线index
+
+        public static List<(int, int, int, int)> SegLineIntSecNode { get { return _SegLineIntSecNode; } }//四岔节点关系，上下左右的分割线index
+        //private static List<HashSet<int>> NewIdxToOrg;//动态更新，合并后分割线对应到原始分割线index
         private static List<Ramp> _Ramps;//坡道
         public static List<Ramp> Ramps { get { return _Ramps; } }//坡道
 
@@ -70,46 +74,22 @@ namespace ThParkingStall.Core.InterProcess
             _SegLineIntsecList = dataWraper.SeglineIndexList;
             _SeglineConnectToBound = dataWraper.SeglineConnectToBound;
             _LowerUpperBound = dataWraper.LowerUpperBound;
-        }
-        public static bool IsValid(Chromosome chromosome)
-        {
-            var newSegLines = new List<LineSegment>();
-            foreach (var gene in chromosome.Genome)
-            {
-                newSegLines.Add(gene.ToLineSegment());
-            }
-            newSegLines.ExtendAndIntSect(SeglineIndexList);//延展
-            newSegLines.ExtendToBound(TotalArea, SeglineConnectToBound);
-            newSegLines.SeglinePrecut(TotalArea);//预切割
-            newSegLines.Clean();//过滤孤立的线
-            if (!newSegLines.Allconnected()) return false;//判断是否全部相连
-            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
-            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
-            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return false;//判断是否满足车道宽
-            return true;
+            _SegLineIntSecNode = dataWraper.SegLineIntSecNode;
+            //NewIdxToOrg = new List<HashSet<int>>();
+            //for (int i = 0; i < InitSegLines.Count; i++)
+            //{
+            //    NewIdxToOrg.Add(new HashSet<int> { i });
+            //}
         }
         //返回长度为0则为不合理解
         public static List<SubArea> GetSubAreas(Chromosome chromosome)
         {
-            var subAreas = new List<SubArea>();//分割出的子区域
-            var newSegLines = new List<LineSegment>();
-            foreach(var gene in chromosome.Genome)
-            {
-                newSegLines.Add(gene.ToLineSegment());
-            }
-            newSegLines.ExtendAndIntSect(SeglineIndexList);//延展
-            newSegLines.ExtendToBound(TotalArea, SeglineConnectToBound);
-            newSegLines.SeglinePrecut(TotalArea);//预切割
-            // 这有个bug，影响subareakey
-
-            newSegLines.Clean();//过滤孤立的线
-            if (!newSegLines.Allconnected()) return subAreas;//判断是否全部相连
-            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            var subAreas = new List<SubArea>();
+            var result_segLines = ProcessToSegLines(chromosome);
+            var newSegLines = result_segLines.Item1;
+            var vaildSeg = result_segLines.Item2;
+            if(newSegLines == null) return subAreas;
             var SegLineStrings = newSegLines.ToLineStrings(false);
-
-            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
-            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return subAreas;//判断是否满足车道宽
-            
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr!=null));//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             var vaildSegSpatialIndex = new MNTSSpatialIndex(vaildSeg.ToLineStrings().Cast<Geometry>().ToList());
@@ -147,26 +127,141 @@ namespace ThParkingStall.Core.InterProcess
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 var subRamps = Ramps.Where(ramp => area.Contains(ramp.InsertPt)).ToList();
                 var subBoundingBoxes = BoundingBoxSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
-                var key = GetSubAreaKey(area, chromosome, SegLineStrings);
+                var key = GetSubAreaKey(area, SegLineStrings); 
                 var subArea = new SubArea(area, subLanes,walls, subBuildings, subRamps, subBoundingBoxes, key);
                 subAreas.Add(subArea);
             }
             return subAreas;
         }
-        
-        public static SubAreaKey GetSubAreaKey(Polygon area,Chromosome chromosome, List<LineString> SegLineStrings)
+        public static (List<LineSegment>, List<LineSegment>) ProcessToSegLines(Chromosome chromosome)
         {
-            var GeneIdxs = new List<int>();
-            var GeneVals = new List<double>();
+            var newSegLines = new List<LineSegment>();
+            foreach (var gene in chromosome.Genome)
+            {
+                newSegLines.Add(gene.ToLineSegment());
+            }
+            newSegLines = MergeSegLines(newSegLines, out List<List<int>> seglineIndexListNew, out List<(bool, bool)> seglineToBoundNew);
+            newSegLines.ExtendToBound(TotalArea, seglineToBoundNew);
+            newSegLines.ExtendAndIntSect(seglineIndexListNew);//延展
+            newSegLines.SeglinePrecut(TotalArea);//预切割
+            newSegLines.Clean();//过滤孤立的线
+            if (!newSegLines.Allconnected()) return (null,null);//判断是否全部相连
+            //var vaildSeg = newSegLines.GetVaildSegLines(TotalArea);//获取有效分割线
+            var vaildSeg = newSegLines.GetVaildLanes(TotalArea, BoundaryObjectsSPIDX);//获取有效车道线
+            if (!vaildSeg.VaildLaneWidthSatisfied(BoundarySpatialIndex)) return (null, null);//判断是否满足车道宽
+            return (newSegLines, vaildSeg);
+        }
+        private static List<LineSegment> MergeSegLines(List<LineSegment> SegLines,out List<List<int>> seglineIndexListNew,out List<(bool, bool)> seglineToBoundNew)
+        {
+            var horzPrior = SegLines.HorzProir();
+            var NewIdxToOrg = new List<HashSet<int>>();
+            for (int i = 0; i < SegLineIntSecNode.Count; i++)
+            {
+                var node = SegLineIntSecNode[i];
+                int id1;
+                int id2;
+                if(horzPrior[i])
+                {
+                    id1 = node.Item3;
+                    id2 = node.Item4;
+                }
+                else
+                {
+                    id1 = node.Item1;
+                    id2 = node.Item2;
+                }
+                //bool founded = false;
+                var partEqual =new List<int>();
+                for(int j = 0; j < NewIdxToOrg.Count; j++)
+                {
+                    var ids = NewIdxToOrg[j];
+                    if (ids.Contains(id1) || ids.Contains(id2)) partEqual.Add(j);
+                }
+                var newSet = new HashSet<int> { id1, id2 };
+                partEqual.ForEach(j => newSet.UnionWith(NewIdxToOrg[j]));
+                partEqual.Reverse();
+                partEqual.ForEach(j => NewIdxToOrg.RemoveAt(j));
+                NewIdxToOrg.Add(newSet);
+            }
+            var newSegLines = new List<LineSegment>();
+            var addedIdxs = new HashSet<int>();
+            seglineIndexListNew = new List<List<int>>();
+            seglineToBoundNew = new List<(bool, bool)>();
+            foreach (var idxs in NewIdxToOrg)//合并需要合并的
+            {
+                var lineToMerge = new List<LineSegment>();
+                foreach (var idx in idxs)
+                {
+                    lineToMerge.Add(SegLines[idx]);
+                    addedIdxs.Add(idx);
+                }  
+                newSegLines.Add(lineToMerge.MergeLinesToMid());
+            }
+            for (int i = 0; i < SegLines.Count; i++)//添加剩余的
+            {
+                if (!addedIdxs.Contains(i))
+                {
+                    newSegLines.Add(SegLines[i]);
+                    NewIdxToOrg.Add(new HashSet<int> {i});
+                }
+            }
+            var OrgIdxToNew = new Dictionary<int, int>();
+            for (int i = 0; i < NewIdxToOrg.Count; i++)
+            {
+                var orgIdxs = NewIdxToOrg[i];
+                foreach (var orgIdx in orgIdxs)
+                {
+                    OrgIdxToNew.Add(orgIdx, i);
+                }
+            }
+            for (int i = 0; i < NewIdxToOrg.Count; i++)
+            {
+                var orgIdxs = NewIdxToOrg[i];
+                bool negConnect = SeglineConnectToBound.Slice(orgIdxs).Any(o => o.Item1);
+                bool posConnect = SeglineConnectToBound.Slice(orgIdxs).Any(o => o.Item2);
+                seglineToBoundNew.Add((negConnect,posConnect));
+
+                var connectToOrg = SeglineIndexList.Slice(orgIdxs);
+                var connectToNewIdxs = new HashSet<int>();
+                //旧id =>新id
+                connectToOrg.ForEach(orgids => orgids.ForEach(orgid => connectToNewIdxs.Add(OrgIdxToNew[orgid])));
+                seglineIndexListNew.Add(connectToNewIdxs.ToList());
+
+            }
+
+            return newSegLines;
+        }
+        public static List<bool> HorzProir(this List<LineSegment> SegLines)
+        {
+            var horzPrior = new List<bool>();
+            foreach (var node in SegLineIntSecNode)
+            {
+                var top = SegLines[node.Item1];
+                var bottom = SegLines[node.Item2];
+                var left = SegLines[node.Item3];
+                var right = SegLines[node.Item4];
+                var distVert = Math.Abs(top.GetValue() - bottom.GetValue());
+                var distHorz = Math.Abs(left.GetValue() - right.GetValue());
+                if (distVert <= distHorz) horzPrior.Add(false);
+                else horzPrior.Add(true);
+            }
+            return horzPrior;
+        }
+        public static SubAreaKey GetSubAreaKey(Polygon area, List<LineString> SegLineStrings)
+        {
+            var centers = new List<Point>();
             for(int idx = 0; idx < SegLineStrings.Count; idx++)
             {
                 var SegLineString = SegLineStrings[idx];
-                if(area.Shell.PartInCommon(SegLineString)) GeneIdxs.Add(idx);
+                if (SegLineString == null) continue;
+                var intSection = area.Shell.Intersection(SegLineString);
+                if (intSection.Length > 0)
+                {
+                    centers.Add(intSection.Centroid);
+                }
             }
             var center = area.GetCenter();
-            //var ValIncreaseDir = center.OnIncreaseDirectionOf( chromosome.Genome[GeneIdxs.First()].ToLineSegment());
-            GeneIdxs.ForEach(idx => GeneVals.Add(chromosome.Genome[idx].Value));
-            return new SubAreaKey(GeneIdxs, GeneVals, center);
+            return new SubAreaKey(centers, center);
         }
     }
 }

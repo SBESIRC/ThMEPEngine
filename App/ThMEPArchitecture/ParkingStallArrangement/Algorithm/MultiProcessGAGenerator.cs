@@ -145,7 +145,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     genome.Add(gene);
                 }
                 solution.Genome = genome;
-                if (InterParameter.IsValid(solution))
+                if (InterParameter.ProcessToSegLines(solution).Item1 != null)
                 {
                     return true;
                 }
