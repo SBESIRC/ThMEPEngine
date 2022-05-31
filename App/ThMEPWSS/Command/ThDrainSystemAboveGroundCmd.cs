@@ -382,11 +382,15 @@ namespace ThMEPWSS.Command
                             tchPipe.TextDirection = otherLine.LineDirection().Negate();
                         }
                         var textFirst = texts.First();
-                        var numStr = textFirst.dbText.TextString.Split('-').ToList().Last();
+                        var spliteStr = textFirst.dbText.TextString.Split('-').ToList();
+                        var numStr = spliteStr.Last();
+                        var floorNum = spliteStr.First();
+                        floorNum = floorNum.Replace(item.tag, "");
                         int.TryParse(numStr, out int intNum);
-                        tchPipe.FloorNum = "";
+                        tchPipe.FloorNum = floorNum;
                         tchPipe.TextStyle = "_TWT_SERIAL";
                         tchPipe.DimType = 0;
+                        tchPipe.FloorType = 4;
                         tchPipe.TextHeight = 3.5;
                         tchPipe.DimRadius = 4.0;
                         tchPipe.Spacing = 4.0;
