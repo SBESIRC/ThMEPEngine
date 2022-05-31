@@ -237,6 +237,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
         , Lane specialLane = null,bool check_adj_collision=false, List<Lane> rlanes=null)
         {
+            var pillarSpatialIndex = new MNTSSpatialIndex(Pillars);
             var lanes = new List<Lane>();
             var Lanes = IniLanes;
             if (rlanes != null)
@@ -266,6 +267,12 @@ namespace ThParkingStall.Core.MPartitionLayout
                     var obcrossed = ObstaclesSpatialIndex.SelectCrossingGeometry(obpl).Cast<Polygon>().ToList();
                     var obpoints = new List<Coordinate>();
                     foreach (var cross in obcrossed)
+                    {
+                        obpoints.AddRange(cross.Coordinates);
+                        obpoints.AddRange(cross.IntersectPoint(obpl));
+                    }
+                    var pillarcrossed=pillarSpatialIndex.SelectCrossingGeometry(obpl).Cast<Polygon>().ToList();
+                    foreach (var cross in pillarcrossed)
                     {
                         obpoints.AddRange(cross.Coordinates);
                         obpoints.AddRange(cross.IntersectPoint(obpl));
@@ -452,7 +459,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         private bool CloseToWall(Coordinate point,LineSegment line)
         {
             double tol = 10;
-            if (Walls.Count == 0)
+            if (/*Walls.Count == 0*/false)
             {
                 if (Boundary.ClosestPoint(point).Distance(point) < tol && ClosestPointInVertLines(point, line, IniLanes.Select(e => e.Line)) > tol)
                     return true;
@@ -898,7 +905,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             Pillars = tmps;
         }
-        private void ReDefinePillarDimensions()
+        public void ReDefinePillarDimensions()
         {
             IniPillar.AddRange(Pillars.Select(e => e.Clone()));
             if (HasImpactOnDepthForPillarConstruct)
@@ -1122,13 +1129,32 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
                 double dis_judge_under_building = 5000;
-                if (ClosestPointInCurvesFast(line.P0, Obstacles.Select(e => new LineString(e.Coordinates)).ToList()) < dis_judge_under_building)
+                var lineendpt_square = (new LineSegment(line.P0.Translation(Vector(line).Normalize() * 10), line.P0.Translation(-Vector(line).Normalize() * 10))).Buffer(10);
+                lineendpt_square = lineendpt_square.Translation(vec.Normalize() * DisPillarMoveDeeplySingle / 2);
+                var pillarSpatialIndex = new MNTSSpatialIndex(Pillars);
+                var crossed_pillar = pillarSpatialIndex.SelectCrossingGeometry(lineendpt_square).Count > 0;
+                var carcrossed = CarSpatialIndex.SelectCrossingGeometry(lineendpt_square);
+                if (crossed_pillar)
                 {
                     var dis = ClosestPointInVertCurves(line.P0, line, IniLanes.Select(e => e.Line).ToList());
                     if (dis >= DisLaneWidth + DisPillarLength - 1 && Math.Abs(dis - DisCarAndHalfLane) > 1)
                         line = new LineSegment(line.P0.Translation(-Vector(line).Normalize() * DisPillarLength), line.P1);
                     else if (line.Length < DisVertCarWidth * 4)
                         line = new LineSegment(line.P0.Translation(-Vector(line).Normalize() * DisPillarLength), line.P1);
+                }
+                else
+                {
+                    if (carcrossed.Count == 0)
+                    {
+                        if (ClosestPointInCurvesFast(line.P0, Obstacles.Select(e => new LineString(e.Coordinates)).ToList()) < dis_judge_under_building)
+                        {
+                            var dis = ClosestPointInVertCurves(line.P0, line, IniLanes.Select(e => e.Line).ToList());
+                            if (dis >= DisLaneWidth + DisPillarLength - 1 && Math.Abs(dis - DisCarAndHalfLane) > 1)
+                                line = new LineSegment(line.P0.Translation(-Vector(line).Normalize() * DisPillarLength), line.P1);
+                            else if (line.Length < DisVertCarWidth * 4)
+                                line = new LineSegment(line.P0.Translation(-Vector(line).Normalize() * DisPillarLength), line.P1);
+                        }
+                    }
                 }
             }
             if (line.Length == 0) return;

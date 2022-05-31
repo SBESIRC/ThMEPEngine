@@ -161,6 +161,30 @@ namespace ThParkingStall.Core.MPartitionLayout
             else
                 return new LineSegment[] { new LineSegment(curve) };
         }
+        public static LineSegment[] SplitLine(LineSegment curve, List<LineString> cutters, double length_filter = 1,
+           bool allow_split_similar_car = false)
+        {
+            List<Coordinate> points = new List<Coordinate>();
+
+            foreach (var cutter in cutters)
+                points.AddRange(curve.IntersectPoint(cutter));
+            if (allow_split_similar_car)
+            {
+                //在处理车道末端时候，出现一个特殊case，车位与车道之间有10容差距离，以此加强判断。
+                foreach (var cutter in cutters)
+                {
+                    points.AddRange(cutter.Coordinates
+                        .Where(p => curve.ClosestPoint(p, false).Distance(p) < 20)
+                        .Select(p => curve.ClosestPoint(p, false)));
+                }
+            }
+            points = RemoveDuplicatePts(points, 1);
+            SortAlongCurve(points, curve);
+            if (points.Count > 0)
+                return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
+            else
+                return new LineSegment[] { new LineSegment(curve) };
+        }
         public static LineSegment[] SplitLine(LineSegment curve, List<LineSegment> cutters, double length_filter = 1)
         {
             List<Coordinate> points = new List<Coordinate>();
