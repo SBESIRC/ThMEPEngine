@@ -35,13 +35,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public  List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分割线
         public  List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public  List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
-
+        public List<Circle> CAD_Anchors = new List<Circle>();// 提取到的cad锚点
         // NTS 数据结构
         public  Polygon WallLine;//初始边界线
         public  List<LineSegment> SegLines = new List<LineSegment>();// 初始分割线
         public  List<Polygon> Obstacles; // 初始障碍物,不包含坡道
         public  List<Ramp> Ramps = new List<Ramp>();// 坡道
-
+        public List<Anchor> Anchors = new List<Anchor>();
         // NTS 衍生数据
         public  List<LineSegment> VaildLanes;//分割线等价车道线
         public  Polygon SegLineBoundary;//智能边界，外部障碍物为不可穿障碍物
@@ -136,6 +136,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var RampPolgons = UpdateWallLine();
             UpdateRamps(RampPolgons);
             UpdateObstacles();
+            UpdateAnchors();
             Buildings = RampPolgons;
             Buildings.AddRange(Obstacles);
             var boundaries = new List<Geometry> { WallLine.Shell };
@@ -226,6 +227,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     CAD_SegLines.Add(line);
                 }
             }
+            if (layerName.Contains("锚点"))
+            {
+                if (ent is BlockReference br)
+                {
+                    var dbObjs = new DBObjectCollection();
+                    br.Explode(dbObjs);
+                    foreach (var obj in dbObjs)
+                    {
+                        if (obj is Circle circle)
+                        {
+                            CAD_Anchors.Add(circle);
+                        }
+                    }
+                }
+                else if (ent is Circle circle)
+                {
+                    CAD_Anchors.Add(circle);
+                }
+            }
         }
         private void UpdateSegLines()
         {
@@ -287,6 +307,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     if (SegLineEx.GetAllIntSecPs(i, SegLines, WallLine).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
                 }
             }
+        }
+        private void UpdateAnchors()
+        {
+            CAD_Anchors.ForEach(a => Anchors.Add(new Anchor(a.Center, a.Radius)));
         }
         #endregion
         #region 预处理
@@ -570,21 +594,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var vaildSegs = SegLines.GetVaildSegLines(WallLine, 0);
             for (int i = 0; i < SegLines.Count; i++)
             {
-                var vaildSeg = vaildSegs[i];
-                if(vaildSeg == null)
-                {
-                    if (SegLines[i].IsVertical())
-                        LowerUpperBound.Add((SegLines[i].P0.X - (VMStock.RoadWidth / 2), SegLines[i].P0.X + (VMStock.RoadWidth / 2)));
-                    else
-                        LowerUpperBound.Add((SegLines[i].P0.Y - (VMStock.RoadWidth / 2), SegLines[i].P0.Y + (VMStock.RoadWidth / 2)));
-                    continue;
-                }
-                if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0)
+                if (RampSpatialIndex?.SelectCrossingGeometry(SegLines[i].ToLineString()).Count > 0||
+                    Anchors.Any(a => SegLines[i].Distance(a.Center)<=a.Radius))
                 {
                     if (SegLines[i].IsVertical())
                         LowerUpperBound.Add((SegLines[i].P0.X, SegLines[i].P0.X));
                     else
                         LowerUpperBound.Add((SegLines[i].P0.Y, SegLines[i].P0.Y));
+                    continue;
+                }
+                var vaildSeg = vaildSegs[i];
+                if (vaildSeg == null)
+                {
+                    if (SegLines[i].IsVertical())
+                        LowerUpperBound.Add((SegLines[i].P0.X - (VMStock.RoadWidth / 2), SegLines[i].P0.X + (VMStock.RoadWidth / 2)));
+                    else
+                        LowerUpperBound.Add((SegLines[i].P0.Y - (VMStock.RoadWidth / 2), SegLines[i].P0.Y + (VMStock.RoadWidth / 2)));
                     continue;
                 }
                 if (vaildSeg.IsVertical())
@@ -744,6 +769,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     l.AddToCurrentSpace();
                 }
             }
+        }
+    }
+    public class Anchor
+    {
+        public Coordinate Center;
+        public double Radius;
+
+        public Anchor(Point3d center, double radius)
+        {
+            Center = center.ToNTSCoordinate();
+            Radius = radius;
         }
     }
 }
