@@ -46,7 +46,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 subAreas.ForEach(subarea => subarea.UpdateParkingCnts(display));
             }
-            if (display)
+            if (false)
             {
                 var walls = new List<LineString>();
                 var cars = new List<InfoCar>();
@@ -87,7 +87,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 
                 return cars.Count;
             }
-            if (/*display*/false)
+            if (display)
             {
                 var walls = new List<LineString>();
                 var cars = new List<InfoCar>();
@@ -156,7 +156,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             MParkingPartitionPro mParkingPartitionPro = new MParkingPartitionPro(
            walls, inilanes, obs, bound);
-            mParkingPartitionPro.OutBoundary = bound;
+            mParkingPartitionPro.OutBoundary = subArea.OutBound;
             mParkingPartitionPro.BuildingBoxes = box;
             //mParkingPartitionPro.ObstaclesSpatialIndex = new MNTSSpatialIndex(obs);
             mParkingPartitionPro.ObstaclesSpatialIndex = InterParameter.BuildingSpatialIndex;

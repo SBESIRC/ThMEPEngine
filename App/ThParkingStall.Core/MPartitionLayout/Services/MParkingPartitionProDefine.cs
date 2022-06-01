@@ -42,10 +42,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             CountPillarDist = (int)Math.Floor((PillarSpacing - PillarNetLength - ThicknessOfPillarConstruct * 2) / DisVertCarWidth);
             DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
             DisModulus = DisCarAndHalfLane * 2;
-            LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2;
-            LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
-            LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 4;
-            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8;
+            LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength * 2;
+            LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
+            LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 4 + DisPillarLength * 2;
+            LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
             GeneratePillars = gpillars;
             Walls = walls;
             Obstacles = obstacles;
@@ -115,14 +115,14 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double DisHalfCarToPillar = (PillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
         public static double DisPillarMoveDeeplyBackBack = 1000;
         public static double DisPillarMoveDeeplySingle = 550;
-        public static double LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
+        public static double LengthCanGIntegralModulesConnectSingle = 3.5 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
-        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3 + DisPillarLength;
+        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.5 + DisPillarLength;
         public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8 + DisPillarLength * 2;
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
         public List<LineSegment> OutUnsuredLanes = new List<LineSegment>();
-        public static bool DisplayFinal = false;
+        public static bool DisplayFinal = true;
         public static int LayoutMode = ((int)LayoutDirection.LENGTH);
         public enum LayoutDirection : int
         {
@@ -141,6 +141,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             GenerateLanes();
             GeneratePerpModules();
             GenerateCarsInModules();
+            ProcessLanes();
             GenerateCarsOnRestLanes();
             PostProcess();
         }
