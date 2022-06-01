@@ -15,7 +15,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     class PipeLineLabelLayout
     {
 
-        private double _pipeYAxisGroupDistance = 500;//Y轴方向上立管分组距离
+        private double _pipeYAxisGroupDistance = 1200;//Y轴方向上立管分组距离
         private double _pipeXAxisGroupDistance = 10;//Y轴分组是X轴方向上允许的误差范围
 
         private double _pipeLabelNearDistance = 500;//文字距离立管最短距离

@@ -23,5 +23,6 @@ namespace ThMEPTCH.Model
         public double DocScale;
         public double DimRadius;
         public double Spacing;
+        public int FloorType;
     }
 }
