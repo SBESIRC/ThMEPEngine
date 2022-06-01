@@ -1107,6 +1107,12 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                             if (meter is CurrentTransformer currentTransformer)
                             {
                                 edgeName = edgeName.Replace("直接表", "CT表").Replace("上海CT表", "上海CT");
+                            }else
+                            {
+                                if (edgeName.Contains("CT表"))
+                                {
+                                    edgeName = edgeName.Replace("CT表", "直接表");
+                                }
                             }
                         }
                         var item = PDSItemInfo.Create(edgeName, new Point(busStart.X, dy + 10));
