@@ -112,6 +112,10 @@
         public const string BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE_FIRE = "字旋转";
         public const string BLOCK_DYNAMIC_PROPERTY_INSTALL_STYLE = "安装方式";
 
+        public const string BLOCK_DYNAMIC_PROPERTY_FAN_ANGLE = "风机角度";
+        public const string BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_X = "标注位置 X";
+        public const string BLOCK_DYNMAIC_PROPERTY_ANNOTATION_POSITION_POINT_Y = "标注位置 Y";
+
         //阀块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY = "可见性";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT = "高度";

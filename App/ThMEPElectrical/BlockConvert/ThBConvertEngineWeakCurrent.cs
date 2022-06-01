@@ -11,7 +11,7 @@ namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertEngineWeakCurrent : ThBConvertEngine
     {
-        public override ObjectId Insert(string name, Scale3d scale, ThBlockReferenceData srcBlockReference)
+        public override ObjectId Insert(string name, Scale3d scale, ThBlockReferenceData srcBlockData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -21,121 +21,52 @@ namespace ThMEPElectrical.BlockConvert
                     Point3d.Origin,
                     scale,
                     0.0,
-                    new Dictionary<string, string>(srcBlockReference.Attributes));
+                    new Dictionary<string, string>(srcBlockData.Attributes));
             }
         }
 
-        public override void MatchProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void MatchProperties(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
         {
             //
         }
 
-        public override void SetDatabaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
+        public override void SetDatabaseProperties(ThBlockReferenceData targetBlockData, ObjectId objId, string layer)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
                 ThBConvertDbUtils.UpdateLayerSettings(layer);
-                var block = acadDatabase.Element<Entity>(blkRef, true);
+                var block = acadDatabase.Element<Entity>(objId, true);
                 block.Layer = layer;
             }
         }
 
-        public override void SetVisibilityState(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
+        public override void SetVisibilityState(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
         {
             //
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            if (srcBlockData.EffectiveName.Contains("自动扫描射水高空水炮") ||
-                srcBlockData.EffectiveName.Contains("消防炮") ||
-                srcBlockData.EffectiveName.Contains("大空间灭火装置") ||
-                srcBlockData.EffectiveName.Contains("自动扫描射水喷头"))
-            {
-                TransformByPosition(blkRef, srcBlockData);
-            }
-            else if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
-            {
-                TransformHYDT(blkRef, srcBlockData);
-            }
-            else
-            {
-                TransformByCenter(blkRef, srcBlockData);
-            }
-        }
-
         /// <summary>
-        /// 按几何中心调整位置
+        /// 分别计算源块与目标块的插入点，并移动
         /// </summary>
-        /// <param name="blkRef"></param>
+        /// <param name="targetBlockData"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var scrCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
+                var blockReference = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
+                var targetBlockDataPosition = targetBlockData.GetNewBasePoint(false);
+                var srcBlockDataPosition = srcBlockData.GetNewBasePoint(true).TransformBy(srcBlockData.OwnerSpace2WCS);
+                var offset = targetBlockDataPosition.GetVectorTo(srcBlockDataPosition);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
 
-        /// <summary>
-        /// 按位置点调整位置
-        /// </summary>
-        /// <param name="blkRef"></param>
-        /// <param name="srcBlockData"></param>
-        private void TransformByPosition(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Rotate(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, ThBlockConvertBlock convertRule)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
-                var targetBlockDataPosition = Point3d.Origin.TransformBy(targetMCS2WCS);
-                var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var targetPoint = targetCentriodPoint.DistanceTo(targetBlockDataPosition) < 2000
-                    ? targetBlockDataPosition : targetCentriodPoint;
-                var srcMCS2WCS = srcBlockData.BlockTransform.PreMultiplyBy(srcBlockData.OwnerSpace2WCS);
-                var srcBlockDataPosition = Point3d.Origin.TransformBy(srcMCS2WCS);
-                var srcCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
-                var srcPoint = srcCentriodPoint.DistanceTo(srcBlockDataPosition) < 2000
-                    ? srcBlockDataPosition : srcCentriodPoint;
-                var offset = targetPoint.GetVectorTo(srcPoint);
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
-            }
-        }
-
-        private void TransformHYDT(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
-                var targetCentriodPoint = targetBlockData.GetBottomCenter().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var bottomCenter = srcBlockData.GetBottomCenter() - srcBlockData.Position;
-                var bottomCenterTiadl = bottomCenter.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
-                    + bottomCenter.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
-                    + bottomCenter.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis;
-                var tranMatrix = Matrix3d.Displacement(
-                    srcBlockData.BlockTransform.Translation.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
-                    + srcBlockData.BlockTransform.Translation.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
-                    + srcBlockData.BlockTransform.Translation.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis);
-                //var tranMatrix = Matrix3d.Displacement(srcBlockData.OwnerSpace2WCS.Translation);
-                var scrCentriodPoint = Point3d.Origin
-                        .TransformBy(tranMatrix.PostMultiplyBy(srcBlockData.OwnerSpace2WCS));
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) + bottomCenterTiadl;
-                blockReference.TransformBy(Matrix3d.Displacement(offset));
-            }
-        }
-
-        public override void Rotate(ObjectId blkRef, ThBlockReferenceData srcBlockData)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var blockReference = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
                 var position = srcBlockData.Position;
                 var rotation = srcBlockData.Rotation;
 
@@ -145,33 +76,36 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     rotation = -rotation;
                 }
-                if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
+                if (convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT].Equals(false))
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
                         .PreMultiplyBy(rotate));
+                    targetBlockData.Position = blockReference.Position;
                 }
                 else
                 {
-                    if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
+                    // rotation大于90度，小于270度
+                    if (rotation > Math.PI / 2 && rotation < Math.PI * 3 / 2)
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position)
                             .PostMultiplyBy(rotate));
+                        targetBlockData.Position = blockReference.Position;
                     }
                     else
                     {
                         blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
                             .PostMultiplyBy(rotate));
+                        targetBlockData.Position = blockReference.Position;
                     }
                 }
             }
         }
 
-        public override void Mirror(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Mirror(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
-                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var blockReference = acadDatabase.Element<BlockReference>(targetBlockData.ObjId, true);
                 var targetScale = targetBlockData.ScaleFactors;
                 var srcScale = srcBlockData.ScaleFactors;
                 var scale = new Scale3d(targetScale.X * srcScale.X, targetScale.Y * srcScale.Y, targetScale.Z * srcScale.Z);
@@ -232,7 +166,12 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockReference, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        public override void Displacement(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData, List<ThRawIfcDistributionElementData> list, Scale3d scale)
+        {
+            //
+        }
+
+        public override void SpecialTreatment(ThBlockReferenceData targetBlockData, ThBlockReferenceData srcBlockData)
         {
             //
         }
