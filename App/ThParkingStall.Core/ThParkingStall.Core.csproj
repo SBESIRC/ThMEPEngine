@@ -76,6 +76,7 @@
     <Compile Include="MPartitionLayout\Utilities\MNTSExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\ListEx.cs" />
     <Compile Include="Tools\PolygonEx.cs" />
     <Compile Include="Tools\GeometryEx.cs" />
     <Compile Include="Tools\LineSegmentEx.cs" />

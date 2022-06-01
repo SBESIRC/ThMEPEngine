@@ -132,7 +132,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             var orgSegLines = new MultiLineString(SegLineStrings.Where(lstr => lstr != null).ToArray());
             var PartToRemove = new MultiLineString(segLineToRemove.ToArray());
-            return orgSegLines.Difference(PartToRemove).Get<LineString>().ToLineSegments().Merge();
+            return orgSegLines.Difference(PartToRemove).Get<LineString>().ToLineSegments().MergeLineWithSharedPts();
         }
         public static List<LineSegment> CombineEmptyToEmptyArea(this List<LineSegment> segLines, bool BoundEmptyAreaToMid, bool HorizontalFirst, out int AreaCnt)
         {
@@ -245,7 +245,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             var orgSegLines = new MultiLineString(SegLineStrings.Where(lstr => lstr != null).ToArray());
             var PartToRemove = new MultiLineString(segLineToRemove.ToArray());
-            return orgSegLines.Difference(PartToRemove).Get<LineString>().ToLineSegments().Merge();
+            return orgSegLines.Difference(PartToRemove).Get<LineString>().ToLineSegments().MergeLineWithSharedPts();
         }
 
         public static List<LineSegment> GridLinesRemoveEmptyAreas(this List<LineSegment> SegLines, bool HorizontalFirst)
