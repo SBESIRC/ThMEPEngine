@@ -153,7 +153,7 @@
         <StackPanel Grid.Row="4" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
             <Label Content="系统图显示效果："  Focusable="False" />
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
-                <RadioButton Name="ShowAllDiagram" Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
+                <RadioButton Name="ShowAllDiagram" Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="1" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="False">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
@@ -162,7 +162,7 @@
                         <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="完全展开" ></Label>
                     </Grid>
                 </RadioButton>
-                <RadioButton Name="HideAllDiagram" Width="140" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
+                <RadioButton Name="HideAllDiagram" Width="140" VerticalAlignment="Center" Focusable="True" TabIndex="2" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="True">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"></RowDefinition>
