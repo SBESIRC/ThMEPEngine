@@ -116,7 +116,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var girdLines = new List<BisectionSegLine>();
             var allLines = BisectSegLineDic.Values.ToList();
-            for(int i = 0; i < allLines.Count(); i++)
+            //allLines.ForEach(l => { l.DrawSegLine(); l.ShowLowerUpperBound(); });
+            for (int i = 0; i < allLines.Count(); i++)
             {
                 bool donminated = false;
                 for (int j = 0;j < allLines.Count(); j++)
@@ -848,7 +849,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             var this_SE = l_this.SegLine.GetStartEndValue();
             var other_SE = l_other.SegLine.GetStartEndValue();
-            var bool2 = (this_SE.Item1 + tol >= other_SE.Item1)  && (this_SE.Item2 <= other_SE.Item2 + tol);
+            var bool2 = ((this_SE.Item1  >= other_SE.Item1)  && (this_SE.Item2 < other_SE.Item2 )) ||
+                        ((this_SE.Item1 > other_SE.Item1) && (this_SE.Item2 <= other_SE.Item2));
             //var bool2 = l_this.StartVal+tol >= l_other.StartVal && l_this.EndVal <= l_other.EndVal + tol;
             return bool1 && bool2;
         }

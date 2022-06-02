@@ -446,7 +446,7 @@ namespace ThMEPArchitecture.MultiProcess
                 return null;
             }
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
-            //girdLines = girdLines.RemoveDuplicated(5);
+            girdLines = girdLines.RemoveDuplicated(5);
             girdLines.SeglinePrecut(layoutData.WallLine);
             //girdLines.ForEach(l => l.ToDbLine().AddToCurrentSpace());
             var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();
