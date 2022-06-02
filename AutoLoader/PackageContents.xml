@@ -256,7 +256,7 @@
                 <Command Local="THPLCD" Global="THPLCD" />
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
-                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THLCKX" Global="THLCKX" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THKJMC" />
                 <Command Local="THJSDY" Global="THJSDY" />
@@ -278,7 +278,7 @@
                 <Command Local="THPLCD" Global="THPLCD" />
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
-                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THLCKX" Global="THLCKX" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THKJMC" />
                 <Command Local="THJSDY" Global="THJSDY" />
@@ -300,7 +300,7 @@
                 <Command Local="THPLCD" Global="THPLCD" />
                 <Command Local="THLGBZ" Global="THLGBZ" />
                 <Command Local="THLGYY" Global="THLGYY" />
-                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THLCKX" Global="THLCKX" />
                 <Command Local="THKJHZ" Global="THKJHZ" />
                 <Command Local="THKJMC" Global="THKJMC" />
                 <Command Local="THJSDY" Global="THJSDY" />

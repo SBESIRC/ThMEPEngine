@@ -35,6 +35,8 @@ panels:
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "楼层定义"
             attributes: { "IsVisible": false, "IsEnabled": false }
+          - text: "楼层框线"
+            attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "图块配置"
             attributes: { "IsVisible": false, "IsEnabled": false }
       - text: ""

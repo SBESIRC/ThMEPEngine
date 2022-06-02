@@ -1159,6 +1159,16 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THLCDY_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
+                // 楼层框线
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("楼层框线",
+                    "天华楼层框线",
+                    "THLCKX",
+                    "天华楼层框线",
+                    "IDI_THCAD_THLCKX_SMALL",
+                    "IDI_THCAD_THLCKX_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
                 // 图块配置
                 subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("图块配置",
