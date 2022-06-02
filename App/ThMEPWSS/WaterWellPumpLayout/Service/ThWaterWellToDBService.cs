@@ -22,7 +22,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 model.Geometry.DowngradeOpen();
             }
         }
-        public void InsertPumpToDb(ThWaterWellModel model,int pumpCount ,string pumpName,double fontHeight)
+        public void InsertPumpToDb(ThWaterWellModel model, int pumpCount, string pumpName, double fontHeight)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -34,14 +34,18 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 Point3d position = model.GetInstalPosition(edgeIndex, pumpCount, out double space);
                 Dictionary<string, string> attNameValues = new Dictionary<string, string>();
                 attNameValues.Add("编号", pumpName);
-                var blk = InsertBlockReference("W-EQPM", WaterWellBlockNames.DeepWaterPump,position, new Scale3d(1, 1, 1), angele * Math.PI / 180, attNameValues);
-                var dump = ThWaterPumpModel.Create(blk);
-                dump.SetPumpCount(pumpCount);
-                dump.SetPumpSpace(space);
-                dump.SetFontHeight(fontHeight);
+                var blk = InsertBlockReference("W-EQPM", WaterWellBlockNames.DeepWaterPump, position, new Scale3d(1, 1, 1), angele * Math.PI / 180, attNameValues);
+
+                SetPumpCount(blk, pumpCount);
+                SetPumpSpace(blk, space);
+                SetFontHeight(blk, fontHeight);
+                //var dump = ThWaterPumpModel.Create(blk);
+                //dump.SetPumpCount(pumpCount);
+                //dump.SetPumpSpace(space);
+                //dump.SetFontHeight(fontHeight);
             }
         }
-        public BlockReference InsertBlockReference(string layer,string blkName,Point3d position, Scale3d scale, double angle, Dictionary<string, string> values)
+        public BlockReference InsertBlockReference(string layer, string blkName, Point3d position, Scale3d scale, double angle, Dictionary<string, string> values)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -50,5 +54,82 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 return blk;
             }
         }
+
+
+        private void SetPumpSpace(BlockReference blk, double space)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                if (blk.IsDynamicBlock)
+                {
+                    foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
+                    {
+                        if (property.PropertyName == "距离")
+                        {
+                            property.Value = space;
+                        }
+                        else if (property.PropertyName == "距离1")
+                        {
+                            property.Value = space * 2;
+                        }
+                        else if (property.PropertyName == "距离2")
+                        {
+                            property.Value = space * 3;
+                        }
+                    }
+                }
+            }
+        }
+        public void SetFontHeight(BlockReference blk, double fontHeight)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                if (blk.IsDynamicBlock)
+                {
+                    foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
+                    {
+                        if (property.PropertyName == "字高")
+                        {
+                            property.Value = fontHeight;
+                        }
+                    }
+                }
+            }
+        }
+        public void SetPumpCount(BlockReference blk, int count)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                if (blk.IsDynamicBlock)
+                {
+                    foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
+                    {
+                        if (property.PropertyName == "可见性")
+                        {
+                            string strCount = "单台";
+                            switch (count)
+                            {
+                                case 1:
+                                    strCount = "单台";
+                                    break;
+                                case 2:
+                                    strCount = "两台";
+                                    break;
+                                case 3:
+                                    strCount = "三台";
+                                    break;
+                                case 4:
+                                    strCount = "四台";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            property.Value = strCount;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

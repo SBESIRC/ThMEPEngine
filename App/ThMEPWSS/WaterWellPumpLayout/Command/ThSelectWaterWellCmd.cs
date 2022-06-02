@@ -8,9 +8,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Command;
+using ThCADCore.NTS;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Model;
+using ThMEPWSS.WaterWellPumpLayout.Service;
+using ThMEPWSS.Command;
 
 namespace ThMEPWSS.WaterWellPumpLayout.Command
 {
@@ -34,18 +37,26 @@ namespace ThMEPWSS.WaterWellPumpLayout.Command
             using (var database = AcadDatabase.Active())
             using (var waterwellEngine = new ThWWaterWellRecognitionEngine(IdentifyInfo))
             {
+                //获取潜水泵
+                ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
+
                 waterwellEngine.Recognize(database.Database, input);
                 waterwellEngine.RecognizeMS(database.Database, input);
+
                 var objIds = new ObjectIdCollection(); // Print
                 foreach (var element in waterwellEngine.Datas)
                 {
                     ThWaterWellModel waterWell = ThWaterWellModel.Create(element);
                     waterWell.InitWellData();
+                    waterWell.CheckHavePumpIndex(pumpIndex, pumpDict);
                     waterWellList.Add(waterWell);
                 }
             }
             return waterWellList;
         }
+
+       
+
         public override void SubExecute()
         {
             Common.Utils.FocusMainWindow();

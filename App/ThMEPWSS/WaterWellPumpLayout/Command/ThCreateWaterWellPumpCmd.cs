@@ -54,26 +54,11 @@ namespace ThMEPWSS.Command
                     ThWWaterWell waterWell = ThWWaterWell.Create(element);
                     waterWell.Init();
                     waterWellList.Add(waterWell);
-                }              
+                }
             }
             return waterWellList;
         }
-        public List<ThWaterPumpModel> GetDeepWellPumpList()
-        {
-            List<ThWaterPumpModel> deepWellPump = new List<ThWaterPumpModel>();
-            using (var database = AcadDatabase.Active())
-            using (var engine = new ThWDeepWellPumpEngine())
-            {
-                var range = new Point3dCollection();
-                engine.RecognizeMS(database.Database, range);
-                foreach (ThIfcDistributionFlowElement element in engine.Elements)
-                {
-                    ThWaterPumpModel pump = ThWaterPumpModel.Create(element.Outline);
-                    deepWellPump.Add(pump);
-                }
-            }
-            return deepWellPump;
-        }
+
         public List<Line> GetRoomLine(Point3dCollection range)
         {
             using (var database = AcadDatabase.Active())
@@ -82,15 +67,15 @@ namespace ThMEPWSS.Command
                 List<Line> resLine = new List<Line>();
                 var roomLines = acadDb.ModelSpace.OfType<Entity>()
                         .Where(o => o.Layer.Contains("AI-房间框线")).ToList();
-                if(range.Count == 0)
+                if (range.Count == 0)
                 {
-                    foreach(var l in roomLines)
+                    foreach (var l in roomLines)
                     {
-                        if(l is Polyline pline)
+                        if (l is Polyline pline)
                         {
                             resLine.AddRange(pline.ToLines());
                         }
-                        else if(l is Line line)
+                        else if (l is Line line)
                         {
                             resLine.Add(line);
                         }
@@ -215,7 +200,7 @@ namespace ThMEPWSS.Command
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (var database = AcadDatabase.Active())
                 {
-                    if(WellConfigInfo == null || WellConfigInfo.Count == 0)
+                    if (WellConfigInfo == null || WellConfigInfo.Count == 0)
                     {
                         return;
                     }
@@ -224,16 +209,18 @@ namespace ThMEPWSS.Command
                     //获取墙
                     List<Line> wallLine = GetWallColumnEdgesInRange(input);
                     //获取潜水泵
-                    List<ThWaterPumpModel> pumpList = GetDeepWellPumpList();
+                    ThWaterWellPumpUtils.GetPumpIndex(out var pumpIndex, out var pumpDict);
+
+
                     foreach (var info in WellConfigInfo)
                     {
                         foreach (var well in info.WellModelList)
                         {
-                            foreach (var pump in pumpList)
-                            {
-                                well.CheckHavePump(pump);
-                            }
-                            well.NearWall(wallLine,50.0);
+                            //foreach (var pump in pumpList)
+                            //{
+                            well.CheckHavePumpIndex(pumpIndex, pumpDict);
+                            //}
+                            well.NearWall(wallLine, 50.0);
                         }
                     }
 
@@ -251,26 +238,26 @@ namespace ThMEPWSS.Command
                             break;
                         default:
                             break;
-                    } 
+                    }
                     var toDbService = new ThWaterWellToDBService();
                     foreach (var info in WellConfigInfo)
                     {
-                        foreach(var well in info.WellModelList)
+                        foreach (var well in info.WellModelList)
                         {
                             if (ConfigInfo.PumpInfo.isCoveredWaterWell)
                             {
-                                if(well.IsHavePump)
+                                if (well.IsHavePump)
                                 {
                                     toDbService.RemovePumpInDb(well.PumpModel);
                                     well.PumpModel = null;
                                     well.IsHavePump = false;
                                     //删除对应的水泵
                                 }
-                                toDbService.InsertPumpToDb(well,int.Parse(info.PumpCount),info.PumpNumber, fontHeight);
+                                toDbService.InsertPumpToDb(well, int.Parse(info.PumpCount), info.PumpNumber, fontHeight);
                             }
                             else
                             {
-                                if(well.IsHavePump)
+                                if (well.IsHavePump)
                                 {
                                     continue;
                                 }

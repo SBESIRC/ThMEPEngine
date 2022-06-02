@@ -71,18 +71,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var selectWell = new ThSelectWaterWellCmd(IdentifyInfo);
             selectWell.Execute();
             var wellList = selectWell.WaterWellList;
-            foreach(var o in wellList)
+            foreach (var o in wellList)
             {
                 bool isHave = false;
-                foreach(var b in WaterWellList)
+                foreach (var b in WaterWellList)
                 {
-                    if(o.IsEqual(b))
+                    if (o.IsEqual(b))
                     {
                         isHave = true;
                         break;
                     }
                 }
-                if(!isHave)
+                if (!isHave)
                 {
                     WaterWellList.Add(o);
                 }
@@ -90,7 +90,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
             var groups = new ObservableCollection<ThWaterWellConfigInfo>();
             var tmpList = WaterWellList.Select(o => o).ToList();
-            while(tmpList.Count>0)
+            while (tmpList.Count > 0)
             {
                 var first = tmpList.First();
                 var sameTypes = tmpList.Where(o => o.IsSameType(first)).ToList();
@@ -100,7 +100,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 info.WellArea = first.GetAcreage();
                 info.BlockName = first.EffName;
                 info.WellSize = first.GetWellSize();
+                if (first.PumpModel != null)
+                {
+                    info.PumpCount = first.PumpModel.VisibilityValue;
+                    info.PumpNumber = first.PumpModel.AttriValue;
+                }
                 info.WellModelList = sameTypes;
+                //info需要增加 泵数量 编号
                 sameTypes.ForEach(s => tmpList.Remove(s));
                 groups.Add(info);
             }
@@ -137,7 +143,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 var tm = cadGraph.TransientManager.CurrentTransientManager;
                 IntegerCollection intCol = new IntegerCollection();
-                if(ViewModel.WellConfigInfo != null)
+                if (ViewModel.WellConfigInfo != null)
                 {
                     foreach (var info in ViewModel.WellConfigInfo)
                     {
@@ -181,7 +187,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 var tm = cadGraph.TransientManager.CurrentTransientManager;
                 IntegerCollection intCol = new IntegerCollection();
-                configInfo.WellModelList.ForEach(w => 
+                configInfo.WellModelList.ForEach(w =>
                 {
                     tm.EraseTransient(w.WellObb, intCol);
                 });

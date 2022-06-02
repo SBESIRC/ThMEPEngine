@@ -19,12 +19,12 @@ namespace ThMEPWSS.WaterWellPumpLayout.Model
         public ThWaterWellConfigInfo()
         {
             WellCount = 0;
-            PumpCount = "2";
+            PumpCount = "0";
             IsDisplay = false;
             WellArea = 0.00;
             BlockName = "";
             WellSize = "0*0";
-            PumpNumber = "A1";
+            PumpNumber = "--";
             WellModelList = new List<ThWaterWellModel>();
         }
 
