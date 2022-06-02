@@ -5,11 +5,11 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanConnect.Model;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using NFox.Cad;
 using ThMEPWSS.HydrantConnectPipe.Command;
 using System.Linq;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.CostGetterService;
 
 namespace ThMEPHVAC.FanConnect.Service
 {

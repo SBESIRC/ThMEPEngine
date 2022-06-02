@@ -7,8 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.GlobleAStarAlgorithm;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.RoutePlannerService;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 
 namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
@@ -61,7 +60,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.PipeRoute
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            GlobleAStarRoutePlanner<Line> aStarRoute = new GlobleAStarRoutePlanner<Line>(mapFrame, dir, closetLane, distance, distance, distance, inflectionWeight);
+            WeightedAStarRoutePlanner<Line> aStarRoute = new WeightedAStarRoutePlanner<Line>(mapFrame, dir, closetLane, distance, distance, distance, inflectionWeight);
 
             //----设置障碍物
             foreach (var weightHole in holes)

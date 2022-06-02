@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
-using ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.AStarModel.OriginAStarModel;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.MapService;
+using ThMEPEngineCore.Algorithm.AStarRoutingEngine.PublicMethod;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
